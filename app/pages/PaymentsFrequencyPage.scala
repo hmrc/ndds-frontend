@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import models.PaymentsFrequency
+import play.api.libs.json.JsPath
 
-trait ModelGenerators {
+case object PaymentsFrequencyPage extends QuestionPage[PaymentsFrequency] {
 
-  implicit lazy val arbitraryPaymentsFrequency: Arbitrary[PaymentsFrequency] =
-    Arbitrary {
-      Gen.oneOf(PaymentsFrequency.values.toSeq)
-    }
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "paymentsFrequency"
 }

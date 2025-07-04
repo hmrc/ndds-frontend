@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import javax.inject.Inject
 
-trait ModelGenerators {
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.PaymentsFrequency
 
-  implicit lazy val arbitraryPaymentsFrequency: Arbitrary[PaymentsFrequency] =
-    Arbitrary {
-      Gen.oneOf(PaymentsFrequency.values.toSeq)
-    }
+class PaymentsFrequencyFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[PaymentsFrequency] =
+    Form(
+      "value" -> enumerable[PaymentsFrequency]("paymentsFrequency.error.required")
+    )
 }

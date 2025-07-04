@@ -47,3 +47,11 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+paymentsFrequency.title = What is the frequency of payments?
+paymentsFrequency.heading = What is the frequency of payments?
+paymentsFrequency.weekly = Weekly
+paymentsFrequency.monthly = Monthly
+paymentsFrequency.checkYourAnswersLabel = What is the frequency of payments?
+paymentsFrequency.error.required = Select paymentsFrequency
+paymentsFrequency.change.hidden = PaymentsFrequency

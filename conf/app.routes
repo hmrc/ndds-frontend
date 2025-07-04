@@ -19,3 +19,8 @@ GET         /account/sign-out                            controllers.auth.AuthCo
 GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
+
+GET        /paymentsFrequency                        controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentsFrequency                        controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
+GET        /changePaymentsFrequency                  controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = CheckMode)
+POST       /changePaymentsFrequency                  controllers.PaymentsFrequencyController.onSubmit(mode: Mode = CheckMode)

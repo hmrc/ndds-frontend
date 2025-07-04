@@ -31,7 +31,7 @@ lazy val microservice = (project in file("."))
       "controllers.routes._",
       "viewmodels.govuk.all._"
     ),
-    PlayKeys.playDefaultPort := 9000,
+    PlayKeys.playDefaultPort := 6990,
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
       ".*Routes.*;.*viewmodels.govuk.*;",
     ScoverageKeys.coverageMinimumStmtTotal := 78,
@@ -45,9 +45,9 @@ lazy val microservice = (project in file("."))
       "-Wconf:msg=Flag.*repeatedly:s"
     ),
     libraryDependencies ++= AppDependencies(),
-    retrieveManaged := true
-//    pipelineStages := Seq(digest),
-//    Assets / pipelineStages := Seq(concat)
+    retrieveManaged := true,
+    pipelineStages := Seq(digest),
+    Assets / pipelineStages := Seq(concat)
   )
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
