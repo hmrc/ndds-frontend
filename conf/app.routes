@@ -20,7 +20,22 @@ GET         /account/signed-out                          controllers.auth.Signed
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
-GET        /paymentsFrequency                        controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
-POST       /paymentsFrequency                        controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
-GET        /changePaymentsFrequency                  controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = CheckMode)
-POST       /changePaymentsFrequency                  controllers.PaymentsFrequencyController.onSubmit(mode: Mode = CheckMode)
+GET        /frequency-of-payments                        controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
+POST       /frequency-of-payments                        controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
+GET        /change-frequency-of-payments                 controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-frequency-of-payments                 controllers.PaymentsFrequencyController.onSubmit(mode: Mode = CheckMode)
+
+GET        /regular-payment-amount                       controllers.RegularPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST       /regular-payment-amount                       controllers.RegularPaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET        /change-regular-payment-amount                controllers.RegularPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-regular-payment-amount                controllers.RegularPaymentAmountController.onSubmit(mode: Mode = CheckMode)
+
+GET        /plan-end-date                                controllers.PlanEndDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /plan-end-date                                controllers.PlanEndDateController.onSubmit(mode: Mode = NormalMode)
+GET        /change-plan-end-date                         controllers.PlanEndDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-plan-end-date                         controllers.PlanEndDateController.onSubmit(mode: Mode = CheckMode)
+
+GET        /total-amount-due                             controllers.TotalAmountDueController.onPageLoad(mode: Mode = NormalMode)
+POST       /total-amount-due                             controllers.TotalAmountDueController.onSubmit(mode: Mode = NormalMode)
+GET        /change-total-amount-due                      controllers.TotalAmountDueController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-total-amount-due                      controllers.TotalAmountDueController.onSubmit(mode: Mode = CheckMode)
