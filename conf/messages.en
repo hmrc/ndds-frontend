@@ -47,3 +47,28 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+paymentsFrequency.title = What is the frequency of payments?
+paymentsFrequency.heading = What is the frequency of payments?
+paymentsFrequency.weekly = Weekly
+paymentsFrequency.monthly = Monthly
+paymentsFrequency.checkYourAnswersLabel = What is the frequency of payments?
+paymentsFrequency.error.required = Select paymentsFrequency
+paymentsFrequency.change.hidden = PaymentsFrequency
+
+yourDirectDebitInstructions.title = Your direct debit instructions
+yourDirectDebitInstructions.heading = Your direct debit instructions
+
+setupDirectDebitPayment.title = Setup a direct debit payment
+setupDirectDebitPayment.heading = Setup a direct debit payment
+
+personalOrBusinessAccount.title = Is this a personal or business account?
+personalOrBusinessAccount.heading = Is this a personal or business account?
+personalOrBusinessAccount.personal = Personal
+personalOrBusinessAccount.business = Business
+personalOrBusinessAccount.checkYourAnswersLabel = Is this a personal or business account?
+personalOrBusinessAccount.error.required = Select personalOrBusinessAccount
+personalOrBusinessAccount.change.hidden = PersonalOrBusinessAccount
+
+accountDetailsNotVarified.title = Your account details could not be varified
+accountDetailsNotVarified.heading = Your account details could not be varified

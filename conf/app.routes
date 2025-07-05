@@ -19,3 +19,14 @@ GET         /account/sign-out                            controllers.auth.AuthCo
 GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
+
+GET        /your-direct-debit-instructions                  controllers.YourDirectDebitInstructionsController.onPageLoad()
+
+GET        /setup-direct-debit-payment                       controllers.SetupDirectDebitPaymentController.onPageLoad()
+
+GET        /personal-or-business-account                        controllers.PersonalOrBusinessAccountController.onPageLoad(mode: Mode = NormalMode)
+POST       /personal-or-business-account                        controllers.PersonalOrBusinessAccountController.onSubmit(mode: Mode = NormalMode)
+GET        /change-personal-or-business-account                  controllers.PersonalOrBusinessAccountController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-personal-or-business-account                  controllers.PersonalOrBusinessAccountController.onSubmit(mode: Mode = CheckMode)
+
+GET        /your-account-details-not-varified                       controllers.AccountDetailsNotVarifiedController.onPageLoad()

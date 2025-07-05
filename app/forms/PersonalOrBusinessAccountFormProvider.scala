@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
+import javax.inject.Inject
 
-trait ModelGenerators {
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.PersonalOrBusinessAccount
 
-  implicit lazy val arbitraryPersonalOrBusinessAccount: Arbitrary[PersonalOrBusinessAccount] =
-    Arbitrary {
-      Gen.oneOf(PersonalOrBusinessAccount.values.toSeq)
-    }
+class PersonalOrBusinessAccountFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[PersonalOrBusinessAccount] =
+    Form(
+      "value" -> enumerable[PersonalOrBusinessAccount]("personalOrBusinessAccount.error.required")
+    )
 }
