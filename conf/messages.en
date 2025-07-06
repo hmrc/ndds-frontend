@@ -50,3 +50,11 @@ unauthorised.heading = You can’t access this service with this account
 
 unverifiedAccountDetails.title = unverifiedAccountDetails
 unverifiedAccountDetails.heading = unverifiedAccountDetails
+
+authorisedAccountHolder.title = Check your answers
+authorisedAccountHolder.heading = Check your answers
+authorisedAccountHolder.yes = Yes
+authorisedAccountHolder.no = No
+authorisedAccountHolder.checkYourAnswersLabel = Check your answers
+authorisedAccountHolder.error.required = Select authorisedAccountHolder
+authorisedAccountHolder.change.hidden = AuthorisedAccountHolder

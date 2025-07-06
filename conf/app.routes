@@ -21,3 +21,8 @@ GET         /account/signed-out                          controllers.auth.Signed
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
 GET        /unverifiedAccountDetails                       controllers.UnverifiedAccountDetailsController.onPageLoad()
+
+GET        /authorisedAccountHolder                        controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = NormalMode)
+POST       /authorisedAccountHolder                        controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = NormalMode)
+GET        /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = CheckMode)

@@ -21,4 +21,9 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
+
+  implicit lazy val arbitraryAuthorisedAccountHolder: Arbitrary[AuthorisedAccountHolder] =
+    Arbitrary {
+      Gen.oneOf(AuthorisedAccountHolder.values.toSeq)
+    }
 }
