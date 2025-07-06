@@ -69,3 +69,11 @@ directDebitSource.machine Games Duty = Machine Games Duty
 directDebitSource.checkYourAnswersLabel = here do you need to make direct debit payment?
 directDebitSource.error.required = Select directDebitSource
 directDebitSource.change.hidden = DirectDebitSource
+
+paymentPlanType.title = What type of payment plan are you selecting?
+paymentPlanType.heading = What type of payment plan are you selecting?
+paymentPlanType.a single payment = A single payment
+paymentPlanType.a variable payment plan = A variable payment plan
+paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
+paymentPlanType.error.required = Select paymentPlanType
+paymentPlanType.change.hidden = PaymentPlanType
