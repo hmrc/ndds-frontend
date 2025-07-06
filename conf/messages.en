@@ -47,3 +47,6 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+unverifiedAccountDetails.title = unverifiedAccountDetails
+unverifiedAccountDetails.heading = unverifiedAccountDetails
