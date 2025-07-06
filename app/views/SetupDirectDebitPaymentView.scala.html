@@ -14,14 +14,29 @@
  * limitations under the License.
  *@
 
+@import views.html.components.gds._
+
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        paragraphBody: paragraphBody,
+        bulletList:bulletList,
+        paragraphBodyLink: paragraphBodyLink,
+        paragraphMessageWithLink: ParagraphMessageWithLink,
+        heading: heading,
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("setupDirectDebitPayment.heading")</h1>
+
+   @heading(messages("setupDirectDebitPayment.heading"), "govuk-heading-l")
+   @paragraphBody(messages("setupDirectDebitPayment.p1"))
+   @bulletList(Seq(Html(messages("setupDirectDebitPayment.li1")),
+           Html(messages("setupDirectDebitPayment.li2")),
+           Html(messages("setupDirectDebitPayment.li3")),
+           Html(messages("setupDirectDebitPayment.li4"))))
+
+
 }

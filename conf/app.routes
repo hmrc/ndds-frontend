@@ -30,3 +30,8 @@ GET        /change-personal-or-business-account                  controllers.Per
 POST       /change-personal-or-business-account                  controllers.PersonalOrBusinessAccountController.onSubmit(mode: Mode = CheckMode)
 
 GET        /your-account-details-not-varified                       controllers.AccountDetailsNotVarifiedController.onPageLoad()
+
+GET        /your-bank-details                        controllers.YourBankDetailsController.onPageLoad(mode: Mode = NormalMode)
+POST       /your-bank-details                         controllers.YourBankDetailsController.onSubmit(mode: Mode = NormalMode)
+GET        /change-your-bank-details      controllers.YourBankDetailsController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-your-bank-details           controllers.YourBankDetailsController.onSubmit(mode: Mode = CheckMode)
