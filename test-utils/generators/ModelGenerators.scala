@@ -22,6 +22,11 @@ import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
 
+  implicit lazy val arbitraryDirectDebitSource: Arbitrary[DirectDebitSource] =
+    Arbitrary {
+      Gen.oneOf(DirectDebitSource.values.toSeq)
+    }
+
   implicit lazy val arbitraryAuthorisedAccountHolder: Arbitrary[AuthorisedAccountHolder] =
     Arbitrary {
       Gen.oneOf(AuthorisedAccountHolder.values.toSeq)

@@ -61,3 +61,11 @@ authorisedAccountHolder.change.hidden = AuthorisedAccountHolder
 
 bankApproval.title = bankApproval
 bankApproval.heading = bankApproval
+
+directDebitSource.title = here do you need to make direct debit payment?
+directDebitSource.heading = here do you need to make direct debit payment?
+directDebitSource.corporation Tax = Corporation Tax
+directDebitSource.machine Games Duty = Machine Games Duty
+directDebitSource.checkYourAnswersLabel = here do you need to make direct debit payment?
+directDebitSource.error.required = Select directDebitSource
+directDebitSource.change.hidden = DirectDebitSource

@@ -28,3 +28,8 @@ GET        /changeAuthorisedAccountHolder                  controllers.Authorise
 POST       /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = CheckMode)
 
 GET        /bankApproval                       controllers.BankApprovalController.onPageLoad()
+
+GET        /directDebitSource                        controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
+POST       /directDebitSource                        controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
+GET        /changeDirectDebitSource                  controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeDirectDebitSource                  controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
