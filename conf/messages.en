@@ -58,3 +58,6 @@ authorisedAccountHolder.no = No
 authorisedAccountHolder.checkYourAnswersLabel = Check your answers
 authorisedAccountHolder.error.required = Select authorisedAccountHolder
 authorisedAccountHolder.change.hidden = AuthorisedAccountHolder
+
+bankApproval.title = bankApproval
+bankApproval.heading = bankApproval

@@ -26,3 +26,5 @@ GET        /authorisedAccountHolder                        controllers.Authorise
 POST       /authorisedAccountHolder                        controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = NormalMode)
 GET        /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = CheckMode)
 POST       /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = CheckMode)
+
+GET        /bankApproval                       controllers.BankApprovalController.onPageLoad()
