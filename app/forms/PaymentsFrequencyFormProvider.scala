@@ -16,25 +16,16 @@
 
 package forms
 
-import java.time.{LocalDate, ZoneOffset}
-import forms.behaviours.DateBehaviours
-import play.api.i18n.Messages
-import play.api.test.Helpers.stubMessages
+import javax.inject.Inject
 
-class yearEndAndMonthFormProviderSpec extends DateBehaviours {
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.PaymentsFrequency
 
-  private implicit val messages: Messages = stubMessages()
-  private val form = new yearEndAndMonthFormProvider()()
+class PaymentsFrequencyFormProvider @Inject() extends Mappings {
 
-  ".value" - {
-
-    val validData = datesBetween(
-      min = LocalDate.of(2000, 1, 1),
-      max = LocalDate.now(ZoneOffset.UTC)
+  def apply(): Form[PaymentsFrequency] =
+    Form(
+      "value" -> enumerable[PaymentsFrequency]("paymentsFrequency.error.required")
     )
-
-    behave like dateField(form, "value", validData)
-
-    behave like mandatoryDateField(form, "value", "yearEndAndMonth.error.required.all")
-  }
 }

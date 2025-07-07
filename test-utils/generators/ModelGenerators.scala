@@ -17,10 +17,14 @@
 package generators
 
 import models._
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
+  
+  implicit lazy val arbitraryPaymentsFrequency: Arbitrary[PaymentsFrequency] =
+    Arbitrary {
+      Gen.oneOf(PaymentsFrequency.values.toSeq)
+    }
 
   implicit lazy val arbitraryPaymentPlanType: Arbitrary[PaymentPlanType] =
     Arbitrary {

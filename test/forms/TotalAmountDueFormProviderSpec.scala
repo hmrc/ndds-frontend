@@ -23,16 +23,16 @@ import play.api.data.FormError
 
 import scala.math.BigDecimal.RoundingMode
 
-class paymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
+class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours {
 
-  val form = new paymentAmountFormProvider()()
+  val form = new TotalAmountDueFormProvider()()
 
   ".value" - {
 
     val fieldName = "value"
 
     val minimum = 0
-    val maximum = Int.MaxValue
+    val maximum = 999999
 
     val validDataGenerator =
       Gen.choose[BigDecimal](minimum, maximum)
@@ -48,21 +48,21 @@ class paymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
     behave like currencyField(
       form,
       fieldName,
-      nonNumericError     = FormError(fieldName, "paymentAmount.error.nonNumeric"),
-      invalidNumericError = FormError(fieldName, "paymentAmount.error.invalidNumeric")
+      nonNumericError     = FormError(fieldName, "totalAmountDue.error.nonNumeric"),
+      invalidNumericError = FormError(fieldName, "totalAmountDue.error.invalidNumeric")
     )
 
     behave like currencyFieldWithMaximum(
       form,
       fieldName,
       maximum,
-      FormError(fieldName, "paymentAmount.error.aboveMaximum", Seq(currencyFormat(maximum)))
+      FormError(fieldName, "totalAmountDue.error.aboveMaximum", Seq(currencyFormat(maximum)))
     )
 
     behave like mandatoryField(
       form,
       fieldName,
-      requiredError = FormError(fieldName, "paymentAmount.error.required")
+      requiredError = FormError(fieldName, "totalAmountDue.error.required")
     )
   }
 }

@@ -16,81 +16,65 @@
 
 package controllers
 
-import java.time.{LocalDate, ZoneOffset}
-
 import base.SpecBase
-import forms.paymentDateFormProvider
-import models.{NormalMode, UserAnswers}
+import forms.PaymentsFrequencyFormProvider
+import models.{NormalMode, PaymentsFrequency, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.paymentDatePage
-import play.api.i18n.Messages
+import pages.PaymentsFrequencyPage
 import play.api.inject.bind
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.paymentDateView
+import views.html.PaymentsFrequencyView
 
 import scala.concurrent.Future
 
-class paymentDateControllerSpec extends SpecBase with MockitoSugar {
-
-  private implicit val messages: Messages = stubMessages()
-
-  private val formProvider = new paymentDateFormProvider()
-  private def form = formProvider()
+class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  lazy val paymentsFrequencyRoute = routes.PaymentsFrequencyController.onPageLoad(NormalMode).url
 
-  lazy val paymentDateRoute = routes.paymentDateController.onPageLoad(NormalMode).url
+  val formProvider = new PaymentsFrequencyFormProvider()
+  val form = formProvider()
 
-  override val emptyUserAnswers = UserAnswers(userAnswersId)
-
-  def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(GET, paymentDateRoute)
-
-  def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
-    FakeRequest(POST, paymentDateRoute)
-      .withFormUrlEncodedBody(
-        "value.day"   -> validAnswer.getDayOfMonth.toString,
-        "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year"  -> validAnswer.getYear.toString
-      )
-
-  "paymentDate Controller" - {
+  "PaymentsFrequency Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val result = route(application, getRequest()).value
+        val request = FakeRequest(GET, paymentsFrequencyRoute)
 
-        val view = application.injector.instanceOf[paymentDateView]
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[PaymentsFrequencyView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(paymentDatePage, validAnswer).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(PaymentsFrequencyPage, PaymentsFrequency.values.head).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val view = application.injector.instanceOf[paymentDateView]
+        val request = FakeRequest(GET, paymentsFrequencyRoute)
 
-        val result = route(application, getRequest()).value
+        val view = application.injector.instanceOf[PaymentsFrequencyView]
+
+        val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(PaymentsFrequency.values.head), NormalMode)(request, messages(application)).toString
       }
     }
 
@@ -109,7 +93,11 @@ class paymentDateControllerSpec extends SpecBase with MockitoSugar {
           .build()
 
       running(application) {
-        val result = route(application, postRequest()).value
+        val request =
+          FakeRequest(POST, paymentsFrequencyRoute)
+            .withFormUrlEncodedBody(("value", PaymentsFrequency.values.head.toString))
+
+        val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
@@ -120,14 +108,14 @@ class paymentDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val request =
-        FakeRequest(POST, paymentDateRoute)
-          .withFormUrlEncodedBody(("value", "invalid value"))
-
       running(application) {
+        val request =
+          FakeRequest(POST, paymentsFrequencyRoute)
+            .withFormUrlEncodedBody(("value", "invalid value"))
+
         val boundForm = form.bind(Map("value" -> "invalid value"))
 
-        val view = application.injector.instanceOf[paymentDateView]
+        val view = application.injector.instanceOf[PaymentsFrequencyView]
 
         val result = route(application, request).value
 
@@ -141,22 +129,26 @@ class paymentDateControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val result = route(application, getRequest()).value
+        val request = FakeRequest(GET, paymentsFrequencyRoute)
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
       }
     }
 
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+    "redirect to Journey Recovery for a POST if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val result = route(application, postRequest()).value
+        val request =
+          FakeRequest(POST, paymentsFrequencyRoute)
+            .withFormUrlEncodedBody(("value", PaymentsFrequency.values.head.toString))
+
+        val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

@@ -15,21 +15,13 @@
  *@
 
 @this(
-    layout: templates.Layout,
-    govukSummaryList: GovukSummaryList,
-    govukButton: GovukButton
+        layout: templates.Layout,
+        govukButton: GovukButton
 )
 
-@(list: SummaryList)(implicit request: Request[_], messages: Messages)
+@()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
+@layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
-
-    @govukSummaryList(list)
-
-    @govukButton(
-        ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
-    )
-
+    <h1 class="govuk-heading-xl">@messages("directDebitConfirmation.heading")</h1>
 }

@@ -19,50 +19,50 @@ package controllers
 import java.time.{LocalDate, ZoneOffset}
 
 import base.SpecBase
-import forms.paymentDateFormProvider
+import forms.PlanEndDateFormProvider
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.paymentDatePage
+import pages.PlanEndDatePage
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.paymentDateView
+import views.html.PlanEndDateView
 
 import scala.concurrent.Future
 
-class paymentDateControllerSpec extends SpecBase with MockitoSugar {
+class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
   private implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new paymentDateFormProvider()
+  private val formProvider = new PlanEndDateFormProvider()
   private def form = formProvider()
 
   def onwardRoute = Call("GET", "/foo")
 
   val validAnswer = LocalDate.now(ZoneOffset.UTC)
 
-  lazy val paymentDateRoute = routes.paymentDateController.onPageLoad(NormalMode).url
+  lazy val planEndDateRoute = routes.PlanEndDateController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers = UserAnswers(userAnswersId)
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(GET, paymentDateRoute)
+    FakeRequest(GET, planEndDateRoute)
 
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
-    FakeRequest(POST, paymentDateRoute)
+    FakeRequest(POST, planEndDateRoute)
       .withFormUrlEncodedBody(
         "value.day"   -> validAnswer.getDayOfMonth.toString,
         "value.month" -> validAnswer.getMonthValue.toString,
         "value.year"  -> validAnswer.getYear.toString
       )
 
-  "paymentDate Controller" - {
+  "PlanEndDate Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
@@ -71,7 +71,7 @@ class paymentDateControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val result = route(application, getRequest()).value
 
-        val view = application.injector.instanceOf[paymentDateView]
+        val view = application.injector.instanceOf[PlanEndDateView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, NormalMode)(getRequest(), messages(application)).toString
@@ -80,12 +80,12 @@ class paymentDateControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(paymentDatePage, validAnswer).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(PlanEndDatePage, validAnswer).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val view = application.injector.instanceOf[paymentDateView]
+        val view = application.injector.instanceOf[PlanEndDateView]
 
         val result = route(application, getRequest()).value
 
@@ -121,13 +121,13 @@ class paymentDateControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       val request =
-        FakeRequest(POST, paymentDateRoute)
+        FakeRequest(POST, planEndDateRoute)
           .withFormUrlEncodedBody(("value", "invalid value"))
 
       running(application) {
         val boundForm = form.bind(Map("value" -> "invalid value"))
 
-        val view = application.injector.instanceOf[paymentDateView]
+        val view = application.injector.instanceOf[PlanEndDateView]
 
         val result = route(application, request).value
 

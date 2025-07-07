@@ -21,10 +21,10 @@ import forms.behaviours.DateBehaviours
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
-class yearEndAndMonthFormProviderSpec extends DateBehaviours {
+class PlanEndDateFormProviderSpec extends DateBehaviours {
 
   private implicit val messages: Messages = stubMessages()
-  private val form = new yearEndAndMonthFormProvider()()
+  private val form = new PlanEndDateFormProvider()()
 
   ".value" - {
 
@@ -35,6 +35,6 @@ class yearEndAndMonthFormProviderSpec extends DateBehaviours {
 
     behave like dateField(form, "value", validData)
 
-    behave like mandatoryDateField(form, "value", "yearEndAndMonth.error.required.all")
+    behave like mandatoryDateField(form, "value", "planEndDate.error.required.all")
   }
 }

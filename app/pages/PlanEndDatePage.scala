@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-    layout: templates.Layout,
-    govukSummaryList: GovukSummaryList,
-    govukButton: GovukButton
-)
+package pages
 
-@(list: SummaryList)(implicit request: Request[_], messages: Messages)
+import java.time.LocalDate
 
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
+import play.api.libs.json.JsPath
 
-    <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
+case object PlanEndDatePage extends QuestionPage[LocalDate] {
 
-    @govukSummaryList(list)
+  override def path: JsPath = JsPath \ toString
 
-    @govukButton(
-        ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
-    )
-
+  override def toString: String = "planEndDate"
 }

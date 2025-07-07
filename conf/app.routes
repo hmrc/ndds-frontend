@@ -1,64 +1,86 @@
 # microservice specific routes
 
-->          /hmrc-frontend                               hmrcfrontend.Routes
+->         /hmrc-frontend                               hmrcfrontend.Routes
 
-GET         /                                            controllers.IndexController.onPageLoad()
+GET        /                                            controllers.IndexController.onPageLoad()
 
-GET         /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
+GET        /assets/*file                                controllers.Assets.versioned(path="/public", file: Asset)
 
-GET         /language/:lang                              controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET        /language/:lang                              controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
-GET         /refresh-session                             controllers.KeepAliveController.keepAlive()
+GET        /refresh-session                             controllers.KeepAliveController.keepAlive()
 
-GET         /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
+GET        /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET         /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad()
+GET        /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad()
 
-GET         /account/sign-out-survey                     controllers.auth.AuthController.signOut()
-GET         /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey()
-GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
+GET        /account/sign-out-survey                     controllers.auth.AuthController.signOut()
+GET        /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey()
+GET        /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
 
-GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
+GET        /unauthorised                                controllers.UnauthorisedController.onPageLoad()
+GET        /unverifiedAccountDetails                    controllers.UnverifiedAccountDetailsController.onPageLoad()
 
-GET        /unverifiedAccountDetails                       controllers.UnverifiedAccountDetailsController.onPageLoad()
+GET        /authorisedAccountHolder                     controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = NormalMode)
+POST       /authorisedAccountHolder                     controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = NormalMode)
+GET        /changeAuthorisedAccountHolder               controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeAuthorisedAccountHolder               controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = CheckMode)
 
-GET        /authorisedAccountHolder                        controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = NormalMode)
-POST       /authorisedAccountHolder                        controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = NormalMode)
-GET        /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = CheckMode)
-POST       /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = CheckMode)
+GET        /bankApproval                                controllers.BankApprovalController.onPageLoad()
 
-GET        /bankApproval                       controllers.BankApprovalController.onPageLoad()
+GET        /directDebitSource                           controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
+POST       /directDebitSource                           controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
+GET        /changeDirectDebitSource                     controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeDirectDebitSource                     controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
 
-GET        /directDebitSource                        controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
-POST       /directDebitSource                        controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
-GET        /changeDirectDebitSource                  controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
-POST       /changeDirectDebitSource                  controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
+GET        /paymentPlanType                             controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentPlanType                             controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
+GET        /changePaymentPlanType                       controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
+POST       /changePaymentPlanType                       controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
 
-GET        /paymentPlanType                        controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
-POST       /paymentPlanType                        controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
-GET        /changePaymentPlanType                  controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
-POST       /changePaymentPlanType                  controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
-GET        /paymentAmount                  controllers.paymentAmountController.onPageLoad(mode: Mode = NormalMode)
-POST       /paymentAmount                  controllers.paymentAmountController.onSubmit(mode: Mode = NormalMode)
-GET        /changepaymentAmount                        controllers.paymentAmountController.onPageLoad(mode: Mode = CheckMode)
-POST       /changepaymentAmount                        controllers.paymentAmountController.onSubmit(mode: Mode = CheckMode)
+GET        /paymentReference                            controllers.paymentReferenceController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentReference                            controllers.paymentReferenceController.onSubmit(mode: Mode = NormalMode)
+GET        /changepaymentReference                      controllers.paymentReferenceController.onPageLoad(mode: Mode = CheckMode)
+POST       /changepaymentReference                      controllers.paymentReferenceController.onSubmit(mode: Mode = CheckMode)
 
-GET        /paymentDate                  controllers.paymentDateController.onPageLoad(mode: Mode = NormalMode)
-POST       /paymentDate                  controllers.paymentDateController.onSubmit(mode: Mode = NormalMode)
-GET        /changepaymentDate                        controllers.paymentDateController.onPageLoad(mode: Mode = CheckMode)
-POST       /changepaymentDate                        controllers.paymentDateController.onSubmit(mode: Mode = CheckMode)
+GET        /paymentAmount                               controllers.paymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentAmount                               controllers.paymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET        /changepaymentAmount                         controllers.paymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST       /changepaymentAmount                         controllers.paymentAmountController.onSubmit(mode: Mode = CheckMode)
 
-GET        /paymentReference                        controllers.paymentReferenceController.onPageLoad(mode: Mode = NormalMode)
-POST       /paymentReference                        controllers.paymentReferenceController.onSubmit(mode: Mode = NormalMode)
-GET        /changepaymentReference                  controllers.paymentReferenceController.onPageLoad(mode: Mode = CheckMode)
-POST       /changepaymentReference                  controllers.paymentReferenceController.onSubmit(mode: Mode = CheckMode)
+GET        /paymentDate                                 controllers.paymentDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentDate                                 controllers.paymentDateController.onSubmit(mode: Mode = NormalMode)
+GET        /changepaymentDate                           controllers.paymentDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /changepaymentDate                           controllers.paymentDateController.onSubmit(mode: Mode = CheckMode)
 
-GET        /planStartDate                  controllers.planStartDateController.onPageLoad(mode: Mode = NormalMode)
-POST       /planStartDate                  controllers.planStartDateController.onSubmit(mode: Mode = NormalMode)
-GET        /changeplanStartDate                        controllers.planStartDateController.onPageLoad(mode: Mode = CheckMode)
-POST       /changeplanStartDate                        controllers.planStartDateController.onSubmit(mode: Mode = CheckMode)
+GET        /planStartDate                               controllers.planStartDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /planStartDate                               controllers.planStartDateController.onSubmit(mode: Mode = NormalMode)
+GET        /changeplanStartDate                         controllers.planStartDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeplanStartDate                         controllers.planStartDateController.onSubmit(mode: Mode = CheckMode)
 
-GET        /yearEndAndMonth                  controllers.yearEndAndMonthController.onPageLoad(mode: Mode = NormalMode)
-POST       /yearEndAndMonth                  controllers.yearEndAndMonthController.onSubmit(mode: Mode = NormalMode)
-GET        /changeyearEndAndMonth                        controllers.yearEndAndMonthController.onPageLoad(mode: Mode = CheckMode)
-POST       /changeyearEndAndMonth                        controllers.yearEndAndMonthController.onSubmit(mode: Mode = CheckMode)
+GET        /yearEndAndMonth                             controllers.yearEndAndMonthController.onPageLoad(mode: Mode = NormalMode)
+POST       /yearEndAndMonth                             controllers.yearEndAndMonthController.onSubmit(mode: Mode = NormalMode)
+GET        /changeyearEndAndMonth                       controllers.yearEndAndMonthController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeyearEndAndMonth                       controllers.yearEndAndMonthController.onSubmit(mode: Mode = CheckMode)
+
+GET        /frequency-of-payments                       controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
+POST       /frequency-of-payments                       controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
+GET        /change-frequency-of-payments                controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-frequency-of-payments                controllers.PaymentsFrequencyController.onSubmit(mode: Mode = CheckMode)
+
+GET        /regular-payment-amount                      controllers.RegularPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST       /regular-payment-amount                      controllers.RegularPaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET        /change-regular-payment-amount               controllers.RegularPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-regular-payment-amount               controllers.RegularPaymentAmountController.onSubmit(mode: Mode = CheckMode)
+
+GET        /plan-end-date                               controllers.PlanEndDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /plan-end-date                               controllers.PlanEndDateController.onSubmit(mode: Mode = NormalMode)
+GET        /change-plan-end-date                        controllers.PlanEndDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-plan-end-date                        controllers.PlanEndDateController.onSubmit(mode: Mode = CheckMode)
+
+GET        /total-amount-due                            controllers.TotalAmountDueController.onPageLoad(mode: Mode = NormalMode)
+POST       /total-amount-due                            controllers.TotalAmountDueController.onSubmit(mode: Mode = NormalMode)
+GET        /change-total-amount-due                     controllers.TotalAmountDueController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-total-amount-due                     controllers.TotalAmountDueController.onSubmit(mode: Mode = CheckMode)
+
+GET        /direct-debit-confirmation                   controllers.DirectDebitConfirmationController.onPageLoad()

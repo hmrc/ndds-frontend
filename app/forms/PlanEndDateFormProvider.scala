@@ -16,25 +16,22 @@
 
 package forms
 
-import java.time.{LocalDate, ZoneOffset}
-import forms.behaviours.DateBehaviours
+import forms.mappings.Mappings
+import play.api.data.Form
 import play.api.i18n.Messages
-import play.api.test.Helpers.stubMessages
 
-class yearEndAndMonthFormProviderSpec extends DateBehaviours {
+import java.time.LocalDate
+import javax.inject.Inject
 
-  private implicit val messages: Messages = stubMessages()
-  private val form = new yearEndAndMonthFormProvider()()
+class PlanEndDateFormProvider @Inject() extends Mappings {
 
-  ".value" - {
-
-    val validData = datesBetween(
-      min = LocalDate.of(2000, 1, 1),
-      max = LocalDate.now(ZoneOffset.UTC)
+  def apply()(implicit messages: Messages): Form[LocalDate] =
+    Form(
+      "value" -> localDate(
+        invalidKey     = "planEndDate.error.invalid",
+        allRequiredKey = "planEndDate.error.required.all",
+        twoRequiredKey = "planEndDate.error.required.two",
+        requiredKey    = "planEndDate.error.required"
+      )
     )
-
-    behave like dateField(form, "value", validData)
-
-    behave like mandatoryDateField(form, "value", "yearEndAndMonth.error.required.all")
-  }
 }

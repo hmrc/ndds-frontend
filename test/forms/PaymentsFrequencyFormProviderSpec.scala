@@ -16,25 +16,30 @@
 
 package forms
 
-import java.time.{LocalDate, ZoneOffset}
-import forms.behaviours.DateBehaviours
-import play.api.i18n.Messages
-import play.api.test.Helpers.stubMessages
+import forms.behaviours.OptionFieldBehaviours
+import models.PaymentsFrequency
+import play.api.data.FormError
 
-class yearEndAndMonthFormProviderSpec extends DateBehaviours {
+class PaymentsFrequencyFormProviderSpec extends OptionFieldBehaviours {
 
-  private implicit val messages: Messages = stubMessages()
-  private val form = new yearEndAndMonthFormProvider()()
+  val form = new PaymentsFrequencyFormProvider()()
 
   ".value" - {
 
-    val validData = datesBetween(
-      min = LocalDate.of(2000, 1, 1),
-      max = LocalDate.now(ZoneOffset.UTC)
+    val fieldName = "value"
+    val requiredKey = "paymentsFrequency.error.required"
+
+    behave like optionsField[PaymentsFrequency](
+      form,
+      fieldName,
+      validValues  = PaymentsFrequency.values,
+      invalidError = FormError(fieldName, "error.invalid")
     )
 
-    behave like dateField(form, "value", validData)
-
-    behave like mandatoryDateField(form, "value", "yearEndAndMonth.error.required.all")
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
   }
 }
