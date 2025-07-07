@@ -33,6 +33,7 @@ index.guidance = Welcome to your NDDS frontend. Please see the README file for a
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
+checkYourAnswers.acceptAndContinue = Accept and Continue
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
