@@ -20,7 +20,7 @@ import models._
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
-
+  
   implicit lazy val arbitraryYourBankDetails: Arbitrary[YourBankDetails] =
 
     Arbitrary {
@@ -34,6 +34,11 @@ trait ModelGenerators {
   implicit lazy val arbitraryPersonalOrBusinessAccount: Arbitrary[PersonalOrBusinessAccount] =
     Arbitrary {
       Gen.oneOf(PersonalOrBusinessAccount.values.toSeq)
+    }
+
+  implicit lazy val arbitraryPaymentsFrequency: Arbitrary[PaymentsFrequency] =
+    Arbitrary {
+      Gen.oneOf(PaymentsFrequency.values.toSeq)
     }
 
   implicit lazy val arbitraryPaymentPlanType: Arbitrary[PaymentPlanType] =

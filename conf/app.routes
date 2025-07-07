@@ -12,14 +12,11 @@ GET        /refresh-session                             controllers.KeepAliveCon
 
 GET        /there-is-a-problem                          controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
 
-GET        /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad()
-
 GET        /account/sign-out-survey                     controllers.auth.AuthController.signOut()
 GET        /account/sign-out                            controllers.auth.AuthController.signOutNoSurvey()
 GET        /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
 
 GET        /unauthorised                                controllers.UnauthorisedController.onPageLoad()
-GET        /unverifiedAccountDetails                    controllers.UnverifiedAccountDetailsController.onPageLoad()
 
 GET        /your-direct-debit-instructions              controllers.YourDirectDebitInstructionsController.onPageLoad()
 
@@ -36,6 +33,8 @@ GET        /your-bank-details                           controllers.YourBankDeta
 POST       /your-bank-details                           controllers.YourBankDetailsController.onSubmit(mode: Mode = NormalMode)
 GET        /change-your-bank-details                    controllers.YourBankDetailsController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-your-bank-details                    controllers.YourBankDetailsController.onSubmit(mode: Mode = CheckMode)
+
+GET        /unverifiedAccountDetails                    controllers.UnverifiedAccountDetailsController.onPageLoad()
 
 GET        /authorisedAccountHolder                     controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = NormalMode)
 POST       /authorisedAccountHolder                     controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = NormalMode)
@@ -79,6 +78,11 @@ POST       /yearEndAndMonth                             controllers.yearEndAndMo
 GET        /changeyearEndAndMonth                       controllers.yearEndAndMonthController.onPageLoad(mode: Mode = CheckMode)
 POST       /changeyearEndAndMonth                       controllers.yearEndAndMonthController.onSubmit(mode: Mode = CheckMode)
 
+GET        /frequency-of-payments                       controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
+POST       /frequency-of-payments                       controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
+GET        /change-frequency-of-payments                controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-frequency-of-payments                controllers.PaymentsFrequencyController.onSubmit(mode: Mode = CheckMode)
+
 GET        /regular-payment-amount                      controllers.RegularPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
 POST       /regular-payment-amount                      controllers.RegularPaymentAmountController.onSubmit(mode: Mode = NormalMode)
 GET        /change-regular-payment-amount               controllers.RegularPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
@@ -93,6 +97,8 @@ GET        /total-amount-due                            controllers.TotalAmountD
 POST       /total-amount-due                            controllers.TotalAmountDueController.onSubmit(mode: Mode = NormalMode)
 GET        /change-total-amount-due                     controllers.TotalAmountDueController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-total-amount-due                     controllers.TotalAmountDueController.onSubmit(mode: Mode = CheckMode)
+
+GET        /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad()
 
 GET        /direct-debit-confirmation                   controllers.DirectDebitConfirmationController.onPageLoad()
 

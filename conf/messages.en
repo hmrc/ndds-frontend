@@ -193,7 +193,7 @@ regularPaymentAmount.change.hidden = RegularPaymentAmount
 
 planEndDate.title = What date are you ending this payment plan?
 planEndDate.heading = What date are you ending this payment plan?
-planEndDate.hint = For example, leave blank or enter future date in format 'dd mm yyyy'
+planEndDate.hint = For example, leave blank or enter future date in format ’dd mm yyyy’
 planEndDate.checkYourAnswersLabel = PlanEndDate
 planEndDate.error.required.all = Enter the plan end date
 planEndDate.error.required.two = The plan end date must include {0} and {1}
@@ -213,8 +213,7 @@ totalAmountDue.error.invalidNumeric = Enter your total amount due using up to tw
 totalAmountDue.error.aboveMaximum = Total amount due must be {0} or less
 totalAmountDue.error.belowMinimum = Total amount due must be {0} or more
 totalAmountDue.change.hidden = TotalAmountDue
-totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your 'Notice to Pay'.
+totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your ’Notice to Pay’.
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation
-
