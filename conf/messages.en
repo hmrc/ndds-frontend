@@ -31,10 +31,6 @@ index.title = ndds-frontend
 index.heading = National Direct Debits System
 index.guidance = Welcome to your NDDS frontend. Please see the README file for a guide to getting started.
 
-checkYourAnswers.title = Check your answers
-checkYourAnswers.heading = Check your answers
-checkYourAnswers.acceptAndContinue = Accept and Continue
-
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
 journeyRecovery.continue.guidance = [Add content to explain how to proceed.]
@@ -85,9 +81,9 @@ yourBankDetails.heading = What are your bank details?
 yourBankDetails.accountHolderName = Account holders(s) name
 yourBankDetails.accountHolderName.hint = This is the account holder(s) name as it appears on your book/bank card.
 yourBankDetails.sortCode = Sort code
-yourBankDetails.sortCode.hint = Must be 6 digit long. For Example, 00 11 22.
+yourBankDetails.sortCode.hint = Must be 6 digits long. For Example, 00 11 22.
 yourBankDetails.accountNumber = Account number
-yourBankDetails.accountNumber.hint = Must be between6 and 8 digit long.
+yourBankDetails.accountNumber.hint = Must be between 6 and 8 digits long.
 yourBankDetails.checkYourAnswersLabel = Your bank details
 yourBankDetails.error.accountHolderName.required = Enter Account holder name
 yourBankDetails.error.sortCode.required = Enter sort code
@@ -105,8 +101,8 @@ authorisedAccountHolder.checkYourAnswersLabel = Check your answers
 authorisedAccountHolder.error.required = Select authorisedAccountHolder
 authorisedAccountHolder.change.hidden = AuthorisedAccountHolder
 
-bankApproval.title = bankApproval
-bankApproval.heading = bankApproval
+bankApproval.title = You need bank approval
+bankApproval.heading = You need bank approval
 
 directDebitSource.title = here do you need to make direct debit payment?
 directDebitSource.heading = here do you need to make direct debit payment?
@@ -131,8 +127,6 @@ paymentReference.error.required = Enter paymentReference
 paymentReference.error.length = paymentReference must be 100 characters or less
 paymentReference.change.hidden = paymentReference
 
-paymentAmount.title = paymentAmount
-paymentAmount.heading = paymentAmount
 paymentAmount.title = What amount do you want to pay?
 paymentAmount.heading = What amount do you want to pay?
 paymentAmount.checkYourAnswersLabel = paymentAmount
@@ -214,6 +208,10 @@ totalAmountDue.error.aboveMaximum = Total amount due must be {0} or less
 totalAmountDue.error.belowMinimum = Total amount due must be {0} or more
 totalAmountDue.change.hidden = TotalAmountDue
 totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your ’Notice to Pay’.
+
+checkYourAnswers.title = Check your answers
+checkYourAnswers.heading = Check your answers
+checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation
