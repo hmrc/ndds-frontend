@@ -47,6 +47,35 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+unverifiedAccountDetails.title = unverifiedAccountDetails
+unverifiedAccountDetails.heading = unverifiedAccountDetails
+
+authorisedAccountHolder.title = Check your answers
+authorisedAccountHolder.heading = Check your answers
+authorisedAccountHolder.yes = Yes
+authorisedAccountHolder.no = No
+authorisedAccountHolder.checkYourAnswersLabel = Check your answers
+authorisedAccountHolder.error.required = Select authorisedAccountHolder
+authorisedAccountHolder.change.hidden = AuthorisedAccountHolder
+
+bankApproval.title = bankApproval
+bankApproval.heading = bankApproval
+
+directDebitSource.title = here do you need to make direct debit payment?
+directDebitSource.heading = here do you need to make direct debit payment?
+directDebitSource.corporationTax = Corporation Tax
+directDebitSource.machineGamesDuty = Machine Games Duty
+directDebitSource.checkYourAnswersLabel = here do you need to make direct debit payment?
+directDebitSource.error.required = Select directDebitSource
+directDebitSource.change.hidden = DirectDebitSource
+
+paymentPlanType.title = What type of payment plan are you selecting?
+paymentPlanType.heading = What type of payment plan are you selecting?
+paymentPlanType.aSinglePayment = A single payment
+paymentPlanType.aVariablePaymentPlan = A variable payment plan
+paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
+paymentPlanType.error.required = Select paymentPlanType
+paymentPlanType.change.hidden = PaymentPlanType
 
 paymentsFrequency.title = What is the frequency of payments?
 paymentsFrequency.heading = What is the frequency of payments?
@@ -68,13 +97,16 @@ regularPaymentAmount.change.hidden = RegularPaymentAmount
 
 planEndDate.title = What date are you ending this payment plan?
 planEndDate.heading = What date are you ending this payment plan?
-planEndDate.hint = For example, leave blank or enter future date in format 'dd mm yyyy'.
+planEndDate.hint = For example, leave blank or enter future date in format 'dd mm yyyy'
 planEndDate.checkYourAnswersLabel = PlanEndDate
 planEndDate.error.required.all = Enter the plan end date
 planEndDate.error.required.two = The plan end date must include {0} and {1}
 planEndDate.error.required = The plan end date must include {0}
 planEndDate.error.invalid = Enter a real plan end date
 planEndDate.change.hidden = PlanEndDate
+planEndDate.p1 = Payments will not be collected from your bank account after the plan end date.
+planEndDate.p2 = If you want your budget payment plan to be open ended then this field can be left blank.
+planEndDate.p3 = (The plan can be ended or cancelled at a later date).
 
 totalAmountDue.title = What is the total amount due?
 totalAmountDue.heading = What is the total amount due?
@@ -85,3 +117,4 @@ totalAmountDue.error.invalidNumeric = Enter your total amount due using up to tw
 totalAmountDue.error.aboveMaximum = Total amount due must be {0} or less
 totalAmountDue.error.belowMinimum = Total amount due must be {0} or more
 totalAmountDue.change.hidden = TotalAmountDue
+totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your 'Notice to Pay'.

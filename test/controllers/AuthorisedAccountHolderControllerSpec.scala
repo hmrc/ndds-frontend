@@ -17,43 +17,43 @@
 package controllers
 
 import base.SpecBase
-import forms.PaymentsFrequencyFormProvider
-import models.{NormalMode, PaymentsFrequency, UserAnswers}
+import forms.AuthorisedAccountHolderFormProvider
+import models.{NormalMode, AuthorisedAccountHolder, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.PaymentsFrequencyPage
+import pages.AuthorisedAccountHolderPage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.SessionRepository
-import views.html.PaymentsFrequencyView
+import views.html.AuthorisedAccountHolderView
 
 import scala.concurrent.Future
 
-class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
+class AuthorisedAccountHolderControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val paymentsFrequencyRoute = routes.PaymentsFrequencyController.onPageLoad(NormalMode).url
+  lazy val authorisedAccountHolderRoute = routes.AuthorisedAccountHolderController.onPageLoad(NormalMode).url
 
-  val formProvider = new PaymentsFrequencyFormProvider()
+  val formProvider = new AuthorisedAccountHolderFormProvider()
   val form = formProvider()
 
-  "PaymentsFrequency Controller" - {
+  "AuthorisedAccountHolder Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, paymentsFrequencyRoute)
+        val request = FakeRequest(GET, authorisedAccountHolderRoute)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[PaymentsFrequencyView]
+        val view = application.injector.instanceOf[AuthorisedAccountHolderView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
@@ -62,19 +62,19 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(PaymentsFrequencyPage, PaymentsFrequency.values.head).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(AuthorisedAccountHolderPage, AuthorisedAccountHolder.values.head).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, paymentsFrequencyRoute)
+        val request = FakeRequest(GET, authorisedAccountHolderRoute)
 
-        val view = application.injector.instanceOf[PaymentsFrequencyView]
+        val view = application.injector.instanceOf[AuthorisedAccountHolderView]
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(PaymentsFrequency.values.head), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(AuthorisedAccountHolder.values.head), NormalMode)(request, messages(application)).toString
       }
     }
 
@@ -94,8 +94,8 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, paymentsFrequencyRoute)
-            .withFormUrlEncodedBody(("value", PaymentsFrequency.values.head.toString))
+          FakeRequest(POST, authorisedAccountHolderRoute)
+            .withFormUrlEncodedBody(("value", AuthorisedAccountHolder.values.head.toString))
 
         val result = route(application, request).value
 
@@ -110,12 +110,12 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, paymentsFrequencyRoute)
+          FakeRequest(POST, authorisedAccountHolderRoute)
             .withFormUrlEncodedBody(("value", "invalid value"))
 
         val boundForm = form.bind(Map("value" -> "invalid value"))
 
-        val view = application.injector.instanceOf[PaymentsFrequencyView]
+        val view = application.injector.instanceOf[AuthorisedAccountHolderView]
 
         val result = route(application, request).value
 
@@ -129,11 +129,12 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request = FakeRequest(GET, paymentsFrequencyRoute)
+        val request = FakeRequest(GET, authorisedAccountHolderRoute)
 
         val result = route(application, request).value
 
-        status(result) mustEqual OK
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
@@ -143,12 +144,14 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, paymentsFrequencyRoute)
-            .withFormUrlEncodedBody(("value", PaymentsFrequency.values.head.toString))
+          FakeRequest(POST, authorisedAccountHolderRoute)
+            .withFormUrlEncodedBody(("value", AuthorisedAccountHolder.values.head.toString))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
+
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

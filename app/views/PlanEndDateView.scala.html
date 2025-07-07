@@ -32,6 +32,11 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
         }
 
+        <p class="govuk-body">@messages("planEndDate.p1")</p>
+        <p class="govuk-body">@messages("planEndDate.p2")</p>
+        <p class="govuk-body">@messages("planEndDate.p3")</p>
+
+
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),

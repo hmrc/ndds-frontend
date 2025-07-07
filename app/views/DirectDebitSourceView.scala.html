@@ -14,36 +14,30 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth._
-
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
-    govukInput: GovukInput,
+    govukRadios: GovukRadios,
     govukButton: GovukButton
 )
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("totalAmountDue.title"))) {
+@layout(pageTitle = title(form, messages("directDebitSource.title"))) {
 
-    @formHelper(action = routes.TotalAmountDueController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.DirectDebitSourceController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
+            @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        <p class="govuk-body">@messages("totalAmountDue.p1")</p>
-
-
-        @govukInput(
-            InputViewModel(
-                field = form("value"),
-                label = LabelViewModel(messages("totalAmountDue.heading")).asPageHeading()
+        @govukRadios(
+            RadiosViewModel(
+                field  = form("value"),
+                legend = LegendViewModel(messages("directDebitSource.heading")).asPageHeading(),
+                items  = DirectDebitSource.options
             )
-            .withPrefix(PrefixOrSuffix(content = "£"))
-            .withWidth(Fixed10)
         )
 
         @govukButton(
