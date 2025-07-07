@@ -19,3 +19,22 @@ GET         /account/sign-out                            controllers.auth.AuthCo
 GET         /account/signed-out                          controllers.auth.SignedOutController.onPageLoad()
 
 GET         /unauthorised                                controllers.UnauthorisedController.onPageLoad()
+
+GET        /unverifiedAccountDetails                       controllers.UnverifiedAccountDetailsController.onPageLoad()
+
+GET        /authorisedAccountHolder                        controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = NormalMode)
+POST       /authorisedAccountHolder                        controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = NormalMode)
+GET        /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeAuthorisedAccountHolder                  controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = CheckMode)
+
+GET        /bankApproval                       controllers.BankApprovalController.onPageLoad()
+
+GET        /directDebitSource                        controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
+POST       /directDebitSource                        controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
+GET        /changeDirectDebitSource                  controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeDirectDebitSource                  controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
+
+GET        /paymentPlanType                        controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentPlanType                        controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
+GET        /changePaymentPlanType                  controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
+POST       /changePaymentPlanType                  controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)

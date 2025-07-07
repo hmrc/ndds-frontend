@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import models._
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import models.PaymentPlanType
+import play.api.libs.json.JsPath
 
-trait ModelGenerators {
+case object PaymentPlanTypePage extends QuestionPage[PaymentPlanType] {
 
-  implicit lazy val arbitraryPaymentPlanType: Arbitrary[PaymentPlanType] =
-    Arbitrary {
-      Gen.oneOf(PaymentPlanType.values.toSeq)
-    }
+  override def path: JsPath = JsPath \ toString
 
-  implicit lazy val arbitraryDirectDebitSource: Arbitrary[DirectDebitSource] =
-    Arbitrary {
-      Gen.oneOf(DirectDebitSource.values.toSeq)
-    }
-
-  implicit lazy val arbitraryAuthorisedAccountHolder: Arbitrary[AuthorisedAccountHolder] =
-    Arbitrary {
-      Gen.oneOf(AuthorisedAccountHolder.values.toSeq)
-    }
+  override def toString: String = "paymentPlanType"
 }

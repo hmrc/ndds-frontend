@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import models._
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import javax.inject.Inject
 
-trait ModelGenerators {
+import forms.mappings.Mappings
+import play.api.data.Form
+import models.PaymentPlanType
 
-  implicit lazy val arbitraryPaymentPlanType: Arbitrary[PaymentPlanType] =
-    Arbitrary {
-      Gen.oneOf(PaymentPlanType.values.toSeq)
-    }
+class PaymentPlanTypeFormProvider @Inject() extends Mappings {
 
-  implicit lazy val arbitraryDirectDebitSource: Arbitrary[DirectDebitSource] =
-    Arbitrary {
-      Gen.oneOf(DirectDebitSource.values.toSeq)
-    }
-
-  implicit lazy val arbitraryAuthorisedAccountHolder: Arbitrary[AuthorisedAccountHolder] =
-    Arbitrary {
-      Gen.oneOf(AuthorisedAccountHolder.values.toSeq)
-    }
+  def apply(): Form[PaymentPlanType] =
+    Form(
+      "value" -> enumerable[PaymentPlanType]("paymentPlanType.error.required")
+    )
 }

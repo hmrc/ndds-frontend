@@ -47,3 +47,33 @@ signedOut.guidance = We did not save your answers.
 
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
+
+unverifiedAccountDetails.title = unverifiedAccountDetails
+unverifiedAccountDetails.heading = unverifiedAccountDetails
+
+authorisedAccountHolder.title = Check your answers
+authorisedAccountHolder.heading = Check your answers
+authorisedAccountHolder.yes = Yes
+authorisedAccountHolder.no = No
+authorisedAccountHolder.checkYourAnswersLabel = Check your answers
+authorisedAccountHolder.error.required = Select authorisedAccountHolder
+authorisedAccountHolder.change.hidden = AuthorisedAccountHolder
+
+bankApproval.title = bankApproval
+bankApproval.heading = bankApproval
+
+directDebitSource.title = here do you need to make direct debit payment?
+directDebitSource.heading = here do you need to make direct debit payment?
+directDebitSource.corporationTax = Corporation Tax
+directDebitSource.machineGamesDuty = Machine Games Duty
+directDebitSource.checkYourAnswersLabel = here do you need to make direct debit payment?
+directDebitSource.error.required = Select directDebitSource
+directDebitSource.change.hidden = DirectDebitSource
+
+paymentPlanType.title = What type of payment plan are you selecting?
+paymentPlanType.heading = What type of payment plan are you selecting?
+paymentPlanType.aSinglePayment = A single payment
+paymentPlanType.aVariablePaymentPlan = A variable payment plan
+paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
+paymentPlanType.error.required = Select paymentPlanType
+paymentPlanType.change.hidden = PaymentPlanType
