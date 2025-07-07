@@ -57,3 +57,5 @@ GET        /total-amount-due                            controllers.TotalAmountD
 POST       /total-amount-due                            controllers.TotalAmountDueController.onSubmit(mode: Mode = NormalMode)
 GET        /change-total-amount-due                     controllers.TotalAmountDueController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-total-amount-due                     controllers.TotalAmountDueController.onSubmit(mode: Mode = CheckMode)
+
+GET        /directDebitConfirmation                     controllers.DirectDebitConfirmationController.onPageLoad()

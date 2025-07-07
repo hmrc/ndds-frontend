@@ -119,3 +119,6 @@ totalAmountDue.error.aboveMaximum = Total amount due must be {0} or less
 totalAmountDue.error.belowMinimum = Total amount due must be {0} or more
 totalAmountDue.change.hidden = TotalAmountDue
 totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your 'Notice to Pay'.
+
+directDebitConfirmation.title = Direct Debit Confirmation
+directDebitConfirmation.heading = Direct Debit Confirmation
