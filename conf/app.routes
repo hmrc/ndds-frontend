@@ -38,6 +38,31 @@ POST       /paymentPlanType                             controllers.PaymentPlanT
 GET        /changePaymentPlanType                       controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
 POST       /changePaymentPlanType                       controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
 
+GET        /paymentReference                            controllers.paymentReferenceController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentReference                            controllers.paymentReferenceController.onSubmit(mode: Mode = NormalMode)
+GET        /changepaymentReference                      controllers.paymentReferenceController.onPageLoad(mode: Mode = CheckMode)
+POST       /changepaymentReference                      controllers.paymentReferenceController.onSubmit(mode: Mode = CheckMode)
+
+GET        /paymentAmount                               controllers.paymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentAmount                               controllers.paymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET        /changepaymentAmount                         controllers.paymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST       /changepaymentAmount                         controllers.paymentAmountController.onSubmit(mode: Mode = CheckMode)
+
+GET        /paymentDate                                 controllers.paymentDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /paymentDate                                 controllers.paymentDateController.onSubmit(mode: Mode = NormalMode)
+GET        /changepaymentDate                           controllers.paymentDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /changepaymentDate                           controllers.paymentDateController.onSubmit(mode: Mode = CheckMode)
+
+GET        /planStartDate                               controllers.planStartDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /planStartDate                               controllers.planStartDateController.onSubmit(mode: Mode = NormalMode)
+GET        /changeplanStartDate                         controllers.planStartDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeplanStartDate                         controllers.planStartDateController.onSubmit(mode: Mode = CheckMode)
+
+GET        /yearEndAndMonth                             controllers.yearEndAndMonthController.onPageLoad(mode: Mode = NormalMode)
+POST       /yearEndAndMonth                             controllers.yearEndAndMonthController.onSubmit(mode: Mode = NormalMode)
+GET        /changeyearEndAndMonth                       controllers.yearEndAndMonthController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeyearEndAndMonth                       controllers.yearEndAndMonthController.onSubmit(mode: Mode = CheckMode)
+
 GET        /frequency-of-payments                       controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
 POST       /frequency-of-payments                       controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
 GET        /change-frequency-of-payments                controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = CheckMode)
@@ -58,4 +83,4 @@ POST       /total-amount-due                            controllers.TotalAmountD
 GET        /change-total-amount-due                     controllers.TotalAmountDueController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-total-amount-due                     controllers.TotalAmountDueController.onSubmit(mode: Mode = CheckMode)
 
-GET        /directDebitConfirmation                     controllers.DirectDebitConfirmationController.onPageLoad()
+GET        /direct-debit-confirmation                   controllers.DirectDebitConfirmationController.onPageLoad()
