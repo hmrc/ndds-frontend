@@ -37,7 +37,6 @@ class YourBankDetailsController @Inject()(
                                       navigator: Navigator,
                                       identify: IdentifierAction,
                                       getData: DataRetrievalAction,
-                                      requireData: DataRequiredAction,
                                       formProvider: YourBankDetailsFormProvider,
                                       val controllerComponents: MessagesControllerComponents,
                                       view: YourBankDetailsView

@@ -8,7 +8,9 @@ This is the new NDDS frontend repository
 
 Service Manager: `sm2 --start NDDS_ALL`
 
-Start local tests: `./run_all_tests.sh`
+To run all tests: `./run_all_tests.sh`
+
+To start the server locally: `sbt run`
 
 
 ### License

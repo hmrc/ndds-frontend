@@ -19,22 +19,22 @@ package controllers
 import base.SpecBase
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.AccountDetailsNotVarifiedView
+import views.html.AccountDetailsNotVerifiedView
 
-class AccountDetailsNotVarifiedControllerSpec extends SpecBase {
+class AccountDetailsNotVerifiedControllerSpec extends SpecBase {
 
-  "AccountDetailsNotVarified Controller" - {
+  "AccountDetailsNotVerified Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.AccountDetailsNotVarifiedController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.AccountDetailsNotVerifiedController.onPageLoad().url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[AccountDetailsNotVarifiedView]
+        val view = application.injector.instanceOf[AccountDetailsNotVerifiedView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view()(request, messages(application)).toString
