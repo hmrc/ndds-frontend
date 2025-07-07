@@ -1,0 +1,42 @@
+@*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@this()
+
+@(
+ title: String,
+ links: Seq[(String, String, Option[String])],
+ extraContent: Option[Html] = None,
+ cardClass: String = "card-half-width"
+)(implicit messages: Messages)
+
+@isManageAccountCard = @{cardClass == "card-full-width"}
+
+<div class=@cardClass>
+ <div>
+  <div class="card-label"><h2 class="govuk-heading-m">@title</h2></div>
+  <div class="card-content">@extraContent
+   <ul class="govuk-list @if(isManageAccountCard){columns}">
+    @for((linkText, url, optDescription) <- links) {
+     <li class="card-links @if(isManageAccountCard){manage-acc-li}">
+      <a href="@url" class="govuk-link">@linkText</a>
+      @optDescription.map { desc => <p class="govuk-body mng-acc-body-text-width">@desc</p> }
+     </li>
+    }
+   </ul>
+  </div>
+ </div>
+</div>

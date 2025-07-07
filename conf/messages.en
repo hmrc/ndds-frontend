@@ -51,6 +51,52 @@ unauthorised.heading = You can’t access this service with this account
 unverifiedAccountDetails.title = unverifiedAccountDetails
 unverifiedAccountDetails.heading = unverifiedAccountDetails
 
+yourDirectDebitInstructions.title = Your direct debit instructions
+yourDirectDebitInstructions.heading = Your direct debit instructions
+yourDirectDebitInstructions.p1 = You can add a new payment plan to existing Direct Debit Instructions(DDI).
+yourDirectDebitInstructions.p2 = You can
+yourDirectDebitInstructions.p2.link = set up a new direct debit payment
+yourDirectDebitInstructions.p2.afterLink = to use an account not previously set up. Once set up, this will be online after 36 hours.
+
+setupDirectDebitPayment.title = Setup a direct debit payment
+setupDirectDebitPayment.heading = Setup a direct debit payment
+setupDirectDebitPayment.p1 = You can use Direct Debit to:
+setupDirectDebitPayment.li1 = make a single payment for one of a number of taxes
+setupDirectDebitPayment.li2 = start a budget payment plan for Self Assessment
+setupDirectDebitPayment.li3 = repay a Tax Credit overpayment over 12 months
+setupDirectDebitPayment.li4 = setup a variable payment plan for Machine Game Duty(MGD)
+
+personalOrBusinessAccount.title = Is this a personal or business account?
+personalOrBusinessAccount.heading = Is this a personal or business account?
+personalOrBusinessAccount.personal = Personal
+personalOrBusinessAccount.business = Business
+personalOrBusinessAccount.checkYourAnswersLabel = Is this a personal or business account?
+personalOrBusinessAccount.error.required = Select personalOrBusinessAccount
+personalOrBusinessAccount.change.hidden = PersonalOrBusinessAccount
+
+accountDetailsNotVerified.title = Your account details could not be Verified
+accountDetailsNotVerified.heading = Your account details could not be Verified
+accountDetailsNotVerified.p1 = You will need to wait until {0} before you enter the details of different bank account
+accountDetailsNotVerified.p2 = if you do not have an other bank account you will need to pay using alternative payment option. You can find more information on this on the
+accountDetailsNotVerified.p2.link = Paying HMRC page
+
+yourBankDetails.title = What are your bank details?
+yourBankDetails.heading = What are your bank details?
+yourBankDetails.accountHolderName = Account holders(s) name
+yourBankDetails.accountHolderName.hint = This is the account holder(s) name as it appears on your book/bank card.
+yourBankDetails.sortCode = Sort code
+yourBankDetails.sortCode.hint = Must be 6 digit long. For Example, 00 11 22.
+yourBankDetails.accountNumber = Account number
+yourBankDetails.accountNumber.hint = Must be between6 and 8 digit long.
+yourBankDetails.checkYourAnswersLabel = Your bank details
+yourBankDetails.error.accountHolderName.required = Enter Account holder name
+yourBankDetails.error.sortCode.required = Enter sort code
+yourBankDetails.error.accountNumber.required= Enter Account number
+yourBankDetails.error.accountHolderName.length = Account holder name must be 100 characters or less
+yourBankDetails.error.sortCode.length = Sort code must be 10 characters or less
+yourBankDetails.accountHolderName.change.hidden = Account holders(s) name
+yourBankDetails.sortCode.change.hidden = Sort Code
+
 authorisedAccountHolder.title = Check your answers
 authorisedAccountHolder.heading = Check your answers
 authorisedAccountHolder.yes = Yes
@@ -147,7 +193,7 @@ regularPaymentAmount.change.hidden = RegularPaymentAmount
 
 planEndDate.title = What date are you ending this payment plan?
 planEndDate.heading = What date are you ending this payment plan?
-planEndDate.hint = For example, leave blank or enter future date in format 'dd mm yyyy'
+planEndDate.hint = For example, leave blank or enter future date in format ’dd mm yyyy’
 planEndDate.checkYourAnswersLabel = PlanEndDate
 planEndDate.error.required.all = Enter the plan end date
 planEndDate.error.required.two = The plan end date must include {0} and {1}
@@ -167,7 +213,7 @@ totalAmountDue.error.invalidNumeric = Enter your total amount due using up to tw
 totalAmountDue.error.aboveMaximum = Total amount due must be {0} or less
 totalAmountDue.error.belowMinimum = Total amount due must be {0} or more
 totalAmountDue.change.hidden = TotalAmountDue
-totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your 'Notice to Pay'.
+totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your ’Notice to Pay’.
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation

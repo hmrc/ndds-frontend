@@ -1,0 +1,70 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import viewmodels.InputWidth._
+
+@this(
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukInput: GovukInput,
+    govukButton: GovukButton
+)
+
+@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = title(form, messages("yourBankDetails.title"))) {
+
+    @formHelper(action = routes.YourBankDetailsController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
+
+        <h1 class="govuk-heading-xl">@messages("yourBankDetails.heading")</h1>
+
+        @govukInput(
+            InputViewModel(
+                field = form("accountHolderName"),
+                label = LabelViewModel(messages("yourBankDetails.accountHolderName"))
+            )
+            .withWidth(Full)
+            .withHint(Hint(content = Text(messages("yourBankDetails.accountHolderName.hint"))))
+        )
+
+        @govukInput(
+            InputViewModel(
+                field = form("sortCode"),
+                label = LabelViewModel(messages("yourBankDetails.sortCode"))
+            )
+            .withWidth(Fixed5)
+            .withHint(Hint(content = Text(messages("yourBankDetails.sortCode.hint"))))
+        )
+
+            @govukInput(
+            InputViewModel(
+            field = form("accountNumber"),
+            label = LabelViewModel(messages("yourBankDetails.accountNumber"))
+            )
+            .withWidth(Fixed10)
+            .withHint(Hint(content = Text(messages("yourBankDetails.accountNumber.hint"))))
+            )
+
+        @govukButton(
+            ButtonViewModel(messages("site.continue"))
+        )
+    }
+}
