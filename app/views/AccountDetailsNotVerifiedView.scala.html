@@ -14,24 +14,14 @@
  * limitations under the License.
  *@
 
-@import views.html.components.gds._
-
 @this(
         layout: templates.Layout,
         govukButton: GovukButton,
-        paragraphBody: paragraphBody,
-        paragraphBodyLink: paragraphBodyLink,
-        paragraphMessageWithLink: ParagraphMessageWithLink,
-        heading: heading,
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("accountDetailsNotVerified.title"))) {
 
-     @heading(messages("accountDetailsNotVerified.heading"), "govuk-heading-l")
-
-     @paragraphBody(messages("accountDetailsNotVerified.p1"," 21 June 2025, 3:54pm"))
-     @paragraphMessageWithLink(Some(messages("accountDetailsNotVerified.p2")), linkMessage = messages("accountDetailsNotVerified.p2.link"), linkUrl = "https://www.gov.uk/guidance/", linkFullStop = true)
-
+            <h1 class="govuk-heading-xl">@messages("accountDetailsNotVerified.heading")</h1>
 }
