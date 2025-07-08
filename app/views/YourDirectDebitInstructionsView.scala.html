@@ -14,26 +14,16 @@
  * limitations under the License.
  *@
 
-@import views.html.components.gds._
-
 @this(
         layout: templates.Layout,
         govukButton: GovukButton,
-        paragraphBody: paragraphBody,
-        paragraphBodyLink: paragraphBodyLink,
-        paragraphMessageWithLink: ParagraphMessageWithLink,
-        heading: heading
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title"))) {
 
-     @heading(messages("yourDirectDebitInstructions.heading"), "govuk-heading-l")
-
-     @paragraphBody(messages("yourDirectDebitInstructions.p1"))
-     @paragraphMessageWithLink(Some(messages("yourDirectDebitInstructions.p2")),
-     linkMessage = messages("yourDirectDebitInstructions.p2.link"), linkUrl = "https://www.gov.uk/guidance/", linkFullStop = false,
-     message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")))
+    <h1 class="govuk-heading-xl">@messages("yourDirectDebitInstructions.heading")</h1>
+    <p class="govuk-body">@messages("setupDirectDebitPayment.p1")</p>
 
 }
