@@ -53,6 +53,13 @@ yourDirectDebitInstructions.p1 = You can add a new payment plan to existing Dire
 yourDirectDebitInstructions.p2 = You can
 yourDirectDebitInstructions.p2.link = set up a new direct debit payment
 yourDirectDebitInstructions.p2.afterLink = to use an account not previously set up. Once set up, this will be online after 36 hours.
+yourDirectDebitInstructions.dl.view.add = View or add to
+yourDirectDebitInstructions.dl.direct.debit.reference = Direct Debit reference
+yourDirectDebitInstructions.dl.date.setup = Date set up
+yourDirectDebitInstructions.dl.sort.code = Bank sort code
+yourDirectDebitInstructions.dl.account.number = Account Number
+yourDirectDebitInstructions.dl.payment.plans = Number of payment plans
+yourDirectDebitInstructions.error.count = You cannot add a new Direct Debit Instruction (DDI). The maximum number of DDIs you can set up is 99.
 
 setupDirectDebitPayment.title = Setup a direct debit payment
 setupDirectDebitPayment.heading = Setup a direct debit payment

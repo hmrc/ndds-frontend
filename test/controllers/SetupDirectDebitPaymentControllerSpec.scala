@@ -37,7 +37,6 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[SetupDirectDebitPaymentView]
 
         status(result) mustEqual OK
-
         contentAsString(result) mustEqual view(0)(request, messages(application)).toString
         contentAsString(result) must not include ("Back")
       }
