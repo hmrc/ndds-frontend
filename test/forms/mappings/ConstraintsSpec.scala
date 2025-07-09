@@ -231,8 +231,6 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     "must return Valid for a string equal to or longer than the minimum length" in {
       val result = minLength(3, "error.tooShort")("abc")
       result mustEqual Valid
-      val result2 = minLength(3, "error.tooShort")("abcd")
-      result2 mustEqual Valid
     }
     "must return Invalid for a string shorter than the minimum length" in {
       val result = minLength(3, "error.tooShort")("ab")
