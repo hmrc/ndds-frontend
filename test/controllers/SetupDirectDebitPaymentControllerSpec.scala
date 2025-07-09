@@ -30,13 +30,15 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(3).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[SetupDirectDebitPaymentView]
 
         status(result) mustEqual OK
+        contentType(result) mustBe Some("text/html")
+        charset(result) mustBe Some("utf-8")
         contentAsString(result) mustEqual view()(request, messages(application)).toString
       }
     }

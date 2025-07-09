@@ -43,6 +43,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("features.welsh-translation")
 
+  val maxNumberDDIsAllowed: Int =
+      configuration.get[Int]("features.maxNumberDDIsAllowed")
+
   def languageMap: Map[String, Lang] = Map(
     "en" -> Lang("en"),
     "cy" -> Lang("cy")

@@ -16,23 +16,28 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourDirectDebitInstructionsView
+import utils.DirectDebitDetailsData
 
 class YourDirectDebitInstructionsController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: YourDirectDebitInstructionsView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                                       override val messagesApi: MessagesApi,
+                                                       identify: IdentifierAction,
+                                                       getData: DataRetrievalAction,
+                                                       val controllerComponents: MessagesControllerComponents,
+                                                       view: YourDirectDebitInstructionsView
+                                                     )(implicit appConfig: FrontendAppConfig
+                                                     ) extends FrontendBaseController
+  with I18nSupport
+  with DirectDebitDetailsData {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData) {
-    implicit request =>
-      Ok(view())
+  def onPageLoad: Action[AnyContent] = (identify andThen getData) { implicit request =>
+    val maxLimitReached = directDebitDetailsData.length > appConfig.maxNumberDDIsAllowed
+    Ok(view(directDebitDetailsData, maxLimitReached))
   }
 }

@@ -20,8 +20,9 @@ import base.SpecBase
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.YourDirectDebitInstructionsView
+import utils.DirectDebitDetailsData
 
-class YourDirectDebitInstructionsControllerSpec extends SpecBase {
+class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebitDetailsData {
 
   "YourDirectDebitInstructions Controller" - {
 
@@ -35,10 +36,18 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[YourDirectDebitInstructionsView]
-
+        val directDebits = directDebitDetailsData
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(directDebits)(request, messages(application)).toString
+        contentAsString(result) must include("Your direct debit instructions")
+        contentAsString(result) must include("You can add a new payment plan to existing Direct Debit Instructions(DDI).")
+        contentAsString(result) must include("Direct Debit reference")
+        contentAsString(result) must include("Date set up")
+        contentAsString(result) must include("Account Number")
+        contentAsString(result) must include("Number of payment plans")
+        contentAsString(result) must include("View or add to")
       }
     }
   }
 }
+

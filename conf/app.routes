@@ -20,7 +20,7 @@ GET        /unauthorised                                controllers.Unauthorised
 
 GET        /your-direct-debit-instructions              controllers.YourDirectDebitInstructionsController.onPageLoad()
 
-GET        /setup-direct-debit-payment                  controllers.SetupDirectDebitPaymentController.onPageLoad()
+GET        /setup-direct-debit-payment                  controllers.SetupDirectDebitPaymentController.onPageLoad(ddiCount:Int)
 
 GET        /personal-or-business-account                controllers.PersonalOrBusinessAccountController.onPageLoad(mode: Mode = NormalMode)
 POST       /personal-or-business-account                controllers.PersonalOrBusinessAccountController.onSubmit(mode: Mode = NormalMode)
