@@ -226,4 +226,28 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
       result mustEqual Invalid("error.max", CurrencyFormatter.currencyFormat(1))
     }
   }
+
+  "minLength" - {
+    "must return Valid for a string equal to or longer than the minimum length" in {
+      val result = minLength(3, "error.tooShort")("abc")
+      result mustEqual Valid
+      val result2 = minLength(3, "error.tooShort")("abcd")
+      result2 mustEqual Valid
+    }
+    "must return Invalid for a string shorter than the minimum length" in {
+      val result = minLength(3, "error.tooShort")("ab")
+      result mustEqual Invalid("error.tooShort", 3)
+    }
+  }
+
+  "NumericRegex" - {
+    "must match only numeric strings" in {
+      "123456" must fullyMatch regex NumericRegex
+      "000" must fullyMatch regex NumericRegex
+      "12a34" mustNot fullyMatch regex NumericRegex
+      "abc" mustNot fullyMatch regex NumericRegex
+      "12 34" mustNot fullyMatch regex NumericRegex
+      "" mustNot fullyMatch regex NumericRegex
+    }
+  }
 }

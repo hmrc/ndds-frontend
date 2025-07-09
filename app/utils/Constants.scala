@@ -20,4 +20,4 @@ object Constants {
   val MaxAccountHolderNameLength = 35
   val MaxSortCodeLength = 6
   val MaxAccountNumberLength = 8
-} 
+}
