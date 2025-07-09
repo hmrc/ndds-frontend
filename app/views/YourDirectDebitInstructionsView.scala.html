@@ -26,11 +26,6 @@ govukButton: GovukButton
 @(directDebitDetails: List[DirectDebitDetails], maxLimit: Boolean = false)(implicit request: Request[_], messages: Messages)
 
 <style>
-    .govuk-summary-list--equal-columns .govuk-summary-list__key,
-    .govuk-summary-list--equal-columns .govuk-summary-list__value {
-      flex-basis: 50% !important;
-      width: 50% !important;
-    }
     .govuk-summary-list--equal-columns .govuk-summary-list__value {
       text-align: right;
     }
@@ -39,7 +34,7 @@ govukButton: GovukButton
     }
 </style>
 
-@layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title"))) {
+@layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
 @if(maxLimit) {
 <div class="govuk-error-summary" data-module="govuk-error-summary">
@@ -50,7 +45,7 @@ govukButton: GovukButton
         <div class="govuk-error-summary__body">
             <ul class="govuk-list govuk-error-summary__list">
                 <li>
-                    You cannot add a new Direct Debit Instruction (DDI). The maximum number of DDIs you can set up is 99.
+                    @messages("yourDirectDebitInstructions.error.count")
                 </li>
             </ul>
         </div>
