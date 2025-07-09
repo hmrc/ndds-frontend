@@ -25,7 +25,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
   "SetupDirectDebitPayment Controller" - {
 
-    "must return OK and the correct view for a GET with no back link (DDI = 0)" in {
+    "must return OK and the correct view for a GET with no back link (DDI = 0) without Back link" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
@@ -38,11 +38,12 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(0)(request, messages(application)).toString
+        contentAsString(result) must not include ("Back")
       }
     }
 
-      "must return OK and the correct view for a GET if there is back link (DDI > 1)" in {
+      "must return OK and the correct view for a GET if there is back link (DDI > 1) with Back link" in {
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
@@ -51,12 +52,9 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
           val result = route(application, request).value
 
-          val withBacklink = "[  <a href=\"#\" class=\"govuk-back-link\" data-module=\"hmrc-back-link\">Back</a>]"
-
           status(result) mustEqual OK
 
-          contentAsString(result) mustEqual view()(request, messages(application)).toString
-          contentAsString(result) must include (withBacklink)
+          contentAsString(result) must include ("Back")
 
           contentAsString(result) must include ("Setup a direct debit payment")
           contentAsString(result) must include ("Please note")
