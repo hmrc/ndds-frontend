@@ -14,16 +14,96 @@
  * limitations under the License.
  *@
 
+@import views.html.helpers._
+@import utils.MaskAndFormatUtils._
+
 @this(
-        layout: templates.Layout,
-        govukButton: GovukButton,
+layout: templates.Layout,
+paragraphMessageWithLink: ParagraphMessageWithLink,
+govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(directDebitDetails: List[DirectDebitDetails], maxLimit: Boolean = false)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title"))) {
+<style>
+    .govuk-summary-list--equal-columns .govuk-summary-list__value {
+      text-align: right;
+    }
+    .govuk-summary-list.no-borders .govuk-summary-list__row {
+      border-bottom: none !important;
+    }
+</style>
 
-    <h1 class="govuk-heading-xl">@messages("yourDirectDebitInstructions.heading")</h1>
-    <p class="govuk-body">@messages("setupDirectDebitPayment.p1")</p>
+@layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
+@if(maxLimit) {
+<div class="govuk-error-summary" data-module="govuk-error-summary">
+    <div role="alert" aria-labelledby="error-summary-title" tabindex="-1">
+        <h2 class="govuk-error-summary__title" id="error-summary-title">
+            There is a problem
+        </h2>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+                <li>
+                    @messages("yourDirectDebitInstructions.error.count")
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+}
+
+<h1 class="govuk-heading-l">@messages("yourDirectDebitInstructions.heading")</h1>
+
+<p class="govuk-body">@messages("yourDirectDebitInstructions.p1")</p>
+
+    @paragraphMessageWithLink(
+    Some(messages("yourDirectDebitInstructions.p2")),
+    linkMessage = messages("yourDirectDebitInstructions.p2.link"),
+    linkUrl = "@routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url",
+    linkFullStop = false,
+    message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
+    maxLimit = maxLimit
+    )
+
+@for(dd <- directDebitDetails) {
+<dl class="govuk-summary-list govuk-summary-list--equal-columns no-borders">
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+            <h2>@dd.directDebitReference</h2>
+        </dt>
+        <dd class="govuk-summary-list__value">
+            <a class="govuk-link" href="" >
+                @messages("yourDirectDebitInstructions.dl.view.add")
+            </a>  <span class="govuk-visually-hidden"> for @dd.directDebitReference </span>
+        </dd>
+
+    </div>
+
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.direct.debit.reference")</dt>
+        <dd class="govuk-summary-list__value">@dd.directDebitReference</dd>
+    </div>
+
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.date.setup")</dt>
+        <dd class="govuk-summary-list__value">@formatDateToGds(dd.setupDate)</dd>
+    </div>
+
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.sort.code")</dt>
+        <dd class="govuk-summary-list__value">@maskSortCode(dd.sortCode)</dd>
+    </div>
+
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.account.number")</dt>
+        <dd class="govuk-summary-list__value">@maskAccountNumber(dd.accountNumber)</dd>
+    </div>
+
+    <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.payment.plans")</dt>
+        <dd class="govuk-summary-list__value">@dd.paymentPlans</dd>
+    </div>
+</dl>
+}
 }
