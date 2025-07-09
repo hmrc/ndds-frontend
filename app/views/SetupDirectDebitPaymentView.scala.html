@@ -14,14 +14,16 @@
  * limitations under the License.
  *@
 
+@import _root_.models.NormalMode
+
 @this(
         layout: templates.Layout,
         govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(ddi: Int)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title"))) {
+@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")), showBackLink = if(ddi == 0) { false } else { true }) {
 
     <h1 class="govuk-heading-l">@messages("setupDirectDebitPayment.heading")</h1>
     <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p1")</strong></p>
@@ -32,7 +34,6 @@
         <li>@messages("setupDirectDebitPayment.l14")</li>
     </ul>
     <br/>
-
     <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p2")</strong></p>
     <ul class="govuk-list govuk-list--bullet">
         <li>@messages("setupDirectDebitPayment.l21")</li>
@@ -56,14 +57,19 @@
 
     <p class="govuk-body">@messages("setupDirectDebitPayment.p6")</p>
     <p class="govuk-body">@messages("setupDirectDebitPayment.p7")
-        <a class="govuk-link govuk-link--no-visited-state" href="http://www.hmrc.gov.uk/payinghmrc/">@messages("setupDirectDebitPayment.p71")</a>
+        <a class="govuk-link govuk-link--no-visited-state" href="http://www.hmrc.gov.uk/payinghmrc/">@messages("setupDirectDebitPayment.link1")</a>
     </p>
     <p class="govuk-body">@messages("setupDirectDebitPayment.p8")</p>
     <p class="govuk-body"><b>@messages("setupDirectDebitPayment.p9")</b> @messages("setupDirectDebitPayment.p91")</p>
+    <p class="govuk-body">@messages("setupDirectDebitPayment.p10")</p>
+    <p class="govuk-body">@messages("setupDirectDebitPayment.p11")</p>
 
-    @govukButton(
-        ButtonViewModel(messages("setupDirectDebitPayment.startNow"))
-    )
+    @govukButton(Button(
+        href = Some(routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url),
+        isStartButton = true,
+        content = Text(messages("setupDirectDebitPayment.startNow")),
+        attributes = Map("id" -> "start-button")
+    ))
     <br/>
 
 }

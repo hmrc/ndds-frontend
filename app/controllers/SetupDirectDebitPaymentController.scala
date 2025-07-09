@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -31,8 +31,9 @@ class SetupDirectDebitPaymentController @Inject()(
                                        view: SetupDirectDebitPaymentView
                                      ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(ddi: Int): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      Ok(view())
+      Ok(view(ddi))
   }
+
 }

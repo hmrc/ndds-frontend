@@ -25,20 +25,45 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
   "SetupDirectDebitPayment Controller" - {
 
-    "must return OK and the correct view for a GET" in {
+    "must return OK and the correct view for a GET with no back link (DDI = 0)" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(0).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[SetupDirectDebitPaymentView]
 
         status(result) mustEqual OK
+
         contentAsString(result) mustEqual view()(request, messages(application)).toString
       }
     }
+
+      "must return OK and the correct view for a GET if there is back link (DDI > 1)" in {
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(5).url)
+
+          val result = route(application, request).value
+
+          val withBacklink = "[  <a href=\"#\" class=\"govuk-back-link\" data-module=\"hmrc-back-link\">Back</a>]"
+
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view()(request, messages(application)).toString
+          contentAsString(result) must include (withBacklink)
+
+          contentAsString(result) must include ("Setup a direct debit payment")
+          contentAsString(result) must include ("Please note")
+
+          contentAsString(result) must include ("Start now")
+        }
+
+      }
   }
 }
