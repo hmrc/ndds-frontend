@@ -22,20 +22,13 @@ import java.time.format.DateTimeFormatter
 object MaskAndFormatUtils {
 
   def maskSortCode(sortCode: String): String =
-    if (sortCode.length >= 6)
-      sortCode.take(2) + "****"
-    else
-      "****"
+    sortCode.take(2) + "****"
 
   def maskAccountNumber(accountNumber: String): String =
-    if (accountNumber.length >= 3)
-      "***" + accountNumber.drop(3)
-    else
-      "***"
+    "***" + accountNumber.drop(3)
 
-
-  private val inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy")
-  private val gdsFormatter   = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  private lazy val inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy")
+  private lazy val gdsFormatter   = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def formatDateToGds(dateStr: String): String = {
     val localDate = LocalDate.parse(dateStr, inputFormatter)

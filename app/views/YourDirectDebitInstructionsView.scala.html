@@ -57,14 +57,14 @@ govukButton: GovukButton
 
 <p class="govuk-body">@messages("yourDirectDebitInstructions.p1")</p>
 
-@paragraphMessageWithLink(
-Some(messages("yourDirectDebitInstructions.p2")),
-linkMessage = messages("yourDirectDebitInstructions.p2.link"),
-linkUrl = "https://www.gov.uk/guidance/",
-linkFullStop = false,
-message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
-maxLimit = maxLimit
-)
+    @paragraphMessageWithLink(
+    Some(messages("yourDirectDebitInstructions.p2")),
+    linkMessage = messages("yourDirectDebitInstructions.p2.link"),
+    linkUrl = "@routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url",
+    linkFullStop = false,
+    message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
+    maxLimit = maxLimit
+    )
 
 @for(dd <- directDebitDetails) {
 <dl class="govuk-summary-list govuk-summary-list--equal-columns no-borders">
@@ -73,7 +73,7 @@ maxLimit = maxLimit
             <h2>@dd.directDebitReference</h2>
         </dt>
         <dd class="govuk-summary-list__value">
-            <a class="govuk-link" href="@routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url" >
+            <a class="govuk-link" href="" >
                 @messages("yourDirectDebitInstructions.dl.view.add")
             </a>  <span class="govuk-visually-hidden"> for @dd.directDebitReference </span>
         </dd>
