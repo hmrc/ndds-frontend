@@ -44,6 +44,7 @@
             )
             .withWidth(Full)
             .withHint(Hint(content = Text(messages("yourBankDetails.accountHolderName.hint"))))
+            .withAttribute(("maxlength", MAX_ACCOUNT_HOLDER_NAME_LENGTH.toString))
         )
 
         @govukInput(
@@ -53,7 +54,7 @@
             )
             .withWidth(Fixed5)
             .withHint(Hint(content = Text(messages("yourBankDetails.sortCode.hint"))))
-            .withAttribute(("maxlength", MaxSortCodeLength.toString))
+            .withAttribute(("maxlength", MAX_SORT_CODE_LENGTH.toString))
         )
 
         @govukInput(
@@ -63,7 +64,7 @@
             )
             .withWidth(Fixed10)
             .withHint(Hint(content = Text(messages("yourBankDetails.accountNumber.hint"))))
-            .withAttribute(("maxlength", MaxAccountNumberLength.toString))
+            .withAttribute(("maxlength", MAX_ACCOUNT_NUMBER_LENGTH.toString))
         )
 
         @govukButton(

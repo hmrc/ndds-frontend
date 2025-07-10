@@ -29,17 +29,17 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
   def apply(): Form[YourBankDetails] = Form(
     mapping(
       "accountHolderName" -> text("yourBankDetails.error.accountHolderName.required")
-        .verifying(maxLength(MaxAccountHolderNameLength, "yourBankDetails.error.accountHolderName.length")),
+        .verifying(maxLength(MAX_ACCOUNT_HOLDER_NAME_LENGTH, "yourBankDetails.error.accountHolderName.length")),
       "sortCode" -> text("yourBankDetails.error.sortCode.required")
         .verifying(firstError(
-          minLength(MaxSortCodeLength, "yourBankDetails.error.sortCode.tooShort"),
-          maxLength(MaxSortCodeLength, "yourBankDetails.error.sortCode.length"),
+          minLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
+          maxLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
           regexp(NumericRegex, "yourBankDetails.error.sortCode.numericOnly")
         )),
       "accountNumber" -> text("yourBankDetails.error.accountNumber.required")
         .verifying(firstError(
-          minLength(MaxAccountNumberLength, "yourBankDetails.error.accountNumber.tooShort"),
-          maxLength(MaxAccountNumberLength, "yourBankDetails.error.accountNumber.length"),
+          minLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.tooShort"),
+          maxLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.length"),
           regexp(NumericRegex, "yourBankDetails.error.accountNumber.numericOnly")
         ))
     )(YourBankDetails.apply)(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))

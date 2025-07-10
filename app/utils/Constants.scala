@@ -17,7 +17,7 @@
 package utils
 
 object Constants {
-  val MaxAccountHolderNameLength = 35
-  val MaxSortCodeLength = 6
-  val MaxAccountNumberLength = 8
+  val MAX_ACCOUNT_HOLDER_NAME_LENGTH = 35
+  val MAX_SORT_CODE_LENGTH = 6
+  val MAX_ACCOUNT_NUMBER_LENGTH = 8
 }
