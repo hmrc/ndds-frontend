@@ -43,28 +43,30 @@ govukErrorSummary: GovukErrorSummary,
 
 @layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
-        @if(maxLimit) {
-        @govukErrorSummary(ErrorSummary(
-        errorList = Seq(
-        ErrorLink(
-        href = None,
-        content = Text(messages("yourDirectDebitInstructions.error.count"))
-        )
-        )
-        ))
-        }
+    @if(maxLimit) {
+            @govukErrorSummary(
+                ErrorSummary(
+                    errorList = Seq(
+                        ErrorLink(
+                            href = None,
+                            content = Text(messages("yourDirectDebitInstructions.error.count"))
+                        )
+                    )
+                )
+            )
+    }
 
 <h1 class="govuk-heading-l">@messages("yourDirectDebitInstructions.heading")</h1>
 
 <p class="govuk-body">@messages("yourDirectDebitInstructions.p1")</p>
 
     @paragraphMessageWithLink(
-    Some(messages("yourDirectDebitInstructions.p2")),
-    linkMessage = messages("yourDirectDebitInstructions.p2.link"),
-    linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url,
-    linkFullStop = false,
-    message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
-    maxLimit = maxLimit
+        Some(messages("yourDirectDebitInstructions.p2")),
+        linkMessage = messages("yourDirectDebitInstructions.p2.link"),
+        linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url,
+        linkFullStop = false,
+        message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
+        maxLimit = maxLimit
     )
 
 @for(dd <- directDebitDetails) {
