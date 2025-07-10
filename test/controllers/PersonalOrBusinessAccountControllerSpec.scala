@@ -27,7 +27,7 @@ import pages.PersonalOrBusinessAccountPage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.{status, *}
 import repositories.SessionRepository
 import views.html.PersonalOrBusinessAccountView
 
@@ -41,6 +41,7 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
 
   val formProvider = new PersonalOrBusinessAccountFormProvider()
   val form = formProvider()
+  lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad(0)
 
   "PersonalOrBusinessAccount Controller" - {
 
@@ -54,13 +55,13 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[PersonalOrBusinessAccountView]
-
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, backLinkRoute)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
+
 
       val userAnswers = UserAnswers(userAnswersId).set(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.values.head).success.value
 
@@ -74,7 +75,7 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(PersonalOrBusinessAccount.values.head), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(PersonalOrBusinessAccount.values.head), NormalMode, backLinkRoute)(request, messages(application)).toString
       }
     }
 
@@ -120,7 +121,29 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, backLinkRoute)(request, messages(application)).toString
+        contentAsString(result) must include("Invalid value")
+      }
+    }
+
+    "must return a Bad Request and errors when no radio option is selected" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, personalOrBusinessAccountRoute)
+            .withFormUrlEncodedBody()
+
+        val boundForm = form.bind(Map.empty)
+
+        val view = application.injector.instanceOf[PersonalOrBusinessAccountView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) mustEqual view(boundForm, NormalMode, backLinkRoute)(request, messages(application)).toString
+        contentAsString(result) must include("Please select an account type.")
       }
     }
 
