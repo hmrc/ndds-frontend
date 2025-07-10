@@ -41,6 +41,7 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
 
   val formProvider = new PersonalOrBusinessAccountFormProvider()
   val form = formProvider()
+  lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad()
 
   "PersonalOrBusinessAccount Controller" - {
 
@@ -49,18 +50,18 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, personalOrBusinessAccountRoute)
+        implicit val request = FakeRequest(GET, personalOrBusinessAccountRoute)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[PersonalOrBusinessAccountView]
-
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, backLinkRoute)(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
+
 
       val userAnswers = UserAnswers(userAnswersId).set(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.values.head).success.value
 
@@ -74,7 +75,7 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(PersonalOrBusinessAccount.values.head), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(PersonalOrBusinessAccount.values.head), NormalMode, backLinkRoute)(request, messages(application)).toString
       }
     }
 
@@ -120,7 +121,7 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, backLinkRoute)(request, messages(application)).toString
       }
     }
 
