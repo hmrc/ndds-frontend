@@ -30,7 +30,8 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(3).url)
+        val NumberOfPreviouslySetupDirectDebit=3
+        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(NumberOfPreviouslySetupDirectDebit).url)
 
         val result = route(application, request).value
 
