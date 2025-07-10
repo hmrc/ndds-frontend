@@ -20,8 +20,8 @@
 @this(
 layout: templates.Layout,
 paragraphMessageWithLink: ParagraphMessageWithLink,
-errorMaxCount: ErrorMaxCount,
-govukButton: GovukButton
+govukButton: GovukButton,
+govukErrorSummary: GovukErrorSummary,
 )
 
 @(directDebitDetails: List[DirectDebitDetails], maxLimit: Boolean = false)(implicit request: Request[_], messages: Messages)
@@ -43,9 +43,16 @@ govukButton: GovukButton
 
 @layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
-@if(maxLimit) {
-@errorMaxCount(messages("yourDirectDebitInstructions.error.count"))
-}
+        @if(maxLimit) {
+        @govukErrorSummary(ErrorSummary(
+        errorList = Seq(
+        ErrorLink(
+        href = None,
+        content = Text(messages("yourDirectDebitInstructions.error.count"))
+        )
+        )
+        ))
+        }
 
 <h1 class="govuk-heading-l">@messages("yourDirectDebitInstructions.heading")</h1>
 
