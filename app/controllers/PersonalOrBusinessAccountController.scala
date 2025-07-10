@@ -22,7 +22,7 @@ import forms.PersonalOrBusinessAccountFormProvider
 import javax.inject.Inject
 import models.{Mode, UserAnswers}
 import navigation.Navigator
-import pages.{PersonalOrBusinessAccountPage, YourBankDetailsPage}
+import pages.PersonalOrBusinessAccountPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -66,7 +66,7 @@ class PersonalOrBusinessAccountController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PersonalOrBusinessAccountPage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+          } yield Redirect(navigator.nextPage(PersonalOrBusinessAccountPage, mode, updatedAnswers))
       )
   }
 }
