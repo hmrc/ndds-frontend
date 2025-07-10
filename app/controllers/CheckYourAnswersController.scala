@@ -21,7 +21,8 @@ import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierA
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.govuk.summarylist._
+import viewmodels.checkAnswers.{YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary, YourBankDetailsSummary}
+import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
 
 class CheckYourAnswersController @Inject()(
@@ -37,7 +38,11 @@ class CheckYourAnswersController @Inject()(
     implicit request =>
 
       val list = SummaryListViewModel(
-        rows = Seq.empty
+        rows = Seq(
+          YourBankDetailsSummary.row(request.userAnswers),
+          YourBankDetailsSortCodeSummary.row(request.userAnswers),
+          YourBankDetailsAccountNumberSummary.row(request.userAnswers),
+        ).flatten
       )
 
       Ok(view(list))
