@@ -25,12 +25,13 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
   "SetupDirectDebitPayment Controller" - {
 
-    "must return OK and the correct view for a GET with no back link (DDI = 0) without Back link" in {
 
+    "must return OK and the correct view for a GET with no back link (DDI = 0) without Back link" in {
+      val ddiCount = 0
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(0).url)
+        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(ddiCount).url)
 
         val result = route(application, request).value
 
@@ -43,11 +44,12 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     }
 
       "must return OK and the correct view for a GET if there is back link (DDI > 1) with Back link" in {
+        val ddiCount = 5
 
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
-          val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(5).url)
+          val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(ddiCount).url)
 
           val result = route(application, request).value
 

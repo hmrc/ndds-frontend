@@ -31,9 +31,9 @@ class SetupDirectDebitPaymentController @Inject()(
                                        view: SetupDirectDebitPaymentView
                                      ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(ddi: Int = 0): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(directDebitCount: Int): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      Ok(view(ddi))
+      Ok(view(directDebitCount))
   }
 
 }

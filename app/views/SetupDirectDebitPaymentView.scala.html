@@ -21,25 +21,24 @@
         govukButton: GovukButton
 )
 
-@(ddi: Int)(implicit request: Request[_], messages: Messages)
+@(directDebitCount: Int)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")), showBackLink = if(ddi == 0) { false } else { true }) {
+@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")), showBackLink = if(directDebitCount != 0) { true } else { false }) {
 
     <h1 class="govuk-heading-l">@messages("setupDirectDebitPayment.heading")</h1>
     <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p1")</strong></p>
-    <ul class="govuk-list govuk-list--bullet">
+    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
         <li>@messages("setupDirectDebitPayment.l11")</li>
         <li>@messages("setupDirectDebitPayment.l12")</li>
         <li>@messages("setupDirectDebitPayment.l13")</li>
         <li>@messages("setupDirectDebitPayment.l14")</li>
     </ul>
-    <br/>
+
     <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p2")</strong></p>
-    <ul class="govuk-list govuk-list--bullet">
+    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
         <li>@messages("setupDirectDebitPayment.l21")</li>
         <li>@messages("setupDirectDebitPayment.l22")</li>
     </ul>
-    <br/>
 
     <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p3")</strong></p>
     <ul class="govuk-list govuk-list--bullet">
@@ -47,11 +46,10 @@
         <li>@messages("setupDirectDebitPayment.l32")</li>
         <li>@messages("setupDirectDebitPayment.l33")</li>
     </ul>
-    <p class="govuk-body">@messages("setupDirectDebitPayment.p4")</p>
-    <br/>
+    <p class="govuk-body govuk-!-padding-bottom-3">@messages("setupDirectDebitPayment.p4")</p>
 
     <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p5")</strong></p>
-    <ul class="govuk-list govuk-list--bullet">
+    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
         <li>@messages("setupDirectDebitPayment.l51")</li>
     </ul>
 
@@ -71,5 +69,4 @@
         attributes = Map("id" -> "start-button")
     ))
     <br/>
-
 }
