@@ -38,6 +38,17 @@ class NavigatorSpec extends SpecBase {
       "must go from YourBankDetailsPage to CheckYourAnswers" in {
         navigator.nextPage(YourBankDetailsPage, NormalMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
+
+      "must go from a PersonalOrBusinessAccountPage to YourBankDetailsPage" in {
+
+        case object UnknownPage extends Page
+        val userAnswers = UserAnswers("id")
+        val page = PersonalOrBusinessAccountPage
+
+        val next = navigator.nextPage(page, NormalMode, userAnswers)
+
+        next mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
+      }
     }
 
     "in Check mode" - {
