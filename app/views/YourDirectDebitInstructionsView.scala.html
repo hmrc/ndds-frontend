@@ -14,12 +14,13 @@
  * limitations under the License.
  *@
 
-@import views.html.helpers._
+@import views.html.components._
 @import utils.MaskAndFormatUtils._
 
 @this(
 layout: templates.Layout,
 paragraphMessageWithLink: ParagraphMessageWithLink,
+errorMaxCount: ErrorMaxCount,
 govukButton: GovukButton
 )
 
@@ -30,27 +31,20 @@ govukButton: GovukButton
       text-align: right;
     }
     .govuk-summary-list.no-borders .govuk-summary-list__row {
-      border-bottom: none !important;
+      border-bottom: none;
     }
+    .govuk-link--disabled {
+      pointer-events: none;
+      color: #6a6a6a;
+      text-decoration: none;
+    }
+
 </style>
 
 @layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
 @if(maxLimit) {
-<div class="govuk-error-summary" data-module="govuk-error-summary">
-    <div role="alert" aria-labelledby="error-summary-title" tabindex="-1">
-        <h2 class="govuk-error-summary__title" id="error-summary-title">
-            There is a problem
-        </h2>
-        <div class="govuk-error-summary__body">
-            <ul class="govuk-list govuk-error-summary__list">
-                <li>
-                    @messages("yourDirectDebitInstructions.error.count")
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
+@errorMaxCount(messages("yourDirectDebitInstructions.error.count"))
 }
 
 <h1 class="govuk-heading-l">@messages("yourDirectDebitInstructions.heading")</h1>
@@ -60,7 +54,7 @@ govukButton: GovukButton
     @paragraphMessageWithLink(
     Some(messages("yourDirectDebitInstructions.p2")),
     linkMessage = messages("yourDirectDebitInstructions.p2.link"),
-    linkUrl = "@routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url",
+    linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url,
     linkFullStop = false,
     message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
     maxLimit = maxLimit

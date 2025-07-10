@@ -1,5 +1,5 @@
 @*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,20 +29,29 @@ maxLimit: Boolean = false
 )
 
 <p class="@classes">
-    @message1.map { message => @Html(message) }
+
+    @message1.map { message => @message }
 
     @if(maxLimit) {
-    <span class="@linkClass govuk-link--disabled" aria-disabled="true"
-          style="pointer-events: none; color: #6a6a6a;">
+    <span
+            @if(linkClass.nonEmpty) { class="@linkClass govuk-link--disabled" }
+            aria-disabled="true"
+    >
             @linkMessage
         </span>
     } else {
-    <a class="@linkClass" href="@linkUrl" rel="@linkRel" target="@target">
+    <a
+            href="@linkUrl"
+            @if(linkClass.nonEmpty) { class="@linkClass" }
+            @if(linkRel.nonEmpty) { rel="@linkRel" }
+            @if(target.nonEmpty) { target="@target" }
+    >
         @linkMessage
     </a>
     }
 
     @{ if(linkFullStop)(".") }
 
-    @message2.map { message => @Html(message) }
+    @message2.map { message => @message }
+
 </p>
