@@ -52,7 +52,7 @@ class PersonalOrBusinessAccountController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))
+      Ok(view(preparedForm, mode, routes.SetupDirectDebitPaymentController.onPageLoad(0)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
@@ -60,7 +60,7 @@ class PersonalOrBusinessAccountController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))),
+          Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad(0)))),
 
         value =>
           for {

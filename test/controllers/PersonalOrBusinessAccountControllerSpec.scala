@@ -41,7 +41,7 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
 
   val formProvider = new PersonalOrBusinessAccountFormProvider()
   val form = formProvider()
-  lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad()
+  lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad(0)
 
   "PersonalOrBusinessAccount Controller" - {
 
