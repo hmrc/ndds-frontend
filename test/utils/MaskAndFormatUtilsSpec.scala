@@ -41,13 +41,12 @@ class MaskAndFormatUtilsSpec extends AnyFreeSpec with Matchers {
       }
 
       "should mask completely if length less than 3" in {
-        MaskAndFormatUtils.maskAccountNumber("12") mustEqual "***"
-        MaskAndFormatUtils.maskAccountNumber("") mustEqual "***"
+        MaskAndFormatUtils.maskAccountNumber("1234") mustEqual "****"
+        MaskAndFormatUtils.maskAccountNumber("123") mustEqual "****"
+        MaskAndFormatUtils.maskAccountNumber("12") mustEqual "****"
+        MaskAndFormatUtils.maskAccountNumber("") mustEqual "****"
       }
 
-      "should just show stars if exactly 3 digits" in {
-        MaskAndFormatUtils.maskAccountNumber("123") mustEqual "***"
-      }
     }
 
     "formatDateToGds" - {
