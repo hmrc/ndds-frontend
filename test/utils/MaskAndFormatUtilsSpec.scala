@@ -37,7 +37,7 @@ class MaskAndFormatUtilsSpec extends AnyFreeSpec with Matchers {
 
     "maskAccountNumber" - {
       "should mask first three digits and show the rest" in {
-        MaskAndFormatUtils.maskAccountNumber("12345678") mustEqual "***45678"
+        MaskAndFormatUtils.maskAccountNumber("12345678") mustEqual "****5678"
       }
 
       "should mask completely if length less than 3" in {

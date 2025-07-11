@@ -25,7 +25,7 @@ object MaskAndFormatUtils {
     sortCode.take(2) + "****"
 
   def maskAccountNumber(accountNumber: String): String =
-    "***" + accountNumber.drop(3)
+    "****" + accountNumber.drop(4)
 
   private lazy val inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy")
   private lazy val gdsFormatter   = DateTimeFormatter.ofPattern("d MMMM yyyy")
