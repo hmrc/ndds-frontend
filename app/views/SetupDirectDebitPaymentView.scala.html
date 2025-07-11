@@ -14,17 +14,59 @@
  * limitations under the License.
  *@
 
+@import _root_.models.NormalMode
+
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton,
-
+        govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(directDebitCount: Int)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title"))) {
+@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")), showBackLink = if(directDebitCount != 0) { true } else { false }) {
 
-    <h1 class="govuk-heading-xl">@messages("setupDirectDebitPayment.heading")</h1>
-    <p class="govuk-body">@messages("setupDirectDebitPayment.p1")</p>
+    <h1 class="govuk-heading-l">@messages("setupDirectDebitPayment.heading")</h1>
+    <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p1")</strong></p>
+    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
+        <li>@messages("setupDirectDebitPayment.l11")</li>
+        <li>@messages("setupDirectDebitPayment.l12")</li>
+        <li>@messages("setupDirectDebitPayment.l13")</li>
+        <li>@messages("setupDirectDebitPayment.l14")</li>
+    </ul>
 
+    <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p2")</strong></p>
+    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
+        <li>@messages("setupDirectDebitPayment.l21")</li>
+        <li>@messages("setupDirectDebitPayment.l22")</li>
+    </ul>
+
+    <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p3")</strong></p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@messages("setupDirectDebitPayment.l31")</li>
+        <li>@messages("setupDirectDebitPayment.l32")</li>
+        <li>@messages("setupDirectDebitPayment.l33")</li>
+    </ul>
+    <p class="govuk-body govuk-!-padding-bottom-3">@messages("setupDirectDebitPayment.p4")</p>
+
+    <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p5")</strong></p>
+    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
+        <li>@messages("setupDirectDebitPayment.l51")</li>
+    </ul>
+
+    <p class="govuk-body">@messages("setupDirectDebitPayment.p6")</p>
+    <p class="govuk-body">@messages("setupDirectDebitPayment.p7")
+        <a class="govuk-link govuk-link--no-visited-state" href="http://www.hmrc.gov.uk/payinghmrc/">@messages("setupDirectDebitPayment.link1")</a>
+    </p>
+    <p class="govuk-body">@messages("setupDirectDebitPayment.p8")</p>
+    <p class="govuk-body"><b>@messages("setupDirectDebitPayment.p9")</b> @messages("setupDirectDebitPayment.p91")</p>
+    <p class="govuk-body">@messages("setupDirectDebitPayment.p10")</p>
+    <p class="govuk-body">@messages("setupDirectDebitPayment.p11")</p>
+
+    @govukButton(Button(
+        href = Some(routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url),
+        isStartButton = true,
+        content = Text(messages("setupDirectDebitPayment.startNow")),
+        attributes = Map("id" -> "start-button")
+    ))
+    <p class = "govuk-!-padding-bottom-3"></p>
 }

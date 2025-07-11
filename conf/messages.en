@@ -31,10 +31,6 @@ index.title = ndds-frontend
 index.heading = National Direct Debits System
 index.guidance = Welcome to your NDDS frontend. Please see the README file for a guide to getting started.
 
-checkYourAnswers.title = Check your answers
-checkYourAnswers.heading = Check your answers
-checkYourAnswers.acceptAndContinue = Accept and Continue
-
 journeyRecovery.continue.title = Sorry, there is a problem with the service
 journeyRecovery.continue.heading = Sorry, there is a problem with the service
 journeyRecovery.continue.guidance = [Add content to explain how to proceed.]
@@ -68,10 +64,29 @@ yourDirectDebitInstructions.error.count = You cannot add a new Direct Debit Inst
 setupDirectDebitPayment.title = Setup a direct debit payment
 setupDirectDebitPayment.heading = Setup a direct debit payment
 setupDirectDebitPayment.p1 = You can use Direct Debit to:
-setupDirectDebitPayment.li1 = make a single payment for one of a number of taxes
-setupDirectDebitPayment.li2 = start a budget payment plan for Self Assessment
-setupDirectDebitPayment.li3 = repay a Tax Credit overpayment over 12 months
-setupDirectDebitPayment.li4 = setup a variable payment plan for Machine Game Duty(MGD)
+setupDirectDebitPayment.l11 = make a single payment for one of a number of taxes
+setupDirectDebitPayment.l12 = start a budget payment plan for Self Assessment
+setupDirectDebitPayment.l13 = repay a Tax Credit overpayment over 12 months
+setupDirectDebitPayment.l14 = set up a variable payment plan for Machine Game Duty (MGD)
+setupDirectDebitPayment.p2 = To set up a Direct Debit you must:
+setupDirectDebitPayment.l21 = use a UK bank/building society account
+setupDirectDebitPayment.l22 = have authority to set up a Direct Debit Instruction on the bank account
+setupDirectDebitPayment.p3 = You will need details of:
+setupDirectDebitPayment.l31 = your bank/building society sort code and account number
+setupDirectDebitPayment.l32 = the Payment Reference or Registration Number
+setupDirectDebitPayment.l33 = how much you wish to pay and the payment date (not needed for variable payment plans)
+setupDirectDebitPayment.p4 = You are protected by the Direct Debit Scheme rules as explained in The Direct Debit Guarantee.
+setupDirectDebitPayment.p5 = You cannot set up a Direct Debit online unless:
+setupDirectDebitPayment.l51 = your bank/building society account requires only one authorised signature to authorise a Direct Debit
+setupDirectDebitPayment.p6 = To be able to set up a Direct Debit online you must be able to authorise Direct Debits from the bank/building society on your own. If the account that you intend to make payments from requires more than one signature HM Revenue & Customs (HMRC) recommends that you speak to your bank/building society to see if they would accept authorisation from just one signatory to set up a Direct Debit Instruction/payment in favour of HMRC. You would then be able to do this online.
+setupDirectDebitPayment.p7 = If your bank/building society will not give approval please use one of the alternative payment options by following the link
+setupDirectDebitPayment.link1 = Paying HMRC.
+setupDirectDebitPayment.p8 = To set up your Direct Debit please follow the ’Set up Direct Debit payment’ link below.
+setupDirectDebitPayment.p9 = Please note:
+setupDirectDebitPayment.p91 = Once you have set up your Direct Debit you will not be able to see it online for up to 36 hours.
+setupDirectDebitPayment.p10 = When setting up your Direct Debit payment you need to complete the online Direct Debit Instruction (DDI) at least 5 bank working days before the date you want your payment to be collected. Bank working days are Monday to Friday excluding bank holidays.
+setupDirectDebitPayment.p11 = For a subsequent payment which reuses the same DDI you need to allow at least 3 bank working days before the date you want your payment to be collected.
+setupDirectDebitPayment.startNow = Start now
 
 personalOrBusinessAccount.title = Is this a personal or business account?
 personalOrBusinessAccount.heading = Is this a personal or business account?
@@ -92,9 +107,9 @@ yourBankDetails.heading = What are your bank details?
 yourBankDetails.accountHolderName = Account holders(s) name
 yourBankDetails.accountHolderName.hint = This is the account holder(s) name as it appears on your book/bank card.
 yourBankDetails.sortCode = Sort code
-yourBankDetails.sortCode.hint = Must be 6 digit long. For Example, 00 11 22.
+yourBankDetails.sortCode.hint = Must be 6 digits long. For Example, 00 11 22.
 yourBankDetails.accountNumber = Account number
-yourBankDetails.accountNumber.hint = Must be between6 and 8 digit long.
+yourBankDetails.accountNumber.hint = Must be between 6 and 8 digits long.
 yourBankDetails.checkYourAnswersLabel = Your bank details
 yourBankDetails.error.accountHolderName.required = Enter the name on the account.
 yourBankDetails.error.sortCode.required = Sort code must be 6 digits.
@@ -116,8 +131,8 @@ authorisedAccountHolder.checkYourAnswersLabel = Check your answers
 authorisedAccountHolder.error.required = Select authorisedAccountHolder
 authorisedAccountHolder.change.hidden = AuthorisedAccountHolder
 
-bankApproval.title = bankApproval
-bankApproval.heading = bankApproval
+bankApproval.title = You need bank approval
+bankApproval.heading = You need bank approval
 
 directDebitSource.title = here do you need to make direct debit payment?
 directDebitSource.heading = here do you need to make direct debit payment?
@@ -142,8 +157,6 @@ paymentReference.error.required = Enter paymentReference
 paymentReference.error.length = paymentReference must be 100 characters or less
 paymentReference.change.hidden = paymentReference
 
-paymentAmount.title = paymentAmount
-paymentAmount.heading = paymentAmount
 paymentAmount.title = What amount do you want to pay?
 paymentAmount.heading = What amount do you want to pay?
 paymentAmount.checkYourAnswersLabel = paymentAmount
@@ -225,6 +238,10 @@ totalAmountDue.error.aboveMaximum = Total amount due must be {0} or less
 totalAmountDue.error.belowMinimum = Total amount due must be {0} or more
 totalAmountDue.change.hidden = TotalAmountDue
 totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your ’Notice to Pay’.
+
+checkYourAnswers.title = Check your answers
+checkYourAnswers.heading = Check your answers
+checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation

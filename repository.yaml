@@ -4,3 +4,6 @@ service-type: frontend
 tags: []
 digital-service: National Direct Debit System
 
+test-repositories:
+  - ndds-accept-tests
+
