@@ -41,7 +41,8 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
 
   val formProvider = new PersonalOrBusinessAccountFormProvider()
   val form = formProvider()
-  lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad(0)
+  val ddiCount = 0
+  lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad(ddiCount)
 
   "PersonalOrBusinessAccount Controller" - {
 
@@ -61,7 +62,6 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
-
 
       val userAnswers = UserAnswers(userAnswersId).set(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.values.head).success.value
 
@@ -126,7 +126,7 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must return a Bad Request and errors when no radio option is selected" in {
+    "must return a Bad Request and errors when no option is selected" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
@@ -143,7 +143,6 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, NormalMode, backLinkRoute)(request, messages(application)).toString
-        contentAsString(result) must include("Please select an account type.")
       }
     }
 

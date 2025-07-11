@@ -71,5 +71,5 @@
         phaseBanner = Some(alphaBanner(appConfig.feedbackUrl))
     ),
     isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
-    backLink = if (showBackLink) backLink.map(BackLink(_))orElse(Some(BackLink.mimicsBrowserBackButtonViaJavaScript)) else None
+    backLink = if (showBackLink) backLink.map(BackLink(_)).orElse(Some(BackLink.mimicsBrowserBackButtonViaJavaScript)) else None
 ))(content)
