@@ -18,17 +18,21 @@ package forms
 
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
+import org.scalacheck.Gen
 
 class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
 
   val form = new YourBankDetailsFormProvider()()
+
+  def numericStringOfLength(n: Int): Gen[String] =
+    Gen.listOfN(n, Gen.numChar).map(_.mkString)
 
   ".accountHolderName" - {
 
     val fieldName = "accountHolderName"
     val requiredKey = "yourBankDetails.error.accountHolderName.required"
     val lengthKey = "yourBankDetails.error.accountHolderName.length"
-    val maxLength = 100
+    val maxLength = 35
 
     behave like fieldThatBindsValidData(
       form,
@@ -55,12 +59,14 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
     val fieldName = "sortCode"
     val requiredKey = "yourBankDetails.error.sortCode.required"
     val lengthKey = "yourBankDetails.error.sortCode.length"
+    val tooShortKey = "yourBankDetails.error.sortCode.tooShort"
+    val numericOnlyKey = "yourBankDetails.error.sortCode.numericOnly"
     val maxLength = 6
 
     behave like fieldThatBindsValidData(
       form,
       fieldName,
-      stringsWithMaxLength(maxLength)
+      numericStringOfLength(maxLength)
     )
 
     behave like fieldWithMaxLength(
@@ -69,6 +75,16 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
       maxLength = maxLength,
       lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
     )
+
+    "not bind strings shorter than 6 characters" in {
+      val result = form.bind(Map(fieldName -> "12345")).apply(fieldName)
+      result.errors must contain only FormError(fieldName, tooShortKey, Seq(maxLength))
+    }
+
+    "not bind non-numeric input" in {
+      val result = form.bind(Map(fieldName -> "12A456")).apply(fieldName)
+      result.errors.exists(_.message == numericOnlyKey) mustBe true
+    }
 
     behave like mandatoryField(
       form,
@@ -82,12 +98,14 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
     val fieldName = "accountNumber"
     val requiredKey = "yourBankDetails.error.accountNumber.required"
     val lengthKey = "yourBankDetails.error.accountNumber.length"
+    val tooShortKey = "yourBankDetails.error.accountNumber.tooShort"
+    val numericOnlyKey = "yourBankDetails.error.accountNumber.numericOnly"
     val maxLength = 8
 
     behave like fieldThatBindsValidData(
       form,
       fieldName,
-      stringsWithMaxLength(maxLength)
+      numericStringOfLength(maxLength)
     )
 
     behave like fieldWithMaxLength(
@@ -96,6 +114,16 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
       maxLength = maxLength,
       lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
     )
+
+    "not bind strings shorter than 8 characters" in {
+      val result = form.bind(Map(fieldName -> "1234567")).apply(fieldName)
+      result.errors must contain only FormError(fieldName, tooShortKey, Seq(maxLength))
+    }
+
+    "not bind non-numeric input" in {
+      val result = form.bind(Map(fieldName -> "1234A678")).apply(fieldName)
+      result.errors.exists(_.message == numericOnlyKey) mustBe true
+    }
 
     behave like mandatoryField(
       form,
