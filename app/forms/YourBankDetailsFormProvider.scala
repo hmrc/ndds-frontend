@@ -22,17 +22,26 @@ import forms.mappings.Mappings
 import play.api.data.Form
 import play.api.data.Forms._
 import models.YourBankDetails
+import utils.Constants._
 
 class YourBankDetailsFormProvider @Inject() extends Mappings {
 
-   def apply(): Form[YourBankDetails] = Form(
-     mapping(
+  def apply(): Form[YourBankDetails] = Form(
+    mapping(
       "accountHolderName" -> text("yourBankDetails.error.accountHolderName.required")
-        .verifying(maxLength(100, "yourBankDetails.error.accountHolderName.length")),
+        .verifying(maxLength(MAX_ACCOUNT_HOLDER_NAME_LENGTH, "yourBankDetails.error.accountHolderName.length")),
       "sortCode" -> text("yourBankDetails.error.sortCode.required")
-        .verifying(maxLength(6, "yourBankDetails.error.sortCode.length")),
-       "accountNumber" -> text("yourBankDetails.error.accountNumber.required")
-         .verifying(maxLength(8, "yourBankDetails.error.accountNumber.length")),
-    )(YourBankDetails.apply)(x => Some((x.accountHolderName, x.sortCode,x.accountNumber)))
-   )
- }
+        .verifying(firstError(
+          minLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
+          maxLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
+          regexp(NumericRegex, "yourBankDetails.error.sortCode.numericOnly")
+        )),
+      "accountNumber" -> text("yourBankDetails.error.accountNumber.required")
+        .verifying(firstError(
+          minLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.tooShort"),
+          maxLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.length"),
+          regexp(NumericRegex, "yourBankDetails.error.accountNumber.numericOnly")
+        ))
+    )(YourBankDetails.apply)(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))
+  )
+}

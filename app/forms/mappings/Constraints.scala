@@ -23,6 +23,8 @@ import play.api.data.validation.{Constraint, Invalid, Valid}
 
 trait Constraints {
 
+  val NumericRegex = "^[0-9]+$"
+
   protected def firstError[A](constraints: Constraint[A]*): Constraint[A] =
     Constraint {
       input =>
@@ -85,6 +87,14 @@ trait Constraints {
         Valid
       case _ =>
         Invalid(errorKey, maximum)
+    }
+
+  protected def minLength(minimum: Int, errorKey: String): Constraint[String] =
+    Constraint {
+      case str if str.length >= minimum =>
+        Valid
+      case _ =>
+        Invalid(errorKey, minimum)
     }
 
   protected def maxDate(maximum: LocalDate, errorKey: String, args: Any*): Constraint[LocalDate] =
