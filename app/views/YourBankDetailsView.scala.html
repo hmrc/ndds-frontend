@@ -15,6 +15,7 @@
  *@
 
 @import viewmodels.InputWidth._
+@import utils.Constants._
 
 @this(
     layout: templates.Layout,
@@ -43,6 +44,7 @@
             )
             .withWidth(Full)
             .withHint(Hint(content = Text(messages("yourBankDetails.accountHolderName.hint"))))
+            .withAttribute(("maxlength", MAX_ACCOUNT_HOLDER_NAME_LENGTH.toString))
         )
 
         @govukInput(
@@ -52,16 +54,18 @@
             )
             .withWidth(Fixed5)
             .withHint(Hint(content = Text(messages("yourBankDetails.sortCode.hint"))))
+            .withAttribute(("maxlength", MAX_SORT_CODE_LENGTH.toString))
         )
 
-            @govukInput(
+        @govukInput(
             InputViewModel(
-            field = form("accountNumber"),
-            label = LabelViewModel(messages("yourBankDetails.accountNumber"))
+                field = form("accountNumber"),
+                label = LabelViewModel(messages("yourBankDetails.accountNumber"))
             )
             .withWidth(Fixed10)
             .withHint(Hint(content = Text(messages("yourBankDetails.accountNumber.hint"))))
-            )
+            .withAttribute(("maxlength", MAX_ACCOUNT_NUMBER_LENGTH.toString))
+        )
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))

@@ -25,22 +25,43 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
   "SetupDirectDebitPayment Controller" - {
 
-    "must return OK and the correct view for a GET" in {
-
+    "must return OK and the correct view for a GET with no back link (DDI = 0) without Back link" in {
+      val directDebitCount = 0
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(3).url)
+        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(directDebitCount).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[SetupDirectDebitPaymentView]
 
         status(result) mustEqual OK
-        contentType(result) mustBe Some("text/html")
-        charset(result) mustBe Some("utf-8")
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(directDebitCount)(request, messages(application)).toString
+        contentAsString(result) must not include ("Back")
       }
+    }
+
+    "must return OK and the correct view for a GET if there is back link (DDI > 1) with Back link" in {
+      val directDebitCount = 5
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad(directDebitCount).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+
+        contentAsString(result) must include ("Back")
+
+        contentAsString(result) must include ("Setup a direct debit payment")
+        contentAsString(result) must include ("Please note")
+
+        contentAsString(result) must include ("Start now")
+      }
+
     }
   }
 }

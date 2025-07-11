@@ -23,7 +23,7 @@ trait DirectDebitDetailsData {
 
   val directDebitDetailsData: List[DirectDebitDetails] = List(DirectDebitDetails(
     directDebitReference ="122222",
-    setupDate="1/2/2024",
+    setupDate="01/02/2024",
     sortCode = "666666",
     accountNumber = "00000000",
     paymentPlans = "0"
