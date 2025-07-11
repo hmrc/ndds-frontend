@@ -1,6 +1,7 @@
 import play.sbt.routes.RoutesKeys
-import sbt.Def
 import scoverage.ScoverageKeys
+import uk.gov.hmrc.*
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 lazy val appName: String = "ndds-frontend"
@@ -15,6 +16,14 @@ lazy val microservice = (project in file("."))
   .settings(ThisBuild / useSuperShell := false)
   .settings(
     name := appName,
+    scalaSettings,
+    defaultSettings(),
+    libraryDependencies ++= AppDependencies(),
+    Test / parallelExecution := false,
+    Test / fork := false,
+    Runtime / fork := true,
+    retrieveManaged := true,
+    routesGenerator := InjectedRoutesGenerator,
     RoutesKeys.routesImport ++= Seq(
       "models._",
       "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl"
