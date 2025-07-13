@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package utils
+package pages
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import play.api.libs.json.JsPath
 
-object MaskAndFormatUtils {
+case object BankDetailsCheckYourAnswerPage extends QuestionPage[Boolean] {
 
-  def maskSortCode(sortCode: String): String =
-    sortCode.take(2) + "****"
+  override def path: JsPath = JsPath \ toString
 
-  def maskAccountNumber(accountNumber: String): String =
-    "****" + accountNumber.drop(4)
-
-  private lazy val inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy")
-  private lazy val gdsFormatter   = DateTimeFormatter.ofPattern("d MMMM yyyy")
-
-  def formatDateToGds(dateStr: String): String = {
-    val localDate = LocalDate.parse(dateStr, inputFormatter)
-    localDate.format(gdsFormatter)
-  }
+  override def toString: String = "bankDetailsCheckYourAnswer"
 }

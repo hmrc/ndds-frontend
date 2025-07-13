@@ -36,7 +36,7 @@ class NavigatorSpec extends SpecBase {
       }
 
       "must go from YourBankDetailsPage to CheckYourAnswers" in {
-        navigator.nextPage(YourBankDetailsPage, NormalMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad()
+        navigator.nextPage(YourBankDetailsPage, NormalMode, UserAnswers("id")) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
       }
     }
 

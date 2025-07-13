@@ -16,8 +16,7 @@
 
 package viewmodels.checkAnswers
 
-import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.UserAnswers
 import pages.YourBankDetailsPage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
@@ -35,7 +34,7 @@ object YourBankDetailsAccountNumberSummary  {
       val value = HtmlFormat.escape(answer.accountNumber).toString
 
         SummaryListRowViewModel(
-          key     = "yourBankDetails.checkYourAnswersLabel",
+          key     = "bankDetailsCheckYourAnswer.account.account.number",
           value   = ValueViewModel(HtmlContent(value)),
           actions = Seq.empty
           

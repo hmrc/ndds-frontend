@@ -245,3 +245,18 @@ checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation
+
+bankDetailsCheckYourAnswer.title = Check your answers
+bankDetailsCheckYourAnswer.heading = Check your answers
+bankDetailsCheckYourAnswer.checkYourAnswersLabel = You bank details check your answers
+bankDetailsCheckYourAnswer.error.required = Select yes if you are the account holder or an authorised signatory
+bankDetailsCheckYourAnswer.change.hidden = If you are the account holder or an authorised signatory
+
+bankDetailsCheckYourAnswer.account.holder.name = Account holders(s) name
+bankDetailsCheckYourAnswer.account.account.number = Account number
+bankDetailsCheckYourAnswer.account.sort.code = Bank sort code
+bankDetailsCheckYourAnswer.account.bank.name = Bank name
+bankDetailsCheckYourAnswer.account.bank.address = Bank address
+
+bankDetailsCheckYourAnswer.p1= Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?
+bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payments from this account either as the account holder pr on behalf of the multiple signatories.

@@ -1,0 +1,85 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@this(
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
+    govukSummaryList: GovukSummaryList,
+    govukRadios: GovukRadios,
+    govukButton: GovukButton
+)
+
+@(form: Form[_], mode: Mode, list: SummaryList)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title"))) {
+                <style>
+                    .govuk-summary-list--equal-columns .govuk-summary-list__key {
+                      width: 65%;
+                    }
+                    .govuk-summary-list.no-borders .govuk-summary-list__row {
+                      border-bottom: none;
+                    }
+                    .govuk-summary-list.govuk-summary-list--equal-columns{
+                    margin-bottom: 0px;
+                    }
+                   .govuk-summary-list__key {
+                      width: 35%;
+                    }
+                    .govuk-summary-list__row {
+                      border-bottom: none;
+                    }
+                </style>
+    @formHelper(action = routes.BankDetailsCheckYourAnswerController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
+        <h1 class="govuk-heading-l">@messages("bankDetailsCheckYourAnswer.heading")</h1>
+
+        <dl class="govuk-summary-list govuk-summary-list--equal-columns no-borders">
+            <div class="govuk-summary-list__row">
+                <dt class="govuk-summary-list__key">
+                    <h2 class="govuk-heading-m">Your bank details </h2>
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    <a class="govuk-link" href="@routes.YourBankDetailsController.onPageLoad(mode)" >
+                        @messages("site.change")
+                    </a>  <span class="govuk-visually-hidden">Your bank details</span>
+                </dd>
+
+            </div>
+        </dl>
+
+        @govukSummaryList(list)
+
+        @govukRadios(
+            RadiosViewModel.yesNo(
+                field = form("value"),
+                legend = LegendViewModel(messages("bankDetailsCheckYourAnswer.p1"))
+                .copy(classes = "govuk-!-padding-bottom-3")
+                ).withHint(
+                Hint(
+                content = Messages("bankDetailsCheckYourAnswer.hint")
+                ).copy(classes = "govuk-!-padding-bottom-3")
+            )
+        )
+
+        @govukButton(
+            ButtonViewModel(messages("site.continue"))
+        )
+    }
+}

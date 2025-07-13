@@ -25,18 +25,19 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object YourBankDetailsSortCodeSummary  {
+object YourBankDetailsAccountHolderNameSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(YourBankDetailsPage).map {
       answer =>
 
-      val value =  HtmlFormat.escape(answer.sortCode).toString
+      val value = HtmlFormat.escape(answer.accountHolderName).toString
 
         SummaryListRowViewModel(
-          key     = "bankDetailsCheckYourAnswer.account.sort.code",
+          key     = "bankDetailsCheckYourAnswer.account.holder.name",
           value   = ValueViewModel(HtmlContent(value)),
           actions = Seq.empty
+          
         )
     }
 }

@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package utils
+package forms
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-object MaskAndFormatUtils {
+import forms.mappings.Mappings
+import play.api.data.Form
 
-  def maskSortCode(sortCode: String): String =
-    sortCode.take(2) + "****"
+class BankDetailsCheckYourAnswerFormProvider @Inject() extends Mappings {
 
-  def maskAccountNumber(accountNumber: String): String =
-    "****" + accountNumber.drop(4)
-
-  private lazy val inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy")
-  private lazy val gdsFormatter   = DateTimeFormatter.ofPattern("d MMMM yyyy")
-
-  def formatDateToGds(dateStr: String): String = {
-    val localDate = LocalDate.parse(dateStr, inputFormatter)
-    localDate.format(gdsFormatter)
-  }
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("bankDetailsCheckYourAnswer.error.required")
+    )
 }
