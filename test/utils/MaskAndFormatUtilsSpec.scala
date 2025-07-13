@@ -39,6 +39,14 @@ class MaskAndFormatUtilsSpec extends AnyFreeSpec with Matchers {
       "should mask first three digits and show the rest" in {
         MaskAndFormatUtils.maskAccountNumber("12345678") mustEqual "****5678"
       }
+
+      "should mask completely if length less than 3" in {
+        MaskAndFormatUtils.maskAccountNumber("1234") mustEqual "****"
+        MaskAndFormatUtils.maskAccountNumber("123") mustEqual "****"
+        MaskAndFormatUtils.maskAccountNumber("12") mustEqual "****"
+        MaskAndFormatUtils.maskAccountNumber("") mustEqual "****"
+      }
+
     }
 
     "formatDateToGds" - {
