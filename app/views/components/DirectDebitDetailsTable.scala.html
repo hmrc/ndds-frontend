@@ -17,7 +17,8 @@
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.table._
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.content._
 @import uk.gov.hmrc.govukfrontend.views.html.components._
- @import utils.Utils.emptyString
+@import views.html.components.LinkWithHiddenText
+@import utils.Utils.emptyString
 
 @this(govukTable: GovukTable)
 
@@ -38,14 +39,11 @@
       ),
       HeadCell(
         content = HtmlContent(
-          s"""
-            <a class="govuk-link" href="$headerRightUrl">
-              $headerRightText
-              ${headerRightVisuallyHiddenText.map { vht =>
-                s"<span class=\"govuk-visually-hidden\"> $vht </span>"
-              }.getOrElse(emptyString)}
-            </a>
-          """
+          LinkWithHiddenText(
+            url = headerRightUrl,
+            text = headerRightText,
+            visuallyHiddenText = headerRightVisuallyHiddenText
+          ).body
         ),
         classes = "govuk-!-text-align-right govuk-!-font-weight-regular"
       )
