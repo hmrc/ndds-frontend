@@ -30,7 +30,7 @@ class PersonalOrBusinessAccountSpec extends AnyFreeSpec with Matchers with Scala
 
     "must deserialise valid values" in {
 
-      val gen = Gen.oneOf(PersonalOrBusinessAccount.values.toSeq)
+      val gen = Gen.oneOf(PersonalOrBusinessAccount.values)
 
       forAll(gen) {
         personalOrBusinessAccount =>
@@ -52,7 +52,7 @@ class PersonalOrBusinessAccountSpec extends AnyFreeSpec with Matchers with Scala
 
     "must serialise" in {
 
-      val gen = Gen.oneOf(PersonalOrBusinessAccount.values.toSeq)
+      val gen = Gen.oneOf(PersonalOrBusinessAccount.values)
 
       forAll(gen) {
         personalOrBusinessAccount =>

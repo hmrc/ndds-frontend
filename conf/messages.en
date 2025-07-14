@@ -93,7 +93,7 @@ personalOrBusinessAccount.heading = Is this a personal or business account?
 personalOrBusinessAccount.personal = Personal
 personalOrBusinessAccount.business = Business
 personalOrBusinessAccount.checkYourAnswersLabel = Is this a personal or business account?
-personalOrBusinessAccount.error.required = Select personalOrBusinessAccount
+personalOrBusinessAccount.error.required = Please select an account type.
 personalOrBusinessAccount.change.hidden = PersonalOrBusinessAccount
 
 accountDetailsNotVerified.title = Your account details could not be Verified
@@ -251,6 +251,7 @@ bankDetailsCheckYourAnswer.heading = Check your answers
 bankDetailsCheckYourAnswer.checkYourAnswersLabel = You bank details check your answers
 bankDetailsCheckYourAnswer.error.required = Select yes if you are the account holder or an authorised signatory
 bankDetailsCheckYourAnswer.change.hidden = If you are the account holder or an authorised signatory
+bankDetailsCheckYourAnswer.h2 = Your bank details
 
 bankDetailsCheckYourAnswer.account.holder.name = Account holders(s) name
 bankDetailsCheckYourAnswer.account.account.number = Account number

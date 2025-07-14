@@ -28,13 +28,15 @@ class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
-    case _ => _ => routes.IndexController.onPageLoad()
+    case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
+    case _ => _ => routes.IndexController.onPageLoad() // need to be agreed where  redirect if no match
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
-    case _ => _ => routes.CheckYourAnswersController.onPageLoad() // need to be updated for final check answer page
+    case _ => _ => routes.IndexController.onPageLoad() // need to be agreed where  redirect if no match
   }
+
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
     case NormalMode =>

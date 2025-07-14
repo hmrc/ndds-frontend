@@ -43,7 +43,8 @@ class PersonalOrBusinessAccountController @Inject()(
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
-
+  val ddiCount = 0
+  
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
@@ -52,7 +53,7 @@ class PersonalOrBusinessAccountController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      Ok(view(preparedForm, mode, routes.SetupDirectDebitPaymentController.onPageLoad(ddiCount)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
@@ -60,7 +61,7 @@ class PersonalOrBusinessAccountController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad(ddiCount)))),
 
         value =>
           for {
