@@ -9,3 +9,25 @@
 .js-enabled .js-visible {
   display: inline-block !important;
 }
+
+// .govuk-summary-list {
+//   &__value {
+//     text-align: right;
+//   }
+// }
+
+.govuk-link--disabled {
+  pointer-events: none;
+  color: #6a6a6a;
+  text-decoration: none;
+}
+
+.govuk-table {
+  &__header,
+  &__cell {
+    border: 0;
+  }
+}
+
+
+
