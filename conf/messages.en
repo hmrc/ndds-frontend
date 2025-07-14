@@ -93,7 +93,7 @@ personalOrBusinessAccount.heading = Is this a personal or business account?
 personalOrBusinessAccount.personal = Personal
 personalOrBusinessAccount.business = Business
 personalOrBusinessAccount.checkYourAnswersLabel = Is this a personal or business account?
-personalOrBusinessAccount.error.required = Select personalOrBusinessAccount
+personalOrBusinessAccount.error.required = Please select an account type.
 personalOrBusinessAccount.change.hidden = PersonalOrBusinessAccount
 
 accountDetailsNotVerified.title = Your account details could not be Verified
