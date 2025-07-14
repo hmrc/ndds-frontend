@@ -50,20 +50,17 @@
         }
         <h1 class="govuk-heading-l">@messages("bankDetailsCheckYourAnswer.heading")</h1>
 
-        <dl class="govuk-summary-list govuk-summary-list--equal-columns no-borders">
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    <h2 class="govuk-heading-m">@messages("bankDetailsCheckYourAnswer.h2")</h2>
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    <a class="govuk-link" href="@routes.YourBankDetailsController.onPageLoad(mode)" >
-                        @messages("site.change")
-                        <span class="govuk-visually-hidden">@messages("bankDetailsCheckYourAnswer.h2")</span>
-                    </a>
-                </dd>
-
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h2 class="govuk-heading-m">@messages("bankDetailsCheckYourAnswer.h2")</h2>
             </div>
-        </dl>
+            <div class="govuk-grid-column-one-third">
+                <a class="govuk-link" href="@routes.YourBankDetailsController.onPageLoad(mode)">
+                    @messages("site.change")
+                    <span class="govuk-visually-hidden">@messages("bankDetailsCheckYourAnswer.h2")</span>
+                </a>
+            </div>
+        </div>
 
         @govukSummaryList(list)
 
