@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.table._
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.content._
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+ @import utils.Utils.emptyString
 
 @this(govukTable: GovukTable)
 
@@ -25,7 +26,7 @@
   headerRightUrl: String,
   headerRightVisuallyHiddenText: Option[String] = None,
   rows: Seq[(String, String)],
-  classes: String = ""
+  classes: String = emptyString
 )
 
 @{
@@ -56,7 +57,7 @@
     Seq(
       TableRow(
         content = HtmlContent(key),
-        classes = "govuk-!-font-weight-bold"
+        classes = "govuk-!-font-weight-bold govuk-grid-column-one-half"
       ),
       TableRow(
         content = HtmlContent(value),
