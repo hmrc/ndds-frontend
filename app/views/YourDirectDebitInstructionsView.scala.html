@@ -16,29 +16,23 @@
 
 @import views.html.components._
 @import utils.MaskAndFormatUtils._
+@import utils.Utils.emptyString
+
 
 @this(
     layout: templates.Layout,
+    header1: Header1,
+    paragraph: Paragraph,
     paragraphMessageWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
-    govukErrorSummary: GovukErrorSummary
+    govukErrorSummary: GovukErrorSummary,
+    govukSummaryList: GovukSummaryList,
+    directDebitDetailsTable: DirectDebitDetailsTable
 )
 
 @(directDebitDetails: List[DirectDebitDetails], maxLimit: Boolean = false)(implicit request: Request[_], messages: Messages)
 
-<style>
-    .govuk-summary-list--equal-columns .govuk-summary-list__value {
-      text-align: right;
-    }
-    .govuk-summary-list.no-borders .govuk-summary-list__row {
-      border-bottom: none;
-    }
-    .govuk-link--disabled {
-      pointer-events: none;
-      color: #6a6a6a;
-      text-decoration: none;
-    }
-</style>
+
 
 @layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
@@ -55,9 +49,8 @@
             )
     }
 
-    <h1 class="govuk-heading-l">@messages("yourDirectDebitInstructions.heading")</h1>
-
-    <p class="govuk-body">@messages("yourDirectDebitInstructions.p1")</p>
+    @header1("yourDirectDebitInstructions.heading")
+    @paragraph("yourDirectDebitInstructions.p1")
 
     @paragraphMessageWithLink(
         Some(messages("yourDirectDebitInstructions.p2")),
@@ -69,43 +62,19 @@
     )
 
     @for(dd <- directDebitDetails) {
-        <dl class="govuk-summary-list govuk-summary-list--equal-columns no-borders">
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">
-                    <h2>@dd.directDebitReference</h2>
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    <a class="govuk-link" href="" >
-                        @messages("yourDirectDebitInstructions.dl.view.add")
-                    </a>  <span class="govuk-visually-hidden"> for @dd.directDebitReference </span>
-                </dd>
-
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.direct.debit.reference")</dt>
-                <dd class="govuk-summary-list__value">@dd.directDebitReference</dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.date.setup")</dt>
-                <dd class="govuk-summary-list__value">@formatDateToGds(dd.setupDate)</dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.sort.code")</dt>
-                <dd class="govuk-summary-list__value">@maskSortCode(dd.sortCode)</dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.account.number")</dt>
-                <dd class="govuk-summary-list__value">@maskAccountNumber(dd.accountNumber)</dd>
-            </div>
-
-            <div class="govuk-summary-list__row">
-                <dt class="govuk-summary-list__key">@messages("yourDirectDebitInstructions.dl.payment.plans")</dt>
-                <dd class="govuk-summary-list__value">@dd.paymentPlans</dd>
-            </div>
-        </dl>
+        @directDebitDetailsTable(
+            headerLeft = dd.directDebitReference,
+            headerRightText = messages("yourDirectDebitInstructions.dl.view.add"),
+            headerRightUrl = emptyString,
+            headerRightVisuallyHiddenText = Some(messages(dd.directDebitReference)),
+            rows = Seq(
+                (messages("yourDirectDebitInstructions.dl.direct.debit.reference"), dd.directDebitReference),
+                (messages("yourDirectDebitInstructions.dl.date.setup"), formatDateToGds(dd.setupDate)),
+                (messages("yourDirectDebitInstructions.dl.sort.code"), maskSortCode(dd.sortCode)),
+                (messages("yourDirectDebitInstructions.dl.account.number"), maskAccountNumber(dd.accountNumber)),
+                (messages("yourDirectDebitInstructions.dl.payment.plans"), dd.paymentPlans)
+            ),
+            classes = "govuk-!-margin-bottom-9"
+        )
     }
 }
