@@ -22,16 +22,18 @@ import play.api.i18n.Messages
 
 import java.time.LocalDate
 import javax.inject.Inject
+import utils.DateFormats
 
 class PlanStartDateFormProvider @Inject() extends Mappings {
 
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
-      "value" -> localDate(
+      "value" -> customPaymentDate(
         invalidKey     = "planStartDate.error.invalid",
         allRequiredKey = "planStartDate.error.required.all",
         twoRequiredKey = "planStartDate.error.required.two",
-        requiredKey    = "planStartDate.error.required"
+        requiredKey    = "planStartDate.error.required",
+        dateFormats    = DateFormats.defaultDateFormats
       )
     )
 }

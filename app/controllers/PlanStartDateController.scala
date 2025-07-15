@@ -42,31 +42,27 @@ class PlanStartDateController @Inject()(
                                          view: PlanStartDateView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-
-      val form = formProvider()
-
-      val preparedForm = request.userAnswers.get(PlanStartDatePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
-      Ok(view(preparedForm, mode))
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) { implicit request =>
+    val form = formProvider()
+    val answers = request.userAnswers.getOrElse(models.UserAnswers(request.userId))
+    val preparedForm = answers.get(PlanStartDatePage) match {
+      case None => form
+      case Some(value) => form.fill(value)
+    }
+    Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-
       val form = formProvider()
-
+      val answers = request.userAnswers.getOrElse(models.UserAnswers(request.userId))
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PlanStartDatePage, value))
+            updatedAnswers <- Future.fromTry(answers.set(PlanStartDatePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
       )

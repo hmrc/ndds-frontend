@@ -47,18 +47,19 @@ class DateFluencySpec extends AnyFreeSpec with Matchers with Mappings with Optio
 
     val errorClass = "govuk-input--error"
 
-    "must highlight all fields when there is an error, but the error does not specify any individual day/month/year field" in {
+    "must highlight all fields and show the general error message when there is an error, but the error does not specify any individual day/month/year field" in {
 
-      val boundForm = form.bind(Map.empty[String, String])
+      val boundForm = form.withError("value", "fieldName.error.required.all").bind(Map.empty[String, String])
 
       val result = DateViewModel(boundForm("value"), fieldset)
 
       result.items.forall(_.classes.contains(errorClass)) mustEqual true
+      result.errorMessage.value.content.asHtml.toString must include(messages("fieldName.error.required.all"))
     }
 
-    "must highlight the day field when the error is that a day is missing" in {
+    "must highlight the day field and show the day error message when the error is that a day is missing" in {
 
-      val boundForm = form.bind(Map(
+      val boundForm = form.withError("value.day", "date.error.day").bind(Map(
         "value.month" -> "1",
         "value.year" -> "2000"
       ))
@@ -68,11 +69,12 @@ class DateFluencySpec extends AnyFreeSpec with Matchers with Mappings with Optio
       result.items.find(_.id == "value.day").value.classes must include(errorClass)
       result.items.find(_.id == "value.month").value.classes must not include errorClass
       result.items.find(_.id == "value.year").value.classes must not include errorClass
+      result.errorMessage.value.content.asHtml.toString must include(messages("date.error.day"))
     }
 
-    "must highlight the day and month fields when the error is that a day and month are both missing" in {
+    "must highlight the day and month fields and show the general error message when the error is that a day and month are both missing" in {
 
-      val boundForm = form.bind(Map(
+      val boundForm = form.withError("value.day", "date.error.day").withError("value.month", "date.error.month").bind(Map(
         "value.year" -> "2000"
       ))
 
@@ -81,11 +83,13 @@ class DateFluencySpec extends AnyFreeSpec with Matchers with Mappings with Optio
       result.items.find(_.id == "value.day").value.classes must include(errorClass)
       result.items.find(_.id == "value.month").value.classes must include(errorClass)
       result.items.find(_.id == "value.year").value.classes must not include (errorClass)
+      // Should show the day error message (first in logic)
+      result.errorMessage.value.content.asHtml.toString must include(messages("date.error.day"))
     }
 
-    "must highlight the day and year fields when the error is that a day and year are both missing" in {
+    "must highlight the day and year fields and show the day error message when the error is that a day and year are both missing" in {
 
-      val boundForm = form.bind(Map(
+      val boundForm = form.withError("value.day", "date.error.day").withError("value.year", "date.error.year").bind(Map(
         "value.month" -> "1"
       ))
 
@@ -94,11 +98,12 @@ class DateFluencySpec extends AnyFreeSpec with Matchers with Mappings with Optio
       result.items.find(_.id == "value.day").value.classes must include(errorClass)
       result.items.find(_.id == "value.month").value.classes must not include errorClass
       result.items.find(_.id == "value.year").value.classes must include(errorClass)
+      result.errorMessage.value.content.asHtml.toString must include(messages("date.error.day"))
     }
 
-    "must highlight the month field when the error is that a month is missing" in {
+    "must highlight the month field and show the month error message when the error is that a month is missing" in {
 
-      val boundForm = form.bind(Map(
+      val boundForm = form.withError("value.month", "date.error.month").bind(Map(
         "value.day" -> "1",
         "value.year" -> "2000"
       ))
@@ -108,11 +113,12 @@ class DateFluencySpec extends AnyFreeSpec with Matchers with Mappings with Optio
       result.items.find(_.id == "value.day").value.classes must not include errorClass
       result.items.find(_.id == "value.month").value.classes must include(errorClass)
       result.items.find(_.id == "value.year").value.classes must not include errorClass
+      result.errorMessage.value.content.asHtml.toString must include(messages("date.error.month"))
     }
 
-    "must highlight the month and year fields when the error is that a month and year are both missing" in {
+    "must highlight the month and year fields and show the month error message when the error is that a month and year are both missing" in {
 
-      val boundForm = form.bind(Map(
+      val boundForm = form.withError("value.month", "date.error.month").withError("value.year", "date.error.year").bind(Map(
         "value.day" -> "1"
       ))
 
@@ -121,11 +127,12 @@ class DateFluencySpec extends AnyFreeSpec with Matchers with Mappings with Optio
       result.items.find(_.id == "value.day").value.classes must not include errorClass
       result.items.find(_.id == "value.month").value.classes must include(errorClass)
       result.items.find(_.id == "value.year").value.classes must include(errorClass)
+      result.errorMessage.value.content.asHtml.toString must include(messages("date.error.month"))
     }
 
-    "must highlight the year field when the error is that a year is missing" in {
+    "must highlight the year field and show the year error message when the error is that a year is missing" in {
 
-      val boundForm = form.bind(Map(
+      val boundForm = form.withError("value.year", "date.error.year").bind(Map(
         "value.day" -> "1",
         "value.month" -> "1"
       ))
@@ -135,9 +142,10 @@ class DateFluencySpec extends AnyFreeSpec with Matchers with Mappings with Optio
       result.items.find(_.id == "value.day").value.classes must not include errorClass
       result.items.find(_.id == "value.month").value.classes must not include errorClass
       result.items.find(_.id == "value.year").value.classes must include(errorClass)
+      result.errorMessage.value.content.asHtml.toString must include(messages("date.error.year"))
     }
 
-    "must not highlight any fields when there is not an error" in {
+    "must not highlight any fields and have no error message when there is not an error" in {
 
       val boundForm = form.bind(Map(
         "value.day" -> "1",
@@ -148,6 +156,7 @@ class DateFluencySpec extends AnyFreeSpec with Matchers with Mappings with Optio
       val result = DateViewModel(boundForm("value"), fieldset)
 
       result.items.forall(_.classes.contains(errorClass)) mustEqual false
+      result.errorMessage mustBe None
     }
   }
 }

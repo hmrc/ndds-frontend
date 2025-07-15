@@ -17,7 +17,7 @@
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
+    mainErrorSummary: components.MainErrorSummary,
     govukDateInput: GovukDateInput,
     govukButton: GovukButton
 )
@@ -28,16 +28,14 @@
 
     @formHelper(action = routes.YearEndAndMonthController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
-        }
+        @mainErrorSummary(form)
 
         @govukDateInput(
-            DateViewModel(
+            YearMonthViewModel(
                 field  = form("value"),
                 legend = LegendViewModel(messages("yearEndAndMonth.heading")).asPageHeading()
             )
-            .withHint(HintViewModel(messages("yearEndAndMonth.hint")))
+            .withHint(HintViewModel(HtmlContent(messages("yearEndAndMonth.hint"))))
         )
 
         @govukButton(

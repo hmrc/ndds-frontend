@@ -40,6 +40,7 @@ class Navigator @Inject()() {
     case TotalAmountDuePage => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
     case PlanStartDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case YearEndAndMonthPage => _ => routes.PaymentsFrequencyController.onPageLoad(NormalMode)
     case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
