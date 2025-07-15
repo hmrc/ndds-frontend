@@ -15,52 +15,72 @@
  *@
 
 @import _root_.models.NormalMode
+@import views.html.components._
 
 @this(
-        layout: templates.Layout,
-        govukButton: GovukButton
+    h1: h1,
+    p: p,
+    layout: templates.Layout,
+    govukButton: GovukButton,
+    bulletList: BulletList
 )
 
 @(directDebitCount: Int)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")), showBackLink = if(directDebitCount != 0) { true } else { false }) {
 
-    <h1 class="govuk-heading-l">@messages("setupDirectDebitPayment.heading")</h1>
-    <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p1")</strong></p>
-    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
-        <li>@messages("setupDirectDebitPayment.l11")</li>
-        <li>@messages("setupDirectDebitPayment.l12")</li>
-        <li>@messages("setupDirectDebitPayment.l13")</li>
-        <li>@messages("setupDirectDebitPayment.l14")</li>
-    </ul>
+    @h1("setupDirectDebitPayment.heading")
+    @p("setupDirectDebitPayment.p1", true)
 
-    <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p2")</strong></p>
-    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
-        <li>@messages("setupDirectDebitPayment.l21")</li>
-        <li>@messages("setupDirectDebitPayment.l22")</li>
-    </ul>
+    @bulletList(
+        items = Seq(
+            "setupDirectDebitPayment.l11",
+            "setupDirectDebitPayment.l12", 
+            "setupDirectDebitPayment.l13",
+            "setupDirectDebitPayment.l14"
+        )
+    )
 
-    <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p3")</strong></p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("setupDirectDebitPayment.l31")</li>
-        <li>@messages("setupDirectDebitPayment.l32")</li>
-        <li>@messages("setupDirectDebitPayment.l33")</li>
-    </ul>
-    <p class="govuk-body govuk-!-padding-bottom-3">@messages("setupDirectDebitPayment.p4")</p>
+    @p("setupDirectDebitPayment.p2", true)
+    @bulletList(
+        items = Seq(
+            "setupDirectDebitPayment.l21",
+            "setupDirectDebitPayment.l22"
+        )
+    )
 
-    <p class="govuk-body"><strong>@messages("setupDirectDebitPayment.p5")</strong></p>
-    <ul class="govuk-list govuk-list--bullet govuk-!-padding-bottom-3">
-        <li>@messages("setupDirectDebitPayment.l51")</li>
-    </ul>
+    @p("setupDirectDebitPayment.p3", true)
+    @bulletList(
+        items = Seq(
+            "setupDirectDebitPayment.l31",
+            "setupDirectDebitPayment.l32",
+            "setupDirectDebitPayment.l33"
+        )
+    )
 
-    <p class="govuk-body">@messages("setupDirectDebitPayment.p6")</p>
+    @p("setupDirectDebitPayment.p4")
+    
+    @p("setupDirectDebitPayment.p5", true)
+
+    @bulletList(
+        items = Seq("setupDirectDebitPayment.l51")
+    )
+
+    @p("setupDirectDebitPayment.p6")
+    
     <p class="govuk-body">@messages("setupDirectDebitPayment.p7")
         <a class="govuk-link govuk-link--no-visited-state" href="http://www.hmrc.gov.uk/payinghmrc/">@messages("setupDirectDebitPayment.link1")</a>
     </p>
-    <p class="govuk-body">@messages("setupDirectDebitPayment.p8")</p>
-    <p class="govuk-body"><b>@messages("setupDirectDebitPayment.p9")</b> @messages("setupDirectDebitPayment.p91")</p>
-    <p class="govuk-body">@messages("setupDirectDebitPayment.p10")</p>
-    <p class="govuk-body">@messages("setupDirectDebitPayment.p11")</p>
+
+     @p("setupDirectDebitPayment.p8")
+
+    <p class="govuk-body">
+        <strong>@messages("setupDirectDebitPayment.p9")</strong> 
+        @messages("setupDirectDebitPayment.p91")
+    </p>
+    
+     @p("setupDirectDebitPayment.p10")
+     @p("setupDirectDebitPayment.p11")
 
     @govukButton(Button(
         href = Some(routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url),
@@ -68,5 +88,4 @@
         content = Text(messages("setupDirectDebitPayment.startNow")),
         attributes = Map("id" -> "start-button")
     ))
-    <p class = "govuk-!-padding-bottom-3"></p>
 }
