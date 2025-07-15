@@ -102,3 +102,8 @@ GET        /check-your-answers                          controllers.CheckYourAns
 
 GET        /direct-debit-confirmation                   controllers.DirectDebitConfirmationController.onPageLoad()
 
+
+GET        /payment-amount                            controllers.PaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST       /payment-amount                            controllers.PaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET        /change-payment-amount                     controllers.PaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-payment-amount                     controllers.PaymentAmountController.onSubmit(mode: Mode = CheckMode)

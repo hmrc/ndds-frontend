@@ -245,3 +245,13 @@ checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation
+
+paymentAmount.title = PaymentAmount
+paymentAmount.heading = PaymentAmount
+paymentAmount.checkYourAnswersLabel = PaymentAmount
+paymentAmount.error.nonNumeric = Enter your paymentAmount using numbers and a decimal point
+paymentAmount.error.required = Enter your paymentAmount
+paymentAmount.error.invalidNumeric = Enter your paymentAmount using up to two decimal places
+paymentAmount.error.aboveMaximum = PaymentAmount must be {0} or less
+paymentAmount.error.belowMinimum = PaymentAmount must be {0} or more
+paymentAmount.change.hidden = PaymentAmount
