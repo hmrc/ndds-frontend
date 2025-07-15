@@ -134,12 +134,18 @@ authorisedAccountHolder.change.hidden = AuthorisedAccountHolder
 bankApproval.title = You need bank approval
 bankApproval.heading = You need bank approval
 
-directDebitSource.title = here do you need to make direct debit payment?
-directDebitSource.heading = here do you need to make direct debit payment?
-directDebitSource.corporationTax = Corporation Tax
-directDebitSource.machineGamesDuty = Machine Games Duty
-directDebitSource.checkYourAnswersLabel = here do you need to make direct debit payment?
-directDebitSource.error.required = Select directDebitSource
+directDebitSource.title = Where do you need to make direct debit payment?
+directDebitSource.heading = Where do you need to make direct debit payment?
+directDebitSource.checkYourAnswersLabel = Where do you need to make direct debit payment?
+directDebitSource.ct = Corporation Tax (CT)
+directDebitSource.mgd = Machine Games Duty (MGD)
+directDebitSource.nic = National Insurance Contributions (NIC)
+directDebitSource.otherLiability = Other Liability
+directDebitSource.paye = Pay As Your Earn (PAYE)
+directDebitSource.sa = Self Assessment (SA)
+directDebitSource.sdlt = Stamp Duty Land Tax (SDLT)
+directDebitSource.vat = Value Added Tax (VAT)
+directDebitSource.error.required = Select Direct Debit Source
 directDebitSource.change.hidden = DirectDebitSource
 
 paymentPlanType.title = What type of payment plan are you selecting?
