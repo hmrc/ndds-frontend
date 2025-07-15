@@ -26,11 +26,6 @@
 @(form: Form[_], mode: Mode, list: SummaryList)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title"))) {
-                <style>
-                   .govuk-summary-list__key {
-                      width: 35%;
-                    }
-                </style>
     @formHelper(action = routes.BankDetailsCheckYourAnswerController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
