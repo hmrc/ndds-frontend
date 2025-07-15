@@ -9,3 +9,20 @@
 .js-enabled .js-visible {
   display: inline-block !important;
 }
+
+.govuk-link--disabled {
+  pointer-events: none;
+  color: #6a6a6a;
+  text-decoration: none;
+}
+
+.govuk-table {
+  &__header,
+  &__cell {
+    border: 0;
+  }
+}
+
+.text-turquoise {
+  color: #28a197;
+}
