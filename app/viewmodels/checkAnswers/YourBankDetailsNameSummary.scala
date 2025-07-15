@@ -20,14 +20,13 @@ import models.UserAnswers
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.DirectDebitDetailsData
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object YourBankDetailsNameSummary {
+object YourBankDetailsNameSummary extends DirectDebitDetailsData{
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
-    val bankName = "Test Bank uk"
-
     Some(SummaryListRowViewModel(
       key = KeyViewModel(messages("bankDetailsCheckYourAnswer.account.bank.name")),
       value = ValueViewModel(HtmlContent(bankName)),

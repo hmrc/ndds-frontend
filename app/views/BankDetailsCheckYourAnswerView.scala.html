@@ -27,20 +27,8 @@
 
 @layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title"))) {
                 <style>
-                    .govuk-summary-list--equal-columns .govuk-summary-list__key {
-                      width: 65%;
-                    }
-                    .govuk-summary-list.no-borders .govuk-summary-list__row {
-                      border-bottom: none;
-                    }
-                    .govuk-summary-list.govuk-summary-list--equal-columns{
-                    margin-bottom: 0px;
-                    }
                    .govuk-summary-list__key {
                       width: 35%;
-                    }
-                    .govuk-summary-list__row {
-                      border-bottom: none;
                     }
                 </style>
     @formHelper(action = routes.BankDetailsCheckYourAnswerController.onSubmit(mode), Symbol("autoComplete") -> "off") {
@@ -55,7 +43,7 @@
                 <h2 class="govuk-heading-m">@messages("bankDetailsCheckYourAnswer.h2")</h2>
             </div>
             <div class="govuk-grid-column-one-third">
-                <a class="govuk-link" href="@routes.YourBankDetailsController.onPageLoad(mode)">
+                <a class="govuk-link" href="@routes.YourBankDetailsController.onPageLoad(CheckMode)">
                     @messages("site.change")
                     <span class="govuk-visually-hidden">@messages("bankDetailsCheckYourAnswer.h2")</span>
                 </a>

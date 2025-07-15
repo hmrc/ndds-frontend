@@ -19,11 +19,13 @@ package models
 import play.api.libs.json.{Json, OFormat}
 import play.twirl.api.HtmlFormat
 
-case class UKAddress(
+case class UKBankAddress(
                       addressLine1: String,
                       addressLine2: Option[String],
-                      postCode:     String,
-                      city:         String
+                      addressLine3: Option[String],
+                      addressLine4: Option[String],
+                      addressLine5: Option[String],
+                      postCode:     String
                     ) {
 
   private def formatLine(value: String): String =
@@ -35,11 +37,13 @@ case class UKAddress(
   def getFullAddress: String = {
     formatLine(addressLine1) +
       formatOptionalLine(addressLine2) +
-      formatLine(postCode) +
-      HtmlFormat.escape(city).body
+      formatOptionalLine(addressLine3) +
+      formatOptionalLine(addressLine4) +
+      formatOptionalLine(addressLine5) +
+      formatLine(postCode) 
   }
 }
 
-object UKAddress {
-  implicit val format: OFormat[UKAddress] = Json.format[UKAddress]
+object UKBankAddress {
+  implicit val format: OFormat[UKBankAddress] = Json.format[UKBankAddress]
 }

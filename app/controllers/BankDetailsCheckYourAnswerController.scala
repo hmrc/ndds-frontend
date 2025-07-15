@@ -21,13 +21,15 @@ import forms.BankDetailsCheckYourAnswerFormProvider
 import models.Mode
 import navigation.Navigator
 import pages.BankDetailsCheckYourAnswerPage
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.data.Form
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.BankDetailsCheckYourAnswerView
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,7 +46,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                          view: BankDetailsCheckYourAnswerView
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
+  val form:Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -53,34 +55,16 @@ class BankDetailsCheckYourAnswerController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
-      val list = SummaryListViewModel(
-        rows = Seq(
-          YourBankDetailsAccountHolderNameSummary.row(request.userAnswers),
-          YourBankDetailsAccountNumberSummary.row(request.userAnswers),
-          YourBankDetailsSortCodeSummary.row(request.userAnswers),
-          YourBankDetailsAccountNumberSummary.row(request.userAnswers),
-          YourBankDetailsNameSummary.row(request.userAnswers),
-          YourBankDetailsAddressSummary.row(request.userAnswers),
-        ).flatten
-      )
-      Ok(view(preparedForm, mode, list))
+      val summaryList = buildSummaryList(request.userAnswers)
+      Ok(view(preparedForm, mode, summaryList))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val list = SummaryListViewModel(
-        rows = Seq(
-          YourBankDetailsAccountHolderNameSummary.row(request.userAnswers),
-          YourBankDetailsAccountNumberSummary.row(request.userAnswers),
-          YourBankDetailsSortCodeSummary.row(request.userAnswers),
-          YourBankDetailsAccountNumberSummary.row(request.userAnswers),
-          YourBankDetailsNameSummary.row(request.userAnswers),
-          YourBankDetailsAddressSummary.row(request.userAnswers),
-        ).flatten
-      )
+      val summaryList = buildSummaryList(request.userAnswers)
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode,list))),
+          Future.successful(BadRequest(view(formWithErrors, mode,summaryList))),
 
         value =>
           for {
@@ -89,4 +73,17 @@ class BankDetailsCheckYourAnswerController @Inject()(
           } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
       )
   }
+
+  private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =
+    SummaryListViewModel(
+      rows = Seq(
+        YourBankDetailsAccountHolderNameSummary.row(answers),
+        YourBankDetailsAccountNumberSummary.row(answers),
+        YourBankDetailsSortCodeSummary.row(answers),
+        YourBankDetailsAccountNumberSummary.row(answers),
+        YourBankDetailsNameSummary.row(answers),
+        YourBankDetailsAddressSummary.row(answers)
+      ).flatten
+    ).copy(classes = "govuk-summary-list--no-border")
+
 }

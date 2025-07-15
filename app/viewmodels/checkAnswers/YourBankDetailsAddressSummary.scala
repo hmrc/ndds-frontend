@@ -16,25 +16,17 @@
 
 package viewmodels.checkAnswers
 
-import models.{UKAddress, UserAnswers}
+import models.{UKBankAddress, UserAnswers}
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.DirectDebitDetailsData
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object YourBankDetailsAddressSummary  {
+object YourBankDetailsAddressSummary extends DirectDebitDetailsData{
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] ={
-
-    // Bars will provide this detail but currently we are just mocking it
-    val ukBankAddress = UKAddress(
-      addressLine1 = "01 Address line 1",
-      addressLine2 = Some("Address line 2"),
-      postCode = "AE1 2XR",
-      city = "City name"
-    )
-
     val formattedAddress = ukBankAddress.getFullAddress
        Some( SummaryListRowViewModel(
           key     = "bankDetailsCheckYourAnswer.account.bank.address",

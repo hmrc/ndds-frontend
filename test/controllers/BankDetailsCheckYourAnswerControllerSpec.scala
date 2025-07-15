@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.BankDetailsCheckYourAnswerFormProvider
-import models.{NormalMode, YourBankDetails}
+import models.{CheckMode, NormalMode, YourBankDetails}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -59,9 +59,9 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
 
         val html = contentAsString(result)
         html must include("Check your answers")
-        html must include("Test Bank uk")
+        html must include("Test Bank Name")
         html must include("Your bank details")
-        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(NormalMode).url + "\"")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
 
       }
     }
@@ -82,12 +82,14 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         status(result) mustEqual OK
         val html = contentAsString(result)
         html must include("Check your answers")
-        html must include("Test Bank uk")
+        html must include("Test Bank Name")
         html must include("Your bank details")
         html must include("Account Holder Name")
         html must include("123212")
         html must include("34211234")
-        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(NormalMode).url + "\"")
+        html must include("Address line 1")
+        html must include("Address line 2")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
       }
     }
 

@@ -16,7 +16,7 @@
 
 package utils
 
-import models.{DirectDebitDetails, UKAddress}
+import models.{DirectDebitDetails, UKBankAddress}
 
 
 trait DirectDebitDetailsData {
@@ -42,7 +42,16 @@ trait DirectDebitDetailsData {
       paymentPlans = "0"
       
     ))
-  val ukBankAddress:UKAddress =UKAddress(addressLine1 =  "01 Adress line 1",addressLine2 = Some( "Address line 2"),postCode = "NE1 2XR",city = "City name")
-
+  
+  val ukBankAddress:UKBankAddress =UKBankAddress(
+    addressLine1 =  "Address line 1",
+    addressLine2 = Some( "Address line 2"),
+    addressLine3 = Some( "Address line 3"),
+    addressLine4 = Some( "Address line 4"),
+    addressLine5 = Some( "Address line 5"),
+    postCode = "TE1 2XR")
+  
+  val bankName="Test Bank Name"
 }
+
 
