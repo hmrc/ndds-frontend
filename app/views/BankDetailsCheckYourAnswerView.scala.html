@@ -14,13 +14,18 @@
  * limitations under the License.
  *@
 
+@import views.html.components._
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList,
     govukRadios: GovukRadios,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    header1:Header1,
+    h2:Header2,
+    linkWithHiddenText: LinkWithHiddenText
 )
 
 @(form: Form[_], mode: Mode, list: SummaryList)(implicit request: Request[_], messages: Messages)
@@ -31,17 +36,18 @@
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
-        <h1 class="govuk-heading-l">@messages("bankDetailsCheckYourAnswer.heading")</h1>
 
+        @header1("bankDetailsCheckYourAnswer.heading")
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-two-thirds">
-                <h2 class="govuk-heading-m">@messages("bankDetailsCheckYourAnswer.h2")</h2>
+                @h2("bankDetailsCheckYourAnswer.h2")
             </div>
             <div class="govuk-grid-column-one-third">
-                <a class="govuk-link" href="@routes.YourBankDetailsController.onPageLoad(CheckMode)">
-                    @messages("site.change")
-                    <span class="govuk-visually-hidden">@messages("bankDetailsCheckYourAnswer.h2")</span>
-                </a>
+                @linkWithHiddenText(
+                    url = routes.YourBankDetailsController.onPageLoad(CheckMode).url,
+                    text = "Change",
+                    visuallyHiddenText = Some("bankDetailsCheckYourAnswer.h2")
+                    )
             </div>
         </div>
 
