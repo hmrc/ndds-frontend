@@ -16,12 +16,13 @@
 
 @import views.html.components._
 @import utils.MaskAndFormatUtils._
+@import utils.Utils.emptyString
 
 
 @this(
     layout: templates.Layout,
-    h1: h1,
-    p: p,
+    header1: Header1,
+    paragraph: Paragraph,
     paragraphMessageWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
@@ -48,9 +49,8 @@
             )
     }
 
-   
-    @h1("yourDirectDebitInstructions.heading")
-    @p("yourDirectDebitInstructions.p1")
+    @header1("yourDirectDebitInstructions.heading")
+    @paragraph("yourDirectDebitInstructions.p1")
 
     @paragraphMessageWithLink(
         Some(messages("yourDirectDebitInstructions.p2")),
@@ -65,7 +65,7 @@
         @directDebitDetailsTable(
             headerLeft = dd.directDebitReference,
             headerRightText = messages("yourDirectDebitInstructions.dl.view.add"),
-            headerRightUrl = routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url,
+            headerRightUrl = emptyString,
             headerRightVisuallyHiddenText = Some(messages(dd.directDebitReference)),
             rows = Seq(
                 (messages("yourDirectDebitInstructions.dl.direct.debit.reference"), dd.directDebitReference),

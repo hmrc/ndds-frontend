@@ -16,14 +16,14 @@
 
 import base.SpecBase
 import org.scalatest.matchers.must.Matchers
-import views.html.components.p
+import views.html.components.Paragraph
 import play.api.test.FakeRequest
 import play.api.i18n.Messages
 import org.jsoup.Jsoup
 
-class PSpec extends SpecBase with Matchers {
+class ParagraphSpec extends SpecBase with Matchers {
 
-  "p" - {
+  "paragraph" - {
     "must render the correct paragraph text in the output HTML" in new Setup {
       val paragraphText = "Test paragraph content."
       val html = p(paragraphText)
@@ -36,7 +36,7 @@ class PSpec extends SpecBase with Matchers {
 
   trait Setup {
     val app = applicationBuilder().build()
-    val p = app.injector.instanceOf[views.html.components.p]
+    val p = app.injector.instanceOf[Paragraph]
     implicit val request: play.api.mvc.Request[_] = FakeRequest()
     implicit val messages: Messages = play.api.i18n.MessagesImpl(
       play.api.i18n.Lang.defaultLang,

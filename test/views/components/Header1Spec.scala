@@ -16,14 +16,14 @@
 
 import base.SpecBase
 import org.scalatest.matchers.must.Matchers
-import views.html.components.h1
+import views.html.components.Header1
 import play.api.test.FakeRequest
 import play.api.i18n.Messages
 import org.jsoup.Jsoup
 
-class H1Spec extends SpecBase with Matchers {
+class Header1Spec extends SpecBase with Matchers {
 
-  "h1" - {
+  "header1" - {
     "must render the correct heading text in the output HTML" in new Setup {
       val headingText = "Test Heading"
       val html = h1(headingText)
@@ -36,7 +36,7 @@ class H1Spec extends SpecBase with Matchers {
 
   trait Setup {
     val app = applicationBuilder().build()
-    val h1 = app.injector.instanceOf[views.html.components.h1]
+    val h1 = app.injector.instanceOf[Header1]
     implicit val request: play.api.mvc.Request[_] = FakeRequest()
     implicit val messages: Messages = play.api.i18n.MessagesImpl(
       play.api.i18n.Lang.defaultLang,
