@@ -27,6 +27,8 @@ import play.api.Logging
 class Navigator @Inject()() extends Logging {
 
   private val normalRoutes: Page => UserAnswers => Call = {
+    case PaymentReferencePage => _ => routes.YearEndAndMonthController.onPageLoad(NormalMode)
+    case YourBankDetailsPage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case DirectDebitSourcePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
