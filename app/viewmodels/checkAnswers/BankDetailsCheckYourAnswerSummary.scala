@@ -18,28 +18,26 @@ package viewmodels.checkAnswers
 
 import controllers.routes
 import models.{CheckMode, UserAnswers}
-import pages.YourBankDetailsPage
+import pages.BankDetailsCheckYourAnswerPage
 import play.api.i18n.Messages
-import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object YourBankDetailsSummary  {
+object BankDetailsCheckYourAnswerSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(YourBankDetailsPage).map {
+    answers.get(BankDetailsCheckYourAnswerPage).map {
       answer =>
 
-      val value = HtmlFormat.escape(answer.accountHolderName).toString
+        val value = if (answer) "site.yes" else "site.no"
 
         SummaryListRowViewModel(
-          key     = "yourBankDetails.checkYourAnswersLabel",
-          value   = ValueViewModel(HtmlContent(value)),
+          key     = "bankDetailsCheckYourAnswer.checkYourAnswersLabel",
+          value   = ValueViewModel(value),
           actions = Seq(
-            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("yourBankDetails.change.hidden"))
+            ActionItemViewModel("site.change", routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.change.hidden"))
           )
         )
     }

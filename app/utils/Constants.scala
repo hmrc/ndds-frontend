@@ -20,4 +20,5 @@ object Constants {
   val MAX_ACCOUNT_HOLDER_NAME_LENGTH = 35
   val MAX_SORT_CODE_LENGTH = 6
   val MAX_ACCOUNT_NUMBER_LENGTH = 8
+  val EMPTY_STRING = ""
 }
