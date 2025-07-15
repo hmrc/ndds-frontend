@@ -16,7 +16,7 @@
 
 package viewmodels.checkAnswers
 
-import models.{UKBankAddress, UserAnswers}
+import models.UserAnswers
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow

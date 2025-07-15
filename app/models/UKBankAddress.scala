@@ -17,7 +17,8 @@
 package models
 
 import play.api.libs.json.{Json, OFormat}
-import play.twirl.api.HtmlFormat
+import play.twirl.api.{Html, HtmlFormat}
+import utils.Constants.EMPTY_STRING
 
 case class UKBankAddress(
                       addressLine1: String,
@@ -32,15 +33,16 @@ case class UKBankAddress(
     HtmlFormat.escape(value).body + "<br>"
 
   private def formatOptionalLine(opt: Option[String]): String =
-    opt.map(formatLine).getOrElse("")
+    opt.map(formatLine).getOrElse(EMPTY_STRING)
 
-  def getFullAddress: String = {
-    formatLine(addressLine1) +
+  def getFullAddress: Html = {
+    Html(Seq(formatLine(addressLine1) +
       formatOptionalLine(addressLine2) +
       formatOptionalLine(addressLine3) +
       formatOptionalLine(addressLine4) +
       formatOptionalLine(addressLine5) +
-      formatLine(postCode) 
+      formatLine(postCode)
+    ).flatten.mkString)
   }
 }
 

@@ -103,7 +103,7 @@ GET        /check-your-answers                          controllers.CheckYourAns
 GET        /direct-debit-confirmation                   controllers.DirectDebitConfirmationController.onPageLoad()
 
 
-GET        /bank-details-check-your-answer                        controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = NormalMode)
-POST       /bank-details-check-your-answer                         controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
-GET        /change-bank-details-check-your-answer                   controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-bank-details-check-your-answer                  controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)
+GET        /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = NormalMode)
+POST       /confirm-bank-details                         controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
+GET        /change-confirm-bank-details                   controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-confirm-bank-details                  controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)

@@ -260,4 +260,4 @@ bankDetailsCheckYourAnswer.account.bank.name = Bank name
 bankDetailsCheckYourAnswer.account.bank.address = Bank address
 
 bankDetailsCheckYourAnswer.p1= Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?
-bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payments from this account either as the account holder pr on behalf of the multiple signatories.
+bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.

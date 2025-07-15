@@ -21,6 +21,7 @@ import forms.BankDetailsCheckYourAnswerFormProvider
 import models.Mode
 import navigation.Navigator
 import pages.BankDetailsCheckYourAnswerPage
+import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -44,13 +45,13 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                          formProvider: BankDetailsCheckYourAnswerFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: BankDetailsCheckYourAnswerView
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging{
 
   val form:Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-
+      logger.info("Display bank details confirmation page")
       val preparedForm = request.userAnswers.get(BankDetailsCheckYourAnswerPage) match {
         case None => form
         case Some(value) => form.fill(value)
@@ -63,9 +64,9 @@ class BankDetailsCheckYourAnswerController @Inject()(
     implicit request =>
       val summaryList = buildSummaryList(request.userAnswers)
       form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode,summaryList))),
-
+        formWithErrors =>{
+          logger.info("Validation Error on display bank details confirmation page")
+          Future.successful(BadRequest(view(formWithErrors, mode,summaryList)))},
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, value))

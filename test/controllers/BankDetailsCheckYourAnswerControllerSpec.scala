@@ -61,6 +61,8 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         html must include("Check your answers")
         html must include("Test Bank Name")
         html must include("Your bank details")
+        html must include("Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?")
+        html must include("You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
 
       }
@@ -88,7 +90,8 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         html must include("123212")
         html must include("34211234")
         html must include("Address line 1")
-        html must include("Address line 2")
+        html must include("Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?")
+        html must include("You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
       }
     }
