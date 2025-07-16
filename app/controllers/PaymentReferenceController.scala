@@ -47,7 +47,7 @@ class PaymentReferenceController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val answers = request.userAnswers.getOrElse(models.UserAnswers(request.userId))
-      val preparedForm = answers.get(pages.PaymentReferencePage) match {
+      val preparedForm = answers.get(PaymentReferencePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -64,9 +64,9 @@ class PaymentReferenceController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(models.UserAnswers(request.userId)).set(pages.PaymentReferencePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(models.UserAnswers(request.userId)).set(PaymentReferencePage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(pages.PaymentReferencePage, mode, updatedAnswers))
+          } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
       )
   }
 }
