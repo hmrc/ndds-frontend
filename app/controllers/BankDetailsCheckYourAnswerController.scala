@@ -65,7 +65,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
       val summaryList = buildSummaryList(request.userAnswers)
       form.bindFromRequest().fold(
         formWithErrors =>{
-          logger.info("Validation Error on display bank details confirmation page")
+          logger.warn("Validation Error on display bank details confirmation page")
           Future.successful(BadRequest(view(formWithErrors, mode,summaryList)))},
         value =>
           for {
