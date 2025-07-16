@@ -159,7 +159,7 @@ paymentPlanType.change.hidden = PaymentPlanType
 paymentReference.title = What is your payment reference?
 paymentReference.heading = What is your payment reference?
 paymentReference.checkYourAnswersLabel = paymentReference
-paymentReference.error.required = Enter paymentReference
+paymentReference.error.required = Please enter a payment reference.
 paymentReference.error.length = paymentReference must be 100 characters or less
 paymentReference.change.hidden = paymentReference
 

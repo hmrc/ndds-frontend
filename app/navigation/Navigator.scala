@@ -26,6 +26,7 @@ import models.*
 class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
+    case PaymentReferencePage => _ => routes.YearEndAndMonthController.onPageLoad(NormalMode)
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
