@@ -21,21 +21,22 @@ import play.api.mvc.Call
 import controllers.routes
 import pages.*
 import models.*
-import play.api.Logging
 
 @Singleton
-class Navigator @Inject()() extends Logging {
+class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
+    case BankDetailsCheckYourAnswerPage => checkBankDetails
     case DirectDebitSourcePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
     case _ => _ => routes.IndexController.onPageLoad()
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
-    case _ => _ => routes.IndexController.onPageLoad() // need to be agreed where  redirect if no match
+    case BankDetailsCheckYourAnswerPage => checkBankDetails
+    case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
@@ -44,4 +45,17 @@ class Navigator @Inject()() extends Logging {
     case CheckMode =>
       checkRouteMap(page)(userAnswers)
   }
+
+  private def checkBankDetails(userAnswers: UserAnswers): Call =
+    userAnswers
+      .get(BankDetailsCheckYourAnswerPage)
+      .map { isAuthorised =>
+        if (isAuthorised) {
+          routes.DirectDebitSourceController.onPageLoad(NormalMode)
+        } else {
+          routes.BankApprovalController.onPageLoad()
+        }
+      }
+      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
 }
