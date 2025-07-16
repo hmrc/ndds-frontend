@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package utils
+@import utils.Utils.emptyString
 
-object Constants {
-  val MAX_ACCOUNT_HOLDER_NAME_LENGTH = 35
-  val MAX_SORT_CODE_LENGTH = 6
-  val MAX_ACCOUNT_NUMBER_LENGTH = 8
-  val EMPTY_STRING = ""
-  val MIN_AMOUNT = 1.0
-  val MAX_AMOUNT = 2000000.00
-}
+@this()
+
+@(
+  msg: String,
+  classes: String = "govuk-heading-m",
+  id: Option[String] = None
+)(implicit messages: Messages)
+
+<h2 @{id.fold(emptyString)(id => s"id=$id")} class="@classes">@messages(msg)</h2>

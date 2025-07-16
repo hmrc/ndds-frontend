@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package utils
+package pages
 
-object Constants {
-  val MAX_ACCOUNT_HOLDER_NAME_LENGTH = 35
-  val MAX_SORT_CODE_LENGTH = 6
-  val MAX_ACCOUNT_NUMBER_LENGTH = 8
-  val EMPTY_STRING = ""
-  val MIN_AMOUNT = 1.0
-  val MAX_AMOUNT = 2000000.00
+import play.api.libs.json.JsPath
+
+case object BankDetailsCheckYourAnswerPage extends QuestionPage[Boolean] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "bankDetailsCheckYourAnswer"
 }

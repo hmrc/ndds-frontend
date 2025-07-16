@@ -22,17 +22,19 @@
     </appender>
 
     <logger name="com.google.inject" level="INFO"/>
-
     <logger name="uk.gov" level="INFO"/>
-
-    <logger name="application" level="DEBUG"/>
-
+    <logger name="application" level="INFO"/>
     <logger name="connector" level="TRACE">
         <appender-ref ref="STDOUT"/>
     </logger>
+    <logger name="org.asynchttpclient.netty.channel" level="WARN"/>
+    <logger name="io.netty.handler" level="WARN"/>
+    <logger name="play.core.netty.utils.ServerCookieDecoder" level="WARN"/>
+    <logger name="org.asynchttpclient.netty.handler.HttpHandler" level="WARN"/>
 
-    <root level="INFO">
+    <root level="ERROR">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>
+
 </configuration>

@@ -35,7 +35,7 @@ import scala.concurrent.Future
 
 class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute = Call("GET", "/direct-debits/year-end-and-month")
 
   val formProvider = new PaymentReferenceFormProvider()
   val form = formProvider()
@@ -124,21 +124,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, paymentReferenceRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+    "must redirect to the next page when valid data is submitted even if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -150,7 +136,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual onwardRoute.url
       }
     }
   }

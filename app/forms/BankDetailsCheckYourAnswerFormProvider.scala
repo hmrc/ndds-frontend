@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package utils
+package forms
 
-object Constants {
-  val MAX_ACCOUNT_HOLDER_NAME_LENGTH = 35
-  val MAX_SORT_CODE_LENGTH = 6
-  val MAX_ACCOUNT_NUMBER_LENGTH = 8
-  val EMPTY_STRING = ""
-  val MIN_AMOUNT = 1.0
-  val MAX_AMOUNT = 2000000.00
+import javax.inject.Inject
+
+import forms.mappings.Mappings
+import play.api.data.Form
+
+class BankDetailsCheckYourAnswerFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("bankDetailsCheckYourAnswer.error.required")
+    )
 }
