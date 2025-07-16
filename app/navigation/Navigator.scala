@@ -28,6 +28,7 @@ class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case YourBankDetailsPage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentAmountPage => _ => routes.UnderConstructionController.onPageLoad
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case _ => _ => routes.IndexController.onPageLoad()
   }

@@ -246,12 +246,13 @@ checkYourAnswers.acceptAndContinue = Accept and Continue
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation
 
-paymentAmount.title = PaymentAmount
-paymentAmount.heading = PaymentAmount
-paymentAmount.checkYourAnswersLabel = PaymentAmount
-paymentAmount.error.nonNumeric = Enter your paymentAmount using numbers and a decimal point
-paymentAmount.error.required = Enter your paymentAmount
-paymentAmount.error.invalidNumeric = Enter your paymentAmount using up to two decimal places
-paymentAmount.error.aboveMaximum = PaymentAmount must be {0} or less
-paymentAmount.error.belowMinimum = PaymentAmount must be {0} or more
-paymentAmount.change.hidden = PaymentAmount
+paymentAmount.title = What Amount do you want to pay?
+paymentAmount.heading = What Amount do you want to pay?
+paymentAmount.checkYourAnswersLabel = What Amount do you want to pay?
+paymentAmount.error.nonNumeric = The amount you have entered is not valid. Please check.
+paymentAmount.error.required = Please enter an amount.
+paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
+paymentAmount.error.max.min.range = The amount entered must between 1.00 and 20,000,000.00.  Please amend your entry.
+paymentAmount.change.hidden =  What Amount do you want to pay?
+
+under_construction.heading = Under Construction
