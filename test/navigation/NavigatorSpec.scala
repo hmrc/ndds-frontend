@@ -30,31 +30,27 @@ class NavigatorSpec extends SpecBase {
     "in Normal mode" - {
 
       "must go from a page that doesn't exist in the route map to Index" in {
-
         case object UnknownPage extends Page
         navigator.nextPage(UnknownPage, NormalMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad()
+      }
+
+      "must go from a PersonalOrBusinessAccountPage to YourBankDetailsPage" in {
+        navigator.nextPage(PersonalOrBusinessAccountPage, NormalMode, UserAnswers("id")) mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
       }
 
       "must go from YourBankDetailsPage to CheckYourAnswers" in {
         navigator.nextPage(YourBankDetailsPage, NormalMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
-      "must go from a PersonalOrBusinessAccountPage to YourBankDetailsPage" in {
-
-        case object UnknownPage extends Page
-        val userAnswers = UserAnswers("id")
-        val page = PersonalOrBusinessAccountPage
-
-        val next = navigator.nextPage(page, NormalMode, userAnswers)
-
-        next mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
+      "must go from DirectDebitSourcePage to PaymentReferencePage" in {
+        navigator.nextPage(DirectDebitSourcePage, NormalMode, UserAnswers("id")) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
       }
+
     }
 
     "in Check mode" - {
 
       "must go from a page that doesn't exist in the edit route map to CheckYourAnswers" in {
-
         case object UnknownPage extends Page
         navigator.nextPage(UnknownPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad()
       }

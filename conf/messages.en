@@ -145,7 +145,7 @@ directDebitSource.paye = Pay As Your Earn (PAYE)
 directDebitSource.sa = Self Assessment (SA)
 directDebitSource.sdlt = Stamp Duty Land Tax (SDLT)
 directDebitSource.vat = Value Added Tax (VAT)
-directDebitSource.error.required = Select Direct Debit Source
+directDebitSource.error.required = Please select one option.
 directDebitSource.change.hidden = DirectDebitSource
 
 paymentPlanType.title = What type of payment plan are you selecting?

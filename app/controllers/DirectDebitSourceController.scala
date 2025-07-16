@@ -38,7 +38,6 @@ class DirectDebitSourceController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
                                        formProvider: DirectDebitSourceFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: DirectDebitSourceView
@@ -48,26 +47,27 @@ class DirectDebitSourceController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      logger.warn("***********************************************in pageload")
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
       val preparedForm = answers.get(DirectDebitSourcePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
 
+      logger.info("*********Direct debit source page loaded...")
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
+          logger.warn(s"Bad Request, error: ${formWithErrors}")
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(DirectDebitSourcePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(DirectDebitSourcePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(DirectDebitSourcePage, mode, updatedAnswers))
       )
