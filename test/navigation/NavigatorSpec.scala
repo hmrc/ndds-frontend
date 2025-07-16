@@ -46,6 +46,10 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(DirectDebitSourcePage, NormalMode, UserAnswers("id")) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
       }
 
+      "must go from PaymentReferencePage to YearEndAndMonthController" in {
+        navigator.nextPage(PaymentReferencePage, NormalMode, UserAnswers("id")) mustBe routes.YearEndAndMonthController.onPageLoad(NormalMode)
+      }
+
     }
 
     "in Check mode" - {
