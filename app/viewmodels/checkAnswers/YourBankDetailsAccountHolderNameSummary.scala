@@ -16,17 +16,16 @@
 
 package viewmodels.checkAnswers
 
-import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.UserAnswers
 import pages.YourBankDetailsPage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object YourBankDetailsSummary  {
+object YourBankDetailsAccountHolderNameSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(YourBankDetailsPage).map {
@@ -35,12 +34,10 @@ object YourBankDetailsSummary  {
       val value = HtmlFormat.escape(answer.accountHolderName).toString
 
         SummaryListRowViewModel(
-          key     = "yourBankDetails.checkYourAnswersLabel",
+          key     = "bankDetailsCheckYourAnswer.account.holder.name",
           value   = ValueViewModel(HtmlContent(value)),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("yourBankDetails.change.hidden"))
-          )
+          actions = Seq.empty
+          
         )
     }
 }

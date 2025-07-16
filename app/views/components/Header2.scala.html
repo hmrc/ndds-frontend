@@ -14,12 +14,14 @@
  * limitations under the License.
  *@
 
-@this()
-@(url: String, text: String, visuallyHiddenText: Option[String] = None)
+@import utils.Utils.emptyString
 
-<a class="govuk-link" href="@url">
-  @text
-  @visuallyHiddenText.map { vht =>
-    <span class="govuk-visually-hidden">@vht</span>
-  }
-</a> 
+@this()
+
+@(
+  msg: String,
+  classes: String = "govuk-heading-m",
+  id: Option[String] = None
+)(implicit messages: Messages)
+
+<h2 @{id.fold(emptyString)(id => s"id=$id")} class="@classes">@messages(msg)</h2>

@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this()
-@(url: String, text: String, visuallyHiddenText: Option[String] = None)
+package pages
 
-<a class="govuk-link" href="@url">
-  @text
-  @visuallyHiddenText.map { vht =>
-    <span class="govuk-visually-hidden">@vht</span>
-  }
-</a> 
+import play.api.libs.json.JsPath
+
+case object BankDetailsCheckYourAnswerPage extends QuestionPage[Boolean] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "bankDetailsCheckYourAnswer"
+}
