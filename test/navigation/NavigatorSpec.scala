@@ -32,11 +32,11 @@ class NavigatorSpec extends SpecBase {
 
       "must go from a page that doesn't exist in the route map to Index" in {
         case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, NormalMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad()
+        navigator.nextPage(UnknownPage, NormalMode, userAnswers) mustBe routes.IndexController.onPageLoad()
       }
 
       "must go from a PersonalOrBusinessAccountPage to YourBankDetailsPage" in {
-        navigator.nextPage(PersonalOrBusinessAccountPage, NormalMode, UserAnswers("id")) mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
+        navigator.nextPage(PersonalOrBusinessAccountPage, NormalMode, userAnswers) mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
       }
 
       "must go from YourBankDetailsPage to BankDetailsCheckYourAnswersPage" in {
@@ -54,11 +54,11 @@ class NavigatorSpec extends SpecBase {
       }
 
       "must throw error from BankDetailsCheckYourAnswersPage if no option selected" in {
-        navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, UserAnswers("id")) mustBe routes.JourneyRecoveryController.onPageLoad()
+        navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
       }
 
       "must go from DirectDebitSourcePage to PaymentReferencePage" in {
-        navigator.nextPage(DirectDebitSourcePage, NormalMode, UserAnswers("id")) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+        navigator.nextPage(DirectDebitSourcePage, NormalMode, userAnswers) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
       }
 
     }
@@ -67,7 +67,7 @@ class NavigatorSpec extends SpecBase {
 
       "must go from a page that doesn't exist in the edit route map to CheckYourAnswers" in {
         case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, CheckMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad()
+        navigator.nextPage(UnknownPage, CheckMode, userAnswers) mustBe routes.IndexController.onPageLoad()
       }
 
       "must go from YourBankDetailsPage to BankDetailsCheckYourAnswersPage" in {
