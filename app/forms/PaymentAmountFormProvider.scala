@@ -17,8 +17,10 @@
 package forms
 
 import forms.mappings.Mappings
+
 import javax.inject.Inject
 import play.api.data.Form
+import utils.Constants._
 
 class PaymentAmountFormProvider @Inject() extends Mappings {
 
@@ -29,6 +31,13 @@ class PaymentAmountFormProvider @Inject() extends Mappings {
         "paymentAmount.error.invalidNumeric",
         "paymentAmount.error.nonNumeric"
       )
-      .verifying(maximumCurrency(Int.MaxValue, "paymentAmount.error.aboveMaximum"))
+        .verifying("paymentAmount.error.moreThanTwoDecimals", amount => amount.scale <= DECIMAL_SCALE)
+        .transform[BigDecimal](
+          amount => amount.setScale(2, BigDecimal.RoundingMode.UNNECESSARY),
+          identity
+        )
+        .verifying(minimumValue[BigDecimal](MIN_AMOUNT, "paymentAmount.error.max.min.range"))
+        .verifying(maximumValue[BigDecimal](MAX_AMOUNT, "paymentAmount.error.max.min.range"))
     )
 }
+

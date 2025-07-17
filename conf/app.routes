@@ -107,3 +107,8 @@ GET        /confirm-bank-details                        controllers.BankDetailsC
 POST       /confirm-bank-details                         controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
 GET        /change-confirm-bank-details                   controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-confirm-bank-details                  controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)
+
+GET        /payment-amount                            controllers.PaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST       /payment-amount                            controllers.PaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET        /change-payment-amount                     controllers.PaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-payment-amount                     controllers.PaymentAmountController.onSubmit(mode: Mode = CheckMode)

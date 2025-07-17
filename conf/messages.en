@@ -163,7 +163,7 @@ paymentPlanType.change.hidden = PaymentPlanType
 paymentReference.title = What is your payment reference?
 paymentReference.heading = What is your payment reference?
 paymentReference.checkYourAnswersLabel = paymentReference
-paymentReference.error.required = Enter paymentReference
+paymentReference.error.required = Please enter a payment reference.
 paymentReference.error.length = paymentReference must be 100 characters or less
 paymentReference.change.hidden = paymentReference
 
@@ -271,3 +271,14 @@ bankDetailsCheckYourAnswer.account.bank.address = Bank address
 
 bankDetailsCheckYourAnswer.p1= Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?
 bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.
+
+paymentAmount.title = What Amount do you want to pay?
+paymentAmount.heading = What Amount do you want to pay?
+paymentAmount.checkYourAnswersLabel = What Amount do you want to pay?
+paymentAmount.error.nonNumeric = The amount you have entered is not valid. Please check.
+paymentAmount.error.required = Please enter an amount.
+paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
+paymentAmount.error.max.min.range = The amount entered must between 1.00 and 20,000,000.00.  Please amend your entry.
+paymentAmount.change.hidden =  What Amount do you want to pay?
+
+under_construction.heading = Under Construction

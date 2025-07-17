@@ -21,12 +21,14 @@ import play.api.mvc.Call
 import controllers.routes
 import pages.*
 import models.*
-import models.DirectDebitSource.{MGD, SA, TC}
+import models.DirectDebitSource.*
 
 @Singleton
 class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
+    case PaymentReferencePage => userAnswers => checkPaymentReferenceLogic(userAnswers)
+    case PaymentAmountPage => _ => routes.IndexController.onPageLoad()
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
@@ -48,6 +50,28 @@ class Navigator @Inject()() {
       checkRouteMap(page)(userAnswers)
   }
 
+  private def checkPaymentReferenceLogic(userAnswers: UserAnswers): Call = {
+    val sourceType = userAnswers.get(DirectDebitSourcePage)
+    val optPaymentType = userAnswers.get(PaymentPlanTypePage)
+    sourceType match {
+      case Some(OL) | Some(NIC) | Some(CT) | Some(SDLT) | Some(VAT) => routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.VariablePaymentPlan) =>
+        routes.PlanStartDateController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.PAYE) => routes.YearEndAndMonthController.onPageLoad(NormalMode)
+//      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.BudgetPaymentPlan) =>
+//        routes.PaymentsFrequencyController.onPageLoad(NormalMode)
+//      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPLan) =>
+//        routes.TotalAmountDueController.onPageLoad(NormalMode)
+      case _ => routes.JourneyRecoveryController.onPageLoad()
+    }
+  }
+
   private def checkBankDetails(userAnswers: UserAnswers): Call =
     userAnswers
       .get(BankDetailsCheckYourAnswerPage)
@@ -63,7 +87,7 @@ class Navigator @Inject()() {
   private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
     userAnswers
       .get(DirectDebitSourcePage) match {
-          case Some(SA) | Some(TC) | Some(MGD) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+          case Some(MGD) | Some(SA) | Some(TC) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
           case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
         }
 

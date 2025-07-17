@@ -20,7 +20,7 @@ import base.SpecBase
 import controllers.routes
 import pages.*
 import models.*
-import models.DirectDebitSource.{CT, MGD, NIC, PAYE, SA, TC}
+import models.DirectDebitSource.*
 
 class NavigatorSpec extends SpecBase {
 
@@ -58,35 +58,77 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
       }
 
-      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is SA" in {
-        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, SA)
-        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is MGD, SA, TC" in {
+        val validSources = Seq(MGD, SA, TC)
+
+        validSources.foreach { source =>
+          val ua = userAnswers.set(DirectDebitSourcePage, source).success.value
+          navigator.nextPage(DirectDebitSourcePage, NormalMode, ua) mustBe routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+        }
       }
 
-      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is TC" in {
-        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, TC)
-        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is CT, NIC, OL, PAYE, SDLT, VAT" in {
+        val validSources = Seq(CT, NIC, OL, PAYE, SDLT, VAT)
+
+        validSources.foreach { source =>
+          val ua = userAnswers.set(DirectDebitSourcePage, source).success.value
+          navigator.nextPage(DirectDebitSourcePage, NormalMode, ua) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+        }
       }
 
-      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is CT" in {
-        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, CT)
-        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+      "must go from PaymentReferencePage to PaymentAmountController for CT, NIC, OL, SDLT, VAT" in {
+        val validSources = Seq(CT, NIC, OL, SDLT, VAT)
+
+        validSources.foreach { source =>
+          val ua = userAnswers.set(DirectDebitSourcePage, source).success.value
+          navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+            routes.PaymentAmountController.onPageLoad(NormalMode)
+        }
       }
 
-      "must go from DirectDebitSourcePage to PaymentReferencePage if source is NIC" in {
-        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, NIC)
-        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+      "must go from PaymentReferencePage to PaymentAmountController for MGD, SA, TC with SinglePayment" in {
+        val sources = Seq(MGD, SA, TC)
+
+        sources.foreach { source =>
+          val ua = userAnswers
+            .set(DirectDebitSourcePage, source).success.value
+            .set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
+          navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+            routes.PaymentAmountController.onPageLoad(NormalMode)
+        }
       }
 
-      "must go from DirectDebitSourcePage to PaymentReferencePage if source is PAYE" in {
-        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, PAYE)
-        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+      "must go from PaymentReferencePage to PlanStartDatePage for MGD with VariablePaymentPlan" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, MGD).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan).success.value
+
+        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+          routes.PlanStartDateController.onPageLoad(NormalMode)
       }
 
-      "must go from PaymentPlanTypePage to PaymentReferencePage for MGD" in {
-        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, MGD)
-        navigator.nextPage(PaymentPlanTypePage, NormalMode, checkPage) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+      "must throw error from PaymentReferencePage if DirectDebitSource is missing" in {
+        navigator.nextPage(PaymentReferencePage, NormalMode, userAnswers) mustBe
+          routes.JourneyRecoveryController.onPageLoad()
       }
+
+//      "must go from PaymentReferencePage to PaymentsFrequencyPage for SA with BudgetPaymentPlan" in {
+//        val ua = userAnswers
+//          .set(DirectDebitSourcePage, SA).success.value
+//          .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+//
+//        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+//          routes.PaymentsFrequencyController.onPageLoad(NormalMode)
+//      }
+
+//      "must go from PaymentReferencePage to PaymentsFrequencyPage for TC with TaxCreditRepaymentPLan" in {
+//        val ua = userAnswers
+//          .set(DirectDebitSourcePage, TC).success.value
+//          .set(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPLan).success.value
+//
+//        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+//          routes.TotalAmountDueController.onPageLoad(NormalMode)
+//      }
 
     }
 

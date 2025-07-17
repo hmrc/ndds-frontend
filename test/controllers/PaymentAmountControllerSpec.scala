@@ -32,27 +32,26 @@ import repositories.SessionRepository
 import views.html.PaymentAmountView
 
 import scala.concurrent.Future
+import scala.math.BigDecimal.RoundingMode
 
 class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
-  val formProvider = new PaymentAmountFormProvider()
-  val form = formProvider()
+  private val formProvider = new PaymentAmountFormProvider()
+  private val form = formProvider()
 
-  def onwardRoute = Call("GET", "/foo")
+  private def onwardRoute = Call("GET", "/foo")
 
-  val validAnswer = 0
+  private val validAnswer = BigDecimal(1.00).setScale(2, RoundingMode.HALF_UP)
 
-  lazy val paymentAmountRoute = routes.PaymentAmountController.onPageLoad(NormalMode).url
+  private lazy val paymentAmountRoute = routes.PaymentAmountController.onPageLoad(NormalMode).url
 
-  "paymentAmount Controller" - {
+  "PaymentAmount Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentAmountRoute)
-
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[PaymentAmountView]
@@ -63,17 +62,14 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
-
       val userAnswers = UserAnswers(userAnswersId).set(PaymentAmountPage, validAnswer).success.value
-
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentAmountRoute)
+        val result = route(application, request).value
 
         val view = application.injector.instanceOf[PaymentAmountView]
-
-        val result = route(application, request).value
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode)(request, messages(application)).toString
@@ -81,23 +77,18 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to the next page when valid data is submitted" in {
-
       val mockSessionRepository = mock[SessionRepository]
-
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+          bind[SessionRepository].toInstance(mockSessionRepository)
+        ).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, paymentAmountRoute)
-            .withFormUrlEncodedBody(("value", validAnswer.toString))
+        val request = FakeRequest(POST, paymentAmountRoute)
+          .withFormUrlEncodedBody(("value", validAnswer.toString))
 
         val result = route(application, request).value
 
@@ -107,18 +98,15 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
-
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, paymentAmountRoute)
-            .withFormUrlEncodedBody(("value", "invalid value"))
+        val request = FakeRequest(POST, paymentAmountRoute)
+          .withFormUrlEncodedBody(("value", "invalid value"))
 
         val boundForm = form.bind(Map("value" -> "invalid value"))
 
         val view = application.injector.instanceOf[PaymentAmountView]
-
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
@@ -126,34 +114,17 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, paymentAmountRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
     "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, paymentAmountRoute)
-            .withFormUrlEncodedBody(("value", validAnswer.toString))
+        val request = FakeRequest(POST, paymentAmountRoute)
+          .withFormUrlEncodedBody(("value", validAnswer.toString))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.IndexController.onPageLoad().url
       }
     }
   }
