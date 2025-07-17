@@ -32,10 +32,11 @@ object DirectDebitSource extends Enumerable.Implicits {
   case object PAYE extends WithName("paye") with DirectDebitSource
   case object SA extends WithName("sa") with DirectDebitSource
   case object SDLT extends WithName("sdlt") with DirectDebitSource
+  case object TC extends WithName("tc") with DirectDebitSource
   case object VAT extends WithName("vat") with DirectDebitSource
 
   val values: Seq[DirectDebitSource] = Seq(
-    CT, MGD, NIC, OL, PAYE, SA, SDLT, VAT
+    CT, MGD, NIC, OL, PAYE, SA, SDLT, TC, VAT
   )
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {

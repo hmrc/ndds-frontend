@@ -147,6 +147,7 @@ directDebitSource.otherLiability.hint = There are a number of 'Other' types of t
 directDebitSource.paye = Pay As Your Earn (PAYE)
 directDebitSource.sa = Self Assessment (SA)
 directDebitSource.sdlt = Stamp Duty Land Tax (SDLT)
+directDebitSource.tc = Tax Credits (TC)
 directDebitSource.vat = Value Added Tax (VAT)
 directDebitSource.error.required = Please select one option.
 directDebitSource.change.hidden = DirectDebitSource

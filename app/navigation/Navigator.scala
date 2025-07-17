@@ -21,7 +21,7 @@ import play.api.mvc.Call
 import controllers.routes
 import pages.*
 import models.*
-import models.DirectDebitSource.{CT, MGD, SA}
+import models.DirectDebitSource.{MGD, SA, TC}
 
 @Singleton
 class Navigator @Inject()() {
@@ -63,7 +63,7 @@ class Navigator @Inject()() {
   private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
     userAnswers
       .get(DirectDebitSourcePage) match {
-          case Some(SA) | Some(CT) | Some(MGD) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+          case Some(SA) | Some(TC) | Some(MGD) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
           case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
         }
 
