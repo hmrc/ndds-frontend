@@ -18,46 +18,76 @@ package navigation
 
 import base.SpecBase
 import controllers.routes
-import pages._
-import models._
+import pages.*
+import models.*
 
 class NavigatorSpec extends SpecBase {
 
   val navigator = new Navigator
+  val userAnswers: UserAnswers = UserAnswers("id")
 
   "Navigator" - {
 
     "in Normal mode" - {
 
       "must go from a page that doesn't exist in the route map to Index" in {
-
         case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, NormalMode, UserAnswers("id")) mustBe routes.IndexController.onPageLoad()
-      }
-
-      "must go from YourBankDetailsPage to CheckYourAnswers" in {
-        navigator.nextPage(YourBankDetailsPage, NormalMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad()
+        navigator.nextPage(UnknownPage, NormalMode, userAnswers) mustBe routes.IndexController.onPageLoad()
       }
 
       "must go from a PersonalOrBusinessAccountPage to YourBankDetailsPage" in {
-
-        case object UnknownPage extends Page
-        val userAnswers = UserAnswers("id")
-        val page = PersonalOrBusinessAccountPage
-
-        val next = navigator.nextPage(page, NormalMode, userAnswers)
-
-        next mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
+        navigator.nextPage(PersonalOrBusinessAccountPage, NormalMode, userAnswers) mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
       }
+
+      "must go from YourBankDetailsPage to BankDetailsCheckYourAnswersPage" in {
+        navigator.nextPage(YourBankDetailsPage, NormalMode, userAnswers) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
+      }
+
+      "must go from BankDetailsCheckYourAnswersPage to DirectDebitSourcePage" in {
+        val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
+        navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, checkPage) mustBe routes.DirectDebitSourceController.onPageLoad(NormalMode)
+      }
+
+      "must go from BankDetailsCheckYourAnswersPage to BankApprovalPage" in {
+        val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, false)
+        navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, checkPage) mustBe routes.BankApprovalController.onPageLoad()
+      }
+
+      "must throw error from BankDetailsCheckYourAnswersPage if no option selected" in {
+        navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
+      }
+
+      "must go from DirectDebitSourcePage to PaymentReferencePage" in {
+        navigator.nextPage(DirectDebitSourcePage, NormalMode, userAnswers) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+      }
+
+      "must go from PaymentReferencePage to YearEndAndMonthController" in {
+        navigator.nextPage(PaymentReferencePage, NormalMode, UserAnswers("id")) mustBe routes.YearEndAndMonthController.onPageLoad(NormalMode)
+      }
+
     }
 
     "in Check mode" - {
 
       "must go from a page that doesn't exist in the edit route map to CheckYourAnswers" in {
-
         case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, CheckMode, UserAnswers("id")) mustBe routes.CheckYourAnswersController.onPageLoad()
+        navigator.nextPage(UnknownPage, CheckMode, userAnswers) mustBe routes.IndexController.onPageLoad()
       }
+
+      "must go from YourBankDetailsPage to BankDetailsCheckYourAnswersPage" in {
+        navigator.nextPage(YourBankDetailsPage, CheckMode, userAnswers) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
+      }
+
+      "must go from BankDetailsCheckYourAnswersPage to DirectDebitSourcePage" in {
+        val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
+        navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.DirectDebitSourceController.onPageLoad(NormalMode)
+      }
+
+      "must go from BankDetailsCheckYourAnswersPage to BankApprovalPage" in {
+        val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, false)
+        navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.BankApprovalController.onPageLoad()
+      }
+
     }
   }
 }

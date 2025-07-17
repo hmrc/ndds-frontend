@@ -16,12 +16,14 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.DirectDebitSourceFormProvider
+
 import javax.inject.Inject
-import models.Mode
+import models.{Mode, UserAnswers}
 import navigation.Navigator
 import pages.DirectDebitSourcePage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -36,35 +38,36 @@ class DirectDebitSourceController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
                                        formProvider: DirectDebitSourceFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: DirectDebitSourceView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-
-      val preparedForm = request.userAnswers.get(DirectDebitSourcePage) match {
+      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val preparedForm = answers.get(DirectDebitSourcePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
 
+      logger.info("*********Direct debit source page loaded...")
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
+          logger.warn(s"Bad Request, error: ${formWithErrors}")
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(DirectDebitSourcePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(DirectDebitSourcePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(DirectDebitSourcePage, mode, updatedAnswers))
       )

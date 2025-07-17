@@ -134,12 +134,18 @@ authorisedAccountHolder.change.hidden = AuthorisedAccountHolder
 bankApproval.title = You need bank approval
 bankApproval.heading = You need bank approval
 
-directDebitSource.title = here do you need to make direct debit payment?
-directDebitSource.heading = here do you need to make direct debit payment?
-directDebitSource.corporationTax = Corporation Tax
-directDebitSource.machineGamesDuty = Machine Games Duty
-directDebitSource.checkYourAnswersLabel = here do you need to make direct debit payment?
-directDebitSource.error.required = Select directDebitSource
+directDebitSource.title = Where do you need to make direct debit payment?
+directDebitSource.heading = Where do you need to make direct debit payment?
+directDebitSource.checkYourAnswersLabel = Where do you need to make direct debit payment?
+directDebitSource.ct = Corporation Tax (CT)
+directDebitSource.mgd = Machine Games Duty (MGD)
+directDebitSource.nic = National Insurance Contributions (NIC)
+directDebitSource.otherLiability = Other Liability
+directDebitSource.paye = Pay As Your Earn (PAYE)
+directDebitSource.sa = Self Assessment (SA)
+directDebitSource.sdlt = Stamp Duty Land Tax (SDLT)
+directDebitSource.vat = Value Added Tax (VAT)
+directDebitSource.error.required = Please select one option.
 directDebitSource.change.hidden = DirectDebitSource
 
 paymentPlanType.title = What type of payment plan are you selecting?
@@ -153,7 +159,7 @@ paymentPlanType.change.hidden = PaymentPlanType
 paymentReference.title = What is your payment reference?
 paymentReference.heading = What is your payment reference?
 paymentReference.checkYourAnswersLabel = paymentReference
-paymentReference.error.required = Enter paymentReference
+paymentReference.error.required = Please enter a payment reference.
 paymentReference.error.length = paymentReference must be 100 characters or less
 paymentReference.change.hidden = paymentReference
 
@@ -245,3 +251,19 @@ checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation
+
+bankDetailsCheckYourAnswer.title = Check your answers
+bankDetailsCheckYourAnswer.heading = Check your answers
+bankDetailsCheckYourAnswer.checkYourAnswersLabel = You bank details check your answers
+bankDetailsCheckYourAnswer.error.required = Select yes if you are the account holder or an authorised signatory
+bankDetailsCheckYourAnswer.change.hidden = If you are the account holder or an authorised signatory
+bankDetailsCheckYourAnswer.h2 = Your bank details
+
+bankDetailsCheckYourAnswer.account.holder.name = Account holders(s) name
+bankDetailsCheckYourAnswer.account.account.number = Account number
+bankDetailsCheckYourAnswer.account.sort.code = Bank sort code
+bankDetailsCheckYourAnswer.account.bank.name = Bank name
+bankDetailsCheckYourAnswer.account.bank.address = Bank address
+
+bankDetailsCheckYourAnswer.p1= Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?
+bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.

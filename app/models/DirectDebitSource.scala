@@ -24,11 +24,17 @@ sealed trait DirectDebitSource
 
 object DirectDebitSource extends Enumerable.Implicits {
 
-  case object CorporationTax extends WithName("corporation Tax") with DirectDebitSource
-  case object MachineGamesDuty extends WithName("machine Games Duty") with DirectDebitSource
+  case object CT extends WithName("ct") with DirectDebitSource
+  case object MGD extends WithName("mgd") with DirectDebitSource
+  case object NIC extends WithName("nic") with DirectDebitSource
+  case object OL extends WithName("otherLiability") with DirectDebitSource
+  case object PAYE extends WithName("paye") with DirectDebitSource
+  case object SA extends WithName("sa") with DirectDebitSource
+  case object SDLT extends WithName("sdlt") with DirectDebitSource
+  case object VAT extends WithName("vat") with DirectDebitSource
 
   val values: Seq[DirectDebitSource] = Seq(
-    CorporationTax, MachineGamesDuty
+    CT, MGD, NIC, OL, PAYE, SA, SDLT, VAT
   )
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {

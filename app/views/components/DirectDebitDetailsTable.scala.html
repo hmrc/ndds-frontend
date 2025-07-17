@@ -16,7 +16,7 @@
 
 @import utils.Utils.emptyString
 
-@this(govukTable: GovukTable)
+@this(govukTable: GovukTable, linkWithHiddenText: LinkWithHiddenText)
 
 @(headerLeft: String,
   headerRightText: String,
@@ -35,7 +35,7 @@
       ),
       HeadCell(
         content = HtmlContent(
-          LinkWithHiddenText(
+          linkWithHiddenText(
             url = headerRightUrl,
             text = headerRightText,
             visuallyHiddenText = headerRightVisuallyHiddenText

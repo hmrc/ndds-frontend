@@ -44,10 +44,10 @@ class PaymentReferenceController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-
-      val preparedForm = request.userAnswers.get(PaymentReferencePage) match {
+      val answers = request.userAnswers.getOrElse(models.UserAnswers(request.userId))
+      val preparedForm = answers.get(PaymentReferencePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -55,7 +55,7 @@ class PaymentReferenceController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -64,7 +64,7 @@ class PaymentReferenceController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(models.UserAnswers(request.userId)).set(PaymentReferencePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
       )

@@ -18,7 +18,7 @@ GET        /account/signed-out                          controllers.auth.SignedO
 
 GET        /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
-GET        /your-direct-debit-instructions              controllers.YourDirectDebitInstructionsController.onPageLoad()
+GET        /your-direct-debit-payment                   controllers.YourDirectDebitInstructionsController.onPageLoad()
 
 GET        /set-up-direct-debit-payment                 controllers.SetupDirectDebitPaymentController.onPageLoad(directDebitCount: Int)
 
@@ -43,10 +43,10 @@ POST       /change-authorised-account-holder            controllers.AuthorisedAc
 
 GET        /bank-approval                               controllers.BankApprovalController.onPageLoad()
 
-GET        /direct-debit-source                         controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
-POST       /direct-debit-source                         controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
-GET        /change-direct-debit-source                  controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-direct-debit-source                  controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
+GET        /where-are-you-making-a-payment              controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
+POST       /where-are-you-making-a-payment              controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
+GET        /change-where-are-you-making-a-payment       controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-where-are-you-making-a-payment       controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-plan-type                           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-plan-type                           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
@@ -102,3 +102,8 @@ GET        /check-your-answers                          controllers.CheckYourAns
 
 GET        /direct-debit-confirmation                   controllers.DirectDebitConfirmationController.onPageLoad()
 
+
+GET        /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = NormalMode)
+POST       /confirm-bank-details                         controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
+GET        /change-confirm-bank-details                   controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-confirm-bank-details                  controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)
