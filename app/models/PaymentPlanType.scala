@@ -26,11 +26,9 @@ object PaymentPlanType extends Enumerable.Implicits {
 
   case object SinglePayment extends WithName("singlePayment") with PaymentPlanType
   case object VariablePaymentPlan extends WithName("variablePaymentPlan") with PaymentPlanType
-  case object BudgetPaymentPlan extends WithName("budgetPaymentPlan") with PaymentPlanType
-  case object TaxCreditRepaymentPlan extends WithName("taxCreditRepaymentPlan") with PaymentPlanType
 
   val values: Seq[PaymentPlanType] = Seq(
-    SinglePayment, VariablePaymentPlan, BudgetPaymentPlan, TaxCreditRepaymentPlan
+    SinglePayment, VariablePaymentPlan
   )
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {

@@ -156,7 +156,7 @@ paymentPlanType.heading = What type of payment plan are you selecting?
 paymentPlanType.singlePayment = A single payment
 paymentPlanType.variablePaymentPlan = A variable payment plan
 paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
-paymentPlanType.error.required = Select Payment Plan Type
+paymentPlanType.error.required = Please select one option.
 paymentPlanType.change.hidden = PaymentPlanType
 
 paymentReference.title = What is your payment reference?
