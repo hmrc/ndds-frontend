@@ -24,11 +24,13 @@ sealed trait PaymentPlanType
 
 object PaymentPlanType extends Enumerable.Implicits {
 
-  case object ASinglePayment extends WithName("a single payment") with PaymentPlanType
-  case object AVariablePaymentPlan extends WithName("a variable payment plan") with PaymentPlanType
+  case object SinglePayment extends WithName("singlePayment") with PaymentPlanType
+  case object VariablePaymentPlan extends WithName("variablePaymentPlan") with PaymentPlanType
+  case object BudgetPaymentPlan extends WithName("budgetPaymentPlan") with PaymentPlanType
+  case object TaxCreditRepaymentPlan extends WithName("taxCreditRepaymentPlan") with PaymentPlanType
 
   val values: Seq[PaymentPlanType] = Seq(
-    ASinglePayment, AVariablePaymentPlan
+    SinglePayment, VariablePaymentPlan, BudgetPaymentPlan, TaxCreditRepaymentPlan
   )
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {

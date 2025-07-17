@@ -19,6 +19,7 @@ package models
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
+import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
 
 sealed trait DirectDebitSource
 
@@ -39,10 +40,13 @@ object DirectDebitSource extends Enumerable.Implicits {
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {
     case (value, index) =>
+      val hintKey = s"directDebitSource.${value.toString}.hint"
+      val hintText = messages(hintKey)
       RadioItem(
         content = Text(messages(s"directDebitSource.${value.toString}")),
         value   = Some(value.toString),
-        id      = Some(s"value_$index")
+        id      = Some(s"value_$index"),
+        hint    = if (hintText != hintKey) Some(Hint(content = Text(hintText))) else None
       )
   }
 

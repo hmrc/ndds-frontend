@@ -16,12 +16,14 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.PaymentPlanTypeFormProvider
+
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.PaymentPlanTypePage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -40,7 +42,7 @@ class PaymentPlanTypeController @Inject()(
                                        formProvider: PaymentPlanTypeFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentPlanTypeView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
@@ -52,6 +54,7 @@ class PaymentPlanTypeController @Inject()(
         case Some(value) => form.fill(value)
       }
 
+      logger.info("Type of Payment Plan page loaded")
       Ok(view(preparedForm, mode))
   }
 
@@ -60,6 +63,7 @@ class PaymentPlanTypeController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
+          logger.warn(s"Validation error: ${formWithErrors}")
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>

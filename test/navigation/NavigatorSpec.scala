@@ -20,6 +20,7 @@ import base.SpecBase
 import controllers.routes
 import pages.*
 import models.*
+import models.DirectDebitSource.{CT, NIC, PAYE, SA}
 
 class NavigatorSpec extends SpecBase {
 
@@ -57,8 +58,24 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
       }
 
-      "must go from DirectDebitSourcePage to PaymentReferencePage" in {
-        navigator.nextPage(DirectDebitSourcePage, NormalMode, userAnswers) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is SA" in {
+        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, SA)
+        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+      }
+
+      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is CT" in {
+        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, CT)
+        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+      }
+
+      "must go from DirectDebitSourcePage to PaymentReferencePage if source is NIC" in {
+        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, NIC)
+        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+      }
+
+      "must go from DirectDebitSourcePage to PaymentReferencePage if source is PAYE" in {
+        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, PAYE)
+        navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
       }
 
     }

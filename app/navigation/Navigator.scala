@@ -21,6 +21,7 @@ import play.api.mvc.Call
 import controllers.routes
 import pages.*
 import models.*
+import models.DirectDebitSource.{CT, MGD, SA}
 
 @Singleton
 class Navigator @Inject()() {
@@ -29,8 +30,8 @@ class Navigator @Inject()() {
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
-    case DirectDebitSourcePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
-    case _ => _ => routes.IndexController.onPageLoad()
+    case DirectDebitSourcePage => checkDirectDebitSource
+    case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
@@ -57,5 +58,12 @@ class Navigator @Inject()() {
         }
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
+  private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
+    userAnswers
+      .get(DirectDebitSourcePage) match {
+          case Some(SA) | Some(CT) | Some(MGD) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+          case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+        }
 
 }
