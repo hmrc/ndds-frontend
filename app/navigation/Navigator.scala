@@ -57,7 +57,7 @@ class Navigator @Inject()() {
       case Some(service) if Set(
         DirectDebitSource.CT,
         DirectDebitSource.NIC,
-        DirectDebitSource.OL, // OL assumed to mean "Other"
+        DirectDebitSource.OL,
         DirectDebitSource.SDLT,
         DirectDebitSource.VAT
       ).contains(service) =>
@@ -68,11 +68,11 @@ class Navigator @Inject()() {
 
       case Some(DirectDebitSource.SA) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
-                       // ct or tc?
+                      
       case Some(DirectDebitSource.CT) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
 
-      case Some(_) => // add other logic ... for t14, t19
+      case Some(_) => 
         routes.IndexController.onPageLoad()
 
       case None =>

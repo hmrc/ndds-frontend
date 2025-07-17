@@ -31,7 +31,7 @@ class PaymentAmountFormProvider @Inject() extends Mappings {
         "paymentAmount.error.invalidNumeric",
         "paymentAmount.error.nonNumeric"
       )
-        .verifying("paymentAmount.error.moreThanTwoDecimals", amount => amount.scale <= 2)
+        .verifying("paymentAmount.error.moreThanTwoDecimals", amount => amount.scale <= DECIMAL_SCALE)
         .transform[BigDecimal](
           amount => amount.setScale(2, BigDecimal.RoundingMode.UNNECESSARY),
           identity
