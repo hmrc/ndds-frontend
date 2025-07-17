@@ -68,11 +68,11 @@ class Navigator @Inject()() {
 
       case Some(DirectDebitSource.SA) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
-                      
+
       case Some(DirectDebitSource.CT) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
 
-      case Some(_) => 
+      case Some(_) =>
         routes.IndexController.onPageLoad()
 
       case None =>
