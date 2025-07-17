@@ -20,7 +20,7 @@ import base.SpecBase
 import controllers.routes
 import pages.*
 import models.*
-import models.DirectDebitSource.{CT, NIC, PAYE, SA}
+import models.DirectDebitSource.{CT, MGD, NIC, PAYE, SA}
 
 class NavigatorSpec extends SpecBase {
 
@@ -76,6 +76,11 @@ class NavigatorSpec extends SpecBase {
       "must go from DirectDebitSourcePage to PaymentReferencePage if source is PAYE" in {
         val checkPage = userAnswers.setOrException(DirectDebitSourcePage, PAYE)
         navigator.nextPage(DirectDebitSourcePage, NormalMode, checkPage) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+      }
+
+      "must go from PaymentPlanTypePage to PaymentReferencePage for MGD" in {
+        val checkPage = userAnswers.setOrException(DirectDebitSourcePage, MGD)
+        navigator.nextPage(PaymentPlanTypePage, NormalMode, checkPage) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
       }
 
     }

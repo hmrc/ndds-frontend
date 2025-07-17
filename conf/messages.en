@@ -155,10 +155,8 @@ paymentPlanType.title = What type of payment plan are you selecting?
 paymentPlanType.heading = What type of payment plan are you selecting?
 paymentPlanType.singlePayment = A single payment
 paymentPlanType.variablePaymentPlan = A variable payment plan
-paymentPlanType.budgetPaymentPlan = A budget payment plan
-paymentPlanType.taxCreditRepaymentPlan = A Tax Credit repayment plan
 paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
-paymentPlanType.error.required = Select paymentPlanType
+paymentPlanType.error.required = Select Payment Plan Type
 paymentPlanType.change.hidden = PaymentPlanType
 
 paymentReference.title = What is your payment reference?

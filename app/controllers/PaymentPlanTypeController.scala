@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.PaymentPlanTypeFormProvider
 
 import javax.inject.Inject
-import models.Mode
+import models.{Mode, UserAnswers}
 import navigation.Navigator
 import pages.PaymentPlanTypePage
 import play.api.Logging
@@ -38,7 +38,6 @@ class PaymentPlanTypeController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
                                        formProvider: PaymentPlanTypeFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentPlanTypeView
@@ -46,19 +45,17 @@ class PaymentPlanTypeController @Inject()(
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-
-      val preparedForm = request.userAnswers.get(PaymentPlanTypePage) match {
+      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val preparedForm = answers.get(PaymentPlanTypePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
-
-      logger.info("Type of Payment Plan page loaded")
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -68,7 +65,7 @@ class PaymentPlanTypeController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PaymentPlanTypePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentPlanTypePage, mode, updatedAnswers))
       )
