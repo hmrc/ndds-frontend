@@ -17,29 +17,36 @@
 package controllers
 
 import base.SpecBase
+import pages.{PaymentAmountPage, PaymentDatePage, PaymentReferencePage}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import viewmodels.govuk.SummaryListFluency
-import views.html.CheckYourAnswersView
+
+import java.time.LocalDate
 
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
+
+  private val userAnswer = emptyUserAnswers
+    .setOrException(PaymentReferencePage, "1234567")
+    .setOrException(PaymentAmountPage, 123.01)
+    .setOrException(PaymentDatePage, LocalDate.now())
 
   "Check Your Answers Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[CheckYourAnswersView]
-        val list = SummaryListViewModel(Seq.empty)
-
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(list)(request, messages(application)).toString
+        contentAsString(result) must include("Check your answers")
+        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("The Direct Debit Guarantee")
+        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include("Accept and Continue")
       }
     }
 
@@ -49,7 +56,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER

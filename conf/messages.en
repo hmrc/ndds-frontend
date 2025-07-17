@@ -247,6 +247,17 @@ totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & C
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
+checkYourAnswers.h2 = Payment Plan details
+checkYourAnswers.p1 = Pay HM Revenue & Revenue & Custom (HMRC) Direct Debits from the account listed in this instruction. This instruction is protected by the Direct Debit Guarantee.
+checkYourAnswers.h3 = The Direct Debit Guarantee
+checkYourAnswers.p2 = This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.
+checkYourAnswers.p3 = If there are any changes to the amount, date or frequency of your Direct Debit HM Revenue & Customs will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HM Revenue & Customs to collect a payment, confirmation of the amount and date will be given to you at the time of the request.
+checkYourAnswers.p4 = If an error is made in the payment of your Direct Debit by HM Revenue & Customs or your bank or building society you are entitled to a full and immediate refund of the amount paid from your bank or building society.
+checkYourAnswers.p5 = If you receive a refund you are not entitled to, you must pay it back when HM Revenue & Customs asks you to.
+checkYourAnswers.p6 = You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us.
+checkYourAnswers.p7 = By accepting, I understand that this instruction may remain with HMRC and, if so, details will be passed electronically to my Bank/Building Society from Date of Issue
+
+
 checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation
