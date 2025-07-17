@@ -21,12 +21,13 @@ import play.api.mvc.Call
 import controllers.routes
 import pages.*
 import models.*
-
+import models.DirectDebitSource._
 @Singleton
 class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case PaymentReferencePage => _ => routes.YearEndAndMonthController.onPageLoad(NormalMode)
+    case PaymentReferencePage => userAnswers => checkPaymentReferenceLogic(userAnswers)
+    case PaymentAmountPage => _ => routes.IndexController.onPageLoad()
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
@@ -47,6 +48,39 @@ class Navigator @Inject()() {
       checkRouteMap(page)(userAnswers)
   }
 
+
+  private def checkPaymentReferenceLogic(userAnswers: UserAnswers): Call = {
+    val serviceOpt: Option[DirectDebitSource] = userAnswers.get(DirectDebitSourcePage)
+    val planTypeOpt: Option[PaymentPlanType] = userAnswers.get(PaymentPlanTypePage)
+
+    serviceOpt match {
+      case Some(service) if Set(
+        DirectDebitSource.CT,
+        DirectDebitSource.NIC,
+        DirectDebitSource.OL,
+        DirectDebitSource.SDLT,
+        DirectDebitSource.VAT
+      ).contains(service) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+
+      case Some(DirectDebitSource.MGD) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+
+      case Some(DirectDebitSource.SA) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+
+      case Some(DirectDebitSource.CT) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+
+      case Some(_) =>
+        routes.IndexController.onPageLoad()
+
+      case None =>
+        routes.JourneyRecoveryController.onPageLoad()
+    }
+  }
+
+
   private def checkBankDetails(userAnswers: UserAnswers): Call =
     userAnswers
       .get(BankDetailsCheckYourAnswerPage)
@@ -58,5 +92,6 @@ class Navigator @Inject()() {
         }
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
 
 }

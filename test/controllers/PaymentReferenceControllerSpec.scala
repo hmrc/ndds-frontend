@@ -18,16 +18,16 @@ package controllers
 
 import base.SpecBase
 import forms.PaymentReferenceFormProvider
-import models.{NormalMode, UserAnswers}
+import models.{DirectDebitSource, NormalMode, PaymentPlanType, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.PaymentReferencePage
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PaymentReferencePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.PaymentReferenceView
 
@@ -125,18 +125,20 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to the next page when valid data is submitted even if no existing data is found" in {
+      val userAnswers = UserAnswers("id")
+        .set(DirectDebitSourcePage, DirectDebitSource.CT).success.value
+        .set(PaymentPlanTypePage, PaymentPlanType.ASinglePayment).success.value
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, paymentReferenceRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+        val request = FakeRequest(POST, paymentReferenceRoute)
+          .withFormUrlEncodedBody(("value", "123.00"))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustEqual routes.PaymentAmountController.onPageLoad(NormalMode).url
       }
     }
   }

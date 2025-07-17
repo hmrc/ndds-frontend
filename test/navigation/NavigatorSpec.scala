@@ -61,9 +61,45 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(DirectDebitSourcePage, NormalMode, userAnswers) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
       }
 
-      "must go from PaymentReferencePage to YearEndAndMonthController" in {
-        navigator.nextPage(PaymentReferencePage, NormalMode, UserAnswers("id")) mustBe routes.YearEndAndMonthController.onPageLoad(NormalMode)
+      "must go from PaymentReferencePage to PaymentAmountController for CT, NIC, Other, SDLT, VAT" in {
+        val validSources = Seq(DirectDebitSource.CT, DirectDebitSource.NIC, DirectDebitSource.OL, DirectDebitSource.SDLT, DirectDebitSource.VAT)
+
+        validSources.foreach { source =>
+          val ua = UserAnswers("id").set(DirectDebitSourcePage, source).success.value
+          navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+            routes.PaymentAmountController.onPageLoad(NormalMode)
+        }
       }
+
+      "must go from PaymentReferencePage to PaymentAmountController for MGD, SA, CT with ASinglePayment" in {
+        val services = Seq(DirectDebitSource.MGD, DirectDebitSource.SA, DirectDebitSource.CT)
+
+        services.foreach { service =>
+          val ua = UserAnswers("id")
+            .set(DirectDebitSourcePage, service).success.value
+            .set(PaymentPlanTypePage, PaymentPlanType.ASinglePayment).success.value
+
+          navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+            routes.PaymentAmountController.onPageLoad(NormalMode)
+        }
+      }
+
+      "must go from PaymentReferencePage to UnderConstructionController for MGD with VariablePaymentPlan" in {
+        val ua = UserAnswers("id")
+          .set(DirectDebitSourcePage, DirectDebitSource.MGD).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.AVariablePaymentPlan).success.value
+
+        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+          routes.IndexController.onPageLoad()
+      }
+
+      "must go from PaymentReferencePage to JourneyRecoveryController if DirectDebitSource is missing" in {
+        val ua = UserAnswers("id") // No DirectDebitSourcePage set
+
+        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+          routes.JourneyRecoveryController.onPageLoad()
+      }
+
 
     }
 

@@ -16,12 +16,14 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.PaymentAmountFormProvider
+
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.PaymentAmountPage
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -42,12 +44,12 @@ class PaymentAmountController @Inject()(
                                          view: PaymentAmountView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
+  val form: Form[BigDecimal] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-
-      val preparedForm = request.userAnswers.get(PaymentAmountPage) match {
+      val answers = request.userAnswers.getOrElse(models.UserAnswers(request.userId))
+      val preparedForm = answers.get(PaymentAmountPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -55,7 +57,7 @@ class PaymentAmountController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -64,7 +66,7 @@ class PaymentAmountController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentAmountPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(models.UserAnswers(request.userId)).set(PaymentAmountPage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentAmountPage, mode, updatedAnswers))
       )
