@@ -27,7 +27,7 @@ class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case PaymentReferencePage => userAnswers => checkPaymentReferenceLogic(userAnswers)
-    case PaymentAmountPage => _ => routes.UnderConstructionController.onPageLoad
+    case PaymentAmountPage => _ => routes.IndexController.onPageLoad()
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
@@ -73,7 +73,7 @@ class Navigator @Inject()() {
         routes.PaymentAmountController.onPageLoad(NormalMode)
 
       case Some(_) => // add other logic ... for t14, t19
-        routes.UnderConstructionController.onPageLoad
+        routes.IndexController.onPageLoad()
 
       case None =>
         routes.JourneyRecoveryController.onPageLoad()

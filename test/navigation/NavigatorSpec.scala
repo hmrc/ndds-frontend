@@ -90,7 +90,7 @@ class NavigatorSpec extends SpecBase {
           .set(PaymentPlanTypePage, PaymentPlanType.AVariablePaymentPlan).success.value
 
         navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
-          routes.UnderConstructionController.onPageLoad
+          routes.IndexController.onPageLoad()
       }
 
       "must go from PaymentReferencePage to JourneyRecoveryController if DirectDebitSource is missing" in {
