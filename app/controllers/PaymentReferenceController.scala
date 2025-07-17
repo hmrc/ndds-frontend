@@ -36,7 +36,6 @@ class PaymentReferenceController @Inject()(
                                         navigator: Navigator,
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
                                         formProvider: PaymentReferenceFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
                                         view: PaymentReferenceView
