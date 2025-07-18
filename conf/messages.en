@@ -138,13 +138,28 @@ directDebitSource.title = Where do you need to make direct debit payment?
 directDebitSource.heading = Where do you need to make direct debit payment?
 directDebitSource.checkYourAnswersLabel = Where do you need to make direct debit payment?
 directDebitSource.ct = Corporation Tax (CT)
+
+
 directDebitSource.mgd = Machine Games Duty (MGD)
+directDebitSource.mgd.hint = For Machine Games Duty payments
+
 directDebitSource.nic = National Insurance Contributions (NIC)
+directDebitSource.nic.hint = For National Insurance Contributions payments
+
 directDebitSource.otherLiability = Other Liability
+directDebitSource.otherLiability.hint = For other types of liability
+
 directDebitSource.paye = Pay As Your Earn (PAYE)
+directDebitSource.paye.hint = For PAYE payments
+
 directDebitSource.sa = Self Assessment (SA)
+directDebitSource.sa.hint = For Self Assessment payments
+
 directDebitSource.sdlt = Stamp Duty Land Tax (SDLT)
+directDebitSource.sdlt.hint = For Stamp Duty Land Tax payments
+
 directDebitSource.vat = Value Added Tax (VAT)
+directDebitSource.vat.hint = For VAT payments
 directDebitSource.error.required = Please select one option.
 directDebitSource.change.hidden = DirectDebitSource
 
@@ -251,6 +266,18 @@ checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation
+directDebitConfirmation.panel.title = Direct Debit set up
+directDebitConfirmation.successMessage = Your direct debit payment was successful.
+directDebitConfirmation.panel.body = <strong>{0}</strong>
+directDebitConfirmation.p1 = Make a note of your direct debit reference <strong>{0}</strong> and service user number <strong>{1}</strong> <br/> Download, save or print your confirmation..
+directDebitConfirmation.h2 = What you need to do
+directDebitConfirmation.printingHelp.h2 = Download your confirmation
+directDebitConfirmation.printSafari = If you are using Safari, confirm the download when asked through the popup window. Tap the arrow icon next to your Safari address bar to access your download files. You can then print your form.
+directDebitConfirmation.printChromeFirefoxEdge = If you are using Google Chrome or Firefox, choose the destination drop-down on the PDF and then select your required option from the list. If you are using Microsoft Edge, you will need to choose the printer drop-down menu on the PDF and then choose your required option.
+directDebitConfirmation.printNoPrinter = If you do not own a printer, your local library may offer printing services for a small fee, or search online for a printing store.
+directDebitConfirmation.downloadButton = Download confirmation
+directDebitConfirmation.pleaseNote = <strong>Please note:</strong> Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
+
 
 bankDetailsCheckYourAnswer.title = Check your answers
 bankDetailsCheckYourAnswer.heading = Check your answers
