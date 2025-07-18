@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.mappings.Mappings
+import forms.mappings.{DateFormat, Mappings}
 import play.api.data.Form
 import play.api.i18n.Messages
 
@@ -24,14 +24,20 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 class PaymentDateFormProvider @Inject() extends Mappings {
-
+val dateFormats: Seq[DateFormat] = Seq(
+  DateFormat(dateType = "day", errorKey = "paymentDate.error.date", regex = "^([1-9]|0[1-9]|1[0-9]|2[0-9]|3[0-1])$"),
+  DateFormat(dateType = "month", errorKey = "paymentDate.error.date", regex = "^(0?[1-9]|1[0-2])$"),
+  DateFormat(dateType = "year", errorKey = "paymentDate.error.date", regex = "^[0-9]{4}$")
+)
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
-      "value" -> localDate(
+      "value" -> customPaymentDate(
         invalidKey     = "paymentDate.error.invalid",
         allRequiredKey = "paymentDate.error.required.all",
         twoRequiredKey = "paymentDate.error.required.two",
-        requiredKey    = "paymentDate.error.required"
+        requiredKey    = "paymentDate.error.required",
+        dateFormats = dateFormats
+
       )
     )
 }

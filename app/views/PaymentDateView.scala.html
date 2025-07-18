@@ -14,15 +14,17 @@
  * limitations under the License.
  *@
 
+@import views.html.components._
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
-    govukButton: GovukButton
+    govukButton: GovukButton,
 )
 
-@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, dateTime: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("paymentDate.title"))) {
 
@@ -37,7 +39,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("paymentDate.heading")).asPageHeading()
             )
-            .withHint(HintViewModel(messages("paymentDate.hint")))
+            .withHint(HintViewModel(HtmlContent(messages("paymentDate.hint", dateTime, dateTime))))
         )
 
         @govukButton(

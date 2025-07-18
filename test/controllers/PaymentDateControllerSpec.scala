@@ -16,8 +16,7 @@
 
 package controllers
 
-import java.time.{LocalDate, ZoneOffset}
-
+import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import base.SpecBase
 import forms.PaymentDateFormProvider
 import models.{NormalMode, UserAnswers}
@@ -30,10 +29,11 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.PaymentDateView
 
+import java.time.format.DateTimeFormatter
 import scala.concurrent.Future
 
 class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
@@ -50,6 +50,12 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   lazy val paymentDateRoute = routes.PaymentDateController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers = UserAnswers(userAnswersId)
+  val fixedInstant = Instant.parse("2024-07-17T00:00:00Z")
+  val fixedClock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
+
+  val date = LocalDateTime.now(fixedClock)
+  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/mm/yyyy")
+  private val formattedDate = date.format(formatter)
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, paymentDateRoute)
@@ -57,16 +63,19 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, paymentDateRoute)
       .withFormUrlEncodedBody(
-        "value.day"   -> validAnswer.getDayOfMonth.toString,
-        "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year"  -> validAnswer.getYear.toString
+        "value.day"   -> "1",
+        "value.month" -> "02",
+        "value.year"  -> "2025"
       )
 
   "paymentDate Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[Clock].toInstance(fixedClock))
+        .build()
+
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -74,7 +83,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentDateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, formattedDate)(getRequest(), messages(application)).toString
       }
     }
 
@@ -82,7 +91,9 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswers = UserAnswers(userAnswersId).set(PaymentDatePage, validAnswer).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[Clock].toInstance(fixedClock))
+        .build()
 
       running(application) {
         val view = application.injector.instanceOf[PaymentDateView]
@@ -90,7 +101,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate)(getRequest(), messages(application)).toString
       }
     }
 
@@ -118,7 +129,9 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[Clock].toInstance(fixedClock))
+        .build()
 
       val request =
         FakeRequest(POST, paymentDateRoute)
@@ -132,7 +145,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate)(request, messages(application)).toString
       }
     }
 
