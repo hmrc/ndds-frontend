@@ -162,10 +162,10 @@ paymentPlanType.change.hidden = PaymentPlanType
 
 paymentReference.title = What is your payment reference?
 paymentReference.heading = What is your payment reference?
-paymentReference.checkYourAnswersLabel = paymentReference
+paymentReference.checkYourAnswersLabel = Payment reference
 paymentReference.error.required = Please enter a payment reference.
-paymentReference.error.length = paymentReference must be 100 characters or less
-paymentReference.change.hidden = paymentReference
+paymentReference.error.length = Payment reference must be 100 characters or less
+paymentReference.change.hidden = Payment reference
 
 paymentAmount.title = What amount do you want to pay?
 paymentAmount.heading = What amount do you want to pay?
@@ -180,13 +180,13 @@ paymentAmount.change.hidden = paymentAmount
 paymentDate.title = What date are you making this payment?
 paymentDate.heading = What date are you making this payment?
 paymentDate.hint = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account.<br><br>The payment date must be within the next 12 months.<br><br>Please note: If your payment is late you may be liable to pay interest and/or surcharge.<br> <br> The earliest date you can enter as your payment date is {0} <br><br> For example, {1}
-paymentDate.checkYourAnswersLabel = paymentDate
+paymentDate.checkYourAnswersLabel = Payment date
 paymentDate.error.required.all = Enter the payment date
 paymentDate.error.required.two = The payment date must include {0} and {1}
 paymentDate.error.required = The payment date must include {0}
 paymentDate.error.invalid = Enter a real payment date
 paymentDate.error.date  = Please enter a valid date.
-paymentDate.change.hidden = paymentDate
+paymentDate.change.hidden = Payment date
 
 planStartDate.title = What date are you starting this payment plan?
 planStartDate.heading = What date are you starting this payment plan?
@@ -252,6 +252,17 @@ totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & C
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
+checkYourAnswers.h2 = Payment Plan details
+checkYourAnswers.p1 = Pay HM Revenue & Revenue & Custom (HMRC) Direct Debits from the account listed in this instruction. This instruction is protected by the Direct Debit Guarantee.
+checkYourAnswers.h3 = The Direct Debit Guarantee
+checkYourAnswers.p2 = This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.
+checkYourAnswers.p3 = If there are any changes to the amount, date or frequency of your Direct Debit HM Revenue & Customs will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HM Revenue & Customs to collect a payment, confirmation of the amount and date will be given to you at the time of the request.
+checkYourAnswers.p4 = If an error is made in the payment of your Direct Debit by HM Revenue & Customs or your bank or building society you are entitled to a full and immediate refund of the amount paid from your bank or building society.
+checkYourAnswers.p5 = If you receive a refund you are not entitled to, you must pay it back when HM Revenue & Customs asks you to.
+checkYourAnswers.p6 = You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us.
+checkYourAnswers.p7 = By accepting, I understand that this instruction may remain with HMRC and, if so, details will be passed electronically to my Bank/Building Society from Date of Issue <strong>{0}</strong>.
+
+
 checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation

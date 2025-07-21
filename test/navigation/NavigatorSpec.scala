@@ -111,6 +111,16 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(PaymentReferencePage, NormalMode, userAnswers) mustBe
           routes.JourneyRecoveryController.onPageLoad()
       }
+      "go from PaymentAmountPage to PaymentDatePage" in {
+        val sources = Seq(MGD, SA, TC)
+        sources.foreach { source =>
+          val ua = userAnswers
+            .set(DirectDebitSourcePage, source).success.value
+            .set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
+          navigator.nextPage(PaymentAmountPage, NormalMode, ua) mustBe
+            routes.PaymentDateController.onPageLoad(NormalMode)
+        }
+      }
 
 //      "must go from PaymentReferencePage to PaymentsFrequencyPage for SA with BudgetPaymentPlan" in {
 //        val ua = userAnswers

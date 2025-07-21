@@ -29,7 +29,7 @@ class Navigator @Inject()() {
   private val normalRoutes: Page => UserAnswers => Call = {
     case PaymentDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentReferencePage => userAnswers => checkPaymentReferenceLogic(userAnswers)
-    case PaymentAmountPage => _ => routes.IndexController.onPageLoad()
+    case PaymentAmountPage => _ => routes.PaymentDateController.onPageLoad(NormalMode)
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
@@ -41,6 +41,9 @@ class Navigator @Inject()() {
   private val checkRouteMap: Page => UserAnswers => Call = {
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
+    case PaymentReferencePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentAmountPage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 

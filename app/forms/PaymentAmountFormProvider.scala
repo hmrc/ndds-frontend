@@ -31,13 +31,14 @@ class PaymentAmountFormProvider @Inject() extends Mappings {
         "paymentAmount.error.invalidNumeric",
         "paymentAmount.error.nonNumeric"
       )
-        .verifying("paymentAmount.error.moreThanTwoDecimals", amount => amount.scale <= DECIMAL_SCALE)
         .transform[BigDecimal](
-          amount => amount.setScale(2, BigDecimal.RoundingMode.UNNECESSARY),
+          _.setScale(2, BigDecimal.RoundingMode.HALF_UP),
           identity
         )
+        .verifying("paymentAmount.error.moreThanTwoDecimals", amount => amount.scale <= DECIMAL_SCALE)
         .verifying(minimumValue[BigDecimal](MIN_AMOUNT, "paymentAmount.error.max.min.range"))
         .verifying(maximumValue[BigDecimal](MAX_AMOUNT, "paymentAmount.error.max.min.range"))
     )
+
 }
 
