@@ -52,8 +52,6 @@ class DirectDebitSourceController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
-
-      logger.info("*********Direct debit source page loaded...")
       Ok(view(preparedForm, mode))
   }
 
@@ -62,7 +60,7 @@ class DirectDebitSourceController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          logger.warn(s"Bad Request, error: ${formWithErrors}")
+          logger.warn(s"Bad Request validation error: ${formWithErrors}")
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>

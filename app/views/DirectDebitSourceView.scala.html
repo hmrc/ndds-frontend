@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import viewmodels.govuk.hint.HintViewModel
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
@@ -37,7 +39,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("directDebitSource.heading")).asPageHeading(),
                 items  = DirectDebitSource.options
-            )
+            ).withHint(HintViewModel(messages("directDebitSource.hint")))
         )
 
         @govukButton(

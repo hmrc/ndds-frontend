@@ -38,7 +38,6 @@ class PaymentAmountController @Inject()(
                                          navigator: Navigator,
                                          identify: IdentifierAction,
                                          getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
                                          formProvider: PaymentAmountFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: PaymentAmountView
