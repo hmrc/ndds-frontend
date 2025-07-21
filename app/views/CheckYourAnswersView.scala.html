@@ -21,7 +21,6 @@
     h2:Header2,
     h3:Header3,
     paragraph: Paragraph,
-    paragraphDate: ParagraphDate,
     layout: templates.Layout,
     govukSummaryList: GovukSummaryList,
     govukButton: GovukButton,
@@ -43,7 +42,8 @@
             @paragraph("checkYourAnswers.p4")
             @paragraph("checkYourAnswers.p5")
             @paragraph("checkYourAnswers.p6")
-            @paragraphDate("checkYourAnswers.p7", currentDate)
+            @paragraph(messages("checkYourAnswers.p7", currentDate))
+
 
         @govukButton(
             ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
