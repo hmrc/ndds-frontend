@@ -27,6 +27,7 @@ import models.DirectDebitSource.*
 class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
+    case PaymentDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentReferencePage => userAnswers => checkPaymentReferenceLogic(userAnswers)
     case PaymentAmountPage => _ => routes.IndexController.onPageLoad()
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)

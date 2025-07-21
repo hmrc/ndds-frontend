@@ -130,6 +130,10 @@ class NavigatorSpec extends SpecBase {
 //          routes.TotalAmountDueController.onPageLoad(NormalMode)
 //      }
 
+
+      "must go from a PaymentDatePage to CheckYourAnswersPage" in {
+        navigator.nextPage(PaymentDatePage, NormalMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
     }
 
     "in Check mode" - {
