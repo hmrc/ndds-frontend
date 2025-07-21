@@ -26,20 +26,50 @@ object PaymentPlanType extends Enumerable.Implicits {
 
   case object SinglePayment extends WithName("singlePayment") with PaymentPlanType
   case object VariablePaymentPlan extends WithName("variablePaymentPlan") with PaymentPlanType
+  case object BudgetPaymentPlan extends WithName("budgetPaymentPlan") with PaymentPlanType
+  case object TaxCreditRepaymentPlan extends WithName("taxCreditRepaymentPlan") with PaymentPlanType
 
-  val values: Seq[PaymentPlanType] = Seq(
+  val values1: Seq[PaymentPlanType] = Seq(
     SinglePayment, VariablePaymentPlan
   )
 
-  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {
-    case (value, index) =>
+  val values2: Seq[PaymentPlanType] = Seq(
+    SinglePayment, BudgetPaymentPlan
+  )
+
+  val values3: Seq[PaymentPlanType] = Seq(
+    SinglePayment, TaxCreditRepaymentPlan
+  )
+
+  def options1(implicit messages: Messages): Seq[RadioItem] = values1.zipWithIndex.map {
+    case (value1, index) =>
       RadioItem(
-        content = Text(messages(s"paymentPlanType.${value.toString}")),
-        value   = Some(value.toString),
-        id      = Some(s"value_$index")
+        content = Text(messages(s"paymentPlanType.${value1.toString}")),
+        value   = Some(value1.toString),
+        id      = Some(s"value1_$index")
       )
   }
 
-  implicit val enumerable: Enumerable[PaymentPlanType] =
-    Enumerable(values.map(v => v.toString -> v): _*)
+  def options2(implicit messages: Messages): Seq[RadioItem] = values2.zipWithIndex.map {
+    case (value2, index) =>
+      RadioItem(
+        content = Text(messages(s"paymentPlanType.${value2.toString}")),
+        value   = Some(value2.toString),
+        id      = Some(s"value2_$index")
+      )
+  }
+
+  def options3(implicit messages: Messages): Seq[RadioItem] = values3.zipWithIndex.map {
+    case (value3, index) =>
+      RadioItem(
+        content = Text(messages(s"paymentPlanType.${value3.toString}")),
+        value   = Some(value3.toString),
+        id      = Some(s"value3_$index")
+      )
+  }
+
+  implicit val enumerable1: Enumerable[PaymentPlanType] =
+    Enumerable(values1.map(v => v.toString -> v): _*)
+//    Enumerable(values2.map(v => v.toString -> v): _*)
+//    Enumerable(values3.map(v => v.toString -> v): _*)
 }

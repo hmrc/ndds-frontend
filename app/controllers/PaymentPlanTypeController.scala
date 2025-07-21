@@ -20,9 +20,9 @@ import controllers.actions.*
 import forms.PaymentPlanTypeFormProvider
 
 import javax.inject.Inject
-import models.{Mode, UserAnswers}
+import models.{DirectDebitSource, Mode, UserAnswers}
 import navigation.Navigator
-import pages.PaymentPlanTypePage
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -48,20 +48,25 @@ class PaymentPlanTypeController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val selectedAnswers = answers.get(DirectDebitSourcePage)
+      logger.info(s"Selected direct debit source: ${selectedAnswers}")
       val preparedForm = answers.get(PaymentPlanTypePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(view(preparedForm, mode))
+      Ok(view(preparedForm, mode, selectedAnswers))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
+      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val selectedAnswers = answers.get(DirectDebitSourcePage)
+      logger.info(s"Selected onsubmit direct debit source: ${selectedAnswers}")
 
       form.bindFromRequest().fold(
         formWithErrors =>
           logger.warn(s"Validation error: ${formWithErrors}")
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers))),
 
         value =>
           for {
