@@ -33,7 +33,7 @@ class PaymentAmountFormProvider @Inject() extends Mappings {
       )
         .verifying("paymentAmount.error.moreThanTwoDecimals", amount => amount.scale <= DECIMAL_SCALE)
         .transform[BigDecimal](
-          amount => amount.setScale(2, BigDecimal.RoundingMode.UNNECESSARY),
+          amount => amount.setScale(2, BigDecimal.RoundingMode.HALF_UP),
           identity
         )
         .verifying(minimumValue[BigDecimal](MIN_AMOUNT, "paymentAmount.error.max.min.range"))

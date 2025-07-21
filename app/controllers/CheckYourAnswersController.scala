@@ -18,6 +18,7 @@ package controllers
 
 import com.google.inject.Inject
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -34,11 +35,11 @@ class CheckYourAnswersController @Inject()  (
                                             requireData: DataRequiredAction,
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView
-                                          ) extends FrontendBaseController with I18nSupport{
+                                          ) extends FrontendBaseController with I18nSupport with Logging{
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-
+      logger.info("Display bank details confirmation page")
       val list = SummaryListViewModel(
         rows = Seq(
           PaymentReferenceSummary.row(request.userAnswers),
@@ -48,5 +49,9 @@ class CheckYourAnswersController @Inject()  (
       )
       val currentDate = DateTimeFormats.formattedCurrentDate
       Ok(view(list, currentDate))
+  }
+
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData) {
+    Redirect(routes.DirectDebitConfirmationController.onPageLoad())
   }
 }

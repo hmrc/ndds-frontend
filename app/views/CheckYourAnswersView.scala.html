@@ -24,30 +24,30 @@
     paragraphDate: ParagraphDate,
     layout: templates.Layout,
     govukSummaryList: GovukSummaryList,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    formHelper: FormWithCSRF,
 )
 
 @(list: SummaryList, currentDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
+@formHelper(action = routes.CheckYourAnswersController.onSubmit(), Symbol("autoComplete") -> "off") {
+            @header1("checkYourAnswers.heading")
+            @h2("checkYourAnswers.h2")
+            @govukSummaryList(list)
+            @paragraph("checkYourAnswers.p1")
+            @h3("checkYourAnswers.h3")
+            @paragraph("checkYourAnswers.p2")
+            @paragraph("checkYourAnswers.p3")
+            @paragraph("checkYourAnswers.p4")
+            @paragraph("checkYourAnswers.p5")
+            @paragraph("checkYourAnswers.p6")
+            @paragraphDate("checkYourAnswers.p7", currentDate)
 
-        @header1("checkYourAnswers.heading")
-        @h2("checkYourAnswers.h2")
-        @govukSummaryList(list)
-        @paragraph("checkYourAnswers.p1")
-        @h3("checkYourAnswers.h3")
-        @paragraph("checkYourAnswers.p2")
-        @paragraph("checkYourAnswers.p3")
-        @paragraph("checkYourAnswers.p4")
-        @paragraph("checkYourAnswers.p5")
-        @paragraph("checkYourAnswers.p6")
-        @paragraphDate("checkYourAnswers.p7", currentDate)
+        @govukButton(
+            ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
+        )
 
-
-
-    @govukButton(
-        ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
-    )
-
+    }
 }

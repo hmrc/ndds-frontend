@@ -26,10 +26,11 @@ import java.time.LocalDate
 
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
+  private val fixedDate = LocalDate.of(2025, 7, 19)
   private val userAnswer = emptyUserAnswers
     .setOrException(PaymentReferencePage, "1234567")
     .setOrException(PaymentAmountPage, 123.01)
-    .setOrException(PaymentDatePage, LocalDate.now())
+    .setOrException(PaymentDatePage, fixedDate)
 
   "Check Your Answers Controller" - {
 
@@ -46,6 +47,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment Plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include("Payment date")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("£123.01")
         contentAsString(result) must include("Accept and Continue")
       }
     }
@@ -62,5 +66,19 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
+
+    "must redirect to the confirmation page for a POST" in {
+
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+      }
+    }
+
   }
 }
