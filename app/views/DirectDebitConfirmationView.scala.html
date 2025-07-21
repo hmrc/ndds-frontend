@@ -14,14 +14,50 @@
  * limitations under the License.
  *@
 
+@import views.html.components._
+
+
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        paragraph: Paragraph,
+        header2: Header2,
+        confirmationPanel: ConfirmationPanel,
+        mainButton: MainButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@()(referenceNumber: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("directDebitConfirmation.heading")</h1>
+    
+    @paragraph(messages("directDebitConfirmation.successMessage"))
+
+    @confirmationPanel(
+      title = messages("directDebitConfirmation.panel.title"),
+      body = Html(messages("directDebitConfirmation.panel.body", referenceNumber)),
+      classes = "govuk-!-margin-bottom-9"
+    )
+
+    @paragraph(messages("directDebitConfirmation.pleaseNote"))
+
+    @header2("directDebitConfirmation.h2")
+
+    @paragraph(messages("directDebitConfirmation.p1", referenceNumber, "X00011111A"))
+    @header2("directDebitConfirmation.printingHelp.h2")
+    @paragraph(messages("directDebitConfirmation.printSafari"))
+    @paragraph(messages("directDebitConfirmation.printChromeFirefoxEdge"))
+    @paragraph(messages("directDebitConfirmation.printNoPrinter"))
+    
+    <div class="govuk-button-group">
+      @mainButton(
+        msg = "directDebitConfirmation.downloadButton",
+        href = Some("#"),
+      )
+      @mainButton(
+        msg = "site.continue",
+        href = Some("#"),
+        classes = "govuk-button--secondary"
+      )
+    </div> 
 }

@@ -37,7 +37,7 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[DirectDebitConfirmationView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view()("600002164")(request, messages(application)).toString
       }
     }
   }
