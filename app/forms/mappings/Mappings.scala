@@ -58,4 +58,13 @@ trait Mappings extends Formatters with Constraints {
                          nonNumericKey: String = "error.nonNumeric",
                          args: Seq[String] = Seq.empty): FieldMapping[BigDecimal] =
     of(currencyFormatter(requiredKey, invalidNumeric, nonNumericKey, args))
+
+  protected def customPaymentDate(
+                             invalidKey: String,
+                             allRequiredKey: String,
+                             twoRequiredKey: String,
+                             requiredKey: String,
+                             args: Seq[String] = Seq.empty,
+                             dateFormats:Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
+    of(new CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
 }
