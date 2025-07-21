@@ -16,16 +16,14 @@
 
 package viewmodels.checkAnswers
 
+import config.CurrencyFormatter.currencyFormat
 import controllers.routes
 import models.{CheckMode, UserAnswers}
 import pages.PaymentAmountPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
-
-import java.text.NumberFormat
-import java.util.Locale
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
 object PaymentAmountSummary {
 
@@ -33,16 +31,11 @@ object PaymentAmountSummary {
     answers.get(PaymentAmountPage).map { amount =>
       SummaryListRowViewModel(
         key     = "paymentAmount.checkYourAnswersLabel",
-        value   = ValueViewModel(formatCurrency(amount)),
+        value   = ValueViewModel(currencyFormat(amount)),
         actions = Seq(
           ActionItemViewModel("site.change", routes.PaymentAmountController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("paymentAmount.change.hidden"))
         )
       )
     }
-
-  private def formatCurrency(amount: BigDecimal): String = {
-    val formatter = NumberFormat.getCurrencyInstance(Locale.UK)
-    formatter.format(amount)
-  }
 }
