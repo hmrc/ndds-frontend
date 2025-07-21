@@ -137,38 +137,27 @@ bankApproval.heading = You need bank approval
 directDebitSource.title = Where do you need to make direct debit payment?
 directDebitSource.heading = Where do you need to make direct debit payment?
 directDebitSource.checkYourAnswersLabel = Where do you need to make direct debit payment?
+directDebitSource.hint = Select one option.
 directDebitSource.ct = Corporation Tax (CT)
-
-
 directDebitSource.mgd = Machine Games Duty (MGD)
-directDebitSource.mgd.hint = For Machine Games Duty payments
-
 directDebitSource.nic = National Insurance Contributions (NIC)
-directDebitSource.nic.hint = For National Insurance Contributions payments
-
+directDebitSource.nic.hint = A National Insurance contributions Deficiency Notice (NIC - DN) is issued to notify you of a potential shortfall in your NIC.
 directDebitSource.otherLiability = Other Liability
-directDebitSource.otherLiability.hint = For other types of liability
-
+directDebitSource.otherLiability.hint = There are a number of 'Other' types of tax and related charges that HM Revenue & Customs can collect online using the Direct Debit payments facility, for example, Investigation settlements and penalties. These have payment references beginning with ’X’.
 directDebitSource.paye = Pay As Your Earn (PAYE)
-directDebitSource.paye.hint = For PAYE payments
-
 directDebitSource.sa = Self Assessment (SA)
-directDebitSource.sa.hint = For Self Assessment payments
-
 directDebitSource.sdlt = Stamp Duty Land Tax (SDLT)
-directDebitSource.sdlt.hint = For Stamp Duty Land Tax payments
-
+directDebitSource.tc = Tax Credits (TC)
 directDebitSource.vat = Value Added Tax (VAT)
-directDebitSource.vat.hint = For VAT payments
 directDebitSource.error.required = Please select one option.
 directDebitSource.change.hidden = DirectDebitSource
 
 paymentPlanType.title = What type of payment plan are you selecting?
 paymentPlanType.heading = What type of payment plan are you selecting?
-paymentPlanType.aSinglePayment = A single payment
-paymentPlanType.aVariablePaymentPlan = A variable payment plan
+paymentPlanType.singlePayment = A single payment
+paymentPlanType.variablePaymentPlan = A variable payment plan
 paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
-paymentPlanType.error.required = Select paymentPlanType
+paymentPlanType.error.required = Please select one option.
 paymentPlanType.change.hidden = PaymentPlanType
 
 paymentReference.title = What is your payment reference?

@@ -21,7 +21,8 @@ import play.api.mvc.Call
 import controllers.routes
 import pages.*
 import models.*
-import models.DirectDebitSource._
+import models.DirectDebitSource.*
+
 @Singleton
 class Navigator @Inject()() {
 
@@ -32,8 +33,9 @@ class Navigator @Inject()() {
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
-    case DirectDebitSourcePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
-    case _ => _ => routes.IndexController.onPageLoad()
+    case DirectDebitSourcePage => checkDirectDebitSource
+    case PaymentPlanTypePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+    case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
@@ -49,38 +51,27 @@ class Navigator @Inject()() {
       checkRouteMap(page)(userAnswers)
   }
 
-
   private def checkPaymentReferenceLogic(userAnswers: UserAnswers): Call = {
-    val serviceOpt: Option[DirectDebitSource] = userAnswers.get(DirectDebitSourcePage)
-    val planTypeOpt: Option[PaymentPlanType] = userAnswers.get(PaymentPlanTypePage)
-
-    serviceOpt match {
-      case Some(service) if Set(
-        DirectDebitSource.CT,
-        DirectDebitSource.NIC,
-        DirectDebitSource.OL,
-        DirectDebitSource.SDLT,
-        DirectDebitSource.VAT
-      ).contains(service) =>
+    val sourceType = userAnswers.get(DirectDebitSourcePage)
+    val optPaymentType = userAnswers.get(PaymentPlanTypePage)
+    sourceType match {
+      case Some(OL) | Some(NIC) | Some(CT) | Some(SDLT) | Some(VAT) => routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
-
-      case Some(DirectDebitSource.MGD) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
+      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
-
-      case Some(DirectDebitSource.SA) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
+      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
-
-      case Some(DirectDebitSource.CT) if planTypeOpt.contains(PaymentPlanType.ASinglePayment) =>
-        routes.PaymentAmountController.onPageLoad(NormalMode)
-
-      case Some(_) =>
-        routes.IndexController.onPageLoad()
-
-      case None =>
-        routes.JourneyRecoveryController.onPageLoad()
+      case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.VariablePaymentPlan) =>
+        routes.PlanStartDateController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.PAYE) => routes.YearEndAndMonthController.onPageLoad(NormalMode)
+//      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.BudgetPaymentPlan) =>
+//        routes.PaymentsFrequencyController.onPageLoad(NormalMode)
+//      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPLan) =>
+//        routes.TotalAmountDueController.onPageLoad(NormalMode)
+      case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }
-
 
   private def checkBankDetails(userAnswers: UserAnswers): Call =
     userAnswers
@@ -93,5 +84,12 @@ class Navigator @Inject()() {
         }
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
+  private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
+    userAnswers
+      .get(DirectDebitSourcePage) match {
+          case Some(MGD) | Some(SA) | Some(TC) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+          case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+        }
 
 }

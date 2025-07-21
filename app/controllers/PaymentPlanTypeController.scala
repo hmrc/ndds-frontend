@@ -16,12 +16,14 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.PaymentPlanTypeFormProvider
+
 import javax.inject.Inject
-import models.Mode
+import models.{Mode, UserAnswers}
 import navigation.Navigator
 import pages.PaymentPlanTypePage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -36,35 +38,34 @@ class PaymentPlanTypeController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
                                        formProvider: PaymentPlanTypeFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentPlanTypeView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-
-      val preparedForm = request.userAnswers.get(PaymentPlanTypePage) match {
+      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val preparedForm = answers.get(PaymentPlanTypePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
-
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
         formWithErrors =>
+          logger.warn(s"Validation error: ${formWithErrors}")
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PaymentPlanTypePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentPlanTypePage, mode, updatedAnswers))
       )

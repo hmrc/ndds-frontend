@@ -127,7 +127,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to the next page when valid data is submitted even if no existing data is found" in {
       val userAnswers = UserAnswers("id")
         .set(DirectDebitSourcePage, DirectDebitSource.CT).success.value
-        .set(PaymentPlanTypePage, PaymentPlanType.ASinglePayment).success.value
+        .set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
