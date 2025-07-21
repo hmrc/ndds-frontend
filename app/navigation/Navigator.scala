@@ -65,10 +65,10 @@ class Navigator @Inject()() {
       case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.VariablePaymentPlan) =>
         routes.PlanStartDateController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.PAYE) => routes.YearEndAndMonthController.onPageLoad(NormalMode)
-//      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.BudgetPaymentPlan) =>
-//        routes.PaymentsFrequencyController.onPageLoad(NormalMode)
-//      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPLan) =>
-//        routes.TotalAmountDueController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.BudgetPaymentPlan) =>
+        routes.PaymentsFrequencyController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPlan) =>
+        routes.TotalAmountDueController.onPageLoad(NormalMode)
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }

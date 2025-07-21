@@ -112,24 +112,23 @@ class NavigatorSpec extends SpecBase {
           routes.JourneyRecoveryController.onPageLoad()
       }
 
-//      "must go from PaymentReferencePage to PaymentsFrequencyPage for SA with BudgetPaymentPlan" in {
-//        val ua = userAnswers
-//          .set(DirectDebitSourcePage, SA).success.value
-//          .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
-//
-//        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
-//          routes.PaymentsFrequencyController.onPageLoad(NormalMode)
-//      }
+      "must go from PaymentReferencePage to PaymentsFrequencyPage for SA with BudgetPaymentPlan" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, SA).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
 
-//      "must go from PaymentReferencePage to PaymentsFrequencyPage for TC with TaxCreditRepaymentPLan" in {
-//        val ua = userAnswers
-//          .set(DirectDebitSourcePage, TC).success.value
-//          .set(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPLan).success.value
-//
-//        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
-//          routes.TotalAmountDueController.onPageLoad(NormalMode)
-//      }
+        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+          routes.PaymentsFrequencyController.onPageLoad(NormalMode)
+      }
 
+      "must go from PaymentReferencePage to PaymentsFrequencyPage for TC with TaxCreditRepaymentPLan" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, TC).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan).success.value
+
+        navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
+          routes.TotalAmountDueController.onPageLoad(NormalMode)
+      }
 
       "must go from a PaymentDatePage to CheckYourAnswersPage" in {
         navigator.nextPage(PaymentDatePage, NormalMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()

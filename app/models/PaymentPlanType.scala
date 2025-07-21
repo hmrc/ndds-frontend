@@ -29,6 +29,11 @@ object PaymentPlanType extends Enumerable.Implicits {
   case object BudgetPaymentPlan extends WithName("budgetPaymentPlan") with PaymentPlanType
   case object TaxCreditRepaymentPlan extends WithName("taxCreditRepaymentPlan") with PaymentPlanType
 
+  // All values used for Enumerable mapping
+  val values: Seq[PaymentPlanType] = Seq(
+    SinglePayment, VariablePaymentPlan, BudgetPaymentPlan, TaxCreditRepaymentPlan
+  )
+
   val values1: Seq[PaymentPlanType] = Seq(
     SinglePayment, VariablePaymentPlan
   )
@@ -41,35 +46,23 @@ object PaymentPlanType extends Enumerable.Implicits {
     SinglePayment, TaxCreditRepaymentPlan
   )
 
-  def options1(implicit messages: Messages): Seq[RadioItem] = values1.zipWithIndex.map {
-    case (value1, index) =>
-      RadioItem(
-        content = Text(messages(s"paymentPlanType.${value1.toString}")),
-        value   = Some(value1.toString),
-        id      = Some(s"value1_$index")
-      )
-  }
+  def options(values: Seq[PaymentPlanType], prefix: String)(implicit messages: Messages): Seq[RadioItem] =
+    values.zipWithIndex.map {
+      case (value, index) =>
+        RadioItem(
+          content = Text(messages(s"paymentPlanType.${value.toString}")),
+          value = Some(value.toString),
+          id = Some(s"${prefix}_$index")
+        )
+    }
 
-  def options2(implicit messages: Messages): Seq[RadioItem] = values2.zipWithIndex.map {
-    case (value2, index) =>
-      RadioItem(
-        content = Text(messages(s"paymentPlanType.${value2.toString}")),
-        value   = Some(value2.toString),
-        id      = Some(s"value2_$index")
-      )
-  }
+  def options1(implicit messages: Messages): Seq[RadioItem] = options(values1, "value1")
 
-  def options3(implicit messages: Messages): Seq[RadioItem] = values3.zipWithIndex.map {
-    case (value3, index) =>
-      RadioItem(
-        content = Text(messages(s"paymentPlanType.${value3.toString}")),
-        value   = Some(value3.toString),
-        id      = Some(s"value3_$index")
-      )
-  }
+  def options2(implicit messages: Messages): Seq[RadioItem] = options(values2, "value2")
 
-  implicit val enumerable1: Enumerable[PaymentPlanType] =
-    Enumerable(values1.map(v => v.toString -> v): _*)
-//    Enumerable(values2.map(v => v.toString -> v): _*)
-//    Enumerable(values3.map(v => v.toString -> v): _*)
+  def options3(implicit messages: Messages): Seq[RadioItem] = options(values3, "value3")
+
+  implicit val enumerable: Enumerable[PaymentPlanType] =
+    Enumerable(values.map(v => v.toString -> v): _*)
+
 }

@@ -34,8 +34,6 @@ class PaymentPlanTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
 
       forAll(gen) {
         paymentPlanType =>
-          println(JsString(paymentPlanType.toString).validate[PaymentPlanType].asOpt.value)
-          println(s"paymentPlanType: ${paymentPlanType}")
           JsString(paymentPlanType.toString).validate[PaymentPlanType].asOpt.value mustEqual paymentPlanType
       }
     }

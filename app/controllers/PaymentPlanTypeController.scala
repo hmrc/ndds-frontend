@@ -49,7 +49,7 @@ class PaymentPlanTypeController @Inject()(
     implicit request =>
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
       val selectedAnswers = answers.get(DirectDebitSourcePage)
-      logger.info(s"Selected direct debit source: ${selectedAnswers}")
+
       val preparedForm = answers.get(PaymentPlanTypePage) match {
         case None => form
         case Some(value) => form.fill(value)
@@ -61,11 +61,10 @@ class PaymentPlanTypeController @Inject()(
     implicit request =>
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
       val selectedAnswers = answers.get(DirectDebitSourcePage)
-      logger.info(s"Selected onsubmit direct debit source: ${selectedAnswers}")
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          logger.warn(s"Validation error: ${formWithErrors}")
+          logger.warn(s"Payment plan validation error: ${formWithErrors}")
           Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers))),
 
         value =>
