@@ -40,6 +40,10 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(PersonalOrBusinessAccountPage, NormalMode, userAnswers) mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
       }
 
+      "must go from a PaymentFrequencyPage to RegularPaymentAmountPage" in {
+        navigator.nextPage(PaymentsFrequencyPage, NormalMode, userAnswers) mustBe routes.RegularPaymentAmountController.onPageLoad(NormalMode)
+      }
+
       "must go from YourBankDetailsPage to BankDetailsCheckYourAnswersPage" in {
         navigator.nextPage(YourBankDetailsPage, NormalMode, userAnswers) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
       }

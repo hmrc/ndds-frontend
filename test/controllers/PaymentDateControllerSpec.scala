@@ -54,7 +54,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   val fixedClock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
 
   val date = LocalDateTime.now(fixedClock)
-  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/mm/yyyy")
+  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
   private val formattedDate = date.format(formatter)
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
