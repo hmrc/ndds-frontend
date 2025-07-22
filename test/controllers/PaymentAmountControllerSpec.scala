@@ -124,7 +124,7 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.IndexController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.PaymentDateController.onPageLoad(NormalMode).url
       }
     }
   }

@@ -18,6 +18,7 @@ package utils
 
 import play.api.i18n.Lang
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -33,7 +34,10 @@ object DateTimeFormats {
   def dateTimeFormat()(implicit lang: Lang): DateTimeFormatter = {
     localisedDateTimeFormatters.getOrElse(lang.code, dateTimeFormatter)
   }
-
+  def formattedCurrentDate: String = {
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+    LocalDate.now().format(formatter)
+  }
   val dateTimeHintFormat: DateTimeFormatter =
     DateTimeFormatter.ofPattern("d M yyyy")
 }
