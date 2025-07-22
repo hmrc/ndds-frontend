@@ -41,6 +41,7 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
 
   val formProvider = new PaymentsFrequencyFormProvider()
   val form = formProvider()
+  lazy val backLinkRoute: Call = routes.PaymentReferenceController.onPageLoad(NormalMode)
 
   "PaymentsFrequency Controller" - {
 
@@ -56,7 +57,7 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentsFrequencyView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, backLinkRoute)(request, messages(application)).toString
       }
     }
 
@@ -74,7 +75,7 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(PaymentsFrequency.values.head), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(PaymentsFrequency.values.head), NormalMode, backLinkRoute)(request, messages(application)).toString
       }
     }
 
@@ -120,7 +121,7 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, backLinkRoute)(request, messages(application)).toString
       }
     }
 
