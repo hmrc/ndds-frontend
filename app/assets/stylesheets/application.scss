@@ -36,3 +36,34 @@
 .govuk-summary-list__row {
   border-bottom:none;
 }
+
+.extra-line-spacing {
+  line-height: 1.4;
+  margin-top: -17px;
+}
+.direct-debit-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.direct-debit-text {
+  flex: 1;
+}
+
+.direct-debit-logo img {
+  max-height: 60px;
+  height: auto;
+  width: auto;
+}
+
+.inline-logo {
+  max-height: 60px;
+  vertical-align: middle;
+  margin: 0.5em 0;
+  width: auto;
+  height: auto;
+}
+

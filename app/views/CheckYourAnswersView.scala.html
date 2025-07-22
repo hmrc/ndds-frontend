@@ -43,6 +43,15 @@
             @paragraph("checkYourAnswers.p5")
             @paragraph("checkYourAnswers.p6")
             @paragraph(messages("checkYourAnswers.p7", currentDate))
+            @paragraph("checkYourAnswers.p8")
+            <div class="govuk-body extra-line-spacing direct-debit-container">
+                <div class="direct-debit-text">
+                    @Html(messages("checkYourAnswers.p9"))
+                </div>
+                <div class="direct-debit-logo">
+                    <img src="@routes.Assets.versioned("images/logo.png")" alt="Direct Debit logo" />
+                </div>
+            </div>
 
 
         @govukButton(

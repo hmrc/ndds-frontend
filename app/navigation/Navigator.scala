@@ -35,6 +35,7 @@ class Navigator @Inject()() {
     case BankDetailsCheckYourAnswerPage => checkBankDetails
     case DirectDebitSourcePage => checkDirectDebitSource
     case PaymentPlanTypePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+    case PlanStartDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
@@ -44,6 +45,7 @@ class Navigator @Inject()() {
     case PaymentReferencePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentAmountPage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PlanStartDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 

@@ -23,7 +23,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
-import viewmodels.checkAnswers.{PaymentAmountSummary, PaymentDateSummary, PaymentReferenceSummary}
+import viewmodels.checkAnswers.{PaymentAmountSummary, PaymentDateSummary, PaymentReferenceSummary, PlanStartDateSummary}
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
 
@@ -45,6 +45,7 @@ class CheckYourAnswersController @Inject()  (
           PaymentReferenceSummary.row(request.userAnswers),
           PaymentAmountSummary.row(request.userAnswers),
           PaymentDateSummary.row(request.userAnswers),
+          PlanStartDateSummary.row(request.userAnswers),
         ).flatten
       )
       val currentDate = DateTimeFormats.formattedCurrentDate

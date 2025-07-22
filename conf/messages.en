@@ -191,12 +191,12 @@ paymentDate.change.hidden = Payment date
 planStartDate.title = What date are you starting this payment plan?
 planStartDate.heading = What date are you starting this payment plan?
 planStartDate.hint = For example, 12 11 2007.
-planStartDate.checkYourAnswersLabel = planStartDate
+planStartDate.checkYourAnswersLabel = Plan Start Date
 planStartDate.error.required.all = Enter the planStartDate
 planStartDate.error.required.two = The planStartDate must include {0} and {1}
 planStartDate.error.required = The planStartDate must include {0}
 planStartDate.error.invalid = Enter a real planStartDate
-planStartDate.change.hidden = planStartDate
+planStartDate.change.hidden = Plan start date
 
 yearEndAndMonth.title = What is the year end and month?
 yearEndAndMonth.heading = What is the year end and month?
@@ -261,6 +261,8 @@ checkYourAnswers.p4 = If an error is made in the payment of your Direct Debit by
 checkYourAnswers.p5 = If you receive a refund you are not entitled to, you must pay it back when HM Revenue & Customs asks you to.
 checkYourAnswers.p6 = You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us.
 checkYourAnswers.p7 = By accepting, I understand that this instruction may remain with HMRC and, if so, details will be passed electronically to my Bank/Building Society from Date of Issue <strong>{0}</strong>.
+checkYourAnswers.p8 = <strong>Instruction to your Bank or Building Society to pay by Direct Debit </strong>
+checkYourAnswers.p9 = HM Revenue & Customs (HMRC)<br/> HMRC Accounts Office <br/> Direct Debit Section <br/> Cumbernauld <br/> Glasgow G67 1YZ
 
 
 checkYourAnswers.acceptAndContinue = Accept and Continue
