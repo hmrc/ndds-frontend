@@ -43,7 +43,7 @@ trait ModelGenerators {
 
   implicit lazy val arbitraryPaymentPlanType: Arbitrary[PaymentPlanType] =
     Arbitrary {
-      Gen.oneOf(PaymentPlanType.values.toSeq)
+      Gen.oneOf(PaymentPlanType.values1.toSeq)
     }
 
   implicit lazy val arbitraryDirectDebitSource: Arbitrary[DirectDebitSource] =

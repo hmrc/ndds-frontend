@@ -69,10 +69,10 @@ class Navigator @Inject()() {
       case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.VariablePaymentPlan) =>
         routes.PlanStartDateController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.PAYE) => routes.YearEndAndMonthController.onPageLoad(NormalMode)
-//      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.BudgetPaymentPlan) =>
-//        routes.PaymentsFrequencyController.onPageLoad(NormalMode)
-//      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPLan) =>
-//        routes.TotalAmountDueController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.BudgetPaymentPlan) =>
+        routes.PaymentsFrequencyController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPlan) =>
+        routes.TotalAmountDueController.onPageLoad(NormalMode)
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }
@@ -90,8 +90,8 @@ class Navigator @Inject()() {
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
 
   private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
-    userAnswers
-      .get(DirectDebitSourcePage) match {
+    val answer: Option[DirectDebitSource] = userAnswers.get(DirectDebitSourcePage)
+    answer match {
           case Some(MGD) | Some(SA) | Some(TC) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
           case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
         }
