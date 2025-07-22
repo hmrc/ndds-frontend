@@ -48,6 +48,10 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(YourBankDetailsPage, NormalMode, userAnswers) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
       }
 
+      "must go from RegularPaymentAmountPage to PlanStartDatePage" in {
+        navigator.nextPage(RegularPaymentAmountPage, NormalMode, userAnswers) mustBe routes.PlanStartDateController.onPageLoad(NormalMode)
+      }
+
       "must go from BankDetailsCheckYourAnswersPage to DirectDebitSourcePage" in {
         val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
         navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, checkPage) mustBe routes.DirectDebitSourceController.onPageLoad(NormalMode)
