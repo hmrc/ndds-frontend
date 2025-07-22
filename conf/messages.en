@@ -221,11 +221,12 @@ paymentsFrequency.change.hidden = PaymentsFrequency
 regularPaymentAmount.title = What is the regular payment amount?
 regularPaymentAmount.heading = What is the regular payment amount?
 regularPaymentAmount.checkYourAnswersLabel = RegularPaymentAmount
-regularPaymentAmount.error.nonNumeric = Enter your regular payment amount using numbers and a decimal point
-regularPaymentAmount.error.required = Enter your regular payment amount
-regularPaymentAmount.error.invalidNumeric = Enter your regular payment amount using up to two decimal places
-regularPaymentAmount.error.aboveMaximum = Regular payment amount must be {0} or less
-regularPaymentAmount.error.belowMinimum = Regular payment amount must be {0} or more
+regularPaymentAmount.hint = Must be pounds and pence value. For example, 1000.00
+regularPaymentAmount.error.nonNumeric = The amount you have entered is not valid. Please check.
+regularPaymentAmount.error.required = Please enter an amount.
+regularPaymentAmount.error.invalidNumeric = The amount you have entered is not valid. Please check.
+regularPaymentAmount.error.aboveMaximum = The amount entered must between 1.00 and 20,000,000.00.  Please amend your entry.
+regularPaymentAmount.error.belowMinimum = The amount entered must between 1.00 and 20,000,000.00.  Please amend your entry.
 regularPaymentAmount.change.hidden = RegularPaymentAmount
 
 planEndDate.title = What date are you ending this payment plan?
