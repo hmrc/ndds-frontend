@@ -59,6 +59,13 @@ class RegularPaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
       FormError(fieldName, "regularPaymentAmount.error.aboveMaximum", Seq(currencyFormat(maximum)))
     )
 
+    behave like currencyFieldWithMinimum(
+      form,
+      fieldName,
+      minimum,
+      FormError(fieldName, "regularPaymentAmount.error.belowMinimum", Seq(currencyFormat(minimum)))
+    )
+
     behave like mandatoryField(
       form,
       fieldName,
