@@ -30,18 +30,17 @@ class PaymentPlanTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
 
     "must deserialise valid values" in {
 
-      val gen = Gen.oneOf(PaymentPlanType.values.toSeq)
+      val gen = Gen.oneOf(PaymentPlanType.values1.toSeq)
 
       forAll(gen) {
         paymentPlanType =>
-
           JsString(paymentPlanType.toString).validate[PaymentPlanType].asOpt.value mustEqual paymentPlanType
       }
     }
 
     "must fail to deserialise invalid values" in {
 
-      val gen = arbitrary[String] suchThat (!PaymentPlanType.values.map(_.toString).contains(_))
+      val gen = arbitrary[String] suchThat (!PaymentPlanType.values1.map(_.toString).contains(_))
 
       forAll(gen) {
         invalidValue =>
@@ -52,7 +51,7 @@ class PaymentPlanTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
 
     "must serialise" in {
 
-      val gen = Gen.oneOf(PaymentPlanType.values.toSeq)
+      val gen = Gen.oneOf(PaymentPlanType.values1.toSeq)
 
       forAll(gen) {
         paymentPlanType =>

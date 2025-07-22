@@ -46,7 +46,7 @@ class PaymentDateController @Inject()(
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   private val now: LocalDateTime = LocalDateTime.now(clock)
-  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/mm/yyyy")
+  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
   private val formattedDate = now.format(formatter)
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {

@@ -32,7 +32,7 @@ class PaymentPlanTypeFormProviderSpec extends OptionFieldBehaviours {
     behave like optionsField[PaymentPlanType](
       form,
       fieldName,
-      validValues  = PaymentPlanType.values,
+      validValues  = PaymentPlanType.values2,
       invalidError = FormError(fieldName, "error.invalid")
     )
 

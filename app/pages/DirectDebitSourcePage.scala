@@ -30,11 +30,12 @@ case object DirectDebitSourcePage extends QuestionPage[DirectDebitSource] {
   override def cleanup(value: Option[DirectDebitSource], userAnswers: UserAnswers): Try[UserAnswers] = {
     value match {
       case Some(DirectDebitSource.OL | DirectDebitSource.NIC | DirectDebitSource.CT | DirectDebitSource.SDLT | DirectDebitSource.VAT) =>
-        userAnswers.remove(PaymentPlanTypePage)
-        userAnswers.remove(PaymentReferencePage)
-        userAnswers.remove(PaymentPlanTypePage)
-        userAnswers.remove(PaymentsFrequencyPage)
-        userAnswers.remove(TotalAmountDuePage)
+        userAnswers
+          .remove(PaymentPlanTypePage)
+          .flatMap(_.remove(PaymentReferencePage))
+          .flatMap(_.remove(PaymentsFrequencyPage))
+          .flatMap(_.remove(TotalAmountDuePage))
+          .flatMap(_.remove(PlanStartDatePage))
       case _ =>
         Try(userAnswers)
     }

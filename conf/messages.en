@@ -1,4 +1,4 @@
-service.name = ndds-frontend
+service.name = Set up a direct debit
 
 site.back = Back
 site.remove = Remove
@@ -27,8 +27,8 @@ error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
 
-index.title = ndds-frontend
-index.heading = National Direct Debits System
+index.title = Set up a direct debit
+index.heading = Set up a direct debit
 index.guidance = Welcome to your NDDS frontend. Please see the README file for a guide to getting started.
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
@@ -104,9 +104,9 @@ accountDetailsNotVerified.p2.link = Paying HMRC page
 
 yourBankDetails.title = What are your bank details?
 yourBankDetails.heading = What are your bank details?
-yourBankDetails.accountHolderName = Account holders(s) name
+yourBankDetails.accountHolderName = Account holder(s) name
 yourBankDetails.accountHolderName.hint = This is the account holder(s) name as it appears on your cheque book/bank card.
-yourBankDetails.accountHolderName.change.hidden = Account holders(s) name
+yourBankDetails.accountHolderName.change.hidden = Account holder(s) name
 yourBankDetails.sortCode.change.hidden = Sort Code
 yourBankDetails.sortCode = Sort code
 yourBankDetails.sortCode.hint = Must be 6 digits long. For example, 001122.
@@ -156,6 +156,8 @@ paymentPlanType.title = What type of payment plan are you selecting?
 paymentPlanType.heading = What type of payment plan are you selecting?
 paymentPlanType.singlePayment = A single payment
 paymentPlanType.variablePaymentPlan = A variable payment plan
+paymentPlanType.budgetPaymentPlan = A budget payment plan
+paymentPlanType.taxCreditRepaymentPlan = A Tax Credit repayment plan
 paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
 paymentPlanType.error.required = Please select one option.
 paymentPlanType.change.hidden = PaymentPlanType
@@ -213,7 +215,7 @@ paymentsFrequency.heading = What is the frequency of payments?
 paymentsFrequency.weekly = Weekly
 paymentsFrequency.monthly = Monthly
 paymentsFrequency.checkYourAnswersLabel = What is the frequency of payments?
-paymentsFrequency.error.required = Select frequency of payments
+paymentsFrequency.error.required = Please select one option
 paymentsFrequency.change.hidden = PaymentsFrequency
 
 regularPaymentAmount.title = What is the regular payment amount?
@@ -289,7 +291,7 @@ bankDetailsCheckYourAnswer.error.required = Select yes if you are the account ho
 bankDetailsCheckYourAnswer.change.hidden = If you are the account holder or an authorised signatory
 bankDetailsCheckYourAnswer.h2 = Your bank details
 
-bankDetailsCheckYourAnswer.account.holder.name = Account holders(s) name
+bankDetailsCheckYourAnswer.account.holder.name = Account holder(s) name
 bankDetailsCheckYourAnswer.account.account.number = Account number
 bankDetailsCheckYourAnswer.account.sort.code = Bank sort code
 bankDetailsCheckYourAnswer.account.bank.name = Bank name
@@ -300,11 +302,11 @@ bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payment
 
 paymentAmount.title = What Amount do you want to pay?
 paymentAmount.heading = What Amount do you want to pay?
-paymentAmount.checkYourAnswersLabel = What Amount do you want to pay?
+paymentAmount.checkYourAnswersLabel = Payment amount
 paymentAmount.error.nonNumeric = The amount you have entered is not valid. Please check.
 paymentAmount.error.required = Please enter an amount.
 paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
 paymentAmount.error.max.min.range = The amount entered must between 1.00 and 20,000,000.00.  Please amend your entry.
-paymentAmount.change.hidden =  What Amount do you want to pay?
+paymentAmount.change.hidden =  Payment amount
 
 under_construction.heading = Under Construction
