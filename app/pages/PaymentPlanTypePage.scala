@@ -16,12 +16,30 @@
 
 package pages
 
-import models.PaymentPlanType
+import models.{PaymentPlanType, UserAnswers}
 import play.api.libs.json.JsPath
+
+import scala.util.Try
 
 case object PaymentPlanTypePage extends QuestionPage[PaymentPlanType] {
 
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "paymentPlanType"
+
+  override def cleanup(value: Option[PaymentPlanType], userAnswers: UserAnswers): Try[UserAnswers] = {
+    value match {
+      case Some(PaymentPlanType.VariablePaymentPlan) =>
+        userAnswers
+          .remove(PaymentReferencePage)
+          .flatMap(_.remove(PaymentAmountPage))
+          .flatMap(_.remove(YearEndAndMonthPage))
+          .flatMap(_.remove(PaymentsFrequencyPage))
+          .flatMap(_.remove(TotalAmountDuePage))
+          .flatMap(_.remove(PaymentDatePage))
+      case _ =>
+        Try(userAnswers)
+    }
+  }
+
 }

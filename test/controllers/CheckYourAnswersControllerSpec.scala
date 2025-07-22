@@ -17,7 +17,8 @@
 package controllers
 
 import base.SpecBase
-import pages.{PaymentAmountPage, PaymentDatePage, PaymentReferencePage}
+import models.{DirectDebitSource, PaymentPlanType}
+import pages.{DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import viewmodels.govuk.SummaryListFluency
@@ -27,17 +28,17 @@ import java.time.LocalDate
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
   private val fixedDate = LocalDate.of(2025, 7, 19)
-  private val userAnswer = emptyUserAnswers
-    .setOrException(PaymentReferencePage, "1234567")
-    .setOrException(PaymentAmountPage, 123.01)
-    .setOrException(PaymentDatePage, fixedDate)
+
 
   "Check Your Answers Controller" - {
+    val userAnswer = emptyUserAnswers
+      .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
+      .setOrException(PaymentReferencePage, "1234567")
+      .setOrException(PaymentAmountPage, 123.01)
+      .setOrException(PaymentDatePage, fixedDate)
 
-    "must return OK and the correct view for a GET" in {
-
+    "must return OK and the correct view if CT selected for a GET" in {
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
@@ -47,6 +48,35 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment Plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include("Payment reference")
+        contentAsString(result) must include("Payment amount")
+        contentAsString(result) must include("123.01")
+        contentAsString(result) must include("Payment date")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("£123.01")
+        contentAsString(result) must include("Accept and Continue")
+      }
+    }
+
+    "must return OK and the correct view if MGD selected and type is single  for a GET" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePayment)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentAmountPage, 123.01)
+        .setOrException(PaymentDatePage, fixedDate)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your answers")
+        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("The Direct Debit Guarantee")
+        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include("Payment reference")
+        contentAsString(result) must include("Payment amount")
+        contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("£123.01")
