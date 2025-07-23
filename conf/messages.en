@@ -168,6 +168,15 @@ paymentReference.checkYourAnswersLabel = Payment reference
 paymentReference.error.required = Please enter a payment reference.
 paymentReference.error.length = Payment reference must be 100 characters or less
 paymentReference.change.hidden = Payment reference
+paymentReference.ct.hint = Your Corporation Tax payment reference is 17 characters long and starts with ten digits followed by A001, this is then followed by a further three characters, for example, 1234567890A00108A.
+paymentReference.mgd.hint = eg XAM00001234567
+paymentReference.nic.hint = Your National Insurance contributions Deficiency Notice (NIC - DN) payment reference is 18 digits long and starts with the number 60, for example 601234567898765432. (Please note: The last character can be an ’X’).
+paymentReference.other.hint = If you are making an Economic Crime Levy (ECL) payment, the payment reference must be X, then a letter, then ’ECL’, then 10 numbers, like XLECL1234567893. If you are making any other liability payment, the payment reference must be 14 characters starting with X, like XCA23456789345.
+paymentReference.paye.hint = Your Pay As You Earn (PAYE) payment reference is your 13 character Accounts Office reference, for example, 123PX00045678.
+paymentReference.sa.hint = Your Self Assessment payment reference has ten digits plus the letter K, for example, 1234567890K.
+paymentReference.sdlt.hint = Your Stamp Duty Land Tax (SDLT) payment reference is nine digits long followed by the letter M and then another letter, for example, 123000678MG.
+paymentReference.tc.hint = Your Tax Credit (TC) payment reference is 16 digits long, starting and ending with two alpha characters, with an ’N’ as the 15th digit, for example, AB123456311204NC.
+paymentReference.vat.hint = Your Value Added Tax (VAT) payment reference is the same as your VAT Registration Number, which is nine digits long, for example 123456789.
 
 paymentAmount.title = What amount do you want to pay?
 paymentAmount.heading = What amount do you want to pay?

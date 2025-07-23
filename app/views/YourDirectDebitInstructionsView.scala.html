@@ -18,7 +18,6 @@
 @import utils.MaskAndFormatUtils._
 @import utils.Utils.emptyString
 
-
 @this(
     layout: templates.Layout,
     header1: Header1,
@@ -32,21 +31,19 @@
 
 @(directDebitDetails: List[DirectDebitDetails], maxLimit: Boolean = false)(implicit request: Request[_], messages: Messages)
 
-
-
 @layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
     @if(maxLimit) {
-            @govukErrorSummary(
-                ErrorSummary(
-                    errorList = Seq(
-                        ErrorLink(
-                            href = None,
-                            content = Text(messages("yourDirectDebitInstructions.error.count"))
-                        )
+        @govukErrorSummary(
+            ErrorSummary(
+                errorList = Seq(
+                    ErrorLink(
+                        href = None,
+                        content = Text(messages("yourDirectDebitInstructions.error.count"))
                     )
                 )
             )
+        )
     }
 
     @header1("yourDirectDebitInstructions.heading")

@@ -24,7 +24,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.PaymentPlanTypePage
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -46,8 +46,8 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
   "PaymentPlanType Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, TC)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
@@ -70,8 +70,6 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
 
-        val view = application.injector.instanceOf[PaymentPlanTypeView]
-
         val result = route(application, request).value
 
         status(result) mustEqual OK
@@ -87,8 +85,6 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
-
-        val view = application.injector.instanceOf[PaymentPlanTypeView]
 
         val result = route(application, request).value
 
