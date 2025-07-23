@@ -98,12 +98,12 @@ POST       /total-amount-due                            controllers.TotalAmountD
 GET        /change-total-amount-due                     controllers.TotalAmountDueController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-total-amount-due                     controllers.TotalAmountDueController.onSubmit(mode: Mode = CheckMode)
 
-GET        /check-your-answers                          controllers.CheckYourAnswersController.onPageLoad()
+GET        /your-saved-direct-debit-payment             controllers.CheckYourAnswersController.onPageLoad()
+POST       /your-saved-direct-debit-payment             controllers.CheckYourAnswersController.onSubmit()
 
 GET        /direct-debit-confirmation                   controllers.DirectDebitConfirmationController.onPageLoad()
 
-
 GET        /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = NormalMode)
-POST       /confirm-bank-details                         controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
-GET        /change-confirm-bank-details                   controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-confirm-bank-details                  controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)
+POST       /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
+GET        /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)

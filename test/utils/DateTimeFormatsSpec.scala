@@ -22,6 +22,7 @@ import play.api.i18n.Lang
 import utils.DateTimeFormats.dateTimeFormat
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class DateTimeFormatsSpec extends AnyFreeSpec with Matchers {
 
@@ -43,6 +44,15 @@ class DateTimeFormatsSpec extends AnyFreeSpec with Matchers {
       val formatter = dateTimeFormat()(Lang("de"))
       val result = LocalDate.of(2023, 1, 1).format(formatter)
       result mustEqual "1 January 2023"
+    }
+    
+    "formattedCurrentDate" - {
+      "should return today's date in 'd MMMM yyyy' format" in {
+        val today = LocalDate.now()
+        val expected = today.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+
+        DateTimeFormats.formattedCurrentDate mustEqual expected
+      }
     }
   }
 }

@@ -22,22 +22,20 @@ import models.{CheckMode, UserAnswers}
 import pages.PaymentAmountPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object PaymentAmountSummary  {
+object PaymentAmountSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentAmountPage).map {
-      answer =>
-
-        SummaryListRowViewModel(
-          key     = "paymentAmount.checkYourAnswersLabel",
-          value   = ValueViewModel(currencyFormat(answer)),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.PaymentAmountController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("paymentAmount.change.hidden"))
-          )
+    answers.get(PaymentAmountPage).map { amount =>
+      SummaryListRowViewModel(
+        key     = "paymentAmount.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(amount)),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.PaymentAmountController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("paymentAmount.change.hidden"))
         )
+      )
     }
 }

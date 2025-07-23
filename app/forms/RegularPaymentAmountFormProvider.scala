@@ -30,5 +30,6 @@ class RegularPaymentAmountFormProvider @Inject() extends Mappings {
         "regularPaymentAmount.error.nonNumeric"
       )
       .verifying(maximumCurrency(20000000, "regularPaymentAmount.error.aboveMaximum"))
+      .verifying(minimumCurrency(1, "regularPaymentAmount.error.belowMinimum"))
     )
 }

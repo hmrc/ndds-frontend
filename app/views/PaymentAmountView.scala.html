@@ -21,7 +21,7 @@
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukInput: GovukInput,
-    govukButton: GovukButton
+    govukButton: GovukButton,
 )
 
 @(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
@@ -34,10 +34,12 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
+
         @govukInput(
             InputViewModel(
                 field = form("value"),
-                label = LabelViewModel(messages("paymentAmount.heading")).asPageHeading()
+                label = LabelViewModel(messages("paymentAmount.heading"))
+                        .asPageHeading().withCssClass("govuk-fieldset__legend--l"),
             )
             .withPrefix(PrefixOrSuffix(content = "£"))
             .withWidth(Fixed10)

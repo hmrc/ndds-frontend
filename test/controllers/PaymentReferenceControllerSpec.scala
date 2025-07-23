@@ -18,16 +18,17 @@ package controllers
 
 import base.SpecBase
 import forms.PaymentReferenceFormProvider
-import models.{NormalMode, UserAnswers}
+import models.DirectDebitSource.{MGD, TC, VAT}
+import models.{DirectDebitSource, NormalMode, PaymentPlanType, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.PaymentReferencePage
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PaymentReferencePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.PaymentReferenceView
 
@@ -45,8 +46,9 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
   "paymentReference Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, MGD)
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentReferenceRoute)
@@ -56,13 +58,16 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentReferenceView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Some(MGD))(request, messages(application)).toString
+        contentAsString(result) must include("XAM00001234567")
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(PaymentReferencePage, "answer").success.value
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(PaymentReferencePage, "answer").success.value
+        .setOrException(DirectDebitSourcePage, TC)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -74,7 +79,8 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill("answer"), NormalMode, Some(TC))(request, messages(application)).toString
+        contentAsString(result) must include("Your Tax Credit (TC) payment reference is 16 digits long")
       }
     }
 
@@ -105,8 +111,8 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, VAT)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
 
       running(application) {
         val request =
@@ -120,23 +126,25 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Some(VAT))(request, messages(application)).toString
       }
     }
 
     "must redirect to the next page when valid data is submitted even if no existing data is found" in {
+      val userAnswers = UserAnswers("id")
+        .set(DirectDebitSourcePage, DirectDebitSource.CT).success.value
+        .set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, paymentReferenceRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
+        val request = FakeRequest(POST, paymentReferenceRoute)
+          .withFormUrlEncodedBody(("value", "123.00"))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustEqual routes.PaymentAmountController.onPageLoad(NormalMode).url
       }
     }
   }

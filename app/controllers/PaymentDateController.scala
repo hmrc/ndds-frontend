@@ -29,6 +29,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentDateView
 
 import scala.concurrent.{ExecutionContext, Future}
+import java.time.{LocalDateTime, Clock}
+import java.time.format.DateTimeFormatter
 
 class PaymentDateController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -39,8 +41,13 @@ class PaymentDateController @Inject()(
                                        requireData: DataRequiredAction,
                                        formProvider: PaymentDateFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
+                                       clock:Clock,
                                        view: PaymentDateView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+
+  private val now: LocalDateTime = LocalDateTime.now(clock)
+  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+  private val formattedDate = now.format(formatter)
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -52,7 +59,7 @@ class PaymentDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      Ok(view(preparedForm, mode, formattedDate))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -62,7 +69,7 @@ class PaymentDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode, formattedDate))),
 
         value =>
           for {

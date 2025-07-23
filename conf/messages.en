@@ -1,4 +1,4 @@
-service.name = ndds-frontend
+service.name = Set up a direct debit
 
 site.back = Back
 site.remove = Remove
@@ -27,8 +27,8 @@ error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
 
-index.title = ndds-frontend
-index.heading = National Direct Debits System
+index.title = Set up a direct debit
+index.heading = Set up a direct debit
 index.guidance = Welcome to your NDDS frontend. Please see the README file for a guide to getting started.
 
 journeyRecovery.continue.title = Sorry, there is a problem with the service
@@ -104,9 +104,9 @@ accountDetailsNotVerified.p2.link = Paying HMRC page
 
 yourBankDetails.title = What are your bank details?
 yourBankDetails.heading = What are your bank details?
-yourBankDetails.accountHolderName = Account holders(s) name
+yourBankDetails.accountHolderName = Account holder(s) name
 yourBankDetails.accountHolderName.hint = This is the account holder(s) name as it appears on your cheque book/bank card.
-yourBankDetails.accountHolderName.change.hidden = Account holders(s) name
+yourBankDetails.accountHolderName.change.hidden = Account holder(s) name
 yourBankDetails.sortCode.change.hidden = Sort Code
 yourBankDetails.sortCode = Sort code
 yourBankDetails.sortCode.hint = Must be 6 digits long. For example, 001122.
@@ -137,31 +137,46 @@ bankApproval.heading = You need bank approval
 directDebitSource.title = Where do you need to make direct debit payment?
 directDebitSource.heading = Where do you need to make direct debit payment?
 directDebitSource.checkYourAnswersLabel = Where do you need to make direct debit payment?
+directDebitSource.hint = Select one option.
 directDebitSource.ct = Corporation Tax (CT)
 directDebitSource.mgd = Machine Games Duty (MGD)
 directDebitSource.nic = National Insurance Contributions (NIC)
+directDebitSource.nic.hint = A National Insurance contributions Deficiency Notice (NIC - DN) is issued to notify you of a potential shortfall in your NIC.
 directDebitSource.otherLiability = Other Liability
+directDebitSource.otherLiability.hint = There are a number of 'Other' types of tax and related charges that HM Revenue & Customs can collect online using the Direct Debit payments facility, for example, Investigation settlements and penalties. These have payment references beginning with ’X’.
 directDebitSource.paye = Pay As Your Earn (PAYE)
 directDebitSource.sa = Self Assessment (SA)
 directDebitSource.sdlt = Stamp Duty Land Tax (SDLT)
+directDebitSource.tc = Tax Credits (TC)
 directDebitSource.vat = Value Added Tax (VAT)
 directDebitSource.error.required = Please select one option.
 directDebitSource.change.hidden = DirectDebitSource
 
 paymentPlanType.title = What type of payment plan are you selecting?
 paymentPlanType.heading = What type of payment plan are you selecting?
-paymentPlanType.aSinglePayment = A single payment
-paymentPlanType.aVariablePaymentPlan = A variable payment plan
+paymentPlanType.singlePayment = A single payment
+paymentPlanType.variablePaymentPlan = A variable payment plan
+paymentPlanType.budgetPaymentPlan = A budget payment plan
+paymentPlanType.taxCreditRepaymentPlan = A Tax Credit repayment plan
 paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
-paymentPlanType.error.required = Select paymentPlanType
+paymentPlanType.error.required = Please select one option.
 paymentPlanType.change.hidden = PaymentPlanType
 
 paymentReference.title = What is your payment reference?
 paymentReference.heading = What is your payment reference?
-paymentReference.checkYourAnswersLabel = paymentReference
+paymentReference.checkYourAnswersLabel = Payment reference
 paymentReference.error.required = Please enter a payment reference.
-paymentReference.error.length = paymentReference must be 100 characters or less
-paymentReference.change.hidden = paymentReference
+paymentReference.error.length = Payment reference must be 100 characters or less
+paymentReference.change.hidden = Payment reference
+paymentReference.ct.hint = Your Corporation Tax payment reference is 17 characters long and starts with ten digits followed by A001, this is then followed by a further three characters, for example, 1234567890A00108A.
+paymentReference.mgd.hint = eg XAM00001234567
+paymentReference.nic.hint = Your National Insurance contributions Deficiency Notice (NIC - DN) payment reference is 18 digits long and starts with the number 60, for example 601234567898765432. (Please note: The last character can be an ’X’).
+paymentReference.other.hint = If you are making an Economic Crime Levy (ECL) payment, the payment reference must be X, then a letter, then ’ECL’, then 10 numbers, like XLECL1234567893. If you are making any other liability payment, the payment reference must be 14 characters starting with X, like XCA23456789345.
+paymentReference.paye.hint = Your Pay As You Earn (PAYE) payment reference is your 13 character Accounts Office reference, for example, 123PX00045678.
+paymentReference.sa.hint = Your Self Assessment payment reference has ten digits plus the letter K, for example, 1234567890K.
+paymentReference.sdlt.hint = Your Stamp Duty Land Tax (SDLT) payment reference is nine digits long followed by the letter M and then another letter, for example, 123000678MG.
+paymentReference.tc.hint = Your Tax Credit (TC) payment reference is 16 digits long, starting and ending with two alpha characters, with an ’N’ as the 15th digit, for example, AB123456311204NC.
+paymentReference.vat.hint = Your Value Added Tax (VAT) payment reference is the same as your VAT Registration Number, which is nine digits long, for example 123456789.
 
 paymentAmount.title = What amount do you want to pay?
 paymentAmount.heading = What amount do you want to pay?
@@ -175,23 +190,24 @@ paymentAmount.change.hidden = paymentAmount
 
 paymentDate.title = What date are you making this payment?
 paymentDate.heading = What date are you making this payment?
-paymentDate.hint = For example, 12 11 2007.
-paymentDate.checkYourAnswersLabel = paymentDate
-paymentDate.error.required.all = Enter the paymentDate
-paymentDate.error.required.two = The paymentDate must include {0} and {1}
-paymentDate.error.required = The paymentDate must include {0}
-paymentDate.error.invalid = Enter a real paymentDate
-paymentDate.change.hidden = paymentDate
+paymentDate.hint = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account.<br><br>The payment date must be within the next 12 months.<br><br>Please note: If your payment is late you may be liable to pay interest and/or surcharge.<br> <br> The earliest date you can enter as your payment date is {0} <br><br> For example, {1}
+paymentDate.checkYourAnswersLabel = Payment date
+paymentDate.error.required.all = Enter the payment date
+paymentDate.error.required.two = The payment date must include {0} and {1}
+paymentDate.error.required = The payment date must include {0}
+paymentDate.error.invalid = Enter a real payment date
+paymentDate.error.date  = Please enter a valid date.
+paymentDate.change.hidden = Payment date
 
 planStartDate.title = What date are you starting this payment plan?
 planStartDate.heading = What date are you starting this payment plan?
 planStartDate.hint = For example, 12 11 2007.
-planStartDate.checkYourAnswersLabel = planStartDate
+planStartDate.checkYourAnswersLabel = Plan Start Date
 planStartDate.error.required.all = Enter the planStartDate
 planStartDate.error.required.two = The planStartDate must include {0} and {1}
 planStartDate.error.required = The planStartDate must include {0}
 planStartDate.error.invalid = Enter a real planStartDate
-planStartDate.change.hidden = planStartDate
+planStartDate.change.hidden = Plan start date
 
 yearEndAndMonth.title = What is the year end and month?
 yearEndAndMonth.heading = What is the year end and month?
@@ -208,17 +224,18 @@ paymentsFrequency.heading = What is the frequency of payments?
 paymentsFrequency.weekly = Weekly
 paymentsFrequency.monthly = Monthly
 paymentsFrequency.checkYourAnswersLabel = What is the frequency of payments?
-paymentsFrequency.error.required = Select frequency of payments
+paymentsFrequency.error.required = Please select one option
 paymentsFrequency.change.hidden = PaymentsFrequency
 
 regularPaymentAmount.title = What is the regular payment amount?
 regularPaymentAmount.heading = What is the regular payment amount?
 regularPaymentAmount.checkYourAnswersLabel = RegularPaymentAmount
-regularPaymentAmount.error.nonNumeric = Enter your regular payment amount using numbers and a decimal point
-regularPaymentAmount.error.required = Enter your regular payment amount
-regularPaymentAmount.error.invalidNumeric = Enter your regular payment amount using up to two decimal places
-regularPaymentAmount.error.aboveMaximum = Regular payment amount must be {0} or less
-regularPaymentAmount.error.belowMinimum = Regular payment amount must be {0} or more
+regularPaymentAmount.hint = Must be pounds and pence value. For example, 1000.00
+regularPaymentAmount.error.nonNumeric = The amount you have entered is not valid. Please check.
+regularPaymentAmount.error.required = Please enter an amount.
+regularPaymentAmount.error.invalidNumeric = The amount you have entered is not valid. Please check.
+regularPaymentAmount.error.aboveMaximum = The amount entered must between 1.00 and 20,000,000.00.  Please amend your entry.
+regularPaymentAmount.error.belowMinimum = The amount entered must between 1.00 and 20,000,000.00.  Please amend your entry.
 regularPaymentAmount.change.hidden = RegularPaymentAmount
 
 planEndDate.title = What date are you ending this payment plan?
@@ -247,10 +264,35 @@ totalAmountDue.p1 = This is the total amount due for repayment to HM Revenue & C
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
+checkYourAnswers.h2 = Payment Plan details
+checkYourAnswers.p1 = Pay HM Revenue & Revenue & Custom (HMRC) Direct Debits from the account listed in this instruction. This instruction is protected by the Direct Debit Guarantee.
+checkYourAnswers.h3 = The Direct Debit Guarantee
+checkYourAnswers.p2 = This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.
+checkYourAnswers.p3 = If there are any changes to the amount, date or frequency of your Direct Debit HM Revenue & Customs will notify you 10 working days in advance of your account being debited or as otherwise agreed. If you request HM Revenue & Customs to collect a payment, confirmation of the amount and date will be given to you at the time of the request.
+checkYourAnswers.p4 = If an error is made in the payment of your Direct Debit by HM Revenue & Customs or your bank or building society you are entitled to a full and immediate refund of the amount paid from your bank or building society.
+checkYourAnswers.p5 = If you receive a refund you are not entitled to, you must pay it back when HM Revenue & Customs asks you to.
+checkYourAnswers.p6 = You can cancel a Direct Debit at any time by simply contacting your bank or building society. Written confirmation may be required. Please also notify us.
+checkYourAnswers.p7 = By accepting, I understand that this instruction may remain with HMRC and, if so, details will be passed electronically to my Bank/Building Society from <strong>Date of Issue {0}</strong>.
+checkYourAnswers.p8 = <strong>Instruction to your Bank or Building Society to pay by Direct Debit </strong>
+checkYourAnswers.p9 = HM Revenue & Customs (HMRC)<br/> HMRC Accounts Office <br/> Direct Debit Section <br/> Cumbernauld <br/> Glasgow G67 1YZ
+
+
 checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Direct Debit Confirmation
 directDebitConfirmation.heading = Direct Debit Confirmation
+directDebitConfirmation.panel.title = Direct Debit set up
+directDebitConfirmation.successMessage = Your direct debit payment was successful.
+directDebitConfirmation.panel.body = <strong>{0}</strong>
+directDebitConfirmation.p1 = Make a note of your direct debit reference <strong>{0}</strong> and service user number <strong>{1}</strong> <br/> Download, save or print your confirmation..
+directDebitConfirmation.h2 = What you need to do
+directDebitConfirmation.printingHelp.h2 = Download your confirmation
+directDebitConfirmation.printSafari = If you are using Safari, confirm the download when asked through the popup window. Tap the arrow icon next to your Safari address bar to access your download files. You can then print your form.
+directDebitConfirmation.printChromeFirefoxEdge = If you are using Google Chrome or Firefox, choose the destination drop-down on the PDF and then select your required option from the list. If you are using Microsoft Edge, you will need to choose the printer drop-down menu on the PDF and then choose your required option.
+directDebitConfirmation.printNoPrinter = If you do not own a printer, your local library may offer printing services for a small fee, or search online for a printing store.
+directDebitConfirmation.downloadButton = Download confirmation
+directDebitConfirmation.pleaseNote = <strong>Please note:</strong> Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
+
 
 bankDetailsCheckYourAnswer.title = Check your answers
 bankDetailsCheckYourAnswer.heading = Check your answers
@@ -259,7 +301,7 @@ bankDetailsCheckYourAnswer.error.required = Select yes if you are the account ho
 bankDetailsCheckYourAnswer.change.hidden = If you are the account holder or an authorised signatory
 bankDetailsCheckYourAnswer.h2 = Your bank details
 
-bankDetailsCheckYourAnswer.account.holder.name = Account holders(s) name
+bankDetailsCheckYourAnswer.account.holder.name = Account holder(s) name
 bankDetailsCheckYourAnswer.account.account.number = Account number
 bankDetailsCheckYourAnswer.account.sort.code = Bank sort code
 bankDetailsCheckYourAnswer.account.bank.name = Bank name
@@ -267,3 +309,14 @@ bankDetailsCheckYourAnswer.account.bank.address = Bank address
 
 bankDetailsCheckYourAnswer.p1= Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?
 bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.
+
+paymentAmount.title = What Amount do you want to pay?
+paymentAmount.heading = What Amount do you want to pay?
+paymentAmount.checkYourAnswersLabel = Payment amount
+paymentAmount.error.nonNumeric = The amount you have entered is not valid. Please check.
+paymentAmount.error.required = Please enter an amount.
+paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
+paymentAmount.error.max.min.range = The amount entered must between 1.00 and 20,000,000.00.  Please amend your entry.
+paymentAmount.change.hidden =  Payment amount
+
+under_construction.heading = Under Construction

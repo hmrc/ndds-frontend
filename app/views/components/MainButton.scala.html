@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,27 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package queries
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
+@import uk.gov.hmrc.govukfrontend.views.Aliases.{Button, Text}
+@import utils.Utils.emptyString
 
-import models.UserAnswers
-import play.api.libs.json.JsPath
+@this(govukButton: GovukButton)
 
-import scala.util.{Success, Try}
+@(msg: String, href: Option[String] = None, classes: String = emptyString)(implicit messages: Messages)
 
-sealed trait Query {
-
-  def path: JsPath
-}
-
-trait Gettable[A] extends Query
-
-trait Settable[A] extends Query {
-
-  def cleanup(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] =
-    Success(userAnswers)
-
-
-  def cleanupBeforeSettingValue(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] = Success(userAnswers)
-}
+@govukButton(
+  Button(
+    content = Text(messages(msg)),
+    href = href,
+    classes = classes
+  )
+)

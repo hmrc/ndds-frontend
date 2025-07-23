@@ -14,7 +14,8 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth._
+@import viewmodels.InputWidth.*
+@import models.DirectDebitSource.*
 
 @this(
     layout: templates.Layout,
@@ -24,7 +25,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("paymentReference.title"))) {
 
@@ -40,6 +41,26 @@
                 label = LabelViewModel(messages("paymentReference.heading")).asPageHeading()
             )
             .withWidth(Full)
+            .withHint(HintViewModel(Text(
+                if (selectedAnswer.contains(CT))
+                    messages("paymentReference.ct.hint")
+                else if (selectedAnswer.contains(MGD))
+                    messages("paymentReference.mgd.hint")
+                else if (selectedAnswer.contains(SA))
+                    messages("paymentReference.sa.hint")
+                else if (selectedAnswer.contains(NIC))
+                    messages("paymentReference.nic.hint")
+                else if (selectedAnswer.contains(OL))
+                    messages("paymentReference.other.hint")
+                else if (selectedAnswer.contains(PAYE))
+                    messages("paymentReference.paye.hint")
+                else if (selectedAnswer.contains(SDLT))
+                    messages("paymentReference.sdlt.hint")
+                else if (selectedAnswer.contains(TC))
+                    messages("paymentReference.tc.hint")
+                else
+                    messages("paymentReference.vat.hint")
+            )))
         )
 
         @govukButton(

@@ -14,22 +14,49 @@
  * limitations under the License.
  *@
 
+@import views.html.components._
+
 @this(
+    header1: Header1,
+    h2:Header2,
+    h3:Header3,
+    paragraph: Paragraph,
     layout: templates.Layout,
     govukSummaryList: GovukSummaryList,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    formHelper: FormWithCSRF,
 )
 
-@(list: SummaryList)(implicit request: Request[_], messages: Messages)
+@(list: SummaryList, currentDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("checkYourAnswers.heading")</h1>
+@formHelper(action = routes.CheckYourAnswersController.onSubmit(), Symbol("autoComplete") -> "off") {
+            @header1("checkYourAnswers.heading")
+            @h2("checkYourAnswers.h2")
+            @govukSummaryList(list)
+            @paragraph("checkYourAnswers.p1")
+            @h3("checkYourAnswers.h3")
+            @paragraph("checkYourAnswers.p2")
+            @paragraph("checkYourAnswers.p3")
+            @paragraph("checkYourAnswers.p4")
+            @paragraph("checkYourAnswers.p5")
+            @paragraph("checkYourAnswers.p6")
+            @paragraph(messages("checkYourAnswers.p7", currentDate),  extraClasses="govuk-!-margin-top-7")
+            @paragraph("checkYourAnswers.p8")
+            <div class="govuk-body extra-line-spacing direct-debit-container">
+                <div class="direct-debit-text">
+                    @Html(messages("checkYourAnswers.p9"))
+                </div>
+                <div class="direct-debit-logo">
+                    <img src="@routes.Assets.versioned("images/logo.png")" alt="Direct Debit logo" />
+                </div>
+            </div>
 
-    @govukSummaryList(list)
 
-    @govukButton(
-        ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
-    )
+        @govukButton(
+            ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
+        )
 
+    }
 }

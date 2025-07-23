@@ -21,22 +21,33 @@ import play.api.mvc.Call
 import controllers.routes
 import pages.*
 import models.*
+import models.DirectDebitSource.*
 
 @Singleton
 class Navigator @Inject()() {
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case PaymentReferencePage => _ => routes.YearEndAndMonthController.onPageLoad(NormalMode)
+    case PaymentDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentReferencePage => userAnswers => checkPaymentReferenceLogic(userAnswers)
+    case PaymentAmountPage => _ => routes.PaymentDateController.onPageLoad(NormalMode)
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
-    case DirectDebitSourcePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
-    case _ => _ => routes.IndexController.onPageLoad()
+    case DirectDebitSourcePage => checkDirectDebitSource
+    case PaymentPlanTypePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+    case PaymentsFrequencyPage => _ => routes.RegularPaymentAmountController.onPageLoad(NormalMode)
+    case RegularPaymentAmountPage => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
+    case PlanStartDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
+    case PaymentReferencePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentAmountPage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PlanStartDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
@@ -45,6 +56,28 @@ class Navigator @Inject()() {
       normalRoutes(page)(userAnswers)
     case CheckMode =>
       checkRouteMap(page)(userAnswers)
+  }
+
+  private def checkPaymentReferenceLogic(userAnswers: UserAnswers): Call = {
+    val sourceType = userAnswers.get(DirectDebitSourcePage)
+    val optPaymentType = userAnswers.get(PaymentPlanTypePage)
+    sourceType match {
+      case Some(OL) | Some(NIC) | Some(CT) | Some(SDLT) | Some(VAT) => routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+        routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.VariablePaymentPlan) =>
+        routes.PlanStartDateController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.PAYE) => routes.YearEndAndMonthController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.BudgetPaymentPlan) =>
+        routes.PaymentsFrequencyController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPlan) =>
+        routes.TotalAmountDueController.onPageLoad(NormalMode)
+      case _ => routes.JourneyRecoveryController.onPageLoad()
+    }
   }
 
   private def checkBankDetails(userAnswers: UserAnswers): Call =
@@ -58,5 +91,12 @@ class Navigator @Inject()() {
         }
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
+  private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
+    val answer: Option[DirectDebitSource] = userAnswers.get(DirectDebitSourcePage)
+    answer match {
+          case Some(MGD) | Some(SA) | Some(TC) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+          case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+        }
 
 }

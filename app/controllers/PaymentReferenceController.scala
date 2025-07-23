@@ -16,12 +16,13 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.PaymentReferenceFormProvider
+
 import javax.inject.Inject
-import models.Mode
+import models.{Mode, UserAnswers}
 import navigation.Navigator
-import pages.PaymentReferencePage
+import pages.{DirectDebitSourcePage, PaymentReferencePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -36,7 +37,6 @@ class PaymentReferenceController @Inject()(
                                         navigator: Navigator,
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
                                         formProvider: PaymentReferenceFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
                                         view: PaymentReferenceView
@@ -46,25 +46,29 @@ class PaymentReferenceController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(models.UserAnswers(request.userId))
+      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val selectedAnswers = answers.get(DirectDebitSourcePage)
+
       val preparedForm = answers.get(PaymentReferencePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      Ok(view(preparedForm, mode, selectedAnswers))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
+      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val selectedAnswers = answers.get(DirectDebitSourcePage)
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers))),
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(models.UserAnswers(request.userId)).set(PaymentReferencePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PaymentReferencePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
       )

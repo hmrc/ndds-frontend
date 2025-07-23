@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,27 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package queries
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.panel.Panel
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
+@import utils.Utils.emptyString
 
-import models.UserAnswers
-import play.api.libs.json.JsPath
+@this(govukPanel: GovukPanel)
 
-import scala.util.{Success, Try}
+@(title: String, body: Html = Html(emptyString), classes: String = emptyString)
 
-sealed trait Query {
-
-  def path: JsPath
-}
-
-trait Gettable[A] extends Query
-
-trait Settable[A] extends Query {
-
-  def cleanup(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] =
-    Success(userAnswers)
-
-
-  def cleanupBeforeSettingValue(value: Option[A], userAnswers: UserAnswers): Try[UserAnswers] = Success(userAnswers)
-}
+@govukPanel(
+  Panel(
+    title = HtmlContent(title),
+    content = HtmlContent(s"<strong>${body.body}</strong>"),
+    classes = classes
+  )
+) 

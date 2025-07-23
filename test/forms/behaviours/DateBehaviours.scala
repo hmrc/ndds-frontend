@@ -27,7 +27,6 @@ class DateBehaviours extends FieldBehaviours {
   def dateField(form: Form[_], key: String, validData: Gen[LocalDate]): Unit = {
 
     "bind valid data" in {
-
       forAll(validData -> "valid date") {
         (date: LocalDate) =>
 

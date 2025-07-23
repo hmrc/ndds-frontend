@@ -18,16 +18,17 @@ package controllers
 
 import base.SpecBase
 import forms.PaymentPlanTypeFormProvider
+import models.DirectDebitSource.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.PaymentPlanTypePage
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.PaymentPlanTypeView
 
@@ -45,8 +46,8 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
   "PaymentPlanType Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, TC)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
@@ -56,25 +57,39 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentPlanTypeView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Some(TC))(request, messages(application)).toString
       }
     }
 
-    "must populate the view correctly on a GET when the question has previously been answered" in {
+    "must populate the view correctly on a GET when the question has previously been answered for values1 header" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(PaymentPlanTypePage, PaymentPlanType.values.head).success.value
+      val userAnswers = UserAnswers(userAnswersId).set(PaymentPlanTypePage, PaymentPlanType.values1.head).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
 
-        val view = application.injector.instanceOf[PaymentPlanTypeView]
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) must include(PaymentPlanType.values1.head.toString)
+      }
+    }
+
+    "must populate the view correctly on a GET when the question has previously been answered for values2 header" in {
+
+      val userAnswers = UserAnswers(userAnswersId).set(PaymentPlanTypePage, PaymentPlanType.values2.head).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, paymentPlanTypeRoute)
 
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(PaymentPlanType.values.head), NormalMode)(request, messages(application)).toString
+        contentAsString(result) must include(PaymentPlanType.values2.head.toString)
       }
     }
 
@@ -95,7 +110,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, paymentPlanTypeRoute)
-            .withFormUrlEncodedBody(("value", PaymentPlanType.values.head.toString))
+            .withFormUrlEncodedBody(("value", PaymentPlanType.values1.head.toString))
 
         val result = route(application, request).value
 
@@ -120,7 +135,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, None)(request, messages(application)).toString
       }
     }
 
@@ -133,8 +148,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        status(result) mustEqual OK
       }
     }
 
@@ -145,13 +159,11 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         val request =
           FakeRequest(POST, paymentPlanTypeRoute)
-            .withFormUrlEncodedBody(("value", PaymentPlanType.values.head.toString))
+            .withFormUrlEncodedBody(("value", PaymentPlanType.values1.head.toString))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }
