@@ -241,15 +241,18 @@ regularPaymentAmount.change.hidden = RegularPaymentAmount
 planEndDate.title = What date are you ending this payment plan?
 planEndDate.heading = What date are you ending this payment plan?
 planEndDate.hint = For example, leave blank or enter future date in format ’dd mm yyyy’
-planEndDate.checkYourAnswersLabel = PlanEndDate
+planEndDate.checkYourAnswersLabel = Plan end date
 planEndDate.error.required.all = Enter the plan end date
 planEndDate.error.required.two = The plan end date must include {0} and {1}
 planEndDate.error.required = The plan end date must include {0}
 planEndDate.error.invalid = Enter a real plan end date
-planEndDate.change.hidden = PlanEndDate
+planEndDate.change.hidden = Plan end date
 planEndDate.p1 = Payments will not be collected from your bank account after the plan end date.
 planEndDate.p2 = If you want your budget payment plan to be open ended then this field can be left blank.
 planEndDate.p3 = (The plan can be ended or cancelled at a later date).
+planEndDate.error.incomplete = The date you have entered is in the wrong format. Please check.
+planEndDate.error.beforeOrEqualStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
+
 
 totalAmountDue.title = What is the total amount due?
 totalAmountDue.heading = What is the total amount due?

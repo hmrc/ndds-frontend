@@ -16,59 +16,73 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.PlanEndDateFormProvider
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.PlanEndDatePage
+import pages.{PlanEndDatePage, PlanStartDatePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.*
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PlanEndDateView
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PlanEndDateController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        sessionRepository: SessionRepository,
-                                        navigator: Navigator,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        formProvider: PlanEndDateFormProvider,
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: PlanEndDateView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       override val messagesApi: MessagesApi,
+                                       sessionRepository: SessionRepository,
+                                       navigator: Navigator,
+                                       identify: IdentifierAction,
+                                       getData: DataRetrievalAction,
+                                       requireData: DataRequiredAction,
+                                       formProvider: PlanEndDateFormProvider,
+                                       val controllerComponents: MessagesControllerComponents,
+                                       view: PlanEndDateView
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
+      request.userAnswers.get(PlanStartDatePage) match {
+        case Some(startDate) =>
+          val form = formProvider(startDate)
+          val preparedForm = request.userAnswers.get(PlanEndDatePage).map(Some(_)).fold(form)(form.fill)
 
-      val form = formProvider()
+          Ok(view(preparedForm, mode))
 
-      val preparedForm = request.userAnswers.get(PlanEndDatePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
+        case None =>
+          Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
-
-      Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
+      request.userAnswers.get(PlanStartDatePage) match {
+        case Some(startDate) =>
+          val form = formProvider(startDate)
 
-      val form = formProvider()
+          form.bindFromRequest().fold(
+            formWithErrors =>
+              Future.successful(BadRequest(view(formWithErrors, mode))),
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+            {
+              case Some(endDate) =>
+                val updatedAnswers = request.userAnswers.set(PlanEndDatePage, endDate).get
+                sessionRepository.set(updatedAnswers).map { _ =>
+                  Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
+                }
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PlanEndDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
-      )
+              case None =>
+                sessionRepository.set(request.userAnswers).map { _ =>
+                  Redirect(navigator.nextPage(PlanEndDatePage, mode, request.userAnswers))
+                }
+            }
+          )
+
+        case None =>
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
   }
 }

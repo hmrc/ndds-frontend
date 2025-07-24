@@ -18,6 +18,7 @@ package forms
 
 import forms.mappings.Mappings
 import play.api.data.Form
+import play.api.data.validation._
 import play.api.i18n.Messages
 
 import java.time.LocalDate
@@ -25,13 +26,22 @@ import javax.inject.Inject
 
 class PlanEndDateFormProvider @Inject() extends Mappings {
 
-  def apply()(implicit messages: Messages): Form[LocalDate] =
+  def apply(startDate: LocalDate)(implicit messages: Messages): Form[Option[LocalDate]] =
     Form(
-      "value" -> localDate(
+      "value" -> optionalLocalDate(
         invalidKey     = "planEndDate.error.invalid",
-        allRequiredKey = "planEndDate.error.required.all",
-        twoRequiredKey = "planEndDate.error.required.two",
-        requiredKey    = "planEndDate.error.required"
-      )
+        allRequiredKey = "planEndDate.error.incomplete",
+        twoRequiredKey = "planEndDate.error.incomplete",
+        requiredKey    = "planEndDate.error.incomplete"
+      ).verifying(optionalDateAfter(startDate, "planEndDate.error.beforeOrEqualStartDate"))
     )
+
+  private def optionalDateAfter(start: LocalDate, errorKey: String): Constraint[Option[LocalDate]] =
+    Constraint {
+      case Some(endDate) if endDate.isBefore(start) =>
+        Invalid(ValidationError(errorKey))
+      case _ =>
+        Valid
+    }
 }
+
