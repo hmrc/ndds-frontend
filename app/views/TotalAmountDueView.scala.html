@@ -34,9 +34,6 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        <p class="govuk-body">@messages("totalAmountDue.p1")</p>
-
-
         @govukInput(
             InputViewModel(
                 field = form("value"),
@@ -44,6 +41,7 @@
             )
             .withPrefix(PrefixOrSuffix(content = "£"))
             .withWidth(Fixed10)
+            .withHint(HintViewModel(HtmlContent(messages("totalAmountDue.hint"))))
         )
 
         @govukButton(
