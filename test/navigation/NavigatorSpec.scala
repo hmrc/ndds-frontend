@@ -52,6 +52,11 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(RegularPaymentAmountPage, NormalMode, userAnswers) mustBe routes.PlanStartDateController.onPageLoad(NormalMode)
       }
 
+      "must go from TotalAmountDuePage to PlanStartDatePage" in {
+        navigator.nextPage(TotalAmountDuePage, NormalMode, userAnswers) mustBe routes.PlanStartDateController.onPageLoad(NormalMode)
+      }
+
+
       "must go from BankDetailsCheckYourAnswersPage to DirectDebitSourcePage" in {
         val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
         navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, checkPage) mustBe routes.DirectDebitSourceController.onPageLoad(NormalMode)
@@ -119,6 +124,7 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(PaymentReferencePage, NormalMode, userAnswers) mustBe
           routes.JourneyRecoveryController.onPageLoad()
       }
+
       "go from PaymentAmountPage to PaymentDatePage" in {
         val sources = Seq(MGD, SA, TC)
         sources.foreach { source =>

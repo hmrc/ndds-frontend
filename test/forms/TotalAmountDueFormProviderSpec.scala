@@ -31,7 +31,7 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours {
 
     val fieldName = "value"
 
-    val minimum = 0
+    val minimum = 12
     val maximum = 999999
 
     val validDataGenerator =
@@ -57,6 +57,13 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours {
       fieldName,
       maximum,
       FormError(fieldName, "totalAmountDue.error.aboveMaximum", Seq(currencyFormat(maximum)))
+    )
+
+    behave like currencyFieldWithMinimum(
+      form,
+      fieldName,
+      minimum,
+      FormError(fieldName, "totalAmountDue.error.belowMinimum", Seq(currencyFormat(minimum)))
     )
 
     behave like mandatoryField(

@@ -40,7 +40,7 @@ class TotalAmountDueControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  val validAnswer = 0
+  val validAnswer = 12
 
   lazy val totalAmountDueRoute = routes.TotalAmountDueController.onPageLoad(NormalMode).url
 

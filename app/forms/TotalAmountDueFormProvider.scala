@@ -21,6 +21,8 @@ import javax.inject.Inject
 import play.api.data.Form
 
 class TotalAmountDueFormProvider @Inject() extends Mappings {
+  val maximum = 999999
+  val minimum = 12
 
   def apply(): Form[BigDecimal] =
     Form(
@@ -29,6 +31,7 @@ class TotalAmountDueFormProvider @Inject() extends Mappings {
         "totalAmountDue.error.invalidNumeric",
         "totalAmountDue.error.nonNumeric"
       )
-      .verifying(maximumCurrency(999999, "totalAmountDue.error.aboveMaximum"))
+      .verifying(maximumCurrency(maximum, "totalAmountDue.error.aboveMaximum"))
+      .verifying(minimumCurrency(minimum, "totalAmountDue.error.belowMinimum"))
     )
 }
