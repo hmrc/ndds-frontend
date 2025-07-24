@@ -16,25 +16,59 @@
 
 package forms
 
-import java.time.{LocalDate, ZoneOffset}
+import java.time.LocalDate
 import forms.behaviours.DateBehaviours
+import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
 class PlanEndDateFormProviderSpec extends DateBehaviours {
-
   private implicit val messages: Messages = stubMessages()
-  private val form = new PlanEndDateFormProvider()()
+  private val startDate = LocalDate.of(2024, 4, 6)
+  private val form = new PlanEndDateFormProvider()(startDate)
 
-  ".value" - {
+  "PlanEndDateFormProvider" - {
 
-    val validData = datesBetween(
-      min = LocalDate.of(2000, 1, 1),
-      max = LocalDate.now(ZoneOffset.UTC)
-    )
+    "must bind valid dates after or equal to the plan start date" in {
+      val validDate = startDate
+      val result = form.bind(
+        Map(
+          "value.day" -> validDate.getDayOfMonth.toString,
+          "value.month" -> validDate.getMonthValue.toString,
+          "value.year" -> validDate.getYear.toString
+        )
+      )
+      result.errors mustBe empty
+      result.value.flatten mustEqual Some(validDate)
+    }
 
-    behave like dateField(form, "value", validData)
+    "must fail to bind dates before the plan start date" in {
+      val invalidDate = startDate.minusDays(1)
+      val result = form.bind(
+        Map(
+          "value.day" -> invalidDate.getDayOfMonth.toString,
+          "value.month" -> invalidDate.getMonthValue.toString,
+          "value.year" -> invalidDate.getYear.toString
+        )
+      )
+      result.errors must contain(FormError("value", "planEndDate.error.beforeOrEqualStartDate"))
+    }
 
-    behave like mandatoryDateField(form, "value", "planEndDate.error.required.all")
+    "must bind successfully when date is left blank (optional)" in {
+      val result = form.bind(Map.empty[String, String])
+      result.errors mustBe empty
+      result.value.flatten mustBe None
+    }
+
+    "must fail with required error if partially completed" in {
+      val result = form.bind(
+        Map(
+          "value.day" -> "",
+          "value.month" -> "4",
+          "value.year" -> ""
+        )
+      )
+      result.errors must contain(FormError("value", "planEndDate.error.incomplete", Seq("date.error.day", "date.error.year")))
+    }
   }
 }

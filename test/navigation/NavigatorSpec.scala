@@ -151,6 +151,10 @@ class NavigatorSpec extends SpecBase {
       "must go from a PaymentDatePage to CheckYourAnswersPage" in {
         navigator.nextPage(PaymentDatePage, NormalMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
+
+      "must go from PlanEndDatePage to CheckYourAnswersController" in {
+        navigator.nextPage(PlanEndDatePage, NormalMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
     }
 
     "in Check mode" - {
@@ -172,6 +176,10 @@ class NavigatorSpec extends SpecBase {
       "must go from BankDetailsCheckYourAnswersPage to BankApprovalPage" in {
         val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, false)
         navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.BankApprovalController.onPageLoad()
+      }
+
+      "must go from PlanEndDatePage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(PlanEndDatePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
     }
