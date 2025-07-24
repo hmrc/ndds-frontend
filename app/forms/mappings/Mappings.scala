@@ -69,17 +69,17 @@ trait Mappings extends Formatters with Constraints {
     of(new CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
 
   def optionalLocalDate(
-                         invalidKey: String,
+                         invalidKey:     String,
                          allRequiredKey: String,
                          twoRequiredKey: String,
-                         requiredKey: String
+                         requiredKey:    String
                        )(implicit messages: Messages): Mapping[Option[LocalDate]] = {
     optional(
       localDate(
-        invalidKey = invalidKey,
+        invalidKey     = invalidKey,
         allRequiredKey = allRequiredKey,
         twoRequiredKey = twoRequiredKey,
-        requiredKey = requiredKey
+        requiredKey    = requiredKey
       )
     )
   }

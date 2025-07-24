@@ -32,23 +32,22 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
         }
 
-            @govukDateInput(
-            DateViewModel(
-            field  = form("value"),
-            legend = LegendViewModel(messages("planEndDate.heading")).asPageHeading()
-            ).withHint(
-            HintViewModel(
-            HtmlContent(
-            Seq(
-
-            s"<p >${messages("planEndDate.p1")}</p>",
-            s"<p >${messages("planEndDate.p2")}</p>",
-            s"<p>${messages("planEndDate.p3")}</p>",
-            s"<p class='govuk-!-margin-top-7'>${messages("planEndDate.hint")}</p>",
-            ).mkString
-            )
-            )
-            )
+        @govukDateInput(
+                DateViewModel(
+                    field  = form("value"),
+                    legend = LegendViewModel(messages("planEndDate.heading")).asPageHeading()
+                    ).withHint(
+                    HintViewModel(
+                        HtmlContent(
+                        Seq(
+                            s"<p >${messages("planEndDate.p1")}</p>",
+                            s"<p >${messages("planEndDate.p2")}</p>",
+                            s"<p>${messages("planEndDate.p3")}</p>",
+                            s"<p class='govuk-!-margin-top-7'>${messages("planEndDate.hint")}</p>",
+                            ).mkString
+                        )
+                    )
+                )
             )
 
         @govukButton(
