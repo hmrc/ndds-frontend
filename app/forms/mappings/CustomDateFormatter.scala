@@ -38,29 +38,20 @@ class CustomDateFormatter(invalidKey: String,
         field -> data.get(s"$key.$field").filter(_.nonEmpty)
     }.toMap
     
-    lazy val missingFields = fields
-      .withFilter(_._2.isEmpty)
-      .map(_._1)
-      .toList
-      .map(field => messages(s"date.error.$field"))
+    lazy val missingFieldErrors = fields.collect {
+      case (field, None) =>
+        FormError(s"$key.$field", s"date.error.$field")
+    }.toList
 
     val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
 
     if (regexErrors.nonEmpty) {
       Left(regexErrors)
+    } else if (missingFieldErrors.nonEmpty) {
+      Left(missingFieldErrors)
     } else {
-      fields.count(_._2.isDefined) match {
-        case 3 =>
-          formatDate(key, data).left.map {
-            _.map(_.copy(key = key, args = args))
-          }
-        case 2 =>
-          Left(List(FormError(key, requiredKey, missingFields ++ args)))
-        case 1 =>
-          Left(List(FormError(key, twoRequiredKey, missingFields ++ args)))
-        case _ =>
-          Left(List(FormError(key, allRequiredKey, args)))
-
+      formatDate(key, data).left.map {
+        _.map(_.copy(key = key, args = args))
       }
     }
   }

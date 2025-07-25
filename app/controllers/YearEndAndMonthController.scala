@@ -19,7 +19,7 @@ package controllers
 import controllers.actions._
 import forms.YearEndAndMonthFormProvider
 import javax.inject.Inject
-import models.Mode
+import models.{Mode, UserAnswers}
 import navigation.Navigator
 import pages.YearEndAndMonthPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -42,22 +42,19 @@ class YearEndAndMonthController @Inject()(
                                            view: YearEndAndMonthView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-
-      val form = formProvider()
-
-      val preparedForm = request.userAnswers.get(YearEndAndMonthPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
+      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val preparedForm = answers.get(YearEndAndMonthPage) match {
+        case None => formProvider()
+        case Some(value) => formProvider().fill(value)
       }
 
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-
       val form = formProvider()
 
       form.bindFromRequest().fold(
@@ -66,7 +63,7 @@ class YearEndAndMonthController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(YearEndAndMonthPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(YearEndAndMonthPage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(YearEndAndMonthPage, mode, updatedAnswers))
       )

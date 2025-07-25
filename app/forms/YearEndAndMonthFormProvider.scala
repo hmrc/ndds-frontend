@@ -22,16 +22,18 @@ import play.api.i18n.Messages
 
 import java.time.LocalDate
 import javax.inject.Inject
+import utils.DateFormats
 
 class YearEndAndMonthFormProvider @Inject() extends Mappings {
 
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
-      "value" -> localDate(
+      "value" -> customPaymentDate(
         invalidKey     = "yearEndAndMonth.error.invalid",
         allRequiredKey = "yearEndAndMonth.error.required.all",
         twoRequiredKey = "yearEndAndMonth.error.required.two",
-        requiredKey    = "yearEndAndMonth.error.required"
+        requiredKey    = "yearEndAndMonth.error.required",
+        dateFormats    = DateFormats.monthYearFormats
       )
     )
 }

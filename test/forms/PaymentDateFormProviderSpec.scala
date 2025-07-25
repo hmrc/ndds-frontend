@@ -20,6 +20,7 @@ import java.time.{LocalDate, ZoneOffset}
 import forms.behaviours.DateBehaviours
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
+import play.api.data.FormError
 
 class PaymentDateFormProviderSpec extends DateBehaviours {
 
@@ -35,6 +36,13 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
 
     behave like dateField(form, "value", validData)
 
-    behave like mandatoryDateField(form, "value", "paymentDate.error.required.all")
+    "fail to bind an empty date" in {
+      val result = form.bind(Map.empty[String, String])
+      result.errors must contain theSameElementsAs Seq(
+        FormError("value.day", "date.error.day"),
+        FormError("value.month", "date.error.month"),
+        FormError("value.year", "date.error.year")
+      )
+    }
   }
 }

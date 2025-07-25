@@ -38,8 +38,9 @@ class Navigator @Inject()() {
     case PaymentsFrequencyPage => _ => routes.RegularPaymentAmountController.onPageLoad(NormalMode)
     case RegularPaymentAmountPage => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
     case TotalAmountDuePage => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
-    case PlanStartDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PlanStartDatePage => userAnswers => checkPlanStartDateLogic(userAnswers)
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case YearEndAndMonthPage => _ => routes.PaymentsFrequencyController.onPageLoad(NormalMode)
     case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
@@ -102,4 +103,18 @@ class Navigator @Inject()() {
           case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
         }
 
+  private def checkPlanStartDateLogic(userAnswers: UserAnswers): Call = {
+    val sourceType = userAnswers.get(DirectDebitSourcePage)
+    val optPaymentType = userAnswers.get(PaymentPlanTypePage)
+    (sourceType, optPaymentType) match {
+      case (Some(DirectDebitSource.SA), Some(PaymentPlanType.BudgetPaymentPlan)) =>
+        routes.PlanEndDateController.onPageLoad(NormalMode)
+      case (Some(DirectDebitSource.MGD), Some(PaymentPlanType.VariablePaymentPlan)) =>
+        routes.CheckYourAnswersController.onPageLoad()
+      case (Some(DirectDebitSource.TC), Some(PaymentPlanType.TaxCreditRepaymentPlan)) =>
+        routes.CheckYourAnswersController.onPageLoad()
+      case _ =>
+        routes.JourneyRecoveryController.onPageLoad()
+    }
+  }
 }
