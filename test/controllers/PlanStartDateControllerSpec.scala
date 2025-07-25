@@ -158,7 +158,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad().url
+        redirectLocation(result).value mustEqual "/direct-debits/there-is-a-problem"
       }
     }
   }
