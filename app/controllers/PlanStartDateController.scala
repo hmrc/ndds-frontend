@@ -36,7 +36,6 @@ class PlanStartDateController @Inject()(
                                          navigator: Navigator,
                                          identify: IdentifierAction,
                                          getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
                                          formProvider: PlanStartDateFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: PlanStartDateView
