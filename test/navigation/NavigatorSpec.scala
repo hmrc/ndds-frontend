@@ -161,6 +161,51 @@ class NavigatorSpec extends SpecBase {
       "must go from PlanEndDatePage to CheckYourAnswersController" in {
         navigator.nextPage(PlanEndDatePage, NormalMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
+
+      "must go from PlanStartDatePage to PlanEndDateController for SA with BudgetPaymentPlan" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, SA).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+        navigator.nextPage(PlanStartDatePage, NormalMode, ua) mustBe
+          routes.PlanEndDateController.onPageLoad(NormalMode)
+      }
+
+      "must go from PlanStartDatePage to CheckYourAnswersController for MGD with VariablePaymentPlan" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, MGD).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan).success.value
+        navigator.nextPage(PlanStartDatePage, NormalMode, ua) mustBe
+          routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from PlanStartDatePage to CheckYourAnswersController for TC with TaxCreditRepaymentPlan" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, TC).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan).success.value
+        navigator.nextPage(PlanStartDatePage, NormalMode, ua) mustBe
+          routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from PlanStartDatePage to JourneyRecoveryController for all other combinations" in {
+        val invalidCombinations = Seq(
+          (SA, PaymentPlanType.SinglePayment),
+          (MGD, PaymentPlanType.SinglePayment),
+          (MGD, PaymentPlanType.BudgetPaymentPlan),
+          (TC, PaymentPlanType.SinglePayment),
+          (TC, PaymentPlanType.VariablePaymentPlan),
+          (CT, PaymentPlanType.SinglePayment),
+          (CT, PaymentPlanType.VariablePaymentPlan),
+          (CT, PaymentPlanType.BudgetPaymentPlan),
+          (CT, PaymentPlanType.TaxCreditRepaymentPlan)
+        )
+        invalidCombinations.foreach { case (source, planType) =>
+          val ua = userAnswers
+            .set(DirectDebitSourcePage, source).success.value
+            .set(PaymentPlanTypePage, planType).success.value
+          navigator.nextPage(PlanStartDatePage, NormalMode, ua) mustBe
+            routes.JourneyRecoveryController.onPageLoad()
+        }
+      }
     }
 
     "in Check mode" - {
