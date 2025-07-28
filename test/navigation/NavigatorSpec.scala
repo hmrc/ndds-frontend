@@ -186,6 +186,13 @@ class NavigatorSpec extends SpecBase {
           routes.CheckYourAnswersController.onPageLoad()
       }
 
+      "must go from PlanStartDatePage to CheckYourAnswersController for PAYE" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, PAYE).success.value
+        navigator.nextPage(PlanStartDatePage, NormalMode, ua) mustBe
+          routes.CheckYourAnswersController.onPageLoad()
+      }
+
       "must go from PlanStartDatePage to JourneyRecoveryController for all other combinations" in {
         val invalidCombinations = Seq(
           (SA, PaymentPlanType.SinglePayment),

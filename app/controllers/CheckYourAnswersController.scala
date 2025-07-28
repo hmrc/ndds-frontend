@@ -18,12 +18,14 @@ package controllers
 
 import com.google.inject.Inject
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import models.DirectDebitSource
+import pages.DirectDebitSourcePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
-import viewmodels.checkAnswers.{PaymentAmountSummary, PaymentDateSummary, PaymentReferenceSummary, PlanStartDateSummary}
+import viewmodels.checkAnswers.{PaymentAmountSummary, PaymentDateSummary, PaymentReferenceSummary, PlanStartDateSummary, YearEndAndMonthSummary}
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
 
@@ -40,13 +42,27 @@ class CheckYourAnswersController @Inject()  (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       logger.info("Display bank details confirmation page")
+      
+      val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
       val list = SummaryListViewModel(
-        rows = Seq(
-          PaymentReferenceSummary.row(request.userAnswers),
-          PaymentAmountSummary.row(request.userAnswers),
-          PaymentDateSummary.row(request.userAnswers),
-          PlanStartDateSummary.row(request.userAnswers),
-        ).flatten
+        rows = directDebitSource match {
+          case Some(DirectDebitSource.PAYE) =>
+            // For PAYE, show Payment Reference, Payment Amount, Payment Date, and Year End and Month
+            Seq(
+              PaymentReferenceSummary.row(request.userAnswers),
+              PaymentAmountSummary.row(request.userAnswers),
+              PaymentDateSummary.row(request.userAnswers),
+              YearEndAndMonthSummary.row(request.userAnswers),
+            ).flatten
+          case _ =>
+            // For other sources, show the existing fields
+            Seq(
+              PaymentReferenceSummary.row(request.userAnswers),
+              PaymentAmountSummary.row(request.userAnswers),
+              PaymentDateSummary.row(request.userAnswers),
+              PlanStartDateSummary.row(request.userAnswers),
+            ).flatten
+        }
       )
       val currentDate = DateTimeFormats.formattedCurrentDate
       Ok(view(list, currentDate))

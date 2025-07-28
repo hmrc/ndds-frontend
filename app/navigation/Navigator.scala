@@ -40,7 +40,7 @@ class Navigator @Inject()() {
     case TotalAmountDuePage => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
     case PlanStartDatePage => userAnswers => checkPlanStartDateLogic(userAnswers)
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
-    case YearEndAndMonthPage => _ => routes.PaymentsFrequencyController.onPageLoad(NormalMode)
+    case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
     case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
   }
 
@@ -109,9 +109,9 @@ class Navigator @Inject()() {
     (sourceType, optPaymentType) match {
       case (Some(DirectDebitSource.SA), Some(PaymentPlanType.BudgetPaymentPlan)) =>
         routes.PlanEndDateController.onPageLoad(NormalMode)
-      case (Some(DirectDebitSource.MGD), Some(PaymentPlanType.VariablePaymentPlan)) =>
-        routes.CheckYourAnswersController.onPageLoad()
-      case (Some(DirectDebitSource.TC), Some(PaymentPlanType.TaxCreditRepaymentPlan)) =>
+      case (Some(DirectDebitSource.MGD), Some(PaymentPlanType.VariablePaymentPlan)) |
+           (Some(DirectDebitSource.TC), Some(PaymentPlanType.TaxCreditRepaymentPlan)) |
+           (Some(DirectDebitSource.PAYE), _) =>
         routes.CheckYourAnswersController.onPageLoad()
       case _ =>
         routes.JourneyRecoveryController.onPageLoad()
