@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import utils.Utils.emptyString
+
 @this()
 
 @( message1: Option[String] = None,
@@ -22,7 +24,7 @@
     linkUrl: String,
     classes: String = "govuk-body",
     linkClass: String = "govuk-link",
-    linkRel: String = "",
+    linkRel: String = emptyString,
     target: String = "_self",
     linkFullStop: Boolean = false,
     maxLimit: Boolean = false
@@ -33,21 +35,21 @@
     @message1.map { message => @message }
 
     @if(maxLimit) {
-    <span
+        <span
             @if(linkClass.nonEmpty) { class="@linkClass govuk-link--disabled" }
             aria-disabled="true"
-    >
+        >
             @linkMessage
         </span>
     } else {
-    <a
+        <a
             href="@linkUrl"
             @if(linkClass.nonEmpty) { class="@linkClass" }
             @if(linkRel.nonEmpty) { rel="@linkRel" }
             @if(target.nonEmpty) { target="@target" }
-    >
-        @linkMessage
-    </a>
+        >
+            @linkMessage
+        </a>
     }
 
     @{ if(linkFullStop)(".") }

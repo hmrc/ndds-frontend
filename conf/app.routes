@@ -32,8 +32,8 @@ POST       /your-bank-details                           controllers.YourBankDeta
 GET        /change-your-bank-details                    controllers.YourBankDetailsController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-your-bank-details                    controllers.YourBankDetailsController.onSubmit(mode: Mode = CheckMode)
 
-GET        /account-not-verified                        controllers.AccountDetailsNotVerifiedController.onPageLoad()
 GET        /reached-limit                               controllers.ReachedLimitController.onPageLoad()
+GET        /account-not-verified                        controllers.AccountDetailsNotVerifiedController.onPageLoad()
 
 GET        /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = NormalMode)
 POST       /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
