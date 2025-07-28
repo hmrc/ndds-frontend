@@ -18,11 +18,9 @@ package controllers
 
 import controllers.actions.*
 import forms.DirectDebitSourceFormProvider
-
-import javax.inject.Inject
-import models.{Mode, UserAnswers}
+import models.{DirectDebitSource, Mode, UserAnswers}
 import navigation.Navigator
-import pages.DirectDebitSourcePage
+import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,21 +28,22 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSourceView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class DirectDebitSourceController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       formProvider: DirectDebitSourceFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: DirectDebitSourceView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                             override val messagesApi: MessagesApi,
+                                             sessionRepository: SessionRepository,
+                                             navigator: Navigator,
+                                             identify: IdentifierAction,
+                                             getData: DataRetrievalAction,
+                                             formProvider: DirectDebitSourceFormProvider,
+                                             val controllerComponents: MessagesControllerComponents,
+                                             view: DirectDebitSourceView
+                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form = formProvider()
-
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
@@ -59,15 +58,44 @@ class DirectDebitSourceController @Inject()(
     implicit request =>
 
       form.bindFromRequest().fold(
-        formWithErrors =>
-          logger.warn(s"Bad Request validation error: ${formWithErrors}")
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+        formWithErrors => {
+          logger.warn(s"Bad Request validation error: ${formWithErrors.errors}")
+          Future.successful(BadRequest(view(formWithErrors, mode)))
+        },
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(DirectDebitSourcePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(DirectDebitSourcePage, mode, updatedAnswers))
+        value => {
+          val originalAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+
+          Future.fromTry(setDirectDebitSource(originalAnswers, value))
+            .flatMap { updatedAnswers =>
+              sessionRepository.set(updatedAnswers).map { _ =>
+                Redirect(navigator.nextPage(DirectDebitSourcePage, mode, updatedAnswers))
+              }
+            }
+            .recoverWith { case ex =>
+              logger.error("Failed to update UserAnswers in setDirectDebitSource", ex)
+              Future.successful(InternalServerError("Unable to update data"))
+            }
+        }
       )
+  }
+
+  private def setDirectDebitSource(userAnswers: UserAnswers, newValue: DirectDebitSource): Try[UserAnswers] = {
+    val oldValue = userAnswers.get(DirectDebitSourcePage)
+    if (oldValue.contains(newValue)) {
+      userAnswers.set(DirectDebitSourcePage, newValue)
+    } else {
+      userAnswers
+        .remove(PaymentPlanTypePage)
+        .flatMap(_.remove(PaymentReferencePage))
+        .flatMap(_.remove(PaymentsFrequencyPage))
+        .flatMap(_.remove(TotalAmountDuePage))
+        .flatMap(_.remove(PlanStartDatePage))
+        .flatMap(_.remove(PlanEndDatePage))
+        .flatMap(_.remove(PaymentPlanTypePage))
+        .flatMap(_.remove(PaymentDatePage))
+        .flatMap(_.remove(YearEndAndMonthPage))
+        .flatMap(cleanedAnswers => cleanedAnswers.set(DirectDebitSourcePage, newValue))
+    }
   }
 }
