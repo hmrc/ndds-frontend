@@ -19,25 +19,26 @@ package controllers
 import base.SpecBase
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.UnverifiedAccountDetailsView
+import views.html.ReachedLimitView
 
-class UnverifiedAccountDetailsControllerSpec extends SpecBase {
+class ReachedLimitControllerSpec extends SpecBase {
 
-  "UnverifiedAccountDetails Controller" - {
+  "ReachedLimit Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val retryDate = "11 June 2025, 3:45pm"
 
       running(application) {
-        val request = FakeRequest(GET, routes.UnverifiedAccountDetailsController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.ReachedLimitController.onPageLoad().url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[UnverifiedAccountDetailsView]
+        val view = application.injector.instanceOf[ReachedLimitView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(retryDate)(request, messages(application)).toString
       }
     }
   }

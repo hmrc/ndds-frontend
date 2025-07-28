@@ -27,19 +27,18 @@ POST       /personal-or-business-account                controllers.PersonalOrBu
 GET        /change-personal-or-business-account         controllers.PersonalOrBusinessAccountController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-personal-or-business-account         controllers.PersonalOrBusinessAccountController.onSubmit(mode: Mode = CheckMode)
 
-GET        /your-account-details-not-Verified           controllers.AccountDetailsNotVerifiedController.onPageLoad()
-
 GET        /your-bank-details                           controllers.YourBankDetailsController.onPageLoad(mode: Mode = NormalMode)
 POST       /your-bank-details                           controllers.YourBankDetailsController.onSubmit(mode: Mode = NormalMode)
 GET        /change-your-bank-details                    controllers.YourBankDetailsController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-your-bank-details                    controllers.YourBankDetailsController.onSubmit(mode: Mode = CheckMode)
 
-GET        /unverified-account-details                  controllers.UnverifiedAccountDetailsController.onPageLoad()
+GET        /account-not-verified                        controllers.AccountDetailsNotVerifiedController.onPageLoad()
+GET        /reached-limit                               controllers.ReachedLimitController.onPageLoad()
 
-GET        /authorised-account-holder                   controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = NormalMode)
-POST       /authorised-account-holder                   controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = NormalMode)
-GET        /change-authorised-account-holder            controllers.AuthorisedAccountHolderController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-authorised-account-holder            controllers.AuthorisedAccountHolderController.onSubmit(mode: Mode = CheckMode)
+GET        /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = NormalMode)
+POST       /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
+GET        /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)
 
 GET        /bank-approval                               controllers.BankApprovalController.onPageLoad()
 
@@ -102,8 +101,3 @@ GET        /your-saved-direct-debit-payment             controllers.CheckYourAns
 POST       /your-saved-direct-debit-payment             controllers.CheckYourAnswersController.onSubmit()
 
 GET        /direct-debit-confirmation                   controllers.DirectDebitConfirmationController.onPageLoad()
-
-GET        /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = NormalMode)
-POST       /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
-GET        /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)

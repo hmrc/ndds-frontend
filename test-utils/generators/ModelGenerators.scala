@@ -51,8 +51,4 @@ trait ModelGenerators {
       Gen.oneOf(DirectDebitSource.values.toSeq)
     }
 
-  implicit lazy val arbitraryAuthorisedAccountHolder: Arbitrary[AuthorisedAccountHolder] =
-    Arbitrary {
-      Gen.oneOf(AuthorisedAccountHolder.values.toSeq)
-    }
 }

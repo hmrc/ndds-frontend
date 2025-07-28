@@ -16,24 +16,24 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.UnverifiedAccountDetailsView
+import views.html.ReachedLimitView
 
-class UnverifiedAccountDetailsController @Inject()(
+class ReachedLimitController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: UnverifiedAccountDetailsView
+                                       view: ReachedLimitView
                                      ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      Ok(view())
+      val retryDate = "11 June 2025, 3:45pm" //TODO - should be retrieved from LOCK service response
+      Ok(view(retryDate))
   }
 }

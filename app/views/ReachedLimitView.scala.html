@@ -14,14 +14,18 @@
  * limitations under the License.
  *@
 
+@import views.html.components.*
+
 @this(
+        header1: Header1,
+        paragraphWithParam: ParagraphWithParameter,
         layout: templates.Layout,
         govukButton: GovukButton
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(retryDate: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("unverifiedAccountDetails.title"))) {
-
-    <h1 class="govuk-heading-xl">@messages("unverifiedAccountDetails.heading")</h1>
+@layout(pageTitle = titleNoForm(messages("reachedLimit.title")), showBackLink = false) {
+    @header1("reachedLimit.heading")
+    @paragraphWithParam("reachedLimit.p1", retryDate)
 }
