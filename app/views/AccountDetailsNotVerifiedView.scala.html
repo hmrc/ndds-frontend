@@ -14,24 +14,14 @@
  * limitations under the License.
  *@
 
-@import views.html.components.*
-
 @this(
-   header1: Header1,
-   paragraphWithParam: ParagraphWithParameter,
-   paragraphWithLink: ParagraphMessageWithLink,
-   layout: templates.Layout,
-   govukButton: GovukButton
+        layout: templates.Layout,
+        govukButton: GovukButton,
 )
 
-@(retryDate: String)(implicit request: Request[_], messages: Messages)
+@()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("accountDetailsNotVerified.title")), showBackLink = false) {
-  @header1("accountDetailsNotVerified.heading")
-  @paragraphWithParam("accountDetailsNotVerified.p1", retryDate)
-  @paragraphWithLink(
-     Some(messages("accountDetailsNotVerified.p2")),
-     linkMessage = messages("accountDetailsNotVerified.p2.link"),
-     linkUrl = messages("accountDetailsNotVerified.p2.url")
-  )
+@layout(pageTitle = titleNoForm(messages("accountDetailsNotVerified.title"))) {
+
+            <h1 class="govuk-heading-xl">@messages("accountDetailsNotVerified.heading")</h1>
 }
