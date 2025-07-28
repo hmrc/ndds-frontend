@@ -99,4 +99,4 @@ private[mappings] class YearMonthFormatter(
       s"$key.month" -> value.getMonthValue.toString,
       s"$key.year" -> value.getYear.toString
     )
-} 
+}
