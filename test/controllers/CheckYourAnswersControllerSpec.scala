@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.{DirectDebitSource, PaymentPlanType}
-import pages.{DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage}
+import pages.{DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, PlanStartDatePage, TotalAmountDuePage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import viewmodels.govuk.SummaryListFluency
@@ -84,12 +84,41 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
+    "must return OK and the correct view if TC selected and type is repayment  for a GET" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(TotalAmountDuePage, 4533)
+        .setOrException(PlanStartDatePage, fixedDate)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your answers")
+        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("The Direct Debit Guarantee")
+        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include("Payment reference")
+        contentAsString(result) must include("Total amount due")
+        contentAsString(result) must include("4,533")
+        contentAsString(result) must include("Plan start date")
+        contentAsString(result) must include("Monthly payment amount")
+        contentAsString(result) must include("£377.75")
+        contentAsString(result) must include("Final payment amount")
+        contentAsString(result) must include("£377.75")
+        contentAsString(result) must include("Accept and Continue")
+      }
+    }
+
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER

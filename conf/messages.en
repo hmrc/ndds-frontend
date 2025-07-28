@@ -202,7 +202,7 @@ paymentDate.change.hidden = Payment date
 planStartDate.title = What date are you starting this payment plan?
 planStartDate.heading = What date are you starting this payment plan?
 planStartDate.hint = For example, 12 11 2007.
-planStartDate.checkYourAnswersLabel = Plan Start Date
+planStartDate.checkYourAnswersLabel = Plan start date
 planStartDate.error.required.all = Enter the planStartDate
 planStartDate.error.required.two = The planStartDate must include {0} and {1}
 planStartDate.error.required = The planStartDate must include {0}
@@ -256,13 +256,15 @@ planEndDate.error.beforeOrEqualStartDate = The plan end date you have entered is
 
 totalAmountDue.title = What is the total amount due?
 totalAmountDue.heading = What is the total amount due?
-totalAmountDue.checkYourAnswersLabel = TotalAmountDue
+totalAmountDue.checkYourAnswersLabel = Total amount due
 totalAmountDue.error.nonNumeric = The amount you have entered is not valid. Please check.
 totalAmountDue.error.required = Please enter an amount.
 totalAmountDue.error.invalidNumeric = The amount you have entered is not valid. Please check.
 totalAmountDue.error.aboveMaximum = The amount entered must be greater than or equal to 12.00. Please amend your entry.
 totalAmountDue.error.belowMinimum = The amount entered must be greater than or equal to 12.00. Please amend your entry.
-totalAmountDue.change.hidden = TotalAmountDue
+totalAmountDue.change.hidden = Total amount due
+totalAmountDue.monthly.checkYourAnswersLabel = Monthly payment amount
+totalAmountDue.final.checkYourAnswersLabel = Final payment amount
 totalAmountDue.hint = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your ’Notice to Pay’.<br><br><strong> Must be pounds and pence value. For example, 1000.00</strong>
 
 checkYourAnswers.title = Check your answers
