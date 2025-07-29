@@ -58,8 +58,8 @@ class CheckYourAnswersController @Inject()  (
           PaymentDateSummary.row(request.userAnswers),
           PaymentsFrequencySummary.row(request.userAnswers),
           RegularPaymentAmountSummary.row(request.userAnswers),
-          PlanEndDateSummary.row(request.userAnswers),
           showStartDate,
+          PlanEndDateSummary.row(request.userAnswers),
           MonthlyPaymentAmountDueSummary.row(request.userAnswers),
           FinalPaymentAmountDueSummary.row(request.userAnswers),
         ).flatten

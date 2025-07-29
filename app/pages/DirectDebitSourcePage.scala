@@ -16,10 +16,8 @@
 
 package pages
 
-import models.{DirectDebitSource, UserAnswers}
+import models.DirectDebitSource
 import play.api.libs.json.JsPath
-
-import scala.util.Try
 
 case object DirectDebitSourcePage extends QuestionPage[DirectDebitSource] {
 
