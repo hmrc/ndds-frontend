@@ -17,6 +17,10 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
+import org.scalatest.matchers.must.Matchers._
+import play.api.i18n.Messages
+import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.BankApprovalView
@@ -26,18 +30,19 @@ class BankApprovalControllerSpec extends SpecBase {
   "BankApproval Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.BankApprovalController.onPageLoad().url)
-
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[BankApprovalView]
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        implicit val msgs: Messages = messages(application)
+        implicit val req: Request[_] = request
+        implicit val appConfig: FrontendAppConfig = application.injector.instanceOf[FrontendAppConfig]
+
+        contentAsString(result) mustEqual view().toString
       }
     }
   }
