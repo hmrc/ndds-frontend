@@ -34,6 +34,10 @@ private[mappings] class YearMonthFormatter(
 
   override protected val fieldKeys: List[String] = List("year", "month")
 
+  override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
+    super.bind(key, data + (s"${key}.day" -> "1"))
+  }
+
   private def toDate(key: String, month: Int, year: Int): Either[Seq[FormError], LocalDate] =
     Try(LocalDate.of(year, month, 1)) match {
       case Success(date) =>
