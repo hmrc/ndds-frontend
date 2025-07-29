@@ -30,9 +30,9 @@ private[mappings] class YearMonthFormatter(
                                             requiredKey: String,
                                             args: Seq[String] = Seq.empty,
                                             dateFormats: Seq[DateFormat]
-                                          ) extends Formatter[LocalDate] with Formatters {
+                                          )(implicit messages: Messages) extends CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats) {
 
-  protected val fieldKeys: List[String] = List("month", "year")
+  override protected val fieldKeys: List[String] = List("year", "month")
 
   private def toDate(key: String, month: Int, year: Int): Either[Seq[FormError], LocalDate] =
     Try(LocalDate.of(year, month, 1)) match {
@@ -42,7 +42,7 @@ private[mappings] class YearMonthFormatter(
         Left(Seq(FormError(key, invalidKey, args)))
     }
 
-  protected def formatDate(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
+  override protected def formatDate(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
 
     val int = intFormatter(
       requiredKey = invalidKey,
@@ -54,49 +54,15 @@ private[mappings] class YearMonthFormatter(
     val month = new MonthFormatter(invalidKey, args)
 
     for {
-      month <- month.bind(s"$key.month", data)
       year  <- int.bind(s"$key.year", data)
+      month <- month.bind(s"$key.month", data)
       date  <- toDate(key, month, year)
     } yield date
   }
 
-  override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
-
-    val fields = fieldKeys.map {
-      field =>
-        field -> data.get(s"$key.$field").filter(_.nonEmpty)
-    }.toMap
-    
-    lazy val missingFieldErrors = fields.collect {
-      case (field, None) =>
-        FormError(s"$key.$field", s"date.error.$field")
-    }.toList
-
-    val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
-
-    if (regexErrors.nonEmpty) {
-      Left(regexErrors)
-    } else if (missingFieldErrors.nonEmpty) {
-      Left(missingFieldErrors)
-    } else {
-      formatDate(key, data).left.map {
-        _.map(_.copy(key = key, args = args))
-      }
-    }
-  }
-
-  private def checkInput(key: String, fields: Map[String, Option[String]], dateFormat: DateFormat): Option[FormError] = {
-    fields.get(dateFormat.dateType).flatten match {
-      case Some(dateType) if !dateType.matches(dateFormat.regex) =>
-        Some(FormError(s"$key.${dateFormat.dateType}", dateFormat.errorKey, args))
-      case _ =>
-        None
-    }
-  }
-
   override def unbind(key: String, value: LocalDate): Map[String, String] =
     Map(
-      s"$key.month" -> value.getMonthValue.toString,
-      s"$key.year" -> value.getYear.toString
+      s"$key.year" -> value.getYear.toString,
+      s"$key.month" -> value.getMonthValue.toString
     )
 }
