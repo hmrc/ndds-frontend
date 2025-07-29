@@ -142,6 +142,10 @@ bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payment
 
 bankApproval.title = You need bank approval
 bankApproval.heading = You need bank approval
+bankApproval.p1 = HMRC suggest that you speak to your bank/building society to see if they would allow just one of the signatories to set up a Direct Debit Instruction/payment in favour of HMRC.
+bankApproval.p2 = If your bank/building society will not give approval please use another electronic payment method. You can find details of the alternative payment options by
+bankApproval.p2.link = paying HMRC
+bankApproval.p2.link.after = .
 
 directDebitSource.title = Where do you need to make direct debit payment?
 directDebitSource.heading = Where do you need to make direct debit payment?
