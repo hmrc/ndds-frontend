@@ -44,25 +44,18 @@ class CheckYourAnswersController @Inject()  (
       logger.info("Display bank details confirmation page")
       
       val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
+      val showStartDate = if(directDebitSource.contains(DirectDebitSource.PAYE)){
+        YearEndAndMonthSummary.row(request.userAnswers)
+      } else {
+        PlanStartDateSummary.row(request.userAnswers)
+      }
       val list = SummaryListViewModel(
-        rows = directDebitSource match {
-          case Some(DirectDebitSource.PAYE) =>
-            // For PAYE, show Payment Reference, Payment Amount, Payment Date, and Year End and Month
-            Seq(
-              PaymentReferenceSummary.row(request.userAnswers),
-              PaymentAmountSummary.row(request.userAnswers),
-              PaymentDateSummary.row(request.userAnswers),
-              YearEndAndMonthSummary.row(request.userAnswers),
-            ).flatten
-          case _ =>
-            // For other sources, show the existing fields
-            Seq(
-              PaymentReferenceSummary.row(request.userAnswers),
-              PaymentAmountSummary.row(request.userAnswers),
-              PaymentDateSummary.row(request.userAnswers),
-              PlanStartDateSummary.row(request.userAnswers),
-            ).flatten
-        }
+        rows = Seq(
+          PaymentReferenceSummary.row(request.userAnswers),
+          PaymentAmountSummary.row(request.userAnswers),
+          PaymentDateSummary.row(request.userAnswers),
+          showStartDate,
+        ).flatten
       )
       val currentDate = DateTimeFormats.formattedCurrentDate
       Ok(view(list, currentDate))
