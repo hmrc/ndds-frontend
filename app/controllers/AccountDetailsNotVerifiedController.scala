@@ -36,9 +36,7 @@ class AccountDetailsNotVerifiedController @Inject()(
   def onPageLoad: Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val retryDate = "21 June 2025, 4:56pm" //TODO - should be retrieved from LOCK service response
-
       val dateString = DateTimeFormats.formattedDateTime(retryDate)
-
       Ok(view(dateString))
   }
 }
