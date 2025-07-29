@@ -25,11 +25,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
 import views.html.AccountDetailsNotVerifiedView
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime}
-import java.time.format.DateTimeFormatter
-import java.util.Date
-
 class AccountDetailsNotVerifiedController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,

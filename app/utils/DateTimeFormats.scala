@@ -39,7 +39,7 @@ object DateTimeFormats {
     LocalDate.now().format(formatter)
   }
 
-  def formattedDateTime(dateTime: String): String = {
+  def formattedDateTime(dateTime: String): String = { //example: 24 July 2020, 16:29pm
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mma")
     dateTime.format(formatter)
   }
