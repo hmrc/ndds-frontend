@@ -25,6 +25,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
+import viewmodels.checkAnswers.*
 import viewmodels.checkAnswers.{PaymentAmountSummary, PaymentDateSummary, PaymentReferenceSummary, PlanStartDateSummary, YearEndAndMonthSummary}
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
@@ -42,7 +43,7 @@ class CheckYourAnswersController @Inject()  (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       logger.info("Display bank details confirmation page")
-      
+
       val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
       val showStartDate = if(directDebitSource.contains(DirectDebitSource.PAYE)){
         YearEndAndMonthSummary.row(request.userAnswers)
@@ -52,11 +53,18 @@ class CheckYourAnswersController @Inject()  (
       val list = SummaryListViewModel(
         rows = Seq(
           PaymentReferenceSummary.row(request.userAnswers),
+          TotalAmountDueSummary.row(request.userAnswers),
           PaymentAmountSummary.row(request.userAnswers),
           PaymentDateSummary.row(request.userAnswers),
+          PaymentsFrequencySummary.row(request.userAnswers),
+          RegularPaymentAmountSummary.row(request.userAnswers),
           showStartDate,
+          PlanEndDateSummary.row(request.userAnswers),
+          MonthlyPaymentAmountDueSummary.row(request.userAnswers),
+          FinalPaymentAmountDueSummary.row(request.userAnswers),
         ).flatten
       )
+
       val currentDate = DateTimeFormats.formattedCurrentDate
       Ok(view(list, currentDate))
   }
