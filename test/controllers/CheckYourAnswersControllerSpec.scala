@@ -17,8 +17,8 @@
 package controllers
 
 import base.SpecBase
-import models.{DirectDebitSource, PaymentPlanType}
-import pages.{DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, PlanStartDatePage, TotalAmountDuePage}
+import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency}
+import pages.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import viewmodels.govuk.SummaryListFluency
@@ -28,6 +28,7 @@ import java.time.LocalDate
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
   private val fixedDate = LocalDate.of(2025, 7, 19)
+  private val endDate = LocalDate.of(2027, 7, 25)
 
 
   "Check Your Answers Controller" - {
@@ -80,6 +81,35 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("£123.01")
+        contentAsString(result) must include("Accept and Continue")
+      }
+    }
+
+    "must return OK and the correct view if SA selected and plan type is budget  for a GET" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+        .setOrException(RegularPaymentAmountPage, 120)
+        .setOrException(PlanStartDatePage, fixedDate)
+        .setOrException(PlanEndDatePage, endDate)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your answers")
+        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("The Direct Debit Guarantee")
+        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include("Payment reference")
+        contentAsString(result) must include("Frequency of payments")
+        contentAsString(result) must include("Monthly")
+        contentAsString(result) must include("Regular payment amount")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("25 July 2027")
+        contentAsString(result) must include("£120")
         contentAsString(result) must include("Accept and Continue")
       }
     }
