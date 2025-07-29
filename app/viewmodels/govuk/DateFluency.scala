@@ -117,18 +117,18 @@ trait DateFluency {
       val yearErrorClass  = if (yearError || allFieldsError) errorClass else emptyString
       val items = Seq(
         InputItem(
-          id      = s"${field.id}.month",
-          name    = s"${field.name}.month",
-          value   = field("month").value,
-          label   = Some(messages("date.month")),
-          classes = s"govuk-input--width-2 $monthErrorClass".trim
-        ),
-        InputItem(
           id      = s"${field.id}.year",
           name    = s"${field.name}.year",
           value   = field("year").value,
           label   = Some(messages("date.year")),
           classes = s"govuk-input--width-4 $yearErrorClass".trim
+        ),
+        InputItem(
+          id      = s"${field.id}.month",
+          name    = s"${field.name}.month",
+          value   = field("month").value,
+          label   = Some(messages("date.month")),
+          classes = s"govuk-input--width-2 $monthErrorClass".trim
         )
       )
       DateInput(

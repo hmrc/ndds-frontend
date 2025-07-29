@@ -17,12 +17,11 @@
 package forms
 
 import java.time.{LocalDate, ZoneOffset}
-import forms.behaviours.DateBehaviours
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 import play.api.data.FormError
 
-class YearEndAndMonthFormProviderSpec extends DateBehaviours {
+class YearEndAndMonthFormProviderSpec extends forms.behaviours.FieldBehaviours {
 
   private implicit val messages: Messages = stubMessages()
   private val form = new YearEndAndMonthFormProvider()()
@@ -34,12 +33,26 @@ class YearEndAndMonthFormProviderSpec extends DateBehaviours {
       max = LocalDate.now(ZoneOffset.UTC)
     )
 
-    behave like dateField(form, "value", validData)
+    "bind valid data" in {
+      forAll(validData -> "valid date") {
+        (date: LocalDate) =>
+
+          val data = Map(
+            "value.month" -> date.getMonthValue.toString,
+            "value.year"  -> date.getYear.toString
+          )
+
+          val result = form.bind(data)
+
+          val expectedDate = LocalDate.of(date.getYear, date.getMonthValue, 1)
+          result.value.value mustEqual expectedDate
+          result.errors mustBe empty
+      }
+    }
 
     "fail to bind an empty date" in {
       val result = form.bind(Map.empty[String, String])
       result.errors must contain theSameElementsAs List(
-        FormError("value.day", List("date.error.day")),
         FormError("value.month", List("date.error.month")),
         FormError("value.year", List("date.error.year"))
       )
