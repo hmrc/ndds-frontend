@@ -17,10 +17,12 @@
 package controllers
 
 import controllers.actions.*
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.DateTimeFormats
 import views.html.ReachedLimitView
 
 class ReachedLimitController @Inject()(
@@ -34,6 +36,8 @@ class ReachedLimitController @Inject()(
   def onPageLoad: Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val retryDate = "11 June 2025, 3:45pm" //TODO - should be retrieved from LOCK service response
-      Ok(view(retryDate))
+      val dateString = DateTimeFormats.formattedDateTime(retryDate)
+
+      Ok(view(dateString))
   }
 }
