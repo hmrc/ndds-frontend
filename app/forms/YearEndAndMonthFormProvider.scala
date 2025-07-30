@@ -28,7 +28,7 @@ class YearEndAndMonthFormProvider @Inject() extends Mappings {
 
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
-      "value" -> customPaymentDate(
+      "value" -> yearMonthDate(
         invalidKey     = "yearEndAndMonth.error.invalid",
         allRequiredKey = "yearEndAndMonth.error.required.all",
         twoRequiredKey = "yearEndAndMonth.error.required.two",
