@@ -28,7 +28,7 @@ object MaskAndFormatUtils {
     "****" + accountNumber.drop(4)
 
   private lazy val inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy")
-  private lazy val gdsFormatter   = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  lazy val gdsFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def formatDateToGds(dateStr: String): String = {
     val localDate = LocalDate.parse(dateStr, inputFormatter)

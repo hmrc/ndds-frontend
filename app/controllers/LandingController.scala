@@ -19,18 +19,25 @@ package controllers
 import controllers.actions.IdentifierAction
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.RDSDatacacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.IndexView
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
-class IndexController @Inject()(
-                                 val controllerComponents: MessagesControllerComponents,
-                                 identify: IdentifierAction,
-                                 view: IndexView
-                               ) extends FrontendBaseController with I18nSupport {
+class LandingController @Inject()(rdsDatacacheService: RDSDatacacheService,
+                                  val controllerComponents: MessagesControllerComponents,
+                                  identify: IdentifierAction)
+                                 (implicit ec: ExecutionContext)
+  extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = identify { implicit request =>
-    Ok(view())
+  def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
+    rdsDatacacheService.retrieveAllDirectDebits(request.userId)
+      .map {
+        case rdsResponse if rdsResponse.directDebitCount == 0 =>
+          Redirect(routes.SetupDirectDebitPaymentController.onPageLoad(rdsResponse.directDebitCount))
+        case _ =>
+          Redirect(routes.YourDirectDebitInstructionsController.onPageLoad())
+      }
   }
 }
