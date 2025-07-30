@@ -48,7 +48,8 @@ class RdsDataCacheConnector @Inject()(
             case Success(data)      => Future.successful(data)
             case Failure(exception) => Future.failed(new Exception(s"Invalid JSON format $exception"))
           }
-        case Left(errorResponse)                      => Future.failed(new Exception(s"Unexpected response: ${errorResponse.message}"))
+        case Left(errorResponse)                      =>
+          Future.failed(new Exception(s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"))
         case Right(response)                          => Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
       }
   }

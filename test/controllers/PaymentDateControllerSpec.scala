@@ -31,6 +31,7 @@ import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
+import viewmodels.PaymentDateViewModel
 import views.html.PaymentDateView
 
 import java.time.format.DateTimeFormatter
@@ -83,7 +84,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentDateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, formattedDate)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, PaymentDateViewModel(NormalMode, formattedDate))(getRequest(), messages(application)).toString
       }
     }
 
@@ -101,7 +102,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), PaymentDateViewModel(NormalMode, formattedDate))(getRequest(), messages(application)).toString
       }
     }
 
@@ -145,7 +146,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, PaymentDateViewModel(NormalMode, formattedDate))(request, messages(application)).toString
       }
     }
 

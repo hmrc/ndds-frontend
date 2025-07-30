@@ -46,7 +46,7 @@ class PaymentDateHelper @Inject()(
     rdsDataCacheConnector.getEarliestPaymentDate(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
   }
   
-  private def calculateOffset(auddisStatus: Boolean): String = {
+  private[viewmodels] def calculateOffset(auddisStatus: Boolean): String = {
     val fixedDelay = frontendAppConfig.paymentDelayFixed
 
     val dynamicDelay = if (auddisStatus) {
