@@ -229,7 +229,7 @@ yearEndAndMonth.error.required.all = Enter the yearEndAndMonth
 yearEndAndMonth.error.required.two = The yearEndAndMonth must include {0} and {1}
 yearEndAndMonth.error.required = The yearEndAndMonth must include {0}
 yearEndAndMonth.error.invalid = Enter a real yearEndAndMonth
-yearEndAndMonth.change.hidden = yearEndAndMonth
+yearEndAndMonth.change.hidden = Year end and month
 
 paymentsFrequency.title = What is the frequency of payments?
 paymentsFrequency.heading = What is the frequency of payments?
