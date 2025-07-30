@@ -16,9 +16,8 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.PaymentDateFormProvider
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.PaymentDatePage
@@ -26,11 +25,12 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.{PaymentDateHelper, PaymentDateViewModel}
 import views.html.PaymentDateView
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import java.time.{LocalDateTime, Clock}
-import java.time.format.DateTimeFormatter
 
 class PaymentDateController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -41,15 +41,11 @@ class PaymentDateController @Inject()(
                                        requireData: DataRequiredAction,
                                        formProvider: PaymentDateFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
-                                       clock:Clock,
-                                       view: PaymentDateView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       view: PaymentDateView,
+                                       paymentDateHelper: PaymentDateHelper
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  private val now: LocalDateTime = LocalDateTime.now(clock)
-  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-  private val formattedDate = now.format(formatter)
-
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       val form = formProvider()
@@ -59,7 +55,9 @@ class PaymentDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode, formattedDate))
+      for {
+        earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
+      } yield Ok(view(preparedForm, PaymentDateViewModel(mode, paymentDateHelper.toDateString(earliestPaymentDate))))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -69,12 +67,14 @@ class PaymentDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, formattedDate))),
+          for {
+            earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
+          } yield BadRequest(view(formWithErrors, PaymentDateViewModel(mode, paymentDateHelper.toDateString(earliestPaymentDate)))),
 
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
       )
   }

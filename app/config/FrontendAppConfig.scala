@@ -20,12 +20,21 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class FrontendAppConfig @Inject() (configuration: Configuration) {
+class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) {
 
   val host: String    = configuration.get[String]("host")
   val appName: String = configuration.get[String]("appName")
+
+  private val rdsDataCacheProxyHost = servicesConfig.baseUrl("rds-datacache-proxy")
+  private val earliestPaymentDateSuffix: String = configuration.get[String]("microservice.services.rds-datacache-proxy.earliestPaymentDateUrl")
+  val earliestPaymentDateUrl: String = s"$rdsDataCacheProxyHost$earliestPaymentDateSuffix"
+
+  val paymentDelayDynamicAuddisEnabled = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-enabled")
+  val paymentDelayDynamicAuddisNotEnabled = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-not-enabled")
+  val paymentDelayFixed = configuration.get[Int]("payment-working-days-delay.fixed-delay")
 
   private val contactHost = configuration.get[String]("contact-frontend.host")
   private val contactFormServiceIdentifier = "ndds-frontend"
@@ -36,7 +45,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val loginUrl: String         = configuration.get[String]("urls.login")
   val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
   val signOutUrl: String       = configuration.get[String]("urls.signOut")
-
+  
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/ndds-frontend"
 

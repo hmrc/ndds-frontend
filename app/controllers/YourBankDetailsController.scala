@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.YourBankDetailsFormProvider
 
 import javax.inject.Inject
-import models.{Mode, UserAnswers}
+import models.{Mode, UserAnswers, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.YourBankDetailsPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -32,15 +32,15 @@ import views.html.YourBankDetailsView
 import scala.concurrent.{ExecutionContext, Future}
 
 class YourBankDetailsController @Inject()(
-                                      override val messagesApi: MessagesApi,
-                                      sessionRepository: SessionRepository,
-                                      navigator: Navigator,
-                                      identify: IdentifierAction,
-                                      getData: DataRetrievalAction,
-                                      formProvider: YourBankDetailsFormProvider,
-                                      val controllerComponents: MessagesControllerComponents,
-                                      view: YourBankDetailsView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                           override val messagesApi: MessagesApi,
+                                           sessionRepository: SessionRepository,
+                                           navigator: Navigator,
+                                           identify: IdentifierAction,
+                                           getData: DataRetrievalAction,
+                                           formProvider: YourBankDetailsFormProvider,
+                                           val controllerComponents: MessagesControllerComponents,
+                                           view: YourBankDetailsView
+                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form = formProvider()
 
@@ -49,7 +49,7 @@ class YourBankDetailsController @Inject()(
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
       val preparedForm = answers.get(YourBankDetailsPage) match {
         case None => form
-        case Some(value) => form.fill(value)
+        case Some(value) => form.fill(YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(value))
       }
 
       Ok(view(preparedForm, mode))
@@ -64,8 +64,13 @@ class YourBankDetailsController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(YourBankDetailsPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            // TODO: Replace line below with response from real BARS service call
+            // TODO: Check if this value actually comes from BARS
+            barsServiceResponse <- Future.successful(false)
+            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId))
+              .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
+            )
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
       )
   }

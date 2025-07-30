@@ -15,6 +15,7 @@
  *@
 
 @import views.html.components._
+@import viewmodels.PaymentDateViewModel
 
 @this(
     layout: templates.Layout,
@@ -24,11 +25,11 @@
     govukButton: GovukButton,
 )
 
-@(form: Form[_], mode: Mode, dateTime: String)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], paymentDateViewModel: PaymentDateViewModel)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("paymentDate.title"))) {
 
-    @formHelper(action = routes.PaymentDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.PaymentDateController.onSubmit(paymentDateViewModel.mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
@@ -39,7 +40,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("paymentDate.heading")).asPageHeading()
             )
-            .withHint(HintViewModel(HtmlContent(messages("paymentDate.hint", dateTime, dateTime))))
+            .withHint(HintViewModel(HtmlContent(messages("paymentDate.hint", paymentDateViewModel.earliestPaymentDate, paymentDateViewModel.earliestPaymentDate))))
         )
 
         @govukButton(
