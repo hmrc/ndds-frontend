@@ -22,8 +22,8 @@ import java.time.LocalDate
 
 case class YearEndAndMonth(year: Int, month: Int) {
   def toLocalDate: LocalDate = {
-    val actualMonth = if (month == 13) 12 else month
-    LocalDate.of(year, actualMonth, 1)
+    val actualMonth = if (month == YearEndAndMonth.SpecialMonthValue) YearEndAndMonth.December else month
+    LocalDate.of(year, actualMonth, YearEndAndMonth.FirstDayOfMonth)
   }
   
   def displayFormat: String = {
@@ -32,9 +32,13 @@ case class YearEndAndMonth(year: Int, month: Int) {
 }
 
 object YearEndAndMonth {
+  private val SpecialMonthValue = 13
+  private val December = 12
+  private val FirstDayOfMonth = 1
+  
   implicit val format: OFormat[YearEndAndMonth] = Json.format[YearEndAndMonth]
   
   def fromLocalDate(localDate: LocalDate): YearEndAndMonth = {
     YearEndAndMonth(localDate.getYear, localDate.getMonthValue)
   }
-} 
+}
