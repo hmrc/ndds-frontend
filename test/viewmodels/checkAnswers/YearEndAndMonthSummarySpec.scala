@@ -17,28 +17,22 @@
 package viewmodels.checkAnswers
 
 import base.SpecBase
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, UserAnswers, YearEndAndMonth}
 import pages.YearEndAndMonthPage
 import play.api.test.FakeRequest
 
-import java.time.LocalDate
-
 class YearEndAndMonthSummarySpec extends SpecBase {
-
-
-  private def yearMonthDate(year: Int, month: Int): LocalDate = LocalDate.of(year, month, 1)
 
   "YearEndAndMonthSummary" - {
 
-    "must display the date in YYYY Month format" in new Setup {
-      val date = LocalDate.of(2025, 1, 15)
+    "must display the date in YYYY MM format" in new Setup {
+      val date = YearEndAndMonth(2025, 1)
       val userAnswers = UserAnswers("id").set(YearEndAndMonthPage, date).success.value
       
       val result = YearEndAndMonthSummary.row(userAnswers)(messages)
       
       result mustBe defined
-      result.value.value.content.asHtml.toString must include("2025")
-      result.value.value.content.asHtml.toString must include("January")
+      result.value.value.content.asHtml.toString must include("2025 01")
     }
 
     "must return None when no date is set" in new Setup {
@@ -50,7 +44,7 @@ class YearEndAndMonthSummarySpec extends SpecBase {
     }
 
     "must have correct key" in new Setup {
-      val date = LocalDate.of(2025, 1, 15)
+      val date = YearEndAndMonth(2025, 1)
       val userAnswers = UserAnswers("id").set(YearEndAndMonthPage, date).success.value
       
       val result = YearEndAndMonthSummary.row(userAnswers)(messages)
@@ -60,7 +54,7 @@ class YearEndAndMonthSummarySpec extends SpecBase {
     }
 
     "must have change action with correct URL" in new Setup {
-      val date = LocalDate.of(2025, 1, 15)
+      val date = YearEndAndMonth(2025, 1)
       val userAnswers = UserAnswers("id").set(YearEndAndMonthPage, date).success.value
       
       val result = YearEndAndMonthSummary.row(userAnswers)(messages)
@@ -73,7 +67,7 @@ class YearEndAndMonthSummarySpec extends SpecBase {
     }
 
     "must have visually hidden text for change action" in new Setup {
-      val date = LocalDate.of(2025, 1, 15)
+      val date = YearEndAndMonth(2025, 1)
       val userAnswers = UserAnswers("id").set(YearEndAndMonthPage, date).success.value
       
       val result = YearEndAndMonthSummary.row(userAnswers)(messages)
@@ -85,9 +79,9 @@ class YearEndAndMonthSummarySpec extends SpecBase {
 
     "must format specific dates correctly" in new Setup {
       val testCases = Seq(
-        (LocalDate.of(2025, 1, 15), "2025 January"),
-        (LocalDate.of(2023, 12, 31), "2023 December"),
-        (LocalDate.of(2020, 6, 1), "2020 June")
+        (YearEndAndMonth(2025, 1), "2025 01"),
+        (YearEndAndMonth(2023, 12), "2023 12"),
+        (YearEndAndMonth(2020, 6), "2020 06")
       )
 
       testCases.foreach { case (date, expectedFormat) =>

@@ -50,6 +50,17 @@ class DateFormatSpec extends AnyFreeSpec with Matchers {
       "abc" must not (fullyMatch regex df.regex)
     }
 
+    "must match valid year end month input with regex" in {
+      val df = DateFormat("month", "error.key", "^(0[1-9]|1[0-3])$")
+      "01" must fullyMatch regex df.regex
+      "09" must fullyMatch regex df.regex
+      "12" must fullyMatch regex df.regex
+      "13" must fullyMatch regex df.regex
+      "00" must not (fullyMatch regex df.regex)
+      "14" must not (fullyMatch regex df.regex)
+      "abc" must not (fullyMatch regex df.regex)
+    }
+
     "must match valid year input with regex" in {
       val df = DateFormat("year", "error.key", "^[0-9]{4}$")
       "2024" must fullyMatch regex df.regex

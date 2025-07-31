@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-package pages
+package models
 
-import models.YearEndAndMonth
+import play.api.libs.json._
 
-import play.api.libs.json.JsPath
+import java.time.LocalDate
 
-case object YearEndAndMonthPage extends QuestionPage[YearEndAndMonth] {
-
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "yearEndAndMonth"
+case class YearEndAndMonth(year: Int, month: Int) {
+  def toLocalDate: LocalDate = {
+    val actualMonth = if (month == 13) 12 else month
+    LocalDate.of(year, actualMonth, 1)
+  }
+  
+  def displayFormat: String = {
+    f"$year%04d $month%02d"
+  }
 }
+
+object YearEndAndMonth {
+  implicit val format: OFormat[YearEndAndMonth] = Json.format[YearEndAndMonth]
+  
+  def fromLocalDate(localDate: LocalDate): YearEndAndMonth = {
+    YearEndAndMonth(localDate.getYear, localDate.getMonthValue)
+  }
+} 

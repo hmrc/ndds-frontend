@@ -17,23 +17,23 @@
 package forms
 
 import forms.mappings.Mappings
+import models.YearEndAndMonth
 import play.api.data.Form
 import play.api.i18n.Messages
 
-import java.time.LocalDate
 import javax.inject.Inject
 import utils.DateFormats
 
 class YearEndAndMonthFormProvider @Inject() extends Mappings {
 
-  def apply()(implicit messages: Messages): Form[LocalDate] =
+  def apply()(implicit messages: Messages): Form[YearEndAndMonth] =
     Form(
-      "value" -> yearMonthDate(
+      "value" -> yearEndMonthDate(
         invalidKey     = "yearEndAndMonth.error.invalid",
         allRequiredKey = "yearEndAndMonth.error.required.all",
         twoRequiredKey = "yearEndAndMonth.error.required.two",
         requiredKey    = "yearEndAndMonth.error.required",
-        dateFormats    = DateFormats.monthYearFormats
+        dateFormats    = DateFormats.yearEndMonthFormats
       )
     )
 }

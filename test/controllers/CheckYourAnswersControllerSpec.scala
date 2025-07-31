@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, YearEndAndMonth}
 import pages.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -30,7 +30,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val fixedDate = LocalDate.of(2025, 7, 19)
   private val paymentDateDetails: PaymentDateDetails = PaymentDateDetails(fixedDate, "2025-7-19")
   private val endDate = LocalDate.of(2027, 7, 25)
-  private val yearEndAndMonthDate = LocalDate.of(2025, 4, 1)
+  private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
 
 
   "Check Your Answers Controller" - {
@@ -110,7 +110,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("£123.01")
         contentAsString(result) must include("Year end and month")
-        contentAsString(result) must include("2025 April")
+        contentAsString(result) must include("2025 04")
         contentAsString(result) must include("Accept and Continue")
       }
     }
