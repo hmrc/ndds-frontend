@@ -18,7 +18,12 @@ package models
 
 import play.api.libs.json.*
 
-case class YourBankDetailsWithAuddisStatus (accountHolderName: String, sortCode: String, accountNumber:String, auddisStatus: Boolean)
+case class YourBankDetailsWithAuddisStatus(
+                                            accountHolderName: String,
+                                            sortCode: String,
+                                            accountNumber: String,
+                                            auddisStatus: Boolean
+                                          )
 
 object YourBankDetailsWithAuddisStatus {
 
