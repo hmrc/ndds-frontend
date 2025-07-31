@@ -21,6 +21,7 @@ import forms.mappings.DateFormat
 object DateFormats {
   private val DayRegex = "^([1-9]|0[1-9]|1[0-9]|2[0-9]|3[0-1])$"
   private val MonthRegex = "^(0?[1-9]|1[0-2])$"
+  private val YearEndMonthRegex = "^(0[1-9]|1[0-3])$"
   private val YearRegex = "^[0-9]{4}$"
 
   val defaultDateFormats: Seq[DateFormat] = Seq(
@@ -32,5 +33,10 @@ object DateFormats {
   val monthYearFormats: Seq[DateFormat] = Seq(
     DateFormat(dateType = "month", errorKey = "date.error.month", regex = MonthRegex),
     DateFormat(dateType = "year", errorKey = "date.error.year", regex = YearRegex)
+  )
+
+  val yearEndMonthFormats: Seq[DateFormat] = Seq(
+    DateFormat(dateType = "year", errorKey = "date.error.year", regex = YearRegex),
+    DateFormat(dateType = "month", errorKey = "date.error.month", regex = YearEndMonthRegex)
   )
 }

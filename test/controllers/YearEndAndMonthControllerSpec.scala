@@ -16,11 +16,9 @@
 
 package controllers
 
-import java.time.{LocalDate, ZoneOffset}
-
 import base.SpecBase
 import forms.YearEndAndMonthFormProvider
-import models.{NormalMode, UserAnswers}
+import models.{NormalMode, UserAnswers, YearEndAndMonth}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -45,7 +43,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  val validAnswer = YearEndAndMonth(2024, 5)
 
   lazy val yearEndAndMonthRoute = routes.YearEndAndMonthController.onPageLoad(NormalMode).url
 
@@ -57,9 +55,8 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, yearEndAndMonthRoute)
       .withFormUrlEncodedBody(
-        "value.day"   -> validAnswer.getDayOfMonth.toString,
-        "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year"  -> validAnswer.getYear.toString
+        "value.month" -> f"${validAnswer.month}%02d",
+        "value.year"  -> validAnswer.year.toString
       )
 
   "yearEndAndMonth Controller" - {

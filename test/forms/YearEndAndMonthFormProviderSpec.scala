@@ -16,7 +16,7 @@
 
 package forms
 
-import java.time.{LocalDate, ZoneOffset}
+import models.YearEndAndMonth
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 import play.api.data.FormError
@@ -28,26 +28,30 @@ class YearEndAndMonthFormProviderSpec extends forms.behaviours.FieldBehaviours {
 
   ".value" - {
 
-    val validData = datesBetween(
-      min = LocalDate.of(2000, 1, 1),
-      max = LocalDate.now(ZoneOffset.UTC)
-    )
-
     "bind valid data" in {
-      forAll(validData -> "valid date") {
-        (date: LocalDate) =>
+      val data = Map(
+        "value.month" -> "05",
+        "value.year"  -> "2024"
+      )
 
-          val data = Map(
-            "value.month" -> date.getMonthValue.toString,
-            "value.year"  -> date.getYear.toString
-          )
+      val result = form.bind(data)
 
-          val result = form.bind(data)
+      val expected = YearEndAndMonth(2024, 5)
+      result.value.value mustEqual expected
+      result.errors mustBe empty
+    }
 
-          val expectedDate = LocalDate.of(date.getYear, date.getMonthValue, 1)
-          result.value.value mustEqual expectedDate
-          result.errors mustBe empty
-      }
+    "bind valid data with month 13" in {
+      val data = Map(
+        "value.month" -> "13",
+        "value.year"  -> "2024"
+      )
+
+      val result = form.bind(data)
+
+      val expected = YearEndAndMonth(2024, 13)
+      result.value.value mustEqual expected
+      result.errors mustBe empty
     }
 
     "fail to bind an empty date" in {

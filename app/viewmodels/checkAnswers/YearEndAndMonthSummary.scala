@@ -19,30 +19,20 @@ package viewmodels.checkAnswers
 import controllers.routes
 import models.{CheckMode, UserAnswers}
 import pages.YearEndAndMonthPage
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-
 object YearEndAndMonthSummary  {
-
-  private def yearAndMonthFormat(): DateTimeFormatter = {
-    val pattern = "yyyy MMMM"
-    DateTimeFormatter.ofPattern(pattern)
-  }
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(YearEndAndMonthPage).map {
       answer =>
 
-        implicit val lang: Lang = messages.lang
-
         SummaryListRowViewModel(
           key     = "yearEndAndMonth.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.format(yearAndMonthFormat())),
+          value   = ValueViewModel(answer.displayFormat),
           actions = Seq(
             ActionItemViewModel("site.change", routes.YearEndAndMonthController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("yearEndAndMonth.change.hidden"))
