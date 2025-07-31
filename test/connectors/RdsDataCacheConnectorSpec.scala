@@ -63,7 +63,7 @@ class RdsDataCacheConnectorSpec extends SpecBase with MockitoSugar {
 
   "getEarliestPaymentDate" - {
     "must successfully retrieve a date" in {
-      val testRequest = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = "5")
+      val testRequest = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = expectedOffset)
 
       setupMocks(testRequest)
 
@@ -77,7 +77,7 @@ class RdsDataCacheConnectorSpec extends SpecBase with MockitoSugar {
     }
 
     "must fail when the result is parsed as a HttpResponse but is not a 200 (OK) response" in {
-      val testRequest = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = "5")
+      val testRequest = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = expectedOffset)
 
       setupMocks(testRequest)
 
@@ -90,7 +90,7 @@ class RdsDataCacheConnectorSpec extends SpecBase with MockitoSugar {
     }
 
     "must fail when the result is parsed as an UpstreamErrorResponse" in {
-      val testRequest = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = "5")
+      val testRequest = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = expectedOffset)
 
       setupMocks(testRequest)
 
@@ -103,7 +103,7 @@ class RdsDataCacheConnectorSpec extends SpecBase with MockitoSugar {
     }
     "must fail when the result is a failed future" in {
 
-      val testRequest = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = "5")
+      val testRequest = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = expectedOffset)
 
       setupMocks(testRequest)
 

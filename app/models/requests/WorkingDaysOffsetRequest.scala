@@ -18,7 +18,7 @@ package models.requests
 
 import play.api.libs.json.{Json, OFormat}
 
-case class WorkingDaysOffsetRequest(baseDate: String, offsetWorkingDays: String)
+case class WorkingDaysOffsetRequest(baseDate: String, offsetWorkingDays: Int)
 
 object WorkingDaysOffsetRequest {
   implicit val format: OFormat[WorkingDaysOffsetRequest] = Json.format[WorkingDaysOffsetRequest]

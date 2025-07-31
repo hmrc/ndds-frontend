@@ -31,7 +31,7 @@ class PaymentDateHelperSpec extends SpecBase {
 
   val mockConnector = mock[RdsDataCacheConnector]
   val mockConfig = mock[FrontendAppConfig]
-
+  
   val testHelper = new PaymentDateHelper(mockConnector, mockConfig)
 
   override def beforeEach(): Unit = {
@@ -40,7 +40,9 @@ class PaymentDateHelperSpec extends SpecBase {
     reset(mockConfig)
   }
 
-
+  val expectedDays5 = 5
+  val expectedDays10 = 10
+  
   "PaymentDateHelper" - {
     "getEarliestPaymentDate when" - {
       "must successfully return the Earliest Payment Date" in {
@@ -96,7 +98,7 @@ class PaymentDateHelperSpec extends SpecBase {
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
-        testHelper.calculateOffset(auddisStatus) mustBe "5"
+        testHelper.calculateOffset(auddisStatus) mustBe expectedDays5
       }
       "successfully calculate the offset when auddis status is not enabled" in {
         val auddisStatus = false
@@ -105,7 +107,7 @@ class PaymentDateHelperSpec extends SpecBase {
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
 
-        testHelper.calculateOffset(auddisStatus) mustBe "10"
+        testHelper.calculateOffset(auddisStatus) mustBe expectedDays10
       }
     }
 

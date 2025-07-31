@@ -21,6 +21,7 @@ import forms.PaymentDateFormProvider
 import models.Mode
 import navigation.Navigator
 import pages.PaymentDatePage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -43,11 +44,10 @@ class PaymentDateController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentDateView,
                                        paymentDateHelper: PaymentDateHelper
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-
+    implicit request => {
       val form = formProvider()
 
       val preparedForm = request.userAnswers.get(PaymentDatePage) match {
@@ -58,6 +58,10 @@ class PaymentDateController @Inject()(
       for {
         earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
       } yield Ok(view(preparedForm, PaymentDateViewModel(mode, paymentDateHelper.toDateString(earliestPaymentDate))))
+    }.recover { case e =>
+      logger.warn(s"Unexpected error: $e")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -76,6 +80,9 @@ class PaymentDateController @Inject()(
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, value))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
-      )
+      ).recover { case e =>
+        logger.warn(s"Unexpected error: $e")
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
   }
 }
