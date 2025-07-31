@@ -97,4 +97,4 @@ private[mappings] class YearEndAndMonthDateFormatter(
       s"$key.year" -> value.year.toString,
       s"$key.month" -> value.month.toString
     )
-} 
+}
