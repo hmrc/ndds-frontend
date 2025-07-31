@@ -18,12 +18,12 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.BankApprovalView
+
+import javax.inject.Inject
 
 class BankApprovalController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -31,11 +31,12 @@ class BankApprovalController @Inject()(
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: BankApprovalView
-                                     )(implicit appConfig: FrontendAppConfig) extends FrontendBaseController with I18nSupport {
+                                       view: BankApprovalView,
+                                       appConfig: FrontendAppConfig
+                                     ) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      Ok(view())
+      Ok(view(appConfig.payingHmrcUrl))
   }
 }

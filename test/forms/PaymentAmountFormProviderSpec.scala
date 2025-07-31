@@ -19,17 +19,20 @@ package forms
 import forms.behaviours.CurrencyFieldBehaviours
 import org.scalacheck.Gen
 import play.api.data.FormError
-import utils.Constants._
 
 import scala.math.BigDecimal.RoundingMode
 
 class PaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
 
-  private val form = new PaymentAmountFormProvider()()
+  val provider = new PaymentAmountFormProvider()
+  private val form = provider()
+  private val min = provider.MIN_AMOUNT
+  private val max = provider.MAX_AMOUNT
+
   private val fieldName = "value"
 
   private val validDataGenerator: Gen[String] =
-    Gen.choose[BigDecimal](MIN_AMOUNT, MAX_AMOUNT)
+    Gen.choose[BigDecimal](min, max)
       .map(_.setScale(2, RoundingMode.HALF_UP))
       .map(_.toString)
 
@@ -51,13 +54,13 @@ class PaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
     behave like currencyFieldWithMaximum(
       form,
       fieldName,
-      MAX_AMOUNT,
-      FormError(fieldName, "paymentAmount.error.max.min.range", Seq(MAX_AMOUNT))
+      max,
+      FormError(fieldName, "paymentAmount.error.max.min.range", Seq(max))
     )
 
     "fail when below minimum" in {
-      val result = form.bind(Map(fieldName -> (MIN_AMOUNT - 1).toString))
-      result.errors must contain only FormError(fieldName, "paymentAmount.error.max.min.range", Seq(MIN_AMOUNT))
+      val result = form.bind(Map(fieldName -> (min - 1).toString))
+      result.errors must contain only FormError(fieldName, "paymentAmount.error.max.min.range", Seq(min))
     }
 
     behave like mandatoryField(

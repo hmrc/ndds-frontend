@@ -22,6 +22,7 @@ import models.{DirectDebitSource, Mode, UserAnswers}
 import navigation.Navigator
 import pages.*
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -38,15 +39,17 @@ class DirectDebitSourceController @Inject()(
                                              navigator: Navigator,
                                              identify: IdentifierAction,
                                              getData: DataRetrievalAction,
+                                             requireData: DataRequiredAction,
                                              formProvider: DirectDebitSourceFormProvider,
                                              val controllerComponents: MessagesControllerComponents,
                                              view: DirectDebitSourceView
                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
+  val form: Form[DirectDebitSource] = formProvider()
+
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val answers = request.userAnswers
       val preparedForm = answers.get(DirectDebitSourcePage) match {
         case None => form
         case Some(value) => form.fill(value)
@@ -54,7 +57,7 @@ class DirectDebitSourceController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -64,7 +67,7 @@ class DirectDebitSourceController @Inject()(
         },
 
         value => {
-          val originalAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+          val originalAnswers = request.userAnswers
 
           Future.fromTry(setDirectDebitSource(originalAnswers, value))
             .flatMap { updatedAnswers =>

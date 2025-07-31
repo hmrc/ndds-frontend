@@ -40,7 +40,7 @@ final case class UserAnswers(
     }
 
   def set[A](page: Settable[A], value: A)(implicit writes: Writes[A]): Try[UserAnswers] =
-    page.cleanupBeforeSettingValue(Some(value), this).flatMap { ua =>
+    page.cleanup(Some(value), this).flatMap { ua =>
       val updatedData = ua.data.setObject(page.path, Json.toJson(value)) match {
         case JsSuccess(jsValue, _) =>
           Success(jsValue)

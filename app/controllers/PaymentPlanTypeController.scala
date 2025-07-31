@@ -18,18 +18,18 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentPlanTypeFormProvider
-
-import javax.inject.Inject
-import models.{DirectDebitSource, Mode, UserAnswers}
+import models.{DirectDebitSource, Mode, PaymentPlanType}
 import navigation.Navigator
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentPlanTypeView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaymentPlanTypeController @Inject()(
@@ -38,16 +38,17 @@ class PaymentPlanTypeController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
+                                       requireData: DataRequiredAction,
                                        formProvider: PaymentPlanTypeFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentPlanTypeView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form = formProvider()
+  val form: Form[PaymentPlanType] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val answers = request.userAnswers
       val selectedAnswers = answers.get(DirectDebitSourcePage)
 
       val preparedForm = answers.get(PaymentPlanTypePage) match {
@@ -57,9 +58,9 @@ class PaymentPlanTypeController @Inject()(
       Ok(view(preparedForm, mode, selectedAnswers))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val answers = request.userAnswers
       val selectedAnswers = answers.get(DirectDebitSourcePage)
 
       form.bindFromRequest().fold(
@@ -69,7 +70,7 @@ class PaymentPlanTypeController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PaymentPlanTypePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentPlanTypePage, mode, updatedAnswers))
       )

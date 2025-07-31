@@ -18,17 +18,17 @@ package controllers
 
 import controllers.actions.*
 import forms.PersonalOrBusinessAccountFormProvider
-
-import javax.inject.Inject
-import models.{Mode, UserAnswers}
+import models.{Mode, PersonalOrBusinessAccount, UserAnswers}
 import navigation.Navigator
 import pages.PersonalOrBusinessAccountPage
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PersonalOrBusinessAccountView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PersonalOrBusinessAccountController @Inject()(
@@ -42,8 +42,8 @@ class PersonalOrBusinessAccountController @Inject()(
                                        view: PersonalOrBusinessAccountView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
-  val ddiCount = 0
+  val form: Form[PersonalOrBusinessAccount] = formProvider()
+  val ddiCount: Int = 0
   
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>

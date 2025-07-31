@@ -20,9 +20,12 @@ import forms.mappings.Mappings
 
 import javax.inject.Inject
 import play.api.data.Form
-import utils.Constants._
 
-class PaymentAmountFormProvider @Inject() extends Mappings {
+class PaymentAmountFormProvider @Inject()() extends Mappings {
+
+  val MIN_AMOUNT: BigDecimal = 1.0
+  val MAX_AMOUNT: BigDecimal = 2000000.00
+  val DECIMAL_SCALE: BigDecimal = 2
 
   def apply(): Form[BigDecimal] =
     Form(

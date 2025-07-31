@@ -22,6 +22,7 @@ import controllers.routes
 import pages.*
 import models.*
 import models.DirectDebitSource.*
+import models.PaymentPlanType.*
 
 @Singleton
 class Navigator @Inject()() {
@@ -102,22 +103,20 @@ class Navigator @Inject()() {
   private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
     val answer: Option[DirectDebitSource] = userAnswers.get(DirectDebitSourcePage)
     answer match {
-          case Some(MGD) | Some(SA) | Some(TC) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
-          case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
-        }
+      case Some(MGD) | Some(SA) | Some(TC) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+      case _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+    }
 
   private def checkPlanStartDateLogic(userAnswers: UserAnswers): Call = {
-    val sourceType = userAnswers.get(DirectDebitSourcePage)
+    val optSourceType = userAnswers.get(DirectDebitSourcePage)
     val optPaymentType = userAnswers.get(PaymentPlanTypePage)
-    (sourceType, optPaymentType) match {
-      case (Some(DirectDebitSource.SA), Some(PaymentPlanType.BudgetPaymentPlan)) =>
+
+    (optSourceType, optPaymentType) match {
+      case (Some(SA), Some(BudgetPaymentPlan)) =>
         routes.PlanEndDateController.onPageLoad(NormalMode)
-      case (Some(DirectDebitSource.MGD), Some(PaymentPlanType.VariablePaymentPlan)) |
-           (Some(DirectDebitSource.TC), Some(PaymentPlanType.TaxCreditRepaymentPlan)) |
-           (Some(DirectDebitSource.PAYE), _) =>
+      case (Some(PAYE), _) | (Some(MGD), Some(VariablePaymentPlan)) | (Some(TC), Some(TaxCreditRepaymentPlan)) =>
         routes.CheckYourAnswersController.onPageLoad()
-      case _ =>
-        routes.JourneyRecoveryController.onPageLoad()
+      case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }
 }
