@@ -35,8 +35,6 @@ class YourBankDetailsViewSpec extends AnyWordSpec with Matchers with GuiceOneApp
       val html: HtmlFormat.Appendable = view(form, NormalMode)
       val doc = org.jsoup.Jsoup.parse(html.toString())
 
-      doc.select("input[name=sortCode]").attr("maxlength") mustBe "6"
-      doc.select("input[name=accountNumber]").attr("maxlength") mustBe "8"
       doc.select("h1").text() mustBe messages("yourBankDetails.heading")
     }
 

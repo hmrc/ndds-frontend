@@ -16,18 +16,19 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.TotalAmountDueFormProvider
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.TotalAmountDuePage
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.TotalAmountDueView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TotalAmountDueController @Inject()(
@@ -42,7 +43,7 @@ class TotalAmountDueController @Inject()(
                                         view: TotalAmountDueView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
+  val form: Form[BigDecimal] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -59,9 +60,7 @@ class TotalAmountDueController @Inject()(
     implicit request =>
 
       form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
-
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(TotalAmountDuePage, value))

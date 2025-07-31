@@ -18,17 +18,17 @@ package controllers
 
 import base.SpecBase
 import forms.YourBankDetailsFormProvider
-import models.{NormalMode, YourBankDetails, UserAnswers}
+import models.{DirectDebitSource, NormalMode, UserAnswers, YourBankDetails}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.YourBankDetailsPage
+import pages.{DirectDebitSourcePage, YourBankDetailsPage}
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.YourBankDetailsView
 
@@ -56,9 +56,8 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   "YourBankDetails Controller" - {
 
-    "must return OK and the correct view for a GET with empty data" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
+    "must return OK and the correct view for a GET" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, yourBankDetailsRoute)
@@ -88,12 +87,11 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted, even if no existing data" in {
-
+    "must redirect to the next page when valid data is submitted" in {
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-      val application = applicationBuilder(userAnswers = None)
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository)
@@ -115,9 +113,10 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted, even if no existing data" in {
+    "must return a Bad Request and errors when invalid data is submitted" in {
+      emptyUserAnswers.setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
 
-      val application = applicationBuilder(userAnswers = None).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(POST, yourBankDetailsRoute)
@@ -131,6 +130,39 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request = FakeRequest(GET, yourBankDetailsRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request = FakeRequest(POST, yourBankDetailsRoute)
+          .withFormUrlEncodedBody(
+            ("accountHolderName", "value 1"),
+            ("sortCode", "123454"),
+            ("accountNumber", "34211234")
+          )
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

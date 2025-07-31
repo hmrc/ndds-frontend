@@ -22,9 +22,12 @@ import forms.mappings.Mappings
 import play.api.data.Form
 import play.api.data.Forms._
 import models.YourBankDetails
-import utils.Constants._
 
 class YourBankDetailsFormProvider @Inject() extends Mappings {
+
+  val MAX_ACCOUNT_HOLDER_NAME_LENGTH = 35
+  val MAX_SORT_CODE_LENGTH = 6
+  val MAX_ACCOUNT_NUMBER_LENGTH = 8
 
   def apply(): Form[YourBankDetails] = Form(
     mapping(

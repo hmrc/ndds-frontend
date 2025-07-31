@@ -16,10 +16,9 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.YearEndAndMonthFormProvider
-import javax.inject.Inject
-import models.{Mode, UserAnswers}
+import models.Mode
 import navigation.Navigator
 import pages.YearEndAndMonthPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -28,6 +27,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YearEndAndMonthView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class YearEndAndMonthController @Inject()(
@@ -36,14 +36,15 @@ class YearEndAndMonthController @Inject()(
                                            navigator: Navigator,
                                            identify: IdentifierAction,
                                            getData: DataRetrievalAction,
+                                           requireData: DataRequiredAction,
                                            formProvider: YearEndAndMonthFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
                                            view: YearEndAndMonthView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val answers = request.userAnswers
       val preparedForm = answers.get(YearEndAndMonthPage) match {
         case None => formProvider()
         case Some(value) => formProvider().fill(value)
@@ -52,7 +53,7 @@ class YearEndAndMonthController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val form = formProvider()
 
@@ -62,7 +63,7 @@ class YearEndAndMonthController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(YearEndAndMonthPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(YearEndAndMonthPage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(YearEndAndMonthPage, mode, updatedAnswers))
       )

@@ -16,12 +16,13 @@
 
 package controllers
 
-import controllers.actions._
-import javax.inject.Inject
+import controllers.actions.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitConfirmationView
+
+import javax.inject.Inject
 
 class DirectDebitConfirmationController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -34,6 +35,7 @@ class DirectDebitConfirmationController @Inject()(
   def onPageLoad: Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val referenceNumber = "600002164"
-      Ok(view()(referenceNumber))
+      val serviceNumber = "X00011111A"
+      Ok(view(referenceNumber, serviceNumber))
   }
 }

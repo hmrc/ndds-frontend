@@ -24,27 +24,27 @@ import play.api.mvc.RequestHeader
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
-  val host: String    = configuration.get[String]("host")
-  val appName: String = configuration.get[String]("appName")
+  lazy val host: String    = configuration.get[String]("host")
+  lazy val appName: String = configuration.get[String]("appName")
 
-  private val contactHost = configuration.get[String]("contact-frontend.host")
-  private val contactFormServiceIdentifier = "ndds-frontend"
+  private lazy val contactHost = configuration.get[String]("contact-frontend.host")
+  private lazy val contactFormServiceIdentifier = configuration.get[String]("contact-frontend.serviceId")
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"
 
-  val loginUrl: String         = configuration.get[String]("urls.login")
-  val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
-  val signOutUrl: String       = configuration.get[String]("urls.signOut")
-  val payingHmrcUrl: String       = configuration.get[String]("urls.payingHmrc")
+  lazy val loginUrl: String         = configuration.get[String]("urls.login")
+  lazy val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
+  lazy val signOutUrl: String       = configuration.get[String]("urls.signOut")
+  lazy val payingHmrcUrl: String    = configuration.get[String]("urls.payingHmrc")
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
-  val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/ndds-frontend"
+  lazy val exitSurveyUrl: String        = s"$exitSurveyBaseUrl/feedback/ndds-frontend"
 
-  val languageTranslationEnabled: Boolean =
+  lazy val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("features.welsh-translation")
 
-  val maxNumberDDIsAllowed: Int =
+  lazy val maxNumberDDIsAllowed: Int =
       configuration.get[Int]("features.maxNumberDDIsAllowed")
 
   def languageMap: Map[String, Lang] = Map(
@@ -52,8 +52,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
     "cy" -> Lang("cy")
   )
 
-  val timeout: Int   = configuration.get[Int]("timeout-dialog.timeout")
-  val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
+  lazy val timeout: Int   = configuration.get[Int]("timeout-dialog.timeout")
+  lazy val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
-  val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+  lazy val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 }

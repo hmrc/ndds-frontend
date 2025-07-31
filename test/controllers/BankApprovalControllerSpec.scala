@@ -17,12 +17,11 @@
 package controllers
 
 import base.SpecBase
-import config.FrontendAppConfig
-import org.scalatest.matchers.must.Matchers._
+import org.scalatest.matchers.must.Matchers.*
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.BankApprovalView
 
 class BankApprovalControllerSpec extends SpecBase {
@@ -40,9 +39,8 @@ class BankApprovalControllerSpec extends SpecBase {
 
         implicit val msgs: Messages = messages(application)
         implicit val req: Request[_] = request
-        implicit val appConfig: FrontendAppConfig = application.injector.instanceOf[FrontendAppConfig]
 
-        contentAsString(result) mustEqual view().toString
+        contentAsString(result) mustEqual view("http://www.hmrc.gov.uk/payinghmrc/").toString
       }
     }
   }

@@ -51,7 +51,6 @@ class PaymentDateController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-
       val form = formProvider()
 
       val preparedForm = request.userAnswers.get(PaymentDatePage) match {
@@ -64,7 +63,6 @@ class PaymentDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-
       val form = formProvider()
 
       form.bindFromRequest().fold(
