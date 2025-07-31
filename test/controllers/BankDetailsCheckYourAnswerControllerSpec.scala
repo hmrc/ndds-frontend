@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.BankDetailsCheckYourAnswerFormProvider
-import models.{CheckMode, NormalMode, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import models.{CheckMode, NormalMode, YourBankDetailsWithAuddisStatus}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when

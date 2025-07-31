@@ -35,12 +35,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   private lazy val earliestPaymentDateSuffix: String = configuration.get[String]("microservice.services.rds-datacache-proxy.earliestPaymentDateUrl")
   lazy val earliestPaymentDateUrl: String = s"$rdsDataCacheProxyHost$earliestPaymentDateSuffix"
 
-  lazy val paymentDelayDynamicAuddisEnabled = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-enabled")
-  lazy val paymentDelayDynamicAuddisNotEnabled = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-not-enabled")
-  lazy val paymentDelayFixed = configuration.get[Int]("payment-working-days-delay.fixed-delay")
-
-  private val contactHost = configuration.get[String]("contact-frontend.host")
-  private val contactFormServiceIdentifier = "ndds-frontend"
+  lazy val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-enabled")
+  lazy val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-not-enabled")
+  lazy val paymentDelayFixed: Int = configuration.get[Int]("payment-working-days-delay.fixed-delay")
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"

@@ -33,19 +33,19 @@ import scala.concurrent.Future
 case class PaymentDateViewModel(mode: Mode, earliestPaymentDate: String)
 
 class PaymentDateHelper @Inject()(
-                                    rdsDataCacheConnector: RdsDataCacheConnector,
-                                    frontendAppConfig: FrontendAppConfig
-                                    ) {
+                                   rdsDataCacheConnector: RdsDataCacheConnector,
+                                   frontendAppConfig: FrontendAppConfig
+                                 ) {
 
   def getEarliestPaymentDate(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)
       .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
     val offsetWorkingDays = calculateOffset(auddisStatus)
     val currentDate = LocalDate.now().toString
-    
+
     rdsDataCacheConnector.getEarliestPaymentDate(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
   }
-  
+
   private[viewmodels] def calculateOffset(auddisStatus: Boolean): Int = {
     val fixedDelay = frontendAppConfig.paymentDelayFixed
 
@@ -59,12 +59,12 @@ class PaymentDateHelper @Inject()(
 
     totalDelay
   }
-  
+
   def toDateString(earliestPaymentDate: EarliestPaymentDate): String = {
     val date = LocalDate.parse(earliestPaymentDate.date)
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
-    
+
     date.format(formatter)
   }
-  
+
 }

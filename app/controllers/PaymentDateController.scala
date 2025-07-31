@@ -46,7 +46,7 @@ class PaymentDateController @Inject()(
                                        paymentDateHelper: PaymentDateHelper
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
       val form = formProvider()
 

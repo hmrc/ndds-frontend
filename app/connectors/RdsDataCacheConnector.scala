@@ -36,21 +36,21 @@ class RdsDataCacheConnector @Inject()(
   extends HttpReadsInstances {
 
   def getEarliestPaymentDate(workingDaysOffsetRequest: WorkingDaysOffsetRequest)(implicit
-                                                                          hc: HeaderCarrier
+                                                                                 hc: HeaderCarrier
   ): Future[EarliestPaymentDate] = {
     httpClientV2
       .post(url"${config.earliestPaymentDateUrl}")
       .withBody(Json.toJson(workingDaysOffsetRequest))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
-      .flatMap{
-        case Right(response)if response.status == OK =>
+      .flatMap {
+        case Right(response) if response.status == OK =>
           Try(response.json.as[EarliestPaymentDate]) match {
-            case Success(data)      => Future.successful(data)
+            case Success(data) => Future.successful(data)
             case Failure(exception) => Future.failed(new Exception(s"Invalid JSON format $exception"))
           }
-        case Left(errorResponse)                      =>
+        case Left(errorResponse) =>
           Future.failed(new Exception(s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"))
-        case Right(response)                          => Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
+        case Right(response) => Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
       }
   }
 

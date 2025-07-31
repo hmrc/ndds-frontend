@@ -18,10 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.YourBankDetailsFormProvider
-
-import javax.inject.Inject
-import models.{Mode, UserAnswers, YourBankDetailsWithAuddisStatus}
-import models.{Mode, YourBankDetails}
+import models.{Mode, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.YourBankDetailsPage
 import play.api.data.Form
@@ -71,7 +68,7 @@ class YourBankDetailsController @Inject()(
             // TODO: Replace line below with response from real BARS service call
             // TODO: Check if this value actually comes from BARS
             barsServiceResponse <- Future.successful(false)
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId))
+            updatedAnswers <- Future.fromTry(request.userAnswers
               .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
             )
             _ <- sessionRepository.set(updatedAnswers)
