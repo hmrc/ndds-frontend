@@ -25,6 +25,9 @@ import java.time.LocalDate
 
 class YearEndAndMonthSummarySpec extends SpecBase {
 
+
+  private def yearMonthDate(year: Int, month: Int): LocalDate = LocalDate.of(year, month, 1)
+
   "YearEndAndMonthSummary" - {
 
     "must display the date in YYYY Month format" in new Setup {
