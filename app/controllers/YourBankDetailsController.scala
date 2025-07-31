@@ -66,7 +66,6 @@ class YourBankDetailsController @Inject()(
         value =>
           for {
             // TODO: Replace line below with response from real BARS service call
-            // TODO: Check if this value actually comes from BARS
             barsServiceResponse <- Future.successful(false)
             updatedAnswers <- Future.fromTry(request.userAnswers
               .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
