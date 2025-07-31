@@ -17,15 +17,17 @@
 package forms
 
 import javax.inject.Inject
-
 import forms.mappings.Mappings
 import play.api.data.Form
 
 class PaymentReferenceFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[String] =
+  def apply(validator: Option[String => Boolean] = None): Form[String] =
     Form(
-      "value" -> text("paymentReference.error.required")
-        .verifying(maxLength(100, "paymentReference.error.length"))
+      "value" -> text("paymentReference.error.invalid")
+        .verifying("paymentReference.error.invalid", reference => validator.forall(_(reference)))
+
     )
+
+
 }
