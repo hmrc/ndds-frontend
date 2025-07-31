@@ -28,6 +28,7 @@ class AccountDetailsNotVerifiedControllerSpec extends SpecBase {
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val retryDate = "21 June 2025, 4:56pm"
 
       running(application) {
         val request = FakeRequest(GET, routes.AccountDetailsNotVerifiedController.onPageLoad().url)
@@ -37,7 +38,7 @@ class AccountDetailsNotVerifiedControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[AccountDetailsNotVerifiedView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(retryDate)(request, messages(application)).toString
       }
     }
   }

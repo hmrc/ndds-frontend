@@ -17,7 +17,6 @@
 package forms.mappings
 
 import play.api.data.FormError
-import play.api.data.format.Formatter
 import play.api.i18n.Messages
 
 import java.time.LocalDate
