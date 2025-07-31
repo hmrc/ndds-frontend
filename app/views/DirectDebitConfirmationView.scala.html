@@ -26,7 +26,7 @@
         mainButton: MainButton
 )
 
-@()(referenceNumber: String)(implicit request: Request[_], messages: Messages)
+@(referenceNumber: String, serviceNumber: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title"))) {
 
@@ -43,7 +43,8 @@
 
     @header2("directDebitConfirmation.h2")
 
-    @paragraph(messages("directDebitConfirmation.p1", referenceNumber, "X00011111A"))
+    @paragraph(messages("directDebitConfirmation.p1", referenceNumber, serviceNumber))
+    @paragraph(messages("directDebitConfirmation.p2"))
     @header2("directDebitConfirmation.printingHelp.h2")
     @paragraph(messages("directDebitConfirmation.printSafari"))
     @paragraph(messages("directDebitConfirmation.printChromeFirefoxEdge"))

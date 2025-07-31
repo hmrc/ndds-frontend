@@ -18,17 +18,17 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentReferenceFormProvider
-
-import javax.inject.Inject
-import models.{Mode, UserAnswers}
+import models.Mode
 import navigation.Navigator
 import pages.{DirectDebitSourcePage, PaymentReferencePage}
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentReferenceView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaymentReferenceController @Inject()(
@@ -37,16 +37,17 @@ class PaymentReferenceController @Inject()(
                                         navigator: Navigator,
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
+                                        requireData: DataRequiredAction,
                                         formProvider: PaymentReferenceFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
                                         view: PaymentReferenceView
                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
+  val form: Form[String] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val answers = request.userAnswers
       val selectedAnswers = answers.get(DirectDebitSourcePage)
 
       val preparedForm = answers.get(PaymentReferencePage) match {
@@ -57,9 +58,9 @@ class PaymentReferenceController @Inject()(
       Ok(view(preparedForm, mode, selectedAnswers))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val answers = request.userAnswers
       val selectedAnswers = answers.get(DirectDebitSourcePage)
 
       form.bindFromRequest().fold(
@@ -68,7 +69,7 @@ class PaymentReferenceController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PaymentReferencePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
       )

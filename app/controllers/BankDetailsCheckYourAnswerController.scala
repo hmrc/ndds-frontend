@@ -26,11 +26,11 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.BankDetailsCheckYourAnswerView
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -47,7 +47,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                          view: BankDetailsCheckYourAnswerView
                                  )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  val form:Form[Boolean] = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -66,7 +66,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors =>{
           logger.warn("Validation Error on display bank details confirmation page")
-          Future.successful(BadRequest(view(formWithErrors, mode,summaryList)))},
+          Future.successful(BadRequest(view(formWithErrors, mode, summaryList)))},
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, value))

@@ -18,17 +18,17 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentsFrequencyFormProvider
-
-import javax.inject.Inject
-import models.{Mode, UserAnswers}
+import models.{Mode, PaymentsFrequency}
 import navigation.Navigator
 import pages.PaymentsFrequencyPage
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentsFrequencyView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaymentsFrequencyController @Inject()(
@@ -37,17 +37,18 @@ class PaymentsFrequencyController @Inject()(
                                        navigator: Navigator,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
+                                       requireData: DataRequiredAction,
                                        formProvider: PaymentsFrequencyFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentsFrequencyView
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
-  val backLink =  mode => routes.PaymentReferenceController.onPageLoad(mode)
+  val form: Form[PaymentsFrequency] = formProvider()
+  val backLink: Mode => Call = mode => routes.PaymentReferenceController.onPageLoad(mode)
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val answers = request.userAnswers
       val preparedForm = answers.get(PaymentsFrequencyPage) match {
         case None => form
         case Some(value) => form.fill(value)
@@ -56,7 +57,7 @@ class PaymentsFrequencyController @Inject()(
       Ok(view(preparedForm, mode, backLink(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -65,7 +66,7 @@ class PaymentsFrequencyController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PaymentsFrequencyPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentsFrequencyPage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentsFrequencyPage, mode, updatedAnswers))
       )

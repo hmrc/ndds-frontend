@@ -25,7 +25,7 @@
         govukButton: GovukButton
 )
 
-@()(implicit request: Request[_],appConfig: FrontendAppConfig, messages: Messages)
+@(payingHmrcUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("bankApproval.title")),showSignOut = false, showBackLink = false) {
 
@@ -35,7 +35,7 @@
          @paragraphMessageWithLink(
          Some(messages("bankApproval.p2")),
          linkMessage = messages("bankApproval.p2.link"),
-         linkUrl = appConfig.payingHmrcUrl,
+         linkUrl = payingHmrcUrl,
          linkFullStop = false,
          message2 = Some(messages("bankApproval.p2.link.after"))
          )

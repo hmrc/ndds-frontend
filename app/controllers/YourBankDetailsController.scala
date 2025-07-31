@@ -21,14 +21,17 @@ import forms.YourBankDetailsFormProvider
 
 import javax.inject.Inject
 import models.{Mode, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.{Mode, YourBankDetails}
 import navigation.Navigator
 import pages.YourBankDetailsPage
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourBankDetailsView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class YourBankDetailsController @Inject()(
@@ -36,17 +39,18 @@ class YourBankDetailsController @Inject()(
                                            sessionRepository: SessionRepository,
                                            navigator: Navigator,
                                            identify: IdentifierAction,
+                                           requireData: DataRequiredAction,
                                            getData: DataRetrievalAction,
                                            formProvider: YourBankDetailsFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
                                            view: YourBankDetailsView
                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form = formProvider()
+  val form: Form[YourBankDetails] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val answers = request.userAnswers
       val preparedForm = answers.get(YourBankDetailsPage) match {
         case None => form
         case Some(value) => form.fill(YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(value))
@@ -55,7 +59,7 @@ class YourBankDetailsController @Inject()(
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(

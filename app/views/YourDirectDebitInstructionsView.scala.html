@@ -29,11 +29,11 @@
     directDebitDetailsTable: DirectDebitDetailsTable
 )
 
-@(directDebitDetails: List[DirectDebitDetails], maxLimit: Boolean = false)(implicit request: Request[_], messages: Messages)
+@(directDebitDetails: List[DirectDebitDetails], maxLimitReached: Boolean = false)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
-    @if(maxLimit) {
+    @if(maxLimitReached) {
         @govukErrorSummary(
             ErrorSummary(
                 errorList = Seq(
@@ -55,7 +55,7 @@
         linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url,
         linkFullStop = false,
         message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
-        maxLimit = maxLimit
+        maxLimit = maxLimitReached
     )
 
     @for(dd <- directDebitDetails) {

@@ -26,7 +26,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
 import viewmodels.checkAnswers.*
-import viewmodels.checkAnswers.{PaymentAmountSummary, PaymentDateSummary, PaymentReferenceSummary, PlanStartDateSummary, YearEndAndMonthSummary}
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
 
@@ -42,14 +41,13 @@ class CheckYourAnswersController @Inject()  (
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      logger.info("Display bank details confirmation page")
-
       val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
       val showStartDate = if(directDebitSource.contains(DirectDebitSource.PAYE)){
         YearEndAndMonthSummary.row(request.userAnswers)
       } else {
         PlanStartDateSummary.row(request.userAnswers)
       }
+
       val list = SummaryListViewModel(
         rows = Seq(
           PaymentReferenceSummary.row(request.userAnswers),
