@@ -16,11 +16,13 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.DateTimeFormats
 import views.html.AccountDetailsNotVerifiedView
 
 class AccountDetailsNotVerifiedController @Inject()(
@@ -33,6 +35,8 @@ class AccountDetailsNotVerifiedController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData) {
     implicit request =>
-      Ok(view())
+      val retryDate = "21 June 2025, 4:56pm" //TODO - should be retrieved from LOCK service response
+      val dateString = DateTimeFormats.formattedDateTime(retryDate)
+      Ok(view(dateString))
   }
 }

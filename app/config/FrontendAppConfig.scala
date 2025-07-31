@@ -45,7 +45,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig:
   val loginUrl: String         = configuration.get[String]("urls.login")
   val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
   val signOutUrl: String       = configuration.get[String]("urls.signOut")
-  
+  val payingHmrcUrl: String       = configuration.get[String]("urls.payingHmrc")
+
+
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   val exitSurveyUrl: String             = s"$exitSurveyBaseUrl/feedback/ndds-frontend"
 

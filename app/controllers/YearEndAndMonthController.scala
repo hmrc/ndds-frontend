@@ -36,7 +36,6 @@ class YearEndAndMonthController @Inject()(
                                            navigator: Navigator,
                                            identify: IdentifierAction,
                                            getData: DataRetrievalAction,
-                                           requireData: DataRequiredAction,
                                            formProvider: YearEndAndMonthFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
                                            view: YearEndAndMonthView

@@ -38,6 +38,12 @@ object DateTimeFormats {
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
     LocalDate.now().format(formatter)
   }
-  val dateTimeHintFormat: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("d M yyyy")
+
+  def formattedDateTime(dateTime: String): String = { //example: 24 July 2020, 16:29pm
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mma")
+    dateTime.format(formatter)
+  }
+
+  val dateTimeHintFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("d M yyyy")
+
 }
