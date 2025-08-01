@@ -51,7 +51,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
   private def form = formProvider()
 
-  val mockHelper = mock[PaymentDateHelper]
+  val mockHelper: PaymentDateHelper = mock[PaymentDateHelper]
 
   def onwardRoute = Call("GET", "/foo")
 
@@ -85,7 +85,10 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         "accountNumber" -> testAccountNumber,
         "auddisStatus" -> true
       ),
-      "paymentDate" -> "2025-02-01"))
+      "paymentDate" -> Json.obj(
+        "enteredDate" -> "2025-02-01",
+        "earliestPaymentDate" -> "2025-02-01",
+      )))
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, paymentDateRoute)
@@ -98,12 +101,9 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         "value.year" -> "2025"
       )
 
-  "paymentDate Controller" - {
-
+  "PaymentDateController" - {
     "onPageLoad" - {
-
       "must return OK and the correct view for a GET" in {
-
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
           .overrides(
             bind[Clock].toInstance(fixedClock),
@@ -183,12 +183,13 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "onSubmit" - {
-
       "must redirect to the next page when valid data is submitted" in {
-
         val mockSessionRepository = mock[SessionRepository]
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(emptyUserAnswers))(any()))
+          .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         val application =
           applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -238,7 +239,6 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
@@ -249,7 +249,26 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained" in {
+      "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
+
+        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
+          .overrides(
+            bind[Clock].toInstance(fixedClock),
+            bind[PaymentDateHelper].toInstance(mockHelper))
+          .build()
+
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        running(application) {
+          val result = route(application, postRequest()).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
 
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(

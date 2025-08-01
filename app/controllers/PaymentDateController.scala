@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentDateFormProvider
-import models.Mode
+import models.{Mode, PaymentDatePageData}
 import navigation.Navigator
 import pages.PaymentDatePage
 import play.api.Logging
@@ -29,7 +29,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.{PaymentDateHelper, PaymentDateViewModel}
 import views.html.PaymentDateView
 
-import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -52,13 +51,13 @@ class PaymentDateController @Inject()(
 
       val preparedForm = request.userAnswers.get(PaymentDatePage) match {
         case None => form
-        case Some(value) => form.fill(value)
+        case Some(value) => form.fill(PaymentDatePageData.toLocalDate(value))
       }
 
       for {
         earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
       } yield Ok(view(preparedForm, PaymentDateViewModel(mode, paymentDateHelper.toDateString(earliestPaymentDate))))
-    }.recover { case e =>
+    } recover { case e =>
       logger.warn(s"Unexpected error: $e")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
@@ -76,10 +75,12 @@ class PaymentDateController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, value))
+            earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
+            updatedAnswers <- Future.fromTry(request.userAnswers
+              .set(PaymentDatePage, PaymentDatePageData.toPaymentDatePageData(value, earliestPaymentDate.date)))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
-      ).recover { case e =>
+      ) recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
