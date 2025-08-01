@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency}
+import models.{DirectDebitSource, PaymentDatePageData, PaymentPlanType, PaymentsFrequency}
 import pages.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -28,6 +28,7 @@ import java.time.LocalDate
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
   private val fixedDate = LocalDate.of(2025, 7, 19)
+  private val paymentDatePageData: PaymentDatePageData = PaymentDatePageData(fixedDate, "2025-7-19")
   private val endDate = LocalDate.of(2027, 7, 25)
   private val yearEndAndMonthDate = LocalDate.of(2025, 4, 1)
 
@@ -37,7 +38,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
       .setOrException(PaymentReferencePage, "1234567")
       .setOrException(PaymentAmountPage, 123.01)
-      .setOrException(PaymentDatePage, fixedDate)
+      .setOrException(PaymentDatePage, paymentDatePageData)
 
     "must return OK and the correct view if CT selected for a GET" in {
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
@@ -66,7 +67,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePayment)
         .setOrException(PaymentReferencePage, "1234567")
         .setOrException(PaymentAmountPage, 123.01)
-        .setOrException(PaymentDatePage, fixedDate)
+        .setOrException(PaymentDatePage, paymentDatePageData)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
@@ -91,7 +92,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
         .setOrException(PaymentReferencePage, "1234567")
         .setOrException(PaymentAmountPage, 123.01)
-        .setOrException(PaymentDatePage, fixedDate)
+        .setOrException(PaymentDatePage, paymentDatePageData)
         .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
       running(application) {

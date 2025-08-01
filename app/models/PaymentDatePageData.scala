@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package pages
+package models
 
-import models.YourBankDetailsWithAuddisStatus
-import play.api.libs.json.JsPath
+import play.api.libs.json.{Json, OFormat}
 
-case object YourBankDetailsPage extends QuestionPage[YourBankDetailsWithAuddisStatus] {
+import java.time.LocalDate
 
-  override def path: JsPath = JsPath \ toString
+case class PaymentDatePageData(enteredDate: LocalDate, earliestPaymentDate: String)
 
-  override def toString: String = "yourBankDetails"
-}
+object PaymentDatePageData:
+
+  implicit val format: OFormat[PaymentDatePageData] = Json.format
+
+  def toPaymentDatePageData(enteredDate: LocalDate, earliestPaymentDate: String): PaymentDatePageData = {
+    PaymentDatePageData(enteredDate, earliestPaymentDate)
+  }
+
+  def toLocalDate(paymentDatePageData: PaymentDatePageData): LocalDate = {
+    paymentDatePageData.enteredDate
+  }

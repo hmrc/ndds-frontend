@@ -49,7 +49,8 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       YourBankDetailsPage.toString -> Json.obj(
         "accountHolderName" -> "value 1",
         "sortCode" -> "123212",
-        "accountNumber" -> "34211234"
+        "accountNumber" -> "34211234",
+        "auddisStatus" -> true
       )
     )
   )

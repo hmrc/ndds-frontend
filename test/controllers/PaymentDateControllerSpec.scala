@@ -16,36 +16,46 @@
 
 package controllers
 
-import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import base.SpecBase
 import forms.PaymentDateFormProvider
+import models.responses.EarliestPaymentDate
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.PaymentDatePage
 import play.api.i18n.Messages
 import play.api.inject.bind
+import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
+import viewmodels.{PaymentDateHelper, PaymentDateViewModel}
 import views.html.PaymentDateView
 
-import java.time.format.DateTimeFormatter
+import java.time.*
 import scala.concurrent.Future
 
 class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
+  override def beforeEach(): Unit = {
+    reset(mockHelper)
+    super.beforeEach()
+  }
+
   private implicit val messages: Messages = stubMessages()
 
   private val formProvider = new PaymentDateFormProvider()
+
   private def form = formProvider()
+
+  val mockHelper: PaymentDateHelper = mock[PaymentDateHelper]
 
   def onwardRoute = Call("GET", "/foo")
 
-  val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  val validAnswer = LocalDate.of(2025, 2, 1)
 
   lazy val paymentDateRoute = routes.PaymentDateController.onPageLoad(NormalMode).url
 
@@ -54,8 +64,31 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   val fixedClock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
 
   val date = LocalDateTime.now(fixedClock)
-  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-  private val formattedDate = date.format(formatter)
+  private val formattedDate = "6 February 2025"
+
+  val expectedEarliestPaymentDate = EarliestPaymentDate("2025-02-06")
+
+  val expectedUserAnswersNormalMode = emptyUserAnswers.copy(data =
+    Json.obj(
+      "yourBankDetails" -> Json.obj(
+        "accountHolderName" -> testAccountHolderName,
+        "sortCode" -> testSortCode,
+        "accountNumber" -> testAccountNumber,
+        "auddisStatus" -> true
+      )))
+
+  val expectedUserAnswersChangeMode = emptyUserAnswers.copy(data =
+    Json.obj(
+      "yourBankDetails" -> Json.obj(
+        "accountHolderName" -> testAccountHolderName,
+        "sortCode" -> testSortCode,
+        "accountNumber" -> testAccountNumber,
+        "auddisStatus" -> true
+      ),
+      "paymentDate" -> Json.obj(
+        "enteredDate" -> "2025-02-01",
+        "earliestPaymentDate" -> "2025-02-01",
+      )))
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, paymentDateRoute)
@@ -63,113 +96,199 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, paymentDateRoute)
       .withFormUrlEncodedBody(
-        "value.day"   -> "1",
+        "value.day" -> "1",
         "value.month" -> "02",
-        "value.year"  -> "2025"
+        "value.year" -> "2025"
       )
 
-  "paymentDate Controller" - {
-
-    "must return OK and the correct view for a GET" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[Clock].toInstance(fixedClock))
-        .build()
-
-
-      running(application) {
-        val result = route(application, getRequest()).value
-
-        val view = application.injector.instanceOf[PaymentDateView]
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, formattedDate)(getRequest(), messages(application)).toString
-      }
-    }
-
-    "must populate the view correctly on a GET when the question has previously been answered" in {
-
-      val userAnswers = UserAnswers(userAnswersId).set(PaymentDatePage, validAnswer).success.value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[Clock].toInstance(fixedClock))
-        .build()
-
-      running(application) {
-        val view = application.injector.instanceOf[PaymentDateView]
-
-        val result = route(application, getRequest()).value
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate)(getRequest(), messages(application)).toString
-      }
-    }
-
-    "must redirect to the next page when valid data is submitted" in {
-
-      val mockSessionRepository = mock[SessionRepository]
-
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+  "PaymentDateController" - {
+    "onPageLoad" - {
+      "must return OK and the correct view for a GET" in {
+        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
           .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
+            bind[Clock].toInstance(fixedClock),
+            bind[PaymentDateHelper].toInstance(mockHelper))
           .build()
 
-      running(application) {
-        val result = route(application, postRequest()).value
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
+          .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        when(mockHelper.toDateString(ArgumentMatchers.eq(expectedEarliestPaymentDate)))
+          .thenReturn(formattedDate)
+
+        running(application) {
+          val result = route(application, getRequest()).value
+
+          val view = application.injector.instanceOf[PaymentDateView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(form, PaymentDateViewModel(NormalMode, formattedDate))(getRequest(), messages(application)).toString
+        }
+      }
+
+      "must populate the view correctly on a GET when the question has previously been answered" in {
+
+        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
+          .overrides(
+            bind[Clock].toInstance(fixedClock),
+            bind[PaymentDateHelper].toInstance(mockHelper))
+          .build()
+
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+
+        when(mockHelper.toDateString(ArgumentMatchers.eq(expectedEarliestPaymentDate)))
+          .thenReturn(formattedDate)
+
+        running(application) {
+          val view = application.injector.instanceOf[PaymentDateView]
+
+          val result = route(application, getRequest()).value
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(form.fill(validAnswer), PaymentDateViewModel(NormalMode, formattedDate))(getRequest(), messages(application)).toString
+        }
+      }
+
+      "must redirect to Journey Recovery for a GET if no existing data is found" in {
+
+        val application = applicationBuilder(userAnswers = None).build()
+
+        running(application) {
+          val result = route(application, getRequest()).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "must redirect to Journey Recovery for a GET if the earliest payment date cannot be obtained" in {
+
+        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
+          .overrides(
+            bind[Clock].toInstance(fixedClock),
+            bind[PaymentDateHelper].toInstance(mockHelper))
+          .build()
+
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        running(application) {
+          val result = route(application, getRequest()).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
+    "onSubmit" - {
+      "must redirect to the next page when valid data is submitted" in {
+        val mockSessionRepository = mock[SessionRepository]
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[Clock].toInstance(fixedClock))
-        .build()
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-      val request =
-        FakeRequest(POST, paymentDateRoute)
-          .withFormUrlEncodedBody(("value", "invalid value"))
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(emptyUserAnswers))(any()))
+          .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
-      running(application) {
-        val boundForm = form.bind(Map("value" -> "invalid value"))
+        val application =
+          applicationBuilder(userAnswers = Some(emptyUserAnswers))
+            .overrides(
+              bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+              bind[SessionRepository].toInstance(mockSessionRepository),
+              bind[PaymentDateHelper].toInstance(mockHelper)
+            )
+            .build()
 
-        val view = application.injector.instanceOf[PaymentDateView]
+        running(application) {
+          val result = route(application, postRequest()).value
 
-        val result = route(application, request).value
-
-        status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate)(request, messages(application)).toString
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual onwardRoute.url
+        }
       }
-    }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+      "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
+          .overrides(
+            bind[Clock].toInstance(fixedClock),
+            bind[PaymentDateHelper].toInstance(mockHelper))
+          .build()
 
-      running(application) {
-        val result = route(application, getRequest()).value
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
+          .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        when(mockHelper.toDateString(ArgumentMatchers.eq(expectedEarliestPaymentDate)))
+          .thenReturn(formattedDate)
+
+        val request =
+          FakeRequest(POST, paymentDateRoute)
+            .withFormUrlEncodedBody(("value", "invalid value"))
+
+        running(application) {
+          val boundForm = form.bind(Map("value" -> "invalid value"))
+
+          val view = application.injector.instanceOf[PaymentDateView]
+
+          val result = route(application, request).value
+
+          status(result) mustEqual BAD_REQUEST
+          contentAsString(result) mustEqual view(boundForm, PaymentDateViewModel(NormalMode, formattedDate))(request, messages(application)).toString
+        }
       }
-    }
 
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+      "must redirect to Journey Recovery for a POST if no existing data is found" in {
+        val application = applicationBuilder(userAnswers = None).build()
 
-      val application = applicationBuilder(userAnswers = None).build()
+        running(application) {
+          val result = route(application, postRequest()).value
 
-      running(application) {
-        val result = route(application, postRequest()).value
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
+
+        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
+          .overrides(
+            bind[Clock].toInstance(fixedClock),
+            bind[PaymentDateHelper].toInstance(mockHelper))
+          .build()
+
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        running(application) {
+          val result = route(application, postRequest()).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
+
+        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
+          .overrides(
+            bind[Clock].toInstance(fixedClock),
+            bind[PaymentDateHelper].toInstance(mockHelper))
+          .build()
+
+        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val request =
+          FakeRequest(POST, paymentDateRoute)
+            .withFormUrlEncodedBody(("value", "invalid value"))
+
+        running(application) {
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
       }
     }
   }

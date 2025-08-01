@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package pages
+package models.requests
 
-import models.YourBankDetailsWithAuddisStatus
-import play.api.libs.json.JsPath
+import play.api.libs.json.{Json, OFormat}
 
-case object YourBankDetailsPage extends QuestionPage[YourBankDetailsWithAuddisStatus] {
+case class WorkingDaysOffsetRequest(baseDate: String, offsetWorkingDays: Int)
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "yourBankDetails"
+object WorkingDaysOffsetRequest {
+  implicit val format: OFormat[WorkingDaysOffsetRequest] = Json.format[WorkingDaysOffsetRequest]
 }
+
+
