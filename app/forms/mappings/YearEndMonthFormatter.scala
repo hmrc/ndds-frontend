@@ -22,7 +22,7 @@ import play.api.i18n.Messages
 import java.time.LocalDate
 import scala.util.{Failure, Success, Try}
 
-private[mappings] class YearMonthFormatter(
+private[mappings] class YearEndMonthFormatter(
                                             invalidKey: String,
                                             allRequiredKey: String,
                                             twoRequiredKey: String,
@@ -68,4 +68,4 @@ private[mappings] class YearMonthFormatter(
       s"$key.year" -> value.getYear.toString,
       s"$key.month" -> value.getMonthValue.toString
     )
-}
+} 
