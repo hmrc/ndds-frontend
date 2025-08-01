@@ -19,18 +19,14 @@ package forms.mappings
 import models.YearEndAndMonth
 import play.api.data.FormError
 import play.api.data.format.Formatter
-import play.api.i18n.Messages
 
 import scala.util.Try
 
 private[mappings] class YearEndAndMonthDateFormatter(
                                             invalidKey: String,
-                                            allRequiredKey: String,
-                                            twoRequiredKey: String,
-                                            requiredKey: String,
                                             args: Seq[String] = Seq.empty,
                                             dateFormats: Seq[DateFormat]
-                                          )(implicit messages: Messages) extends Formatter[YearEndAndMonth] with Formatters {
+                                          ) extends Formatter[YearEndAndMonth] with Formatters {
 
   protected val fieldKeys: List[String] = List("year", "month")
 
