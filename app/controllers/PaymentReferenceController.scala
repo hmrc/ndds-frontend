@@ -18,7 +18,9 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentReferenceFormProvider
-import models.Mode
+
+import javax.inject.Inject
+import models.{DirectDebitSource, Mode, UserAnswers}
 import navigation.Navigator
 import pages.{DirectDebitSourcePage, PaymentReferencePage}
 import play.api.data.Form
@@ -26,52 +28,71 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import validation.ReferenceTypeValidatorMap
 import views.html.PaymentReferenceView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PaymentReferenceController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        sessionRepository: SessionRepository,
-                                        navigator: Navigator,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        formProvider: PaymentReferenceFormProvider,
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: PaymentReferenceView
-                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                            override val messagesApi: MessagesApi,
+                                            sessionRepository: SessionRepository,
+                                            navigator: Navigator,
+                                            identify: IdentifierAction,
+                                            getData: DataRetrievalAction,
+                                            requireData: DataRequiredAction,
+                                            formProvider: PaymentReferenceFormProvider,
+                                            val controllerComponents: MessagesControllerComponents,
+                                            view: PaymentReferenceView
+                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form: Form[String] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val answers = request.userAnswers
       val selectedAnswers = answers.get(DirectDebitSourcePage)
+      val dds = selectedAnswers.flatMap(dds => DirectDebitSource.objectMap.get(dds.toString))
+      val result = dds.flatMap(v => ReferenceTypeValidatorMap.validatorType(v))
 
-      val preparedForm = answers.get(PaymentReferencePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
+      result match {
+        case None =>
+          Redirect(navigator.nextPage(PaymentReferencePage, mode, answers))
+        case Some(_) =>
+
+          val form = formProvider(None)
+
+          val preparedForm = answers.get(PaymentReferencePage) match {
+            case None => form
+            case Some(value) => form.fill(value)
+          }
+
+          Ok(view(preparedForm, mode, selectedAnswers))
       }
-
-      Ok(view(preparedForm, mode, selectedAnswers))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val answers = request.userAnswers
       val selectedAnswers = answers.get(DirectDebitSourcePage)
+      val dds = selectedAnswers.flatMap(dds => DirectDebitSource.objectMap.get(dds.toString))
+      val result = dds.flatMap(v => ReferenceTypeValidatorMap.validatorType(v))
+      
+      result match {
+        case None =>
+          Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
+        case Some(serviceType) =>
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers))),
+          val form = formProvider(Some(serviceType))
+          form.bindFromRequest().fold(
+            formWithErrors =>
+              Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers))),
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
-      )
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, value))
+                _ <- sessionRepository.set(updatedAnswers)
+              } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
+          )
+      }
   }
 }

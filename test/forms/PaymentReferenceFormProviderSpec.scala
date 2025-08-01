@@ -23,6 +23,7 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
 
   val requiredKey = "paymentReference.error.required"
   val lengthKey = "paymentReference.error.length"
+  val invalidKey= "paymentReference.error.invalid"
   val maxLength = 100
 
   val form = new PaymentReferenceFormProvider()()
@@ -37,17 +38,11 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
       stringsWithMaxLength(maxLength)
     )
 
-    behave like fieldWithMaxLength(
-      form,
+    behave like invalidField(
+      new PaymentReferenceFormProvider().apply(Some({_ => false})),
       fieldName,
-      maxLength = maxLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
-    )
-
-    behave like mandatoryField(
-      form,
-      fieldName,
-      requiredError = FormError(fieldName, requiredKey)
+      requiredError = FormError(fieldName, invalidKey),
+      "test"
     )
   }
 }

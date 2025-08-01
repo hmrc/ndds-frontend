@@ -26,13 +26,21 @@ sealed trait DirectDebitSource
 object DirectDebitSource extends Enumerable.Implicits {
 
   case object CT extends WithName("ct") with DirectDebitSource
+
   case object MGD extends WithName("mgd") with DirectDebitSource
+
   case object NIC extends WithName("nic") with DirectDebitSource
+
   case object OL extends WithName("otherLiability") with DirectDebitSource
+
   case object PAYE extends WithName("paye") with DirectDebitSource
+
   case object SA extends WithName("sa") with DirectDebitSource
+
   case object SDLT extends WithName("sdlt") with DirectDebitSource
+
   case object TC extends WithName("tc") with DirectDebitSource
+
   case object VAT extends WithName("vat") with DirectDebitSource
 
   val values: Seq[DirectDebitSource] = Seq(
@@ -45,12 +53,15 @@ object DirectDebitSource extends Enumerable.Implicits {
       val hintText = messages(hintKey)
       RadioItem(
         content = Text(messages(s"directDebitSource.${value.toString}")),
-        value   = Some(value.toString),
-        id      = Some(s"value_$index"),
-        hint    = if (hintText != hintKey) Some(Hint(content = Text(hintText))) else None
+        value = Some(value.toString),
+        id = Some(s"value_$index"),
+        hint = if (hintText != hintKey) Some(Hint(content = Text(hintText))) else None
       )
   }
 
+
   implicit val enumerable: Enumerable[DirectDebitSource] =
     Enumerable(values.map(v => v.toString -> v): _*)
+
+   val objectMap: Map[String, DirectDebitSource] = values.map(v => v.toString -> v).toMap
 }
