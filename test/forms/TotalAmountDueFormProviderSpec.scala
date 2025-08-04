@@ -17,15 +17,21 @@
 package forms
 
 import config.CurrencyFormatter.currencyFormat
+import config.FrontendAppConfig
 import forms.behaviours.CurrencyFieldBehaviours
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import play.api.data.FormError
 
 import scala.math.BigDecimal.RoundingMode
 
-class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours {
+class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with MockitoSugar {
 
-  val form = new TotalAmountDueFormProvider()()
+  val mockConfig = mock[FrontendAppConfig]
+  when(mockConfig.minimumLiabilityAmount).thenReturn(BigDecimal("12.00"))
+  
+  val form = new TotalAmountDueFormProvider(mockConfig)()
 
   ".value" - {
 
@@ -71,5 +77,16 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours {
       fieldName,
       requiredError = FormError(fieldName, "totalAmountDue.error.required")
     )
+
+    "must validate the minimum liability amount from config" in {
+      val testConfig = mock[FrontendAppConfig]
+      when(testConfig.minimumLiabilityAmount).thenReturn(BigDecimal("25.00"))
+      
+      val testForm = new TotalAmountDueFormProvider(testConfig)()
+      
+      val result = testForm.bind(Map("value" -> "10.00"))
+      
+      result.errors must contain(FormError("value", "totalAmountDue.error.belowMinimum", Seq("£25")))
+    }
   }
 }
