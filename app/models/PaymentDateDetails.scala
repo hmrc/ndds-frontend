@@ -26,10 +26,10 @@ object PaymentDateDetails:
 
   implicit val format: OFormat[PaymentDateDetails] = Json.format
 
-  def toPaymentDatePageData(enteredDate: LocalDate, earliestPaymentDate: String): PaymentDateDetails = {
+  def toPaymentDateDetails(enteredDate: LocalDate, earliestPaymentDate: String): PaymentDateDetails = {
     PaymentDateDetails(enteredDate, earliestPaymentDate)
   }
 
-  def toLocalDate(paymentDatePageData: PaymentDateDetails): LocalDate = {
-    paymentDatePageData.enteredDate
+  def toLocalDate(paymentDateDetails: PaymentDateDetails): LocalDate = {
+    paymentDateDetails.enteredDate
   }

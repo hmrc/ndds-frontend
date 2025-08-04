@@ -25,19 +25,19 @@ class PaymentDateDetailsSpec extends SpecBase {
   val testLocalDate: LocalDate = LocalDate.of(2025, 5, 5)
   val testEarliestPaymentDate: String = "2025-5-10"
 
-  "PaymentDatePageData" - {
-    "toPaymentDatePageData method" - {
-      "must successfully convert from LocalDate to PaymentDatePageData" in {
+  "PaymentDateDetails" - {
+    "toPaymentDateDetails method" - {
+      "must successfully convert from LocalDate to PaymentDateDetails" in {
         val expectedResult = PaymentDateDetails(testLocalDate, testEarliestPaymentDate)
 
-        val result = PaymentDateDetails.toPaymentDatePageData(testLocalDate, testEarliestPaymentDate)
+        val result = PaymentDateDetails.toPaymentDateDetails(testLocalDate, testEarliestPaymentDate)
 
         result mustEqual expectedResult
       }
     }
 
     "toLocalDate method" - {
-      "must successfully convert from PaymentDatePageData to LocalDate" in {
+      "must successfully convert from PaymentDateDetails to LocalDate" in {
         val testModel = PaymentDateDetails(testLocalDate, testEarliestPaymentDate)
 
         val expectedResult = testLocalDate

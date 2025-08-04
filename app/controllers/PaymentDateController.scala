@@ -77,7 +77,7 @@ class PaymentDateController @Inject()(
           for {
             earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
             updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(PaymentDatePage, PaymentDateDetails.toPaymentDatePageData(value, earliestPaymentDate.date)))
+              .set(PaymentDatePage, PaymentDateDetails.toPaymentDateDetails(value, earliestPaymentDate.date)))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
       ) recover { case e =>
