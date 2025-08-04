@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentDateFormProvider
-import models.{Mode, PaymentDatePageData}
+import models.{Mode, PaymentDateDetails}
 import navigation.Navigator
 import pages.PaymentDatePage
 import play.api.Logging
@@ -51,7 +51,7 @@ class PaymentDateController @Inject()(
 
       val preparedForm = request.userAnswers.get(PaymentDatePage) match {
         case None => form
-        case Some(value) => form.fill(PaymentDatePageData.toLocalDate(value))
+        case Some(value) => form.fill(PaymentDateDetails.toLocalDate(value))
       }
 
       for {
@@ -77,7 +77,7 @@ class PaymentDateController @Inject()(
           for {
             earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
             updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(PaymentDatePage, PaymentDatePageData.toPaymentDatePageData(value, earliestPaymentDate.date)))
+              .set(PaymentDatePage, PaymentDateDetails.toPaymentDatePageData(value, earliestPaymentDate.date)))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
       ) recover { case e =>

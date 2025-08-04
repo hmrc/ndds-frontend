@@ -20,16 +20,16 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-case class PaymentDatePageData(enteredDate: LocalDate, earliestPaymentDate: String)
+case class PaymentDateDetails(enteredDate: LocalDate, earliestPaymentDate: String)
 
-object PaymentDatePageData:
+object PaymentDateDetails:
 
-  implicit val format: OFormat[PaymentDatePageData] = Json.format
+  implicit val format: OFormat[PaymentDateDetails] = Json.format
 
-  def toPaymentDatePageData(enteredDate: LocalDate, earliestPaymentDate: String): PaymentDatePageData = {
-    PaymentDatePageData(enteredDate, earliestPaymentDate)
+  def toPaymentDatePageData(enteredDate: LocalDate, earliestPaymentDate: String): PaymentDateDetails = {
+    PaymentDateDetails(enteredDate, earliestPaymentDate)
   }
 
-  def toLocalDate(paymentDatePageData: PaymentDatePageData): LocalDate = {
+  def toLocalDate(paymentDatePageData: PaymentDateDetails): LocalDate = {
     paymentDatePageData.enteredDate
   }

@@ -16,10 +16,10 @@
 
 package pages
 
-import models.PaymentDatePageData
+import models.PaymentDateDetails
 import play.api.libs.json.JsPath
 
-case object PaymentDatePage extends QuestionPage[PaymentDatePageData] {
+case object PaymentDatePage extends QuestionPage[PaymentDateDetails] {
 
   override def path: JsPath = JsPath \ toString
 

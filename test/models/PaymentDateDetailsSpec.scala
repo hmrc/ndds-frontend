@@ -20,7 +20,7 @@ import base.SpecBase
 
 import java.time.LocalDate
 
-class PaymentDatePageDataSpec extends SpecBase {
+class PaymentDateDetailsSpec extends SpecBase {
 
   val testLocalDate: LocalDate = LocalDate.of(2025, 5, 5)
   val testEarliestPaymentDate: String = "2025-5-10"
@@ -28,9 +28,9 @@ class PaymentDatePageDataSpec extends SpecBase {
   "PaymentDatePageData" - {
     "toPaymentDatePageData method" - {
       "must successfully convert from LocalDate to PaymentDatePageData" in {
-        val expectedResult = PaymentDatePageData(testLocalDate, testEarliestPaymentDate)
+        val expectedResult = PaymentDateDetails(testLocalDate, testEarliestPaymentDate)
 
-        val result = PaymentDatePageData.toPaymentDatePageData(testLocalDate, testEarliestPaymentDate)
+        val result = PaymentDateDetails.toPaymentDatePageData(testLocalDate, testEarliestPaymentDate)
 
         result mustEqual expectedResult
       }
@@ -38,11 +38,11 @@ class PaymentDatePageDataSpec extends SpecBase {
 
     "toLocalDate method" - {
       "must successfully convert from PaymentDatePageData to LocalDate" in {
-        val testModel = PaymentDatePageData(testLocalDate, testEarliestPaymentDate)
+        val testModel = PaymentDateDetails(testLocalDate, testEarliestPaymentDate)
 
         val expectedResult = testLocalDate
 
-        val result = PaymentDatePageData.toLocalDate(testModel)
+        val result = PaymentDateDetails.toLocalDate(testModel)
 
         result mustEqual expectedResult
       }
