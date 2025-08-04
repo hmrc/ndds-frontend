@@ -162,7 +162,7 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(PlanEndDatePage, NormalMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
-      "must go from YearEndAndMonthPage to CheckYourAnswersController" in {
+      "must go from YearEndAndMonthPage to PaymentAmountController" in {
         navigator.nextPage(YearEndAndMonthPage, NormalMode, userAnswers) mustBe routes.PaymentAmountController.onPageLoad(NormalMode)
       }
 
