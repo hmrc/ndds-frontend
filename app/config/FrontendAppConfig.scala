@@ -58,5 +58,5 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
   lazy val minimumLiabilityAmount: BigDecimal = 
-    BigDecimal(configuration.get[String]("business-rules.minimumLiabilityAmount"))
+    BigDecimal(configuration.get[String]("payment-validation.minimumLiabilityAmount"))
 }
