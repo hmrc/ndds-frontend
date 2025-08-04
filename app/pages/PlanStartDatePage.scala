@@ -16,12 +16,12 @@
 
 package pages
 
-import models.PlanStartDatePageData
+import models.PlanStartDateDetails
 
 import java.time.LocalDate
 import play.api.libs.json.JsPath
 
-case object PlanStartDatePage extends QuestionPage[PlanStartDatePageData] {
+case object PlanStartDatePage extends QuestionPage[PlanStartDateDetails] {
 
   override def path: JsPath = JsPath \ toString
 

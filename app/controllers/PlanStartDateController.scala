@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.PlanStartDateFormProvider
-import models.{Mode, PlanStartDatePageData}
+import models.{Mode, PlanStartDateDetails}
 import navigation.Navigator
 import pages.PlanStartDatePage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -50,7 +50,7 @@ class PlanStartDateController @Inject()(
       val answers = request.userAnswers
       val preparedForm = answers.get(PlanStartDatePage) match {
         case None => form
-        case Some(value) => form.fill(PlanStartDatePageData.toLocalDate(value))
+        case Some(value) => form.fill(PlanStartDateDetails.toLocalDate(value))
       }
       Ok(view(preparedForm, mode))
   }
@@ -65,7 +65,7 @@ class PlanStartDateController @Inject()(
           for {
             earliestPaymentDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
             updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(PlanStartDatePage, PlanStartDatePageData.toPaymentDatePageData(value, earliestPaymentDate.date)))
+              .set(PlanStartDatePage, PlanStartDateDetails.toPaymentDatePageData(value, earliestPaymentDate.date)))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
       )
