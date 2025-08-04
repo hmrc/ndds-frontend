@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package pages
+package models
 
-import models.PlanStartDatePageData
+import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
-import play.api.libs.json.JsPath
 
-case object PlanStartDatePage extends QuestionPage[PlanStartDatePageData] {
+case class PlanStartDatePageData(enteredDate: LocalDate, earliestPlanStartSate: String)
 
-  override def path: JsPath = JsPath \ toString
+object PlanStartDatePageData {
+  implicit val format: OFormat[PlanStartDatePageData] = Json.format
 
-  override def toString: String = "planStartDate"
+  def toPaymentDatePageData(enteredDate: LocalDate, earliestPlanStartSate: String): PlanStartDatePageData = {
+    PlanStartDatePageData(enteredDate, earliestPlanStartSate)
+  }
+
+  def toLocalDate(paymentDatePageData: PlanStartDatePageData): LocalDate = {
+    paymentDatePageData.enteredDate
+  }
 }

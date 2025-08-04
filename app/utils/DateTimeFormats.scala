@@ -44,6 +44,11 @@ object DateTimeFormats {
     dateTime.format(formatter)
   }
 
-  val dateTimeHintFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("d M yyyy")
+  def formattedDateTimeShort(dateTime: String): String = { //example: 24 July 2020
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+    dateTime.format(formatter)
+  }
 
+  val dateTimeHintFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("d M yyyy")
+  
 }

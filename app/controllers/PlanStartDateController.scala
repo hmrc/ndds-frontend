@@ -18,13 +18,14 @@ package controllers
 
 import controllers.actions.*
 import forms.PlanStartDateFormProvider
-import models.Mode
+import models.{Mode, PlanStartDatePageData}
 import navigation.Navigator
 import pages.PlanStartDatePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.PlanStartDateHelper
 import views.html.PlanStartDateView
 
 import javax.inject.Inject
@@ -39,7 +40,8 @@ class PlanStartDateController @Inject()(
                                          requireData: DataRequiredAction,
                                          formProvider: PlanStartDateFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
-                                         view: PlanStartDateView
+                                         view: PlanStartDateView,
+                                         planStartDateHelper: PlanStartDateHelper
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
@@ -48,21 +50,22 @@ class PlanStartDateController @Inject()(
       val answers = request.userAnswers
       val preparedForm = answers.get(PlanStartDatePage) match {
         case None => form
-        case Some(value) => form.fill(value)
+        case Some(value) => form.fill(PlanStartDatePageData.toLocalDate(value))
       }
       Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val form = formProvider()
-      val answers = request.userAnswers.getOrElse(models.UserAnswers(request.userId))
-
+      
       form.bindFromRequest().fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
         value =>
           for {
-            updatedAnswers <- Future.fromTry(answers.set(PlanStartDatePage, value))
+            earliestPaymentDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
+            updatedAnswers <- Future.fromTry(request.userAnswers
+              .set(PlanStartDatePage, PlanStartDatePageData.toPaymentDatePageData(value, earliestPaymentDate.date)))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
       )
