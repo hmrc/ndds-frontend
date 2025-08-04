@@ -66,5 +66,4 @@ class PaymentDateHelper @Inject()(
 
     date.format(formatter)
   }
-
 }
