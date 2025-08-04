@@ -28,7 +28,7 @@
 
 @(referenceNumber: String, serviceNumber: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title"))) {
+@layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title")), showBackLink = false) {
 
     
     @paragraph(messages("directDebitConfirmation.successMessage"))
