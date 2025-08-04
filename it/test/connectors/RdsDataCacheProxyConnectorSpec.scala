@@ -1,0 +1,100 @@
+/*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package connectors
+
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathMatching}
+import itutil.ApplicationWithWiremock
+import models.requests.WorkingDaysOffsetRequest
+import models.responses.EarliestPaymentDate
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.matchers.should.Matchers
+import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
+import uk.gov.hmrc.http.HeaderCarrier
+
+class RdsDataCacheProxyConnectorSpec extends ApplicationWithWiremock
+  with Matchers
+  with ScalaFutures
+  with IntegrationPatience {
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  val connector: RDSDatacacheProxyConnector = app.injector.instanceOf[RDSDatacacheProxyConnector]
+
+  "getEarliestPaymentDate" should {
+    "successfully retrieve a date" in {
+      stubFor(
+        post(urlPathMatching("/rds-datacache-proxy/direct-debits/earliest-payment-date"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(s"""{"date":"2024-12-28"}""")
+          )
+      )
+
+      val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
+      val result = connector.getEarliestPaymentDate(requestBody).futureValue
+
+      result shouldBe EarliestPaymentDate("2024-12-28")
+    }
+
+    "must fail when the result is parsed as a HttpResponse but is not a 200 (OK) response" in {
+      stubFor(
+        post(urlPathMatching("/rds-datacache-proxy/direct-debits/earliest-payment-date"))
+          .willReturn(
+            aResponse()
+              .withStatus(CREATED)
+          )
+      )
+
+      val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
+      val result = intercept[Exception](connector.getEarliestPaymentDate(requestBody).futureValue)
+
+      result.getMessage should include("Unexpected status code: 201")
+    }
+
+    "must fail when the result is parsed as an UpstreamErrorResponse" in {
+      stubFor(
+        post(urlPathMatching("/rds-datacache-proxy/direct-debits/earliest-payment-date"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+              .withBody("test error")
+          )
+      )
+
+      val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
+      val result = intercept[Exception](connector.getEarliestPaymentDate(requestBody).futureValue)
+
+      result.getMessage should include("Response body: 'test error', status code: 500")
+    }
+
+    "must fail when the result is a failed future" in {
+      stubFor(
+        post(urlPathMatching("/rds-datacache-proxy/direct-debits/earliest-payment-date"))
+          .willReturn(
+            aResponse()
+              .withStatus(0)
+          )
+      )
+
+      val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
+      val result = intercept[Exception](connector.getEarliestPaymentDate(requestBody).futureValue)
+
+      result.getMessage should include("The future returned an exception")
+    }
+  }
+}

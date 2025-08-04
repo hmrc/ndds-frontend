@@ -23,7 +23,7 @@ import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Messages
 import play.api.inject.bind
@@ -32,7 +32,7 @@ import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
-import viewmodels.{PaymentDateHelper, PaymentDateViewModel}
+import services.RDSDatacacheService
 import views.html.PaymentDateView
 
 import java.time.*
@@ -40,35 +40,33 @@ import scala.concurrent.Future
 
 class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
-  override def beforeEach(): Unit = {
-    reset(mockHelper)
-    super.beforeEach()
-  }
-
   private implicit val messages: Messages = stubMessages()
 
   private val formProvider = new PaymentDateFormProvider()
 
   private def form = formProvider()
 
-  val mockHelper: PaymentDateHelper = mock[PaymentDateHelper]
+  val mockService: RDSDatacacheService = mock[RDSDatacacheService]
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute: Call = Call("GET", "/foo")
 
-  val validAnswer = LocalDate.of(2025, 2, 1)
+  val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
 
-  lazy val paymentDateRoute = routes.PaymentDateController.onPageLoad(NormalMode).url
+  lazy val paymentDateRoute: String = routes.PaymentDateController.onPageLoad(NormalMode).url
 
-  override val emptyUserAnswers = UserAnswers(userAnswersId)
-  val fixedInstant = Instant.parse("2024-07-17T00:00:00Z")
-  val fixedClock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
+  override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
+  val fixedInstant: Instant = Instant.parse("2024-07-17T00:00:00Z")
+  val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
 
-  val date = LocalDateTime.now(fixedClock)
+  val date: LocalDateTime = LocalDateTime.now(fixedClock)
   private val formattedDate = "6 February 2025"
 
-  val expectedEarliestPaymentDate = EarliestPaymentDate("2025-02-06")
+  val expectedEarliestPaymentDate: EarliestPaymentDate = EarliestPaymentDate("2025-02-06")
+  val testSortCode = "123456"
+  val testAccountNumber = "12345678"
+  val testAccountHolderName = "Jon B Jones"
 
-  val expectedUserAnswersNormalMode = emptyUserAnswers.copy(data =
+  val expectedUserAnswersNormalMode: UserAnswers = emptyUserAnswers.copy(data =
     Json.obj(
       "yourBankDetails" -> Json.obj(
         "accountHolderName" -> testAccountHolderName,
@@ -77,7 +75,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         "auddisStatus" -> true
       )))
 
-  val expectedUserAnswersChangeMode = emptyUserAnswers.copy(data =
+  val expectedUserAnswersChangeMode: UserAnswers = emptyUserAnswers.copy(data =
     Json.obj(
       "yourBankDetails" -> Json.obj(
         "accountHolderName" -> testAccountHolderName,
@@ -90,7 +88,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         "earliestPaymentDate" -> "2025-02-01",
       )))
 
-  def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
+  val getRequest: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, paymentDateRoute)
 
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
@@ -107,22 +105,19 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
           .overrides(
             bind[Clock].toInstance(fixedClock),
-            bind[PaymentDateHelper].toInstance(mockHelper))
+            bind[RDSDatacacheService].toInstance(mockService))
           .build()
 
-        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
+        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
-        when(mockHelper.toDateString(ArgumentMatchers.eq(expectedEarliestPaymentDate)))
-          .thenReturn(formattedDate)
-
         running(application) {
-          val result = route(application, getRequest()).value
+          val result = route(application, getRequest).value
 
           val view = application.injector.instanceOf[PaymentDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, PaymentDateViewModel(NormalMode, formattedDate))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, formattedDate)(getRequest, messages(application)).toString
         }
       }
 
@@ -131,22 +126,19 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(
             bind[Clock].toInstance(fixedClock),
-            bind[PaymentDateHelper].toInstance(mockHelper))
+            bind[RDSDatacacheService].toInstance(mockService))
           .build()
 
-        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
-
-        when(mockHelper.toDateString(ArgumentMatchers.eq(expectedEarliestPaymentDate)))
-          .thenReturn(formattedDate)
 
         running(application) {
           val view = application.injector.instanceOf[PaymentDateView]
 
-          val result = route(application, getRequest()).value
+          val result = route(application, getRequest).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), PaymentDateViewModel(NormalMode, formattedDate))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate)(getRequest, messages(application)).toString
         }
       }
 
@@ -155,7 +147,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val result = route(application, getRequest()).value
+          val result = route(application, getRequest).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -167,14 +159,14 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(
             bind[Clock].toInstance(fixedClock),
-            bind[PaymentDateHelper].toInstance(mockHelper))
+            bind[RDSDatacacheService].toInstance(mockService))
           .build()
 
-        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
         running(application) {
-          val result = route(application, getRequest()).value
+          val result = route(application, getRequest).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -188,7 +180,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(emptyUserAnswers))(any()))
+        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(emptyUserAnswers))(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         val application =
@@ -196,7 +188,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
             .overrides(
               bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
               bind[SessionRepository].toInstance(mockSessionRepository),
-              bind[PaymentDateHelper].toInstance(mockHelper)
+              bind[RDSDatacacheService].toInstance(mockService)
             )
             .build()
 
@@ -213,14 +205,11 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
           .overrides(
             bind[Clock].toInstance(fixedClock),
-            bind[PaymentDateHelper].toInstance(mockHelper))
+            bind[RDSDatacacheService].toInstance(mockService))
           .build()
 
-        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
+        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
-
-        when(mockHelper.toDateString(ArgumentMatchers.eq(expectedEarliestPaymentDate)))
-          .thenReturn(formattedDate)
 
         val request =
           FakeRequest(POST, paymentDateRoute)
@@ -234,7 +223,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, PaymentDateViewModel(NormalMode, formattedDate))(request, messages(application)).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate)(request, messages(application)).toString
         }
       }
 
@@ -254,10 +243,10 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(
             bind[Clock].toInstance(fixedClock),
-            bind[PaymentDateHelper].toInstance(mockHelper))
+            bind[RDSDatacacheService].toInstance(mockService))
           .build()
 
-        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
         running(application) {
@@ -273,10 +262,10 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(
             bind[Clock].toInstance(fixedClock),
-            bind[PaymentDateHelper].toInstance(mockHelper))
+            bind[RDSDatacacheService].toInstance(mockService))
           .build()
 
-        when(mockHelper.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
         val request =

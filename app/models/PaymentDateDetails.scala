@@ -22,14 +22,7 @@ import java.time.LocalDate
 
 case class PaymentDateDetails(enteredDate: LocalDate, earliestPaymentDate: String)
 
-object PaymentDateDetails:
-
+object PaymentDateDetails {
   implicit val format: OFormat[PaymentDateDetails] = Json.format
+}
 
-  def toPaymentDateDetails(enteredDate: LocalDate, earliestPaymentDate: String): PaymentDateDetails = {
-    PaymentDateDetails(enteredDate, earliestPaymentDate)
-  }
-
-  def toLocalDate(paymentDateDetails: PaymentDateDetails): LocalDate = {
-    paymentDateDetails.enteredDate
-  }

@@ -25,8 +25,8 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.RDSDatacacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.{PaymentDateHelper, PaymentDateViewModel}
 import views.html.PaymentDateView
 
 import javax.inject.Inject
@@ -42,7 +42,7 @@ class PaymentDateController @Inject()(
                                        formProvider: PaymentDateFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentDateView,
-                                       paymentDateHelper: PaymentDateHelper
+                                       rdsDatacacheService: RDSDatacacheService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -51,15 +51,15 @@ class PaymentDateController @Inject()(
 
       val preparedForm = request.userAnswers.get(PaymentDatePage) match {
         case None => form
-        case Some(value) => form.fill(PaymentDateDetails.toLocalDate(value))
+        case Some(value) => form.fill(value.enteredDate)
       }
 
-      for {
-        earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
-      } yield Ok(view(preparedForm, PaymentDateViewModel(mode, paymentDateHelper.toDateString(earliestPaymentDate))))
-    } recover { case e =>
-      logger.warn(s"Unexpected error: $e")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
+        Ok(view(preparedForm, mode, earliestPaymentDate.toDateString))
+      } recover { case e =>
+        logger.warn(s"Unexpected error: $e")
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
     }
   }
 
@@ -69,15 +69,15 @@ class PaymentDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          for {
-            earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
-          } yield BadRequest(view(formWithErrors, PaymentDateViewModel(mode, paymentDateHelper.toDateString(earliestPaymentDate)))),
-
+          rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
+            BadRequest(view(formWithErrors, mode, earliestPaymentDate.toDateString))
+          },
         value =>
           for {
-            earliestPaymentDate <- paymentDateHelper.getEarliestPaymentDate(request.userAnswers)
-            updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(PaymentDatePage, PaymentDateDetails.toPaymentDateDetails(value, earliestPaymentDate.date)))
+            earliestPaymentDate <- rdsDatacacheService.getEarliestPaymentDate(request.userAnswers)
+            updatedAnswers <- Future.fromTry(
+              request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date))
+            )
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
       ) recover { case e =>
