@@ -113,9 +113,9 @@ class CheckYourAnswersController @Inject()  (
             planStartDate = planStartDate,
             monthsOffset = appConfig.tcMonthsUntilFinalPayment
           )
-
-          logger.info(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
-          logger.info(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
+          // add next action here - these lines will be deleted
+          logger.debug(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
+          logger.debug(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
 
           Redirect(routes.DirectDebitConfirmationController.onPageLoad())
 
