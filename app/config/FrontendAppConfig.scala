@@ -58,19 +58,19 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
   // Derived payment plan config
-  lazy val totalNumberOfPayments: Int =
-    configuration.get[Int]("paymentPlan.totalNumberOfPayments")
+  lazy val tcTotalNumberOfPayments: Int =
+    configuration.get[Int]("paymentSchedule.tc.totalNumberOfPayments")
 
-  lazy val numberOfEqualPayments: Int =
-    configuration.get[Int]("paymentPlan.numberOfEqualPayments")
+  lazy val tcNumberOfEqualPayments: Int =
+    configuration.get[Int]("paymentSchedule.tc.numberOfEqualPayments")
 
-  lazy val monthsUntilSecondPayment: Int =
-    configuration.get[Int]("paymentPlan.monthsUntilSecondPayment")
+  lazy val tcMonthsUntilSecondPayment: Int =
+    configuration.get[Int]("paymentSchedule.tc.monthsUntilSecondPayment")
 
-  lazy val monthsUntilPenultimatePayment: Int =
-    configuration.get[Int]("paymentPlan.monthsUntilPenultimatePayment")
+  lazy val tcMonthsUntilPenultimatePayment: Int =
+    configuration.get[Int]("paymentSchedule.tc.monthsUntilPenultimatePayment")
 
-  lazy val monthsUntilFinalPayment: Int =
-    configuration.get[Int]("paymentPlan.monthsUntilFinalPayment")
+  lazy val tcMonthsUntilFinalPayment: Int =
+    configuration.get[Int]("paymentSchedule.tc.monthsUntilFinalPayment")
 
 }

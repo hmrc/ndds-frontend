@@ -71,46 +71,46 @@ class CheckYourAnswersController @Inject()  (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
-    performPaymentCalculationAndRedirect(request.userAnswers).getOrElse {
+    paymentCalculation(request.userAnswers).getOrElse {
       logger.warn("Missing required answers for payment calculations")
       Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
 
   }
 
-  private def performPaymentCalculationAndRedirect(userAnswers: UserAnswers): Option[Result] = {
+  private def paymentCalculation(userAnswers: UserAnswers): Option[Result] = {
     for {
       totalAmountDue <- userAnswers.get(TotalAmountDuePage)
       planStartDate <- userAnswers.get(PlanStartDatePage)
     } yield {
       val regularPaymentAmount = PaymentCalculations.calculateRegularPaymentAmount(
         totalAmountDueInput = totalAmountDue,
-        totalNumberOfPayments = appConfig.totalNumberOfPayments
+        totalNumberOfPayments = appConfig.tcTotalNumberOfPayments
       )
 
       val finalPaymentAmount = PaymentCalculations.calculateFinalPayment(
         totalAmountDue = totalAmountDue,
         regularPaymentAmount = BigDecimal(regularPaymentAmount),
-        numberOfEqualPayments = appConfig.numberOfEqualPayments
+        numberOfEqualPayments = appConfig.tcNumberOfEqualPayments
       )
 
       val secondPaymentDate = PaymentCalculations.calculateSecondPaymentDate(
         planStartDate = planStartDate,
-        monthsOffset = appConfig.monthsUntilSecondPayment
+        monthsOffset = appConfig.tcMonthsUntilSecondPayment
       )
 
       val penultimatePaymentDate = PaymentCalculations.calculatePenultimatePaymentDate(
         planStartDate = planStartDate,
-        penultimateInstallmentOffset = appConfig.monthsUntilPenultimatePayment
+        penultimateInstallmentOffset = appConfig.tcMonthsUntilPenultimatePayment
       )
 
       val finalPaymentDate = PaymentCalculations.calculateFinalPaymentDate(
         planStartDate = planStartDate,
-        monthsOffset = appConfig.monthsUntilFinalPayment
+        monthsOffset = appConfig.tcMonthsUntilFinalPayment
       )
-      // perform further actions
-      logger.info(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
-      logger.info(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
+      // perform further actions - these lines will be removed
+      logger.debug(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
+      logger.debug(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
 
       Redirect(routes.DirectDebitConfirmationController.onPageLoad())
     }
