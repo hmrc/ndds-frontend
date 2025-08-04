@@ -244,6 +244,10 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(PlanEndDatePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
+      "must go from YearEndAndMonthPage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(YearEndAndMonthPage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
     }
   }
 }
