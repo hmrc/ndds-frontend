@@ -162,6 +162,10 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(PlanEndDatePage, NormalMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
+      "must go from YearEndAndMonthPage to PaymentAmountController" in {
+        navigator.nextPage(YearEndAndMonthPage, NormalMode, userAnswers) mustBe routes.PaymentAmountController.onPageLoad(NormalMode)
+      }
+
       "must go from PlanStartDatePage to PlanEndDateController for SA with BudgetPaymentPlan" in {
         val ua = userAnswers
           .set(DirectDebitSourcePage, SA).success.value
@@ -238,6 +242,10 @@ class NavigatorSpec extends SpecBase {
 
       "must go from PlanEndDatePage to CheckYourAnswersController in CheckMode" in {
         navigator.nextPage(PlanEndDatePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from YearEndAndMonthPage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(YearEndAndMonthPage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
     }
