@@ -56,4 +56,21 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
   lazy val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+
+  // Derived payment plan config
+  lazy val totalNumberOfPayments: Int =
+    configuration.get[Int]("paymentPlan.totalNumberOfPayments")
+
+  lazy val numberOfEqualPayments: Int =
+    configuration.get[Int]("paymentPlan.numberOfEqualPayments")
+
+  lazy val monthsUntilSecondPayment: Int =
+    configuration.get[Int]("paymentPlan.monthsUntilSecondPayment")
+
+  lazy val monthsUntilPenultimatePayment: Int =
+    configuration.get[Int]("paymentPlan.monthsUntilPenultimatePayment")
+
+  lazy val monthsUntilFinalPayment: Int =
+    configuration.get[Int]("paymentPlan.monthsUntilFinalPayment")
+
 }
