@@ -16,11 +16,11 @@
 
 package pages
 
-import java.time.LocalDate
+import models.YearEndAndMonth
 
 import play.api.libs.json.JsPath
 
-case object YearEndAndMonthPage extends QuestionPage[LocalDate] {
+case object YearEndAndMonthPage extends QuestionPage[YearEndAndMonth] {
 
   override def path: JsPath = JsPath \ toString
 
