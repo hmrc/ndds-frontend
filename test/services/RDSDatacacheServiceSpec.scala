@@ -14,37 +14,80 @@
  * limitations under the License.
  */
 
-package viewmodels
+package services
 
 import base.SpecBase
 import config.FrontendAppConfig
-import connectors.RdsDataCacheConnector
+import connectors.RDSDatacacheProxyConnector
 import models.responses.EarliestPaymentDate
+import models.{RDSDatacacheResponse, RDSDirectDebitDetails}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.when
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.libs.json.Json
+import repositories.DirectDebitCacheRepository
+import uk.gov.hmrc.http.HeaderCarrier
+import utils.DirectDebitDetailsData
 
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class PaymentDateHelperSpec extends SpecBase {
+class RDSDatacacheServiceSpec extends SpecBase
+  with MockitoSugar
+  with DirectDebitDetailsData {
 
-  val mockConnector: RdsDataCacheConnector = mock[RdsDataCacheConnector]
+  implicit val ec: ExecutionContext = global
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  val mockConnector: RDSDatacacheProxyConnector = mock[RDSDatacacheProxyConnector]
+  val mockCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
 
-  val testHelper = new PaymentDateHelper(mockConnector, mockConfig)
+  val service = new RDSDatacacheService(mockConnector, mockCache, mockConfig)
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockConnector)
-    reset(mockConfig)
-  }
+  val testId = "id"
 
-  val expectedDays5 = 5
-  val expectedDays10 = 10
+  "RDSDatacacheService" - {
+    "retrieve" - {
+      "should retrieve existing details from Cache first" in {
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(rdsResponse.directDebitList))
 
-  "PaymentDateHelper" - {
+        val result = service.retrieveAllDirectDebits(testId).futureValue
+        result mustEqual rdsResponse
+      }
+
+      "should retrieve details from Connector if Cache is empty, and cache the response" in {
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(Seq.empty[RDSDirectDebitDetails]))
+        when(mockConnector.retrieveDirectDebits()(any()))
+          .thenReturn(Future.successful(rdsResponse))
+        when(mockCache.cacheResponse(any())(any()))
+          .thenReturn(Future.successful(true))
+
+        val result = service.retrieveAllDirectDebits(testId).futureValue
+        result mustEqual rdsResponse
+      }
+
+      "should be able to return no details from Connector or Cache is correctly empty" in {
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(Seq.empty[RDSDirectDebitDetails]))
+        when(mockConnector.retrieveDirectDebits()(any()))
+          .thenReturn(Future.successful(RDSDatacacheResponse(0, Seq())))
+        when(mockCache.cacheResponse(any())(any()))
+          .thenReturn(Future.successful(true))
+
+        val result = service.retrieveAllDirectDebits(testId).futureValue
+        result mustEqual RDSDatacacheResponse(0, Seq())
+      }
+    }
     "getEarliestPaymentDate when" - {
+      val testSortCode = "123456"
+      val testAccountNumber = "12345678"
+      val testAccountHolderName = "Jon B Jones"
+
       "must successfully return the Earliest Payment Date" in {
         val expectedUserAnswers = emptyUserAnswers.copy(data =
           Json.obj(
@@ -60,13 +103,13 @@ class PaymentDateHelperSpec extends SpecBase {
         when(mockConnector.getEarliestPaymentDate(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
 
-        val result = testHelper.getEarliestPaymentDate(expectedUserAnswers).futureValue
+        val result = service.getEarliestPaymentDate(expectedUserAnswers).futureValue
 
         result mustBe EarliestPaymentDate("2025-12-25")
       }
 
       "fail when auddis status is not in user answers" in {
-        val result = intercept[Exception](testHelper.getEarliestPaymentDate(emptyUserAnswers).futureValue)
+        val result = intercept[Exception](service.getEarliestPaymentDate(emptyUserAnswers).futureValue)
 
         result.getMessage must include("YourBankDetailsPage details missing from user answers")
       }
@@ -85,7 +128,7 @@ class PaymentDateHelperSpec extends SpecBase {
         when(mockConnector.getEarliestPaymentDate(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
-        val result = intercept[Exception](testHelper.getEarliestPaymentDate(expectedUserAnswers).futureValue)
+        val result = intercept[Exception](service.getEarliestPaymentDate(expectedUserAnswers).futureValue)
 
         result.getMessage must include("bang")
       }
@@ -98,7 +141,9 @@ class PaymentDateHelperSpec extends SpecBase {
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
-        testHelper.calculateOffset(auddisStatus) mustBe expectedDays5
+        val expected = 5
+
+        service.calculateOffset(auddisStatus) mustBe expected
       }
       "successfully calculate the offset when auddis status is not enabled" in {
         val auddisStatus = false
@@ -107,15 +152,9 @@ class PaymentDateHelperSpec extends SpecBase {
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
 
-        testHelper.calculateOffset(auddisStatus) mustBe expectedDays10
-      }
-    }
+        val expected = 10
 
-    "toDateString" - {
-      "must convert a local date to the GDS format" in {
-        val testModel = EarliestPaymentDate(date = "2025-12-25")
-
-        testHelper.toDateString(testModel) mustBe "25 December 2025"
+        service.calculateOffset(auddisStatus) mustBe expected
       }
     }
   }

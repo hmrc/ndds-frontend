@@ -21,6 +21,10 @@ import base.SpecBase
 class YourBankDetailsWithAuddisStatusSpec extends SpecBase {
 
   "YourBankDetailsWithAuddisStatus" - {
+    val testSortCode = "123456"
+    val testAccountNumber = "12345678"
+    val testAccountHolderName = "Jon B Jones"
+
     "toModelWithAuddisStatus method" - {
       "must successfully convert from YourBankDetails to YourBankDetailsWithAuddisStatus" in {
         val testAuddisStatus = true

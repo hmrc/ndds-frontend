@@ -20,11 +20,12 @@ import config.FrontendAppConfig
 import controllers.actions.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.RDSDatacacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.DirectDebitDetailsData
 import views.html.YourDirectDebitInstructionsView
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class YourDirectDebitInstructionsController @Inject()(
                                                        override val messagesApi: MessagesApi,
@@ -32,12 +33,15 @@ class YourDirectDebitInstructionsController @Inject()(
                                                        getData: DataRetrievalAction,
                                                        val controllerComponents: MessagesControllerComponents,
                                                        view: YourDirectDebitInstructionsView,
-                                                       appConfig: FrontendAppConfig
-                                                     )
-  extends FrontendBaseController with I18nSupport with DirectDebitDetailsData {
+                                                       appConfig: FrontendAppConfig,
+                                                       rdsDatacacheService: RDSDatacacheService
+                                                     )(implicit ec: ExecutionContext)
+  extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData) { implicit request =>
-    val maxLimitReached = directDebitDetailsData.length > appConfig.maxNumberDDIsAllowed
-    Ok(view(directDebitDetailsData, maxLimitReached))
+  def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    rdsDatacacheService.retrieveAllDirectDebits(request.userId) map { directDebitDetailsData =>
+      val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
+      Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
+    }
   }
 }

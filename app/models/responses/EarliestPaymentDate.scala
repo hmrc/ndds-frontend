@@ -18,7 +18,15 @@ package models.responses
 
 import play.api.libs.json.{Json, OFormat}
 
-case class EarliestPaymentDate(date: String)
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+case class EarliestPaymentDate(date: String) {
+  val toDateString: String = {
+    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+    LocalDate.parse(date).format(formatter)
+  }
+}
 
 object EarliestPaymentDate {
   implicit val format: OFormat[EarliestPaymentDate] = Json.format
