@@ -24,7 +24,7 @@
     govukButton: GovukButton,
 )
 
-@(form: Form[_], mode: Mode, dateTime: String)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, earliestPaymentDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("paymentDate.title"))) {
 
@@ -39,7 +39,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("paymentDate.heading")).asPageHeading()
             )
-            .withHint(HintViewModel(HtmlContent(messages("paymentDate.hint", dateTime, dateTime))))
+            .withHint(HintViewModel(HtmlContent(messages("paymentDate.hint", earliestPaymentDate, earliestPaymentDate))))
         )
 
         @govukButton(

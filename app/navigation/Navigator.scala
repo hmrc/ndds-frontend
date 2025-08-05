@@ -42,7 +42,7 @@ class Navigator @Inject()() {
     case PlanStartDatePage => userAnswers => checkPlanStartDateLogic(userAnswers)
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
-    case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
+    case _ => _ => routes.LandingController.onPageLoad()
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
@@ -51,12 +51,13 @@ class Navigator @Inject()() {
     case PaymentReferencePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentAmountPage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
-    case PlanStartDatePage=> _ => routes.CheckYourAnswersController.onPageLoad()
+    case PlanStartDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case TotalAmountDuePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentsFrequencyPage => _ => routes.CheckYourAnswersController.onPageLoad()
     case RegularPaymentAmountPage => _ => routes.CheckYourAnswersController.onPageLoad()
-    case _ => _ => routes.IndexController.onPageLoad() // TODO - should redirect to landing controller (when implemented)
+    case YearEndAndMonthPage => _ => routes.CheckYourAnswersController.onPageLoad()
+    case _ => _ => routes.LandingController.onPageLoad() 
   }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {

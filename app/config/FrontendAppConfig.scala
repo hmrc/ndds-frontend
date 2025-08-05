@@ -30,6 +30,11 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   private lazy val contactHost = configuration.get[String]("contact-frontend.host")
   private lazy val contactFormServiceIdentifier = configuration.get[String]("contact-frontend.serviceId")
 
+  lazy val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-enabled")
+  lazy val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-not-enabled")
+  lazy val paymentDelayFixed: Int = configuration.get[Int]("payment-working-days-delay.fixed-delay")
+  lazy val variableMgdFixedDelay: Int = configuration.get[Int]("working-days-delay.variable-mgd-fixed-delay")
+
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"
 
@@ -56,6 +61,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
   lazy val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+
+  lazy val minimumLiabilityAmount: BigDecimal =
+    BigDecimal(configuration.get[String]("payment-validation.minimumLiabilityAmount"))
 
   // Derived payment plan config
   lazy val tcTotalNumberOfPayments: Int =

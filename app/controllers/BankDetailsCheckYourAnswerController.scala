@@ -45,7 +45,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                          formProvider: BankDetailsCheckYourAnswerFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: BankDetailsCheckYourAnswerView
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging{
+                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
 

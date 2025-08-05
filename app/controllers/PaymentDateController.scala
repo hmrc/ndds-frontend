@@ -16,21 +16,21 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.PaymentDateFormProvider
-import javax.inject.Inject
-import models.Mode
+import models.{Mode, PaymentDateDetails}
 import navigation.Navigator
 import pages.PaymentDatePage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.RDSDatacacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentDateView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import java.time.{LocalDateTime, Clock}
-import java.time.format.DateTimeFormatter
 
 class PaymentDateController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -41,24 +41,26 @@ class PaymentDateController @Inject()(
                                        requireData: DataRequiredAction,
                                        formProvider: PaymentDateFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
-                                       clock:Clock,
-                                       view: PaymentDateView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       view: PaymentDateView,
+                                       rdsDatacacheService: RDSDatacacheService
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  private val now: LocalDateTime = LocalDateTime.now(clock)
-  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-  private val formattedDate = now.format(formatter)
-
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request => {
       val form = formProvider()
 
       val preparedForm = request.userAnswers.get(PaymentDatePage) match {
         case None => form
-        case Some(value) => form.fill(value)
+        case Some(value) => form.fill(value.enteredDate)
       }
 
-      Ok(view(preparedForm, mode, formattedDate))
+      rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
+        Ok(view(preparedForm, mode, earliestPaymentDate.toDateString))
+      } recover { case e =>
+        logger.warn(s"Unexpected error: $e")
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -67,13 +69,20 @@ class PaymentDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, formattedDate))),
-
+          rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
+            BadRequest(view(formWithErrors, mode, earliestPaymentDate.toDateString))
+          },
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            earliestPaymentDate <- rdsDatacacheService.getEarliestPaymentDate(request.userAnswers)
+            updatedAnswers <- Future.fromTry(
+              request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date))
+            )
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
-      )
+      ) recover { case e =>
+        logger.warn(s"Unexpected error: $e")
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
   }
 }

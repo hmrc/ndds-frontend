@@ -17,20 +17,37 @@
 package controllers
 
 import base.SpecBase
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
+import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import views.html.YourDirectDebitInstructionsView
+import play.api.test.Helpers.*
+import services.RDSDatacacheService
 import utils.DirectDebitDetailsData
+import views.html.YourDirectDebitInstructionsView
+
+import scala.concurrent.Future
 
 class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebitDetailsData {
 
   "YourDirectDebitInstructions Controller" - {
 
+    val mockService = mock[RDSDatacacheService]
+
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[RDSDatacacheService].toInstance(mockService)
+        )
+        .build()
 
       running(application) {
+
+        when(mockService.retrieveAllDirectDebits(any())(any()))
+          .thenReturn(Future.successful(rdsResponse))
+
         val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url)
 
         val result = route(application, request).value

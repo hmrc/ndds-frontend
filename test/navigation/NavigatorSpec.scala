@@ -33,7 +33,7 @@ class NavigatorSpec extends SpecBase {
 
       "must go from a page that doesn't exist in the route map to Index" in {
         case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, NormalMode, userAnswers) mustBe routes.IndexController.onPageLoad()
+        navigator.nextPage(UnknownPage, NormalMode, userAnswers) mustBe routes.LandingController.onPageLoad()
       }
 
       "must go from a PersonalOrBusinessAccountPage to YourBankDetailsPage" in {
@@ -162,6 +162,10 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(PlanEndDatePage, NormalMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
+      "must go from YearEndAndMonthPage to PaymentAmountController" in {
+        navigator.nextPage(YearEndAndMonthPage, NormalMode, userAnswers) mustBe routes.PaymentAmountController.onPageLoad(NormalMode)
+      }
+
       "must go from PlanStartDatePage to PlanEndDateController for SA with BudgetPaymentPlan" in {
         val ua = userAnswers
           .set(DirectDebitSourcePage, SA).success.value
@@ -219,7 +223,7 @@ class NavigatorSpec extends SpecBase {
 
       "must go from a page that doesn't exist in the edit route map to CheckYourAnswers" in {
         case object UnknownPage extends Page
-        navigator.nextPage(UnknownPage, CheckMode, userAnswers) mustBe routes.IndexController.onPageLoad()
+        navigator.nextPage(UnknownPage, CheckMode, userAnswers) mustBe routes.LandingController.onPageLoad()
       }
 
       "must go from YourBankDetailsPage to BankDetailsCheckYourAnswersPage" in {
@@ -238,6 +242,10 @@ class NavigatorSpec extends SpecBase {
 
       "must go from PlanEndDatePage to CheckYourAnswersController in CheckMode" in {
         navigator.nextPage(PlanEndDatePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from YearEndAndMonthPage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(YearEndAndMonthPage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
     }

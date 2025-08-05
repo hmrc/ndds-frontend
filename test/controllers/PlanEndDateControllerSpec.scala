@@ -44,12 +44,12 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private val formProvider = new PlanEndDateFormProvider()
   private def form = formProvider(startDate)
 
-  def onwardRoute = Call("GET", "/foo")
-  val validAnswer = LocalDate.now(ZoneOffset.UTC)
-  lazy val planEndDateRoute = routes.PlanEndDateController.onPageLoad(NormalMode).url
-  override val emptyUserAnswers = UserAnswers(userAnswersId).set(PlanStartDatePage, startDate).success.value
+  def onwardRoute: Call = Call("GET", "/foo")
+  val validAnswer: LocalDate = LocalDate.now(ZoneOffset.UTC)
+  lazy val planEndDateRoute: String = routes.PlanEndDateController.onPageLoad(NormalMode).url
+  override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId).set(PlanStartDatePage, startDate).success.value
 
-  def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
+  val getRequest: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, planEndDateRoute)
 
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
@@ -66,10 +66,10 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
       running(application) {
-        val result = route(application, getRequest()).value
+        val result = route(application, getRequest).value
         val view = application.injector.instanceOf[PlanEndDateView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode)(getRequest, messages(application)).toString
       }
     }
 
@@ -81,9 +81,9 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       running(application) {
         val view = application.injector.instanceOf[PlanEndDateView]
-        val result = route(application, getRequest()).value
+        val result = route(application, getRequest).value
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(Some(validAnswer)), NormalMode)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(Some(validAnswer)), NormalMode)(getRequest, messages(application)).toString
       }
     }
 
@@ -126,7 +126,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = None).build()
       running(application) {
-        val result = route(application, getRequest()).value
+        val result = route(application, getRequest).value
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }

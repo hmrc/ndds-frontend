@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.YourBankDetailsFormProvider
-import models.{Mode, YourBankDetails}
+import models.{Mode, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.YourBankDetailsPage
 import play.api.data.Form
@@ -32,16 +32,16 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class YourBankDetailsController @Inject()(
-                                      override val messagesApi: MessagesApi,
-                                      sessionRepository: SessionRepository,
-                                      navigator: Navigator,
-                                      identify: IdentifierAction,
-                                      getData: DataRetrievalAction,
-                                      requireData: DataRequiredAction,
-                                      formProvider: YourBankDetailsFormProvider,
-                                      val controllerComponents: MessagesControllerComponents,
-                                      view: YourBankDetailsView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                           override val messagesApi: MessagesApi,
+                                           sessionRepository: SessionRepository,
+                                           navigator: Navigator,
+                                           identify: IdentifierAction,
+                                           requireData: DataRequiredAction,
+                                           getData: DataRetrievalAction,
+                                           formProvider: YourBankDetailsFormProvider,
+                                           val controllerComponents: MessagesControllerComponents,
+                                           view: YourBankDetailsView
+                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form: Form[YourBankDetails] = formProvider()
 
@@ -50,7 +50,7 @@ class YourBankDetailsController @Inject()(
       val answers = request.userAnswers
       val preparedForm = answers.get(YourBankDetailsPage) match {
         case None => form
-        case Some(value) => form.fill(value)
+        case Some(value) => form.fill(YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(value))
       }
 
       Ok(view(preparedForm, mode))
@@ -65,8 +65,12 @@ class YourBankDetailsController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(YourBankDetailsPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            // TODO: Replace line below with response from real BARS service call
+            barsServiceResponse <- Future.successful(false)
+            updatedAnswers <- Future.fromTry(request.userAnswers
+              .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
+            )
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
       )
   }
