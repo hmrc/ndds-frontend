@@ -54,5 +54,23 @@ class DateTimeFormatsSpec extends AnyFreeSpec with Matchers {
         DateTimeFormats.formattedCurrentDate mustEqual expected
       }
     }
+
+    "formattedDateTimeShort" - {
+      "should return today's date in 'dd MMM yyyy' format" in {
+        val dateStr = "2021-07-31"
+        val expected = "31 Jul 2021"
+
+        DateTimeFormats.formattedDateTimeShort(dateStr) mustEqual expected
+      }
+    }
+
+    "formattedDateTimeNumeric" - {
+      "should return today's date in 'dd MM yyyy' format" in {
+        val dateStr = "2021-07-31"
+        val expected = "31 07 2021"
+
+        DateTimeFormats.formattedDateTimeNumeric(dateStr) mustEqual expected
+      }
+    }
   }
 }

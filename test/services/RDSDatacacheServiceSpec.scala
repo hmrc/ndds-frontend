@@ -19,13 +19,16 @@ package services
 import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RDSDatacacheProxyConnector
+import models.DirectDebitSource.{MGD, SA, TC}
+import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.EarliestPaymentDate
-import models.{RDSDatacacheResponse, RDSDirectDebitDetails}
+import models.{DirectDebitSource, PaymentPlanType, RDSDatacacheResponse, RDSDirectDebitDetails, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.libs.json.Json
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -48,6 +51,15 @@ class RDSDatacacheServiceSpec extends SpecBase
   val service = new RDSDatacacheService(mockConnector, mockCache, mockConfig)
 
   val testId = "id"
+  val testSortCode = "123456"
+  val testAccountNumber = "12345678"
+  val testAccountHolderName = "Jon B Jones"
+
+  val testBankDetailsAuddisTrue: YourBankDetailsWithAuddisStatus =
+    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName, sortCode = testSortCode, accountNumber = testAccountNumber, auddisStatus = true)
+
+  val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
+  val testDirectDebitSource: DirectDebitSource = MGD
 
   "RDSDatacacheService" - {
     "retrieve" - {
@@ -83,20 +95,10 @@ class RDSDatacacheServiceSpec extends SpecBase
         result mustEqual RDSDatacacheResponse(0, Seq())
       }
     }
-    "getEarliestPaymentDate when" - {
-      val testSortCode = "123456"
-      val testAccountNumber = "12345678"
-      val testAccountHolderName = "Jon B Jones"
 
+    "getEarliestPaymentDate" - {
       "must successfully return the Earliest Payment Date" in {
-        val expectedUserAnswers = emptyUserAnswers.copy(data =
-          Json.obj(
-            "yourBankDetails" -> Json.obj(
-              "accountHolderName" -> testAccountHolderName,
-              "sortCode" -> testSortCode,
-              "accountNumber" -> testAccountNumber,
-              "auddisStatus" -> true
-            )))
+        val expectedUserAnswers = emptyUserAnswers.set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
@@ -113,15 +115,9 @@ class RDSDatacacheServiceSpec extends SpecBase
 
         result.getMessage must include("YourBankDetailsPage details missing from user answers")
       }
+
       "fail when the connector call fails" in {
-        val expectedUserAnswers = emptyUserAnswers.copy(data =
-          Json.obj(
-            "yourBankDetails" -> Json.obj(
-              "accountHolderName" -> testAccountHolderName,
-              "sortCode" -> testSortCode,
-              "accountNumber" -> testAccountNumber,
-              "auddisStatus" -> true
-            )))
+        val expectedUserAnswers = emptyUserAnswers.set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
@@ -134,7 +130,68 @@ class RDSDatacacheServiceSpec extends SpecBase
       }
     }
 
-    "calculateOffset" - {
+    "getEarliestPlanStartDate" - {
+      "must successfully return the Earliest Payment Date" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType).success.value
+          .set(DirectDebitSourcePage, testDirectDebitSource).success.value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
+
+        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+        when(mockConnector.getEarliestPaymentDate(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+
+        val result = service.getEarliestPlanStartDate(expectedUserAnswers).futureValue
+
+        result mustBe EarliestPaymentDate("2025-12-25")
+      }
+
+      "fail when auddis status is not in user answers" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType).success.value
+          .set(DirectDebitSourcePage, testDirectDebitSource).success.value
+
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
+
+        result.getMessage must include("YourBankDetailsPage details missing from user answers")
+      }
+      "fail when payment plan type is not in user answers" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(DirectDebitSourcePage, testDirectDebitSource).success.value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
+
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
+
+        result.getMessage must include("PaymentPlanTypePage details missing from user answers")
+      }
+      "fail when direct debit source is not in user answers" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType).success.value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
+
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
+
+        result.getMessage must include("DirectDebitSourcePage details missing from user answers")
+      }
+      "fail when the connector call fails" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType).success.value
+          .set(DirectDebitSourcePage, testDirectDebitSource).success.value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
+
+        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+        when(mockConnector.getEarliestPaymentDate(any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
+
+        result.getMessage must include("bang")
+      }
+    }
+
+    "calculateOffset using auddis status method" - {
       "successfully calculate the offset when auddis status is enabled" in {
         val auddisStatus = true
 
@@ -155,6 +212,60 @@ class RDSDatacacheServiceSpec extends SpecBase
         val expected = 10
 
         service.calculateOffset(auddisStatus) mustBe expected
+      }
+    }
+
+    "calculateOffset using auddis status, payment plan type and direct debit source method " - {
+      "successfully calculate the offset when source is machine games duty" in {
+        val auddisStatus = true
+
+        when(mockConfig.variableMgdFixedDelay).thenReturn(10)
+
+        val expected = 10
+
+        service.calculateOffset(auddisStatus, VariablePaymentPlan, MGD) mustBe expected
+      }
+      "successfully calculate the offset when auddis status is enabled and source is self assessment" in {
+        val auddisStatus = true
+
+        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+
+        val expected = 5
+
+        service.calculateOffset(auddisStatus, BudgetPaymentPlan, SA) mustBe expected
+      }
+      "successfully calculate the offset when auddis status is not enabled and source is tax credits" in {
+        val auddisStatus = false
+        val expectedVariableDelay = 8
+
+        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
+
+        val expected = 10
+
+        service.calculateOffset(auddisStatus, BudgetPaymentPlan, SA) mustBe expected
+      }
+      "successfully calculate the offset when auddis status is enabled and source is tax credits" in {
+        val auddisStatus = true
+
+        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+
+        val expected = 5
+
+        service.calculateOffset(auddisStatus, TaxCreditRepaymentPlan, TC) mustBe expected
+      }
+      "successfully calculate the offset when auddis status is not enabled and source is self assessment" in {
+        val auddisStatus = false
+        val expectedVariableDelay = 8
+
+        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
+
+        val expected = 10
+
+        service.calculateOffset(auddisStatus, TaxCreditRepaymentPlan, TC) mustBe expected
       }
     }
   }

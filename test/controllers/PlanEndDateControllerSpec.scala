@@ -17,10 +17,9 @@
 package controllers
 
 import java.time.{LocalDate, ZoneOffset}
-
 import base.SpecBase
 import forms.PlanEndDateFormProvider
-import models.{NormalMode, UserAnswers}
+import models.{NormalMode, PlanStartDateDetails, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -30,7 +29,7 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.PlanEndDateView
 
@@ -41,13 +40,14 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
 
   private val startDate: LocalDate = LocalDate.of(2024, 1, 1)
+  private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(startDate, "2024-1-11")
   private val formProvider = new PlanEndDateFormProvider()
   private def form = formProvider(startDate)
 
   def onwardRoute: Call = Call("GET", "/foo")
   val validAnswer: LocalDate = LocalDate.now(ZoneOffset.UTC)
   lazy val planEndDateRoute: String = routes.PlanEndDateController.onPageLoad(NormalMode).url
-  override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId).set(PlanStartDatePage, startDate).success.value
+  override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId).set(PlanStartDatePage, planStartDateDetails).success.value
 
   val getRequest: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, planEndDateRoute)
@@ -76,7 +76,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = UserAnswers(userAnswersId)
-        .set(PlanStartDatePage, startDate).success.value
+        .set(PlanStartDatePage, planStartDateDetails).success.value
         .set(PlanEndDatePage, validAnswer).success.value
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       running(application) {
