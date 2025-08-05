@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.BankDetailsCheckYourAnswerFormProvider
-import models.{CheckMode, NormalMode, YourBankDetails}
+import models.{CheckMode, NormalMode, YourBankDetailsWithAuddisStatus}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -46,7 +46,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must return OK and the correct view for a GET" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetails("Account Holder Name", "123212", "34211234"))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -71,7 +71,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetails("Account Holder Name", "123212", "34211234"))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true))
         .set(BankDetailsCheckYourAnswerPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
@@ -103,7 +103,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetails("Account Holder Name", "123212", "34211234"))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -126,7 +126,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetails("Account Holder Name", "123212", "34211234"))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 

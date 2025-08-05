@@ -20,15 +20,24 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class FrontendAppConfig @Inject() (configuration: Configuration) {
+class FrontendAppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) {
 
   lazy val host: String    = configuration.get[String]("host")
   lazy val appName: String = configuration.get[String]("appName")
 
   private lazy val contactHost = configuration.get[String]("contact-frontend.host")
   private lazy val contactFormServiceIdentifier = configuration.get[String]("contact-frontend.serviceId")
+
+  private lazy val rdsDataCacheProxyHost = servicesConfig.baseUrl("rds-datacache-proxy")
+  private lazy val earliestPaymentDateSuffix: String = configuration.get[String]("microservice.services.rds-datacache-proxy.earliestPaymentDateUrl")
+  lazy val earliestPaymentDateUrl: String = s"$rdsDataCacheProxyHost$earliestPaymentDateSuffix"
+
+  lazy val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-enabled")
+  lazy val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-not-enabled")
+  lazy val paymentDelayFixed: Int = configuration.get[Int]("payment-working-days-delay.fixed-delay")
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"

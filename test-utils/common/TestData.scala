@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package pages
+package common
 
-import models.YourBankDetailsWithAuddisStatus
-import play.api.libs.json.JsPath
-
-case object YourBankDetailsPage extends QuestionPage[YourBankDetailsWithAuddisStatus] {
-
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "yourBankDetails"
+trait TestData {
+  
+  val testSortCode = "123456"
+  val testAccountNumber = "12345678"
+  val testAccountHolderName = "Jon B Jones"
+  
 }

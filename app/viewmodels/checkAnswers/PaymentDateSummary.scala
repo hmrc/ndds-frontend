@@ -35,7 +35,7 @@ object PaymentDateSummary  {
 
         SummaryListRowViewModel(
           key     = "paymentDate.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.format(dateTimeFormat())),
+          value   = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
           actions = Seq(
             ActionItemViewModel("site.change", routes.PaymentDateController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("paymentDate.change.hidden"))

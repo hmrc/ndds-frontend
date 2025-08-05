@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package pages
+package models.responses
 
-import models.YourBankDetailsWithAuddisStatus
-import play.api.libs.json.JsPath
+import play.api.libs.json.{Json, OFormat}
 
-case object YourBankDetailsPage extends QuestionPage[YourBankDetailsWithAuddisStatus] {
+case class EarliestPaymentDate(date: String)
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "yourBankDetails"
+object EarliestPaymentDate {
+  implicit val format: OFormat[EarliestPaymentDate] = Json.format
 }
