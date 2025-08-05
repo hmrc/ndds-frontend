@@ -20,14 +20,14 @@ import controllers.actions.*
 import forms.PlanStartDateFormProvider
 import models.{Mode, PlanStartDateDetails}
 import navigation.Navigator
-import pages.PlanStartDatePage
+import pages.{DirectDebitSourcePage, PlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.RDSDatacacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
-import viewmodels.{PlanStartDateHelper, PlanStartDateViewModel}
 import views.html.PlanStartDateView
 
 import javax.inject.Inject
@@ -43,7 +43,7 @@ class PlanStartDateController @Inject()(
                                          formProvider: PlanStartDateFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: PlanStartDateView,
-                                         planStartDateHelper: PlanStartDateHelper
+                                         rdsDatacacheService: RDSDatacacheService
                                        )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -54,16 +54,19 @@ class PlanStartDateController @Inject()(
         case None => form
         case Some(value) => form.fill(PlanStartDateDetails.toLocalDate(value))
       }
-      for {
-        earliestPlanStartDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
-      } yield Ok(view(preparedForm, PlanStartDateViewModel(
-        mode,
-        DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
-        DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date)
-      )))
-    } recover { case e =>
-      logger.warn(s"Unexpected error: $e")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+
+      rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
+        Ok(view(
+          preparedForm,
+          mode,
+          DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
+          DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+          request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
+        ))
+      } recover { case e =>
+        logger.warn(s"Unexpected error: $e")
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
     }
   }
 
@@ -73,20 +76,25 @@ class PlanStartDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          for {
-            earliestPlanStartDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
-          } yield BadRequest(view(formWithErrors, PlanStartDateViewModel(
-            mode,
-            DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
-            DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date)
-          ))),
+          rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
+            BadRequest(view(
+              formWithErrors,
+              mode,
+              DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
+              DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+              request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
+            ))
+          },
         value =>
           for {
-            earliestPlanStartDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
+            earliestPlanStartDate <- rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers)
             updatedAnswers <- Future.fromTry(request.userAnswers
               .set(PlanStartDatePage, PlanStartDateDetails.toPaymentDatePageData(value, earliestPlanStartDate.date)))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
-      )
+      ) recover { case e =>
+        logger.warn(s"Unexpected error: $e")
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
   }
 }

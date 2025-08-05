@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import models.requests.DataRequest
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
@@ -22,7 +24,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, dateTimeShort: String, dateTimeNumeric: String, source: DirectDebitSource)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("planStartDate.title"))) {
 
@@ -35,7 +37,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("planStartDate.heading")).asPageHeading()
             )
-            .withHint(HintViewModel(messages("planStartDate.hint")))
+            .withHint(HintViewModel(HtmlContent(messages(s"planStartDate.${source.toString}.hint", dateTimeShort) + messages("planStartDate.fixedHint", dateTimeNumeric))))
         )
 
         @govukButton(
