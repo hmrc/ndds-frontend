@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
 import forms.TotalAmountDueFormProvider
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
@@ -35,7 +36,10 @@ import scala.concurrent.Future
 
 class TotalAmountDueControllerSpec extends SpecBase with MockitoSugar {
 
-  val formProvider = new TotalAmountDueFormProvider()
+  val mockConfig = mock[FrontendAppConfig]
+  when(mockConfig.minimumLiabilityAmount).thenReturn(BigDecimal("12.00"))
+  
+  val formProvider = new TotalAmountDueFormProvider(mockConfig)
   val form = formProvider()
 
   def onwardRoute = Call("GET", "/foo")

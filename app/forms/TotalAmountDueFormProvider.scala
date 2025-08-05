@@ -16,13 +16,14 @@
 
 package forms
 
+import config.FrontendAppConfig
 import forms.mappings.Mappings
 import javax.inject.Inject
 import play.api.data.Form
 
-class TotalAmountDueFormProvider @Inject() extends Mappings {
+class TotalAmountDueFormProvider @Inject()(config: FrontendAppConfig) extends Mappings {
   val maximum = 999999
-  val minimum = 12
+  val minimum = config.minimumLiabilityAmount
 
   def apply(): Form[BigDecimal] =
     Form(
