@@ -17,23 +17,34 @@
 package controllers
 
 import controllers.actions.*
+import models.responses.{LockedAndUnverified, LockedAndVerified, NotLocked}
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.LockService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SetupDirectDebitPaymentView
+
+import scala.concurrent.ExecutionContext
 
 class SetupDirectDebitPaymentController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: SetupDirectDebitPaymentView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                       view: SetupDirectDebitPaymentView,
+                                       lockService: LockService
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(directDebitCount: Int): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(directDebitCount: Int): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      Ok(view(directDebitCount))
+      lockService.isUserLocked(request.userId) map { _.lockStatus match
+        case NotLocked => Ok(view(directDebitCount))
+        case LockedAndVerified => Redirect(routes.ReachedLimitController.onPageLoad())
+        case LockedAndUnverified => Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad())
+      }
   }
 
 }
+

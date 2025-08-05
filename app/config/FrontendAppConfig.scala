@@ -52,6 +52,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val maxNumberDDIsAllowed: Int =
       configuration.get[Int]("features.maxNumberDDIsAllowed")
 
+  lazy val isLockServiceEnabled: Boolean =
+      configuration.get[Boolean]("features.enableLockService")
+
   def languageMap: Map[String, Lang] = Map(
     "en" -> Lang("en"),
     "cy" -> Lang("cy")

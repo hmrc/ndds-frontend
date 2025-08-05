@@ -17,9 +17,15 @@
 package controllers
 
 import base.SpecBase
+import models.responses.LockResponse
+import org.scalatestplus.mockito.MockitoSugar.mock
+import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import services.LockService
 import views.html.ReachedLimitView
+
+import java.time.Instant
 
 class ReachedLimitControllerSpec extends SpecBase {
 
@@ -28,17 +34,18 @@ class ReachedLimitControllerSpec extends SpecBase {
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val retryDate = "11 June 2025, 3:45pm"
 
       running(application) {
-        val request = FakeRequest(GET, routes.ReachedLimitController.onPageLoad().url)
 
+        val request = FakeRequest(GET, routes.ReachedLimitController.onPageLoad().url)
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[ReachedLimitView]
 
+        val expectedDate = "28 June 2025, 15:30"
+
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(retryDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(expectedDate)(request, messages(application)).toString
       }
     }
   }

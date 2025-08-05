@@ -17,28 +17,40 @@
 package controllers
 
 import base.SpecBase
+import models.responses.LockResponse
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
+import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import services.LockService
 import views.html.AccountDetailsNotVerifiedView
+
+import java.time.Instant
+import scala.concurrent.Future
 
 class AccountDetailsNotVerifiedControllerSpec extends SpecBase {
 
   "AccountDetailsNotVerified Controller" - {
 
+
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val retryDate = "21 June 2025, 4:56pm"
 
       running(application) {
+
         val request = FakeRequest(GET, routes.AccountDetailsNotVerifiedController.onPageLoad().url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[AccountDetailsNotVerifiedView]
 
+        val expectedDate = "28 June 2025, 15:30"
+
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(retryDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(expectedDate)(request, messages(application)).toString
       }
     }
   }
