@@ -21,11 +21,13 @@ import forms.PlanStartDateFormProvider
 import models.{Mode, PlanStartDateDetails}
 import navigation.Navigator
 import pages.PlanStartDatePage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.PlanStartDateHelper
+import utils.DateTimeFormats
+import viewmodels.{PlanStartDateHelper, PlanStartDateViewModel}
 import views.html.PlanStartDateView
 
 import javax.inject.Inject
@@ -42,31 +44,48 @@ class PlanStartDateController @Inject()(
                                          val controllerComponents: MessagesControllerComponents,
                                          view: PlanStartDateView,
                                          planStartDateHelper: PlanStartDateHelper
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request => {
       val form = formProvider()
       val answers = request.userAnswers
       val preparedForm = answers.get(PlanStartDatePage) match {
         case None => form
         case Some(value) => form.fill(PlanStartDateDetails.toLocalDate(value))
       }
-      Ok(view(preparedForm, mode))
+      for {
+        earliestPlanStartDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
+      } yield Ok(view(preparedForm, PlanStartDateViewModel(
+        mode,
+        DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
+        DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date)
+      )))
+    } recover { case e =>
+      logger.warn(s"Unexpected error: $e")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val form = formProvider()
-      
+
       form.bindFromRequest().fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+        formWithErrors =>
+          for {
+            earliestPlanStartDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
+          } yield BadRequest(view(formWithErrors, PlanStartDateViewModel(
+            mode,
+            DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
+            DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date)
+          ))),
         value =>
           for {
-            earliestPaymentDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
+            earliestPlanStartDate <- planStartDateHelper.getEarliestPlanStartDate(request.userAnswers)
             updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(PlanStartDatePage, PlanStartDateDetails.toPaymentDatePageData(value, earliestPaymentDate.date)))
-            _              <- sessionRepository.set(updatedAnswers)
+              .set(PlanStartDatePage, PlanStartDateDetails.toPaymentDatePageData(value, earliestPlanStartDate.date)))
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
       )
   }

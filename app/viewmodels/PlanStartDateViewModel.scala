@@ -25,12 +25,32 @@ import models.requests.WorkingDaysOffsetRequest
 import models.responses.EarliestPaymentDate
 import models.{DirectDebitSource, Mode, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import play.api.i18n.Messages
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
 import java.time.LocalDate
 import scala.concurrent.Future
 
-case class PlanStartDateViewModel(mode: Mode)
+case class PlanStartDateViewModel(mode: Mode, earliestPlanStartDate: String, earliestPlanStartDateNumeric: String) {
+
+  def getHint(userAnswers: UserAnswers)(implicit messages: Messages): String = {
+    val paymentPlanType = userAnswers.get(PaymentPlanTypePage)
+      .getOrElse(throw new Exception("PaymentPlanTypePage details missing from user answers"))
+    val directDebitSource = userAnswers.get(DirectDebitSourcePage)
+      .getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
+
+    val variableHint = (paymentPlanType, directDebitSource) match {
+      case (VariablePaymentPlan, MGD) => messages("planStartDate.mgd.hint", earliestPlanStartDate)
+      case (BudgetPaymentPlan, SA) => messages("planStartDate.sa.hint", earliestPlanStartDate)
+      case (TaxCreditRepaymentPlan, TC) => messages("planStartDate.tc.hint", earliestPlanStartDate)
+      case _ => throw new InternalServerException("User should not be on this page without being on one of the specified journeys")
+    }
+    
+    val fixedHint = messages("planStartDate.fixedHint", earliestPlanStartDateNumeric)
+    
+    variableHint + fixedHint
+  }
+}
 
 class PlanStartDateHelper @Inject()(
                                      rdsDataCacheConnector: RdsDataCacheConnector,
