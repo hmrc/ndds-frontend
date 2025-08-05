@@ -88,5 +88,17 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with Mockit
       
       result.errors must contain(FormError("value", "totalAmountDue.error.belowMinimum", Seq("£25")))
     }
+
+    "must accept the minimum value as valid (inclusive)" in {
+      val testConfig = mock[FrontendAppConfig]
+      when(testConfig.minimumLiabilityAmount).thenReturn(BigDecimal("25.00"))
+      
+      val testForm = new TotalAmountDueFormProvider(testConfig)()
+      
+      val result = testForm.bind(Map("value" -> "25.00"))
+      
+      result.errors must be(empty)
+      result.value.value mustEqual BigDecimal("25.00")
+    }
   }
 }
