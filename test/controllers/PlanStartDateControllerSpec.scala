@@ -45,6 +45,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
 
   private val formProvider = new PlanStartDateFormProvider()
+
   private def form = formProvider()
 
   def onwardRoute: Call = Call("GET", "/foo")
@@ -73,9 +74,9 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, planStartDateRoute)
       .withFormUrlEncodedBody(
-        "value.day"   -> validAnswer.getDayOfMonth.toString,
+        "value.day" -> validAnswer.getDayOfMonth.toString,
         "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year"  -> validAnswer.getYear.toString
+        "value.year" -> validAnswer.getYear.toString
       )
 
   "planStartDate Controller" - {
@@ -86,7 +87,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
-      
+
       running(application) {
         val result = route(application, getRequest).value
 

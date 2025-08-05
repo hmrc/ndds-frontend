@@ -34,6 +34,7 @@ object DateTimeFormats {
   def dateTimeFormat()(implicit lang: Lang): DateTimeFormatter = {
     localisedDateTimeFormatters.getOrElse(lang.code, dateTimeFormatter)
   }
+
   def formattedCurrentDate: String = {
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
     LocalDate.now().format(formatter)
@@ -59,5 +60,5 @@ object DateTimeFormats {
   }
 
   val dateTimeHintFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("d M yyyy")
-  
+
 }

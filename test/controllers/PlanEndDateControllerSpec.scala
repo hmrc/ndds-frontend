@@ -42,9 +42,11 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private val startDate: LocalDate = LocalDate.of(2024, 1, 1)
   private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(startDate, "2024-1-11")
   private val formProvider = new PlanEndDateFormProvider()
+
   private def form = formProvider(startDate)
 
   def onwardRoute: Call = Call("GET", "/foo")
+
   val validAnswer: LocalDate = LocalDate.now(ZoneOffset.UTC)
   lazy val planEndDateRoute: String = routes.PlanEndDateController.onPageLoad(NormalMode).url
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId).set(PlanStartDatePage, planStartDateDetails).success.value
@@ -55,9 +57,9 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, planEndDateRoute)
       .withFormUrlEncodedBody(
-        "value.day"   -> validAnswer.getDayOfMonth.toString,
+        "value.day" -> validAnswer.getDayOfMonth.toString,
         "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year"  -> validAnswer.getYear.toString
+        "value.year" -> validAnswer.getYear.toString
       )
 
   "PlanEndDate Controller" - {
@@ -78,6 +80,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       val userAnswers = UserAnswers(userAnswersId)
         .set(PlanStartDatePage, planStartDateDetails).success.value
         .set(PlanEndDatePage, validAnswer).success.value
+
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       running(application) {
         val view = application.injector.instanceOf[PlanEndDateView]

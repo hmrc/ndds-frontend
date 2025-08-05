@@ -22,14 +22,13 @@ import connectors.RDSDatacacheProxyConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.EarliestPaymentDate
-import models.{DirectDebitSource, PaymentPlanType, RDSDatacacheResponse, RDSDirectDebitDetails, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, PaymentPlanType, RDSDatacacheResponse, RDSDirectDebitDetails, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
-import play.api.libs.json.Json
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData

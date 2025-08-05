@@ -25,7 +25,7 @@ import utils.DateTimeFormats.dateTimeFormat
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object PlanStartDateSummary  {
+object PlanStartDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PlanStartDatePage).map {
@@ -34,8 +34,8 @@ object PlanStartDateSummary  {
         implicit val lang: Lang = messages.lang
 
         SummaryListRowViewModel(
-          key     = "planStartDate.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
+          key = "planStartDate.checkYourAnswersLabel",
+          value = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
           actions = Seq(
             ActionItemViewModel("site.change", routes.PlanStartDateController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("planStartDate.change.hidden"))

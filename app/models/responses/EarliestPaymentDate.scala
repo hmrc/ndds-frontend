@@ -18,9 +18,6 @@ package models.responses
 
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 case class EarliestPaymentDate(date: String)
 
 object EarliestPaymentDate {

@@ -17,8 +17,6 @@
 package pages
 
 import models.PlanStartDateDetails
-
-import java.time.LocalDate
 import play.api.libs.json.JsPath
 
 case object PlanStartDatePage extends QuestionPage[PlanStartDateDetails] {

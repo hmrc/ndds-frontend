@@ -17,8 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, YearEndAndMonth}
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth}
 import pages.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
