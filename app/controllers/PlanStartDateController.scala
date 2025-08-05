@@ -52,7 +52,7 @@ class PlanStartDateController @Inject()(
       val answers = request.userAnswers
       val preparedForm = answers.get(PlanStartDatePage) match {
         case None => form
-        case Some(value) => form.fill(PlanStartDateDetails.toLocalDate(value))
+        case Some(value) => form.fill(value.enteredDate)
       }
 
       rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
@@ -89,7 +89,7 @@ class PlanStartDateController @Inject()(
           for {
             earliestPlanStartDate <- rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers)
             updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(PlanStartDatePage, PlanStartDateDetails.toPaymentDatePageData(value, earliestPlanStartDate.date)))
+              .set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date)))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
       ) recover { case e =>

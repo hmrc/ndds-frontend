@@ -24,12 +24,4 @@ case class PlanStartDateDetails(enteredDate: LocalDate, earliestPlanStartDate: S
 
 object PlanStartDateDetails {
   implicit val format: OFormat[PlanStartDateDetails] = Json.format
-
-  def toPaymentDatePageData(enteredDate: LocalDate, earliestPlanStartDate: String): PlanStartDateDetails = {
-    PlanStartDateDetails(enteredDate, earliestPlanStartDate)
-  }
-
-  def toLocalDate(planStartDateDetails: PlanStartDateDetails): LocalDate = {
-    planStartDateDetails.enteredDate
-  }
 }

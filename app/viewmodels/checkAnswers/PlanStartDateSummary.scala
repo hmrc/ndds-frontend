@@ -35,7 +35,7 @@ object PlanStartDateSummary  {
 
         SummaryListRowViewModel(
           key     = "planStartDate.checkYourAnswersLabel",
-          value   = ValueViewModel(PlanStartDateDetails.toLocalDate(answer).format(dateTimeFormat())),
+          value   = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
           actions = Seq(
             ActionItemViewModel("site.change", routes.PlanStartDateController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("planStartDate.change.hidden"))

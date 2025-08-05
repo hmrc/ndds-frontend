@@ -47,7 +47,7 @@ class PlanEndDateController @Inject()(
     implicit request =>
       request.userAnswers.get(PlanStartDatePage) match {
         case Some(startDate) =>
-          val form = formProvider(PlanStartDateDetails.toLocalDate(startDate))
+          val form = formProvider(startDate.enteredDate)
           val preparedForm = request.userAnswers.get(PlanEndDatePage).map(Some(_)).fold(form)(form.fill)
 
           Ok(view(preparedForm, mode))
@@ -61,7 +61,7 @@ class PlanEndDateController @Inject()(
     implicit request =>
       request.userAnswers.get(PlanStartDatePage) match {
         case Some(startDate) =>
-          val form = formProvider(PlanStartDateDetails.toLocalDate(startDate))
+          val form = formProvider(startDate.enteredDate)
 
           form.bindFromRequest().fold(
             formWithErrors =>
