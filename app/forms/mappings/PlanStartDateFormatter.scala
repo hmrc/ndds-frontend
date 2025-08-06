@@ -20,6 +20,7 @@ import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.data.FormError
 import play.api.i18n.Messages
+import utils.PaymentPlanConstants._
 
 import java.time.LocalDate
 
@@ -56,14 +57,14 @@ class PlanStartDateFormatter(
     val directDebitSource = userAnswers.get(DirectDebitSourcePage)
 
     if (isBudgetPaymentPlan(paymentPlanType, directDebitSource)) {
-      val maxPlanStartDate = currentDate.plusYears(1)
+      val maxPlanStartDate = currentDate.plusYears(BudgetPaymentPlanMaxYears)
       if (enteredDate.isAfter(maxPlanStartDate)) {
         errors += FormError(key, budgetAfterMaxDateKey, args)
       }
     }
 
     if (isTimeToPayOrVppPaymentPlan(paymentPlanType, directDebitSource)) {
-      val maxPlanStartDate = currentDate.plusDays(30)
+      val maxPlanStartDate = currentDate.plusDays(TimeToPayMaxDays)
       if (enteredDate.isAfter(maxPlanStartDate)) {
         errors += FormError(key, timeToPayAfterMaxDateKey, args)
       }
