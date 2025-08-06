@@ -42,9 +42,12 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
   private implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new PaymentDateFormProvider()
+  //private val fixedClock: Clock = Clock.fixed(Instant.parse("2024-07-17T00:00:00Z"), ZoneId.systemDefault())
+  val fixedInstant: Instant = Instant.parse("2024-07-17T00:00:00Z")
+  val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
+  private val formProvider = new PaymentDateFormProvider(fixedClock)
+  private def form = formProvider(LocalDate.parse(expectedEarliestPaymentDate.date), isSinglePlan = false) // or true if applicable
 
-  private def form = formProvider()
 
   val mockService: RDSDatacacheService = mock[RDSDatacacheService]
 
@@ -55,8 +58,8 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   lazy val paymentDateRoute: String = routes.PaymentDateController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
-  val fixedInstant: Instant = Instant.parse("2024-07-17T00:00:00Z")
-  val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
+
+
 
   val date: LocalDateTime = LocalDateTime.now(fixedClock)
   private val formattedDate = "6 February 2025"

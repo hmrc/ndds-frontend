@@ -29,6 +29,7 @@ import services.RDSDatacacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentDateView
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -47,14 +48,17 @@ class PaymentDateController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
-      val form = formProvider()
-
-      val preparedForm = request.userAnswers.get(PaymentDatePage) match {
-        case None => form
-        case Some(value) => form.fill(value.enteredDate)
-      }
-
       rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
+        val isSinglePlan = rdsDatacacheService.isSinglePaymentPlan(request.userAnswers)
+
+        val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
+
+        val preparedForm = request.userAnswers.get(PaymentDatePage) match {
+          case None => form
+          case Some(value) => form.fill(value.enteredDate)
+        }
+
+
         Ok(view(preparedForm, mode, earliestPaymentDate.toDateString))
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
@@ -65,24 +69,28 @@ class PaymentDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val form = formProvider()
+      rdsDatacacheService.getEarliestPaymentDate(request.userAnswers).flatMap { earliestPaymentDate => {
+        val isSinglePlan = rdsDatacacheService.isSinglePaymentPlan(request.userAnswers)
+        val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
-            BadRequest(view(formWithErrors, mode, earliestPaymentDate.toDateString))
-          },
-        value =>
-          for {
-            earliestPaymentDate <- rdsDatacacheService.getEarliestPaymentDate(request.userAnswers)
-            updatedAnswers <- Future.fromTry(
-              request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date))
-            )
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
-      ) recover { case e =>
-        logger.warn(s"Unexpected error: $e")
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        form.bindFromRequest().fold(
+          formWithErrors =>
+            rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
+              BadRequest(view(formWithErrors, mode, earliestPaymentDate.toDateString))
+            },
+          value =>
+            for {
+              earliestPaymentDate <- rdsDatacacheService.getEarliestPaymentDate(request.userAnswers)
+              updatedAnswers <- Future.fromTry(
+                request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date))
+              )
+              _ <- sessionRepository.set(updatedAnswers)
+            } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
+        ) recover { case e =>
+          logger.warn(s"Unexpected error: $e")
+          Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+      }
       }
   }
 }

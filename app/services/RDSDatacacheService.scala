@@ -92,4 +92,7 @@ class RDSDatacacheService @Inject()(rdsConnector: RDSDatacacheProxyConnector,
 
     config.paymentDelayFixed + dynamicDelay
   }
+
+  def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment)
 }
