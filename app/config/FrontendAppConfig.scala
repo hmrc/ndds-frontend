@@ -62,6 +62,23 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   lazy val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
-  lazy val minimumLiabilityAmount: BigDecimal = 
+  lazy val minimumLiabilityAmount: BigDecimal =
     BigDecimal(configuration.get[String]("payment-validation.minimumLiabilityAmount"))
+
+  // Derived payment plan config
+  lazy val tcTotalNumberOfPayments: Int =
+    configuration.get[Int]("paymentSchedule.tc.totalNumberOfPayments")
+
+  lazy val tcNumberOfEqualPayments: Int =
+    configuration.get[Int]("paymentSchedule.tc.numberOfEqualPayments")
+
+  lazy val tcMonthsUntilSecondPayment: Int =
+    configuration.get[Int]("paymentSchedule.tc.monthsUntilSecondPayment")
+
+  lazy val tcMonthsUntilPenultimatePayment: Int =
+    configuration.get[Int]("paymentSchedule.tc.monthsUntilPenultimatePayment")
+
+  lazy val tcMonthsUntilFinalPayment: Int =
+    configuration.get[Int]("paymentSchedule.tc.monthsUntilFinalPayment")
+
 }

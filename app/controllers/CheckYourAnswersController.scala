@@ -16,15 +16,16 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import com.google.inject.Inject
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.DirectDebitSource
-import pages.DirectDebitSourcePage
+import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PlanStartDatePage, TotalAmountDuePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.DateTimeFormats
+import utils.{DateTimeFormats, PaymentCalculations}
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
@@ -36,7 +37,8 @@ class CheckYourAnswersController @Inject()  (
                                             getData: DataRetrievalAction,
                                             requireData: DataRequiredAction,
                                             val controllerComponents: MessagesControllerComponents,
-                                            view: CheckYourAnswersView
+                                            view: CheckYourAnswersView,
+                                            appConfig: FrontendAppConfig
                                           ) extends FrontendBaseController with I18nSupport with Logging{
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
@@ -67,7 +69,69 @@ class CheckYourAnswersController @Inject()  (
       Ok(view(list, currentDate))
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    paymentCalculation(request.userAnswers).getOrElse {
+      logger.warn("Missing required answers for payment calculations")
+      Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+    }
   }
+
+  private def paymentCalculation(userAnswers: UserAnswers): Option[Result] = {
+    userAnswers.get(DirectDebitSourcePage) match {
+      case Some(DirectDebitSource.TC) =>
+        userAnswers.get(PaymentPlanTypePage) match {
+          case Some(PaymentPlanType.TaxCreditRepaymentPlan) =>
+            calculateTaxCreditRepaymentPlan(userAnswers)
+          case Some(otherPlan) =>
+            logger.debug(s"No calculation needed for TC service with plan [$otherPlan]")
+            Some(Redirect(routes.DirectDebitConfirmationController.onPageLoad()))
+          case None =>
+            logger.warn("Plan type is missing for TC service")
+            Some(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        }
+        // will add next steps  and update
+      case _ =>
+        Some(Redirect(routes.DirectDebitConfirmationController.onPageLoad()))
+    }
+  }
+
+
+  private def calculateTaxCreditRepaymentPlan(userAnswers: UserAnswers): Option[Result] = {
+    for {
+      totalAmountDue <- userAnswers.get(TotalAmountDuePage)
+      planStartDate <- userAnswers.get(PlanStartDatePage)
+    } yield {
+      val regularPaymentAmount = PaymentCalculations.calculateRegularPaymentAmount(
+        totalAmountDueInput = totalAmountDue,
+        totalNumberOfPayments = appConfig.tcTotalNumberOfPayments
+      )
+
+      val finalPaymentAmount = PaymentCalculations.calculateFinalPayment(
+        totalAmountDue = totalAmountDue,
+        regularPaymentAmount = BigDecimal(regularPaymentAmount),
+        numberOfEqualPayments = appConfig.tcNumberOfEqualPayments
+      )
+
+      val secondPaymentDate = PaymentCalculations.calculateSecondPaymentDate(
+        planStartDate = planStartDate,
+        monthsOffset = appConfig.tcMonthsUntilSecondPayment
+      )
+
+      val penultimatePaymentDate = PaymentCalculations.calculatePenultimatePaymentDate(
+        planStartDate = planStartDate,
+        penultimateInstallmentOffset = appConfig.tcMonthsUntilPenultimatePayment
+      )
+
+      val finalPaymentDate = PaymentCalculations.calculateFinalPaymentDate(
+        planStartDate = planStartDate,
+        monthsOffset = appConfig.tcMonthsUntilFinalPayment
+      )
+      logger.debug(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
+      logger.debug(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
+
+      Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+    }
+  }
+
+
 }

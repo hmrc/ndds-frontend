@@ -186,10 +186,30 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to the confirmation page for a POST" in {
+    "must redirect to Journey Recovery for a POST if required data is missing" in {
+      val incompleteAnswers = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
 
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers)).build()
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        val result = route(application, request).value
 
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to confirmation page if DirectDebitSource  is 'TC' for a POST if all require data is provided" in {
+      val totalDueAmount = 200
+      val incompleteAnswers = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+        .setOrException(TotalAmountDuePage, totalDueAmount)
+        .setOrException(PlanStartDatePage, fixedDate)
+
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers)).build()
       running(application) {
         val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
         val result = route(application, request).value
@@ -198,6 +218,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
       }
     }
+
 
   }
 }
