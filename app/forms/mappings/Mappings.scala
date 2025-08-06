@@ -20,6 +20,7 @@ import models.{Enumerable, YearEndAndMonth}
 import play.api.data.{FieldMapping, Mapping}
 import play.api.data.Forms.{of, optional}
 import play.api.i18n.Messages
+import play.api.data.validation.{Constraint, Invalid, Valid}
 
 import java.time.LocalDate
 
@@ -78,6 +79,31 @@ trait Mappings extends Formatters with Constraints {
                              args: Seq[String] = Seq.empty,
                              dateFormats:Seq[DateFormat]): FieldMapping[YearEndAndMonth] =
     of(new YearEndAndMonthDateFormatter(invalidKey, args, dateFormats))
+
+  private def  currencyConstraint(
+                          nonNumericKey: String,
+                          invalidNumericKey: String
+                        ): Constraint[String] = Constraint("currencyConstraint") { str =>
+    if (!str.matches("""^[0-9.]+$""")) {
+      Invalid(nonNumericKey)
+    } else if (!str.matches("""^\d+(\.\d{2})?$""")) {
+      Invalid(invalidNumericKey)
+    } else {
+      Valid
+    }
+  }
+
+  def currencyWithTwoDecimalsOrWholeNumber(
+                                            requiredKey: String,
+                                            invalidNumericKey: String,
+                                            nonNumericKey: String
+                                          ): Mapping[BigDecimal] =
+    text(requiredKey)
+      .verifying(currencyConstraint(nonNumericKey, invalidNumericKey))
+      .transform[BigDecimal](
+        str => BigDecimal(str).setScale(2, BigDecimal.RoundingMode.UNNECESSARY),
+        bigDecimal => bigDecimal.setScale(2).underlying.toPlainString
+      )
 
   def optionalLocalDate(
                          invalidKey:     String,
