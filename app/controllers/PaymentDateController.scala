@@ -67,30 +67,28 @@ class PaymentDateController @Inject()(
     }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      rdsDatacacheService.getEarliestPaymentDate(request.userAnswers).flatMap { earliestPaymentDate => {
-        val isSinglePlan = rdsDatacacheService.isSinglePaymentPlan(request.userAnswers)
-        val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    rdsDatacacheService.getEarliestPaymentDate(request.userAnswers).flatMap { earliestPaymentDate =>
+      val isSinglePlan = rdsDatacacheService.isSinglePaymentPlan(request.userAnswers)
+      val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
-        form.bindFromRequest().fold(
-          formWithErrors =>
-            rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
-              BadRequest(view(formWithErrors, mode, earliestPaymentDate.toDateString))
-            },
-          value =>
-            for {
-              earliestPaymentDate <- rdsDatacacheService.getEarliestPaymentDate(request.userAnswers)
-              updatedAnswers <- Future.fromTry(
-                request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date))
-              )
-              _ <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
-        ) recover { case e =>
-          logger.warn(s"Unexpected error: $e")
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
-        }
-      }
-      }
+      form.bindFromRequest().fold(
+        formWithErrors =>
+          rdsDatacacheService.getEarliestPaymentDate(request.userAnswers).map { earliestPaymentDate =>
+            BadRequest(view(formWithErrors, mode, earliestPaymentDate.toDateString))
+          },
+        value =>
+          for {
+            earliestPaymentDate <- rdsDatacacheService.getEarliestPaymentDate(request.userAnswers)
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
+      )
+    }.recoverWith {
+      case e =>
+        logger.warn(s"Unexpected error: $e")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
   }
+
 }
