@@ -18,9 +18,9 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentPlanTypeFormProvider
-import models.{DirectDebitSource, Mode, PaymentPlanType}
+import models.{DirectDebitSource, Mode, PaymentPlanType, UserAnswers}
 import navigation.Navigator
-import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
+import pages.{DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -31,6 +31,7 @@ import views.html.PaymentPlanTypeView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class PaymentPlanTypeController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -60,19 +61,40 @@ class PaymentPlanTypeController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val answers = request.userAnswers
-      val selectedAnswers = answers.get(DirectDebitSourcePage)
+      val selectedSource = request.userAnswers.get(DirectDebitSourcePage)
 
       form.bindFromRequest().fold(
-        formWithErrors =>
-          logger.warn(s"Payment plan validation error: ${formWithErrors}")
-          Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers))),
+        formWithErrors => {
+          logger.warn(s"Payment plan validation error: ${formWithErrors.errors}")
+          Future.successful(BadRequest(view(formWithErrors, mode, selectedSource)))
+        },
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PaymentPlanTypePage, mode, updatedAnswers))
+        newValue =>
+          Future.fromTry(setPaymentPlanType(request.userAnswers, newValue))
+            .flatMap { updatedAnswers =>
+              sessionRepository.set(updatedAnswers).map { _ =>
+                Redirect(navigator.nextPage(PaymentPlanTypePage, mode, updatedAnswers))
+              }
+            }
+            .recoverWith { case ex =>
+              logger.error("Failed to update user answers in setPaymentPlanType", ex)
+              Future.successful(InternalServerError("Unable to update data"))
+            }
       )
   }
+
+  private def setPaymentPlanType(userAnswers: UserAnswers, newValue: PaymentPlanType): Try[UserAnswers] = {
+    val oldValue = userAnswers.get(PaymentPlanTypePage)
+
+    if (oldValue.contains(newValue)) {
+      userAnswers.set(PaymentPlanTypePage, newValue)
+    } else {
+      userAnswers
+        .remove(PaymentAmountPage)
+        .flatMap(_.remove(PaymentReferencePage))
+        .flatMap(_.remove(PaymentDatePage))
+        .flatMap(_.set(PaymentPlanTypePage, newValue))
+    }
+  }
+
 }
