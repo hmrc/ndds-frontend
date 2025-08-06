@@ -19,11 +19,9 @@ package controllers
 import controllers.actions.*
 import forms.PaymentReferenceFormProvider
 
-import javax.inject.Inject
-import models.{DirectDebitSource, Mode, UserAnswers}
+import models.{DirectDebitSource, Mode}
 import navigation.Navigator
 import pages.{DirectDebitSourcePage, PaymentReferencePage}
-import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository

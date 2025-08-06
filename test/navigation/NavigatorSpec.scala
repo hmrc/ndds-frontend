@@ -55,8 +55,7 @@ class NavigatorSpec extends SpecBase {
       "must go from TotalAmountDuePage to PlanStartDatePage" in {
         navigator.nextPage(TotalAmountDuePage, NormalMode, userAnswers) mustBe routes.PlanStartDateController.onPageLoad(NormalMode)
       }
-
-
+      
       "must go from BankDetailsCheckYourAnswersPage to DirectDebitSourcePage" in {
         val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
         navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, checkPage) mustBe routes.DirectDebitSourceController.onPageLoad(NormalMode)
@@ -240,8 +239,36 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.BankApprovalController.onPageLoad()
       }
 
+      "must go from PaymentReferencePage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(PaymentReferencePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from PaymentAmountPage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(PaymentAmountPage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from PaymentDatePage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(PaymentDatePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from PlanStartDatePage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(PlanStartDatePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
       "must go from PlanEndDatePage to CheckYourAnswersController in CheckMode" in {
         navigator.nextPage(PlanEndDatePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from TotalAmountDuePage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(TotalAmountDuePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from PaymentsFrequencyPage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(PaymentsFrequencyPage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from RegularPaymentAmountPage to CheckYourAnswersController in CheckMode" in {
+        navigator.nextPage(RegularPaymentAmountPage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
       "must go from YearEndAndMonthPage to CheckYourAnswersController in CheckMode" in {
