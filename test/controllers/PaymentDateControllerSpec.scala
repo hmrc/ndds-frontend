@@ -91,7 +91,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         "earliestPaymentDate" -> "2025-02-01",
       )))
 
-  val getRequest: FakeRequest[AnyContentAsEmpty.type] =
+  def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, paymentDateRoute)
 
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
@@ -115,12 +115,12 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         running(application) {
-          val result = route(application, getRequest).value
+          val result = route(application, getRequest()).value
 
           val view = application.injector.instanceOf[PaymentDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, formattedDate)(getRequest, messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, formattedDate)(getRequest(), messages(application)).toString
         }
       }
 
@@ -138,10 +138,10 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           val view = application.injector.instanceOf[PaymentDateView]
 
-          val result = route(application, getRequest).value
+          val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate)(getRequest, messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate)(getRequest(), messages(application)).toString
         }
       }
 
@@ -150,7 +150,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val result = route(application, getRequest).value
+          val result = route(application, getRequest()).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
@@ -169,7 +169,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .thenReturn(Future.failed(new Exception("bang")))
 
         running(application) {
-          val result = route(application, getRequest).value
+          val result = route(application, getRequest()).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
