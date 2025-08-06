@@ -118,7 +118,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val view = application.injector.instanceOf[PaymentDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric)(getRequest, messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric)(getRequest(), messages(application)).toString
         }
       }
 
@@ -139,7 +139,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric)(getRequest, messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric)(getRequest(), messages(application)).toString
         }
       }
 
