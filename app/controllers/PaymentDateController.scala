@@ -27,6 +27,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.RDSDatacacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.DateTimeFormats
 import views.html.PaymentDateView
 
 import javax.inject.Inject
@@ -55,7 +56,11 @@ class PaymentDateController @Inject()(
       }
 
       rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
-        Ok(view(preparedForm, mode, earliestPaymentDate.toDateString))
+        Ok(view(preparedForm,
+          mode,
+          DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
+          DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date)
+        ))
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
@@ -70,7 +75,11 @@ class PaymentDateController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors =>
           rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
-            BadRequest(view(formWithErrors, mode, earliestPaymentDate.toDateString))
+            BadRequest(view(formWithErrors,
+              mode,
+              DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
+              DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date)
+            ))
           },
         value =>
           for {
