@@ -70,60 +70,74 @@ class CheckYourAnswersController @Inject()  (
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-
     paymentCalculation(request.userAnswers).getOrElse {
       logger.warn("Missing required answers for payment calculations")
       Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
-
   }
 
   private def paymentCalculation(userAnswers: UserAnswers): Option[Result] = {
+    userAnswers.get(DirectDebitSourcePage) match {
+      case Some(serviceType) =>
+        userAnswers.get(PaymentPlanTypePage) match {
+          case Some(planType) =>
+            (serviceType, planType) match {
+              case (DirectDebitSource.TC, PaymentPlanType.TaxCreditRepaymentPlan) =>
+                calculateTaxCreditRepaymentPlan(userAnswers)
+
+              case _ =>
+                logger.debug(s"No multi-payment calculation required for service [$serviceType] and plan [$planType]")
+                Some(Redirect(routes.DirectDebitConfirmationController.onPageLoad()))
+            }
+
+          case None =>
+            logger.warn("Plan type is missing for service")
+            Some(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        }
+
+      case None =>
+        logger.warn("Direct debit source (service type) is missing")
+        Some(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+    }
+  }
+
+  private def calculateTaxCreditRepaymentPlan(userAnswers: UserAnswers): Option[Result] = {
     for {
-      serviceType <- userAnswers.get(DirectDebitSourcePage)
-      planType <- userAnswers.get(PaymentPlanTypePage)
       totalAmountDue <- userAnswers.get(TotalAmountDuePage)
       planStartDate <- userAnswers.get(PlanStartDatePage)
     } yield {
-      (serviceType, planType) match {
-        case (DirectDebitSource.TC, PaymentPlanType.TaxCreditRepaymentPlan) =>
+      val regularPaymentAmount = PaymentCalculations.calculateRegularPaymentAmount(
+        totalAmountDueInput = totalAmountDue,
+        totalNumberOfPayments = appConfig.tcTotalNumberOfPayments
+      )
 
-          val regularPaymentAmount = PaymentCalculations.calculateRegularPaymentAmount(
-            totalAmountDueInput = totalAmountDue,
-            totalNumberOfPayments = appConfig.tcTotalNumberOfPayments
-          )
+      val finalPaymentAmount = PaymentCalculations.calculateFinalPayment(
+        totalAmountDue = totalAmountDue,
+        regularPaymentAmount = BigDecimal(regularPaymentAmount),
+        numberOfEqualPayments = appConfig.tcNumberOfEqualPayments
+      )
 
-          val finalPaymentAmount = PaymentCalculations.calculateFinalPayment(
-            totalAmountDue = totalAmountDue,
-            regularPaymentAmount = BigDecimal(regularPaymentAmount),
-            numberOfEqualPayments = appConfig.tcNumberOfEqualPayments
-          )
+      val secondPaymentDate = PaymentCalculations.calculateSecondPaymentDate(
+        planStartDate = planStartDate,
+        monthsOffset = appConfig.tcMonthsUntilSecondPayment
+      )
 
-          val secondPaymentDate = PaymentCalculations.calculateSecondPaymentDate(
-            planStartDate = planStartDate,
-            monthsOffset = appConfig.tcMonthsUntilSecondPayment
-          )
+      val penultimatePaymentDate = PaymentCalculations.calculatePenultimatePaymentDate(
+        planStartDate = planStartDate,
+        penultimateInstallmentOffset = appConfig.tcMonthsUntilPenultimatePayment
+      )
 
-          val penultimatePaymentDate = PaymentCalculations.calculatePenultimatePaymentDate(
-            planStartDate = planStartDate,
-            penultimateInstallmentOffset = appConfig.tcMonthsUntilPenultimatePayment
-          )
+      val finalPaymentDate = PaymentCalculations.calculateFinalPaymentDate(
+        planStartDate = planStartDate,
+        monthsOffset = appConfig.tcMonthsUntilFinalPayment
+      )
 
-          val finalPaymentDate = PaymentCalculations.calculateFinalPaymentDate(
-            planStartDate = planStartDate,
-            monthsOffset = appConfig.tcMonthsUntilFinalPayment
-          )
-          // add next action here - these lines will be deleted
-          logger.debug(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
-          logger.debug(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
+      logger.debug(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
+      logger.debug(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
 
-          Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-
-        case _ =>
-          logger.debug(s"No multi-payment calculation required for service [$serviceType] and plan [$planType]")
-          Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-      }
+      Redirect(routes.DirectDebitConfirmationController.onPageLoad())
     }
   }
+
 
 }
