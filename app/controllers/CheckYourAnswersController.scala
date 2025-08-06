@@ -78,28 +78,23 @@ class CheckYourAnswersController @Inject()  (
 
   private def paymentCalculation(userAnswers: UserAnswers): Option[Result] = {
     userAnswers.get(DirectDebitSourcePage) match {
-      case Some(serviceType) =>
+      case Some(DirectDebitSource.TC) =>
         userAnswers.get(PaymentPlanTypePage) match {
-          case Some(planType) =>
-            (serviceType, planType) match {
-              case (DirectDebitSource.TC, PaymentPlanType.TaxCreditRepaymentPlan) =>
-                calculateTaxCreditRepaymentPlan(userAnswers)
-
-              case _ =>
-                logger.debug(s"No multi-payment calculation required for service [$serviceType] and plan [$planType]")
-                Some(Redirect(routes.DirectDebitConfirmationController.onPageLoad()))
-            }
-
+          case Some(PaymentPlanType.TaxCreditRepaymentPlan) =>
+            calculateTaxCreditRepaymentPlan(userAnswers)
+          case Some(otherPlan) =>
+            logger.debug(s"No calculation needed for TC service with plan [$otherPlan]")
+            Some(Redirect(routes.DirectDebitConfirmationController.onPageLoad()))
           case None =>
-            logger.warn("Plan type is missing for service")
+            logger.warn("Plan type is missing for TC service")
             Some(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
-
-      case None =>
-        logger.warn("Direct debit source (service type) is missing")
-        Some(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        // will add next steps  and update
+      case _ =>
+        Some(Redirect(routes.DirectDebitConfirmationController.onPageLoad()))
     }
   }
+
 
   private def calculateTaxCreditRepaymentPlan(userAnswers: UserAnswers): Option[Result] = {
     for {
@@ -131,7 +126,6 @@ class CheckYourAnswersController @Inject()  (
         planStartDate = planStartDate,
         monthsOffset = appConfig.tcMonthsUntilFinalPayment
       )
-
       logger.debug(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
       logger.debug(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
 
