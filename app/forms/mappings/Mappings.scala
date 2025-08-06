@@ -16,7 +16,7 @@
 
 package forms.mappings
 
-import models.Enumerable
+import models.{Enumerable, YearEndAndMonth}
 import play.api.data.{FieldMapping, Mapping}
 import play.api.data.Forms.{of, optional}
 import play.api.i18n.Messages
@@ -68,14 +68,16 @@ trait Mappings extends Formatters with Constraints {
                              dateFormats:Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
     of(new CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
 
-  protected def yearMonthDate(
+
+
+  protected def yearEndMonthDate(
                              invalidKey: String,
                              allRequiredKey: String,
                              twoRequiredKey: String,
                              requiredKey: String,
                              args: Seq[String] = Seq.empty,
-                             dateFormats:Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
-    of(new YearMonthFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
+                             dateFormats:Seq[DateFormat]): FieldMapping[YearEndAndMonth] =
+    of(new YearEndAndMonthDateFormatter(invalidKey, args, dateFormats))
 
   def optionalLocalDate(
                          invalidKey:     String,

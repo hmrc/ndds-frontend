@@ -180,6 +180,7 @@ paymentReference.heading = What is your payment reference?
 paymentReference.checkYourAnswersLabel = Payment reference
 paymentReference.error.required = Enter a payment reference.
 paymentReference.error.length = Payment reference must be 100 characters or less
+paymentReference.error.invalid = Payment reference must be 14 or 15 characters starting with X, like XCA23456789345 or XLECL1234567893
 paymentReference.change.hidden = Payment reference
 paymentReference.ct.hint = Your Corporation Tax payment reference is 17 characters long and starts with ten digits followed by A001, this is then followed by a further three characters, for example, 1234567890A00108A.
 paymentReference.mgd.hint = eg XAM00001234567
@@ -223,13 +224,13 @@ planStartDate.change.hidden = Plan start date
 
 yearEndAndMonth.title = What is the year end and month?
 yearEndAndMonth.heading = What is the year end and month?
-yearEndAndMonth.hint = The Year end and month represents the period that you are making payment for and is in the format ʻyymm’, where ʻyy’ is the deduction year end and ʻmm’ is the month or quarter. However, when the year being paid is an earlier year then the month must be entered as 13. <br/><br/> For example, for the period ending 5 August 2009/2010, the year end for the deduction year 2009/2010 would be 10 whilst the month would be 04. When 2009/2010 is an earlier year the Year end and Month would be 1013. <br/><br/> Please note: When you are making a payment for the period that you are due to pay, you do not need to enter any information.
+yearEndAndMonth.hint = The Year end and month represents the period that you are making payment for and is in the format ''yyyy'' and ''mm'', where ''yyyy'' is the deduction year end and ''mm'' is the month or quarter. However, when the year being paid is an earlier year then the month must be entered as 13. <br><br> For example, for the period ending 5 August 2024/2025, the year end for the deduction year 2024/2025 would be 2025 whilst the month would be 04. When 2024/2025 is an earlier year the Year end and Month would be 2025 and 13. <br><br> Please note: When you are making a payment for the period that you are due to pay, you do not need to enter any information.
 yearEndAndMonth.checkYourAnswersLabel = Year end and month
 yearEndAndMonth.error.required.all = Enter the yearEndAndMonth
 yearEndAndMonth.error.required.two = The yearEndAndMonth must include {0} and {1}
 yearEndAndMonth.error.required = The yearEndAndMonth must include {0}
 yearEndAndMonth.error.invalid = Enter a real yearEndAndMonth
-yearEndAndMonth.change.hidden = yearEndAndMonth
+yearEndAndMonth.change.hidden = Year end and month
 
 paymentsFrequency.title = What is the frequency of payments?
 paymentsFrequency.heading = What is the frequency of payments?
