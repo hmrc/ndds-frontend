@@ -40,8 +40,12 @@ object DateTimeFormats {
   }
 
   def formattedDateTime(dateTime: LocalDateTime): String = { //example: 24 July 2020, 16:29pm
-    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm")
-    dateTime.format(formatter)
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mma")
+    val extractDateSuffix = """(.*)(am|pm|AM|PM)""".r
+
+    dateTime.format(formatter) match {
+      case extractDateSuffix(dateThing, suffix) => dateThing + suffix.toLowerCase
+    }
   }
 
   val dateTimeHintFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("d M yyyy")
