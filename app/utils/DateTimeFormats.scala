@@ -18,8 +18,8 @@ package utils
 
 import play.api.i18n.Lang
 
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import java.util.Locale
 
 object DateTimeFormats {
@@ -40,9 +40,13 @@ object DateTimeFormats {
     LocalDate.now().format(formatter)
   }
 
-  def formattedDateTime(dateTime: String): String = { //example: 24 July 2020, 16:29pm
+  def formattedDateTime(dateTime: LocalDateTime): String = { //example: 24 July 2020, 16:29pm
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mma")
-    dateTime.format(formatter)
+    val extractDateSuffix = """(.*)(am|pm|AM|PM)""".r
+
+    dateTime.format(formatter) match {
+      case extractDateSuffix(dateThing, suffix) => dateThing + suffix.toLowerCase
+    }
   }
 
   def formattedDateTimeShort(dateTime: String): String = { //example: 14 Aug 2025

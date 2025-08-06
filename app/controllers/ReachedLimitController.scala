@@ -19,26 +19,33 @@ package controllers
 import controllers.actions.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.LockService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
 import views.html.ReachedLimitView
 
+import java.time.{LocalDateTime, ZoneOffset}
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class ReachedLimitController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: ReachedLimitView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                       view: ReachedLimitView,
+                                       lockService: LockService
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val retryDate = "11 June 2025, 3:45pm" //TODO - should be retrieved from LOCK service response
-      val dateString = DateTimeFormats.formattedDateTime(retryDate)
+      lockService.isUserLocked(request.userId) map { response =>
+        val formattedDate = response.lockoutExpiryDateTime
+          .map(LocalDateTime.ofInstant(_, ZoneOffset.UTC))
+          .map(DateTimeFormats.formattedDateTime)
+          .getOrElse(throw Exception("Locked user has no expiry time"))
 
-      Ok(view(dateString))
+        Ok(view(formattedDate))
+      }
   }
 }
