@@ -245,10 +245,10 @@ regularPaymentAmount.heading = What is the regular payment amount?
 regularPaymentAmount.checkYourAnswersLabel = Regular payment amount
 regularPaymentAmount.hint = Must be pounds and pence value. For example, 1000.00
 regularPaymentAmount.error.nonNumeric = Enter a valid amount
-regularPaymentAmount.error.required = Enter an amount
-regularPaymentAmount.error.invalidNumeric = Enter a valid amount
-regularPaymentAmount.error.aboveMaximum = The amount entered must between 1.00 and 20,000,000.00
-regularPaymentAmount.error.belowMinimum = The amount entered must between 1.00 and 20,000,000.00
+regularPaymentAmount.error.required = Please enter an amount.
+regularPaymentAmount.error.invalidNumeric = The amount you have entered is not valid. Please check.
+regularPaymentAmount.error.aboveMaximum = The amount entered must between 1.00 and 20,000,000.00. Please amend your entry.
+regularPaymentAmount.error.belowMinimum = The amount entered must between 1.00 and 20,000,000.00. Please amend your entry.
 regularPaymentAmount.change.hidden = Regular payment amount
 
 planEndDate.title = What date are you ending this payment plan?
