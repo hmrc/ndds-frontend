@@ -68,6 +68,20 @@ trait Mappings extends Formatters with Constraints {
                              dateFormats:Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
     of(new CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
 
+  protected def planStartDate(
+                             invalidKey: String,
+                             allRequiredKey: String,
+                             twoRequiredKey: String,
+                             requiredKey: String,
+                             beforeEarliestDateKey: String,
+                             budgetAfterMaxDateKey: String,
+                             timeToPayAfterMaxDateKey: String,
+                             args: Seq[String] = Seq.empty,
+                             dateFormats: Seq[DateFormat],
+                             userAnswers: models.UserAnswers,
+                             earliestPlanStartDate: java.time.LocalDate)(implicit messages: Messages): FieldMapping[java.time.LocalDate] =
+    of(new PlanStartDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, beforeEarliestDateKey, budgetAfterMaxDateKey, timeToPayAfterMaxDateKey, args, dateFormats, userAnswers, earliestPlanStartDate))
+
 
 
   protected def yearEndMonthDate(
