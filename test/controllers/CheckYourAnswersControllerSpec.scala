@@ -208,7 +208,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(TotalAmountDuePage, totalDueAmount)
-        .setOrException(PlanStartDatePage, fixedDate)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
 
       val application = applicationBuilder(userAnswers = Some(incompleteAnswers)).build()
       running(application) {
