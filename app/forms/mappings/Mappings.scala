@@ -80,18 +80,18 @@ trait Mappings extends Formatters with Constraints {
                              dateFormats:Seq[DateFormat]): FieldMapping[YearEndAndMonth] =
     of(new YearEndAndMonthDateFormatter(invalidKey, args, dateFormats))
 
-  private def  currencyConstraint(
-                          nonNumericKey: String,
-                          invalidNumericKey: String
-                        ): Constraint[String] = Constraint("currencyConstraint") { str =>
-    if (!str.matches("""^[0-9.]+$""")) {
-      Invalid(nonNumericKey)
-    } else if (!str.matches("""^\d+(\.\d{2})?$""")) {
-      Invalid(invalidNumericKey)
+  private def currencyConstraint(
+                                  nonNumericKey: String,
+                                  invalidNumericKey: String
+                                ): Constraint[String] = Constraint("currencyConstraint") { str =>
+    if (!str.matches("""^-?\d+(\.\d{2})?$""")) {
+      if (str.exists(ch => !ch.isDigit && ch != '.' && ch != '-')) Invalid(nonNumericKey)
+      else Invalid(invalidNumericKey)
     } else {
       Valid
     }
   }
+
 
   def currencyWithTwoDecimalsOrWholeNumber(
                                             requiredKey: String,

@@ -16,40 +16,38 @@
 
 package forms
 
-import config.CurrencyFormatter.currencyFormat
 import config.FrontendAppConfig
+import config.CurrencyFormatter.currencyFormat
 import forms.behaviours.CurrencyFieldBehaviours
-import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.Mockito.when
 import org.scalacheck.Gen
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.data.FormError
 
 import scala.math.BigDecimal.RoundingMode
 
 class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with MockitoSugar {
 
-  val mockConfig = mock[FrontendAppConfig]
-  when(mockConfig.minimumLiabilityAmount).thenReturn(BigDecimal("12.00"))
-  
-  val form = new TotalAmountDueFormProvider(mockConfig)()
+  private val fieldName = "value"
+  private val min = BigDecimal(12.00)
+  private val max = BigDecimal(999999)
+
+  private def formWithMin(minValue: BigDecimal) = {
+    val config = mock[FrontendAppConfig]
+    when(config.minimumLiabilityAmount).thenReturn(minValue)
+    new TotalAmountDueFormProvider(config)()
+  }
+
+  private val form = formWithMin(min)
+
+  private val validDataGenerator: Gen[String] =
+    Gen.choose[BigDecimal](min, max)
+      .map(_.setScale(2, RoundingMode.HALF_UP))
+      .map(_.toString)
 
   ".value" - {
 
-    val fieldName = "value"
-
-    val minimum = 12
-    val maximum = 999999
-
-    val validDataGenerator =
-      Gen.choose[BigDecimal](minimum, maximum)
-        .map(_.setScale(2, RoundingMode.HALF_UP))
-        .map(_.toString)
-
-    behave like fieldThatBindsValidData(
-      form,
-      fieldName,
-      validDataGenerator
-    )
+    behave like fieldThatBindsValidData(form, fieldName, validDataGenerator)
 
     behave like currencyField(
       form,
@@ -61,15 +59,15 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with Mockit
     behave like currencyFieldWithMaximum(
       form,
       fieldName,
-      maximum,
-      FormError(fieldName, "totalAmountDue.error.aboveMaximum", Seq(currencyFormat(maximum)))
+      max,
+      FormError(fieldName, "totalAmountDue.error.aboveMaximum", Seq(currencyFormat(max)))
     )
 
     behave like currencyFieldWithMinimum(
       form,
       fieldName,
-      minimum,
-      FormError(fieldName, "totalAmountDue.error.belowMinimum", Seq(currencyFormat(minimum)))
+      min,
+      FormError(fieldName, "totalAmountDue.error.belowMinimum", Seq(currencyFormat(min)))
     )
 
     behave like mandatoryField(
@@ -78,27 +76,59 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with Mockit
       requiredError = FormError(fieldName, "totalAmountDue.error.required")
     )
 
-    "must validate the minimum liability amount from config" in {
-      val testConfig = mock[FrontendAppConfig]
-      when(testConfig.minimumLiabilityAmount).thenReturn(BigDecimal("25.00"))
-      
-      val testForm = new TotalAmountDueFormProvider(testConfig)()
-      
-      val result = testForm.bind(Map("value" -> "10.00"))
-      
-      result.errors must contain(FormError("value", "totalAmountDue.error.belowMinimum", Seq("£25")))
+    "fail when below minimum" in {
+      val result = form.bind(Map(fieldName -> (min - 0.01).toString))
+      result.errors must contain only FormError(fieldName, "totalAmountDue.error.belowMinimum", Seq(currencyFormat(min)))
     }
 
-    "must accept the minimum value as valid (inclusive)" in {
-      val testConfig = mock[FrontendAppConfig]
-      when(testConfig.minimumLiabilityAmount).thenReturn(BigDecimal("25.00"))
-      
-      val testForm = new TotalAmountDueFormProvider(testConfig)()
-      
-      val result = testForm.bind(Map("value" -> "25.00"))
-      
-      result.errors must be(empty)
-      result.value.value mustEqual BigDecimal("25.00")
+    "bind a whole number and format it as .00" in {
+      val result = form.bind(Map(fieldName -> "1000"))
+      result.errors mustBe empty
+      result.value.value mustBe BigDecimal("1000.00")
+    }
+
+    "bind a value with exactly two decimal places" in {
+      val result = form.bind(Map(fieldName -> "123.45"))
+      result.errors mustBe empty
+      result.value.value mustBe BigDecimal("123.45")
+    }
+
+    "fail to bind a value with only one decimal place" in {
+      val result = form.bind(Map(fieldName -> "123.4"))
+      result.errors must contain only FormError(fieldName, "totalAmountDue.error.invalidNumeric")
+    }
+
+    "fail to bind a value with more than two decimal places" in {
+      val result = form.bind(Map(fieldName -> "123.456"))
+      result.errors must contain only FormError(fieldName, "totalAmountDue.error.invalidNumeric")
+    }
+
+    "fail to bind negative values" in {
+      val result = form.bind(Map(fieldName -> "-10.00"))
+      result.errors must contain only FormError(fieldName, "totalAmountDue.error.belowMinimum", Seq(currencyFormat(min)))
+    }
+
+    "unbinds value with two decimal places for redisplay" in {
+      val unbound = form.fill(BigDecimal("123.40")).apply(fieldName)
+      unbound.value.value mustBe "123.40"
+    }
+
+    "unbinds whole number as .00 for redisplay" in {
+      val unbound = form.fill(BigDecimal("50")).apply(fieldName)
+      unbound.value.value mustBe "50.00"
+    }
+
+    "must validate dynamic minimum liability from config" in {
+      val testForm = formWithMin(BigDecimal("25.00"))
+      val result = testForm.bind(Map(fieldName -> "10.00"))
+      result.errors must contain only FormError(fieldName, "totalAmountDue.error.belowMinimum", Seq("£25"))
+    }
+
+    "must accept the configured minimum value (inclusive)" in {
+      val testForm = formWithMin(BigDecimal("25.00"))
+      val result = testForm.bind(Map(fieldName -> "25.00"))
+      result.errors mustBe empty
+      result.value.value mustBe BigDecimal("25.00")
     }
   }
 }
