@@ -53,14 +53,14 @@ class TotalAmountDueController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentReferenceController.onPageLoad(mode)))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(TotalAmountDuePage, value))

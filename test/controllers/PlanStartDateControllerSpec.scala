@@ -62,7 +62,8 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   private val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   private val validPlanStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(validAnswer, earliestPlanStartDate)
   lazy val planStartDateRoute: String = routes.PlanStartDateController.onPageLoad(NormalMode).url
-
+  lazy val paymentReferenceRoute: String = routes.PaymentReferenceController.onPageLoad(NormalMode).url
+  
   val expectedUserAnswers: UserAnswers = UserAnswers(userAnswersId)
     .set(DirectDebitSourcePage, testDirectDebitSource).success.value
     .set(PaymentPlanTypePage, testPaymentPlanType).success.value
@@ -94,7 +95,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanStartDateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
       }
     }
 
@@ -115,7 +116,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
       }
     }
 
@@ -196,7 +197,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
       }
     }
 

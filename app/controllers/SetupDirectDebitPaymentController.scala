@@ -17,23 +17,34 @@
 package controllers
 
 import controllers.actions.*
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.RDSDatacacheService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SetupDirectDebitPaymentView
+
+import scala.concurrent.ExecutionContext
 
 class SetupDirectDebitPaymentController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
+                                       rdsDatacacheService: RDSDatacacheService,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SetupDirectDebitPaymentView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(directDebitCount: Int): Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      Ok(view(directDebitCount))
+      rdsDatacacheService.retrieveAllDirectDebits(request.userId)
+        .map {
+          rdsResponse =>
+            val ddiCount = rdsResponse.directDebitCount
+
+            Ok(view(ddiCount, routes.YourDirectDebitInstructionsController.onPageLoad()))
+        }
   }
 
 }

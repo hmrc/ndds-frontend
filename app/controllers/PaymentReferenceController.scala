@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentReferenceFormProvider
-
+import models.DirectDebitSource.{MGD, SA, TC}
 import models.{DirectDebitSource, Mode}
 import navigation.Navigator
 import pages.{DirectDebitSourcePage, PaymentReferencePage}
@@ -56,15 +56,17 @@ class PaymentReferenceController @Inject()(
         case None =>
           Redirect(navigator.nextPage(PaymentReferencePage, mode, answers))
         case Some(_) =>
-
           val form = formProvider(None)
-
           val preparedForm = answers.get(PaymentReferencePage) match {
             case None => form
             case Some(value) => form.fill(value)
           }
 
-          Ok(view(preparedForm, mode, selectedAnswers))
+          if (selectedAnswers.contains(MGD) || selectedAnswers.contains(SA) || selectedAnswers.contains(TC)) {
+            Ok(view(preparedForm, mode, selectedAnswers, routes.PaymentPlanTypeController.onPageLoad(mode)))
+          } else {
+            Ok(view(preparedForm, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode)))
+          }
       }
   }
 
@@ -79,11 +81,14 @@ class PaymentReferenceController @Inject()(
         case None =>
           Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
         case Some(serviceType) =>
-
           val form = formProvider(Some(serviceType))
           form.bindFromRequest().fold(
             formWithErrors =>
-              Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers))),
+              if (selectedAnswers.contains(MGD) || selectedAnswers.contains(SA) || selectedAnswers.contains(TC)) {
+                Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, routes.PaymentPlanTypeController.onPageLoad(mode))))
+              } else {
+                Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode))))
+              },
 
             value =>
               for {

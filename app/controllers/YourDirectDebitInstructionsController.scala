@@ -39,9 +39,10 @@ class YourDirectDebitInstructionsController @Inject()(
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    rdsDatacacheService.retrieveAllDirectDebits(request.userId) map { directDebitDetailsData =>
-      val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
-      Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
+    rdsDatacacheService.retrieveAllDirectDebits(request.userId) map {
+      directDebitDetailsData =>
+        val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
+        Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
     }
   }
 }

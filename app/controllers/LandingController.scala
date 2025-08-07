@@ -35,7 +35,7 @@ class LandingController @Inject()(rdsDatacacheService: RDSDatacacheService,
     rdsDatacacheService.retrieveAllDirectDebits(request.userId)
       .map {
         case rdsResponse if rdsResponse.directDebitCount == 0 =>
-          Redirect(routes.SetupDirectDebitPaymentController.onPageLoad(rdsResponse.directDebitCount))
+          Redirect(routes.SetupDirectDebitPaymentController.onPageLoad())
         case _ =>
           Redirect(routes.YourDirectDebitInstructionsController.onPageLoad())
       }

@@ -56,7 +56,7 @@ class PaymentPlanTypeController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(view(preparedForm, mode, selectedAnswers))
+      Ok(view(preparedForm, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -66,7 +66,7 @@ class PaymentPlanTypeController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors => {
           logger.warn(s"Payment plan validation error: ${formWithErrors.errors}")
-          Future.successful(BadRequest(view(formWithErrors, mode, selectedSource)))
+          Future.successful(BadRequest(view(formWithErrors, mode, selectedSource, routes.DirectDebitSourceController.onPageLoad(mode))))
         },
 
         newValue =>

@@ -59,7 +59,8 @@ class PaymentDateController @Inject()(
         Ok(view(preparedForm,
           mode,
           DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
-          DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date)
+          DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
+          routes.PaymentAmountController.onPageLoad(mode)
         ))
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
@@ -78,7 +79,8 @@ class PaymentDateController @Inject()(
             BadRequest(view(formWithErrors,
               mode,
               DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
-              DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date)
+              DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
+              routes.PaymentAmountController.onPageLoad(mode)
             ))
           },
         value =>

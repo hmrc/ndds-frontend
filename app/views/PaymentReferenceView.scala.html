@@ -25,9 +25,9 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource])(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("paymentReference.title"))) {
+@layout(pageTitle = title(form, messages("paymentReference.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.PaymentReferenceController.onSubmit(mode)) {
 

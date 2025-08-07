@@ -25,6 +25,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PaymentReferencePage}
+import play.api.data.Form
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -36,12 +37,13 @@ import scala.concurrent.Future
 
 class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/direct-debits/year-end-and-month")
+  def onwardRoute: Call = Call("GET", "/direct-debits/year-end-and-month")
 
   val formProvider = new PaymentReferenceFormProvider()
-  val form = formProvider()
+  val form: Form[String] = formProvider()
 
-  lazy val paymentReferenceRoute = routes.PaymentReferenceController.onPageLoad(NormalMode).url
+  lazy val paymentReferenceRoute: String = routes.PaymentReferenceController.onPageLoad(NormalMode).url
+  lazy val paymentPlanTypeRoute: String = routes.PaymentPlanTypeController.onPageLoad(NormalMode).url
 
   "paymentReference Controller" - {
 
@@ -58,7 +60,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentReferenceView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Some(MGD))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Some(MGD), Call("GET", paymentPlanTypeRoute))(request, messages(application)).toString
         contentAsString(result) must include("XAM00001234567")
       }
     }
@@ -79,7 +81,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), NormalMode, Some(TC))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill("answer"), NormalMode, Some(TC), Call("GET", paymentPlanTypeRoute))(request, messages(application)).toString
         contentAsString(result) must include("Your Tax Credit (TC) payment reference is 16 digits long")
       }
     }
@@ -113,6 +115,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
     "must return a Bad Request and errors when invalid data is submitted" in {
       val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, VAT)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      lazy val directDebitSourceRoute: String = routes.DirectDebitSourceController.onPageLoad(NormalMode).url
 
       running(application) {
         val request =
@@ -126,7 +129,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, Some(VAT))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Some(VAT), Call("GET", directDebitSourceRoute))(request, messages(application)).toString
       }
     }
 

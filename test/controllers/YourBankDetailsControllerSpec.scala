@@ -24,6 +24,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{DirectDebitSourcePage, YourBankDetailsPage}
+import play.api.data.Form
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.mvc.Call
@@ -36,14 +37,15 @@ import scala.concurrent.Future
 
 class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute: Call = Call("GET", "/foo")
 
   val formProvider = new YourBankDetailsFormProvider()
-  val form = formProvider()
+  val form: Form[YourBankDetails] = formProvider()
 
-  lazy val yourBankDetailsRoute = routes.YourBankDetailsController.onPageLoad(NormalMode).url
+  lazy val yourBankDetailsRoute: String = routes.YourBankDetailsController.onPageLoad(NormalMode).url
+  lazy val personalOrBusinessAccountRoute: String = routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url
 
-  val userAnswers = UserAnswers(
+  val userAnswers: UserAnswers = UserAnswers(
     userAnswersId,
     Json.obj(
       YourBankDetailsPage.toString -> Json.obj(
@@ -68,7 +70,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
       }
     }
 
@@ -84,7 +86,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212","34211234")), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212","34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
       }
     }
 
@@ -130,7 +132,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
       }
     }
 

@@ -53,6 +53,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
 
   lazy val paymentDateRoute: String = routes.PaymentDateController.onPageLoad(NormalMode).url
+  lazy val paymentAmountRoute = routes.PaymentAmountController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
   val fixedInstant: Instant = Instant.parse("2024-07-17T00:00:00Z")
@@ -118,7 +119,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val view = application.injector.instanceOf[PaymentDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric)(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -139,7 +140,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric)(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -224,7 +225,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(request, messages(application)).toString
         }
       }
 
