@@ -47,7 +47,7 @@ class PaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
     behave like currencyField(
       form,
       fieldName,
-      nonNumericError     = FormError(fieldName, "paymentAmount.error.nonNumeric"),
+      nonNumericError = FormError(fieldName, "paymentAmount.error.nonNumeric"),
       invalidNumericError = FormError(fieldName, "paymentAmount.error.invalidNumeric")
     )
 

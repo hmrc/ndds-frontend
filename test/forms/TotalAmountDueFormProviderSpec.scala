@@ -52,7 +52,7 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with Mockit
     behave like currencyField(
       form,
       fieldName,
-      nonNumericError     = FormError(fieldName, "totalAmountDue.error.nonNumeric"),
+      nonNumericError = FormError(fieldName, "totalAmountDue.error.nonNumeric"),
       invalidNumericError = FormError(fieldName, "totalAmountDue.error.invalidNumeric")
     )
 

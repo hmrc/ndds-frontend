@@ -23,12 +23,13 @@ import play.api.data.Form
 class RegularPaymentAmountFormProvider @Inject() extends Mappings {
   val MIN_AMOUNT: BigDecimal = 1.0
   val MAX_AMOUNT: BigDecimal = 20000000.00
+
   def apply(): Form[BigDecimal] =
     Form(
       "value" -> currencyWithTwoDecimalsOrWholeNumber(
-        requiredKey       = "regularPaymentAmount.error.required",
+        requiredKey = "regularPaymentAmount.error.required",
         invalidNumericKey = "regularPaymentAmount.error.invalidNumeric",
-        nonNumericKey     = "regularPaymentAmount.error.nonNumeric"
+        nonNumericKey = "regularPaymentAmount.error.nonNumeric"
       )
         .verifying(maximumCurrency(MAX_AMOUNT, "regularPaymentAmount.error.aboveMaximum"))
         .verifying(minimumCurrency(MIN_AMOUNT, "regularPaymentAmount.error.belowMinimum"))

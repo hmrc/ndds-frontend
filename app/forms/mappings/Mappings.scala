@@ -61,23 +61,21 @@ trait Mappings extends Formatters with Constraints {
     of(currencyFormatter(requiredKey, invalidNumeric, nonNumericKey, args))
 
   protected def customPaymentDate(
-                             invalidKey: String,
-                             allRequiredKey: String,
-                             twoRequiredKey: String,
-                             requiredKey: String,
-                             args: Seq[String] = Seq.empty,
-                             dateFormats:Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
+                                   invalidKey: String,
+                                   allRequiredKey: String,
+                                   twoRequiredKey: String,
+                                   requiredKey: String,
+                                   args: Seq[String] = Seq.empty,
+                                   dateFormats: Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
     of(new CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
 
-
-
   protected def yearEndMonthDate(
-                             invalidKey: String,
-                             allRequiredKey: String,
-                             twoRequiredKey: String,
-                             requiredKey: String,
-                             args: Seq[String] = Seq.empty,
-                             dateFormats:Seq[DateFormat]): FieldMapping[YearEndAndMonth] =
+                                  invalidKey: String,
+                                  allRequiredKey: String,
+                                  twoRequiredKey: String,
+                                  requiredKey: String,
+                                  args: Seq[String] = Seq.empty,
+                                  dateFormats: Seq[DateFormat]): FieldMapping[YearEndAndMonth] =
     of(new YearEndAndMonthDateFormatter(invalidKey, args, dateFormats))
 
   private def currencyConstraint(
@@ -92,7 +90,6 @@ trait Mappings extends Formatters with Constraints {
     }
   }
 
-
   def currencyWithTwoDecimalsOrWholeNumber(
                                             requiredKey: String,
                                             invalidNumericKey: String,
@@ -106,17 +103,17 @@ trait Mappings extends Formatters with Constraints {
       )
 
   def optionalLocalDate(
-                         invalidKey:     String,
+                         invalidKey: String,
                          allRequiredKey: String,
                          twoRequiredKey: String,
-                         requiredKey:    String
+                         requiredKey: String
                        )(implicit messages: Messages): Mapping[Option[LocalDate]] = {
     optional(
       localDate(
-        invalidKey     = invalidKey,
+        invalidKey = invalidKey,
         allRequiredKey = allRequiredKey,
         twoRequiredKey = twoRequiredKey,
-        requiredKey    = requiredKey
+        requiredKey = requiredKey
       )
     )
   }

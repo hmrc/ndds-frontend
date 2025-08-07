@@ -29,9 +29,9 @@ class TotalAmountDueFormProvider @Inject()(config: FrontendAppConfig) extends Ma
   def apply(): Form[BigDecimal] =
     Form(
       "value" -> currencyWithTwoDecimalsOrWholeNumber(
-        requiredKey       = "totalAmountDue.error.required",
+        requiredKey = "totalAmountDue.error.required",
         invalidNumericKey = "totalAmountDue.error.invalidNumeric",
-        nonNumericKey     = "totalAmountDue.error.nonNumeric"
+        nonNumericKey = "totalAmountDue.error.nonNumeric"
       ).verifying(
         maximumCurrency(maximum, "totalAmountDue.error.aboveMaximum"),
         minimumCurrency(minimum, "totalAmountDue.error.belowMinimum")
