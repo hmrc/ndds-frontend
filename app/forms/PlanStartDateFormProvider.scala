@@ -17,12 +17,13 @@
 package forms
 
 import forms.mappings.Mappings
+import models.UserAnswers
 import play.api.data.Form
 import play.api.i18n.Messages
+import utils.DateFormats
 
 import java.time.LocalDate
 import javax.inject.Inject
-import utils.DateFormats
 
 class PlanStartDateFormProvider @Inject() extends Mappings {
 
@@ -34,6 +35,22 @@ class PlanStartDateFormProvider @Inject() extends Mappings {
         twoRequiredKey = "planStartDate.error.required.two",
         requiredKey    = "planStartDate.error.required",
         dateFormats    = DateFormats.defaultDateFormats
+      )
+    )
+
+  def apply(userAnswers: UserAnswers, earliestPlanStartDate: LocalDate)(implicit messages: Messages): Form[LocalDate] =
+    Form(
+      "value" -> planStartDate(
+        invalidKey     = "planStartDate.error.invalid",
+        allRequiredKey = "planStartDate.error.required.all",
+        twoRequiredKey = "planStartDate.error.required.two",
+        requiredKey    = "planStartDate.error.required",
+        beforeEarliestDateKey = "planStartDate.error.beforeEarliestDate",
+        budgetAfterMaxDateKey = "planStartDate.error.budgetAfterMaxDate",
+        timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
+        dateFormats    = DateFormats.defaultDateFormats,
+        userAnswers    = userAnswers,
+        earliestPlanStartDate = earliestPlanStartDate
       )
     )
 }
