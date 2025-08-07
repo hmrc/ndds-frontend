@@ -210,6 +210,8 @@ paymentDate.error.required.two = The payment date must include {0} and {1}
 paymentDate.error.required = The payment date must include {0}
 paymentDate.error.invalid = Enter a real payment date
 paymentDate.error.date = Enter a valid date
+paymentDate.error.beforeEarliest=The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
+paymentDate.error.tooFarInFuture=The date you have entered is not valid. It cannot be more than 12 months after the current date.
 paymentDate.change.hidden = Payment date
 
 planStartDate.title = What date are you starting this payment plan?
