@@ -30,7 +30,7 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with Mockit
 
   private val fieldName = "value"
   private val min = BigDecimal(12.00)
-  private val max = BigDecimal(999999)
+  private val max = BigDecimal(99999999.99)
 
   private def formWithMin(minValue: BigDecimal) = {
     val config = mock[FrontendAppConfig]

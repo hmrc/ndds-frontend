@@ -23,7 +23,7 @@ import play.api.data.Form
 
 class TotalAmountDueFormProvider @Inject()(config: FrontendAppConfig) extends Mappings {
 
-  private val maximum = 999999
+  private val maximum = 99999999.99
   private val minimum = config.minimumLiabilityAmount
 
   def apply(): Form[BigDecimal] =
