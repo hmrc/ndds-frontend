@@ -32,6 +32,8 @@ import views.html.PlanStartDateView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class PlanStartDateController @Inject()(
                                          override val messagesApi: MessagesApi,
@@ -48,14 +50,16 @@ class PlanStartDateController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
-      val form = formProvider()
       val answers = request.userAnswers
-      val preparedForm = answers.get(PlanStartDatePage) match {
-        case None => form
-        case Some(value) => form.fill(value.enteredDate)
-      }
 
       rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
+        val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+        val form = formProvider(answers, earliestDate)
+        val preparedForm = answers.get(PlanStartDatePage) match {
+          case None => form
+          case Some(value) => form.fill(value.enteredDate)
+        }
+
         Ok(view(
           preparedForm,
           mode,
@@ -72,27 +76,27 @@ class PlanStartDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val form = formProvider()
-
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
-            BadRequest(view(
+      (for {
+        earliestPlanStartDate <- rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers)
+        earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+        form = formProvider(request.userAnswers, earliestDate)
+        result <- form.bindFromRequest().fold(
+          formWithErrors =>
+            Future.successful(BadRequest(view(
               formWithErrors,
               mode,
               DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
               DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
               request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
-            ))
-          },
-        value =>
-          for {
-            earliestPlanStartDate <- rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers)
-            updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date)))
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
-      ) recover { case e =>
+            ))),
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers
+                .set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date)))
+              _ <- sessionRepository.set(updatedAnswers)
+            } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
+        )
+      } yield result).recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
