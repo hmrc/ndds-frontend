@@ -42,6 +42,7 @@
             )
             .withPrefix(PrefixOrSuffix(content = "£"))
             .withWidth(Fixed10)
+            .withHint(HintViewModel(HtmlContent(messages("paymentAmount.hint"))))
         )
 
         @govukButton(

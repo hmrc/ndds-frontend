@@ -197,6 +197,7 @@ paymentAmount.heading = What amount do you want to pay?
 paymentAmount.checkYourAnswersLabel = Payment amount
 paymentAmount.error.nonNumeric = Enter a valid amount in the correct format
 paymentAmount.error.required = Enter an amount
+paymentAmount.hint = Must be pounds and pence value. For example, 1000.00
 paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
 paymentAmount.error.max.min.range = The amount entered must between 1.00 and 20,000,000.00
 paymentAmount.change.hidden =  Payment amount
