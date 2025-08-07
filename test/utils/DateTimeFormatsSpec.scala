@@ -45,13 +45,31 @@ class DateTimeFormatsSpec extends AnyFreeSpec with Matchers {
       val result = LocalDate.of(2023, 1, 1).format(formatter)
       result mustEqual "1 January 2023"
     }
-    
+
     "formattedCurrentDate" - {
       "should return today's date in 'd MMMM yyyy' format" in {
         val today = LocalDate.now()
         val expected = today.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
         DateTimeFormats.formattedCurrentDate mustEqual expected
+      }
+    }
+
+    "formattedDateTimeShort" - {
+      "should return today's date in 'dd MMM yyyy' format" in {
+        val dateStr = "2021-07-31"
+        val expected = "31 Jul 2021"
+
+        DateTimeFormats.formattedDateTimeShort(dateStr) mustEqual expected
+      }
+    }
+
+    "formattedDateTimeNumeric" - {
+      "should return today's date in 'dd MM yyyy' format" in {
+        val dateStr = "2021-07-31"
+        val expected = "31 07 2021"
+
+        DateTimeFormats.formattedDateTimeNumeric(dateStr) mustEqual expected
       }
     }
   }

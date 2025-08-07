@@ -18,8 +18,8 @@ package utils
 
 import play.api.i18n.Lang
 
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import java.util.Locale
 
 object DateTimeFormats {
@@ -34,14 +34,33 @@ object DateTimeFormats {
   def dateTimeFormat()(implicit lang: Lang): DateTimeFormatter = {
     localisedDateTimeFormatters.getOrElse(lang.code, dateTimeFormatter)
   }
+
   def formattedCurrentDate: String = {
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
     LocalDate.now().format(formatter)
   }
 
-  def formattedDateTime(dateTime: String): String = { //example: 24 July 2020, 16:29pm
+  def formattedDateTime(dateTime: LocalDateTime): String = { //example: 24 July 2020, 16:29pm
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mma")
-    dateTime.format(formatter)
+    val extractDateSuffix = """(.*)(am|pm|AM|PM)""".r
+
+    dateTime.format(formatter) match {
+      case extractDateSuffix(dateThing, suffix) => dateThing + suffix.toLowerCase
+    }
+  }
+
+  def formattedDateTimeShort(dateTime: String): String = { //example: 14 Aug 2025
+    val date = LocalDate.parse(dateTime)
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.UK)
+
+    date.format(formatter)
+  }
+
+  def formattedDateTimeNumeric(dateTime: String): String = { //example: 17 11 2017
+    val date = LocalDate.parse(dateTime)
+    val formatter = DateTimeFormatter.ofPattern("dd MM yyyy", Locale.UK)
+
+    date.format(formatter)
   }
 
   val dateTimeHintFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("d M yyyy")
