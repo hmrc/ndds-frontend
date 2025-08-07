@@ -20,7 +20,6 @@ import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.data.FormError
 import play.api.i18n.Messages
-import utils.PaymentPlanConstants._
 
 import java.time.LocalDate
 
@@ -37,6 +36,9 @@ class PlanStartDateFormatter(
                               userAnswers: UserAnswers,
                               earliestPlanStartDate: LocalDate
                             )(implicit messages: Messages) extends CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats) {
+
+  private val BudgetPaymentPlanMaxYears = 1
+  private val TimeToPayMaxDays = 30
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
    
