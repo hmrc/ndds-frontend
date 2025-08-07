@@ -113,17 +113,17 @@ class CheckYourAnswersController @Inject()  (
       )
 
       val secondPaymentDate = PaymentCalculations.calculateSecondPaymentDate(
-        planStartDate = planStartDate,
+        planStartDate = planStartDate.enteredDate,
         monthsOffset = appConfig.tcMonthsUntilSecondPayment
       )
 
       val penultimatePaymentDate = PaymentCalculations.calculatePenultimatePaymentDate(
-        planStartDate = planStartDate,
+        planStartDate = planStartDate.enteredDate,
         penultimateInstallmentOffset = appConfig.tcMonthsUntilPenultimatePayment
       )
 
       val finalPaymentDate = PaymentCalculations.calculateFinalPaymentDate(
-        planStartDate = planStartDate,
+        planStartDate = planStartDate.enteredDate,
         monthsOffset = appConfig.tcMonthsUntilFinalPayment
       )
       logger.debug(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")

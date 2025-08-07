@@ -30,9 +30,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   private lazy val contactHost = configuration.get[String]("contact-frontend.host")
   private lazy val contactFormServiceIdentifier = configuration.get[String]("contact-frontend.serviceId")
 
-  lazy val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-enabled")
-  lazy val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("payment-working-days-delay.dynamic-delay-with-auddis-not-enabled")
-  lazy val paymentDelayFixed: Int = configuration.get[Int]("payment-working-days-delay.fixed-delay")
+  lazy val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-enabled")
+  lazy val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-not-enabled")
+  lazy val paymentDelayFixed: Int = configuration.get[Int]("working-days-delay.fixed-delay")
   lazy val variableMgdFixedDelay: Int = configuration.get[Int]("working-days-delay.variable-mgd-fixed-delay")
 
   def feedbackUrl(implicit request: RequestHeader): String =
@@ -51,6 +51,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   lazy val maxNumberDDIsAllowed: Int =
       configuration.get[Int]("features.maxNumberDDIsAllowed")
+
+  lazy val isLockServiceEnabled: Boolean =
+      configuration.get[Boolean]("features.enableLockService")
 
   def languageMap: Map[String, Lang] = Map(
     "en" -> Lang("en"),

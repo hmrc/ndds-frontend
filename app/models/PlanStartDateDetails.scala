@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package models.responses
+package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class EarliestPaymentDate(date: String)
+import java.time.LocalDate
 
-object EarliestPaymentDate {
-  implicit val format: OFormat[EarliestPaymentDate] = Json.format
+case class PlanStartDateDetails(enteredDate: LocalDate, earliestPlanStartDate: String)
+
+object PlanStartDateDetails {
+  implicit val format: OFormat[PlanStartDateDetails] = Json.format
 }
