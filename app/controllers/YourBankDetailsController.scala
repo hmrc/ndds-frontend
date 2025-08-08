@@ -18,13 +18,14 @@ package controllers
 
 import controllers.actions.*
 import forms.YourBankDetailsFormProvider
-import models.{Mode, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import models.{Mode, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.YourBankDetailsPage
+import pages.{PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.BARService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourBankDetailsView
 
@@ -38,6 +39,7 @@ class YourBankDetailsController @Inject()(
                                            identify: IdentifierAction,
                                            requireData: DataRequiredAction,
                                            getData: DataRetrievalAction,
+                                           barService: BARService,
                                            formProvider: YourBankDetailsFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
                                            view: YourBankDetailsView
@@ -58,20 +60,24 @@ class YourBankDetailsController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-
+      val personalOrBusiness = request.userAnswers.get(PersonalOrBusinessAccountPage)
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>
-          for {
-            // TODO: Replace line below with response from real BARS service call
-            barsServiceResponse <- Future.successful(false)
-            updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
-            )
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+          
+          personalOrBusiness.fold(Future.successful(Redirect(navigator.nextPage(YourBankDetailsPage, mode, request.userAnswers)))) {
+            b =>
+              for {
+                // TODO: Replace line below with response from real BARS service call
+                barsServiceResponse <- Future.successful(false)
+                updatedAnswers <- Future.fromTry(request.userAnswers
+                  .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
+                )
+                _ <- sessionRepository.set(updatedAnswers)
+              } yield Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+          }
       )
   }
 }
