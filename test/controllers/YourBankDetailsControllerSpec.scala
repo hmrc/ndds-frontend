@@ -21,7 +21,7 @@ import forms.YourBankDetailsFormProvider
 import models.{DirectDebitSource, NormalMode, UserAnswers, YourBankDetails}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, verify, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{DirectDebitSourcePage, YourBankDetailsPage}
 import play.api.data.Form
@@ -31,7 +31,6 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
-import services.AuditService
 import views.html.YourBankDetailsView
 
 import scala.concurrent.Future
@@ -45,7 +44,6 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val yourBankDetailsRoute: String = routes.YourBankDetailsController.onPageLoad(NormalMode).url
   lazy val personalOrBusinessAccountRoute: String = routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url
-  val mockAuditService: AuditService = mock[AuditService]
 
   val userAnswers: UserAnswers = UserAnswers(
     userAnswersId,
@@ -88,24 +86,22 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212","34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212", "34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
       }
     }
 
-    "must redirect to the next page when valid data is submitted and send an audit event" in {
+    "must redirect to the next page when valid data is submitted" in {
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-          bind[AuditService].toInstance(mockAuditService),
           bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-      doNothing().when(mockAuditService).sendEvent(any())(any(), any(), any())
 
       running(application) {
         val request = FakeRequest(POST, yourBankDetailsRoute)
@@ -119,7 +115,6 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
-        verify(mockAuditService).sendEvent(any())(any(), any(), any())
       }
     }
 

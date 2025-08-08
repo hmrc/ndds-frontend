@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions.*
 import forms.YourBankDetailsFormProvider
-import models.audits.ConfirmBankDetails
 import models.{Mode, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.YourBankDetailsPage
@@ -26,7 +25,6 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourBankDetailsView
 
@@ -42,8 +40,7 @@ class YourBankDetailsController @Inject()(
                                            getData: DataRetrievalAction,
                                            formProvider: YourBankDetailsFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
-                                           view: YourBankDetailsView,
-                                           auditService: AuditService
+                                           view: YourBankDetailsView
                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form: Form[YourBankDetails] = formProvider()
@@ -75,7 +72,6 @@ class YourBankDetailsController @Inject()(
             )
             _ <- sessionRepository.set(updatedAnswers)
           } yield {
-            auditService.sendEvent(ConfirmBankDetails())
             Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
           }
       )
