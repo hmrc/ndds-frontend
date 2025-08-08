@@ -16,12 +16,13 @@
 
 package views
 
+import controllers.routes
 import forms.YourBankDetailsFormProvider
 import models.NormalMode
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.data.Form
 import play.api.i18n.Messages
-import play.api.mvc.Request
+import play.api.mvc.{Call, Request}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import views.html.YourBankDetailsView
@@ -30,9 +31,11 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class YourBankDetailsViewSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
+  lazy val personalorBusinessRoute = routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url
+
   "YourBankDetailsView" should {
     "render the page with all fields and correct maxlength attributes" in new Setup {
-      val html: HtmlFormat.Appendable = view(form, NormalMode)
+      val html: HtmlFormat.Appendable = view(form, NormalMode, Call("GET", personalorBusinessRoute))
       val doc = org.jsoup.Jsoup.parse(html.toString())
 
       doc.select("h1").text() mustBe messages("yourBankDetails.heading")
@@ -40,7 +43,7 @@ class YourBankDetailsViewSpec extends AnyWordSpec with Matchers with GuiceOneApp
 
     "display error messages when form has errors" in new Setup {
       val errorForm = form.withError("sortCode", "yourBankDetails.error.sortCode.tooShort")
-      val html = view(errorForm, NormalMode)
+      val html = view(errorForm, NormalMode, Call("GET", personalorBusinessRoute))
       val doc = org.jsoup.Jsoup.parse(html.toString())
       doc.select(".govuk-error-summary").text() must include (messages("yourBankDetails.error.sortCode.tooShort"))
     }

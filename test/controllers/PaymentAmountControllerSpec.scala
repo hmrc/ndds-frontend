@@ -47,6 +47,7 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
   "PaymentAmount Controller" - {
 
+    lazy val paymentReferenceRoute = routes.PaymentReferenceController.onPageLoad(NormalMode).url
     "must return OK and the correct view for a GET" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
@@ -57,7 +58,7 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentAmountView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
       }
     }
 
@@ -72,7 +73,7 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentAmountView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
       }
     }
 
@@ -110,7 +111,7 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
       }
     }
 

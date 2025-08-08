@@ -25,7 +25,6 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -56,6 +55,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
 
   lazy val paymentDateRoute: String = routes.PaymentDateController.onPageLoad(NormalMode).url
+  lazy val paymentAmountRoute: String = routes.PaymentAmountController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
@@ -120,7 +120,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val view = application.injector.instanceOf[PaymentDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric)(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -141,7 +141,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric)(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -236,7 +236,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(request, messages(application)).toString
         }
       }
 

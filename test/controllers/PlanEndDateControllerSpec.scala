@@ -45,6 +45,8 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
   private def form = formProvider(startDate)
 
+  lazy val planStartDateRoute: String = routes.PlanStartDateController.onPageLoad(NormalMode).url
+
   def onwardRoute: Call = Call("GET", "/foo")
 
   val validAnswer: LocalDate = LocalDate.now(ZoneOffset.UTC)
@@ -71,7 +73,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest).value
         val view = application.injector.instanceOf[PlanEndDateView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", planStartDateRoute))(getRequest, messages(application)).toString
       }
     }
 
@@ -86,7 +88,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanEndDateView]
         val result = route(application, getRequest).value
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(Some(validAnswer)), NormalMode)(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(Some(validAnswer)), NormalMode, Call("GET", planStartDateRoute))(getRequest, messages(application)).toString
       }
     }
 
@@ -121,7 +123,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanEndDateView]
         val result = route(application, request).value
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", planStartDateRoute))(request, messages(application)).toString
       }
     }
 

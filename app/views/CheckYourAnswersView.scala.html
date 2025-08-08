@@ -29,7 +29,7 @@
 
 @(list: SummaryList, currentDate: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title"))) {
+@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title")), showBackLink = false) {
 
 @formHelper(action = routes.CheckYourAnswersController.onSubmit(), Symbol("autoComplete") -> "off") {
             @header1("checkYourAnswers.heading")

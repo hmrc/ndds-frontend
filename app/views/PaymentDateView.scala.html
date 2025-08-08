@@ -25,9 +25,9 @@
     govukButton: GovukButton,
 )
 
-@(form: Form[_], mode: Mode, earliestPaymentDate: String, earliestPaymentDateNumeric: String)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, earliestPaymentDate: String, earliestPaymentDateNumeric: String, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("paymentDate.title"))) {
+@layout(pageTitle = title(form, messages("paymentDate.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.PaymentDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
