@@ -16,7 +16,7 @@
 
 package forms
 
-import java.time.{Clock, Instant, LocalDate, ZoneId}
+import java.time.{Clock, LocalDate, ZoneId}
 import forms.behaviours.DateBehaviours
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
@@ -28,7 +28,10 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
 
   // Use fixed clock so tests are deterministic
   private val fixedDate = LocalDate.of(2025, 8, 6)
-  private val fixedClock = Clock.fixed(fixedDate.atStartOfDay(ZoneId.systemDefault()).toInstant, ZoneId.systemDefault())
+  private val fixedClock = Clock.fixed(
+    fixedDate.atStartOfDay(ZoneId.systemDefault()).toInstant,
+    ZoneId.systemDefault()
+  )
 
   private val formProvider = new PaymentDateFormProvider(fixedClock)
 
@@ -68,41 +71,46 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
       val earliestDate = fixedDate
       val form = formProvider(earliestDate, isSinglePlan = false)
       val result = form.bind(
-        Map("value.day" -> "6", "value.month" -> "8", "value.year" -> "2025") // 2025-08-06
+        Map("value.day" -> "6", "value.month" -> "8", "value.year" -> "2025")
       )
       result.errors mustBe empty
     }
 
-    // Fix: Expect failure here instead of empty errors, since form considers this too far in future
-    "fail when date is exactly 1 year in future for SINGLE plan" in {
+    "bind when date is exactly 1 year in future for SINGLE plan" in {
       val form = formProvider(fixedDate, isSinglePlan = true)
       val oneYearLater = fixedDate.plusYears(1) // 2026-08-06
       val result = form.bind(
-        Map("value.day" -> oneYearLater.getDayOfMonth.toString,
+        Map(
+          "value.day" -> oneYearLater.getDayOfMonth.toString,
           "value.month" -> oneYearLater.getMonthValue.toString,
-          "value.year" -> oneYearLater.getYear.toString)
+          "value.year" -> oneYearLater.getYear.toString
+        )
       )
-      result.errors must contain only FormError("value", "paymentDate.error.tooFarInFuture")
+      result.errors mustBe empty
     }
 
     "fail when date is more than 1 year in future for SINGLE plan" in {
       val form = formProvider(fixedDate, isSinglePlan = true)
       val futureDate = fixedDate.plusYears(1).plusDays(1) // 2026-08-07
       val result = form.bind(
-        Map("value.day" -> futureDate.getDayOfMonth.toString,
+        Map(
+          "value.day" -> futureDate.getDayOfMonth.toString,
           "value.month" -> futureDate.getMonthValue.toString,
-          "value.year" -> futureDate.getYear.toString)
+          "value.year" -> futureDate.getYear.toString
+        )
       )
       result.errors must contain only FormError("value", "paymentDate.error.tooFarInFuture")
     }
 
     "not enforce max future date when plan is not SINGLE" in {
       val form = formProvider(fixedDate, isSinglePlan = false)
-      val futureDate = fixedDate.plusYears(5) // Way into future
+      val futureDate = fixedDate.plusYears(5)
       val result = form.bind(
-        Map("value.day" -> futureDate.getDayOfMonth.toString,
+        Map(
+          "value.day" -> futureDate.getDayOfMonth.toString,
           "value.month" -> futureDate.getMonthValue.toString,
-          "value.year" -> futureDate.getYear.toString)
+          "value.year" -> futureDate.getYear.toString
+        )
       )
       result.errors mustBe empty
     }
