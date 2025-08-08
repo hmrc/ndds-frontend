@@ -20,6 +20,7 @@ import models.{Enumerable, YearEndAndMonth}
 import play.api.data.{FieldMapping, Mapping}
 import play.api.data.Forms.{of, optional}
 import play.api.i18n.Messages
+import play.api.data.validation.{Constraint, Invalid, Valid}
 
 import java.time.LocalDate
 
@@ -60,12 +61,12 @@ trait Mappings extends Formatters with Constraints {
     of(currencyFormatter(requiredKey, invalidNumeric, nonNumericKey, args))
 
   protected def customPaymentDate(
-                             invalidKey: String,
-                             allRequiredKey: String,
-                             twoRequiredKey: String,
-                             requiredKey: String,
-                             args: Seq[String] = Seq.empty,
-                             dateFormats:Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
+                                   invalidKey: String,
+                                   allRequiredKey: String,
+                                   twoRequiredKey: String,
+                                   requiredKey: String,
+                                   args: Seq[String] = Seq.empty,
+                                   dateFormats: Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
     of(new CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
 
   protected def planStartDate(
@@ -85,26 +86,50 @@ trait Mappings extends Formatters with Constraints {
 
 
   protected def yearEndMonthDate(
-                             invalidKey: String,
-                             allRequiredKey: String,
-                             twoRequiredKey: String,
-                             requiredKey: String,
-                             args: Seq[String] = Seq.empty,
-                             dateFormats:Seq[DateFormat]): FieldMapping[YearEndAndMonth] =
+                                  invalidKey: String,
+                                  allRequiredKey: String,
+                                  twoRequiredKey: String,
+                                  requiredKey: String,
+                                  args: Seq[String] = Seq.empty,
+                                  dateFormats: Seq[DateFormat]): FieldMapping[YearEndAndMonth] =
     of(new YearEndAndMonthDateFormatter(invalidKey, args, dateFormats))
 
+  private def currencyConstraint(
+                                  nonNumericKey: String,
+                                  invalidNumericKey: String
+                                ): Constraint[String] = Constraint("currencyConstraint") { str =>
+    if (!str.matches("""^-?\d+(\.\d{2})?$""")) {
+      if (str.exists(ch => !ch.isDigit && ch != '.' && ch != '-')) Invalid(nonNumericKey)
+      else Invalid(invalidNumericKey)
+    } else {
+      Valid
+    }
+  }
+
+  def currencyWithTwoDecimalsOrWholeNumber(
+                                            requiredKey: String,
+                                            invalidNumericKey: String,
+                                            nonNumericKey: String
+                                          ): Mapping[BigDecimal] =
+    text(requiredKey)
+      .verifying(currencyConstraint(nonNumericKey, invalidNumericKey))
+      .transform[BigDecimal](
+        str => BigDecimal(str).setScale(2, BigDecimal.RoundingMode.UNNECESSARY),
+        bigDecimal => bigDecimal.setScale(2).underlying.toPlainString
+      )
+
   def optionalLocalDate(
-                         invalidKey:     String,
+                         invalidKey: String,
                          allRequiredKey: String,
                          twoRequiredKey: String,
-                         requiredKey:    String
+                         requiredKey: String
                        )(implicit messages: Messages): Mapping[Option[LocalDate]] = {
     optional(
       localDate(
-        invalidKey     = invalidKey,
+        invalidKey = invalidKey,
         allRequiredKey = allRequiredKey,
         twoRequiredKey = twoRequiredKey,
-        requiredKey    = requiredKey
+        requiredKey = requiredKey
       )
     )
   }

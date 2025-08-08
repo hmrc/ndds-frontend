@@ -22,17 +22,21 @@ import javax.inject.Inject
 import play.api.data.Form
 
 class TotalAmountDueFormProvider @Inject()(config: FrontendAppConfig) extends Mappings {
-  val maximum = 999999
-  val minimum = config.minimumLiabilityAmount
+
+  private val maximum = 99999999.99
+  private val minimum = config.minimumLiabilityAmount
 
   def apply(): Form[BigDecimal] =
     Form(
-      "value" -> currency(
-        "totalAmountDue.error.required",
-        "totalAmountDue.error.invalidNumeric",
-        "totalAmountDue.error.nonNumeric"
+      "value" -> currencyWithTwoDecimalsOrWholeNumber(
+        requiredKey = "totalAmountDue.error.required",
+        invalidNumericKey = "totalAmountDue.error.invalidNumeric",
+        nonNumericKey = "totalAmountDue.error.nonNumeric"
+      ).verifying(
+        maximumCurrency(maximum, "totalAmountDue.error.aboveMaximum"),
+        minimumCurrency(minimum, "totalAmountDue.error.belowMinimum")
       )
-      .verifying(maximumCurrency(maximum, "totalAmountDue.error.aboveMaximum"))
-      .verifying(minimumCurrency(minimum, "totalAmountDue.error.belowMinimum"))
     )
+
 }
+

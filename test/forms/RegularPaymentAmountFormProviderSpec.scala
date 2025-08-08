@@ -25,19 +25,24 @@ import scala.math.BigDecimal.RoundingMode
 
 class RegularPaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
 
-  val form = new RegularPaymentAmountFormProvider()()
+  private val form = new RegularPaymentAmountFormProvider()()
+
+  private val fieldName = "value"
+  private val minimum = 1
+  private val maximum = 20000000
+
+  private val requiredError = "regularPaymentAmount.error.required"
+  private val nonNumericError = "regularPaymentAmount.error.nonNumeric"
+  private val invalidNumericError = "regularPaymentAmount.error.invalidNumeric"
+  private val aboveMaximumError = "regularPaymentAmount.error.aboveMaximum"
+  private val belowMinimumError = "regularPaymentAmount.error.belowMinimum"
+
+  private val validDataGenerator: Gen[String] =
+    Gen.choose[BigDecimal](minimum, maximum)
+      .map(_.setScale(2, RoundingMode.HALF_UP))
+      .map(_.toString)
 
   ".value" - {
-
-    val fieldName = "value"
-
-    val minimum = 1
-    val maximum = 20000000
-
-    val validDataGenerator =
-      Gen.choose[BigDecimal](minimum, maximum)
-        .map(_.setScale(2, RoundingMode.HALF_UP))
-        .map(_.toString)
 
     behave like fieldThatBindsValidData(
       form,
@@ -45,31 +50,39 @@ class RegularPaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
       validDataGenerator
     )
 
-    behave like currencyField(
-      form,
-      fieldName,
-      nonNumericError     = FormError(fieldName, "regularPaymentAmount.error.nonNumeric"),
-      invalidNumericError = FormError(fieldName, "regularPaymentAmount.error.invalidNumeric")
-    )
+    "fail to bind non-numeric input with non-numeric error" in {
+      val result = form.bind(Map(fieldName -> "abc"))
+      result.errors must contain only FormError(fieldName, nonNumericError)
+    }
 
-    behave like currencyFieldWithMaximum(
-      form,
-      fieldName,
-      maximum,
-      FormError(fieldName, "regularPaymentAmount.error.aboveMaximum", Seq(currencyFormat(maximum)))
-    )
+    "fail to bind incorrectly formatted numeric input (e.g. one decimal place)" in {
+      val result = form.bind(Map(fieldName -> "123.4"))
+      result.errors must contain only FormError(fieldName, invalidNumericError)
+    }
 
-    behave like currencyFieldWithMinimum(
-      form,
-      fieldName,
-      minimum,
-      FormError(fieldName, "regularPaymentAmount.error.belowMinimum", Seq(currencyFormat(minimum)))
-    )
+    "fail when above maximum" in {
+      val result = form.bind(Map(fieldName -> (maximum + 1).toString))
+      result.errors must contain only FormError(fieldName, aboveMaximumError, Seq(currencyFormat(maximum)))
+    }
 
-    behave like mandatoryField(
-      form,
-      fieldName,
-      requiredError = FormError(fieldName, "regularPaymentAmount.error.required")
-    )
+    "fail when below minimum" in {
+      val result = form.bind(Map(fieldName -> (minimum - 1).toString))
+      result.errors must contain only FormError(fieldName, belowMinimumError, Seq(currencyFormat(minimum)))
+    }
+
+    "fail when empty" in {
+      val result = form.bind(Map(fieldName -> ""))
+      result.errors must contain only FormError(fieldName, requiredError)
+    }
+
+    "successfully bind a whole number and format it to 2 decimal places" in {
+      val result = form.bind(Map(fieldName -> "123"))
+      result.value.value mustBe BigDecimal("123.00")
+    }
+
+    "successfully bind a number with exactly 2 decimal places" in {
+      val result = form.bind(Map(fieldName -> "123.45"))
+      result.value.value mustBe BigDecimal("123.45")
+    }
   }
 }
