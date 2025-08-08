@@ -52,7 +52,7 @@ class LandingControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value must startWith(controllers.routes.SetupDirectDebitPaymentController.onPageLoad(0).url)
+        redirectLocation(result).value must startWith(controllers.routes.SetupDirectDebitPaymentController.onPageLoad().url)
       }
     }
 

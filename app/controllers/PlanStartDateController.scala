@@ -18,9 +18,11 @@ package controllers
 
 import controllers.actions.*
 import forms.PlanStartDateFormProvider
-import models.{Mode, PlanStartDateDetails}
+import models.DirectDebitSource.{MGD, SA, TC}
+import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers}
 import navigation.Navigator
-import pages.{DirectDebitSourcePage, PlanStartDatePage}
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -65,12 +67,27 @@ class PlanStartDateController @Inject()(
           mode,
           DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
           DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-          request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
+          answers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers")),
+          backLinkRedirect(mode, answers)
         ))
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
+    }
+  }
+
+  private def backLinkRedirect(mode: Mode, answers: UserAnswers) = {
+    val optPaymentType = answers.get(PaymentPlanTypePage)
+    val optSourceType = answers.get(DirectDebitSourcePage)
+    (optSourceType, optPaymentType) match {
+      case (Some(MGD), Some(VariablePaymentPlan)) =>
+        routes.PaymentReferenceController.onPageLoad(mode)
+      case (Some(SA), Some(BudgetPaymentPlan)) =>
+        routes.RegularPaymentAmountController.onPageLoad(mode)
+      case (Some(TC), Some(TaxCreditRepaymentPlan)) =>
+        routes.TotalAmountDueController.onPageLoad(mode)
+      case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }
 
@@ -87,7 +104,8 @@ class PlanStartDateController @Inject()(
               mode,
               DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
               DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-              request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
+              request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers")),
+              backLinkRedirect(mode, request.userAnswers)
             ))),
           value =>
             for {

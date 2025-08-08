@@ -25,9 +25,9 @@
     bulletList: BulletList
 )
 
-@(directDebitCount: Int)(implicit request: Request[_], messages: Messages)
+@(directDebitCount: Int, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")), showBackLink = if(directDebitCount != 0) { true } else { false }) {
+@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")), backLink = if(directDebitCount != 0) { Some(call.url) } else { None }, showBackLink = if(directDebitCount != 0) { true } else { false }) {
 
     @header1("setupDirectDebitPayment.heading")
     @paragraph("setupDirectDebitPayment.p1", true, extraClasses = "text-turquoise")

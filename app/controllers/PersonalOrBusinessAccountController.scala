@@ -43,8 +43,7 @@ class PersonalOrBusinessAccountController @Inject()(
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form: Form[PersonalOrBusinessAccount] = formProvider()
-  val ddiCount: Int = 0
-  
+
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
@@ -53,21 +52,21 @@ class PersonalOrBusinessAccountController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode, routes.SetupDirectDebitPaymentController.onPageLoad(ddiCount)))
+      Ok(view(preparedForm, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad(ddiCount)))),
+          form.bindFromRequest().fold(
+            formWithErrors =>
+              Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))),
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PersonalOrBusinessAccountPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PersonalOrBusinessAccountPage, mode, updatedAnswers))
-      )
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PersonalOrBusinessAccountPage, value))
+                _ <- sessionRepository.set(updatedAnswers)
+              } yield Redirect(navigator.nextPage(PersonalOrBusinessAccountPage, mode, updatedAnswers))
+          )
   }
 }

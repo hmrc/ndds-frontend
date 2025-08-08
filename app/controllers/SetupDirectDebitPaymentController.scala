@@ -22,27 +22,33 @@ import models.responses.{LockedAndUnverified, LockedAndVerified, NotLocked}
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.RDSDatacacheService
 import services.LockService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SetupDirectDebitPaymentView
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class SetupDirectDebitPaymentController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
+                                       rdsDatacacheService: RDSDatacacheService,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: SetupDirectDebitPaymentView,
                                        lockService: LockService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(directDebitCount: Int): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      lockService.isUserLocked(request.userId) map { _.lockStatus match
-        case NotLocked => Ok(view(directDebitCount))
-        case LockedAndVerified => Redirect(routes.ReachedLimitController.onPageLoad())
-        case LockedAndUnverified => Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad())
+      lockService.isUserLocked(request.userId) flatMap { _.lockStatus match
+        case NotLocked =>
+          rdsDatacacheService.retrieveAllDirectDebits(request.userId) map { rdsResponse =>
+            val ddiCount = rdsResponse.directDebitCount
+            Ok(view(ddiCount, routes.YourDirectDebitInstructionsController.onPageLoad()))
+          }
+        case LockedAndVerified => Future.successful(Redirect(routes.ReachedLimitController.onPageLoad()))
+        case LockedAndUnverified => Future.successful(Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad()))
       }
   }
 

@@ -57,7 +57,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
         case Some(value) => form.fill(value)
       }
       val summaryList = buildSummaryList(request.userAnswers)
-      Ok(view(preparedForm, mode, summaryList))
+      Ok(view(preparedForm, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -66,7 +66,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
       form.bindFromRequest().fold(
         formWithErrors =>{
           logger.warn("Validation Error on display bank details confirmation page")
-          Future.successful(BadRequest(view(formWithErrors, mode, summaryList)))},
+          Future.successful(BadRequest(view(formWithErrors, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode))))},
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, value))

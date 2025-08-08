@@ -24,6 +24,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.PersonalOrBusinessAccountPage
+import play.api.data.Form
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -35,14 +36,14 @@ import scala.concurrent.Future
 
 class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute: Call = Call("GET", "/foo")
 
-  lazy val personalOrBusinessAccountRoute = routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url
+  lazy val personalOrBusinessAccountRoute: String = routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url
 
   val formProvider = new PersonalOrBusinessAccountFormProvider()
-  val form = formProvider()
-  val ddiCount = 0
-  lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad(ddiCount)
+  val form: Form[PersonalOrBusinessAccount] = formProvider()
+  
+  lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad()
 
   "PersonalOrBusinessAccount Controller" - {
 

@@ -52,7 +52,7 @@
     @paragraphMessageWithLink(
         Some(messages("yourDirectDebitInstructions.p2")),
         linkMessage = messages("yourDirectDebitInstructions.p2.link"),
-        linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad(directDebitDetails.length).url,
+        linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
         linkFullStop = false,
         message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
         maxLimit = maxLimitReached
