@@ -18,9 +18,15 @@ package controllers
 
 import base.SpecBase
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{doNothing, verify}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
+import play.api.inject.bind
+import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import services.AuditService
 import viewmodels.govuk.SummaryListFluency
 
 import java.time.LocalDate
@@ -32,7 +38,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(fixedDate, "2025-7-19")
   private val endDate = LocalDate.of(2027, 7, 25)
   private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
-
+  private val mockAuditService: AuditService = mock[AuditService]
 
   "Check Your Answers Controller" - {
     val userAnswer = emptyUserAnswers
@@ -62,7 +68,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must return OK and the correct view if MGD selected and type is single  for a GET" in {
+    "must return OK and the correct view if MGD selected and type is single for a GET" in {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePayment)
@@ -116,7 +122,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must return OK and the correct view if SA selected and plan type is budget  for a GET" in {
+    "must return OK and the correct view if SA selected and plan type is budget for a GET" in {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
@@ -145,7 +151,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must return OK and the correct view if TC selected and type is repayment  for a GET" in {
+    "must return OK and the correct view if TC selected and type is repayment for a GET" in {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
@@ -202,24 +208,32 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to confirmation page if DirectDebitSource  is 'TC' for a POST if all require data is provided" in {
+    "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all require data is provided" in {
       val totalDueAmount = 200
       val incompleteAnswers = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(TotalAmountDuePage, totalDueAmount)
         .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(PaymentReferencePage, "testReference")
 
-      val application = applicationBuilder(userAnswers = Some(incompleteAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+        .overrides(
+          bind[AuditService].toInstance(mockAuditService)
+        )
+        .build()
+
+      doNothing().when(mockAuditService).sendEvent(any())(any(), any(), any())
+
       running(application) {
         val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        verify(mockAuditService).sendEvent(any())(any(), any(), any())
       }
     }
-
 
   }
 }
