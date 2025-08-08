@@ -98,7 +98,7 @@ class CheckYourAnswersController @Inject()(
             logger.warn("Plan type is missing for TC service")
             Some(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
-      // will add next steps  and update
+        // will add next steps  and update
       case _ =>
         Some(Redirect(routes.DirectDebitConfirmationController.onPageLoad()))
     }
