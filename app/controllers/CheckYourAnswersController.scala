@@ -16,18 +16,16 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import com.google.inject.Inject
+import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.audits.SubmitDirectDebitPaymentPlan
-import models.requests.DataRequest
+import models.DirectDebitSource.*
 import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
-import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PaymentReferencePage, PlanStartDatePage, TotalAmountDuePage}
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PlanStartDatePage, TotalAmountDuePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services.AuditService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{DateTimeFormats, PaymentCalculations}
 import viewmodels.checkAnswers.*
@@ -77,7 +75,7 @@ class CheckYourAnswersController @Inject()(
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     paymentCalculation(request.userAnswers) match {
       case Some(result) =>
-        sendAudit()
+        auditService.sendSubmitDirectDebitPaymentPlan
         result
       case None =>
         logger.warn("Missing required answers for payment calculations")
@@ -140,15 +138,4 @@ class CheckYourAnswersController @Inject()(
       Redirect(routes.DirectDebitConfirmationController.onPageLoad())
     }
   }
-
-  private def sendAudit(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Unit = {
-    val paymentReference =
-      request.userAnswers.get(PaymentReferencePage).getOrElse(throw new Exception("PaymentReferencePage details missing from user answers"))
-    val paymentPlanType =
-      request.userAnswers.get(PaymentPlanTypePage).getOrElse(throw new Exception("PaymentPlanTypePage details missing from user answers"))
-
-    auditService.sendEvent(SubmitDirectDebitPaymentPlan(paymentReference, paymentPlanType))
-  }
-
-
 }

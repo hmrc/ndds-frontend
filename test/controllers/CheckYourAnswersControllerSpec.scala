@@ -223,7 +223,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         )
         .build()
 
-      doNothing().when(mockAuditService).sendEvent(any())(any(), any(), any())
+      doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
 
       running(application) {
         val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
@@ -231,7 +231,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-        verify(mockAuditService).sendEvent(any())(any(), any(), any())
+        verify(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
       }
     }
 

@@ -61,5 +61,23 @@ class AuditServiceSpec extends SpecBase {
         verify(mockConnector).sendExtendedEvent(any())(any(), any())
       }
     }
+
+    "sendSubmitDirectDebitPaymentPlan method" - {
+      "must send an audit when needed data is gathered successfully and payment plan type is in the session" in {
+
+      }
+      "must send an audit when needed data is gathered successfully and payment plan type is NOT in the session" in {
+
+      }
+      "must fail when payment reference is missing from the session" in {
+
+      }
+      "must fail when plan source is missing from the session" in {
+
+      }
+      "must fail if payment plan type is missing, but is supposed to exist" in {
+
+      }
+    }
   }
 }

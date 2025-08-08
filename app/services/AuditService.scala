@@ -17,9 +17,13 @@
 package services
 
 import com.google.inject.{Inject, Singleton}
-import models.audits.AuditEvent
+import models.DirectDebitSource.{MGD, SA, TC}
+import models.PaymentPlanType.SinglePayment
+import models.audits.{AuditEvent, SubmitDirectDebitPaymentPlan}
+import models.requests.DataRequest
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PaymentReferencePage}
 import play.api.libs.json.{Json, Writes}
-import play.api.mvc.Request
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.*
@@ -44,6 +48,23 @@ class AuditService @Inject(
       tags = hc.toAuditTags(auditEvent.transactionName, request.uri)
     )
 
+    println("XXXXXXXX")
+
     auditConnector.sendExtendedEvent(extendedDataEvent)
+  }
+
+  def sendSubmitDirectDebitPaymentPlan(implicit hc: HeaderCarrier, request: DataRequest[AnyContent]): Unit = {
+    val paymentReference =
+      request.userAnswers.get(PaymentReferencePage).getOrElse(throw new Exception("PaymentReferencePage details missing from user answers"))
+    val paymentPlanSource =
+      request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("PaymentPlanTypePage details missing from user answers"))
+
+    val paymentPlanType = paymentPlanSource match {
+      case MGD | TC | SA =>
+        request.userAnswers.get(PaymentPlanTypePage).getOrElse(throw new Exception("PaymentPlanTypePage details missing from user answers"))
+      case _ => SinglePayment
+    }
+
+    sendEvent(SubmitDirectDebitPaymentPlan(paymentReference, paymentPlanType))
   }
 }
