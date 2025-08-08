@@ -48,8 +48,6 @@ class AuditService @Inject(
       tags = hc.toAuditTags(auditEvent.transactionName, request.uri)
     )
 
-    println("XXXXXXXX")
-
     auditConnector.sendExtendedEvent(extendedDataEvent)
   }
 
@@ -57,7 +55,7 @@ class AuditService @Inject(
     val paymentReference =
       request.userAnswers.get(PaymentReferencePage).getOrElse(throw new Exception("PaymentReferencePage details missing from user answers"))
     val paymentPlanSource =
-      request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("PaymentPlanTypePage details missing from user answers"))
+      request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
 
     val paymentPlanType = paymentPlanSource match {
       case MGD | TC | SA =>
