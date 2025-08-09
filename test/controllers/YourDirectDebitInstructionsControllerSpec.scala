@@ -45,7 +45,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebi
 
       running(application) {
 
-        when(mockService.retrieveAllDirectDebits(any())(any()))
+        when(mockService.retrieveAllDirectDebits(any())(any(), any()))
           .thenReturn(Future.successful(rdsResponse))
 
         val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url)

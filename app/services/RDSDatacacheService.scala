@@ -20,10 +20,12 @@ import config.FrontendAppConfig
 import connectors.RDSDatacacheProxyConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.audits.GetDDIs
 import models.requests.WorkingDaysOffsetRequest
 import models.responses.EarliestPaymentDate
 import models.{DirectDebitSource, PaymentPlanType, RDSDatacacheResponse, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
@@ -34,14 +36,16 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class RDSDatacacheService @Inject()(rdsConnector: RDSDatacacheProxyConnector,
                                     val directDebitCache: DirectDebitCacheRepository,
-                                    config: FrontendAppConfig)
+                                    config: FrontendAppConfig,
+                                    auditService: AuditService)
                                    (implicit ec: ExecutionContext) {
 
-  def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier): Future[RDSDatacacheResponse] = {
+  def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[RDSDatacacheResponse] = {
     directDebitCache.retrieveCache(id) flatMap {
       case Seq() =>
         for {
           directDebits <- rdsConnector.retrieveDirectDebits()
+          _ = auditService.sendEvent(GetDDIs())
           _ <- directDebitCache.cacheResponse(directDebits)(id)
         } yield directDebits
       case existingCache =>

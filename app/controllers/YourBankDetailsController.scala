@@ -71,7 +71,9 @@ class YourBankDetailsController @Inject()(
               .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
             )
             _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+          } yield {
+            Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+          }
       )
   }
 }

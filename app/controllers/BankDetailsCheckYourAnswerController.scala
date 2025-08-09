@@ -19,6 +19,7 @@ package controllers
 import controllers.actions.*
 import forms.BankDetailsCheckYourAnswerFormProvider
 import models.Mode
+import models.audits.ConfirmBankDetails
 import navigation.Navigator
 import pages.BankDetailsCheckYourAnswerPage
 import play.api.Logging
@@ -26,6 +27,7 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.AuditService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
@@ -36,16 +38,17 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class BankDetailsCheckYourAnswerController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: BankDetailsCheckYourAnswerFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: BankDetailsCheckYourAnswerView
-                                 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                                      override val messagesApi: MessagesApi,
+                                                      sessionRepository: SessionRepository,
+                                                      navigator: Navigator,
+                                                      identify: IdentifierAction,
+                                                      getData: DataRetrievalAction,
+                                                      requireData: DataRequiredAction,
+                                                      auditService: AuditService,
+                                                      formProvider: BankDetailsCheckYourAnswerFormProvider,
+                                                      val controllerComponents: MessagesControllerComponents,
+                                                      view: BankDetailsCheckYourAnswerView
+                                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
 
@@ -64,14 +67,20 @@ class BankDetailsCheckYourAnswerController @Inject()(
     implicit request =>
       val summaryList = buildSummaryList(request.userAnswers)
       form.bindFromRequest().fold(
-        formWithErrors =>{
+        formWithErrors => {
           logger.warn("Validation Error on display bank details confirmation page")
-          Future.successful(BadRequest(view(formWithErrors, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode))))},
+          Future.successful(BadRequest(view(formWithErrors, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode))))
+        },
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield {
+            if (value) {
+              auditService.sendEvent(ConfirmBankDetails())
+            }
+            Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
+          }
       )
   }
 

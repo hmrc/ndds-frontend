@@ -19,16 +19,20 @@ package services
 import base.SpecBase
 import config.FrontendAppConfig
 import connectors.RDSDatacacheProxyConnector
+import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.EarliestPaymentDate
 import models.{DirectDebitSource, PaymentPlanType, RDSDatacacheResponse, RDSDirectDebitDetails, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{doNothing, reset, verify, when}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+import play.api.test.Helpers.GET
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
@@ -40,19 +44,27 @@ class RDSDatacacheServiceSpec extends SpecBase
   with MockitoSugar
   with DirectDebitDetailsData {
 
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockAuditService)
+  }
+
   implicit val ec: ExecutionContext = global
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val mockConnector: RDSDatacacheProxyConnector = mock[RDSDatacacheProxyConnector]
   val mockCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
+  val mockAuditService: AuditService = mock[AuditService]
 
-  val service = new RDSDatacacheService(mockConnector, mockCache, mockConfig)
+  val service = new RDSDatacacheService(mockConnector, mockCache, mockConfig, mockAuditService)
 
   val testId = "id"
   val testSortCode = "123456"
   val testAccountNumber = "12345678"
   val testAccountHolderName = "Jon B Jones"
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(GET, routes.LandingController.onPageLoad().url)
 
   val testBankDetailsAuddisTrue: YourBankDetailsWithAuddisStatus =
     YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName, sortCode = testSortCode, accountNumber = testAccountNumber, auddisStatus = true)
@@ -92,6 +104,19 @@ class RDSDatacacheServiceSpec extends SpecBase
 
         val result = service.retrieveAllDirectDebits(testId).futureValue
         result mustEqual RDSDatacacheResponse(0, Seq())
+      }
+
+      "must create an audit event when retrieving direct debits from the backend" in {
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(Seq.empty[RDSDirectDebitDetails]))
+        when(mockConnector.retrieveDirectDebits()(any()))
+          .thenReturn(Future.successful(rdsResponse))
+        when(mockCache.cacheResponse(any())(any()))
+          .thenReturn(Future.successful(true))
+        doNothing().when(mockAuditService).sendEvent(any())(any(), any(), any())
+
+        val result = service.retrieveAllDirectDebits(testId).futureValue
+        verify(mockAuditService).sendEvent(any())(any(), any(), any())
       }
     }
 

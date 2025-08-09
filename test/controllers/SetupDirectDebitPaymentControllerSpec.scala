@@ -64,7 +64,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
       running(application) {
 
-        when(mockRDSDatacacheService.retrieveAllDirectDebits(any())(any()))
+        when(mockRDSDatacacheService.retrieveAllDirectDebits(any())(any(), any()))
                 .thenReturn(Future.successful(cacheResponse))
 
         when(mockService.isUserLocked(any())(any()))
@@ -91,7 +91,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
       running(application) {
 
-        when(mockRDSDatacacheService.retrieveAllDirectDebits(any())(any()))
+        when(mockRDSDatacacheService.retrieveAllDirectDebits(any())(any(), any()))
           .thenReturn(Future.successful(cacheResponse))
 
         when(mockService.isUserLocked(any())(any()))
