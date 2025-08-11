@@ -86,7 +86,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212","34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212", "34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
       }
     }
 
@@ -100,6 +100,8 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
           bind[SessionRepository].toInstance(mockSessionRepository)
         )
         .build()
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       running(application) {
         val request = FakeRequest(POST, yourBankDetailsRoute)
