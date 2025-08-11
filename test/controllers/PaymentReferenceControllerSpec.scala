@@ -65,6 +65,24 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must render the view with DirectDebitSourceController route on GET for other source" in {
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, DirectDebitSource.OL) // a valid value but not MGD/SA/TC
+
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, paymentReferenceRoute)
+
+        val view = application.injector.instanceOf[PaymentReferenceView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, Some(DirectDebitSource.OL), routes.DirectDebitSourceController.onPageLoad(NormalMode))(request, messages(application)).toString
+      }
+    }
+
+
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = UserAnswers(userAnswersId)
