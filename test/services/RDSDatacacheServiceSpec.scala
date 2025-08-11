@@ -117,6 +117,7 @@ class RDSDatacacheServiceSpec extends SpecBase
 
         val result = service.retrieveAllDirectDebits(testId).futureValue
         verify(mockAuditService).sendEvent(any())(any(), any(), any())
+        result mustEqual rdsResponse
       }
     }
 

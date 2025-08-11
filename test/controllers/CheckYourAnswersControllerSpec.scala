@@ -124,7 +124,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
     "must return OK and the correct view if SA selected and plan type is budget for a GET" in {
       val userAnswer = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
         .setOrException(PaymentReferencePage, "1234567")
         .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
@@ -143,7 +142,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Frequency of payments")
         contentAsString(result) must include("Monthly")
-        contentAsString(result) must include("Regular payment amount")
+        contentAsString(result) must include("Regular Payment Amount")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("25 July 2027")
         contentAsString(result) must include("£120")
@@ -153,7 +152,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
     "must return OK and the correct view if TC selected and type is repayment for a GET" in {
       val userAnswer = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(PaymentReferencePage, "1234567")
         .setOrException(TotalAmountDuePage, 4533)
@@ -168,12 +166,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
         contentAsString(result) must include("Payment reference")
-        contentAsString(result) must include("Total amount due")
+        contentAsString(result) must include("1234567")
+        contentAsString(result) must include("Total Amount Due")
         contentAsString(result) must include("4,533")
-        contentAsString(result) must include("Plan start date")
-        contentAsString(result) must include("Monthly payment amount")
+        contentAsString(result) must include("Plan Start Date")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("Monthly Payment Amount")
         contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Final payment amount")
+        contentAsString(result) must include("Final Payment Date")
+        contentAsString(result) must include("19 June 2026")
+        contentAsString(result) must include("Final Payment Amount")
         contentAsString(result) must include("£377.75")
         contentAsString(result) must include("Accept and Continue")
       }
