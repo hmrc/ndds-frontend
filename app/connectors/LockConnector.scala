@@ -43,7 +43,7 @@ class LockConnector @Inject()(config: ServicesConfig,
     buildRequest("/markUnverifiable", credId)
 
   private def buildRequest[A](uri: String, credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    http.post(url"$lockBaseUrl/$uri")(hc)
+    http.post(url"$lockBaseUrl$uri")(hc)
       .withBody(Json.parse(
         s"""
            |{
