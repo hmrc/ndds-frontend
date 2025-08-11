@@ -67,7 +67,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
         when(mockRDSDatacacheService.retrieveAllDirectDebits(any())(any(), any()))
                 .thenReturn(Future.successful(cacheResponse))
 
-        when(mockService.isUserLocked(any())(any()))
+        when(mockService.isUserLocked(any())(any(),any()))
           .thenReturn(Future.successful(response))
 
         val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad().url)
@@ -94,7 +94,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
         when(mockRDSDatacacheService.retrieveAllDirectDebits(any())(any(), any()))
           .thenReturn(Future.successful(cacheResponse))
 
-        when(mockService.isUserLocked(any())(any()))
+        when(mockService.isUserLocked(any())(any(),any()))
           .thenReturn(Future.successful(response))
 
         val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad().url)
@@ -118,7 +118,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
       running(application) {
 
-        when(mockService.isUserLocked(any())(any()))
+        when(mockService.isUserLocked(any())(any(), any()))
           .thenReturn(Future.successful(response.copy(isLocked = true, unverifiable = Some(true))))
 
         val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad().url)
@@ -137,7 +137,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
       running(application) {
 
-        when(mockService.isUserLocked(any())(any()))
+        when(mockService.isUserLocked(any())(any(), any()))
           .thenReturn(Future.successful(response.copy(isLocked = true, unverifiable = Some(false))))
 
         val request = FakeRequest(GET, routes.SetupDirectDebitPaymentController.onPageLoad().url)
