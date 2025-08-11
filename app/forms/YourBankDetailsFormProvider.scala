@@ -45,6 +45,6 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
           maxLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.length"),
           regexp(NumericRegex, "yourBankDetails.error.accountNumber.numericOnly")
         ))
-    )(YourBankDetails.apply)(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))
+    )(YourBankDetails(_,_,_))(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))
   )
 }

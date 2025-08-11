@@ -19,8 +19,12 @@ package services
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import connectors.{BARSConnector, LockConnector}
+import models.errors.BarsErrors.*
 import models.YourBankDetails
+import models.errors.BarsErrors
+import models.responses.BarsResponse
 import models.responses.BarsResponse.*
+import models.responses.BarsVerificationResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,17 +34,59 @@ case class BARService @Inject(barsConnector: BARSConnector,
                               config: FrontendAppConfig)
                              (implicit ec: ExecutionContext) {
 
-  def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  private val checkAccountAndName = (accountExists: BarsResponse, nameMatches: BarsResponse) => {
+    if (accountExists == Indeterminate || nameMatches == Indeterminate) {
+      Left(BankAccountUnverified)
+    } else {
+      Right(())
+    }
+  }
+  private val checkAccountNumberFormat = (accountNumberIsWellFormatted: BarsResponse) =>
+    if (accountNumberIsWellFormatted == No) Left(AccountDetailInvalidFormat) else Right(())
+
+  private val checkSortCodeExistsOnEiscd = (sortCodeIsPresentOnEiscd: BarsResponse) =>
+    if (sortCodeIsPresentOnEiscd == No) Left(SortCodeNotFound) else Right(())
+
+  private val checkSortCodeDirectDebitSupport = (sortCodeSupportsDirectDebit: BarsResponse) =>
+    if (sortCodeSupportsDirectDebit == No) Left(SortCodeNotSupported) else Right(())
+
+  private val checkAccountExists = (accountExists: BarsResponse) =>
+    if (accountExists == No || accountExists == Inapplicable) Left(AccountNotFound) else Right(())
+
+  private val checkNameMatches = (nameMatches: BarsResponse, accountExists: BarsResponse) =>
+    if (nameMatches == No || nameMatches == Inapplicable || (nameMatches == Indeterminate && accountExists != Indeterminate)) Left(NameMismatch) else Right(())
+
+  private val checkBarsResponseSuccess = (response: BarsVerificationResponse) => {
+    (response.accountNumberIsWellFormatted == Yes || response.accountNumberIsWellFormatted == Indeterminate) &&
+      response.sortCodeIsPresentOnEISCD == Yes &&
+      response.accountExists == Yes &&
+      (response.nameMatches == Yes || response.nameMatches == Partial) &&
+      response.sortCodeSupportsDirectDebit == Yes
+  }
+
+  def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)(implicit hc: HeaderCarrier): Future[Either[BarsErrors, Unit]] = {
     val isPersonal = personalOrBusiness.toLowerCase == "personal"
+
 
     barsConnector.verify(isPersonal, bankDetails).map {
       response =>
-        (response.accountNumberIsWellFormatted == Yes || response.accountNumberIsWellFormatted == Indeterminate) &&
-          response.sortCodeIsPresentOnEISCD == Yes &&
-          response.accountExists == Yes &&
-          (response.nameMatches == Yes || response.nameMatches == Partial) &&
-          response.sortCodeSupportsDirectDebit == Yes
+        if (checkBarsResponseSuccess(response)) {
+          Right(())
+        } else {
+          val validatedResult: Either[BarsErrors, Unit] = for {
+            _ <- checkAccountAndName(response.accountExists, response.nameMatches)
+            _ <- checkAccountNumberFormat(response.accountNumberIsWellFormatted)
+            _ <- checkSortCodeExistsOnEiscd(response.sortCodeIsPresentOnEISCD)
+            _ <- checkSortCodeDirectDebitSupport(response.sortCodeSupportsDirectDebit)
+            _ <- checkAccountExists(response.accountExists)
+            _ <- checkNameMatches(response.nameMatches, response.accountExists)
+
+          } yield Right(())
+          Left(validatedResult.fold(identity, _ => DetailsVerificationFailed))
+        }
     }
+
+
   }
 
 }

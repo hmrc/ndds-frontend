@@ -25,7 +25,7 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.BARService
+import services.{BARService, LockService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourBankDetailsView
 
@@ -40,6 +40,7 @@ class YourBankDetailsController @Inject()(
                                            requireData: DataRequiredAction,
                                            getData: DataRetrievalAction,
                                            barService: BARService,
+                                           lockService: LockService,
                                            formProvider: YourBankDetailsFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
                                            view: YourBankDetailsView
@@ -66,18 +67,33 @@ class YourBankDetailsController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode))),
 
         value =>
-          
+
           personalOrBusiness.fold(Future.successful(Redirect(navigator.nextPage(YourBankDetailsPage, mode, request.userAnswers)))) {
-            b =>
+            accountType =>
               for {
-                // TODO: Replace line below with response from real BARS service call
-                barsServiceResponse <- Future.successful(false)
-                updatedAnswers <- Future.fromTry(request.userAnswers
-                  .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
-                )
-                _ <- sessionRepository.set(updatedAnswers)
+                audisFlag <- Future.successful(false)
+                barsServiceResponse <- barService.barsVerification(accountType.toString, value)
+                accountUnverified <- Future.successful(barsServiceResponse.fold(_ => true, _ => false))
+                _ <- if  (accountUnverified) {
+                 onFailedVerification()
+                }
+                else{
+                  onSuccessfulVerification(request.userAnswers)
+                }
               } yield Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
           }
       )
+  }
+
+  private def onSuccessfulVerification(userAnswers: UserAnswers) = {
+    Future.fromTry(userAnswers
+      .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, audisFlag, Some(accountUnverified)))
+    ).flatMap{
+      sessionRepository.set
+    }
+  }
+
+  private def onFailedVerification(credId: String) = {
+    lockService.updateLockForUser(credId)
   }
 }

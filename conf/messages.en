@@ -115,6 +115,10 @@ yourBankDetails.error.accountNumber.required = Enter your account number
 yourBankDetails.error.accountNumber.length = Account number must be 8 digits
 yourBankDetails.error.accountNumber.tooShort = Account number must be 8 digits
 yourBankDetails.error.accountNumber.numericOnly = Account number must be 8 digits
+yourBankDetails.error.accountHolderName.unverified = These account details could not be verified. Check your details or try different account details.
+yourBankDetails.error.accountNumberAndSortCode.invalid = Enter a valid combination of bank account number and sort code.
+yourBankDetails.error.sortCode.incorrectPaymentType = You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details of a different account.
+yourBankDetails.error.accountHolderName.default = Enter the name on the account as it appears on the bank statement. Do not copy and paste it.
 
 reachedLimit.title = You’ve reached the limit for confirming your bank details
 reachedLimit.heading = You’ve reached the limit for confirming your bank details

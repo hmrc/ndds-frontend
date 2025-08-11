@@ -39,8 +39,8 @@ case class BARSConnector @Inject(config: ServicesConfig,
                                 (implicit ec: ExecutionContext) extends HttpReadsInstances {
 
   private val barsBaseUrl: String = config.baseUrl("bars")
-  private val personalUrl = "verify/personal"
-  private val businessUrl = "verify/business"
+  private val personalUrl = "personal"
+  private val businessUrl = "business"
   
   private val requestBodyPersonal = (bankDetails: YourBankDetails) =>BarsPersonalRequest(
     BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
@@ -52,22 +52,32 @@ case class BARSConnector @Inject(config: ServicesConfig,
   )
   
   def verify(isPersonal: Boolean, bankDetails: YourBankDetails)(implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
+    println("called")
     val verifyUrl = if (isPersonal) personalUrl else businessUrl
     val requestBody = if (isPersonal) Json.toJson(requestBodyPersonal(bankDetails)) else Json.toJson(requestBodyBusiness(bankDetails))
+    println(url"$barsBaseUrl/verify/$verifyUrl")
     http
-      .post(url"$barsBaseUrl/$verifyUrl")
+      .post(url"$barsBaseUrl/verify/$verifyUrl")
       .withBody(requestBody)
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
         case Right(response) if response.status == OK =>
+          println("entry")
           Try(response.json.as[BarsVerificationResponse]) match {
             case Success(data) =>  println(data); Future.successful(data)
             case Failure(exception) => Future.failed(new Exception(s"Invalid JSON format $exception"))
           }
         case Left(errorResponse) =>
+          println("fail1")
           Future.failed(new Exception(s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"))
         case Right(response) =>
+          println("fail2")
           Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
+
+        case _ =>
+          println("confused")
+          Future.failed(new Exception(s"Unexpected status code:"))
+          
       }
 
   }
