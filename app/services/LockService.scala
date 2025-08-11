@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class LockService @Inject()(
                              lockConnector: LockConnector,
                              config: FrontendAppConfig
-                           ) {
+                           )(implicit ec: ExecutionContext) {
 
   private val defaultLockResponse: LockResponse = LockResponse(
     _id = "",
@@ -42,26 +42,23 @@ class LockService @Inject()(
   )
 
   def isUserLocked(credId: String)(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext
+    implicit hc: HeaderCarrier
   ): Future[LockResponse] =
     stubLockIfFeatureDisabled(lockConnector.checkLock(credId))
 
   def updateLockForUser(credId: String)(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext
+    implicit hc: HeaderCarrier
   ): Future[LockResponse] =
     stubLockIfFeatureDisabled(lockConnector.updateLock(credId))
 
   def markUserAsUnverifiable(credId: String)(
-    implicit hc: HeaderCarrier,
-    ec: ExecutionContext
+    implicit hc: HeaderCarrier
   ): Future[LockResponse] =
     stubLockIfFeatureDisabled(lockConnector.markUnverifiable(credId))
 
   private def stubLockIfFeatureDisabled(
                                          f: HeaderCarrier => Future[LockResponse]
-                                       )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[LockResponse] = {
+                                       )(implicit hc: HeaderCarrier): Future[LockResponse] = {
 
     if (config.isLockServiceEnabled) {
       f(hc).recover {
