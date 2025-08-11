@@ -1,65 +1,59 @@
-/*
- * Copyright 2025 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package services
 
 import config.FrontendAppConfig
 import connectors.LockConnector
 import models.responses.LockResponse
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class LockService @Inject()(lockConnector: LockConnector,
-                            config: FrontendAppConfig) {
+class LockService @Inject()(
+                             lockConnector: LockConnector,
+                             config: FrontendAppConfig
+                           ) {
 
-  def isUserLocked(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    stubLockIfFeatureDisabled(
-      lockConnector.checkLock(credId)
-    )
+  private val defaultLockResponse: LockResponse = LockResponse(
+    _id = "",
+    verifyCalls = 0,
+    isLocked = false,
+    unverifiable = None,
+    createdAt = None,
+    lastUpdated = None,
+    lockoutExpiryDateTime = Some(Instant.parse("2025-06-28T15:30:30Z"))
+  )
 
-  def updateLockForUser(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    stubLockIfFeatureDisabled(
-      lockConnector.updateLock(credId)
-    )
+  def isUserLocked(credId: String)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[LockResponse] =
+    stubLockIfFeatureDisabled(lockConnector.checkLock(credId))
 
-  def markUserAsUnverifiable(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    stubLockIfFeatureDisabled(
-      lockConnector.markUnverifiable(credId)
-    )
+  def updateLockForUser(credId: String)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[LockResponse] =
+    stubLockIfFeatureDisabled(lockConnector.updateLock(credId))
 
-  private def stubLockIfFeatureDisabled(f: HeaderCarrier => Future[LockResponse])(implicit hc: HeaderCarrier) = {
-    if (config.isLockServiceEnabled){
-      f(implicitly)
+  def markUserAsUnverifiable(credId: String)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[LockResponse] =
+    stubLockIfFeatureDisabled(lockConnector.markUnverifiable(credId))
+
+  private def stubLockIfFeatureDisabled(
+                                         f: HeaderCarrier => Future[LockResponse]
+                                       )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[LockResponse] = {
+
+    if (config.isLockServiceEnabled) {
+      f(hc).recover {
+        case e: UpstreamErrorResponse if e.statusCode == 409 =>
+          defaultLockResponse
+      }
     } else {
-      Future.successful(
-        LockResponse(
-          _id = "",
-          verifyCalls = 0,
-          isLocked = false,
-          unverifiable = None,
-          createdAt = None,
-          lastUpdated = None,
-          lockoutExpiryDateTime = Some(Instant.parse("2025-06-28T15:30:30Z"))
-        )
-      )
+      Future.successful(defaultLockResponse)
     }
   }
-
 }
