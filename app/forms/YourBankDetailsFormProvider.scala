@@ -48,3 +48,5 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
     )(YourBankDetails(_,_,_))(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))
   )
 }
+
+
