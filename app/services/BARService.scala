@@ -66,7 +66,7 @@ case class BARService @Inject(barsConnector: BARSConnector,
 
   def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)(implicit hc: HeaderCarrier): Future[Either[BarsErrors, Unit]] = {
     val isPersonal = personalOrBusiness.toLowerCase == "personal"
-
+    println("******************bars varification callled***********************")
 
     barsConnector.verify(isPersonal, bankDetails).map {
       response =>

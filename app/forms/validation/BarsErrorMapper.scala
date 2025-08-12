@@ -18,24 +18,35 @@ package forms.validation
 
 import models.errors.BarsErrors
 import models.errors.BarsErrors.*
-import play.api.data.FormError
-import play.api.data.Form
-import play.api.data.Forms._
+import play.api.data.{Form, FormError}
+import play.api.data.Forms.*
+
 object BarsErrorMapper {
 
-  def toFormError(error: BarsErrors): Seq[FormError] ={
-    error match{
+  def toFormError(error: BarsErrors): Seq[FormError] = {
+    error match {
       case BankAccountUnverified =>
-        Seq(FormError("accountHolderName","yourBankDetails.error.accountHolderName.unverified"),
-          FormError("sortCode","yourBankDetails.error.accountHolderName.unverified"))
+        Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified")
+        )
       case AccountDetailInvalidFormat =>
+        Seq(FormError("accountNumber", "yourBankDetails.error.accountNumberAndSortCode.invalid"),
+          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid"))
       case SortCodeNotFound =>
+        Seq(FormError("accountNumber", "yourBankDetails.error.accountNumberAndSortCode.invalid"),
+          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid"))
       case SortCodeNotSupported =>
+        Seq(
+          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid"))
       case AccountNotFound =>
+        Seq(FormError("accountNumber", "yourBankDetails.error.accountNumberAndSortCode.invalid"),
+          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid"))
       case NameMismatch =>
+        Seq(FormError("accountHolderName", "yourBankDetails.error.accountNumberAndSortCode.invalid")
+        )
       case DetailsVerificationFailed =>
-        
-        
+        Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified")
+        )
+
     }
   }
 }

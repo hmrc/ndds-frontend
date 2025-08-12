@@ -19,13 +19,15 @@ package controllers
 import controllers.actions.*
 import forms.YourBankDetailsFormProvider
 import forms.validation.BarsErrorMapper
-import models.errors.BarsErrors.*
+import models.errors.BarsErrors
+import models.errors.BarsErrors.BankAccountUnverified
+import models.requests.DataRequest
 import models.{Mode, PersonalOrBusinessAccount, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.{PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
 import services.{BARService, LockService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -53,30 +55,28 @@ class YourBankDetailsController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      val answers = request.userAnswers
-      val preparedForm = answers.get(YourBankDetailsPage) match {
-        case None => form
+      val preparedForm = request.userAnswers.get(YourBankDetailsPage) match {
+        case None        => form
         case Some(value) => form.fill(YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(value))
       }
-
       Ok(view(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val personalOrBusiness = request.userAnswers.get(PersonalOrBusinessAccountPage)
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+      val personalOrBusinessOpt = request.userAnswers.get(PersonalOrBusinessAccountPage)
+      val credId = request.userId // or however you get credId
 
-        value =>
-        //BadRequest(view(BarsErrorMapper.toFormError(BankAccountUnverified).foldLeft(form)(_ withError _) use this for providing errors
-          personalOrBusiness.fold(Future.successful(Redirect(navigator.nextPage(YourBankDetailsPage, mode, request.userAnswers)))) {
-            accountType =>
-              for {
-                audisFlag <- Future.successful(false)
-                barsServiceResponse <- barService.barsVerification(accountType.toString, value)
-              } yield Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+      form.bindFromRequest().fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+
+        bankDetails =>
+          personalOrBusinessOpt match {
+            case None =>
+              Future.successful(Redirect(navigator.nextPage(YourBankDetailsPage, mode, request.userAnswers)))
+
+            case Some(accountType) =>
+              startVerification(accountType, bankDetails, request.userAnswers, credId, mode)
           }
       )
   }
@@ -84,23 +84,46 @@ class YourBankDetailsController @Inject()(
   private def startVerification(accountType: PersonalOrBusinessAccount,
                                 bankDetails: YourBankDetails,
                                 userAnswers: UserAnswers,
-                                credId: String)(implicit hc: HeaderCarrier) = {
-    
+                                credId: String,
+                                mode: Mode
+                               )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+
     barService.barsVerification(accountType.toString, bankDetails).flatMap {
-      case Right(_) => onSuccessfulVerification(userAnswers, false, bankDetails)
-      case Left(a) => onFailedVerification(credId)
+      case Right(_) =>
+        onSuccessfulVerification(userAnswers, false, bankDetails).map { updatedAnswers =>
+          Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+        }
+
+      case Left(_) =>
+        onFailedVerification(credId, bankDetails, mode)
     }
   }
 
-  private def onSuccessfulVerification(userAnswers: UserAnswers, audisFlag: Boolean, bankDetails: YourBankDetails) = {
-    Future.fromTry(userAnswers
-      .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, audisFlag, Some(false)))
-    ).flatMap {
-      sessionRepository.set
+  private def onSuccessfulVerification(userAnswers: UserAnswers,
+                                       audisFlag: Boolean,
+                                       bankDetails: YourBankDetails): Future[UserAnswers] = {
+    val updatedAnswers = userAnswers.set(
+      YourBankDetailsPage,
+      YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, audisFlag, Some(false))
+    )
+
+    Future.fromTry(updatedAnswers).flatMap { ua =>
+      sessionRepository.set(ua).map(_ => ua)
     }
   }
 
-  private def onFailedVerification(credId: String)(implicit hc: HeaderCarrier) = {
-    lockService.updateLockForUser(credId)
+  private def onFailedVerification(credId: String,
+                                   bankDetails: YourBankDetails,
+                                   mode: Mode
+                                  )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+
+    lockService.updateLockForUser(credId).map { _ =>
+      println("********************lock called***************")
+      val formWithErrors = BarsErrorMapper
+        .toFormError(BankAccountUnverified)
+        .foldLeft(form.fill(bankDetails))(_ withError _)
+
+      BadRequest(view(formWithErrors, mode))
+    }
   }
 }
