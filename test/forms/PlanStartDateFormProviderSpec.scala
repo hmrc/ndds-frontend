@@ -18,11 +18,14 @@ package forms
 
 import java.time.{LocalDate, ZoneOffset}
 import forms.behaviours.DateBehaviours
+import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 import play.api.data.FormError
+import org.scalatest.TryValues
 
-class PlanStartDateFormProviderSpec extends DateBehaviours {
+class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
 
   private implicit val messages: Messages = stubMessages()
   private val form = new PlanStartDateFormProvider()()
@@ -43,6 +46,73 @@ class PlanStartDateFormProviderSpec extends DateBehaviours {
         FormError("value.month", "date.error.month"),
         FormError("value.year", "date.error.year")
       )
+    }
+  }
+
+  ".value with business rules" - {
+
+    val earliestPlanStartDate = LocalDate.of(2024, 1, 15)
+    val userAnswers = UserAnswers("test-id")
+
+    "must bind valid date successfully" in {
+      val formWithRules = new PlanStartDateFormProvider().apply(userAnswers, earliestPlanStartDate)
+      val data = Map(
+        "value.day" -> "20",
+        "value.month" -> "1",
+        "value.year" -> "2024"
+      )
+
+      val result = formWithRules.bind(data)
+      result.get mustBe LocalDate.of(2024, 1, 20)
+      result.errors mustBe empty
+    }
+
+    "must return error when date is before earliest plan start date" in {
+      val formWithRules = new PlanStartDateFormProvider().apply(userAnswers, earliestPlanStartDate)
+      val data = Map(
+        "value.day" -> "10",
+        "value.month" -> "1",
+        "value.year" -> "2024"
+      )
+
+      val result = formWithRules.bind(data)
+      result.errors must contain(FormError("value", "planStartDate.error.beforeEarliestDate"))
+    }
+
+    "must return error for BUDGET payment plan when date is more than 12 months after current date" in {
+      val currentDate = LocalDate.now()
+      val budgetUserAnswers = UserAnswers("test-id")
+        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+        .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+
+      val formWithRules = new PlanStartDateFormProvider().apply(budgetUserAnswers, earliestPlanStartDate)
+      val futureDate = currentDate.plusYears(1).plusDays(1)
+      val data = Map(
+        "value.day" -> futureDate.getDayOfMonth.toString,
+        "value.month" -> futureDate.getMonthValue.toString,
+        "value.year" -> futureDate.getYear.toString
+      )
+
+      val result = formWithRules.bind(data)
+      result.errors must contain(FormError("value", "planStartDate.error.budgetAfterMaxDate"))
+    }
+
+    "must return error for TIME_TO_PAY/VPP payment plan when date is more than 30 days after current date" in {
+      val currentDate = LocalDate.now()
+      val vppUserAnswers = UserAnswers("test-id")
+        .set(DirectDebitSourcePage, DirectDebitSource.MGD).success.value
+        .set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan).success.value
+
+      val formWithRules = new PlanStartDateFormProvider().apply(vppUserAnswers, earliestPlanStartDate)
+      val futureDate = currentDate.plusDays(31)
+      val data = Map(
+        "value.day" -> futureDate.getDayOfMonth.toString,
+        "value.month" -> futureDate.getMonthValue.toString,
+        "value.year" -> futureDate.getYear.toString
+      )
+
+      val result = formWithRules.bind(data)
+      result.errors must contain(FormError("value", "planStartDate.error.timeToPayAfterMaxDate"))
     }
   }
 }

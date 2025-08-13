@@ -18,9 +18,10 @@ package controllers
 
 import controllers.actions.*
 import forms.PaymentAmountFormProvider
+import models.DirectDebitSource.PAYE
 import models.Mode
 import navigation.Navigator
-import pages.PaymentAmountPage
+import pages.{DirectDebitSourcePage, PaymentAmountPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -52,14 +53,25 @@ class PaymentAmountController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
-
-      Ok(view(preparedForm, mode))
+      val selectedAnswers = answers.get(DirectDebitSourcePage)
+      if (selectedAnswers.contains(PAYE)) {
+        Ok(view(preparedForm, mode, routes.YearEndAndMonthController.onPageLoad(mode)))
+      } else {
+        Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
+      }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
+      val selectedSource = request.userAnswers.get(DirectDebitSourcePage)
+
       form.bindFromRequest().fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+        formWithErrors =>
+          if (selectedSource.contains(PAYE)) {
+            Future.successful(BadRequest(view(formWithErrors, mode, routes.YearEndAndMonthController.onPageLoad(mode))))
+          } else {
+            Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentReferenceController.onPageLoad(mode))))
+          },
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentAmountPage, value))

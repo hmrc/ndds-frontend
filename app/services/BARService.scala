@@ -18,13 +18,12 @@ package services
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
-import connectors.{BARSConnector, LockConnector}
-import models.errors.BarsErrors.*
+import connectors.BARSConnector
 import models.YourBankDetails
 import models.errors.BarsErrors
-import models.responses.BarsResponse
+import models.errors.BarsErrors.*
 import models.responses.BarsResponse.*
-import models.responses.BarsVerificationResponse
+import models.responses.{BarsResponse, BarsVerificationResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}

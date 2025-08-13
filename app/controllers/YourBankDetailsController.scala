@@ -19,7 +19,6 @@ package controllers
 import controllers.actions.*
 import forms.YourBankDetailsFormProvider
 import forms.validation.BarsErrorMapper
-import models.errors.BarsErrors
 import models.errors.BarsErrors.BankAccountUnverified
 import models.requests.DataRequest
 import models.{Mode, PersonalOrBusinessAccount, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
@@ -56,10 +55,11 @@ class YourBankDetailsController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val preparedForm = request.userAnswers.get(YourBankDetailsPage) match {
-        case None        => form
+        case None => form
         case Some(value) => form.fill(YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(value))
       }
-      Ok(view(preparedForm, mode))
+
+      Ok(view(preparedForm, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -68,7 +68,7 @@ class YourBankDetailsController @Inject()(
       val credId = request.userId // or however you get credId
 
       form.bindFromRequest().fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))),
 
         bankDetails =>
           personalOrBusinessOpt match {
@@ -123,7 +123,8 @@ class YourBankDetailsController @Inject()(
         .toFormError(BankAccountUnverified)
         .foldLeft(form.fill(bankDetails))(_ withError _)
 
-      BadRequest(view(formWithErrors, mode))
+      BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode))) // check with shridhar 3rd parameter for view
+
     }
   }
 }

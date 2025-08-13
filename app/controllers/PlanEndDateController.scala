@@ -50,22 +50,24 @@ class PlanEndDateController @Inject()(
           val form = formProvider(startDate.enteredDate)
           val preparedForm = request.userAnswers.get(PlanEndDatePage).map(Some(_)).fold(form)(form.fill)
 
-          Ok(view(preparedForm, mode))
+          Ok(view(preparedForm, mode, routes.PlanStartDateController.onPageLoad(mode)))
 
         case None =>
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
       request.userAnswers.get(PlanStartDatePage) match {
         case Some(startDate) =>
           val form = formProvider(startDate.enteredDate)
 
           form.bindFromRequest().fold(
             formWithErrors =>
-              Future.successful(BadRequest(view(formWithErrors, mode))),
+              Future.successful(
+                BadRequest(view(formWithErrors, mode, routes.PlanStartDateController.onPageLoad(mode)))
+              ),
 
             {
               case Some(endDate) =>
@@ -75,8 +77,9 @@ class PlanEndDateController @Inject()(
                 }
 
               case None =>
-                sessionRepository.set(request.userAnswers).map { _ =>
-                  Redirect(navigator.nextPage(PlanEndDatePage, mode, request.userAnswers))
+                val updatedAnswers = request.userAnswers.remove(PlanEndDatePage).get
+                sessionRepository.set(updatedAnswers).map { _ =>
+                  Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
                 }
             }
           )
@@ -84,5 +87,6 @@ class PlanEndDateController @Inject()(
         case None =>
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
-  }
+    }
+
 }

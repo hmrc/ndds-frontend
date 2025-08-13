@@ -25,6 +25,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
+import play.api.data.Form
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -38,10 +39,11 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val paymentPlanTypeRoute = routes.PaymentPlanTypeController.onPageLoad(NormalMode).url
-
+  lazy val paymentPlanTypeRoute: String = routes.PaymentPlanTypeController.onPageLoad(NormalMode).url
+  lazy val directDebitSourceRoute: String = routes.DirectDebitSourceController.onPageLoad(NormalMode).url
+  
   val formProvider = new PaymentPlanTypeFormProvider()
-  val form = formProvider()
+  val form: Form[PaymentPlanType] = formProvider()
 
   "PaymentPlanType Controller" - {
 
@@ -57,7 +59,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentPlanTypeView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Some(TC))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Some(TC), Call("GET", directDebitSourceRoute))(request, messages(application)).toString
       }
     }
 
@@ -135,7 +137,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, None)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, None, Call("GET", directDebitSourceRoute))(request, messages(application)).toString
       }
     }
 

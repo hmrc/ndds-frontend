@@ -47,7 +47,7 @@ class PaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
     behave like currencyField(
       form,
       fieldName,
-      nonNumericError     = FormError(fieldName, "paymentAmount.error.nonNumeric"),
+      nonNumericError = FormError(fieldName, "paymentAmount.error.nonNumeric"),
       invalidNumericError = FormError(fieldName, "paymentAmount.error.invalidNumeric")
     )
 
@@ -59,7 +59,7 @@ class PaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
     )
 
     "fail when below minimum" in {
-      val result = form.bind(Map(fieldName -> (min - 1).toString))
+      val result = form.bind(Map(fieldName -> (min - 0.01).toString))
       result.errors must contain only FormError(fieldName, "paymentAmount.error.max.min.range", Seq(min))
     }
 
@@ -68,5 +68,37 @@ class PaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
       fieldName,
       requiredError = FormError(fieldName, "paymentAmount.error.required")
     )
+
+    "bind a whole number and format it as .00" in {
+      val result = form.bind(Map(fieldName -> "1"))
+      result.errors mustBe empty
+      result.value.value mustBe BigDecimal("1.00")
+    }
+
+    "bind a value with exactly two decimal places" in {
+      val result = form.bind(Map(fieldName -> "123.45"))
+      result.errors mustBe empty
+      result.value.value mustBe BigDecimal("123.45")
+    }
+
+    "fail to bind a value with only one decimal place" in {
+      val result = form.bind(Map(fieldName -> "123.4"))
+      result.errors must contain only FormError(fieldName, "paymentAmount.error.invalidNumeric")
+    }
+
+    "fail to bind a value with more than two decimal places" in {
+      val result = form.bind(Map(fieldName -> "123.456"))
+      result.errors must contain only FormError(fieldName, "paymentAmount.error.invalidNumeric")
+    }
+
+    "unbinds value with two decimal places for redisplay" in {
+      val unbound = form.fill(BigDecimal("123.40")).apply(fieldName)
+      unbound.value.value mustBe "123.40"
+    }
+
+    "unbinds whole number as .00 for redisplay" in {
+      val unbound = form.fill(BigDecimal("50")).apply(fieldName)
+      unbound.value.value mustBe "50.00"
+    }
   }
 }

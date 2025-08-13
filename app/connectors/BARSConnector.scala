@@ -17,17 +17,14 @@
 package connectors
 
 import models.YourBankDetails
-import models.requests.{BarsAccount, BarsBusiness, BarsBusinessRequest, BarsPersonalRequest, BarsSubject}
-import models.responses.{BarsVerificationResponse, EarliestPaymentDate}
-import uk.gov.hmrc.http.{HttpReadsInstances, StringContextOps}
-import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, HttpResponse, StringContextOps, UpstreamErrorResponse}
-import play.api.libs.json.Json
-import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
-import play.api.libs.ws.WSBodyWritables.writeableOf_JsValue
-import play.api.libs.ws.writeableOf_JsValue
+import models.requests.*
+import models.responses.BarsVerificationResponse
 import play.api.http.Status.OK
+import play.api.libs.json.Json
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, HttpResponse, StringContextOps, UpstreamErrorResponse}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

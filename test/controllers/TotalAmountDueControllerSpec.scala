@@ -25,10 +25,11 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.TotalAmountDuePage
+import play.api.data.Form
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.TotalAmountDueView
 
@@ -36,17 +37,18 @@ import scala.concurrent.Future
 
 class TotalAmountDueControllerSpec extends SpecBase with MockitoSugar {
 
-  val mockConfig = mock[FrontendAppConfig]
+  val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   when(mockConfig.minimumLiabilityAmount).thenReturn(BigDecimal("12.00"))
   
   val formProvider = new TotalAmountDueFormProvider(mockConfig)
-  val form = formProvider()
+  val form: Form[BigDecimal] = formProvider()
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute: Call = Call("GET", "/foo")
 
   val validAnswer = 12
 
-  lazy val totalAmountDueRoute = routes.TotalAmountDueController.onPageLoad(NormalMode).url
+  lazy val totalAmountDueRoute: String = routes.TotalAmountDueController.onPageLoad(NormalMode).url
+  lazy val paymentReferenceRoute: String = routes.PaymentReferenceController.onPageLoad(NormalMode).url
 
   "TotalAmountDue Controller" - {
 
@@ -62,7 +64,7 @@ class TotalAmountDueControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[TotalAmountDueView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
       }
     }
 
@@ -80,7 +82,7 @@ class TotalAmountDueControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
       }
     }
 
@@ -126,7 +128,7 @@ class TotalAmountDueControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
       }
     }
 

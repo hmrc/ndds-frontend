@@ -41,13 +41,14 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
   private val formProvider = new YearEndAndMonthFormProvider()
   private def form = formProvider()
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute: Call = Call("GET", "/foo")
 
-  val validAnswer = YearEndAndMonth(2024, 5)
+  val validAnswer: YearEndAndMonth = YearEndAndMonth(2024, 5)
 
-  lazy val yearEndAndMonthRoute = routes.YearEndAndMonthController.onPageLoad(NormalMode).url
+  lazy val yearEndAndMonthRoute: String = routes.YearEndAndMonthController.onPageLoad(NormalMode).url
+  lazy val paymentReferenceRoute: String = routes.PaymentReferenceController.onPageLoad(NormalMode).url
 
-  override val emptyUserAnswers = UserAnswers(userAnswersId)
+  override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, yearEndAndMonthRoute)
@@ -71,7 +72,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[YearEndAndMonthView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
       }
     }
 
@@ -87,7 +88,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode)(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
       }
     }
 
@@ -129,7 +130,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
       }
     }
 

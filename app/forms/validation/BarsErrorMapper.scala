@@ -18,8 +18,7 @@ package forms.validation
 
 import models.errors.BarsErrors
 import models.errors.BarsErrors.*
-import play.api.data.{Form, FormError}
-import play.api.data.Forms.*
+import play.api.data.FormError
 
 object BarsErrorMapper {
 

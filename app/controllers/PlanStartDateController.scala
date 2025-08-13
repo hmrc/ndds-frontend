@@ -18,9 +18,11 @@ package controllers
 
 import controllers.actions.*
 import forms.PlanStartDateFormProvider
-import models.{Mode, PlanStartDateDetails}
+import models.DirectDebitSource.{MGD, SA, TC}
+import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers}
 import navigation.Navigator
-import pages.{DirectDebitSourcePage, PlanStartDatePage}
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,6 +34,8 @@ import views.html.PlanStartDateView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class PlanStartDateController @Inject()(
                                          override val messagesApi: MessagesApi,
@@ -48,20 +52,23 @@ class PlanStartDateController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
-      val form = formProvider()
       val answers = request.userAnswers
-      val preparedForm = answers.get(PlanStartDatePage) match {
-        case None => form
-        case Some(value) => form.fill(value.enteredDate)
-      }
 
       rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
+        val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+        val form = formProvider(answers, earliestDate)
+        val preparedForm = answers.get(PlanStartDatePage) match {
+          case None => form
+          case Some(value) => form.fill(value.enteredDate)
+        }
+
         Ok(view(
           preparedForm,
           mode,
           DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
           DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-          request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
+          answers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers")),
+          backLinkRedirect(mode, answers)
         ))
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
@@ -70,29 +77,44 @@ class PlanStartDateController @Inject()(
     }
   }
 
+  private def backLinkRedirect(mode: Mode, answers: UserAnswers) = {
+    val optPaymentType = answers.get(PaymentPlanTypePage)
+    val optSourceType = answers.get(DirectDebitSourcePage)
+    (optSourceType, optPaymentType) match {
+      case (Some(MGD), Some(VariablePaymentPlan)) =>
+        routes.PaymentReferenceController.onPageLoad(mode)
+      case (Some(SA), Some(BudgetPaymentPlan)) =>
+        routes.RegularPaymentAmountController.onPageLoad(mode)
+      case (Some(TC), Some(TaxCreditRepaymentPlan)) =>
+        routes.TotalAmountDueController.onPageLoad(mode)
+      case _ => routes.JourneyRecoveryController.onPageLoad()
+    }
+  }
+
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val form = formProvider()
-
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
-            BadRequest(view(
+      (for {
+        earliestPlanStartDate <- rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers)
+        earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+        form = formProvider(request.userAnswers, earliestDate)
+        result <- form.bindFromRequest().fold(
+          formWithErrors =>
+            Future.successful(BadRequest(view(
               formWithErrors,
               mode,
               DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
               DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-              request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
-            ))
-          },
-        value =>
-          for {
-            earliestPlanStartDate <- rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers)
-            updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date)))
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
-      ) recover { case e =>
+              request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers")),
+              backLinkRedirect(mode, request.userAnswers)
+            ))),
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers
+                .set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date)))
+              _ <- sessionRepository.set(updatedAnswers)
+            } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
+        )
+      } yield result).recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
       }

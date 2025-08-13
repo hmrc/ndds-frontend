@@ -19,47 +19,54 @@ package services
 import config.FrontendAppConfig
 import connectors.LockConnector
 import models.responses.LockResponse
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import java.time.Instant
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class LockService @Inject()(lockConnector: LockConnector,
-                            config: FrontendAppConfig) {
+class LockService @Inject()(
+                             lockConnector: LockConnector,
+                             config: FrontendAppConfig
+                           )(implicit ec: ExecutionContext) {
 
-  def isUserLocked(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    stubLockIfFeatureDisabled(
-      lockConnector.checkLock(credId)
-    )
+  private val defaultLockResponse: LockResponse = LockResponse(
+    _id = "",
+    verifyCalls = 0,
+    isLocked = false,
+    unverifiable = None,
+    createdAt = None,
+    lastUpdated = None,
+    lockoutExpiryDateTime = Some(Instant.parse("2025-06-28T15:30:30Z"))
+  )
 
-  def updateLockForUser(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    stubLockIfFeatureDisabled(
-      lockConnector.updateLock(credId)
-    )
+  def isUserLocked(credId: String)(
+    implicit hc: HeaderCarrier
+  ): Future[LockResponse] =
+    stubLockIfFeatureDisabled(lockConnector.checkLock(credId))
 
-  def markUserAsUnverifiable(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    stubLockIfFeatureDisabled(
-      lockConnector.markUnverifiable(credId)
-    )
+  def updateLockForUser(credId: String)(
+    implicit hc: HeaderCarrier
+  ): Future[LockResponse] =
+    stubLockIfFeatureDisabled(lockConnector.updateLock(credId))
 
-  private def stubLockIfFeatureDisabled(f: HeaderCarrier => Future[LockResponse])(implicit hc: HeaderCarrier) = {
-    if (config.isLockServiceEnabled){
-      f(implicitly)
+  def markUserAsUnverifiable(credId: String)(
+    implicit hc: HeaderCarrier
+  ): Future[LockResponse] =
+    stubLockIfFeatureDisabled(lockConnector.markUnverifiable(credId))
+
+  private def stubLockIfFeatureDisabled(
+                                         f: HeaderCarrier => Future[LockResponse]
+                                       )(implicit hc: HeaderCarrier): Future[LockResponse] = {
+
+    if (config.isLockServiceEnabled) {
+      f(hc).recover {
+        case e: UpstreamErrorResponse if e.statusCode == 409 =>
+          defaultLockResponse
+      }
     } else {
-      Future.successful(
-        LockResponse(
-          _id = "",
-          verifyCalls = 0,
-          isLocked = false,
-          unverifiable = None,
-          createdAt = None,
-          lastUpdated = None,
-          lockoutExpiryDateTime = Some(Instant.parse("2025-06-28T15:30:30Z"))
-        )
-      )
+      Future.successful(defaultLockResponse)
     }
   }
-
 }

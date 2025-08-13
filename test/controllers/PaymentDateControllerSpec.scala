@@ -42,9 +42,11 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
   private implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new PaymentDateFormProvider()
+  val fixedInstant: Instant = Instant.parse("2024-07-17T00:00:00Z")
+  val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
+  private val formProvider = new PaymentDateFormProvider(fixedClock)
 
-  private def form = formProvider()
+  private def form = formProvider(LocalDate.parse(expectedEarliestPaymentDate.date), isSinglePlan = false)
 
   val mockService: RDSDatacacheService = mock[RDSDatacacheService]
 
@@ -53,10 +55,10 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
   val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
 
   lazy val paymentDateRoute: String = routes.PaymentDateController.onPageLoad(NormalMode).url
+  lazy val paymentAmountRoute: String = routes.PaymentAmountController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
-  val fixedInstant: Instant = Instant.parse("2024-07-17T00:00:00Z")
-  val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
+
 
   val date: LocalDateTime = LocalDateTime.now(fixedClock)
   private val formattedDate = "06 Feb 2025"
@@ -118,7 +120,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val view = application.injector.instanceOf[PaymentDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric)(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -139,7 +141,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric)(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -184,6 +186,15 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(emptyUserAnswers))(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
+        val validDate = LocalDate.parse(expectedEarliestPaymentDate.date)
+
+        val postRequest = FakeRequest(POST, paymentDateRoute)
+          .withFormUrlEncodedBody(
+            "value.day" -> validDate.getDayOfMonth.toString,
+            "value.month" -> validDate.getMonthValue.toString,
+            "value.year" -> validDate.getYear.toString
+          )
+
         val application =
           applicationBuilder(userAnswers = Some(emptyUserAnswers))
             .overrides(
@@ -194,12 +205,13 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
             .build()
 
         running(application) {
-          val result = route(application, postRequest()).value
+          val result = route(application, postRequest).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual onwardRoute.url
         }
       }
+
 
       "must return a Bad Request and errors when invalid data is submitted" in {
 
@@ -224,7 +236,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric)(request, messages(application)).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(request, messages(application)).toString
         }
       }
 
@@ -240,46 +252,82 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
-
-        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
-          .overrides(
-            bind[Clock].toInstance(fixedClock),
-            bind[RDSDatacacheService].toInstance(mockService))
-          .build()
-
-        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+        val mockSessionRepository = mock[SessionRepository]
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockService.getEarliestPaymentDate(ArgumentMatchers.any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
+        val validDate = LocalDate.now()
+
+        val postRequest = FakeRequest(POST, paymentDateRoute)
+          .withFormUrlEncodedBody(
+            "value.day" -> validDate.getDayOfMonth.toString,
+            "value.month" -> validDate.getMonthValue.toString,
+            "value.year" -> validDate.getYear.toString
+          )
+
+        val application =
+          applicationBuilder(userAnswers = Some(emptyUserAnswers))
+            .overrides(
+              bind[SessionRepository].toInstance(mockSessionRepository),
+              bind[RDSDatacacheService].toInstance(mockService)
+            )
+            .build()
+
         running(application) {
-          val result = route(application, postRequest()).value
+          val result = route(application, postRequest).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
         }
       }
+        "must return Bad Request with earliest date error if date is before earliest payment date" in {
+          when(mockService.getEarliestPaymentDate(any())(any()))
+            .thenReturn(Future.successful(expectedEarliestPaymentDate))
+
+          val invalidDate = LocalDate.parse(expectedEarliestPaymentDate.date).minusDays(1)
+
+          val request = FakeRequest(POST, paymentDateRoute)
+            .withFormUrlEncodedBody(
+              "value.day" -> invalidDate.getDayOfMonth.toString,
+              "value.month" -> invalidDate.getMonthValue.toString,
+              "value.year" -> invalidDate.getYear.toString
+            )
+
+          val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
+            .overrides(
+              bind[Clock].toInstance(fixedClock),
+              bind[RDSDatacacheService].toInstance(mockService))
+            .build()
+
+          running(application) {
+            val result = route(application, request).value
+
+            status(result) mustEqual BAD_REQUEST
+            contentAsString(result) must include("The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.")
+          }
+        }
 
       "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
+          val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
+            .overrides(
+              bind[Clock].toInstance(fixedClock),
+              bind[RDSDatacacheService].toInstance(mockService))
+            .build()
 
-        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
-          .overrides(
-            bind[Clock].toInstance(fixedClock),
-            bind[RDSDatacacheService].toInstance(mockService))
-          .build()
+          when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
+            .thenReturn(Future.failed(new Exception("bang")))
 
-        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersChangeMode))(any()))
-          .thenReturn(Future.failed(new Exception("bang")))
+          val request =
+            FakeRequest(POST, paymentDateRoute)
+              .withFormUrlEncodedBody(("value", "invalid value"))
 
-        val request =
-          FakeRequest(POST, paymentDateRoute)
-            .withFormUrlEncodedBody(("value", "invalid value"))
-
-        running(application) {
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          running(application) {
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          }
         }
-      }
     }
   }
 }

@@ -16,14 +16,16 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import com.google.inject.Inject
+import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import models.DirectDebitSource.*
 import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PlanStartDatePage, TotalAmountDuePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{DateTimeFormats, PaymentCalculations}
 import viewmodels.checkAnswers.*
@@ -31,20 +33,21 @@ import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
 
 
-class CheckYourAnswersController @Inject()  (
+class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             identify: IdentifierAction,
                                             getData: DataRetrievalAction,
                                             requireData: DataRequiredAction,
+                                            auditService: AuditService,
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView,
                                             appConfig: FrontendAppConfig
-                                          ) extends FrontendBaseController with I18nSupport with Logging{
+                                          ) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
-      val showStartDate = if(directDebitSource.contains(DirectDebitSource.PAYE)){
+      val showStartDate = if (directDebitSource.contains(DirectDebitSource.PAYE)) {
         YearEndAndMonthSummary.row(request.userAnswers)
       } else {
         PlanStartDateSummary.row(request.userAnswers)
@@ -61,7 +64,8 @@ class CheckYourAnswersController @Inject()  (
           showStartDate,
           PlanEndDateSummary.row(request.userAnswers),
           MonthlyPaymentAmountDueSummary.row(request.userAnswers),
-          FinalPaymentAmountDueSummary.row(request.userAnswers),
+          FinalPaymentDateSummary.row(request.userAnswers, appConfig),
+          FinalPaymentAmountDueSummary.row(request.userAnswers)
         ).flatten
       )
 
@@ -70,9 +74,13 @@ class CheckYourAnswersController @Inject()  (
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    paymentCalculation(request.userAnswers).getOrElse {
-      logger.warn("Missing required answers for payment calculations")
-      Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+    paymentCalculation(request.userAnswers) match {
+      case Some(result) =>
+        auditService.sendSubmitDirectDebitPaymentPlan
+        result
+      case None =>
+        logger.warn("Missing required answers for payment calculations")
+        Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
     }
   }
 
@@ -94,7 +102,6 @@ class CheckYourAnswersController @Inject()  (
         Some(Redirect(routes.DirectDebitConfirmationController.onPageLoad()))
     }
   }
-
 
   private def calculateTaxCreditRepaymentPlan(userAnswers: UserAnswers): Option[Result] = {
     for {
@@ -132,6 +139,4 @@ class CheckYourAnswersController @Inject()  (
       Redirect(routes.DirectDebitConfirmationController.onPageLoad())
     }
   }
-
-
 }
