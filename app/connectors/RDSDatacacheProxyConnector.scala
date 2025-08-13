@@ -35,7 +35,7 @@ class RDSDatacacheProxyConnector @Inject()(config: ServicesConfig,
                                            http: HttpClientV2)
                                           (implicit ec: ExecutionContext) extends HttpReadsInstances {
 
-  private val rdsDatacacheProxyBaseUrl: String = config.baseUrl("rds-datacache-proxy") + "/rds-datacache-proxy"
+  private val rdsDatacacheProxyBaseUrl: String = config.baseUrl("ndds-backend") + "/ndds-backend"
 
   // Use this to try different journeys until a real stub exists
   def limit: Int = if(config.getBoolean("features.existingDirectDebit")) Random.nextInt(3) + 1 else 0
