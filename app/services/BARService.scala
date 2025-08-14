@@ -29,9 +29,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class BARService @Inject(barsConnector: BARSConnector,
-                              config: FrontendAppConfig)
-                             (implicit ec: ExecutionContext) {
+case class BARService @Inject()(
+                                 barsConnector: BARSConnector,
+                                 config: FrontendAppConfig
+                               )(implicit ec: ExecutionContext) {
 
   private val checkAccountAndName = (accountExists: BarsResponse, nameMatches: BarsResponse) => {
     if (accountExists == Indeterminate || nameMatches == Indeterminate) {
@@ -40,6 +41,7 @@ case class BARService @Inject(barsConnector: BARSConnector,
       Right(())
     }
   }
+
   private val checkAccountNumberFormat = (accountNumberIsWellFormatted: BarsResponse) =>
     if (accountNumberIsWellFormatted == No) Left(AccountDetailInvalidFormat) else Right(())
 
@@ -63,25 +65,29 @@ case class BARService @Inject(barsConnector: BARSConnector,
       response.sortCodeSupportsDirectDebit == Yes
   }
 
-  def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)(implicit hc: HeaderCarrier): Future[Either[BarsErrors, Unit]] = {
+  /**
+   * Perform BARS verification and return either an error or the full BarsVerificationResponse
+   */
+  def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)
+                      (implicit hc: HeaderCarrier): Future[Either[BarsErrors, BarsVerificationResponse]] = {
     val isPersonal = personalOrBusiness.toLowerCase == "personal"
 
-    barsConnector.verify(isPersonal, bankDetails).map {
-      response =>
-        if (checkBarsResponseSuccess(response)) {
-          Right(())
-        } else {
-          val validatedResult: Either[BarsErrors, Unit] = for {
-            _ <- checkAccountAndName(response.accountExists, response.nameMatches)
-            _ <- checkAccountNumberFormat(response.accountNumberIsWellFormatted)
-            _ <- checkSortCodeExistsOnEiscd(response.sortCodeIsPresentOnEISCD)
-            _ <- checkSortCodeDirectDebitSupport(response.sortCodeSupportsDirectDebit)
-            _ <- checkAccountExists(response.accountExists)
-            _ <- checkNameMatches(response.nameMatches, response.accountExists)
+    barsConnector.verify(isPersonal, bankDetails).map { response =>
+      if (checkBarsResponseSuccess(response)) {
+        println("*****************************************************"+response)
+        Right(response) // ✅ return full response
+      } else {
+        val validatedResult: Either[BarsErrors, Unit] = for {
+          _ <- checkAccountAndName(response.accountExists, response.nameMatches)
+          _ <- checkAccountNumberFormat(response.accountNumberIsWellFormatted)
+          _ <- checkSortCodeExistsOnEiscd(response.sortCodeIsPresentOnEISCD)
+          _ <- checkSortCodeDirectDebitSupport(response.sortCodeSupportsDirectDebit)
+          _ <- checkAccountExists(response.accountExists)
+          _ <- checkNameMatches(response.nameMatches, response.accountExists)
+        } yield Right(())
 
-          } yield Right(())
-          Left(validatedResult.fold(identity, _ => DetailsVerificationFailed))
-        }
+        Left(validatedResult.fold(identity, _ => DetailsVerificationFailed))
+      }
     }
   }
 }

@@ -18,9 +18,9 @@ package connectors
 
 import models.YourBankDetails
 import models.requests.*
-import models.responses.BarsVerificationResponse
+import models.responses.{Bank, BankAddress, BarsVerificationResponse, Country}
 import play.api.Logging
-import play.api.http.Status.OK
+import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.json.Json
 import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -53,6 +53,37 @@ case class BARSConnector @Inject()(
       BarsBusiness(bankDetails.accountHolderName)
     )
 
+  /** Fetch bank metadata for given sort code */
+  private def getMetadata(sortCode: String)(implicit hc: HeaderCarrier): Future[Option[Bank]] = {
+    http
+      .get(url"$barsBaseUrl/metadata/$sortCode")
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case OK =>
+            val json = response.json
+            val addressJson = json \ "address"
+
+            val linesSeq = (addressJson \ "lines").as[Seq[String]]
+            val lines = linesSeq.mkString(", ")
+            val town = (addressJson \ "town").as[String]
+            val country = Country((addressJson \ "country" \ "name").as[String])
+            val postCode = (addressJson \ "postCode").as[String]
+
+            val address = BankAddress(lines, town, country, postCode)
+            Some(Bank(
+              name = (json \ "bankName").as[String],
+              address = address
+            ))
+
+          case NOT_FOUND =>
+            None // ✅ gracefully handle unknown sort codes
+          case other =>
+            throw new Exception(s"Unexpected status from metadata: $other")
+        }
+      }
+  }
+
   def verify(isPersonal: Boolean, bankDetails: YourBankDetails)
             (implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
 
@@ -73,9 +104,11 @@ case class BARSConnector @Inject()(
       .flatMap {
         case Right(response) if response.status == OK =>
           Try(response.json.as[BarsVerificationResponse]) match {
-            case Success(data) =>
-              logger.info("Account validation successful")
-              Future.successful(data)
+            case Success(verificationData) =>
+              getMetadata(bankDetails.sortCode).map { bank =>
+                verificationData.copy(bank = bank)
+              }
+
             case Failure(exception) =>
               logger.warn("Invalid JSON format in BARS response", exception)
               Future.failed(new Exception(s"Invalid JSON format: $exception"))
