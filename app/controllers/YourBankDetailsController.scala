@@ -65,7 +65,7 @@ class YourBankDetailsController @Inject()(
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val personalOrBusinessOpt = request.userAnswers.get(PersonalOrBusinessAccountPage)
-      val credId = request.userId // or however you get credId
+      val credId = request.userId
 
       form.bindFromRequest().fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))),
@@ -118,13 +118,10 @@ class YourBankDetailsController @Inject()(
                                   )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
 
     lockService.updateLockForUser(credId).map { _ =>
-      println("********************lock called***************")
       val formWithErrors = BarsErrorMapper
         .toFormError(BankAccountUnverified)
         .foldLeft(form.fill(bankDetails))(_ withError _)
-
-      BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode))) // check with shridhar 3rd parameter for view
-
+      BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
     }
   }
 }

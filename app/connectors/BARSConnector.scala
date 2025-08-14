@@ -19,6 +19,7 @@ package connectors
 import models.YourBankDetails
 import models.requests.*
 import models.responses.BarsVerificationResponse
+import play.api.Logging
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import play.api.libs.ws.writeableOf_JsValue
@@ -31,57 +32,63 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-case class BARSConnector @Inject(config: ServicesConfig,
-                                 http: HttpClientV2)
-                                (implicit ec: ExecutionContext) extends HttpReadsInstances {
+case class BARSConnector @Inject()(
+                                    config: ServicesConfig,
+                                    http: HttpClientV2
+                                  )(implicit ec: ExecutionContext) extends HttpReadsInstances with Logging {
 
   private val barsBaseUrl: String = config.baseUrl("bars")
   private val personalUrl = "personal"
   private val businessUrl = "business"
-  
-  private val requestBodyPersonal = (bankDetails: YourBankDetails) =>BarsPersonalRequest(
-    BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
-    BarsSubject(bankDetails.accountHolderName)
-  )
-  private val requestBodyBusiness = (bankDetails: YourBankDetails) => BarsBusinessRequest(
-    BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
-    BarsBusiness(bankDetails.accountHolderName)
-  )
-  
-  def verify(isPersonal: Boolean, bankDetails: YourBankDetails)(implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
-    println("called")
+
+  private val requestBodyPersonal = (bankDetails: YourBankDetails) =>
+    BarsPersonalRequest(
+      BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
+      BarsSubject(bankDetails.accountHolderName)
+    )
+
+  private val requestBodyBusiness = (bankDetails: YourBankDetails) =>
+    BarsBusinessRequest(
+      BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
+      BarsBusiness(bankDetails.accountHolderName)
+    )
+
+  def verify(isPersonal: Boolean, bankDetails: YourBankDetails)
+            (implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
+
     val verifyUrl = if (isPersonal) personalUrl else businessUrl
-    val requestBody = if (isPersonal) Json.toJson(requestBodyPersonal(bankDetails)) else Json.toJson(requestBodyBusiness(bankDetails))
-    println(url"$barsBaseUrl/verify/$verifyUrl")
+
+    val requestJson = if (isPersonal) {
+      Json.toJson(requestBodyPersonal(bankDetails))
+    } else {
+      Json.toJson(requestBodyBusiness(bankDetails))
+    }
+
+    logger.info(s"Account validation called with $verifyUrl")
+
     http
       .post(url"$barsBaseUrl/verify/$verifyUrl")
-      .withBody(requestBody)
+      .withBody(requestJson)
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
         case Right(response) if response.status == OK =>
-          println("entry")
           Try(response.json.as[BarsVerificationResponse]) match {
-            case Success(data) =>  println(data); Future.successful(data)
-            case Failure(exception) => Future.failed(new Exception(s"Invalid JSON format $exception"))
+            case Success(data) =>
+              logger.info("Account validation successful")
+              Future.successful(data)
+            case Failure(exception) =>
+              logger.warn("Invalid JSON format in BARS response", exception)
+              Future.failed(new Exception(s"Invalid JSON format: $exception"))
           }
+
         case Left(errorResponse) =>
-          println("fail1")
-          Future.failed(new Exception(s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"))
+          Future.failed(new Exception(
+            s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"
+          ))
+
         case Right(response) =>
-          println("fail2")
+          logger.warn(s"Unexpected status code from BARS: ${response.status}")
           Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
-
-        case _ =>
-          println("confused")
-          Future.failed(new Exception(s"Unexpected status code:"))
-          
       }
-
   }
-
-
-
-
 }
-
-

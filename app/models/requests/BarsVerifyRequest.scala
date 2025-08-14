@@ -16,7 +16,6 @@
 
 package models.requests
 
-import models.YourBankDetails
 import play.api.libs.json.{Json, OFormat}
 
 case class BarsPersonalRequest(account: BarsAccount, subject: BarsSubject)
