@@ -56,13 +56,14 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebi
         val directDebits = directDebitDetailsData
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(directDebits)(request, messages(application)).toString
-        contentAsString(result) must include("Your direct debit instructions")
+        contentAsString(result) must include("Your Direct Debit instructions")
         contentAsString(result) must include("You can add a new payment plan to existing Direct Debit Instructions(DDI).")
         contentAsString(result) must include("Direct Debit reference")
         contentAsString(result) must include("Date set up")
         contentAsString(result) must include("Account Number")
         contentAsString(result) must include("Number of payment plans")
         contentAsString(result) must include("View or add to")
+        contentAsString(result) must include("<b>Note:</b> If you want to cancel a Direct Debit you must contact the HMRC Payment Helpline on 0845 366 1208.")
       }
     }
   }

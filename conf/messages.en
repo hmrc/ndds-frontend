@@ -45,12 +45,13 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
-yourDirectDebitInstructions.title = Your direct debit instructions
-yourDirectDebitInstructions.heading = Your direct debit instructions
+yourDirectDebitInstructions.title = Your Direct Debit instructions
+yourDirectDebitInstructions.heading = Your Direct Debit instructions
 yourDirectDebitInstructions.p1 = You can add a new payment plan to existing Direct Debit Instructions(DDI).
 yourDirectDebitInstructions.p2 = You can
 yourDirectDebitInstructions.p2.link = set up a new direct debit payment
 yourDirectDebitInstructions.p2.afterLink = to use an account not previously set up. Once set up, this will be online after 36 hours.
+yourDirectDebitInstructions.p3.note = <b>Note:</b> If you want to cancel a Direct Debit you must contact the HMRC Payment Helpline on 0845 366 1208. Alternatively, you can cancel your Direct Debit via your bank.
 yourDirectDebitInstructions.dl.view.add = View or add to
 yourDirectDebitInstructions.dl.direct.debit.reference = Direct Debit reference
 yourDirectDebitInstructions.dl.date.setup = Date set up

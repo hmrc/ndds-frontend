@@ -17,6 +17,7 @@
 @import views.html.components._
 @import utils.MaskAndFormatUtils._
 @import utils.Utils.emptyString
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
     layout: templates.Layout,
@@ -25,8 +26,7 @@
     paragraphMessageWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
-    govukSummaryList: GovukSummaryList,
-    directDebitDetailsTable: DirectDebitDetailsTable
+    govukSummaryList: GovukSummaryList
 )
 
 @(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false)(implicit request: Request[_], messages: Messages)
@@ -58,20 +58,66 @@
         maxLimit = maxLimitReached
     )
 
+    @paragraph("yourDirectDebitInstructions.p3.note")
+
     @for(dd <- directDebitDetails) {
-        @directDebitDetailsTable(
-            headerLeft = dd.directDebitReference,
-            headerRightText = messages("yourDirectDebitInstructions.dl.view.add"),
-            headerRightUrl = emptyString,
-            headerRightVisuallyHiddenText = Some(messages(dd.directDebitReference)),
+        @govukSummaryList(SummaryList(
+            card = Some(Card(
+                title = Some(CardTitle(
+                    content = Text(dd.directDebitReference)
+                )),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = "#",
+                            content = messages("yourDirectDebitInstructions.dl.view.add"),
+                            visuallyHiddenText = Some(messages(dd.directDebitReference))
+                        )
+                    )
+                ))
+            )),
             rows = Seq(
-                (messages("yourDirectDebitInstructions.dl.direct.debit.reference"), dd.directDebitReference),
-                (messages("yourDirectDebitInstructions.dl.date.setup"), dd.setupDate),
-                (messages("yourDirectDebitInstructions.dl.sort.code"), maskSortCode(dd.sortCode)),
-                (messages("yourDirectDebitInstructions.dl.account.number"), maskAccountNumber(dd.accountNumber)),
-                (messages("yourDirectDebitInstructions.dl.payment.plans"), dd.paymentPlans)
-            ),
-            classes = "govuk-!-margin-bottom-9"
-        )
+                SummaryListRow(
+                    key = Key(
+                        content = messages("yourDirectDebitInstructions.dl.direct.debit.reference")
+                    ),
+                    value = Value(
+                        content = HtmlContent(dd.directDebitReference)
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("yourDirectDebitInstructions.dl.date.setup")
+                    ),
+                    value = Value(
+                        content = HtmlContent(dd.setupDate)
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("yourDirectDebitInstructions.dl.sort.code")
+                    ),
+                    value = Value(
+                        content = HtmlContent(maskSortCode(dd.sortCode))
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("yourDirectDebitInstructions.dl.account.number")
+                    ),
+                    value = Value(
+                        content = HtmlContent(maskAccountNumber(dd.accountNumber))
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("yourDirectDebitInstructions.dl.payment.plans")
+                    ),
+                    value = Value(
+                        content = HtmlContent(dd.paymentPlans)
+                    )
+                )
+            )
+        ))
     }
 }
