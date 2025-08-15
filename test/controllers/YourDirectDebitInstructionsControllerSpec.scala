@@ -23,7 +23,7 @@ import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.RDSDatacacheService
+import services.NationalDirectDebitService
 import utils.DirectDebitDetailsData
 import views.html.YourDirectDebitInstructionsView
 
@@ -33,20 +33,20 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebi
 
   "YourDirectDebitInstructions Controller" - {
 
-    val mockService = mock[RDSDatacacheService]
+    val mockService = mock[NationalDirectDebitService]
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
-          bind[RDSDatacacheService].toInstance(mockService)
+          bind[NationalDirectDebitService].toInstance(mockService)
         )
         .build()
 
       running(application) {
 
         when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-          .thenReturn(Future.successful(rdsResponse))
+          .thenReturn(Future.successful(nddResponse))
 
         val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url)
 

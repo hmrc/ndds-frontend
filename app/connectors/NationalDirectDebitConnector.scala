@@ -16,7 +16,7 @@
 
 package connectors
 
-import models.RDSDatacacheResponse
+import models.NddResponse
 import models.requests.WorkingDaysOffsetRequest
 import models.responses.EarliestPaymentDate
 import play.api.http.Status.OK
@@ -31,24 +31,24 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Random, Success, Try}
 
 @Singleton
-class RDSDatacacheProxyConnector @Inject()(config: ServicesConfig,
-                                           http: HttpClientV2)
-                                          (implicit ec: ExecutionContext) extends HttpReadsInstances {
+class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
+                                             http: HttpClientV2)
+                                            (implicit ec: ExecutionContext) extends HttpReadsInstances {
 
-  private val rdsDatacacheProxyBaseUrl: String = config.baseUrl("ndds-backend") + "/ndds-backend"
+  private val nationalDirectDebitBaseUrl: String = config.baseUrl("national-direct-debit") + "/national-direct-debit"
 
   // Use this to try different journeys until a real stub exists
   def limit: Int = if(config.getBoolean("features.existingDirectDebit")) Random.nextInt(3) + 1 else 0
 
-  def retrieveDirectDebits()(implicit hc: HeaderCarrier): Future[RDSDatacacheResponse] = {
-    http.get(url"$rdsDatacacheProxyBaseUrl/direct-debits?maxRecords=$limit")(hc)
-      .execute[RDSDatacacheResponse]
+  def retrieveDirectDebits()(implicit hc: HeaderCarrier): Future[NddResponse] = {
+    http.get(url"$nationalDirectDebitBaseUrl/direct-debits?maxRecords=$limit")(hc)
+      .execute[NddResponse]
   }
 
   def getEarliestPaymentDate(workingDaysOffsetRequest: WorkingDaysOffsetRequest)
                             (implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     http
-      .post(url"$rdsDatacacheProxyBaseUrl/direct-debits/earliest-payment-date")
+      .post(url"$nationalDirectDebitBaseUrl/direct-debits/earliest-payment-date")
       .withBody(Json.toJson(workingDaysOffsetRequest))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
@@ -67,7 +67,7 @@ class RDSDatacacheProxyConnector @Inject()(config: ServicesConfig,
      def getEarliestPaymentDate(workingDaysOffsetRequest: WorkingDaysOffsetRequest)
                               (implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
       http
-        .post(url"$rdsDatacacheProxyBaseUrl/direct-debits/earliest-payment-date")
+        .post(url"$nationalDirectDebitBaseUrl/direct-debits/earliest-payment-date")
         .withBody(Json.toJson(workingDaysOffsetRequest))
         .execute[EarliestPaymentDate]
     }

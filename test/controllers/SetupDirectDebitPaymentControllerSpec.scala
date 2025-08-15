@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{RDSDatacacheResponse, RDSDirectDebitDetails}
+import models.{NddResponse, NddDetails}
 import models.responses.LockResponse
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -25,7 +25,7 @@ import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.{LockService, RDSDatacacheService}
+import services.{LockService, NationalDirectDebitService}
 import views.html.SetupDirectDebitPaymentView
 import play.api.mvc.Call
 
@@ -51,14 +51,14 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
     lazy val yourDirectDebitInstructionsRoute: String = routes.YourDirectDebitInstructionsController.onPageLoad().url
 
-    val mockRDSDatacacheService: RDSDatacacheService = mock[RDSDatacacheService]
-    val sequence: Seq[RDSDirectDebitDetails] = Seq.empty
+    val mockRDSDatacacheService: NationalDirectDebitService = mock[NationalDirectDebitService]
+    val sequence: Seq[NddDetails] = Seq.empty
 
     "must return OK and the correct view for a GET with no back link (DDI = 0) without Back link" in {
-      val cacheResponse: RDSDatacacheResponse = RDSDatacacheResponse(0, sequence)
+      val cacheResponse: NddResponse = NddResponse(0, sequence)
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).overrides(
-        bind[RDSDatacacheService].toInstance(mockRDSDatacacheService),
+        bind[NationalDirectDebitService].toInstance(mockRDSDatacacheService),
         bind[LockService].toInstance(mockService)
       ).build()
 
@@ -82,10 +82,10 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     }
 
     "must return OK and the correct view for a GET if there is back link (DDI > 1) with Back link" in {
-      val cacheResponse: RDSDatacacheResponse = RDSDatacacheResponse(3, sequence)
+      val cacheResponse: NddResponse = NddResponse(3, sequence)
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).overrides(
-        bind[RDSDatacacheService].toInstance(mockRDSDatacacheService),
+        bind[NationalDirectDebitService].toInstance(mockRDSDatacacheService),
         bind[LockService].toInstance(mockService)
       ).build()
 

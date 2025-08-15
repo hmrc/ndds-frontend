@@ -27,7 +27,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.RDSDatacacheService
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
 import views.html.PlanStartDateView
@@ -47,14 +47,14 @@ class PlanStartDateController @Inject()(
                                          formProvider: PlanStartDateFormProvider,
                                          val controllerComponents: MessagesControllerComponents,
                                          view: PlanStartDateView,
-                                         rdsDatacacheService: RDSDatacacheService
+                                         nddService: NationalDirectDebitService
                                        )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
       val answers = request.userAnswers
 
-      rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
+      nddService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
         val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
         val form = formProvider(answers, earliestDate)
         val preparedForm = answers.get(PlanStartDatePage) match {
@@ -94,7 +94,7 @@ class PlanStartDateController @Inject()(
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       (for {
-        earliestPlanStartDate <- rdsDatacacheService.getEarliestPlanStartDate(request.userAnswers)
+        earliestPlanStartDate <- nddService.getEarliestPlanStartDate(request.userAnswers)
         earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
         form = formProvider(request.userAnswers, earliestDate)
         result <- form.bindFromRequest().fold(

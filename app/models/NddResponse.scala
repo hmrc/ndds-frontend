@@ -22,13 +22,13 @@ import utils.MaskAndFormatUtils.gdsFormatter
 
 import java.time.{Instant, LocalDateTime}
 
-case class RDSDirectDebitDetails(ddiRefNumber: String,
-                                 submissionDateTime: LocalDateTime,
-                                 bankSortCode: String,
-                                 bankAccountNumber: String,
-                                 bankAccountName: String,
-                                 auDdisFlag: Boolean,
-                                 numberOfPayPlans: Int) {
+case class NddDetails(ddiRefNumber: String,
+                      submissionDateTime: LocalDateTime,
+                      bankSortCode: String,
+                      bankAccountNumber: String,
+                      bankAccountName: String,
+                      auDdisFlag: Boolean,
+                      numberOfPayPlans: Int) {
   val toDirectDebitDetails: DirectDebitDetails = DirectDebitDetails(
     directDebitReference = ddiRefNumber,
     setupDate = submissionDateTime.format(gdsFormatter),
@@ -38,27 +38,27 @@ case class RDSDirectDebitDetails(ddiRefNumber: String,
   )
 }
 
-object RDSDirectDebitDetails {
-  implicit val format: OFormat[RDSDirectDebitDetails] = Json.format[RDSDirectDebitDetails]
+object NddDetails {
+  implicit val format: OFormat[NddDetails] = Json.format[NddDetails]
   java.time.Month.values()
 }
 
 
-case class RDSDatacacheResponse(directDebitCount: Int,
-                                directDebitList: Seq[RDSDirectDebitDetails])
+case class NddResponse(directDebitCount: Int,
+                       directDebitList: Seq[NddDetails])
 
-object RDSDatacacheResponse {
-  import RDSDirectDebitDetails.format
-  implicit val format: OFormat[RDSDatacacheResponse] = Json.format[RDSDatacacheResponse]
+object NddResponse {
+  import NddDetails.format
+  implicit val format: OFormat[NddResponse] = Json.format[NddResponse]
 }
 
 
-case class RDSDatacacheDAO(id: String,
-                           lastUpdated: Instant,
-                           directDebits: Seq[RDSDirectDebitDetails])
+case class NddDAO(id: String,
+                  lastUpdated: Instant,
+                  directDebits: Seq[NddDetails])
 
-object RDSDatacacheDAO {
-  import RDSDirectDebitDetails.format
+object NddDAO {
+  import NddDetails.format
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
-  implicit val format: OFormat[RDSDatacacheDAO] = Json.format[RDSDatacacheDAO]
+  implicit val format: OFormat[NddDAO] = Json.format[NddDAO]
 }
