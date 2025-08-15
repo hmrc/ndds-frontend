@@ -35,8 +35,8 @@ trait ApplicationWithWiremock
     Map[String, Any](
       "microservice.services.auth.host" -> WireMockConstants.stubHost,
       "microservice.services.auth.port" -> WireMockConstants.stubPort,
-      "microservice.services.rds-datacache-proxy.host" -> WireMockConstants.stubHost,
-      "microservice.services.rds-datacache-proxy.port" -> WireMockConstants.stubPort
+      "microservice.services.national-direct-debit.host" -> WireMockConstants.stubHost,
+      "microservice.services.national-direct-debit.port" -> WireMockConstants.stubPort
     )
   }
 
