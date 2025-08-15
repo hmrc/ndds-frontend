@@ -23,7 +23,6 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
 
-
 trait ApplicationWithWiremock
   extends AnyWordSpec
     with GuiceOneServerPerSuite
@@ -36,8 +35,8 @@ trait ApplicationWithWiremock
     Map[String, Any](
       "microservice.services.auth.host" -> WireMockConstants.stubHost,
       "microservice.services.auth.port" -> WireMockConstants.stubPort,
-      "microservice.services.rds-datacache-proxy.host" -> WireMockConstants.stubHost,
-      "microservice.services.rds-datacache-proxy.port" -> WireMockConstants.stubPort
+      "microservice.services.national-direct-debit.host" -> WireMockConstants.stubHost,
+      "microservice.services.national-direct-debit.port" -> WireMockConstants.stubPort
     )
   }
 
@@ -59,4 +58,4 @@ trait ApplicationWithWiremock
     wireMock.stop()
     super.afterAll()
 
-  val baseUrl: String = s"http://localhost:$port/rds-datacache-proxy"
+  val baseUrl: String = s"http://localhost:$port/national-direct-debit"

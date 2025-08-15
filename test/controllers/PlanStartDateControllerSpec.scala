@@ -35,7 +35,7 @@ import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
-import services.RDSDatacacheService
+import services.NationalDirectDebitService
 import views.html.PlanStartDateView
 
 import scala.concurrent.Future
@@ -52,7 +52,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
   val validAnswer: LocalDate = LocalDate.now(ZoneOffset.UTC)
 
-  val mockService: RDSDatacacheService = mock[RDSDatacacheService]
+  val mockService: NationalDirectDebitService = mock[NationalDirectDebitService]
 
   private val expectedEarliestPlanStartDate: EarliestPaymentDate = EarliestPaymentDate("2025-02-06")
   private val formattedDate = "06 Feb 2025"
@@ -83,7 +83,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   "planStartDate Controller" - {
     "must return OK and the correct view for a GET" in {
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
-        .overrides(bind[RDSDatacacheService].toInstance(mockService))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
@@ -104,7 +104,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       val userAnswers = expectedUserAnswers.set(PlanStartDatePage, validPlanStartDateDetails).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[RDSDatacacheService].toInstance(mockService))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
@@ -136,7 +136,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(
-          bind[RDSDatacacheService].toInstance(mockService))
+          bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
@@ -164,7 +164,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[RDSDatacacheService].toInstance(mockService)
+            bind[NationalDirectDebitService].toInstance(mockService)
           )
           .build()
 
@@ -179,7 +179,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
-        .overrides(bind[RDSDatacacheService].toInstance(mockService))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
@@ -228,7 +228,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(
-          bind[RDSDatacacheService].toInstance(mockService))
+          bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
@@ -246,7 +246,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(
-          bind[RDSDatacacheService].toInstance(mockService))
+          bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))

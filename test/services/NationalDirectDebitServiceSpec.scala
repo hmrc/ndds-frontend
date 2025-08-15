@@ -18,12 +18,12 @@ package services
 
 import base.SpecBase
 import config.FrontendAppConfig
-import connectors.RDSDatacacheProxyConnector
+import connectors.NationalDirectDebitConnector
 import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.EarliestPaymentDate
-import models.{DirectDebitSource, PaymentPlanType, RDSDatacacheResponse, RDSDirectDebitDetails, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, PaymentPlanType, NddResponse, NddDetails, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doNothing, reset, verify, when}
 import org.scalatest.freespec.AnyFreeSpec
@@ -40,7 +40,7 @@ import utils.DirectDebitDetailsData
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class RDSDatacacheServiceSpec extends SpecBase
+class NationalDirectDebitServiceSpec extends SpecBase
   with MockitoSugar
   with DirectDebitDetailsData {
 
@@ -52,12 +52,12 @@ class RDSDatacacheServiceSpec extends SpecBase
   implicit val ec: ExecutionContext = global
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val mockConnector: RDSDatacacheProxyConnector = mock[RDSDatacacheProxyConnector]
+  val mockConnector: NationalDirectDebitConnector = mock[NationalDirectDebitConnector]
   val mockCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   val mockAuditService: AuditService = mock[AuditService]
 
-  val service = new RDSDatacacheService(mockConnector, mockCache, mockConfig, mockAuditService)
+  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService)
 
   val testId = "id"
   val testSortCode = "123456"
@@ -72,52 +72,52 @@ class RDSDatacacheServiceSpec extends SpecBase
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD
 
-  "RDSDatacacheService" - {
+  "NationalDirectDebitService" - {
     "retrieve" - {
       "should retrieve existing details from Cache first" in {
         when(mockCache.retrieveCache(any()))
-          .thenReturn(Future.successful(rdsResponse.directDebitList))
+          .thenReturn(Future.successful(nddResponse.directDebitList))
 
         val result = service.retrieveAllDirectDebits(testId).futureValue
-        result mustEqual rdsResponse
+        result mustEqual nddResponse
       }
 
       "should retrieve details from Connector if Cache is empty, and cache the response" in {
         when(mockCache.retrieveCache(any()))
-          .thenReturn(Future.successful(Seq.empty[RDSDirectDebitDetails]))
+          .thenReturn(Future.successful(Seq.empty[NddDetails]))
         when(mockConnector.retrieveDirectDebits()(any()))
-          .thenReturn(Future.successful(rdsResponse))
+          .thenReturn(Future.successful(nddResponse))
         when(mockCache.cacheResponse(any())(any()))
           .thenReturn(Future.successful(true))
 
         val result = service.retrieveAllDirectDebits(testId).futureValue
-        result mustEqual rdsResponse
+        result mustEqual nddResponse
       }
 
       "should be able to return no details from Connector or Cache is correctly empty" in {
         when(mockCache.retrieveCache(any()))
-          .thenReturn(Future.successful(Seq.empty[RDSDirectDebitDetails]))
+          .thenReturn(Future.successful(Seq.empty[NddDetails]))
         when(mockConnector.retrieveDirectDebits()(any()))
-          .thenReturn(Future.successful(RDSDatacacheResponse(0, Seq())))
+          .thenReturn(Future.successful(NddResponse(0, Seq())))
         when(mockCache.cacheResponse(any())(any()))
           .thenReturn(Future.successful(true))
 
         val result = service.retrieveAllDirectDebits(testId).futureValue
-        result mustEqual RDSDatacacheResponse(0, Seq())
+        result mustEqual NddResponse(0, Seq())
       }
 
       "must create an audit event when retrieving direct debits from the backend" in {
         when(mockCache.retrieveCache(any()))
-          .thenReturn(Future.successful(Seq.empty[RDSDirectDebitDetails]))
+          .thenReturn(Future.successful(Seq.empty[NddDetails]))
         when(mockConnector.retrieveDirectDebits()(any()))
-          .thenReturn(Future.successful(rdsResponse))
+          .thenReturn(Future.successful(nddResponse))
         when(mockCache.cacheResponse(any())(any()))
           .thenReturn(Future.successful(true))
         doNothing().when(mockAuditService).sendEvent(any())(any(), any(), any())
 
         val result = service.retrieveAllDirectDebits(testId).futureValue
         verify(mockAuditService).sendEvent(any())(any(), any(), any())
-        result mustEqual rdsResponse
+        result mustEqual nddResponse
       }
     }
 

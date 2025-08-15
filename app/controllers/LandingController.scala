@@ -19,13 +19,13 @@ package controllers
 import controllers.actions.IdentifierAction
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.RDSDatacacheService
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class LandingController @Inject()(rdsDatacacheService: RDSDatacacheService,
+class LandingController @Inject()(rdsDatacacheService: NationalDirectDebitService,
                                   val controllerComponents: MessagesControllerComponents,
                                   identify: IdentifierAction)
                                  (implicit ec: ExecutionContext)

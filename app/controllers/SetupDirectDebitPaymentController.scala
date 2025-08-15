@@ -22,7 +22,7 @@ import models.responses.{LockedAndUnverified, LockedAndVerified, NotLocked}
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.RDSDatacacheService
+import services.NationalDirectDebitService
 import services.LockService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SetupDirectDebitPaymentView
@@ -30,20 +30,20 @@ import views.html.SetupDirectDebitPaymentView
 import scala.concurrent.{ExecutionContext, Future}
 
 class SetupDirectDebitPaymentController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       rdsDatacacheService: RDSDatacacheService,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: SetupDirectDebitPaymentView,
-                                       lockService: LockService
+                                                   override val messagesApi: MessagesApi,
+                                                   identify: IdentifierAction,
+                                                   getData: DataRetrievalAction,
+                                                   nddService: NationalDirectDebitService,
+                                                   val controllerComponents: MessagesControllerComponents,
+                                                   view: SetupDirectDebitPaymentView,
+                                                   lockService: LockService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       lockService.isUserLocked(request.userId) flatMap { _.lockStatus match
         case NotLocked =>
-          rdsDatacacheService.retrieveAllDirectDebits(request.userId) map { rdsResponse =>
+          nddService.retrieveAllDirectDebits(request.userId) map { rdsResponse =>
             val ddiCount = rdsResponse.directDebitCount
             Ok(view(ddiCount, routes.YourDirectDebitInstructionsController.onPageLoad()))
           }

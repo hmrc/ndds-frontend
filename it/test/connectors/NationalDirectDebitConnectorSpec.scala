@@ -25,19 +25,19 @@ import org.scalatest.matchers.should.Matchers
 import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
 import uk.gov.hmrc.http.HeaderCarrier
 
-class RdsDataCacheProxyConnectorSpec extends ApplicationWithWiremock
+class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
   with Matchers
   with ScalaFutures
   with IntegrationPatience {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val connector: RDSDatacacheProxyConnector = app.injector.instanceOf[RDSDatacacheProxyConnector]
+  val connector: NationalDirectDebitConnector = app.injector.instanceOf[NationalDirectDebitConnector]
 
   "getEarliestPaymentDate" should {
     "successfully retrieve a date" in {
       stubFor(
-        post(urlPathMatching("/rds-datacache-proxy/direct-debits/earliest-payment-date"))
+        post(urlPathMatching("/national-direct-debit/direct-debits/earliest-payment-date"))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -53,7 +53,7 @@ class RdsDataCacheProxyConnectorSpec extends ApplicationWithWiremock
 
     "must fail when the result is parsed as a HttpResponse but is not a 200 (OK) response" in {
       stubFor(
-        post(urlPathMatching("/rds-datacache-proxy/direct-debits/earliest-payment-date"))
+        post(urlPathMatching("/national-direct-debit/direct-debits/earliest-payment-date"))
           .willReturn(
             aResponse()
               .withStatus(CREATED)
@@ -68,7 +68,7 @@ class RdsDataCacheProxyConnectorSpec extends ApplicationWithWiremock
 
     "must fail when the result is parsed as an UpstreamErrorResponse" in {
       stubFor(
-        post(urlPathMatching("/rds-datacache-proxy/direct-debits/earliest-payment-date"))
+        post(urlPathMatching("/national-direct-debit/direct-debits/earliest-payment-date"))
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)
@@ -84,7 +84,7 @@ class RdsDataCacheProxyConnectorSpec extends ApplicationWithWiremock
 
     "must fail when the result is a failed future" in {
       stubFor(
-        post(urlPathMatching("/rds-datacache-proxy/direct-debits/earliest-payment-date"))
+        post(urlPathMatching("/national-direct-debit/direct-debits/earliest-payment-date"))
           .willReturn(
             aResponse()
               .withStatus(0)
