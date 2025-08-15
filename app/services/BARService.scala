@@ -74,7 +74,6 @@ case class BARService @Inject()(
 
     barsConnector.verify(isPersonal, bankDetails).map { response =>
       if (checkBarsResponseSuccess(response)) {
-        println("*****************************************************"+response)
         Right(response) // ✅ return full response
       } else {
         val validatedResult: Either[BarsErrors, Unit] = for {
