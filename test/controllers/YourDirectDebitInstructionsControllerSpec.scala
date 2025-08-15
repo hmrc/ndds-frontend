@@ -57,7 +57,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebi
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(directDebits)(request, messages(application)).toString
         contentAsString(result) must include("Your Direct Debit instructions")
-        contentAsString(result) must include("You can add a new payment plan to existing Direct Debit Instructions(DDI).")
+        contentAsString(result) must include("You can add a new payment plan to existing Direct Debit Instructions (DDI).")
         contentAsString(result) must include("Direct Debit reference")
         contentAsString(result) must include("Date set up")
         contentAsString(result) must include("Account Number")
