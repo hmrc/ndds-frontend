@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.PersonalOrBusinessAccountFormProvider
 import models.{Mode, PersonalOrBusinessAccount, UserAnswers}
 import navigation.Navigator
-import pages.PersonalOrBusinessAccountPage
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,25 +30,26 @@ import views.html.PersonalOrBusinessAccountView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class PersonalOrBusinessAccountController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       formProvider: PersonalOrBusinessAccountFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: PersonalOrBusinessAccountView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                                     override val messagesApi: MessagesApi,
+                                                     sessionRepository: SessionRepository,
+                                                     navigator: Navigator,
+                                                     identify: IdentifierAction,
+                                                     getData: DataRetrievalAction,
+                                                     formProvider: PersonalOrBusinessAccountFormProvider,
+                                                     val controllerComponents: MessagesControllerComponents,
+                                                     view: PersonalOrBusinessAccountView
+                                                   )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  val form: Form[PersonalOrBusinessAccount] = formProvider()
+  private val form: Form[PersonalOrBusinessAccount] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
       val preparedForm = answers.get(PersonalOrBusinessAccountPage) match {
-        case None => form
+        case None        => form
         case Some(value) => form.fill(value)
       }
 
@@ -57,16 +58,38 @@ class PersonalOrBusinessAccountController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
+      form.bindFromRequest().fold(
+        formWithErrors =>
+          Future.successful(
+            BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))
+          ),
+        value => {
+          val originalAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
 
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))),
+          Future.fromTry(updateAnswers(originalAnswers, value))
+            .flatMap { updatedAnswers =>
+              sessionRepository.set(updatedAnswers).map { _ =>
+                Redirect(navigator.nextPage(PersonalOrBusinessAccountPage, mode, updatedAnswers))
+              }
+            }
+        }
+      )
+  }
 
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.getOrElse(UserAnswers(request.userId)).set(PersonalOrBusinessAccountPage, value))
-                _ <- sessionRepository.set(updatedAnswers)
-              } yield Redirect(navigator.nextPage(PersonalOrBusinessAccountPage, mode, updatedAnswers))
-          )
+  private def updateAnswers(
+                             userAnswers: UserAnswers,
+                             newValue: PersonalOrBusinessAccount
+                           ): Try[UserAnswers] = {
+    val oldValue = userAnswers.get(PersonalOrBusinessAccountPage)
+
+    if (oldValue.contains(newValue)) {
+      userAnswers.set(PersonalOrBusinessAccountPage, newValue)
+    } else {
+      userAnswers
+        .remove(BankDetailsAddressPage)
+        .flatMap(_.remove(BankDetailsBankNamePage))
+        .flatMap(_.remove(YourBankDetailsPage))
+        .flatMap(_.set(PersonalOrBusinessAccountPage, newValue))
+    }
   }
 }
