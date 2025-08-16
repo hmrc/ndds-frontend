@@ -18,13 +18,19 @@ package controllers
 
 import controllers.actions.*
 import forms.YourBankDetailsFormProvider
-import models.{Mode, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import forms.validation.BarsErrorMapper
+import models.errors.BarsErrors.BankAccountUnverified
+import models.requests.DataRequest
+import models.responses.BankAddress
+import models.{Mode, PersonalOrBusinessAccount, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.YourBankDetailsPage
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
+import services.{BARService, LockService}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourBankDetailsView
 
@@ -38,6 +44,8 @@ class YourBankDetailsController @Inject()(
                                            identify: IdentifierAction,
                                            requireData: DataRequiredAction,
                                            getData: DataRetrievalAction,
+                                           barService: BARService,
+                                           lockService: LockService,
                                            formProvider: YourBankDetailsFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
                                            view: YourBankDetailsView
@@ -45,35 +53,94 @@ class YourBankDetailsController @Inject()(
 
   val form: Form[YourBankDetails] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val answers = request.userAnswers
-      val preparedForm = answers.get(YourBankDetailsPage) match {
-        case None => form
+  def onPageLoad(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData) { implicit request =>
+      val preparedForm = request.userAnswers.get(YourBankDetailsPage) match {
+        case None        => form
         case Some(value) => form.fill(YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(value))
       }
-
       Ok(view(preparedForm, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
-  }
+    }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+      val personalOrBusinessOpt = request.userAnswers.get(PersonalOrBusinessAccountPage)
+      val credId                = request.userId
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))),
+          Future.successful(
+            BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+          ),
+        bankDetails =>
+          personalOrBusinessOpt match {
+            case None =>
+              Future.successful(Redirect(navigator.nextPage(YourBankDetailsPage, mode, request.userAnswers)))
 
-        value =>
-          for {
-            // TODO: Replace line below with response from real BARS service call
-            barsServiceResponse <- Future.successful(false)
-            updatedAnswers <- Future.fromTry(request.userAnswers
-              .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(value, barsServiceResponse))
-            )
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield {
-            Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+            case Some(accountType) =>
+              startVerification(accountType, bankDetails, request.userAnswers, credId, mode)
           }
       )
+    }
+
+  private def startVerification(
+                                 accountType: PersonalOrBusinessAccount,
+                                 bankDetails: YourBankDetails,
+                                 userAnswers: UserAnswers,
+                                 credId: String,
+                                 mode: Mode
+                               )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+
+    barService.barsVerification(accountType.toString, bankDetails).flatMap {
+      case Right(response) =>
+        onSuccessfulVerification(
+          userAnswers,
+          audisFlag = false,
+          bankDetails,
+          bankName = response.bank.map(_.name),
+          bankAddress = response.bank.map(_.address)
+        ).map { updatedAnswers =>
+          Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
+        }
+
+      case Left(_) =>
+        onFailedVerification(credId, bankDetails, mode)
+    }
+  }
+
+  private def onSuccessfulVerification(
+                                        userAnswers: UserAnswers,
+                                        audisFlag: Boolean,
+                                        bankDetails: YourBankDetails,
+                                        bankName: Option[String],
+                                        bankAddress: Option[BankAddress]
+                                      ): Future[UserAnswers] = {
+
+    val updatedAnswersTry = for {
+      ua1 <- userAnswers.set(
+        YourBankDetailsPage,
+        YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, audisFlag, Some(false))
+      )
+      ua2 <- bankName.map(name => ua1.set(BankDetailsBankNamePage, name)).getOrElse(scala.util.Success(ua1))
+      ua3 <- bankAddress.map(addr => ua2.set(BankDetailsAddressPage, addr)).getOrElse(scala.util.Success(ua2))
+    } yield ua3
+
+    Future.fromTry(updatedAnswersTry).flatMap { ua =>
+      sessionRepository.set(ua).map(_ => ua)
+    }
+  }
+
+  private def onFailedVerification(
+                                    credId: String,
+                                    bankDetails: YourBankDetails,
+                                    mode: Mode
+                                  )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+
+    lockService.updateLockForUser(credId).map { _ =>
+      val formWithErrors = BarsErrorMapper
+        .toFormError(BankAccountUnverified)
+        .foldLeft(form.fill(bankDetails))(_ withError _)
+      BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+    }
   }
 }

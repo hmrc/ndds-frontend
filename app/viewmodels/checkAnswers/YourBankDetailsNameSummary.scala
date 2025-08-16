@@ -17,20 +17,24 @@
 package viewmodels.checkAnswers
 
 import models.UserAnswers
+import pages.BankDetailsBankNamePage
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
+import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DirectDebitDetailsData
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object YourBankDetailsNameSummary extends DirectDebitDetailsData{
+object YourBankDetailsNameSummary extends DirectDebitDetailsData {
 
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
-    Some(SummaryListRowViewModel(
-      key = KeyViewModel(messages("bankDetailsCheckYourAnswer.account.bank.name")),
-      value = ValueViewModel(HtmlContent(bankName)),
-      actions = Seq.empty
-    ))
-  }
+
+  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(BankDetailsBankNamePage).map {
+      answer =>
+        SummaryListRowViewModel(
+          key = "bankDetailsCheckYourAnswer.account.bank.name",
+          value = ValueViewModel(HtmlFormat.escape(answer).toString),
+          actions = Seq.empty
+        )
+    }
 }
