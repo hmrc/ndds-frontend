@@ -53,7 +53,6 @@ case class BARSConnector @Inject()(
       BarsBusiness(bankDetails.accountHolderName)
     )
 
-  /** Fetch bank metadata for given sort code */
   private def getMetadata(sortCode: String)(implicit hc: HeaderCarrier): Future[Option[Bank]] = {
     http
       .get(url"$barsBaseUrl/metadata/$sortCode")

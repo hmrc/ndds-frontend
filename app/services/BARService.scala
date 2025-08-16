@@ -65,16 +65,13 @@ case class BARService @Inject()(
       response.sortCodeSupportsDirectDebit == Yes
   }
 
-  /**
-   * Perform BARS verification and return either an error or the full BarsVerificationResponse
-   */
   def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)
                       (implicit hc: HeaderCarrier): Future[Either[BarsErrors, BarsVerificationResponse]] = {
     val isPersonal = personalOrBusiness.toLowerCase == "personal"
 
     barsConnector.verify(isPersonal, bankDetails).map { response =>
       if (checkBarsResponseSuccess(response)) {
-        Right(response) // ✅ return full response
+        Right(response)
       } else {
         val validatedResult: Either[BarsErrors, Unit] = for {
           _ <- checkAccountAndName(response.accountExists, response.nameMatches)

@@ -21,15 +21,15 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import models.YourBankDetails
 import models.responses.{BarsVerificationResponse, Country}
-import org.scalatest.concurrent.{ScalaFutures, PatienceConfiguration}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, OptionValues}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext
@@ -44,9 +44,8 @@ class BARSConnectorSpec
   private val wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
   implicit private val ec: ExecutionContext = ExecutionContext.global
-  implicit private val hc: HeaderCarrier   = HeaderCarrier()
+  implicit private val hc: HeaderCarrier = HeaderCarrier()
 
-  // Increase patience for futures
   implicit override val patienceConfig: PatienceConfig =
     PatienceConfig(timeout = Span(5, Seconds), interval = Span(50, Millis))
 
@@ -60,22 +59,21 @@ class BARSConnectorSpec
     super.afterAll()
   }
 
-  private val app: Application = new GuiceApplicationBuilder()
+  lazy private val app: Application = new GuiceApplicationBuilder()
     .configure(
       "microservice.services.bars.host" -> "localhost",
       "microservice.services.bars.port" -> wireMockServer.port()
     )
     .build()
 
-  private val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
-  private val config: ServicesConfig   = app.injector.instanceOf[ServicesConfig]
-
-  private val connector = BARSConnector(config, httpClient)
+  lazy private val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
+  lazy private val config: ServicesConfig = app.injector.instanceOf[ServicesConfig]
+  lazy private val connector = BARSConnector(config, httpClient)
 
   private val bankDetails = YourBankDetails(
     accountHolderName = "Teddy Dickson",
-    sortCode          = "443116",
-    accountNumber     = "55207102"
+    sortCode = "443116",
+    accountNumber = "55207102"
   )
 
   "BARSConnector.verify" should {
@@ -86,7 +84,8 @@ class BARSConnectorSpec
           .willReturn(
             aResponse()
               .withStatus(200)
-              .withBody("""{
+              .withBody(
+                """{
                   "accountNumberIsWellFormatted": "yes",
                   "sortCodeIsPresentOnEISCD": "yes",
                   "accountExists": "yes",
@@ -102,21 +101,26 @@ class BARSConnectorSpec
           .willReturn(
             aResponse()
               .withStatus(200)
-              .withBody("""{
+              .withBody(
+                """{
                 "bankName": "Some Bank",
-                "address": { "country": { "name": "United Kingdom" }, "postCode": "SW1A 1AA" }
+                "address": {
+                  "lines": ["123 Bank Street"],
+                  "town": "London",
+                  "country": { "name": "United Kingdom" },
+                  "postCode": "SW1A 1AA"
+                }
               }""")
           )
       )
 
-      val resultF = connector.verify(isPersonal = true, bankDetails)
-
-      whenReady(resultF) { result =>
-        result.accountNumberIsWellFormatted.toString.toLowerCase shouldBe "yes"
-        result.bank.value.name shouldBe "Some Bank"
-        result.bank.value.address.country shouldBe Country("United Kingdom")
-        result.bank.value.address.postCode shouldBe "SW1A 1AA"
-      }
+      val result = connector.verify(isPersonal = true, bankDetails).futureValue
+      result.accountNumberIsWellFormatted.toString.toLowerCase shouldBe "yes"
+      result.bank.value.name shouldBe "Some Bank"
+      result.bank.value.address.lines shouldEqual "123 Bank Street"
+      result.bank.value.address.town shouldBe "London"
+      result.bank.value.address.country shouldBe Country("United Kingdom")
+      result.bank.value.address.postCode shouldBe "SW1A 1AA"
     }
 
     "return verification result without bank metadata when metadata endpoint returns 404" in {
@@ -125,7 +129,8 @@ class BARSConnectorSpec
           .willReturn(
             aResponse()
               .withStatus(200)
-              .withBody("""{
+              .withBody(
+                """{
                   "accountNumberIsWellFormatted": "yes",
                   "sortCodeIsPresentOnEISCD": "yes",
                   "accountExists": "yes",
@@ -141,11 +146,9 @@ class BARSConnectorSpec
           .willReturn(aResponse().withStatus(404))
       )
 
-      val resultF = connector.verify(isPersonal = true, bankDetails)
+      val result = connector.verify(isPersonal = true, bankDetails).futureValue
 
-      whenReady(resultF) { result =>
-        result.bank shouldBe None
-      }
+      result.bank shouldBe None
     }
 
     "fail when verification endpoint returns 500" in {
@@ -154,11 +157,10 @@ class BARSConnectorSpec
           .willReturn(aResponse().withStatus(500))
       )
 
-      val resultF = connector.verify(isPersonal = true, bankDetails)
-
-      whenReady(resultF.failed) { ex =>
-        ex shouldBe a[Exception] // matches actual exception type
+      val ex = intercept[Exception] {
+        connector.verify(isPersonal = true, bankDetails).futureValue
       }
+      ex.getMessage should include("500")
     }
 
     "fail when metadata endpoint is called but responds with 500" in {
@@ -167,7 +169,8 @@ class BARSConnectorSpec
           .willReturn(
             aResponse()
               .withStatus(200)
-              .withBody("""{
+              .withBody(
+                """{
                   "accountNumberIsWellFormatted": "yes",
                   "sortCodeIsPresentOnEISCD": "yes",
                   "accountExists": "yes",
@@ -183,11 +186,10 @@ class BARSConnectorSpec
           .willReturn(aResponse().withStatus(500))
       )
 
-      val resultF = connector.verify(isPersonal = true, bankDetails)
-
-      whenReady(resultF.failed) { ex =>
-        ex shouldBe a[Exception] // matches actual exception type
+      val ex = intercept[Exception] {
+        connector.verify(isPersonal = true, bankDetails).futureValue
       }
+      ex.getMessage should include("500")
     }
   }
 }
