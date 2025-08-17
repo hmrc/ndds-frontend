@@ -25,27 +25,24 @@ object BarsErrorMapper {
   def toFormError(error: BarsErrors): Seq[FormError] = {
     error match {
       case BankAccountUnverified =>
-        Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified")
-        )
-      case AccountDetailInvalidFormat =>
-        Seq(FormError("accountNumber", "yourBankDetails.error.accountNumberAndSortCode.invalid"),
-          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid"))
-      case SortCodeNotFound =>
-        Seq(FormError("accountNumber", "yourBankDetails.error.accountNumberAndSortCode.invalid"),
-          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid"))
-      case SortCodeNotSupported =>
+        Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
+
+      case AccountDetailInvalidFormat | SortCodeNotFound | AccountNotFound =>
         Seq(
-          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid"))
-      case AccountNotFound =>
-        Seq(FormError("accountNumber", "yourBankDetails.error.accountNumberAndSortCode.invalid"),
-          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid"))
-      case NameMismatch =>
-        Seq(FormError("accountHolderName", "yourBankDetails.error.accountNumberAndSortCode.invalid")
-        )
-      case DetailsVerificationFailed =>
-        Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified")
+          FormError("accountNumber", "yourBankDetails.error.accountNumberAndSortCode.invalid"),
+          FormError("sortCode", "yourBankDetails.error.accountNumberAndSortCode.invalid")
         )
 
+      case SortCodeNotSupported =>
+        Seq(FormError("sortCode", "yourBankDetails.error.sortCodeNotSupported.invalid"))
+
+      case NameMismatch =>
+        Seq(FormError("accountHolderName", "yourBankDetails.error.nameMismatch.invalid"))
+
+      case DetailsVerificationFailed =>
+        Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
+
+      case _ => Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
     }
   }
 }

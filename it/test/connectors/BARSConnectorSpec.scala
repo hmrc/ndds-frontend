@@ -117,7 +117,7 @@ class BARSConnectorSpec
       val result = connector.verify(isPersonal = true, bankDetails).futureValue
       result.accountNumberIsWellFormatted.toString.toLowerCase shouldBe "yes"
       result.bank.value.name shouldBe "Some Bank"
-      result.bank.value.address.lines shouldEqual "123 Bank Street"
+      result.bank.value.address.lines shouldEqual Seq("123 Bank Street")
       result.bank.value.address.town shouldBe "London"
       result.bank.value.address.country shouldBe Country("United Kingdom")
       result.bank.value.address.postCode shouldBe "SW1A 1AA"

@@ -19,7 +19,7 @@ package models.responses
 import play.api.libs.json.{Json, OFormat}
 
 case class BankAddress(
-                        lines: String,
+                        lines: Seq[String],
                         town: String,
                         country: Country,
                         postCode: String

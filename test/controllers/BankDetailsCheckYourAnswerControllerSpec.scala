@@ -52,7 +52,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
-        .setOrException(BankDetailsAddressPage, BankAddress("P.O. Box 44", "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -83,7 +83,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
-        .setOrException(BankDetailsAddressPage, BankAddress("P.O. Box 44", "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
         .set(BankDetailsCheckYourAnswerPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()

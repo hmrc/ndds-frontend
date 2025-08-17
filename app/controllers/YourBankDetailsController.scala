@@ -19,12 +19,14 @@ package controllers
 import controllers.actions.*
 import forms.YourBankDetailsFormProvider
 import forms.validation.BarsErrorMapper
+import models.errors.BarsErrors
 import models.errors.BarsErrors.BankAccountUnverified
 import models.requests.DataRequest
 import models.responses.BankAddress
 import models.{Mode, PersonalOrBusinessAccount, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
+import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -49,7 +51,7 @@ class YourBankDetailsController @Inject()(
                                            formProvider: YourBankDetailsFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
                                            view: YourBankDetailsView
-                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[YourBankDetails] = formProvider()
 
@@ -103,10 +105,16 @@ class YourBankDetailsController @Inject()(
           Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
         }
 
-      case Left(_) =>
-        onFailedVerification(credId, bankDetails, mode)
+      case Left(barsError) =>
+        logger.warn(
+          s"[YourBankDetailsController][startVerification] " +
+            s"BARS verification failed for userId=$credId, accountType=$accountType. " +
+            s"Reason: ${barsError.toString}"
+        )
+        onFailedVerification(credId, bankDetails, mode, barsError)
     }
   }
+
 
   private def onSuccessfulVerification(
                                         userAnswers: UserAnswers,
@@ -126,21 +134,26 @@ class YourBankDetailsController @Inject()(
     } yield ua3
 
     Future.fromTry(updatedAnswersTry).flatMap { ua =>
-      sessionRepository.set(ua).map(_ => ua)
+      sessionRepository.set(ua).map { _ =>
+        logger.info(s"[YourBankDetailsController][onSuccessfulVerification] Session repository updated successfully")
+        ua
+      }
     }
   }
 
   private def onFailedVerification(
                                     credId: String,
                                     bankDetails: YourBankDetails,
-                                    mode: Mode
+                                    mode: Mode,
+                                    barsError: BarsErrors
                                   )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
 
     lockService.updateLockForUser(credId).map { _ =>
       val formWithErrors = BarsErrorMapper
-        .toFormError(BankAccountUnverified)
+        .toFormError(barsError)      // <- use the actual error now
         .foldLeft(form.fill(bankDetails))(_ withError _)
       BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
     }
   }
+
 }

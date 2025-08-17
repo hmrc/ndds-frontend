@@ -69,7 +69,7 @@ case class BARSConnector @Inject()(
             val country = Country((addressJson \ "country" \ "name").as[String])
             val postCode = (addressJson \ "postCode").as[String]
 
-            val address = BankAddress(lines, town, country, postCode)
+            val address = BankAddress(Seq(lines), town, country, postCode)
             Some(Bank(
               name = (json \ "bankName").as[String],
               address = address
