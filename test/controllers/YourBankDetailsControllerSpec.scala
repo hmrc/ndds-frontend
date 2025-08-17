@@ -18,13 +18,13 @@ package controllers
 
 import base.SpecBase
 import forms.YourBankDetailsFormProvider
-import models.responses.{BarsResponse, BarsVerificationResponse, Bank, BankAddress, Country}
-import models.{DirectDebitSource, NormalMode, UserAnswers, YourBankDetails}
+import models.responses.{Bank, BankAddress, BarsResponse, BarsVerificationResponse, Country}
+import models.{DirectDebitSource, NormalMode, PersonalOrBusinessAccount, UserAnswers, YourBankDetails}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{DirectDebitSourcePage, YourBankDetailsPage}
+import pages.{DirectDebitSourcePage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -62,18 +62,101 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   "YourBankDetails Controller" - {
 
-    // existing GET and POST tests here (unchanged) ...
+    "must return OK and the correct view for a GET" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, yourBankDetailsRoute)
+        val view = application.injector.instanceOf[YourBankDetailsView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
+      }
+    }
+
+    "must populate the view correctly on a GET when data exists" in {
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      running(application) {
+        val request = FakeRequest(GET, yourBankDetailsRoute)
+        val view = application.injector.instanceOf[YourBankDetailsView]
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212", "34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
+      }
+    }
+
+    "must return a Bad Request and errors when invalid data is submitted" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(POST, yourBankDetailsRoute)
+          .withFormUrlEncodedBody(
+            "accountHolderName" -> "",
+            "sortCode" -> "12",
+            "accountNumber" -> "abcd"
+          )
+
+        val boundForm = form.bind(Map(
+          "accountHolderName" -> "",
+          "sortCode" -> "12",
+          "accountNumber" -> "abcd"
+        ))
+
+        val view = application.injector.instanceOf[YourBankDetailsView]
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request = FakeRequest(GET, yourBankDetailsRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request = FakeRequest(POST, yourBankDetailsRoute)
+          .withFormUrlEncodedBody(
+            "accountHolderName" -> "value 1",
+            "sortCode" -> "123454",
+            "accountNumber" -> "34211234",
+            "auddisStatus" -> "true"
+          )
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
 
     "must call BARService and handle response on valid POST submission" in {
+
+      val ua = userAnswers
+                .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+
       val mockSessionRepository = mock[SessionRepository]
       val mockBarService = mock[BARService]
 
-      // Provide implicit HeaderCarrier
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      // Example BARService mock response
       val barResponse = BarsVerificationResponse(
         accountNumberIsWellFormatted = BarsResponse.Yes,
         sortCodeIsPresentOnEISCD = BarsResponse.Yes,
@@ -102,7 +185,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(barResponse)))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = Some(ua))
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository),
@@ -125,6 +208,82 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual onwardRoute.url
       }
     }
+
+    "must handle BARService failure and call onFailedVerification when Left returned" in {
+      val ua = userAnswers
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+
+      val mockSessionRepository = mock[SessionRepository]
+      val mockBarService = mock[BARService]
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Left(models.errors.BarsErrors.BankAccountUnverified)))
+
+      val application = applicationBuilder(userAnswers = Some(ua))
+        .overrides(
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[BARService].toInstance(mockBarService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, yourBankDetailsRoute)
+          .withFormUrlEncodedBody(
+            "accountHolderName" -> "value 1",
+            "sortCode" -> "123212",
+            "accountNumber" -> "34211234",
+            "auddisStatus" -> "true"
+          )
+
+        val result = route(application, request).value
+
+        status(result) mustEqual BAD_REQUEST
+
+        contentAsString(result) must include("These account details could not be verified. Check your details or try different account details")
+      }
+    }
+
+    "must log a warning when BARService returns Left" in {
+      val ua = userAnswers
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+
+      val mockSessionRepository = mock[SessionRepository]
+      val mockBarService = mock[BARService]
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Left(models.errors.BarsErrors.BankAccountUnverified)))
+
+      val application = applicationBuilder(userAnswers = Some(ua))
+        .overrides(
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[BARService].toInstance(mockBarService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, yourBankDetailsRoute)
+          .withFormUrlEncodedBody(
+            "accountHolderName" -> "value 1",
+            "sortCode" -> "123212",
+            "accountNumber" -> "34211234",
+            "auddisStatus" -> "true"
+          )
+
+        val result = route(application, request).value
+        status(result) mustEqual BAD_REQUEST
+
+      }
+    }
+
 
   }
 }

@@ -163,6 +163,55 @@ class BARSConnectorSpec
       ex.getMessage should include("500")
     }
 
+    "successfully verify business bank details and fetch metadata" in {
+      wireMockServer.stubFor(
+        post(urlEqualTo("/verify/business"))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(
+                """{
+                    "accountNumberIsWellFormatted": "yes",
+                    "sortCodeIsPresentOnEISCD": "yes",
+                    "accountExists": "yes",
+                    "nameMatches": "yes",
+                    "sortCodeSupportsDirectDebit": "yes",
+                    "sortCodeSupportsDirectCredit": "yes"
+                  }"""
+              )
+          )
+      )
+
+      wireMockServer.stubFor(
+        get(urlEqualTo("/metadata/443116"))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(
+                """{
+                    "bankName": "Some Business Bank",
+                    "address": {
+                      "lines": ["456 Business Road"],
+                      "town": "Manchester",
+                      "country": { "name": "United Kingdom" },
+                      "postCode": "M1 2AB"
+                    }
+                  }"""
+              )
+          )
+      )
+
+      val result = connector.verify(isPersonal = false, bankDetails).futureValue
+
+      result.accountNumberIsWellFormatted.toString.toLowerCase shouldBe "yes"
+      result.bank.value.name shouldBe "Some Business Bank"
+      result.bank.value.address.lines shouldEqual Seq("456 Business Road")
+      result.bank.value.address.town shouldBe "Manchester"
+      result.bank.value.address.country shouldBe Country("United Kingdom")
+      result.bank.value.address.postCode shouldBe "M1 2AB"
+    }
+
+
     "fail when metadata endpoint is called but responds with 500" in {
       wireMockServer.stubFor(
         post(urlEqualTo("/verify/personal"))

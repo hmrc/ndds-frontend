@@ -76,7 +76,7 @@ case class BARSConnector @Inject()(
             ))
 
           case NOT_FOUND =>
-            None // ✅ gracefully handle unknown sort codes
+            None //gracefully handle unknown sort codes
           case other =>
             throw new Exception(s"Unexpected status from metadata: $other")
         }
