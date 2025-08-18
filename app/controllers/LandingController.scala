@@ -25,14 +25,14 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class LandingController @Inject()(rdsDatacacheService: NationalDirectDebitService,
+class LandingController @Inject()(nddService: NationalDirectDebitService,
                                   val controllerComponents: MessagesControllerComponents,
                                   identify: IdentifierAction)
                                  (implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
-    rdsDatacacheService.retrieveAllDirectDebits(request.userId)
+    nddService.retrieveAllDirectDebits(request.userId)
       .map {
         case rdsResponse if rdsResponse.directDebitCount == 0 =>
           Redirect(routes.SetupDirectDebitPaymentController.onPageLoad())

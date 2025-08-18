@@ -43,7 +43,6 @@ object NddDetails {
   java.time.Month.values()
 }
 
-
 case class NddResponse(directDebitCount: Int,
                        directDebitList: Seq[NddDetails])
 

@@ -20,7 +20,6 @@ import models.{DirectDebitDetails, NddResponse, NddDetails, UKBankAddress}
 
 import java.time.LocalDateTime
 
-
 trait DirectDebitDetailsData {
 
   val directDebitDetailsData: List[DirectDebitDetails] = List(DirectDebitDetails(

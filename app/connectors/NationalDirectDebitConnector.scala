@@ -62,15 +62,4 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
         case Right(response) => Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
       }
   }
-  /*
-    getEarliestPaymentDate could be simplified to this since we don't handle the errors any differently
-     def getEarliestPaymentDate(workingDaysOffsetRequest: WorkingDaysOffsetRequest)
-                              (implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
-      http
-        .post(url"$nationalDirectDebitBaseUrl/direct-debits/earliest-payment-date")
-        .withBody(Json.toJson(workingDaysOffsetRequest))
-        .execute[EarliestPaymentDate]
-    }
-     */
-
 }
