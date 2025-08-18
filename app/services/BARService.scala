@@ -70,6 +70,7 @@ case class BARService @Inject()(
     val isPersonal = personalOrBusiness.toLowerCase == "personal"
 
     barsConnector.verify(isPersonal, bankDetails).map { response =>
+      println("*********************res*******************"+response)
       if (checkBarsResponseSuccess(response)) {
         Right(response)
       } else {

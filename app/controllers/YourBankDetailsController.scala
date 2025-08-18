@@ -20,12 +20,11 @@ import controllers.actions.*
 import forms.YourBankDetailsFormProvider
 import forms.validation.BarsErrorMapper
 import models.errors.BarsErrors
-import models.errors.BarsErrors.BankAccountUnverified
 import models.requests.DataRequest
-import models.responses.BankAddress
+import models.responses.{BankAddress, LockedAndUnverified, LockedAndVerified, NotLocked}
 import models.{Mode, PersonalOrBusinessAccount, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
+import pages.*
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -141,19 +140,45 @@ class YourBankDetailsController @Inject()(
     }
   }
 
-  private def onFailedVerification(
-                                    credId: String,
-                                    bankDetails: YourBankDetails,
-                                    mode: Mode,
-                                    barsError: BarsErrors
-                                  )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+    private def onFailedVerification(
+                                      credId: String,
+                                      bankDetails: YourBankDetails,
+                                      mode: Mode,
+                                      barsError: BarsErrors
+                                    )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+      // comment will be deleted when end journey  screen ready
+      // Step 1: Determine accountUnverified flag
+      val accountUnverifiedFlag: Boolean = barsError match {
+        case BarsErrors.BankAccountUnverified => true // scenario 1
+        case _ => false // scenarios 2-7
+      }
 
-    lockService.updateLockForUser(credId).map { _ =>
-      val formWithErrors = BarsErrorMapper
-        .toFormError(barsError)      // <- use the actual error now
-        .foldLeft(form.fill(bankDetails))(_ withError _)
-      BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+      // Step 2: Invoke Lock Update Status (I4)
+      lockService.updateLockForUser(credId).flatMap { lockResponse =>
+
+        // Step 3a: Store accountUnverified in session
+        val updatedAnswersTry = request.userAnswers
+          .set(AccountUnverifiedPage, accountUnverifiedFlag)
+
+        val updatedAnswersFut = Future.fromTry(updatedAnswersTry).flatMap(sessionRepository.set)
+
+        updatedAnswersFut.map { _ =>
+          // Step 3b: Process lock response
+          lockResponse.lockStatus match {
+            case NotLocked =>
+              // Remain on current screen T4 and display error(s)
+              val formWithErrors = BarsErrorMapper
+                .toFormError(barsError)
+                .foldLeft(form.fill(bankDetails))(_ withError _)
+
+              BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+
+            case LockedAndVerified | LockedAndUnverified =>
+              // User is locked, invoke Lock End Journey (I5)
+              Redirect("/todo-lock-end-journey") // TODO: replace with actual route
+          }
+        }
+      }
     }
-  }
 
 }
