@@ -18,7 +18,7 @@ package services
 
 import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
-import connectors.BARSConnector
+import connectors.BarsConnector
 import models.YourBankDetails
 import models.errors.BarsErrors
 import models.errors.BarsErrors.*
@@ -29,8 +29,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class BARService @Inject()(
-                                 barsConnector: BARSConnector,
+case class BarsService @Inject()(
+                                 barsConnector: BarsConnector,
                                  config: FrontendAppConfig
                                )(implicit ec: ExecutionContext) {
 
@@ -70,7 +70,6 @@ case class BARService @Inject()(
     val isPersonal = personalOrBusiness.toLowerCase == "personal"
 
     barsConnector.verify(isPersonal, bankDetails).map { response =>
-      println("*********************res*******************"+response)
       if (checkBarsResponseSuccess(response)) {
         Right(response)
       } else {

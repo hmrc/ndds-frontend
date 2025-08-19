@@ -26,7 +26,7 @@ case class BankAddress(
                       )
 
 case class Country(
-                 name: String,
+                 name: String
                )
 
 object Country {
@@ -34,7 +34,7 @@ object Country {
 }
 
 case class Bank(
-                 name: String,
+                 bankName: String,
                  address: BankAddress
                )
 

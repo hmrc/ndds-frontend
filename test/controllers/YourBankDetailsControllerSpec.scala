@@ -18,13 +18,13 @@ package controllers
 
 import base.SpecBase
 import forms.YourBankDetailsFormProvider
-import models.responses.{Bank, BankAddress, BarsResponse, BarsVerificationResponse, Country}
-import models.{DirectDebitSource, NormalMode, PersonalOrBusinessAccount, UserAnswers, YourBankDetails}
+import models.responses.*
+import models.{NormalMode, PersonalOrBusinessAccount, UserAnswers, YourBankDetails}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{DirectDebitSourcePage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
+import pages.{PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.data.Form
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -32,7 +32,7 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
-import services.BARService
+import services.BarsService
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.YourBankDetailsView
 
@@ -149,12 +149,10 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
     "must call BARService and handle response on valid POST submission" in {
 
       val ua = userAnswers
-                .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
 
       val mockSessionRepository = mock[SessionRepository]
-      val mockBarService = mock[BARService]
-
-      implicit val hc: HeaderCarrier = HeaderCarrier()
+      val mockBarService = mock[BarsService]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
       val barResponse = BarsVerificationResponse(
@@ -170,7 +168,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         accountName = Some("John Doe"),
         bank = Some(
           Bank(
-            name = "Test Bank",
+            bankName = "Test Bank",
             address = BankAddress(
               lines = Seq("1 Bank Street"),
               town = "London",
@@ -189,7 +187,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository),
-          bind[BARService].toInstance(mockBarService)
+          bind[BarsService].toInstance(mockBarService)
         )
         .build()
 
@@ -214,9 +212,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
 
       val mockSessionRepository = mock[SessionRepository]
-      val mockBarService = mock[BARService]
-
-      implicit val hc: HeaderCarrier = HeaderCarrier()
+      val mockBarService = mock[BarsService]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
       when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
@@ -226,7 +222,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository),
-          bind[BARService].toInstance(mockBarService)
+          bind[BarsService].toInstance(mockBarService)
         )
         .build()
 
@@ -252,9 +248,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
 
       val mockSessionRepository = mock[SessionRepository]
-      val mockBarService = mock[BARService]
-
-      implicit val hc: HeaderCarrier = HeaderCarrier()
+      val mockBarService = mock[BarsService]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -265,7 +259,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository),
-          bind[BARService].toInstance(mockBarService)
+          bind[BarsService].toInstance(mockBarService)
         )
         .build()
 

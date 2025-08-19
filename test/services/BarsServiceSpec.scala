@@ -17,7 +17,7 @@
 package services
 
 import config.FrontendAppConfig
-import connectors.BARSConnector
+import connectors.BarsConnector
 import models.YourBankDetails
 import models.errors.BarsErrors.*
 import models.responses.BarsResponse.*
@@ -31,14 +31,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class BARServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with ScalaFutures {
+class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with ScalaFutures {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  val mockConnector: BARSConnector = mock[BARSConnector]
+  val mockConnector: BarsConnector = mock[BarsConnector]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
-  val service = BARService(mockConnector, mockConfig)
+  val service = BarsService(mockConnector, mockConfig)
 
   val sampleBankDetails = YourBankDetails(
     accountNumber = "12345678",

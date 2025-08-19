@@ -34,7 +34,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext
 
-class BARSConnectorSpec
+class BarsConnectorSpec
   extends AnyWordSpec
     with Matchers
     with ScalaFutures
@@ -68,7 +68,7 @@ class BARSConnectorSpec
 
   lazy private val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
   lazy private val config: ServicesConfig = app.injector.instanceOf[ServicesConfig]
-  lazy private val connector = BARSConnector(config, httpClient)
+  lazy private val connector = BarsConnector(config, httpClient)
 
   private val bankDetails = YourBankDetails(
     accountHolderName = "Teddy Dickson",
@@ -116,7 +116,7 @@ class BARSConnectorSpec
 
       val result = connector.verify(isPersonal = true, bankDetails).futureValue
       result.accountNumberIsWellFormatted.toString.toLowerCase shouldBe "yes"
-      result.bank.value.name shouldBe "Some Bank"
+      result.bank.value.bankName shouldBe "Some Bank"
       result.bank.value.address.lines shouldEqual Seq("123 Bank Street")
       result.bank.value.address.town shouldBe "London"
       result.bank.value.address.country shouldBe Country("United Kingdom")
@@ -204,7 +204,7 @@ class BARSConnectorSpec
       val result = connector.verify(isPersonal = false, bankDetails).futureValue
 
       result.accountNumberIsWellFormatted.toString.toLowerCase shouldBe "yes"
-      result.bank.value.name shouldBe "Some Business Bank"
+      result.bank.value.bankName shouldBe "Some Business Bank"
       result.bank.value.address.lines shouldEqual Seq("456 Business Road")
       result.bank.value.address.town shouldBe "Manchester"
       result.bank.value.address.country shouldBe Country("United Kingdom")

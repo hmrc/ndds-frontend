@@ -30,7 +30,7 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
-import services.{BARService, LockService}
+import services.{BarsService, LockService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourBankDetailsView
@@ -45,7 +45,7 @@ class YourBankDetailsController @Inject()(
                                            identify: IdentifierAction,
                                            requireData: DataRequiredAction,
                                            getData: DataRetrievalAction,
-                                           barService: BARService,
+                                           barService: BarsService,
                                            lockService: LockService,
                                            formProvider: YourBankDetailsFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
@@ -57,7 +57,7 @@ class YourBankDetailsController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData) { implicit request =>
       val preparedForm = request.userAnswers.get(YourBankDetailsPage) match {
-        case None        => form
+        case None => form
         case Some(value) => form.fill(YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(value))
       }
       Ok(view(preparedForm, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
@@ -66,7 +66,7 @@ class YourBankDetailsController @Inject()(
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
       val personalOrBusinessOpt = request.userAnswers.get(PersonalOrBusinessAccountPage)
-      val credId                = request.userId
+      val credId = request.userId
 
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -98,7 +98,7 @@ class YourBankDetailsController @Inject()(
           userAnswers,
           audisFlag = false,
           bankDetails,
-          bankName = response.bank.map(_.name),
+          bankName = response.bank.map(_.bankName),
           bankAddress = response.bank.map(_.address)
         ).map { updatedAnswers =>
           Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
@@ -140,45 +140,45 @@ class YourBankDetailsController @Inject()(
     }
   }
 
-    private def onFailedVerification(
-                                      credId: String,
-                                      bankDetails: YourBankDetails,
-                                      mode: Mode,
-                                      barsError: BarsErrors
-                                    )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
-      // comment will be deleted when end journey  screen ready
-      // Step 1: Determine accountUnverified flag
-      val accountUnverifiedFlag: Boolean = barsError match {
-        case BarsErrors.BankAccountUnverified => true // scenario 1
-        case _ => false // scenarios 2-7
-      }
+  private def onFailedVerification(
+                                    credId: String,
+                                    bankDetails: YourBankDetails,
+                                    mode: Mode,
+                                    barsError: BarsErrors
+                                  )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+    // comment will be deleted when end journey  screen ready
+    // Step 1: Determine accountUnverified flag
+    val accountUnverifiedFlag: Boolean = barsError match {
+      case BarsErrors.BankAccountUnverified => true // scenario 1
+      case _ => false // scenarios 2-7
+    }
 
-      // Step 2: Invoke Lock Update Status (I4)
-      lockService.updateLockForUser(credId).flatMap { lockResponse =>
+    // Step 2: Invoke Lock Update Status (I4)
+    lockService.updateLockForUser(credId).flatMap { lockResponse =>
 
-        // Step 3a: Store accountUnverified in session
-        val updatedAnswersTry = request.userAnswers
-          .set(AccountUnverifiedPage, accountUnverifiedFlag)
+      // Step 3a: Store accountUnverified in session
+      val updatedAnswersTry = request.userAnswers
+        .set(AccountUnverifiedPage, accountUnverifiedFlag)
 
-        val updatedAnswersFut = Future.fromTry(updatedAnswersTry).flatMap(sessionRepository.set)
+      val updatedAnswersFut = Future.fromTry(updatedAnswersTry).flatMap(sessionRepository.set)
 
-        updatedAnswersFut.map { _ =>
-          // Step 3b: Process lock response
-          lockResponse.lockStatus match {
-            case NotLocked =>
-              // Remain on current screen T4 and display error(s)
-              val formWithErrors = BarsErrorMapper
-                .toFormError(barsError)
-                .foldLeft(form.fill(bankDetails))(_ withError _)
+      updatedAnswersFut.map { _ =>
+        // Step 3b: Process lock response
+        lockResponse.lockStatus match {
+          case NotLocked =>
+            // Remain on current screen T4 and display error(s)
+            val formWithErrors = BarsErrorMapper
+              .toFormError(barsError)
+              .foldLeft(form.fill(bankDetails))(_ withError _)
 
-              BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+            BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
 
-            case LockedAndVerified | LockedAndUnverified =>
-              // User is locked, invoke Lock End Journey (I5)
-              Redirect("/todo-lock-end-journey") // TODO: replace with actual route
-          }
+          case LockedAndVerified | LockedAndUnverified =>
+            // User is locked, invoke Lock End Journey (I5)
+            Redirect("/todo-lock-end-journey") // TODO: replace with actual route
         }
       }
     }
+  }
 
 }
