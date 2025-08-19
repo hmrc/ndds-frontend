@@ -17,14 +17,14 @@
 package controllers
 
 import base.SpecBase
-import models.RDSDatacacheResponse
+import models.NddResponse
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.RDSDatacacheService
+import services.NationalDirectDebitService
 
 import scala.concurrent.Future
 
@@ -32,20 +32,20 @@ class LandingControllerSpec extends SpecBase {
 
   "Landing Controller" - {
 
-    val mockService = mock[RDSDatacacheService]
+    val mockService = mock[NationalDirectDebitService]
 
     "must return REDIRECT and the correct view for a GET with no existing debits" in {
 
       val application = applicationBuilder(userAnswers = None)
         .overrides(
-          bind[RDSDatacacheService].toInstance(mockService)
+          bind[NationalDirectDebitService].toInstance(mockService)
         )
         .build()
 
       running(application) {
 
         when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-          .thenReturn(Future.successful(RDSDatacacheResponse(0, Seq())))
+          .thenReturn(Future.successful(NddResponse(0, Seq())))
 
         val request = FakeRequest(GET, routes.LandingController.onPageLoad().url)
 
@@ -60,14 +60,14 @@ class LandingControllerSpec extends SpecBase {
 
       val application = applicationBuilder(userAnswers = None)
         .overrides(
-          bind[RDSDatacacheService].toInstance(mockService)
+          bind[NationalDirectDebitService].toInstance(mockService)
         )
         .build()
 
       running(application) {
 
         when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-          .thenReturn(Future.successful(RDSDatacacheResponse(2, Seq())))
+          .thenReturn(Future.successful(NddResponse(2, Seq())))
 
         val request = FakeRequest(GET, routes.LandingController.onPageLoad().url)
 
@@ -82,7 +82,7 @@ class LandingControllerSpec extends SpecBase {
 
       val application = applicationBuilder(userAnswers = None)
         .overrides(
-          bind[RDSDatacacheService].toInstance(mockService)
+          bind[NationalDirectDebitService].toInstance(mockService)
         )
         .build()
 

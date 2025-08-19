@@ -16,10 +16,9 @@
 
 package utils
 
-import models.{DirectDebitDetails, RDSDatacacheResponse, RDSDirectDebitDetails, UKBankAddress}
+import models.{DirectDebitDetails, NddResponse, NddDetails, UKBankAddress}
 
 import java.time.LocalDateTime
-
 
 trait DirectDebitDetailsData {
 
@@ -45,10 +44,10 @@ trait DirectDebitDetailsData {
       
     ))
 
-  val rdsResponse: RDSDatacacheResponse = RDSDatacacheResponse(
+  val nddResponse: NddResponse = NddResponse(
     directDebitCount = 3,
     directDebitList = Seq(
-      RDSDirectDebitDetails(
+      NddDetails(
         ddiRefNumber = "122222",
         submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
         bankSortCode = "666666",
@@ -57,7 +56,7 @@ trait DirectDebitDetailsData {
         auDdisFlag = false,
         numberOfPayPlans = 0
       ),
-      RDSDirectDebitDetails(
+      NddDetails(
         ddiRefNumber = "133333",
         submissionDateTime = LocalDateTime.parse("2024-03-02T00:00:00"),
         bankSortCode = "555555",
@@ -66,7 +65,7 @@ trait DirectDebitDetailsData {
         auDdisFlag = false,
         numberOfPayPlans = 0
       ),
-      RDSDirectDebitDetails(
+      NddDetails(
         ddiRefNumber = "144444",
         submissionDateTime = LocalDateTime.parse("2024-03-03T00:00:00"),
         bankSortCode = "333333",

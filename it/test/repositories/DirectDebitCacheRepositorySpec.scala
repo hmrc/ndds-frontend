@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.{RDSDatacacheDAO, RDSDatacacheResponse, RDSDirectDebitDetails}
+import models.{NddDAO, NddResponse, NddDetails}
 import org.mockito.Mockito.when
 import org.mongodb.scala.model.Filters
 import org.scalactic.source.Position
@@ -38,7 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class DirectDebitCacheRepositorySpec
   extends AnyFreeSpec
     with Matchers
-    with DefaultPlayMongoRepositorySupport[RDSDatacacheDAO]
+    with DefaultPlayMongoRepositorySupport[NddDAO]
     with ScalaFutures
     with IntegrationPatience
     with OptionValues
@@ -47,10 +47,10 @@ class DirectDebitCacheRepositorySpec
   private val instant = Instant.now.truncatedTo(ChronoUnit.MILLIS)
   private val stubClock: Clock = Clock.fixed(instant, ZoneId.systemDefault)
 
-  val rdsResponse: RDSDatacacheResponse = RDSDatacacheResponse(
+  val rdsResponse: NddResponse = NddResponse(
     directDebitCount = 3,
     directDebitList = Seq(
-      RDSDirectDebitDetails(
+      NddDetails(
         ddiRefNumber = "122222",
         submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
         bankSortCode = "666666",
@@ -59,7 +59,7 @@ class DirectDebitCacheRepositorySpec
         auDdisFlag = false,
         numberOfPayPlans = 0
       ),
-      RDSDirectDebitDetails(
+      NddDetails(
         ddiRefNumber = "133333",
         submissionDateTime = LocalDateTime.parse("2024-03-02T00:00:00"),
         bankSortCode = "555555",
@@ -68,7 +68,7 @@ class DirectDebitCacheRepositorySpec
         auDdisFlag = false,
         numberOfPayPlans = 0
       ),
-      RDSDirectDebitDetails(
+      NddDetails(
         ddiRefNumber = "144444",
         submissionDateTime = LocalDateTime.parse("2024-03-03T00:00:00"),
         bankSortCode = "333333",
@@ -80,8 +80,8 @@ class DirectDebitCacheRepositorySpec
     )
   )
 
-  def rdsData(debits: Seq[RDSDirectDebitDetails] = Seq()): RDSDatacacheDAO =
-    RDSDatacacheDAO("id", Instant.ofEpochSecond(1), debits)
+  def rdsData(debits: Seq[NddDetails] = Seq()): NddDAO =
+    NddDAO("id", Instant.ofEpochSecond(1), debits)
 
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
@@ -98,7 +98,7 @@ class DirectDebitCacheRepositorySpec
 
       val expectedResult = rdsData() copy (lastUpdated = instant)
 
-      repository.cacheResponse(RDSDatacacheResponse(0, Seq()))("id").futureValue
+      repository.cacheResponse(NddResponse(0, Seq()))("id").futureValue
       val updatedRecord = find(Filters.equal("_id", expectedResult.id)).futureValue.headOption.value
 
       updatedRecord mustEqual expectedResult
@@ -148,9 +148,9 @@ class DirectDebitCacheRepositorySpec
     "when there is a record for this id" - {
 
       "must update its lastUpdated to `now` and return true" in {
-        val data: RDSDatacacheDAO = rdsData()
+        val data: NddDAO = rdsData()
 
-        repository.cacheResponse(RDSDatacacheResponse(0, Seq()))("id").futureValue
+        repository.cacheResponse(NddResponse(0, Seq()))("id").futureValue
         repository.keepAlive(data.id).futureValue
 
         val expected = data copy (lastUpdated = instant)

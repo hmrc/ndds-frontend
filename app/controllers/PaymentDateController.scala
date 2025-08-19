@@ -25,7 +25,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.RDSDatacacheService
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
 import views.html.PaymentDateView
@@ -44,13 +44,13 @@ class PaymentDateController @Inject()(
                                        formProvider: PaymentDateFormProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentDateView,
-                                       rdsDatacacheService: RDSDatacacheService
+                                       nddService: NationalDirectDebitService
                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
-      rdsDatacacheService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
-        val isSinglePlan = rdsDatacacheService.isSinglePaymentPlan(request.userAnswers)
+      nddService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
+        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers)
 
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
@@ -72,13 +72,13 @@ class PaymentDateController @Inject()(
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    rdsDatacacheService.getEarliestPaymentDate(request.userAnswers).flatMap { earliestPaymentDate =>
-      val isSinglePlan = rdsDatacacheService.isSinglePaymentPlan(request.userAnswers)
+    nddService.getEarliestPaymentDate(request.userAnswers).flatMap { earliestPaymentDate =>
+      val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers)
       val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          rdsDatacacheService.getEarliestPaymentDate(request.userAnswers).map { earliestPaymentDate =>
+          nddService.getEarliestPaymentDate(request.userAnswers).map { earliestPaymentDate =>
             BadRequest(view(formWithErrors, mode,
               DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
               DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
@@ -87,7 +87,7 @@ class PaymentDateController @Inject()(
           },
         value =>
           for {
-            earliestPaymentDate <- rdsDatacacheService.getEarliestPaymentDate(request.userAnswers)
+            earliestPaymentDate <- nddService.getEarliestPaymentDate(request.userAnswers)
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
