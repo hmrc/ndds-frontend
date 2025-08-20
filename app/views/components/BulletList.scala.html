@@ -20,11 +20,11 @@
 
 @(
   items: Seq[String],
-  classes: String = "govuk-list govuk-list--bullet govuk-!-padding-bottom-3",
+  classes: String = "govuk-list govuk-list--bullet",
   id: Option[String] = None
 )(implicit messages: Messages)
 
-<ul @{id.fold(emptyString)(id => s"id=$id")} class="@classes">
+<ul @{id.fold(emptyString)(id => id)} class="@classes">
     @for(item <- items) {
         <li>@messages(item)</li>
     }

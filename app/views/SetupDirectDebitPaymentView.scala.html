@@ -16,6 +16,7 @@
 
 @import _root_.models.NormalMode
 @import views.html.components._
+@import views.helpers.DirectDebitCountBackLink
 
 @this(
     header1: Header1,
@@ -30,8 +31,8 @@
 
 @layout(
     pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")),
-    backLink = if(directDebitCount != 0) { Some(call.url) } else { None },
-    showBackLink = if(directDebitCount != 0) { true } else { false }
+    backLink = DirectDebitCountBackLink.link(directDebitCount, call),
+    showBackLink = DirectDebitCountBackLink.show(directDebitCount)
 ) {
 
     @header1("setupDirectDebitPayment.heading")

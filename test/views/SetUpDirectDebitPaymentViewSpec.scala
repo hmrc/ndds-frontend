@@ -21,6 +21,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.should
+import play.api.Application
 import views.html.SetupDirectDebitPaymentView
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Call, Request}
@@ -89,6 +90,7 @@ class SetUpDirectDebitPaymentViewSpec extends SpecBase with Matchers {
   }
 
   trait Setup {
+    val app: Application = applicationBuilder().build()
     implicit val request: Request[AnyContent] = FakeRequest()
     implicit val msgs: Messages = messages(app)
     
