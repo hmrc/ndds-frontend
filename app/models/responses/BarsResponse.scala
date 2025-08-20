@@ -37,12 +37,11 @@ given Format[BarsResponse] with {
         case _ =>  JsError(s"Unknown value: $str")
       }
   
-    case _ => println("failed at unexpected"); JsError("Expected String")
+    case _ => JsError("Expected String")
 
   }
 
   def writes(barsResponse: BarsResponse): JsValue = {
-    println("write failed too");
     JsString(barsResponse.toString.toLowerCase())
   }
 }
