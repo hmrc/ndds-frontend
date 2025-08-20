@@ -34,16 +34,16 @@ class LockConnector @Inject()(config: ServicesConfig,
   private val lockBaseUrl: String = config.baseUrl("lock") + "/locks/bars"
 
   def checkLock(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    buildRequest("/status", credId)
+    buildRequest(s"$lockBaseUrl/status", credId)
 
   def updateLock(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    buildRequest("/update", credId)
+    buildRequest(s"$lockBaseUrl/update", credId)
 
   def markUnverifiable(credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    buildRequest("/markUnverifiable", credId)
+    buildRequest(s"$lockBaseUrl/markUnverifiable", credId)
 
   private def buildRequest[A](uri: String, credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    http.post(url"$lockBaseUrl$uri")(hc)
+    http.post(url"$uri")(hc)
       .withBody(Json.parse(
         s"""
            |{
