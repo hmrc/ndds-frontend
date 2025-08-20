@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.{RDSDatacacheDAO, RDSDatacacheResponse, RDSDirectDebitDetails}
+import models.{NddDAO, NddResponse, NddDetails}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes, ReplaceOptions, Updates}
 import play.api.libs.json.Format
@@ -36,10 +36,10 @@ class DirectDebitCacheRepository @Inject()(mongoComponent: MongoComponent,
                                            appConfig: FrontendAppConfig,
                                            clock: Clock)
                                           (implicit ec: ExecutionContext)
-  extends PlayMongoRepository[RDSDatacacheDAO](
+  extends PlayMongoRepository[NddDAO](
     collectionName = "direct-debit-cache",
     mongoComponent = mongoComponent,
-    domainFormat   = RDSDatacacheDAO.format,
+    domainFormat   = NddDAO.format,
     indexes        = Seq(
       IndexModel(
         Indexes.ascending("lastUpdated"),
@@ -54,7 +54,7 @@ class DirectDebitCacheRepository @Inject()(mongoComponent: MongoComponent,
 
   private def byId(id: String): Bson = Filters.equal("_id", id)
 
-  def retrieveCache(id: String): Future[Seq[RDSDirectDebitDetails]] = Mdc.preservingMdc {
+  def retrieveCache(id: String): Future[Seq[NddDetails]] = Mdc.preservingMdc {
     keepAlive(id).flatMap {
       _ =>
         collection
@@ -68,8 +68,8 @@ class DirectDebitCacheRepository @Inject()(mongoComponent: MongoComponent,
     }
   }
 
-  def cacheResponse(response: RDSDatacacheResponse)(id: String): Future[Boolean] = Mdc.preservingMdc {
-    val document = RDSDatacacheDAO(id, Instant.now(clock), response.directDebitList)
+  def cacheResponse(response: NddResponse)(id: String): Future[Boolean] = Mdc.preservingMdc {
+    val document = NddDAO(id, Instant.now(clock), response.directDebitList)
 
     retrieveCache(id) flatMap {
       case Seq() =>

@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import controllers.actions.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.RDSDatacacheService
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourDirectDebitInstructionsView
 
@@ -34,12 +34,12 @@ class YourDirectDebitInstructionsController @Inject()(
                                                        val controllerComponents: MessagesControllerComponents,
                                                        view: YourDirectDebitInstructionsView,
                                                        appConfig: FrontendAppConfig,
-                                                       rdsDatacacheService: RDSDatacacheService
+                                                       nddService: NationalDirectDebitService
                                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    rdsDatacacheService.retrieveAllDirectDebits(request.userId) map {
+    nddService.retrieveAllDirectDebits(request.userId) map {
       directDebitDetailsData =>
         val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
         Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))

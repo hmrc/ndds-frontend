@@ -17,13 +17,13 @@
 package services
 
 import config.FrontendAppConfig
-import connectors.RDSDatacacheProxyConnector
+import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.WorkingDaysOffsetRequest
 import models.responses.EarliestPaymentDate
-import models.{DirectDebitSource, PaymentPlanType, RDSDatacacheResponse, UserAnswers}
+import models.{DirectDebitSource, PaymentPlanType, NddResponse, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
@@ -34,22 +34,22 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RDSDatacacheService @Inject()(rdsConnector: RDSDatacacheProxyConnector,
-                                    val directDebitCache: DirectDebitCacheRepository,
-                                    config: FrontendAppConfig,
-                                    auditService: AuditService)
-                                   (implicit ec: ExecutionContext) {
+class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConnector,
+                                           val directDebitCache: DirectDebitCacheRepository,
+                                           config: FrontendAppConfig,
+                                           auditService: AuditService)
+                                          (implicit ec: ExecutionContext) {
 
-  def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[RDSDatacacheResponse] = {
+  def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[NddResponse] = {
     directDebitCache.retrieveCache(id) flatMap {
       case Seq() =>
         for {
-          directDebits <- rdsConnector.retrieveDirectDebits()
+          directDebits <- nddConnector.retrieveDirectDebits()
           _ = auditService.sendEvent(GetDDIs())
           _ <- directDebitCache.cacheResponse(directDebits)(id)
         } yield directDebits
       case existingCache =>
-        Future.successful(RDSDatacacheResponse(existingCache.size, existingCache))
+        Future.successful(NddResponse(existingCache.size, existingCache))
     }
   }
 
@@ -59,7 +59,7 @@ class RDSDatacacheService @Inject()(rdsConnector: RDSDatacacheProxyConnector,
     val offsetWorkingDays = calculateOffset(auddisStatus)
     val currentDate = LocalDate.now().toString
 
-    rdsConnector.getEarliestPaymentDate(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
+    nddConnector.getEarliestPaymentDate(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
   }
 
   def getEarliestPlanStartDate(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
@@ -73,7 +73,7 @@ class RDSDatacacheService @Inject()(rdsConnector: RDSDatacacheProxyConnector,
     val offsetWorkingDays = calculateOffset(auddisStatus, paymentPlanType, directDebitSource)
     val currentDate = LocalDate.now().toString
 
-    rdsConnector.getEarliestPaymentDate(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
+    nddConnector.getEarliestPaymentDate(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
   }
 
   private[services] def calculateOffset(auddisStatus: Boolean, paymentPlanType: PaymentPlanType, directDebitSource: DirectDebitSource): Int = {
