@@ -54,9 +54,18 @@
             </div>
 
 
-        @govukButton(
-            ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
-        )
+            @govukCheckboxes(
+                CheckboxesViewModel(
+                    name: "waste",
+                    fieldset: {
+                    legend: {
+                    text: "Which types of waste do you transport?",
+                    isPageHeading: true,
+                    classes: "govuk-fieldset__legend--l"
+                    }
+}
+                )
+            )
 
     }
 }
