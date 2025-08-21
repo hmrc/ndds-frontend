@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import utils.Utils.emptyString
+package views.helpers
 
-@this()
+import play.api.mvc.Call
 
-@(
-  items: Seq[String],
-  classes: String = "govuk-list govuk-list--bullet",
-  id: Option[String] = None
-)(implicit messages: Messages)
-
-<ul @{id.fold(emptyString)(id => id)} class="@classes">
-    @for(item <- items) {
-        <li>@messages(item)</li>
-    }
-</ul>
+object DirectDebitCountBackLink {
+    def link(DirectDebitCount: Int, call: Call): Option[String] =
+      if (DirectDebitCount != 0) Some(call.url) else None
+      
+    def show(DirectDebitCount: Int): Boolean =
+      DirectDebitCount != 0
+}

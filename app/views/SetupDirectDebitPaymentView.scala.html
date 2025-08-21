@@ -16,71 +16,55 @@
 
 @import _root_.models.NormalMode
 @import views.html.components._
+@import views.helpers.DirectDebitCountBackLink
 
 @this(
     header1: Header1,
     paragraph: Paragraph,
     layout: templates.Layout,
     govukButton: GovukButton,
-    bulletList: BulletList
+    bulletList: BulletListLinks,
+    govukDetails: GovukDetails,
 )
 
 @(directDebitCount: Int, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")), backLink = if(directDebitCount != 0) { Some(call.url) } else { None }, showBackLink = if(directDebitCount != 0) { true } else { false }) {
+@layout(
+    pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")),
+    backLink = DirectDebitCountBackLink.link(directDebitCount, call),
+    showBackLink = DirectDebitCountBackLink.show(directDebitCount)
+) {
 
     @header1("setupDirectDebitPayment.heading")
-    @paragraph("setupDirectDebitPayment.p1", true, extraClasses = "text-turquoise")
 
-    @bulletList(
-        items = Seq(
-            "setupDirectDebitPayment.l11",
-            "setupDirectDebitPayment.l12", 
-            "setupDirectDebitPayment.l13",
-            "setupDirectDebitPayment.l14"
+    @paragraph("setUpDirectDebitPayment.p1")
+
+    @paragraph("setUpDirectDebitPayment.p2")
+
+    @paragraph("setUpDirectDebitPayment.p3")
+
+    @defining(HtmlFormat.fill(Seq(
+            paragraph("directDebitMoreInfo.p1"),
+            paragraph("directDebitMoreInfo.p2"),
+            paragraph("directDebitMoreInfo.p3"),
+        bulletList(
+          items = Seq(
+            "directDebitMoreInfo.bullet.l1" -> Some(routes.SetupDirectDebitPaymentController.onPageLoad()),
+            "directDebitMoreInfo.bullet.l2" -> Some(routes.SetupDirectDebitPaymentController.onPageLoad()),
+            "directDebitMoreInfo.bullet.l3" -> Some(routes.SetupDirectDebitPaymentController.onPageLoad()),
+            "directDebitMoreInfo.bullet.l4" -> Some(routes.SetupDirectDebitPaymentController.onPageLoad())
+          )
         )
-    )
+        ))) { ddMoreInfoContent =>
 
-    @paragraph("setupDirectDebitPayment.p2", true, extraClasses = "text-turquoise")
-    @bulletList(
-        items = Seq(
-            "setupDirectDebitPayment.l21",
-            "setupDirectDebitPayment.l22"
+        @govukDetails(
+            Details(
+                id = Some("dd-more-info"),
+                summary = messages("directDebitMoreInfo.collapsable"),
+                content = HtmlContent(ddMoreInfoContent)
+            )
         )
-    )
-
-    @paragraph("setupDirectDebitPayment.p3", true, extraClasses = "text-turquoise")
-    @bulletList(
-        items = Seq(
-            "setupDirectDebitPayment.l31",
-            "setupDirectDebitPayment.l32",
-            "setupDirectDebitPayment.l33"
-        )
-    )
-
-    @paragraph("setupDirectDebitPayment.p4")
-    
-    @paragraph("setupDirectDebitPayment.p5", true, extraClasses = "text-turquoise")
-
-    @bulletList(
-        items = Seq("setupDirectDebitPayment.l51")
-    )
-
-    @paragraph("setupDirectDebitPayment.p6")
-    
-    <p class="govuk-body">@messages("setupDirectDebitPayment.p7")
-        <a class="govuk-link govuk-link--no-visited-state" href="http://www.hmrc.gov.uk/payinghmrc/">@messages("setupDirectDebitPayment.link1")</a>
-    </p>
-
-    @paragraph("setupDirectDebitPayment.p8")
-
-    <p class="govuk-body">
-        <strong>@messages("setupDirectDebitPayment.p9")</strong> 
-        @messages("setupDirectDebitPayment.p91")
-    </p>
-    
-     @paragraph("setupDirectDebitPayment.p10")
-     @paragraph("setupDirectDebitPayment.p11")
+    }
 
     @govukButton(Button(
         href = Some(routes.PersonalOrBusinessAccountController.onPageLoad(NormalMode).url),
