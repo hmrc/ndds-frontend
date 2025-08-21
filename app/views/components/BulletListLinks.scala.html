@@ -15,17 +15,23 @@
  *@
 
 @import utils.Utils.emptyString
+@import play.api.mvc.Call
 
 @this()
 
 @(
-  items: Seq[String],
-  classes: String = "govuk-list govuk-list--bullet",
-  id: Option[String] = None
+        items: Seq[(String, Option[Call])],
+        classes: String = "govuk-list govuk-list--bullet",
+        id: Option[String] = None
 )(implicit messages: Messages)
 
 <ul @{id.fold(emptyString)(id => id)} class="@classes">
-    @for(item <- items) {
-        <li>@messages(item)</li>
+@for((item, callOpt) <- items) {
+    <li>
+    @callOpt.map { call =>
+        <a class="govuk-link" href="@call.url">@messages(item)</a>
+    }.getOrElse {
+        @messages(item)</li>
     }
+}
 </ul>

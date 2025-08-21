@@ -17,27 +17,49 @@
 package controllers
 
 import base.SpecBase
+import models.responses.LockResponse
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import services.LockService
+import uk.gov.hmrc.http.HeaderCarrier
 import views.html.AccountDetailsNotVerifiedView
 
-class AccountDetailsNotVerifiedControllerSpec extends SpecBase {
+import java.time.Instant
+import scala.concurrent.Future
+
+class AccountDetailsNotVerifiedControllerSpec extends SpecBase with MockitoSugar {
 
   "AccountDetailsNotVerified Controller" - {
 
-
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val mockLockService = mock[LockService]
+      val testInstant = Instant.parse("2025-06-28T15:30:00Z")
+
+      when(mockLockService.isUserLocked(any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(LockResponse(
+          _id = "",
+          verifyCalls = 0,
+          isLocked = true,
+          unverifiable = None,
+          createdAt = None,
+          lastUpdated = None,
+          lockoutExpiryDateTime = Some(testInstant)
+        )))
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(inject.bind[LockService].toInstance(mockLockService))
+        .build()
 
       running(application) {
-
         val request = FakeRequest(GET, routes.AccountDetailsNotVerifiedController.onPageLoad().url)
-
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[AccountDetailsNotVerifiedView]
-
         val expectedDate = "28 June 2025, 15:30pm"
 
         status(result) mustEqual OK
