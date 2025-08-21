@@ -307,7 +307,7 @@ checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Your direct debit payment was successful
 directDebitConfirmation.heading = Your direct debit payment was successful
-directDebitConfirmation.panel.title = Direct Debit set up1
+directDebitConfirmation.panel.title = Direct Debit set up
 directDebitConfirmation.successMessage = Your direct debit payment was successful
 directDebitConfirmation.panel.body = <strong>{0}</strong>
 directDebitConfirmation.p1 = Make a note of your direct debit reference <strong>{0}</strong> and service user number <strong>{1}</strong>.
