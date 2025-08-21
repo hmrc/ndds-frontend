@@ -16,12 +16,10 @@
 
 package connectors
 
-import models.YourBankDetails
-import models.requests.*
 import models.responses.{Bank, BarsVerificationResponse}
 import play.api.Logging
 import play.api.http.Status.NOT_FOUND
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, StringContextOps, UpstreamErrorResponse}
@@ -42,14 +40,15 @@ case class BarsConnector @Inject()(
     http
       .get(url"$barsBaseUrl/metadata/$sortCode")
       .execute[Either[UpstreamErrorResponse, Bank]]
-      .map {
-        case Right(bank) => Some(bank)
+      .flatMap {
+        case Right(bank) => Future.successful(Some(bank))
         case Left(err) if err.statusCode == NOT_FOUND =>
-          None // gracefully handle unknown sort codes
+          Future.successful(None) // gracefully handle unknown sort codes
         case Left(err) =>
-          throw new Exception(s"Unexpected error from metadata: ${err.statusCode} - ${err.message}")
+          Future.failed(new Exception(s"Unexpected error from metadata: ${err.statusCode} - ${err.message}"))
       }
   }
+
 
   def verify(verifyUrl: String, requestJson: JsValue)
             (implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
