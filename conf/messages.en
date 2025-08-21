@@ -291,6 +291,8 @@ checkYourAnswers.p6 = You can cancel a Direct Debit at any time by simply contac
 checkYourAnswers.p7 = By accepting, I understand that this instruction may remain with HMRC and, if so, details will be passed electronically to my Bank/Building Society from <strong>Date of Issue {0}</strong>.
 checkYourAnswers.p8 = <strong>Instruction to your Bank or Building Society to pay by Direct Debit </strong>
 checkYourAnswers.p9 = HM Revenue & Customs (HMRC)<br/> HMRC Accounts Office <br/> Direct Debit Section <br/> Cumbernauld <br/> Glasgow G67 1YZ
+checkYourAnswers.confirmHeading = Confirm your authority
+checkYourAnswers.p10 = I confirm that I am the account holder or an authorised signatory, and I am able to authorise Direct Debit payments from this account
 checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Your direct debit payment was successful
