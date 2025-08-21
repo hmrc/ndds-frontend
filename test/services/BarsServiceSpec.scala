@@ -16,127 +16,208 @@
 
 package services
 
-import config.FrontendAppConfig
-import connectors.BarsConnector
 import models.YourBankDetails
 import models.errors.BarsErrors.*
-import models.responses.BarsResponse.*
-import models.responses.{BarsResponse, BarsVerificationResponse}
-import org.mockito.Mockito.*
+import models.responses.{Bank, BankAddress, BarsResponse, BarsVerificationResponse, Country}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
-import org.scalatestplus.mockito.MockitoSugar
+import connectors.BarsConnector
+import config.FrontendAppConfig
 import uk.gov.hmrc.http.HeaderCarrier
+import play.api.libs.json.Json
 
 import scala.concurrent.Future
 
 class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with ScalaFutures {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   val mockConnector: BarsConnector = mock[BarsConnector]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
-  val service = BarsService(mockConnector, mockConfig)
 
-  val sampleBankDetails = YourBankDetails(
-    accountNumber = "12345678",
+  val service = new BarsService(mockConnector, mockConfig)
+
+  val bank = Bank(
+    bankName = "Test Bank",
+    address = BankAddress(
+      lines = Seq("123 Bank Street", "Suite 100"),
+      town = "London",
+      country = Country("United Kingdom"),
+      postCode = "AB12 3CD"
+    )
+  )
+
+  val validBankDetails = YourBankDetails(
     sortCode = "123456",
+    accountNumber = "12345678",
     accountHolderName = "John Doe"
   )
 
-  def createResponse(
-                      accountNumberIsWellFormatted: BarsResponse,
-                      sortCodeIsPresentOnEISCD: BarsResponse,
-                      accountExists: BarsResponse,
-                      nameMatches: BarsResponse,
-                      sortCodeSupportsDirectDebit: BarsResponse
-                    ): BarsVerificationResponse = BarsVerificationResponse(
-    accountNumberIsWellFormatted = accountNumberIsWellFormatted,
-    sortCodeIsPresentOnEISCD = sortCodeIsPresentOnEISCD,
-    sortCodeBankName = None,
-    accountExists = accountExists,
-    nameMatches = nameMatches,
-    sortCodeSupportsDirectDebit = sortCodeSupportsDirectDebit,
-    sortCodeSupportsDirectCredit = Yes,
-    nonStandardAccountDetailsRequiredForBacs = None,
-    iban = None,
-    accountName = None,
-    bank = None
-  )
+  "BarsService#barsVerification" should {
 
-  "BARService#barsVerification" should {
+    "return Right(BarsVerificationResponse) when all checks pass for personal account" in {
+      val response = BarsVerificationResponse(
+        accountNumberIsWellFormatted = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
+        sortCodeBankName = Some(bank.bankName),
+        accountExists = BarsResponse.Yes,
+        nameMatches = BarsResponse.Yes,
+        sortCodeSupportsDirectDebit = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        nonStandardAccountDetailsRequiredForBacs = None,
+        iban = Some("GB33BUKB20201555555555"),
+        accountName = Some("John Doe"),
+        bank = Some(bank)
+      )
 
-    "return Right(response) when all BARS checks pass" in {
-      val response = createResponse(Yes, Yes, Yes, Yes, Yes)
+      when(mockConnector.verify(any(), any())(any()))
+        .thenReturn(Future.successful(response))
 
-      when(mockConnector.verify(true, sampleBankDetails)).thenReturn(Future.successful(response))
-
-      service.barsVerification("personal", sampleBankDetails).map { result =>
+      service.barsVerification("personal", validBankDetails).map { result =>
         result shouldBe Right(response)
       }
     }
 
-    "return Left(AccountDetailInvalidFormat) if account number is badly formatted" in {
-      val response = createResponse(No, Yes, Yes, Yes, Yes)
+    "return Left(BankAccountUnverified) when account or name is indeterminate" in {
+      val response = BarsVerificationResponse(
+        accountNumberIsWellFormatted = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
+        sortCodeBankName = Some(bank.bankName),
+        accountExists = BarsResponse.Indeterminate,
+        nameMatches = BarsResponse.Indeterminate,
+        sortCodeSupportsDirectDebit = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        nonStandardAccountDetailsRequiredForBacs = None,
+        iban = Some("GB33BUKB20201555555555"),
+        accountName = Some("John Doe"),
+        bank = Some(bank)
+      )
 
-      when(mockConnector.verify(true, sampleBankDetails)).thenReturn(Future.successful(response))
+      when(mockConnector.verify(any(), any())(any()))
+        .thenReturn(Future.successful(response))
 
-      service.barsVerification("personal", sampleBankDetails).map { result =>
-        result shouldBe Left(AccountDetailInvalidFormat)
-      }
-    }
-
-    "return Left(SortCodeNotFound) if sort code does not exist on EISCD" in {
-      val response = createResponse(Yes, No, Yes, Yes, Yes)
-
-      when(mockConnector.verify(true, sampleBankDetails)).thenReturn(Future.successful(response))
-
-      service.barsVerification("personal", sampleBankDetails).map { result =>
-        result shouldBe Left(SortCodeNotFound)
-      }
-    }
-
-    "return Left(NameMismatch) if name does not match" in {
-      val response = createResponse(Yes, Yes, Yes, No, Yes)
-
-      when(mockConnector.verify(true, sampleBankDetails)).thenReturn(Future.successful(response))
-
-      service.barsVerification("personal", sampleBankDetails).map { result =>
-        result shouldBe Left(NameMismatch)
-      }
-    }
-
-    "return Left(BankAccountUnverified) if accountExists or nameMatches are Indeterminate" in {
-      val response = createResponse(Yes, Yes, Indeterminate, Yes, Yes)
-
-      when(mockConnector.verify(true, sampleBankDetails)).thenReturn(Future.successful(response))
-
-      service.barsVerification("personal", sampleBankDetails).map { result =>
+      service.barsVerification("personal", validBankDetails).map { result =>
         result shouldBe Left(BankAccountUnverified)
       }
     }
 
-    "return Left(SortCodeNotSupported) if sort code does not support direct debit" in {
-      val response = createResponse(Yes, Yes, Yes, Yes, No)
+    "return Left(AccountDetailInvalidFormat) when account number is badly formatted" in {
+      val response = BarsVerificationResponse(
+        accountNumberIsWellFormatted = BarsResponse.No,
+        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
+        sortCodeBankName = Some(bank.bankName),
+        accountExists = BarsResponse.Yes,
+        nameMatches = BarsResponse.Yes,
+        sortCodeSupportsDirectDebit = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        nonStandardAccountDetailsRequiredForBacs = None,
+        iban = Some("GB33BUKB20201555555555"),
+        accountName = Some("John Doe"),
+        bank = Some(bank)
+      )
 
-      when(mockConnector.verify(true, sampleBankDetails)).thenReturn(Future.successful(response))
+      when(mockConnector.verify(any(), any())(any()))
+        .thenReturn(Future.successful(response))
 
-      service.barsVerification("personal", sampleBankDetails).map { result =>
+      service.barsVerification("personal", validBankDetails).map { result =>
+        result shouldBe Left(AccountDetailInvalidFormat)
+      }
+    }
+
+    "return Left(SortCodeNotFound) when sort code not present on EISCD" in {
+      val response = BarsVerificationResponse(
+        accountNumberIsWellFormatted = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD = BarsResponse.No,
+        sortCodeBankName = Some(bank.bankName),
+        accountExists = BarsResponse.Yes,
+        nameMatches = BarsResponse.Yes,
+        sortCodeSupportsDirectDebit = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        nonStandardAccountDetailsRequiredForBacs = None,
+        iban = Some("GB33BUKB20201555555555"),
+        accountName = Some("John Doe"),
+        bank = Some(bank)
+      )
+
+      when(mockConnector.verify(any(), any())(any()))
+        .thenReturn(Future.successful(response))
+
+      service.barsVerification("personal", validBankDetails).map { result =>
+        result shouldBe Left(SortCodeNotFound)
+      }
+    }
+
+    "return Left(SortCodeNotSupported) when sort code does not support direct debit" in {
+      val response = BarsVerificationResponse(
+        accountNumberIsWellFormatted = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
+        sortCodeBankName = Some(bank.bankName),
+        accountExists = BarsResponse.Yes,
+        nameMatches = BarsResponse.Yes,
+        sortCodeSupportsDirectDebit = BarsResponse.No,
+        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        nonStandardAccountDetailsRequiredForBacs = None,
+        iban = Some("GB33BUKB20201555555555"),
+        accountName = Some("John Doe"),
+        bank = Some(bank)
+      )
+
+      when(mockConnector.verify(any(), any())(any()))
+        .thenReturn(Future.successful(response))
+
+      service.barsVerification("personal", validBankDetails).map { result =>
         result shouldBe Left(SortCodeNotSupported)
       }
     }
 
-    "return Left(AccountNotFound) if account does not exist" in {
-      val response = createResponse(Yes, Yes, No, Yes, Yes)
+    "return Left(AccountNotFound) when account does not exist" in {
+      val response = BarsVerificationResponse(
+        accountNumberIsWellFormatted = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
+        sortCodeBankName = Some(bank.bankName),
+        accountExists = BarsResponse.No,
+        nameMatches = BarsResponse.Yes,
+        sortCodeSupportsDirectDebit = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        nonStandardAccountDetailsRequiredForBacs = None,
+        iban = Some("GB33BUKB20201555555555"),
+        accountName = Some("John Doe"),
+        bank = Some(bank)
+      )
 
-      when(mockConnector.verify(true, sampleBankDetails)).thenReturn(Future.successful(response))
+      when(mockConnector.verify(any(), any())(any()))
+        .thenReturn(Future.successful(response))
 
-      service.barsVerification("personal", sampleBankDetails).map { result =>
+      service.barsVerification("personal", validBankDetails).map { result =>
         result shouldBe Left(AccountNotFound)
       }
     }
 
+    "return Left(NameMismatch) when name does not match" in {
+      val response = BarsVerificationResponse(
+        accountNumberIsWellFormatted = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
+        sortCodeBankName = Some(bank.bankName),
+        accountExists = BarsResponse.Yes,
+        nameMatches = BarsResponse.No,
+        sortCodeSupportsDirectDebit = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        nonStandardAccountDetailsRequiredForBacs = None,
+        iban = Some("GB33BUKB20201555555555"),
+        accountName = Some("John Doe"),
+        bank = Some(bank)
+      )
+
+      when(mockConnector.verify(any(), any())(any()))
+        .thenReturn(Future.successful(response))
+
+      service.barsVerification("personal", validBankDetails).map { result =>
+        result shouldBe Left(NameMismatch)
+      }
+    }
   }
 }

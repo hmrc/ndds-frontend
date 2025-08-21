@@ -22,9 +22,11 @@ import connectors.BarsConnector
 import models.YourBankDetails
 import models.errors.BarsErrors
 import models.errors.BarsErrors.*
+import models.requests.{BarsAccount, BarsBusiness, BarsBusinessRequest, BarsPersonalRequest, BarsSubject}
 import models.responses.BarsResponse.*
 import models.responses.{BarsResponse, BarsVerificationResponse}
 import uk.gov.hmrc.http.HeaderCarrier
+import play.api.libs.json.Json
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -67,9 +69,23 @@ case class BarsService @Inject()(
 
   def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)
                       (implicit hc: HeaderCarrier): Future[Either[BarsErrors, BarsVerificationResponse]] = {
-    val isPersonal = personalOrBusiness.toLowerCase == "personal"
+    val (verifyUrl, requestJson) = if (personalOrBusiness.toLowerCase == "personal") {
+      ("personal", Json.toJson(
+        BarsPersonalRequest(
+          BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
+          BarsSubject(bankDetails.accountHolderName)
+        )
+      ))
+    } else {
+      ("business", Json.toJson(
+        BarsBusinessRequest(
+          BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
+          BarsBusiness(bankDetails.accountHolderName)
+        )
+      ))
+    }
 
-    barsConnector.verify(isPersonal, bankDetails).map { response =>
+    barsConnector.verify(verifyUrl, requestJson).map { response =>
       if (checkBarsResponseSuccess(response)) {
         Right(response)
       } else {
@@ -86,4 +102,5 @@ case class BarsService @Inject()(
       }
     }
   }
+
 }

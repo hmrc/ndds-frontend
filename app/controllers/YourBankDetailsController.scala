@@ -45,7 +45,7 @@ class YourBankDetailsController @Inject()(
                                            identify: IdentifierAction,
                                            requireData: DataRequiredAction,
                                            getData: DataRetrievalAction,
-                                           barService: BarsService,
+                                           barsService: BarsService,
                                            lockService: LockService,
                                            formProvider: YourBankDetailsFormProvider,
                                            val controllerComponents: MessagesControllerComponents,
@@ -57,7 +57,7 @@ class YourBankDetailsController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData) { implicit request =>
       val preparedForm = request.userAnswers.get(YourBankDetailsPage) match {
-        case None => form
+        case None        => form
         case Some(value) => form.fill(YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(value))
       }
       Ok(view(preparedForm, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
@@ -65,23 +65,25 @@ class YourBankDetailsController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      val personalOrBusinessOpt = request.userAnswers.get(PersonalOrBusinessAccountPage)
+
       val credId = request.userId
+      val personalOrBusinessOpt = request.userAnswers.get(PersonalOrBusinessAccountPage)
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(
-            BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
-          ),
-        bankDetails =>
-          personalOrBusinessOpt match {
-            case None =>
-              Future.successful(Redirect(navigator.nextPage(YourBankDetailsPage, mode, request.userAnswers)))
+      personalOrBusinessOpt match {
+        case None =>
+          logger.warn(s"[YourBankDetailsController][onSubmit] Missing PersonalOrBusinessAccountPage for user $credId")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
 
-            case Some(accountType) =>
+        case Some(accountType) =>
+          form.bindFromRequest().fold(
+            formWithErrors =>
+              Future.successful(
+                BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+              ),
+            bankDetails =>
               startVerification(accountType, bankDetails, request.userAnswers, credId, mode)
-          }
-      )
+          )
+      }
     }
 
   private def startVerification(
@@ -92,19 +94,21 @@ class YourBankDetailsController @Inject()(
                                  mode: Mode
                                )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
 
-    barService.barsVerification(accountType.toString, bankDetails).flatMap {
+    barsService.barsVerification(accountType.toString, bankDetails).flatMap {
       case Right(response) =>
+        // Step 1: BARS verification succeeded -> update answers with verified data
         onSuccessfulVerification(
           userAnswers,
-          audisFlag = false,
-          bankDetails,
-          bankName = response.bank.map(_.bankName),
+          audisFlag   = false,
+          bankDetails = bankDetails,
+          bankName    = response.bank.map(_.bankName),
           bankAddress = response.bank.map(_.address)
         ).map { updatedAnswers =>
           Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
         }
 
       case Left(barsError) =>
+        // Step 1: BARS verification failed -> handle error response
         logger.warn(
           s"[YourBankDetailsController][startVerification] " +
             s"BARS verification failed for userId=$credId, accountType=$accountType. " +
@@ -114,7 +118,6 @@ class YourBankDetailsController @Inject()(
     }
   }
 
-
   private def onSuccessfulVerification(
                                         userAnswers: UserAnswers,
                                         audisFlag: Boolean,
@@ -122,7 +125,7 @@ class YourBankDetailsController @Inject()(
                                         bankName: Option[String],
                                         bankAddress: Option[BankAddress]
                                       ): Future[UserAnswers] = {
-
+    // Step 1: Update UserAnswers with bank details + optional bank name/address
     val updatedAnswersTry = for {
       ua1 <- userAnswers.set(
         YourBankDetailsPage,
@@ -132,11 +135,13 @@ class YourBankDetailsController @Inject()(
       ua3 <- bankAddress.map(addr => ua2.set(BankDetailsAddressPage, addr)).getOrElse(scala.util.Success(ua2))
     } yield ua3
 
-    Future.fromTry(updatedAnswersTry).flatMap { ua =>
-      sessionRepository.set(ua).map { _ =>
-        logger.info(s"[YourBankDetailsController][onSuccessfulVerification] Session repository updated successfully")
-        ua
-      }
+    // Step 2: Persist in session repo
+    for {
+      updatedAnswers <- Future.fromTry(updatedAnswersTry)
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield {
+      logger.info(s"[YourBankDetailsController][onSuccessfulVerification] Session repository updated successfully")
+      updatedAnswers
     }
   }
 
@@ -146,39 +151,33 @@ class YourBankDetailsController @Inject()(
                                     mode: Mode,
                                     barsError: BarsErrors
                                   )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
-    // comment will be deleted when end journey  screen ready
-    // Step 1: Determine accountUnverified flag
+
+    // Step 1: Work out if this is an "unverified account" case
     val accountUnverifiedFlag: Boolean = barsError match {
-      case BarsErrors.BankAccountUnverified => true // scenario 1
-      case _ => false // scenarios 2-7
+      case BarsErrors.BankAccountUnverified => true
+      case _                                => false
     }
 
     // Step 2: Invoke Lock Update Status (I4)
-    lockService.updateLockForUser(credId).flatMap { lockResponse =>
+    for {
+      lockResponse   <- lockService.updateLockForUser(credId)
 
       // Step 3a: Store accountUnverified in session
-      val updatedAnswersTry = request.userAnswers
-        .set(AccountUnverifiedPage, accountUnverifiedFlag)
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(AccountUnverifiedPage, accountUnverifiedFlag))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield {
+      // Step 3b: Either show errors on the form or redirect to lock end-journey
+      lockResponse.lockStatus match {
+        case NotLocked =>
+          val formWithErrors = BarsErrorMapper
+            .toFormError(barsError)
+            .foldLeft(form.fill(bankDetails))(_ withError _)
 
-      val updatedAnswersFut = Future.fromTry(updatedAnswersTry).flatMap(sessionRepository.set)
+          BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
 
-      updatedAnswersFut.map { _ =>
-        // Step 3b: Process lock response
-        lockResponse.lockStatus match {
-          case NotLocked =>
-            // Remain on current screen T4 and display error(s)
-            val formWithErrors = BarsErrorMapper
-              .toFormError(barsError)
-              .foldLeft(form.fill(bankDetails))(_ withError _)
-
-            BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
-
-          case LockedAndVerified | LockedAndUnverified =>
-            // User is locked, invoke Lock End Journey (I5)
-            Redirect("/todo-lock-end-journey") // TODO: replace with actual route
-        }
+        case LockedAndVerified | LockedAndUnverified =>
+          Redirect("/todo-lock-end-journey") // TODO: replace with actual lock end-journey route
       }
     }
   }
-
 }

@@ -21,10 +21,10 @@ import models.requests.*
 import models.responses.{Bank, BarsVerificationResponse}
 import play.api.Logging
 import play.api.http.Status.NOT_FOUND
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, UpstreamErrorResponse, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
@@ -36,22 +36,7 @@ case class BarsConnector @Inject()(
                                     http: HttpClientV2
                                   )(implicit ec: ExecutionContext)
   extends HttpReadsInstances with Logging {
-
   private val barsBaseUrl: String = config.baseUrl("bars")
-  private val personalUrl = "personal"
-  private val businessUrl = "business"
-
-  private val requestBodyPersonal = (bankDetails: YourBankDetails) =>
-    BarsPersonalRequest(
-      BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
-      BarsSubject(bankDetails.accountHolderName)
-    )
-
-  private val requestBodyBusiness = (bankDetails: YourBankDetails) =>
-    BarsBusinessRequest(
-      BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
-      BarsBusiness(bankDetails.accountHolderName)
-    )
 
   private def getMetadata(sortCode: String)(implicit hc: HeaderCarrier): Future[Option[Bank]] = {
     http
@@ -66,26 +51,16 @@ case class BarsConnector @Inject()(
       }
   }
 
-  def verify(isPersonal: Boolean, bankDetails: YourBankDetails)
+  def verify(verifyUrl: String, requestJson: JsValue)
             (implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
-
-    val verifyUrl = if (isPersonal) personalUrl else businessUrl
-    val requestJson = if (isPersonal) {
-      Json.toJson(requestBodyPersonal(bankDetails))
-    } else {
-      Json.toJson(requestBodyBusiness(bankDetails))
-    }
-
     logger.info(s"Account validation called with $verifyUrl")
-
     http
       .post(url"$barsBaseUrl/verify/$verifyUrl")
       .withBody(requestJson)
       .execute[Either[UpstreamErrorResponse, BarsVerificationResponse]]
       .flatMap {
         case Right(verificationData) =>
-          // fetch optional bank metadata and merge
-          getMetadata(bankDetails.sortCode).map { bank =>
+          getMetadata((requestJson \ "account" \ "sortCode").as[String]).map { bank =>
             verificationData.copy(bank = bank)
           }
 
@@ -95,4 +70,5 @@ case class BarsConnector @Inject()(
           ))
       }
   }
+
 }
