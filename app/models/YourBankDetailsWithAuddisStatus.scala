@@ -32,7 +32,7 @@ object YourBankDetailsWithAuddisStatus {
   def toModelWithAuddisStatus(yourBankDetails: YourBankDetails, auddisStatus: Boolean): YourBankDetailsWithAuddisStatus = {
     YourBankDetailsWithAuddisStatus(
       accountHolderName = yourBankDetails.accountHolderName,
-      sortCode = yourBankDetails.sortCode,
+      sortCode = yourBankDetails.sortCode.replaceAll("\\s",("")),
       accountNumber = yourBankDetails.accountNumber,
       auddisStatus = auddisStatus
     )
@@ -41,7 +41,7 @@ object YourBankDetailsWithAuddisStatus {
   def toModelWithoutAuddisStatus(yourBankDetailsWithoutAuddisStatus: YourBankDetailsWithAuddisStatus): YourBankDetails = {
     YourBankDetails(
       accountHolderName = yourBankDetailsWithoutAuddisStatus.accountHolderName,
-      sortCode = yourBankDetailsWithoutAuddisStatus.sortCode,
+      sortCode = yourBankDetailsWithoutAuddisStatus.sortCode.replaceAll("\\s",("")),
       accountNumber = yourBankDetailsWithoutAuddisStatus.accountNumber
     )
   }
