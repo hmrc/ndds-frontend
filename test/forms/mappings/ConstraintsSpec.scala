@@ -124,6 +124,29 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     }
   }
 
+  "maxLengthWithSpaces" - {
+
+    "must return Valid for a string shorter than the allowed length" in {
+      val result = maxLengthWithSpaces(10, "error.length")(" a" * 9)
+      result mustEqual Valid
+    }
+
+    "must return Valid for an empty string" in {
+      val result = maxLengthWithSpaces(10, "error.length")("")
+      result mustEqual Valid
+    }
+
+    "must return Valid for a string equal to the allowed length" in {
+      val result = maxLengthWithSpaces(10, "error.length")(" a " * 10)
+      result mustEqual Valid
+    }
+
+    "must return Invalid for a string longer than the allowed length" in {
+      val result = maxLengthWithSpaces(10, "error.length")("a " * 11)
+      result mustEqual Invalid("error.length", 10)
+    }
+  }
+
   "maxDate" - {
 
     "must return Valid for a date before or equal to the maximum" in {
@@ -245,7 +268,20 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
       "12a34" mustNot fullyMatch regex NumericRegex
       "abc" mustNot fullyMatch regex NumericRegex
       "12 34" mustNot fullyMatch regex NumericRegex
+      "£$%^" mustNot fullyMatch regex NumericRegex
       "" mustNot fullyMatch regex NumericRegex
+    }
+  }
+
+  "NumericRegexWithSpaces" - {
+    "must match numeric strings with spaces" in {
+      "123456" must fullyMatch regex NumericRegexWithSpaces
+      "12 34 56" must fullyMatch regex NumericRegexWithSpaces
+      "000" must fullyMatch regex NumericRegexWithSpaces
+      "12a34" mustNot fullyMatch regex NumericRegexWithSpaces
+      "abc" mustNot fullyMatch regex NumericRegexWithSpaces
+      "£$%^" mustNot fullyMatch regex NumericRegexWithSpaces
+      "" mustNot fullyMatch regex NumericRegexWithSpaces
     }
   }
 }
