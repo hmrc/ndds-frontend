@@ -67,7 +67,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
     FakeRequest(GET, routes.LandingController.onPageLoad().url)
 
   val testBankDetailsAuddisTrue: YourBankDetailsWithAuddisStatus =
-    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName, sortCode = testSortCode, accountNumber = testAccountNumber, auddisStatus = true)
+    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName, sortCode = testSortCode, accountNumber = testAccountNumber, auddisStatus = true, false)
 
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD

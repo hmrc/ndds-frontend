@@ -49,7 +49,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must return OK and the correct view for a GET" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
         .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
@@ -80,7 +80,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
         .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
@@ -117,7 +117,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true, false))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -145,7 +145,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true, false))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 

@@ -126,7 +126,7 @@ class YourBankDetailsController @Inject()(
     val updatedAnswersTry = for {
       ua1 <- userAnswers.set(
         YourBankDetailsPage,
-        YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, audisFlag, Some(false))
+        YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, audisFlag, false)
       )
       ua2 <- bankName.map(name => ua1.set(BankDetailsBankNamePage, name)).getOrElse(scala.util.Success(ua1))
       ua3 <- bankAddress.map(addr => ua2.set(BankDetailsAddressPage, addr)).getOrElse(scala.util.Success(ua2))

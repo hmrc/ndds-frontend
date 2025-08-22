@@ -67,7 +67,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   val expectedUserAnswers: UserAnswers = UserAnswers(userAnswersId)
     .set(DirectDebitSourcePage, testDirectDebitSource).success.value
     .set(PaymentPlanTypePage, testPaymentPlanType).success.value
-    .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true)).success.value
+    .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true, false)).success.value
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, planStartDateRoute)

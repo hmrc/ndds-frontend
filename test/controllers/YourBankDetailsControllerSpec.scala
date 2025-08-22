@@ -55,7 +55,8 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         "accountHolderName" -> "value 1",
         "sortCode" -> "123212",
         "accountNumber" -> "34211234",
-        "auddisStatus" -> true
+        "auddisStatus" -> true,
+        "accountVerified" -> false
       )
     )
   )
