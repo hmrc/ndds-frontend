@@ -60,6 +60,8 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
     )
   )
 
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+
   "YourBankDetails Controller" - {
 
     "must return OK and the correct view for a GET" in {
@@ -121,7 +123,6 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -163,6 +164,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       val mockBarService = mock[BarsService]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
       val barResponse = BarsVerificationResponse(
         accountNumberIsWellFormatted = BarsResponse.Yes,
         sortCodeIsPresentOnEISCD = BarsResponse.Yes,
@@ -173,23 +175,21 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         sortCodeSupportsDirectCredit = BarsResponse.Yes,
         nonStandardAccountDetailsRequiredForBacs = Some(BarsResponse.No),
         iban = Some("GB29NWBK60161331926819"),
-        accountName = Some("John Doe"),
-        bank = Some(
-          Bank(
-            bankName = "Test Bank",
-            address = BankAddress(
-              lines = Seq("1 Bank Street"),
-              town = "London",
-              country = Country("UK"),
-              postCode = "EC1A 1AA"
-            )
-          )
+        accountName = Some("John Doe")
+      )
+
+      val bank = Bank(
+        bankName = "Test Bank",
+        address = BankAddress(
+          lines = Seq("1 Bank Street"),
+          town = "London",
+          country = Country("UK"),
+          postCode = "EC1A 1AA"
         )
       )
 
-
       when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Right(barResponse)))
+        .thenReturn(Future.successful(Right((barResponse, bank))))
 
       val application = applicationBuilder(userAnswers = Some(ua))
         .overrides(
@@ -282,10 +282,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
         status(result) mustEqual BAD_REQUEST
-
       }
     }
-
-
   }
 }

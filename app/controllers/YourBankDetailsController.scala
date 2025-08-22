@@ -95,20 +95,18 @@ class YourBankDetailsController @Inject()(
                                )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
 
     barsService.barsVerification(accountType.toString, bankDetails).flatMap {
-      case Right(response) =>
-        // Step 1: BARS verification succeeded -> update answers with verified data
+      case Right((verificationResponse, bank)) =>
         onSuccessfulVerification(
           userAnswers,
           audisFlag   = false,
           bankDetails = bankDetails,
-          bankName    = response.bank.map(_.bankName),
-          bankAddress = response.bank.map(_.address)
+          bankName    = Some(bank.bankName),
+          bankAddress = Some(bank.address)
         ).map { updatedAnswers =>
           Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
         }
 
       case Left(barsError) =>
-        // Step 1: BARS verification failed -> handle error response
         logger.warn(
           s"[YourBankDetailsController][startVerification] " +
             s"BARS verification failed for userId=$credId, accountType=$accountType. " +
@@ -125,7 +123,6 @@ class YourBankDetailsController @Inject()(
                                         bankName: Option[String],
                                         bankAddress: Option[BankAddress]
                                       ): Future[UserAnswers] = {
-    // Step 1: Update UserAnswers with bank details + optional bank name/address
     val updatedAnswersTry = for {
       ua1 <- userAnswers.set(
         YourBankDetailsPage,
@@ -135,7 +132,6 @@ class YourBankDetailsController @Inject()(
       ua3 <- bankAddress.map(addr => ua2.set(BankDetailsAddressPage, addr)).getOrElse(scala.util.Success(ua2))
     } yield ua3
 
-    // Step 2: Persist in session repo
     for {
       updatedAnswers <- Future.fromTry(updatedAnswersTry)
       _              <- sessionRepository.set(updatedAnswers)
@@ -152,21 +148,16 @@ class YourBankDetailsController @Inject()(
                                     barsError: BarsErrors
                                   )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
 
-    // Step 1: Work out if this is an "unverified account" case
     val accountUnverifiedFlag: Boolean = barsError match {
       case BarsErrors.BankAccountUnverified => true
       case _                                => false
     }
 
-    // Step 2: Invoke Lock Update Status (I4)
     for {
       lockResponse   <- lockService.updateLockForUser(credId)
-
-      // Step 3a: Store accountUnverified in session
       updatedAnswers <- Future.fromTry(request.userAnswers.set(AccountUnverifiedPage, accountUnverifiedFlag))
       _              <- sessionRepository.set(updatedAnswers)
     } yield {
-      // Step 3b: Either show errors on the form or redirect to lock end-journey
       lockResponse.lockStatus match {
         case NotLocked =>
           val formWithErrors = BarsErrorMapper

@@ -18,7 +18,6 @@ package connectors
 
 import models.responses.{Bank, BarsVerificationResponse}
 import play.api.Logging
-import play.api.http.Status.NOT_FOUND
 import play.api.libs.json.JsValue
 import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -36,38 +35,40 @@ case class BarsConnector @Inject()(
   extends HttpReadsInstances with Logging {
   private val barsBaseUrl: String = config.baseUrl("bars")
 
-  private def getMetadata(sortCode: String)(implicit hc: HeaderCarrier): Future[Option[Bank]] = {
+  def getMetadata(sortCode: String)(implicit hc: HeaderCarrier): Future[Option[Bank]] =
     http
       .get(url"$barsBaseUrl/metadata/$sortCode")
       .execute[Either[UpstreamErrorResponse, Bank]]
       .flatMap {
         case Right(bank) => Future.successful(Some(bank))
-        case Left(err) if err.statusCode == NOT_FOUND =>
-          Future.successful(None) // gracefully handle unknown sort codes
         case Left(err) =>
-          Future.failed(new Exception(s"Unexpected error from metadata: ${err.statusCode} - ${err.message}"))
+          Future.failed(
+            new Exception(
+              s"Unexpected error from metadata: ${err.statusCode} - ${err.message}"
+            )
+          )
       }
-  }
 
-
-  def verify(verifyUrl: String, requestJson: JsValue)
+  def verify(endpoint: String, requestJson: JsValue)
             (implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
-    logger.info(s"Account validation called with $verifyUrl")
+    val url = s"$barsBaseUrl/verify/$endpoint"
+    logger.info(s"Account validation called with $url")
+
     http
-      .post(url"$barsBaseUrl/verify/$verifyUrl")
+      .post(url"$url")
       .withBody(requestJson)
       .execute[Either[UpstreamErrorResponse, BarsVerificationResponse]]
       .flatMap {
         case Right(verificationData) =>
-          getMetadata((requestJson \ "account" \ "sortCode").as[String]).map { bank =>
-            verificationData.copy(bank = bank)
-          }
-
+          Future.successful(verificationData)
         case Left(errorResponse) =>
-          Future.failed(new Exception(
-            s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"
-          ))
+          Future.failed(
+            new Exception(
+              s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"
+            )
+          )
       }
   }
+
 
 }

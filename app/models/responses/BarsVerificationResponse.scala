@@ -28,8 +28,7 @@ case class BarsVerificationResponse(accountNumberIsWellFormatted: BarsResponse,
                                     sortCodeSupportsDirectCredit: BarsResponse,
                                     nonStandardAccountDetailsRequiredForBacs: Option[BarsResponse],
                                     iban: Option[String],
-                                    accountName: Option[String],
-                                    bank: Option[Bank]
+                                    accountName: Option[String]
                                    ) {
 
 }

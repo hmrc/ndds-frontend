@@ -23,8 +23,7 @@ import models.YourBankDetails
 import models.errors.BarsErrors
 import models.errors.BarsErrors.*
 import models.requests.{BarsAccount, BarsBusiness, BarsBusinessRequest, BarsPersonalRequest, BarsSubject}
-import models.responses.BarsResponse.*
-import models.responses.{BarsResponse, BarsVerificationResponse}
+import models.responses.{BarsResponse, BarsVerificationResponse, Bank}
 import uk.gov.hmrc.http.HeaderCarrier
 import play.api.libs.json.Json
 
@@ -32,75 +31,79 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 case class BarsService @Inject()(
-                                 barsConnector: BarsConnector,
-                                 config: FrontendAppConfig
-                               )(implicit ec: ExecutionContext) {
-
+                                  barsConnector: BarsConnector,
+                                  config: FrontendAppConfig
+                                )(implicit ec: ExecutionContext) {
+  
   private val checkAccountAndName = (accountExists: BarsResponse, nameMatches: BarsResponse) => {
-    if (accountExists == Indeterminate || nameMatches == Indeterminate) {
+    if (accountExists == BarsResponse.Indeterminate || nameMatches == BarsResponse.Indeterminate)
       Left(BankAccountUnverified)
-    } else {
-      Right(())
-    }
+    else Right(())
   }
 
   private val checkAccountNumberFormat = (accountNumberIsWellFormatted: BarsResponse) =>
-    if (accountNumberIsWellFormatted == No) Left(AccountDetailInvalidFormat) else Right(())
+    if (accountNumberIsWellFormatted == BarsResponse.No) Left(AccountDetailInvalidFormat) else Right(())
 
-  private val checkSortCodeExistsOnEiscd = (sortCodeIsPresentOnEiscd: BarsResponse) =>
-    if (sortCodeIsPresentOnEiscd == No) Left(SortCodeNotFound) else Right(())
+  private val checkSortCodeExistsOnEiscd = (sortCodeIsPresentOnEISCD: BarsResponse) =>
+    if (sortCodeIsPresentOnEISCD == BarsResponse.No) Left(SortCodeNotFound) else Right(())
 
   private val checkSortCodeDirectDebitSupport = (sortCodeSupportsDirectDebit: BarsResponse) =>
-    if (sortCodeSupportsDirectDebit == No) Left(SortCodeNotSupported) else Right(())
+    if (sortCodeSupportsDirectDebit == BarsResponse.No) Left(SortCodeNotSupported) else Right(())
 
   private val checkAccountExists = (accountExists: BarsResponse) =>
-    if (accountExists == No || accountExists == Inapplicable) Left(AccountNotFound) else Right(())
+    if (accountExists == BarsResponse.No || accountExists == BarsResponse.Inapplicable) Left(AccountNotFound) else Right(())
 
   private val checkNameMatches = (nameMatches: BarsResponse, accountExists: BarsResponse) =>
-    if (nameMatches == No || nameMatches == Inapplicable || (nameMatches == Indeterminate && accountExists != Indeterminate)) Left(NameMismatch) else Right(())
+    if (nameMatches == BarsResponse.No || nameMatches == BarsResponse.Inapplicable ||
+      (nameMatches == BarsResponse.Indeterminate && accountExists != BarsResponse.Indeterminate)) Left(NameMismatch)
+    else Right(())
 
   private val checkBarsResponseSuccess = (response: BarsVerificationResponse) => {
-    (response.accountNumberIsWellFormatted == Yes || response.accountNumberIsWellFormatted == Indeterminate) &&
-      response.sortCodeIsPresentOnEISCD == Yes &&
-      response.accountExists == Yes &&
-      (response.nameMatches == Yes || response.nameMatches == Partial) &&
-      response.sortCodeSupportsDirectDebit == Yes
+    (response.accountNumberIsWellFormatted == BarsResponse.Yes || response.accountNumberIsWellFormatted == BarsResponse.Indeterminate) &&
+      response.sortCodeIsPresentOnEISCD == BarsResponse.Yes &&
+      response.accountExists == BarsResponse.Yes &&
+      (response.nameMatches == BarsResponse.Yes || response.nameMatches == BarsResponse.Partial) &&
+      response.sortCodeSupportsDirectDebit == BarsResponse.Yes
   }
-
+  
   def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)
-                      (implicit hc: HeaderCarrier): Future[Either[BarsErrors, BarsVerificationResponse]] = {
-    val (verifyUrl, requestJson) = if (personalOrBusiness.toLowerCase == "personal") {
-      ("personal", Json.toJson(
+                      (implicit hc: HeaderCarrier): Future[Either[BarsErrors, (BarsVerificationResponse, Bank)]] = {
+
+    val (endpoint, requestJson) = if (personalOrBusiness.toLowerCase == "personal") {
+      "personal" -> Json.toJson(
         BarsPersonalRequest(
           BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
           BarsSubject(bankDetails.accountHolderName)
         )
-      ))
+      )
     } else {
-      ("business", Json.toJson(
+      "business" -> Json.toJson(
         BarsBusinessRequest(
           BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
           BarsBusiness(bankDetails.accountHolderName)
         )
-      ))
+      )
     }
 
-    barsConnector.verify(verifyUrl, requestJson).map { response =>
-      if (checkBarsResponseSuccess(response)) {
-        Right(response)
+    for {
+      verificationResponse <- barsConnector.verify(endpoint, requestJson)
+      result <- if (checkBarsResponseSuccess(verificationResponse)) {
+        barsConnector.getMetadata(bankDetails.sortCode).map {
+          case Some(bank) => Right((verificationResponse, bank))
+          case None       => throw new Exception(s"Bank metadata missing for sort code ${bankDetails.sortCode}")
+        }
       } else {
         val validatedResult: Either[BarsErrors, Unit] = for {
-          _ <- checkAccountAndName(response.accountExists, response.nameMatches)
-          _ <- checkAccountNumberFormat(response.accountNumberIsWellFormatted)
-          _ <- checkSortCodeExistsOnEiscd(response.sortCodeIsPresentOnEISCD)
-          _ <- checkSortCodeDirectDebitSupport(response.sortCodeSupportsDirectDebit)
-          _ <- checkAccountExists(response.accountExists)
-          _ <- checkNameMatches(response.nameMatches, response.accountExists)
+          _ <- checkAccountAndName(verificationResponse.accountExists, verificationResponse.nameMatches)
+          _ <- checkAccountNumberFormat(verificationResponse.accountNumberIsWellFormatted)
+          _ <- checkSortCodeExistsOnEiscd(verificationResponse.sortCodeIsPresentOnEISCD)
+          _ <- checkSortCodeDirectDebitSupport(verificationResponse.sortCodeSupportsDirectDebit)
+          _ <- checkAccountExists(verificationResponse.accountExists)
+          _ <- checkNameMatches(verificationResponse.nameMatches, verificationResponse.accountExists)
         } yield Right(())
 
-        Left(validatedResult.fold(identity, _ => DetailsVerificationFailed))
+        Future.successful(Left(validatedResult.fold(identity, _ => DetailsVerificationFailed)))
       }
-    }
+    } yield result
   }
-
 }

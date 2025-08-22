@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import models.YourBankDetails
-import models.responses.{BarsVerificationResponse, Country}
+import models.responses.{Bank, BarsResponse, BarsVerificationResponse, Country}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -85,17 +85,9 @@ class BarsConnectorSpec
     "name" -> bankDetails.accountHolderName
   )
 
-  private val businessRequestJson = Json.obj(
-    "account" -> Json.obj(
-      "sortCode" -> bankDetails.sortCode,
-      "accountNumber" -> bankDetails.accountNumber
-    ),
-    "businessName" -> bankDetails.accountHolderName
-  )
-
   "BarsConnector.verify" should {
 
-    "return verification result with metadata when personal endpoint succeeds" in {
+    "return verification result when personal endpoint succeeds" in {
       wireMockServer.stubFor(
         post(urlEqualTo("/verify/personal"))
           .withRequestBody(equalToJson(personalRequestJson.toString()))
@@ -115,6 +107,30 @@ class BarsConnectorSpec
           )
       )
 
+      val result = connector.verify("personal", personalRequestJson).futureValue
+      result.accountNumberIsWellFormatted shouldBe BarsResponse.Yes
+      result.sortCodeIsPresentOnEISCD shouldBe BarsResponse.Yes
+      result.accountExists shouldBe BarsResponse.Yes
+      result.nameMatches shouldBe BarsResponse.Yes
+    }
+
+    "fail when verification endpoint returns 500" in {
+      wireMockServer.stubFor(
+        post(urlEqualTo("/verify/personal"))
+          .withRequestBody(equalToJson(personalRequestJson.toString()))
+          .willReturn(aResponse().withStatus(500))
+      )
+
+      val ex = intercept[Exception] {
+        connector.verify("personal", personalRequestJson).futureValue
+      }
+      ex.getMessage should include("500")
+    }
+  }
+
+  "BarsConnector.getMetadata" should {
+
+    "return bank metadata when metadata endpoint succeeds" in {
       wireMockServer.stubFor(
         get(urlEqualTo("/metadata/443116"))
           .willReturn(
@@ -134,132 +150,22 @@ class BarsConnectorSpec
           )
       )
 
-      val result = connector.verify("personal", personalRequestJson).futureValue
-
-      result.accountNumberIsWellFormatted.toString.toLowerCase shouldBe "yes"
-      result.bank.value.bankName shouldBe "Some Bank"
-      result.bank.value.address.lines shouldEqual Seq("123 Bank Street")
-      result.bank.value.address.town shouldBe "London"
-      result.bank.value.address.country shouldBe Country("United Kingdom")
-      result.bank.value.address.postCode shouldBe "SW1A 1AA"
-    }
-
-    "return verification result without bank metadata when metadata endpoint returns 404" in {
-      wireMockServer.stubFor(
-        post(urlEqualTo("/verify/personal"))
-          .withRequestBody(equalToJson(personalRequestJson.toString()))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-              .withBody(
-                """{
-                  "accountNumberIsWellFormatted": "yes",
-                  "sortCodeIsPresentOnEISCD": "yes",
-                  "accountExists": "yes",
-                  "nameMatches": "yes",
-                  "sortCodeSupportsDirectDebit": "yes",
-                  "sortCodeSupportsDirectCredit": "yes"
-                }"""
-              )
-          )
-      )
-
-      wireMockServer.stubFor(
-        get(urlEqualTo("/metadata/443116"))
-          .willReturn(aResponse().withStatus(404))
-      )
-
-      val result = connector.verify("personal", personalRequestJson).futureValue
-      result.bank shouldBe None
-    }
-
-    "fail when verification endpoint returns 500" in {
-      wireMockServer.stubFor(
-        post(urlEqualTo("/verify/personal"))
-          .withRequestBody(equalToJson(personalRequestJson.toString()))
-          .willReturn(aResponse().withStatus(500))
-      )
-
-      val ex = intercept[Exception] {
-        connector.verify("personal", personalRequestJson).futureValue
-      }
-      ex.getMessage should include("500")
-    }
-
-    "successfully verify business bank details and fetch metadata" in {
-      wireMockServer.stubFor(
-        post(urlEqualTo("/verify/business"))
-          .withRequestBody(equalToJson(businessRequestJson.toString()))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-              .withBody(
-                """{
-                  "accountNumberIsWellFormatted": "yes",
-                  "sortCodeIsPresentOnEISCD": "yes",
-                  "accountExists": "yes",
-                  "nameMatches": "yes",
-                  "sortCodeSupportsDirectDebit": "yes",
-                  "sortCodeSupportsDirectCredit": "yes"
-                }"""
-              )
-          )
-      )
-
-      wireMockServer.stubFor(
-        get(urlEqualTo("/metadata/443116"))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-              .withBody(
-                """{
-                  "bankName": "Some Business Bank",
-                  "address": {
-                    "lines": ["456 Business Road"],
-                    "town": "Manchester",
-                    "country": { "name": "United Kingdom" },
-                    "postCode": "M1 2AB"
-                  }
-                }"""
-              )
-          )
-      )
-
-      val result = connector.verify("business", businessRequestJson).futureValue
-
-      result.accountNumberIsWellFormatted.toString.toLowerCase shouldBe "yes"
-      result.bank.value.bankName shouldBe "Some Business Bank"
-      result.bank.value.address.lines shouldEqual Seq("456 Business Road")
-      result.bank.value.address.town shouldBe "Manchester"
-      result.bank.value.address.country shouldBe Country("United Kingdom")
-      result.bank.value.address.postCode shouldBe "M1 2AB"
+      val result = connector.getMetadata("443116").futureValue.value
+      result.bankName shouldBe "Some Bank"
+      result.address.lines shouldEqual Seq("123 Bank Street")
+      result.address.town shouldBe "London"
+      result.address.country shouldBe Country("United Kingdom")
+      result.address.postCode shouldBe "SW1A 1AA"
     }
 
     "fail when metadata endpoint responds with 500" in {
       wireMockServer.stubFor(
-        post(urlEqualTo("/verify/personal"))
-          .withRequestBody(equalToJson(personalRequestJson.toString()))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-              .withBody(
-                """{
-                  "accountNumberIsWellFormatted": "yes",
-                  "sortCodeIsPresentOnEISCD": "yes",
-                  "accountExists": "yes",
-                  "nameMatches": "yes",
-                  "sortCodeSupportsDirectDebit": "yes",
-                  "sortCodeSupportsDirectCredit": "yes"
-                }"""
-              )
-          )
-      )
-      wireMockServer.stubFor(
         get(urlEqualTo("/metadata/443116"))
           .willReturn(aResponse().withStatus(500))
       )
+
       val ex = intercept[Exception] {
-        connector.verify("personal", personalRequestJson).futureValue
+        connector.getMetadata("443116").futureValue
       }
       ex.getMessage should include("500")
     }
