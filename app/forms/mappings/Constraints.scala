@@ -90,9 +90,9 @@ trait Constraints {
         Invalid(errorKey, maximum)
     }
 
-  protected def maxLengthWithSpaces(maximum: Int, errorKey: String): Constraint[String] =
+  protected def exactLengthWithSpaces(maximum: Int, errorKey: String): Constraint[String] =
     Constraint {
-      case str if str.replaceAll("\\s","").length <= maximum =>
+      case str if str.replaceAll("\\s","").length == maximum =>
         Valid
       case _ =>
         Invalid(errorKey, maximum)

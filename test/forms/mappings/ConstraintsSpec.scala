@@ -124,26 +124,36 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     }
   }
 
-  "maxLengthWithSpaces" - {
+  "exactLengthWithSpaces" - {
 
-    "must return Valid for a string shorter than the allowed length" in {
-      val result = maxLengthWithSpaces(10, "error.length")(" a" * 9)
+    "must return Valid for a string equal to the allowed length with spaces" in {
+      val result = exactLengthWithSpaces(6, "error.length")(" a " * 6)
       result mustEqual Valid
     }
 
-    "must return Valid for an empty string" in {
-      val result = maxLengthWithSpaces(10, "error.length")("")
+    "must return Valid for a string equal to the allowed length without spaces" in {
+      val result = exactLengthWithSpaces(6, "error.length")("a" * 6)
       result mustEqual Valid
     }
 
-    "must return Valid for a string equal to the allowed length" in {
-      val result = maxLengthWithSpaces(10, "error.length")(" a " * 10)
-      result mustEqual Valid
+    "must return Invalid for a string shorter than the allowed length with spaces" in {
+      val result = exactLengthWithSpaces(6, "error.length")(" a " * 4)
+      result mustEqual Invalid("error.length",6)
     }
 
-    "must return Invalid for a string longer than the allowed length" in {
-      val result = maxLengthWithSpaces(10, "error.length")("a " * 11)
-      result mustEqual Invalid("error.length", 10)
+    "must return Invalid for an empty string" in {
+      val result = exactLengthWithSpaces(6, "error.length")("")
+      result mustEqual Invalid("error.length",6)
+    }
+
+    "must return Invalid for only spaces" in {
+      val result = exactLengthWithSpaces(6, "error.length")("  " * 6)
+      result mustEqual Invalid("error.length", 6)
+    }
+
+    "must return Invalid for a string longer than the allowed length with spaces" in {
+      val result = exactLengthWithSpaces(6, "error.length")("a " * 11)
+      result mustEqual Invalid("error.length", 6)
     }
   }
 
