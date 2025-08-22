@@ -18,12 +18,13 @@ package controllers
 
 import base.SpecBase
 import forms.BankDetailsCheckYourAnswerFormProvider
-import models.{CheckMode, NormalMode, YourBankDetailsWithAuddisStatus}
+import models.responses.{BankAddress, Country}
+import models.{CheckMode, NormalMode, PersonalOrBusinessAccount, YourBankDetailsWithAuddisStatus}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doNothing, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{BankDetailsCheckYourAnswerPage, YourBankDetailsPage}
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, BankDetailsCheckYourAnswerPage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -48,7 +49,10 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must return OK and the correct view for a GET" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+        .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -61,7 +65,10 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
 
         val html = contentAsString(result)
         html must include("Check your answers")
-        html must include("Test Bank Name")
+        html must include("BARCLAYS BANK UK PLC")
+        html must include("P.O. Box 44")
+        html must include("RG1 8BW")
+        html must include("UNITED KINGDOM")
         html must include("Your bank details")
         html must include("Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?")
         html must include("You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.")
@@ -73,7 +80,10 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+        .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
         .set(BankDetailsCheckYourAnswerPage, true).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
@@ -86,12 +96,14 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         status(result) mustEqual OK
         val html = contentAsString(result)
         html must include("Check your answers")
-        html must include("Test Bank Name")
+        html must include("BARCLAYS BANK UK PLC")
+        html must include("P.O. Box 44")
+        html must include("RG1 8BW")
+        html must include("UNITED KINGDOM")
         html must include("Your bank details")
         html must include("Account Holder Name")
         html must include("123212")
         html must include("34211234")
-        html must include("Address line 1")
         html must include("Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?")
         html must include("You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
@@ -105,7 +117,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true, false))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
@@ -133,7 +145,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true, false))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
