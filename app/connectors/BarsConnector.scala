@@ -35,12 +35,12 @@ case class BarsConnector @Inject()(
   extends HttpReadsInstances with Logging {
   private val barsBaseUrl: String = config.baseUrl("bars")
 
-  def getMetadata(sortCode: String)(implicit hc: HeaderCarrier): Future[Option[Bank]] =
+  def getMetadata(sortCode: String)(implicit hc: HeaderCarrier): Future[Bank] =
     http
       .get(url"$barsBaseUrl/metadata/$sortCode")
       .execute[Either[UpstreamErrorResponse, Bank]]
       .flatMap {
-        case Right(bank) => Future.successful(Some(bank))
+        case Right(bank) => Future.successful(bank)
         case Left(err) =>
           Future.failed(
             new Exception(

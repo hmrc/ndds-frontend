@@ -23,7 +23,7 @@ case class YourBankDetailsWithAuddisStatus(
                                             sortCode: String,
                                             accountNumber: String,
                                             auddisStatus: Boolean,
-                                            accountVerified: Option[Boolean] = None
+                                            accountVerified: Option[Boolean] = Some(false)
                                           )
 
 object YourBankDetailsWithAuddisStatus {
@@ -32,7 +32,7 @@ object YourBankDetailsWithAuddisStatus {
 
   def toModelWithAuddisStatus(yourBankDetails: YourBankDetails,
                               auddisStatus: Boolean,
-                              accountVerified: Option[Boolean] = None): YourBankDetailsWithAuddisStatus = {
+                              accountVerified: Option[Boolean] = Some(false)): YourBankDetailsWithAuddisStatus = {
     YourBankDetailsWithAuddisStatus(
       accountHolderName = yourBankDetails.accountHolderName,
       sortCode = yourBankDetails.sortCode,

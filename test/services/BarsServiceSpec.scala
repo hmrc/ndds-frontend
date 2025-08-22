@@ -28,6 +28,7 @@ import org.scalatest.wordspec.AsyncWordSpec
 import connectors.BarsConnector
 import config.FrontendAppConfig
 import uk.gov.hmrc.http.HeaderCarrier
+import play.api.libs.json.Json
 
 import scala.concurrent.Future
 
@@ -58,7 +59,7 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
   "BarsService#barsVerification" should {
 
-    "return Right((BarsVerificationResponse, Bank)) when all checks pass for personal account" in {
+    "return Right(BarsVerificationResponse, Bank) when all checks pass for personal account" in {
       val response = BarsVerificationResponse(
         accountNumberIsWellFormatted = BarsResponse.Yes,
         sortCodeIsPresentOnEISCD = BarsResponse.Yes,
@@ -75,7 +76,7 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
       when(mockConnector.verify(any(), any())(any()))
         .thenReturn(Future.successful(response))
       when(mockConnector.getMetadata(any())(any()))
-        .thenReturn(Future.successful(Some(bank)))
+        .thenReturn(Future.successful(bank))
 
       service.barsVerification("personal", validBankDetails).map { result =>
         result shouldBe Right((response, bank))

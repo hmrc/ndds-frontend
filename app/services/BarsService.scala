@@ -34,7 +34,8 @@ case class BarsService @Inject()(
                                   barsConnector: BarsConnector,
                                   config: FrontendAppConfig
                                 )(implicit ec: ExecutionContext) {
-  
+
+  // --- Validation helpers ---
   private val checkAccountAndName = (accountExists: BarsResponse, nameMatches: BarsResponse) => {
     if (accountExists == BarsResponse.Indeterminate || nameMatches == BarsResponse.Indeterminate)
       Left(BankAccountUnverified)
@@ -58,14 +59,14 @@ case class BarsService @Inject()(
       (nameMatches == BarsResponse.Indeterminate && accountExists != BarsResponse.Indeterminate)) Left(NameMismatch)
     else Right(())
 
-  private val checkBarsResponseSuccess = (response: BarsVerificationResponse) => {
+  private val checkBarsResponseSuccess = (response: BarsVerificationResponse) =>
     (response.accountNumberIsWellFormatted == BarsResponse.Yes || response.accountNumberIsWellFormatted == BarsResponse.Indeterminate) &&
       response.sortCodeIsPresentOnEISCD == BarsResponse.Yes &&
       response.accountExists == BarsResponse.Yes &&
       (response.nameMatches == BarsResponse.Yes || response.nameMatches == BarsResponse.Partial) &&
       response.sortCodeSupportsDirectDebit == BarsResponse.Yes
-  }
-  
+
+  // --- Main verification method ---
   def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)
                       (implicit hc: HeaderCarrier): Future[Either[BarsErrors, (BarsVerificationResponse, Bank)]] = {
 
@@ -88,9 +89,9 @@ case class BarsService @Inject()(
     for {
       verificationResponse <- barsConnector.verify(endpoint, requestJson)
       result <- if (checkBarsResponseSuccess(verificationResponse)) {
-        barsConnector.getMetadata(bankDetails.sortCode).map {
-          case Some(bank) => Right((verificationResponse, bank))
-          case None       => throw new Exception(s"Bank metadata missing for sort code ${bankDetails.sortCode}")
+        // Only call getMetadata if verification succeeded
+        barsConnector.getMetadata(bankDetails.sortCode).map { bank =>
+          Right((verificationResponse, bank))
         }
       } else {
         val validatedResult: Either[BarsErrors, Unit] = for {

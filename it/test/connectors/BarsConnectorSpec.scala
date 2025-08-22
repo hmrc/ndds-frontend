@@ -150,7 +150,7 @@ class BarsConnectorSpec
           )
       )
 
-      val result = connector.getMetadata("443116").futureValue.value
+      val result = connector.getMetadata("443116").futureValue
       result.bankName shouldBe "Some Bank"
       result.address.lines shouldEqual Seq("123 Bank Street")
       result.address.town shouldBe "London"
