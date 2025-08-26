@@ -23,6 +23,7 @@
     govukSummaryList: GovukSummaryList,
     govukRadios: GovukRadios,
     govukButton: GovukButton,
+    govukCheckboxes: GovukCheckboxes,
     header1:Header1,
     h2:Header2,
     linkWithHiddenText: LinkWithHiddenText
@@ -52,18 +53,17 @@
         </div>
 
         @govukSummaryList(list)
-
-        @govukRadios(
-            RadiosViewModel.yesNo(
-                field = form("value"),
-                legend = LegendViewModel(messages("bankDetailsCheckYourAnswer.p1"))
-                .copy(classes = "govuk-!-padding-bottom-3")
-                ).withHint(
-                Hint(
-                content = Messages("bankDetailsCheckYourAnswer.hint")
-                ).copy(classes = "govuk-!-padding-bottom-3")
-            )
-        )
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+<!--                @govukCheckboxes(-->
+<!--                CheckboxesViewModel(-->
+<!--                name   = "value",-->
+<!--                legend = LegendViewModel(messages("bankDetailsCheckYourAnswer.confirmHeading")).asPageHeading()-->
+<!--                items = -->
+<!--                )-->
+<!--                )-->
+            </div>
+        </div>
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))

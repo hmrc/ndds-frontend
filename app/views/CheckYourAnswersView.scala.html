@@ -1,30 +1,30 @@
 @*
- * Copyright 2025 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *@
+* Copyright 2025 HM Revenue & Customs
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*@
 
 @import views.html.components._
 
 @this(
-    header1: Header1,
-    h2:Header2,
-    h3:Header3,
-    paragraph: Paragraph,
-    layout: templates.Layout,
-    govukSummaryList: GovukSummaryList,
-    govukButton: GovukButton,
-    formHelper: FormWithCSRF,
+header1: Header1,
+h2:Header2,
+h3:Header3,
+paragraph: Paragraph,
+layout: templates.Layout,
+govukSummaryList: GovukSummaryList,
+govukButton: GovukButton,
+formHelper: FormWithCSRF,
 )
 
 @(list: SummaryList, currentDate: String)(implicit request: Request[_], messages: Messages)
@@ -32,40 +32,31 @@
 @layout(pageTitle = titleNoForm(messages("checkYourAnswers.title")), showBackLink = false) {
 
 @formHelper(action = routes.CheckYourAnswersController.onSubmit(), Symbol("autoComplete") -> "off") {
-            @header1("checkYourAnswers.heading")
-            @h2("checkYourAnswers.h2")
-            @govukSummaryList(list)
-            @paragraph("checkYourAnswers.p1")
-            @h3("checkYourAnswers.h3")
-            @paragraph("checkYourAnswers.p2")
-            @paragraph("checkYourAnswers.p3")
-            @paragraph("checkYourAnswers.p4")
-            @paragraph("checkYourAnswers.p5")
-            @paragraph("checkYourAnswers.p6")
-            @paragraph(messages("checkYourAnswers.p7", currentDate),  extraClasses="govuk-!-margin-top-7")
-            @paragraph("checkYourAnswers.p8")
-            <div class="govuk-body extra-line-spacing direct-debit-container">
-                <div class="direct-debit-text">
-                    @Html(messages("checkYourAnswers.p9"))
-                </div>
-                <div class="direct-debit-logo">
-                    <img src="@routes.Assets.versioned("images/logo.png")" alt="Direct Debit logo" />
-                </div>
-            </div>
+@header1("checkYourAnswers.heading")
+@h2("checkYourAnswers.h2")
+@govukSummaryList(list)
+@paragraph("checkYourAnswers.p1")
+@h3("checkYourAnswers.h3")
+@paragraph("checkYourAnswers.p2")
+@paragraph("checkYourAnswers.p3")
+@paragraph("checkYourAnswers.p4")
+@paragraph("checkYourAnswers.p5")
+@paragraph("checkYourAnswers.p6")
+@paragraph(messages("checkYourAnswers.p7", currentDate),  extraClasses="govuk-!-margin-top-7")
+@paragraph("checkYourAnswers.p8")
+<div class="govuk-body extra-line-spacing direct-debit-container">
+    <div class="direct-debit-text">
+        @Html(messages("checkYourAnswers.p9"))
+    </div>
+    <div class="direct-debit-logo">
+        <img src="@routes.Assets.versioned("images/logo.png")" alt="Direct Debit logo" />
+    </div>
+</div>
 
 
-            @govukCheckboxes(
-                CheckboxesViewModel(
-                    name: "waste",
-                    fieldset: {
-                    legend: {
-                    text: "Which types of waste do you transport?",
-                    isPageHeading: true,
-                    classes: "govuk-fieldset__legend--l"
-                    }
+@govukButton(
+ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
+)
+
 }
-                )
-            )
-
-    }
 }
