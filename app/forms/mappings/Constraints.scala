@@ -90,12 +90,20 @@ trait Constraints {
         Invalid(errorKey, maximum)
     }
 
-  protected def maxLengthWithSpaces(maximum: Int, errorKey: String): Constraint[String] =
+  protected def maxLengthWithoutSpaces(maximum: Int, errorKey: String): Constraint[String] =
     Constraint {
       case str if str.replaceAll("\\s","").length <= maximum =>
         Valid
       case _ =>
         Invalid(errorKey, maximum)
+    }
+
+  protected def minLengthWithoutSpaces(minimum: Int, errorKey: String): Constraint[String] =
+    Constraint {
+      case str if str.replaceAll("\\s","").length >= minimum =>
+        Valid
+      case _ =>
+        Invalid(errorKey, minimum)
     }
 
   protected def minLength(minimum: Int, errorKey: String): Constraint[String] =
