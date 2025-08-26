@@ -22,8 +22,8 @@ import connectors.NationalDirectDebitConnector
 import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
-import models.responses.EarliestPaymentDate
-import models.{DirectDebitSource, PaymentPlanType, NddResponse, NddDetails, YourBankDetailsWithAuddisStatus}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
+import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doNothing, reset, verify, when}
 import org.scalatest.freespec.AnyFreeSpec
@@ -291,6 +291,26 @@ class NationalDirectDebitServiceSpec extends SpecBase
         val expected = 10
 
         service.calculateOffset(auddisStatus, TaxCreditRepaymentPlan, TC) mustBe expected
+      }
+    }
+
+    "generateNewDdiReference" - {
+      "must successfully return the DDI Reference Number" in {
+        when(mockConnector.generateNewDdiReference(any())(any()))
+          .thenReturn(Future.successful(GenerateDdiRefResponse("testRes")))
+
+        val result = service.generateNewDdiReference("testRef").futureValue
+
+        result mustBe GenerateDdiRefResponse("testRes")
+      }
+      
+      "fail when the connector call fails" in {
+        when(mockConnector.generateNewDdiReference(any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.generateNewDdiReference("testRef").futureValue)
+
+        result.getMessage must include("bang")
       }
     }
   }
