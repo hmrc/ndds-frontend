@@ -90,7 +90,6 @@ class BankDetailsCheckYourAnswerController @Inject()(
         YourBankDetailsAccountHolderNameSummary.row(answers),
         YourBankDetailsAccountNumberSummary.row(answers),
         YourBankDetailsSortCodeSummary.row(answers),
-        YourBankDetailsAccountNumberSummary.row(answers),
         YourBankDetailsNameSummary.row(answers),
         YourBankDetailsAddressSummary.row(answers)
       ).flatten

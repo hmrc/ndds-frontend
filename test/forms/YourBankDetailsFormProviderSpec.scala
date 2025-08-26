@@ -76,6 +76,11 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
       lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
     )
 
+    "bind sort codes with spaces" in {
+      val result = form.bind(Map("sortCode" -> "12 34 56")).apply("sortCode")
+      result.errors mustBe empty
+    }
+
     "not bind strings shorter than 6 characters" in {
       val result = form.bind(Map(fieldName -> "12345")).apply(fieldName)
       result.errors must contain only FormError(fieldName, tooShortKey, Seq(maxLength))
