@@ -104,8 +104,8 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
         status(result) mustEqual OK
 
         contentAsString(result) must include("Back")
-        contentAsString(result) must include("Setup a direct debit payment")
-        contentAsString(result) must include("Please note")
+        contentAsString(result) must include("Set up a Direct Debit payment")
+        contentAsString(result) must include("More information about Direct Debit payments")
         contentAsString(result) must include("Start now")
       }
 
