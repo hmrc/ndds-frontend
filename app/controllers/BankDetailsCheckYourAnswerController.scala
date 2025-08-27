@@ -51,6 +51,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
+  val isAuthorised = false
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -93,6 +94,6 @@ class BankDetailsCheckYourAnswerController @Inject()(
         YourBankDetailsNameSummary.row(answers),
         YourBankDetailsAddressSummary.row(answers)
       ).flatten
-    ).copy(classes = "govuk-summary-list--no-border")
+    ).copy(classes="govuk-summary-list__row")
 
 }

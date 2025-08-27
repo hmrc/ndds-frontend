@@ -126,8 +126,8 @@ bankDetailsCheckYourAnswer.account.account.number = Account number
 bankDetailsCheckYourAnswer.account.sort.code = Bank sort code
 bankDetailsCheckYourAnswer.account.bank.name = Bank name
 bankDetailsCheckYourAnswer.account.bank.address = Bank address
-bankDetailsCheckYourAnswers.confirmHeading = Confirm your authority
-bankDetailsCheckYourAnswers.confirmMessage = I confirm that I am the account holder or an authorised signatory, and I am able to authorise Direct Debit payments from this account
+bankDetailsCheckYourAnswer.confirmHeading = Confirm your authority
+bankDetailsCheckYourAnswer.confirmMessage = I confirm that I am the account holder or an authorised signatory, and I am able to authorise Direct Debit payments from this account
 
 bankApproval.title = You need bank approval
 bankApproval.heading = You need bank approval

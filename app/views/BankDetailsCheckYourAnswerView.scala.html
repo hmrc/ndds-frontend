@@ -39,34 +39,44 @@
         }
 
         @header1("bankDetailsCheckYourAnswer.heading")
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                @h2("bankDetailsCheckYourAnswer.h2")
-            </div>
-            <div class="govuk-grid-column-one-third">
-                @linkWithHiddenText(
-                    url = routes.YourBankDetailsController.onPageLoad(CheckMode).url,
-                    text = "Change",
-                    visuallyHiddenText = Some("bankDetailsCheckYourAnswer.h2")
-                    )
-            </div>
-        </div>
+        @h2("bankDetailsCheckYourAnswer.h2")
 
         @govukSummaryList(list)
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-<!--                @govukCheckboxes(-->
-<!--                CheckboxesViewModel(-->
-<!--                name   = "value",-->
-<!--                legend = LegendViewModel(messages("bankDetailsCheckYourAnswer.confirmHeading")).asPageHeading()-->
-<!--                items = -->
-<!--                )-->
-<!--                )-->
-            </div>
-        </div>
+
+        @h2("bankDetailsCheckYourAnswer.confirmHeading")
+        @govukCheckboxes(Checkboxes(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    classes = "govuk-fieldset__legend--l",
+                    isPageHeading = false
+                ))
+           )),
+           name = "direct-debit-authority",
+           items = Seq(
+                CheckboxItem(
+                    content = messages("bankDetailsCheckYourAnswer.confirmMessage"),
+                    value = "authorised"
+                ),
+           )
+        ))
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))
         )
     }
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            var checkbox = document.getElementById("checkbox");
+            var button = document.getElementById("button");
+
+            function toggleButton() {
+                button.disabled = !checkbox.checked;
+            }
+
+            checkbox.addEventListener("change", toggleButton);
+
+            toggleButton();
+        });
+    </script>
 }

@@ -16,7 +16,8 @@
 
 package viewmodels.checkAnswers
 
-import models.UserAnswers
+import controllers.routes
+import models.{CheckMode, UserAnswers}
 import pages.YourBankDetailsPage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
@@ -36,7 +37,10 @@ object YourBankDetailsSortCodeSummary  {
         SummaryListRowViewModel(
           key     = "bankDetailsCheckYourAnswer.account.sort.code",
           value   = ValueViewModel(HtmlContent(value)),
-          actions = Seq.empty
+          actions = Seq(
+            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+          )
         )
     }
 }
