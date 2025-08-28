@@ -19,15 +19,11 @@ package controllers
 import controllers.actions.*
 import forms.BankDetailsCheckYourAnswerFormProvider
 import models.Mode
-import models.audits.ConfirmBankDetails
-import navigation.Navigator
 import pages.BankDetailsCheckYourAnswerPage
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import repositories.SessionRepository
-import services.AuditService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
@@ -35,23 +31,19 @@ import viewmodels.govuk.all.SummaryListViewModel
 import views.html.BankDetailsCheckYourAnswerView
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class BankDetailsCheckYourAnswerController @Inject()(
                                                       override val messagesApi: MessagesApi,
-                                                      sessionRepository: SessionRepository,
-                                                      navigator: Navigator,
                                                       identify: IdentifierAction,
                                                       getData: DataRetrievalAction,
                                                       requireData: DataRequiredAction,
-                                                      auditService: AuditService,
                                                       formProvider: BankDetailsCheckYourAnswerFormProvider,
                                                       val controllerComponents: MessagesControllerComponents,
                                                       view: BankDetailsCheckYourAnswerView
                                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
-  val isAuthorised = false
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -61,28 +53,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
         case Some(value) => form.fill(value)
       }
       val summaryList = buildSummaryList(request.userAnswers)
-      Ok(view(preparedForm, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode)))
-  }
-
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val summaryList = buildSummaryList(request.userAnswers)
-      form.bindFromRequest().fold(
-        formWithErrors => {
-          logger.warn("Validation Error on display bank details confirmation page")
-          Future.successful(BadRequest(view(formWithErrors, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode))))
-        },
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, value))
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield {
-            if (value) {
-              auditService.sendEvent(ConfirmBankDetails())
-            }
-            Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
-          }
-      )
+      Ok(view(preparedForm, mode, summaryList, routes.DirectDebitSourceController.onPageLoad(mode)))
   }
 
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =
@@ -94,6 +65,6 @@ class BankDetailsCheckYourAnswerController @Inject()(
         YourBankDetailsNameSummary.row(answers),
         YourBankDetailsAddressSummary.row(answers)
       ).flatten
-    ).copy(classes="govuk-summary-list__row")
+    )
 
 }

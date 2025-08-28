@@ -17,66 +17,32 @@
 @import views.html.components._
 
 @this(
-    layout: templates.Layout,
-    formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
-    govukSummaryList: GovukSummaryList,
-    govukRadios: GovukRadios,
-    govukButton: GovukButton,
-    govukCheckboxes: GovukCheckboxes,
-    header1:Header1,
-    h2:Header2,
-    linkWithHiddenText: LinkWithHiddenText
+layout: templates.Layout,
+formHelper: FormWithCSRF,
+govukErrorSummary: GovukErrorSummary,
+govukSummaryList: GovukSummaryList,
+govukRadios: GovukRadios,
+govukButton: GovukButton,
+govukCheckboxes: GovukCheckboxes,
+header1:Header1,
+h2:Header2,
+linkWithHiddenText: LinkWithHiddenText
 )
 
 @(form: Form[_], mode: Mode, list: SummaryList, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title")), backLink = Some(call.url)) {
-    @formHelper(action = routes.BankDetailsCheckYourAnswerController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+@formHelper(action = routes.BankDetailsCheckYourAnswerController.onPageLoad(mode)) {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
-        }
+    @header1("bankDetailsCheckYourAnswer.heading")
+    @h2("bankDetailsCheckYourAnswer.h2")
 
-        @header1("bankDetailsCheckYourAnswer.heading")
-        @h2("bankDetailsCheckYourAnswer.h2")
+    @govukSummaryList(list)
 
-        @govukSummaryList(list)
 
-        @h2("bankDetailsCheckYourAnswer.confirmHeading")
-        @govukCheckboxes(Checkboxes(
-            fieldset = Some(Fieldset(
-                legend = Some(Legend(
-                    classes = "govuk-fieldset__legend--l",
-                    isPageHeading = false
-                ))
-           )),
-           name = "direct-debit-authority",
-           items = Seq(
-                CheckboxItem(
-                    content = messages("bankDetailsCheckYourAnswer.confirmMessage"),
-                    value = "authorised"
-                ),
-           )
-        ))
+    @govukButton(
+    ButtonViewModel(messages("site.continue"))
+    )
+ }
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
-    }
-
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            var checkbox = document.getElementById("checkbox");
-            var button = document.getElementById("button");
-
-            function toggleButton() {
-                button.disabled = !checkbox.checked;
-            }
-
-            checkbox.addEventListener("change", toggleButton);
-
-            toggleButton();
-        });
-    </script>
 }
