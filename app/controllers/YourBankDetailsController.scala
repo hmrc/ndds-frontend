@@ -167,7 +167,7 @@ class YourBankDetailsController @Inject()(
           BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
 
         case LockedAndVerified | LockedAndUnverified =>
-          Redirect("/todo-lock-end-journey") // TODO: replace with actual lock end-journey route
+          Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad())
       }
     }
   }
