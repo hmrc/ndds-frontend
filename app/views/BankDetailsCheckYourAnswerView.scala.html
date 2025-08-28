@@ -14,35 +14,33 @@
  * limitations under the License.
  *@
 
-@import views.html.components._
+@import views.html.components.*
 
 @this(
-layout: templates.Layout,
-formHelper: FormWithCSRF,
-govukErrorSummary: GovukErrorSummary,
-govukSummaryList: GovukSummaryList,
-govukRadios: GovukRadios,
-govukButton: GovukButton,
-govukCheckboxes: GovukCheckboxes,
-header1:Header1,
-h2:Header2,
-linkWithHiddenText: LinkWithHiddenText
+    layout: templates.Layout,
+    formHelper: FormWithCSRF,
+    govukSummaryList: GovukSummaryList,
+    govukButton: GovukButton,
+    h1:Header1,
+    h2:Header2,
+    linkWithHiddenText: LinkWithHiddenText
 )
 
 @(form: Form[_], mode: Mode, list: SummaryList, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title")), backLink = Some(call.url)) {
-@formHelper(action = routes.BankDetailsCheckYourAnswerController.onPageLoad(mode)) {
+    @formHelper(action = routes.BankDetailsCheckYourAnswerController.onPageLoad(mode)) {
 
-    @header1("bankDetailsCheckYourAnswer.heading")
-    @h2("bankDetailsCheckYourAnswer.h2")
+        @h1("bankDetailsCheckYourAnswer.heading")
+        @h2("bankDetailsCheckYourAnswer.h2")
 
-    @govukSummaryList(list)
+        @govukSummaryList(list)
 
-
-    @govukButton(
-    ButtonViewModel(messages("site.continue"))
-    )
- }
+        @govukButton(Button(
+            href = Some(routes.DirectDebitSourceController.onPageLoad(NormalMode).url),
+            content = Text(messages("site.continue")),
+            attributes = Map("id" -> "continue-button")
+        ))
+    }
 
 }

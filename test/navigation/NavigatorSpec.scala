@@ -56,20 +56,6 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(TotalAmountDuePage, NormalMode, userAnswers) mustBe routes.PlanStartDateController.onPageLoad(NormalMode)
       }
       
-      "must go from BankDetailsCheckYourAnswersPage to DirectDebitSourcePage" in {
-        val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
-        navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, checkPage) mustBe routes.DirectDebitSourceController.onPageLoad(NormalMode)
-      }
-
-      "must go from BankDetailsCheckYourAnswersPage to BankApprovalPage" in {
-        val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, false)
-        navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, checkPage) mustBe routes.BankApprovalController.onPageLoad()
-      }
-
-      "must throw error from BankDetailsCheckYourAnswersPage if no option selected" in {
-        navigator.nextPage(BankDetailsCheckYourAnswerPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
-      }
-
       "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is MGD, SA, TC" in {
         val validSources = Seq(MGD, SA, TC)
 
@@ -227,16 +213,6 @@ class NavigatorSpec extends SpecBase {
 
       "must go from YourBankDetailsPage to BankDetailsCheckYourAnswersPage" in {
         navigator.nextPage(YourBankDetailsPage, CheckMode, userAnswers) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
-      }
-
-      "must go from BankDetailsCheckYourAnswersPage to DirectDebitSourcePage" in {
-        val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
-        navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.DirectDebitSourceController.onPageLoad(NormalMode)
-      }
-
-      "must go from BankDetailsCheckYourAnswersPage to BankApprovalPage" in {
-        val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, false)
-        navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.BankApprovalController.onPageLoad()
       }
 
       "must go from PaymentReferencePage to CheckYourAnswersController in CheckMode" in {

@@ -15,14 +15,14 @@
  *@
 
 @import config.FrontendAppConfig
-@import views.html.components._
+@import views.html.components.*
 
 @this(
-        layout: templates.Layout,
-        header1: Header1,
-        paragraph: Paragraph,
-        paragraphMessageWithLink: ParagraphMessageWithLink,
-        govukButton: GovukButton
+    layout: templates.Layout,
+    header1: Header1,
+    paragraph: Paragraph,
+    paragraphMessageWithLink: ParagraphMessageWithLink,
+    govukButton: GovukButton
 )
 
 @(payingHmrcUrl: String)(implicit request: Request[_], messages: Messages)
@@ -30,13 +30,12 @@
 @layout(pageTitle = titleNoForm(messages("bankApproval.title")), showSignOut = false, showBackLink = false) {
 
     <h1 class="govuk-heading-xl">@messages("bankApproval.heading")</h1>
-         @header1("bankApproval.heading")
          @paragraph("bankApproval.p1")
          @paragraphMessageWithLink(
-         Some(messages("bankApproval.p2")),
-         linkMessage = messages("bankApproval.p2.link"),
-         linkUrl = payingHmrcUrl,
-         linkFullStop = false,
-         message2 = Some(messages("bankApproval.p2.link.after"))
+             Some(messages("bankApproval.p2")),
+             linkMessage = messages("bankApproval.p2.link"),
+             linkUrl = payingHmrcUrl,
+             linkFullStop = false,
+             message2 = Some(messages("bankApproval.p2.link.after"))
          )
 }

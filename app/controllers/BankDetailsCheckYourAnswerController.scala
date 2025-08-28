@@ -31,7 +31,6 @@ import viewmodels.govuk.all.SummaryListViewModel
 import views.html.BankDetailsCheckYourAnswerView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
 
 class BankDetailsCheckYourAnswerController @Inject()(
                                                       override val messagesApi: MessagesApi,
@@ -41,19 +40,18 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                                       formProvider: BankDetailsCheckYourAnswerFormProvider,
                                                       val controllerComponents: MessagesControllerComponents,
                                                       view: BankDetailsCheckYourAnswerView
-                                                    )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                                    ) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      logger.info("Display bank details confirmation page")
       val preparedForm = request.userAnswers.get(BankDetailsCheckYourAnswerPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
       val summaryList = buildSummaryList(request.userAnswers)
-      Ok(view(preparedForm, mode, summaryList, routes.DirectDebitSourceController.onPageLoad(mode)))
+      Ok(view(preparedForm, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode)))
   }
 
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =
