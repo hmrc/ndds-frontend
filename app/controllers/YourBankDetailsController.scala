@@ -100,8 +100,8 @@ class YourBankDetailsController @Inject()(
           userAnswers,
           audisFlag   = false,
           bankDetails = bankDetails,
-          bankName    = Some(bank.bankName),
-          bankAddress = Some(bank.address)
+          bankName    = bank.bankName,
+          bankAddress = bank.address
         ).map { updatedAnswers =>
           Redirect(navigator.nextPage(YourBankDetailsPage, mode, updatedAnswers))
         }
@@ -120,16 +120,16 @@ class YourBankDetailsController @Inject()(
                                         userAnswers: UserAnswers,
                                         audisFlag: Boolean,
                                         bankDetails: YourBankDetails,
-                                        bankName: Option[String],
-                                        bankAddress: Option[BankAddress]
+                                        bankName: String,
+                                        bankAddress: BankAddress
                                       ): Future[UserAnswers] = {
     val updatedAnswersTry = for {
       ua1 <- userAnswers.set(
         YourBankDetailsPage,
         YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, audisFlag, false)
       )
-      ua2 <- bankName.map(name => ua1.set(BankDetailsBankNamePage, name)).getOrElse(scala.util.Success(ua1))
-      ua3 <- bankAddress.map(addr => ua2.set(BankDetailsAddressPage, addr)).getOrElse(scala.util.Success(ua2))
+      ua2 <- ua1.set(BankDetailsBankNamePage, bankName)
+      ua3 <- ua2.set(BankDetailsAddressPage, bankAddress)
     } yield ua3
 
     for {
