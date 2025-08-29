@@ -18,7 +18,11 @@ package models
 
 import play.api.libs.json._
 
-case class YourBankDetails(accountHolderName: String, sortCode: String, accountNumber: String)
+case class YourBankDetails(accountHolderName: String, sortCode: String, accountNumber: String) {
+
+  val sortCodeNoSpaces: String = sortCode.replaceAll("\\s", "")
+
+}
 
 object YourBankDetails {
 

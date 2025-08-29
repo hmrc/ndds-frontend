@@ -73,14 +73,14 @@ case class BarsService @Inject()(
     val (endpoint, requestJson) = if (personalOrBusiness.toLowerCase == "personal") {
       "personal" -> Json.toJson(
         BarsPersonalRequest(
-          BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
+          BarsAccount(bankDetails.sortCodeNoSpaces, bankDetails.accountNumber),
           BarsSubject(bankDetails.accountHolderName)
         )
       )
     } else {
       "business" -> Json.toJson(
         BarsBusinessRequest(
-          BarsAccount(bankDetails.sortCode, bankDetails.accountNumber),
+          BarsAccount(bankDetails.sortCodeNoSpaces, bankDetails.accountNumber),
           BarsBusiness(bankDetails.accountHolderName)
         )
       )
@@ -90,7 +90,7 @@ case class BarsService @Inject()(
       verificationResponse <- barsConnector.verify(endpoint, requestJson)
       result <- if (checkBarsResponseSuccess(verificationResponse)) {
         // Only call getMetadata if verification succeeded
-        barsConnector.getMetadata(bankDetails.sortCode).map { bank =>
+        barsConnector.getMetadata(bankDetails.sortCodeNoSpaces).map { bank =>
           Right((verificationResponse, bank))
         }
       } else {
