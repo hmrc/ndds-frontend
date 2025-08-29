@@ -19,6 +19,7 @@ package controllers
 import controllers.actions.*
 import forms.BankDetailsCheckYourAnswerFormProvider
 import models.Mode
+import models.audits.ConfirmBankDetails
 import pages.BankDetailsCheckYourAnswerPage
 import play.api.Logging
 import play.api.data.Form
@@ -27,6 +28,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
+import services.AuditService
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.BankDetailsCheckYourAnswerView
 
@@ -37,6 +39,7 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                                       identify: IdentifierAction,
                                                       getData: DataRetrievalAction,
                                                       requireData: DataRequiredAction,
+                                                      auditService: AuditService,
                                                       formProvider: BankDetailsCheckYourAnswerFormProvider,
                                                       val controllerComponents: MessagesControllerComponents,
                                                       view: BankDetailsCheckYourAnswerView
@@ -50,6 +53,8 @@ class BankDetailsCheckYourAnswerController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
+      //TODO: will be covered in the next page of confirmation
+      auditService.sendEvent(ConfirmBankDetails())
       val summaryList = buildSummaryList(request.userAnswers)
       Ok(view(preparedForm, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode)))
   }

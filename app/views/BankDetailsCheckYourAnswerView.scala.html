@@ -29,7 +29,6 @@
 @(form: Form[_], mode: Mode, list: SummaryList, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title")), backLink = Some(call.url)) {
-    @formHelper(action = routes.BankDetailsCheckYourAnswerController.onPageLoad(mode)) {
 
         @h1("bankDetailsCheckYourAnswer.heading")
         @h2("bankDetailsCheckYourAnswer.h2")
@@ -41,6 +40,5 @@
             content = Text(messages("site.continue")),
             attributes = Map("id" -> "continue-button")
         ))
-    }
 
 }
