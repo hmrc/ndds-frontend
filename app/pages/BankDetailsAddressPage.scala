@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package models
+package pages
 
-import play.api.libs.json._
+import models.responses.BankAddress
+import play.api.libs.json.JsPath
 
-case class YourBankDetails(accountHolderName: String, sortCode: String, accountNumber: String)
+case object BankDetailsAddressPage extends QuestionPage[BankAddress] {
 
-object YourBankDetails {
+  override def path: JsPath = JsPath \ toString
 
-  implicit val format: OFormat[YourBankDetails] = Json.format
+  override def toString: String = "bankDetailsAddress"
 }

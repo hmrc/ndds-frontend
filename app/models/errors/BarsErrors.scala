@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package models
+package models.errors
 
-import play.api.libs.json._
-
-case class YourBankDetails(accountHolderName: String, sortCode: String, accountNumber: String)
-
-object YourBankDetails {
-
-  implicit val format: OFormat[YourBankDetails] = Json.format
+enum BarsErrors {
+  case BankAccountUnverified,
+  AccountDetailInvalidFormat, 
+  SortCodeNotFound,  
+  SortCodeNotSupported, 
+  AccountNotFound, 
+  NameMismatch, 
+  DetailsVerificationFailed
 }
