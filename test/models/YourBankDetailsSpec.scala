@@ -47,4 +47,12 @@ class YourBankDetailsSpec extends AnyWordSpec with Matchers {
       json.as[YourBankDetails] mustEqual sample
     }
   }
+
+  "sortCodeNoSpaces" must {
+    "remove spaces from sort code" in {
+      val testData: YourBankDetails = YourBankDetails(accountHolderName = "testName", sortCode = "12 34 56", accountNumber = "12345678")
+
+      testData.sortCodeNoSpaces mustEqual "123456"
+    }
+  }
 }
