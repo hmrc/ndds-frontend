@@ -22,19 +22,23 @@ case class YourBankDetailsWithAuddisStatus(
                                             accountHolderName: String,
                                             sortCode: String,
                                             accountNumber: String,
-                                            auddisStatus: Boolean
+                                            auddisStatus: Boolean,
+                                            accountVerified: Boolean
                                           )
 
 object YourBankDetailsWithAuddisStatus {
 
   implicit val format: OFormat[YourBankDetailsWithAuddisStatus] = Json.format
 
-  def toModelWithAuddisStatus(yourBankDetails: YourBankDetails, auddisStatus: Boolean): YourBankDetailsWithAuddisStatus = {
+  def toModelWithAuddisStatus(yourBankDetails: YourBankDetails,
+                              auddisStatus: Boolean,
+                              accountVerified: Boolean): YourBankDetailsWithAuddisStatus = {
     YourBankDetailsWithAuddisStatus(
       accountHolderName = yourBankDetails.accountHolderName,
       sortCode = yourBankDetails.sortCode,
       accountNumber = yourBankDetails.accountNumber,
-      auddisStatus = auddisStatus
+      auddisStatus = auddisStatus,
+      accountVerified = accountVerified
     )
   }
 

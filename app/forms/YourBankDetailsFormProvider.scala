@@ -35,9 +35,9 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
         .verifying(maxLength(MAX_ACCOUNT_HOLDER_NAME_LENGTH, "yourBankDetails.error.accountHolderName.length")),
       "sortCode" -> text("yourBankDetails.error.sortCode.required")
         .verifying(firstError(
-          minLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
-          maxLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
-          regexp(NumericRegex, "yourBankDetails.error.sortCode.numericOnly")
+          minLengthWithoutSpaces(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
+          maxLengthWithoutSpaces(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
+          regexp(NumericRegexWithSpaces, "yourBankDetails.error.sortCode.numericOnly")
         )),
       "accountNumber" -> text("yourBankDetails.error.accountNumber.required")
         .verifying(firstError(
@@ -45,6 +45,8 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
           maxLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.length"),
           regexp(NumericRegex, "yourBankDetails.error.accountNumber.numericOnly")
         ))
-    )(YourBankDetails.apply)(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))
+    )(YourBankDetails(_,_,_))(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))
   )
 }
+
+

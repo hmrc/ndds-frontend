@@ -17,7 +17,9 @@
 package viewmodels.checkAnswers
 
 import models.UserAnswers
+import pages.BankDetailsAddressPage
 import play.api.i18n.Messages
+import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DirectDebitDetailsData
@@ -26,7 +28,7 @@ import viewmodels.implicits.*
 
 object YourBankDetailsAddressSummary extends DirectDebitDetailsData{
 
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] ={
+  def row1(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] ={
     val formattedAddress = ukBankAddress.getFullAddress
        Some( SummaryListRowViewModel(
           key     = "bankDetailsCheckYourAnswer.account.bank.address",
@@ -34,4 +36,24 @@ object YourBankDetailsAddressSummary extends DirectDebitDetailsData{
           actions = Seq.empty
         ))
     }
+
+  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers
+      .get(BankDetailsAddressPage)
+      .map { answer =>
+
+        val field1 = answer.lines.map(HtmlFormat.escape).mkString("<br/>")
+        val field2 = HtmlFormat.escape(answer.town).toString
+        val field3 = HtmlFormat.escape(answer.postCode).toString
+        val field4 = HtmlFormat.escape(answer.country.name).toString
+
+        val fullAddress = Html(s"$field1<br/>$field2<br/>$field3<br/>$field4")
+
+        SummaryListRowViewModel(
+          key = "bankDetailsCheckYourAnswer.account.bank.address",
+          value = ValueViewModel(HtmlContent(fullAddress )),
+          actions = Seq.empty
+        )
+      }
+
 }
