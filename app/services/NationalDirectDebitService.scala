@@ -21,9 +21,9 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
-import models.requests.WorkingDaysOffsetRequest
-import models.responses.EarliestPaymentDate
-import models.{DirectDebitSource, PaymentPlanType, NddResponse, UserAnswers}
+import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
+import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
@@ -99,4 +99,8 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment)
+
+  def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
+    nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
+  }
 }
