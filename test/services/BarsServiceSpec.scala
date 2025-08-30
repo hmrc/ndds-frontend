@@ -28,7 +28,6 @@ import org.scalatest.wordspec.AsyncWordSpec
 import connectors.BarsConnector
 import config.FrontendAppConfig
 import uk.gov.hmrc.http.HeaderCarrier
-import play.api.libs.json.Json
 
 import scala.concurrent.Future
 
