@@ -16,7 +16,6 @@
 
 package viewmodels.checkAnswers
 
-import models.UserAnswers
 import pages.YourBankDetailsPage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
@@ -24,6 +23,8 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
+import controllers.routes
+import models.{CheckMode, UserAnswers}
 
 object YourBankDetailsAccountNumberSummary  {
 
@@ -36,8 +37,10 @@ object YourBankDetailsAccountNumberSummary  {
         SummaryListRowViewModel(
           key     = "bankDetailsCheckYourAnswer.account.account.number",
           value   = ValueViewModel(HtmlContent(value)),
-          actions = Seq.empty
-          
+          actions = Seq(
+            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+          )
         )
     }
 }
