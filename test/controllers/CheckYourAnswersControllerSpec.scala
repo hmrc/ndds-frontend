@@ -17,19 +17,21 @@
 package controllers
 
 import base.SpecBase
+import models.responses.GenerateDdiRefResponse
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, verify}
+import org.mockito.Mockito.{doNothing, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
 import play.api.inject.bind
 import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.AuditService
+import services.{AuditService, NationalDirectDebitService}
 import viewmodels.govuk.SummaryListFluency
 
 import java.time.LocalDate
+import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
@@ -39,6 +41,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val endDate = LocalDate.of(2027, 7, 25)
   private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
   private val mockAuditService: AuditService = mock[AuditService]
+  private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
 
   "Check Your Answers Controller" - {
     val userAnswer = emptyUserAnswers
@@ -195,7 +198,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if required data is missing" in {
+    "must redirect to Journey Recovery for a POST if PaymentReferencePage data is missing" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
@@ -203,39 +206,101 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       val application = applicationBuilder(userAnswers = Some(incompleteAnswers)).build()
       running(application) {
         val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = route(application, request).value
+        val result = intercept[Exception](route(application, request).value.futureValue)
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        result.getMessage must include("Missing details: PaymentReferencePage.")
       }
     }
 
-    "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all require data is provided" in {
-      val totalDueAmount = 200
+    "must redirect to Journey Recovery for a POST if DirectDebitSource data is missing" in {
       val incompleteAnswers = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+        .setOrException(PaymentReferencePage, "testRef")
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-        .setOrException(TotalAmountDuePage, totalDueAmount)
-        .setOrException(PlanStartDatePage, planStartDateDetails)
-        .setOrException(PaymentReferencePage, "testReference")
 
       val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-        .overrides(
-          bind[AuditService].toInstance(mockAuditService)
-        )
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
         .build()
 
-      doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
+      when(mockNddService.generateNewDdiReference(any())(any())).thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
 
       running(application) {
         val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = route(application, request).value
+        val result = intercept[Exception](route(application, request).value.futureValue)
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-        verify(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
+        result.getMessage must include("Missing details: DirectDebitSourcePage.")
       }
     }
 
+    "must redirect to Journey Recovery for a POST if PaymentPlanType data is missing" in {
+      val incompleteAnswers = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+        .setOrException(PaymentReferencePage, "testRef")
+
+      when(mockNddService.generateNewDdiReference(any())(any())).thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("Missing details: PaymentPlanTypePage.")
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if Ddi reference number is not obtained successfully" in {
+      val totalDueAmount = 200
+      val incompleteAnswers = emptyUserAnswers
+        .setOrException(PaymentReferencePage, "testReference")
+
+      when(mockNddService.generateNewDdiReference(any())(any())).thenReturn(Future.failed(new Exception("bang")))
+
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("bang")
+      }
+    }
+
+    "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all required data is provided" - {
+      "and ddi reference is generated successfully" in {
+        val totalDueAmount = 200
+        val incompleteAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(TotalAmountDuePage, totalDueAmount)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(PaymentReferencePage, "testReference")
+
+        when(mockNddService.generateNewDdiReference(any())(any())).thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+
+        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+          .overrides(
+            bind[AuditService].toInstance(mockAuditService),
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          )
+          .build()
+
+        doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+          verify(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
+        }
+      }
+    }
   }
 }

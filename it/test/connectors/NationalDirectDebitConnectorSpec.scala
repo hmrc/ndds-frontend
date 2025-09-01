@@ -18,8 +18,8 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathMatching}
 import itutil.ApplicationWithWiremock
-import models.requests.WorkingDaysOffsetRequest
-import models.responses.EarliestPaymentDate
+import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
@@ -93,6 +93,70 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
       val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
       val result = intercept[Exception](connector.getEarliestPaymentDate(requestBody).futureValue)
+
+      result.getMessage should include("The future returned an exception")
+    }
+  }
+
+  "generateNewDdiReference" should {
+    "successfully retrieve ddi reference number" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/direct-debit-reference"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(s"""{"ddiRefNumber":"testRef"}""")
+          )
+      )
+
+      val requestBody = GenerateDdiRefRequest("testRef")
+      val result = connector.generateNewDdiReference(requestBody).futureValue
+
+      result shouldBe GenerateDdiRefResponse("testRef")
+    }
+
+    "must fail when the result is parsed as a HttpResponse but is not a 200 (OK) response" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/direct-debit-reference"))
+          .willReturn(
+            aResponse()
+              .withStatus(CREATED)
+          )
+      )
+
+      val requestBody = GenerateDdiRefRequest("testRef")
+      val result = intercept[Exception](connector.generateNewDdiReference(requestBody).futureValue)
+
+      result.getMessage should include("Unexpected status code: 201")
+    }
+
+    "must fail when the result is parsed as an UpstreamErrorResponse" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/direct-debit-reference"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+              .withBody("test error")
+          )
+      )
+
+      val requestBody = GenerateDdiRefRequest("testRef")
+      val result = intercept[Exception](connector.generateNewDdiReference(requestBody).futureValue)
+
+      result.getMessage should include("Response body: 'test error', status code: 500")
+    }
+
+    "must fail when the result is a failed future" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/direct-debit-reference"))
+          .willReturn(
+            aResponse()
+              .withStatus(0)
+          )
+      )
+
+      val requestBody = GenerateDdiRefRequest("testRef")
+      val result = intercept[Exception](connector.generateNewDdiReference(requestBody).futureValue)
 
       result.getMessage should include("The future returned an exception")
     }
