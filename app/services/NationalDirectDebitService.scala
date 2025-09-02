@@ -49,7 +49,8 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           _ <- directDebitCache.cacheResponse(directDebits)(id)
         } yield directDebits
       case existingCache =>
-        Future.successful(NddResponse(existingCache.size, existingCache))
+        val response = NddResponse(existingCache.size, existingCache)
+        Future.successful(response)
     }
   }
 
