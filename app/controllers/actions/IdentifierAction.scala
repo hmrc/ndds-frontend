@@ -44,7 +44,6 @@ class AuthenticatedIdentifierAction @Inject()(
 
     authorised().retrieve(Retrievals.credentials) {
       case Some(credentials) =>
-        println(s"Provider ID: ${credentials.providerId}")
         block(IdentifierRequest(request, credentials.providerId))
       case None =>
         throw new UnauthorizedException("Unable to retrieve credential Id")
