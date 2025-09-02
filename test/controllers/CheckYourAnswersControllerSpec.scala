@@ -251,7 +251,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
     }
 
     "must redirect to Journey Recovery for a POST if Ddi reference number is not obtained successfully" in {
-      val totalDueAmount = 200
       val incompleteAnswers = emptyUserAnswers
         .setOrException(PaymentReferencePage, "testReference")
 

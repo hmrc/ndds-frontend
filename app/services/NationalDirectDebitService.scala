@@ -25,6 +25,7 @@ import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import play.api.Logging
 import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
@@ -38,8 +39,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
                                            val directDebitCache: DirectDebitCacheRepository,
                                            config: FrontendAppConfig,
                                            auditService: AuditService)
-                                          (implicit ec: ExecutionContext) {
-
+                                          (implicit ec: ExecutionContext) extends Logging {
   def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[NddResponse] = {
     directDebitCache.retrieveCache(id) flatMap {
       case Seq() =>
@@ -49,7 +49,8 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           _ <- directDebitCache.cacheResponse(directDebits)(id)
         } yield directDebits
       case existingCache =>
-        Future.successful(NddResponse(existingCache.size, existingCache))
+        val response = NddResponse(existingCache.size, existingCache)
+        Future.successful(response)
     }
   }
 
