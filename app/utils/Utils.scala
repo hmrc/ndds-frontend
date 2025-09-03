@@ -18,4 +18,5 @@ package utils
 
 object Utils {
   val emptyString = ""
+  val LockExpirySessionKey = "lockoutExpiryDateTime"
 }
