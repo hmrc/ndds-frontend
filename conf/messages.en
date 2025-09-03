@@ -121,6 +121,10 @@ accountDetailsNotVerified.p1 = You will need to wait until {0} before you enter 
 accountDetailsNotVerified.p2 = If you do not have another bank account you will need to pay using an alternative payment option. You can find more information on this on the
 accountDetailsNotVerified.p2.link = Paying HMRC page
 
+confirmYourAuthority.title = Confirm your authority
+confirmYourAuthority.heading = Confirm your authority
+confirmYourAuthority.p1 = Confirm that you are the account holder or an authorised signatory, and are able to authorise Direct Debit payments from this account.
+
 bankDetailsCheckYourAnswer.title = Check your answers
 bankDetailsCheckYourAnswer.heading = Check your answers
 bankDetailsCheckYourAnswer.checkYourAnswersLabel = Your bank details check your answers
