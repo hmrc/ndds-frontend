@@ -23,7 +23,7 @@ import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, Variab
 import models.audits.GetDDIs
 import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
+import models.{ChrisSubmissionRequest, DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
 import play.api.mvc.Request
@@ -53,6 +53,16 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         Future.successful(response)
     }
   }
+
+  def submitChrisData(submission: ChrisSubmissionRequest)
+                     (implicit hc: HeaderCarrier): Future[Boolean] = {
+    nddConnector.submitChrisData(submission).recover {
+      case ex =>
+        logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
+        false
+    }
+  }
+
 
   def getEarliestPaymentDate(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)

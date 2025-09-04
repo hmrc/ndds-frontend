@@ -20,8 +20,8 @@ import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.DirectDebitSource.*
-import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
-import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentPlanTypePage, PaymentReferencePage, PlanStartDatePage, TotalAmountDuePage}
+import models.{ChrisSubmissionRequest, DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, CheckYourAnswerPage, DirectDebitSourcePage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, PaymentsFrequencyPage, PlanStartDatePage, TotalAmountDuePage, YearEndAndMonthPage, YourBankDetailsPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -80,37 +80,87 @@ class CheckYourAnswersController @Inject()(
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     for {
+      // 1. Generate a new DDI reference
       reference <- nddService.generateNewDdiReference(
-        request.userAnswers.get(PaymentReferencePage).getOrElse(throw new Exception("Missing details: PaymentReferencePage"))
+        request.userAnswers.get(PaymentReferencePage)
+          .getOrElse(throw new Exception("Missing details: PaymentReferencePage"))
       )
-      res = paymentCalculation(request.userAnswers)
+
+      // 2. Build ChrisSubmissionRequest with calculations
+      submission = buildChrisSubmissionRequest(request.userAnswers, reference.ddiRefNumber)
+
+      // 3. Send to backend
+      _ <- nddService.submitChrisData(submission)
+
+      // 4. Update session with reference
       updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckYourAnswerPage, reference))
       _ <- sessionRepository.set(updatedAnswers)
+
+      // 5. Audit event
       _ = auditService.sendSubmitDirectDebitPaymentPlan
     } yield {
-      res
+      Redirect(routes.DirectDebitConfirmationController.onPageLoad())
     }
   }
 
-  private def paymentCalculation(userAnswers: UserAnswers): Result = {
-    userAnswers.get(DirectDebitSourcePage).getOrElse(throw new Exception("Missing details: DirectDebitSourcePage")) match {
-      case DirectDebitSource.TC =>
-        userAnswers.get(PaymentPlanTypePage).getOrElse(throw new Exception("Missing details: PaymentPlanTypePage")) match {
-          case PaymentPlanType.TaxCreditRepaymentPlan =>
-            calculateTaxCreditRepaymentPlan(userAnswers)
-          case otherPlan =>
-            logger.debug(s"No calculation needed for TC service with plan [$otherPlan]")
-            Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-        }
-      // will add next steps  and update
-      case _ =>
-        Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-    }
+  private def buildChrisSubmissionRequest(
+                                           userAnswers: UserAnswers,
+                                           ddiReference: String
+                                         ): ChrisSubmissionRequest = {
+
+    val totalAmountDue = userAnswers.get(TotalAmountDuePage)
+    val planStartDate = userAnswers.get(PlanStartDatePage)
+    val paymentDate = userAnswers.get(PaymentDatePage)
+    val paymentFrequency = userAnswers.get(PaymentsFrequencyPage) // optional
+    val yearEndAndMonth = userAnswers.get(YearEndAndMonthPage) // optional
+
+    val bankDetailsWithAuddis = userAnswers.get(YourBankDetailsPage)
+      .getOrElse(throw new Exception("Missing details: YourBankDetailsPage"))
+
+    val bankName = userAnswers.get(BankDetailsBankNamePage)
+      .getOrElse(throw new Exception("Missing details: BankDetailsBankNamePage"))
+
+    val bankAddress = userAnswers.get(BankDetailsAddressPage)
+      .getOrElse(throw new Exception("Missing details: BankDetailsAddressPage"))
+
+    val calculationOpt: Option[PaymentPlanCalculation] =
+      userAnswers.get(DirectDebitSourcePage) match {
+        case Some(DirectDebitSource.TC) =>
+          userAnswers.get(PaymentPlanTypePage) match {
+            case Some(PaymentPlanType.TaxCreditRepaymentPlan) =>
+              Some(calculateTaxCreditRepaymentPlan(userAnswers))
+            case otherPlan =>
+              logger.debug(s"No calculation needed for TC service with plan [$otherPlan]")
+              None
+          }
+        case _ =>
+          None
+      }
+
+    ChrisSubmissionRequest(
+      serviceType = userAnswers.get(DirectDebitSourcePage).get,
+      paymentPlanType = userAnswers.get(PaymentPlanTypePage).get,
+      paymentFrequency = paymentFrequency,
+      yourBankDetailsWithAuddisStatus = bankDetailsWithAuddis,
+      auddisStatus = Some(bankDetailsWithAuddis.auddisStatus),
+      planStartDate = planStartDate,
+      paymentDate = paymentDate,
+      yearEndAndMonth = yearEndAndMonth,
+      bankDetails = YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(bankDetailsWithAuddis),
+      bankDetailsAddress = bankAddress,
+      bankName = bankName,
+      ddiReferenceNo = ddiReference,
+      totalAmountDue = totalAmountDue,
+      calculation = calculationOpt
+    )
   }
 
-  private def calculateTaxCreditRepaymentPlan(userAnswers: UserAnswers): Result = {
-    val totalAmountDue = userAnswers.get(TotalAmountDuePage).getOrElse(throw new Exception("Missing details: TotalAmountDuePage"))
-    val planStartDate = userAnswers.get(PlanStartDatePage).getOrElse(throw new Exception("Missing details: PlanStartDatePage"))
+
+  private def calculateTaxCreditRepaymentPlan(userAnswers: UserAnswers): PaymentPlanCalculation = {
+    val totalAmountDue = userAnswers.get(TotalAmountDuePage)
+      .getOrElse(throw new Exception("Missing details: TotalAmountDuePage"))
+    val planStartDate = userAnswers.get(PlanStartDatePage)
+      .getOrElse(throw new Exception("Missing details: PlanStartDatePage"))
 
     val regularPaymentAmount = PaymentCalculations.calculateRegularPaymentAmount(
       totalAmountDueInput = totalAmountDue,
@@ -137,10 +187,17 @@ class CheckYourAnswersController @Inject()(
       planStartDate = planStartDate.enteredDate,
       monthsOffset = appConfig.tcMonthsUntilFinalPayment
     )
+
     logger.debug(s"Regular Payment: £$regularPaymentAmount, Final Payment: £$finalPaymentAmount")
     logger.debug(s"Second: $secondPaymentDate, Penultimate: $penultimatePaymentDate, Final: $finalPaymentDate")
 
-    Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+    PaymentPlanCalculation(
+      regularPaymentAmount = Some(BigDecimal(regularPaymentAmount)),
+      finalPaymentAmount = Some(finalPaymentAmount),
+      secondPaymentDate = Some(secondPaymentDate),
+      penultimatePaymentDate = Some(penultimatePaymentDate),
+      finalPaymentDate = Some(finalPaymentDate)
+    )
   }
 
 }
