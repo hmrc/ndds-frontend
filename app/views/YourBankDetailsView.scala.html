@@ -51,6 +51,8 @@
                 label = LabelViewModel(messages("yourBankDetails.sortCode"))
             )
             .withWidth(Fixed5)
+            .withInputType("number")
+            .withPattern("[0-9]*")
             .withHint(Hint(content = Text(messages("yourBankDetails.sortCode.hint"))))
         )
 
@@ -60,6 +62,8 @@
                 label = LabelViewModel(messages("yourBankDetails.accountNumber"))
             )
             .withWidth(Fixed10)
+            .withInputType("number")
+            .withPattern("[0-9]*")
             .withHint(Hint(content = Text(messages("yourBankDetails.accountNumber.hint"))))
         )
 

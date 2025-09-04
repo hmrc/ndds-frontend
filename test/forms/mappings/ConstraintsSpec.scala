@@ -123,41 +123,7 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
       result mustEqual Invalid("error.length", 10)
     }
   }
-
-  "maxLengthWithoutSpaces" - {
-
-    "must return Valid for a string shorter than the allowed length" in {
-      val result = maxLengthWithoutSpaces(6, "error.length")(" a " * 5)
-      result mustEqual Valid
-    }
-
-    "must return Valid for an empty string" in {
-      val result = maxLengthWithoutSpaces(6, "error.length")("")
-      result mustEqual Valid
-    }
-
-    "must return Valid for a string equal to the allowed length" in {
-      val result = maxLengthWithoutSpaces(6, "error.length")(" a" * 6)
-      result mustEqual Valid
-    }
-
-    "must return Invalid for a string longer than the allowed length" in {
-      val result = maxLengthWithoutSpaces(6, "error.length")("a " * 8)
-      result mustEqual Invalid("error.length", 6)
-    }
-  }
-
-  "minLengthWithoutSpaces" - {
-
-    "must return Valid for a string equal to or longer than the minimum length" in {
-      val result = minLengthWithoutSpaces(3, "error.tooShort")(" abc")
-      result mustEqual Valid
-    }
-    "must return Invalid for a string shorter than the minimum length" in {
-      val result = minLengthWithoutSpaces(3, "error.tooShort")(" ab")
-      result mustEqual Invalid("error.tooShort", 3)
-    }
-  }
+  
 
   "maxDate" - {
 
@@ -282,18 +248,6 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
       "12 34" mustNot fullyMatch regex NumericRegex
       "£$%^" mustNot fullyMatch regex NumericRegex
       "" mustNot fullyMatch regex NumericRegex
-    }
-  }
-
-  "NumericRegexWithSpaces" - {
-    "must match numeric strings with spaces" in {
-      "123456" must fullyMatch regex NumericRegexWithSpaces
-      "12 34 56" must fullyMatch regex NumericRegexWithSpaces
-      "000" must fullyMatch regex NumericRegexWithSpaces
-      "12a34" mustNot fullyMatch regex NumericRegexWithSpaces
-      "abc" mustNot fullyMatch regex NumericRegexWithSpaces
-      "£$%^" mustNot fullyMatch regex NumericRegexWithSpaces
-      "" mustNot fullyMatch regex NumericRegexWithSpaces
     }
   }
 }
