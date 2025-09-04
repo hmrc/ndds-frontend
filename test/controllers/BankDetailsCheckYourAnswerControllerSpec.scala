@@ -49,7 +49,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
 
         val html = contentAsString(result)
         html must include("Check your answers")
-//        html must include("Test Bank Name")
         html must include("Your bank details")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
       }
