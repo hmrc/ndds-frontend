@@ -37,7 +37,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
   "getEarliestPaymentDate" should {
     "successfully retrieve a date" in {
       stubFor(
-        post(urlPathMatching("/national-direct-debit/direct-debits/earliest-payment-date"))
+        post(urlPathMatching("/national-direct-debit/direct-debits/future-working-days"))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -53,7 +53,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
     "must fail when the result is parsed as a HttpResponse but is not a 200 (OK) response" in {
       stubFor(
-        post(urlPathMatching("/national-direct-debit/direct-debits/earliest-payment-date"))
+        post(urlPathMatching("/national-direct-debit/direct-debits/future-working-days"))
           .willReturn(
             aResponse()
               .withStatus(CREATED)
@@ -68,7 +68,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
     "must fail when the result is parsed as an UpstreamErrorResponse" in {
       stubFor(
-        post(urlPathMatching("/national-direct-debit/direct-debits/earliest-payment-date"))
+        post(urlPathMatching("/national-direct-debit/direct-debits/future-working-days"))
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)
@@ -84,7 +84,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
     "must fail when the result is a failed future" in {
       stubFor(
-        post(urlPathMatching("/national-direct-debit/direct-debits/earliest-payment-date"))
+        post(urlPathMatching("/national-direct-debit/direct-debits/future-working-days"))
           .willReturn(
             aResponse()
               .withStatus(0)

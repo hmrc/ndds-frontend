@@ -70,5 +70,4 @@ case class BarsConnector @Inject()(
       }
   }
 
-
 }
