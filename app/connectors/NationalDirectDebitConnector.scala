@@ -48,7 +48,7 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   def getEarliestPaymentDate(workingDaysOffsetRequest: WorkingDaysOffsetRequest)
                             (implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     http
-      .post(url"$nationalDirectDebitBaseUrl/direct-debits/earliest-payment-date")
+      .post(url"$nationalDirectDebitBaseUrl/direct-debits/future-working-days")
       .withBody(Json.toJson(workingDaysOffsetRequest))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
