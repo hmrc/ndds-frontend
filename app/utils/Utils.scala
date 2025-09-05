@@ -16,6 +16,15 @@
 
 package utils
 
+import java.time.LocalDate
+
 object Utils {
   val emptyString = ""
+
+  def isTwoDaysPriorPaymentDate(paymentDate: LocalDate): Boolean =
+    val currentDate = LocalDate.now()
+
+    if (paymentDate.isBefore(currentDate.plusDays(3))) true else false
+
 }
+

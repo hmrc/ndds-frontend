@@ -104,4 +104,5 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
   }
+
 }
