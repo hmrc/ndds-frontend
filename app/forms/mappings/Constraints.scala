@@ -24,7 +24,6 @@ import play.api.data.validation.{Constraint, Invalid, Valid}
 trait Constraints {
 
   val NumericRegex = "^[0-9]+$"
-  val NumericRegexWithSpaces = "^[0-9\\s]+$"
 
   protected def firstError[A](constraints: Constraint[A]*): Constraint[A] =
     Constraint {
@@ -88,22 +87,6 @@ trait Constraints {
         Valid
       case _ =>
         Invalid(errorKey, maximum)
-    }
-
-  protected def maxLengthWithoutSpaces(maximum: Int, errorKey: String): Constraint[String] =
-    Constraint {
-      case str if str.replaceAll("\\s","").length <= maximum =>
-        Valid
-      case _ =>
-        Invalid(errorKey, maximum)
-    }
-
-  protected def minLengthWithoutSpaces(minimum: Int, errorKey: String): Constraint[String] =
-    Constraint {
-      case str if str.replaceAll("\\s","").length >= minimum =>
-        Valid
-      case _ =>
-        Invalid(errorKey, minimum)
     }
 
   protected def minLength(minimum: Int, errorKey: String): Constraint[String] =
