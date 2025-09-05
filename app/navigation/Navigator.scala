@@ -34,6 +34,7 @@ class Navigator @Inject()() {
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
     case BankDetailsCheckYourAnswerPage => _ => routes.ConfirmAuthorityController.onPageLoad(NormalMode)
+    case ConfirmAuthorityPage           => nextAfterConfirmAuthority(NormalMode)
     case DirectDebitSourcePage => checkDirectDebitSource
     case PaymentPlanTypePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
     case PaymentsFrequencyPage => _ => routes.RegularPaymentAmountController.onPageLoad(NormalMode)
@@ -48,7 +49,7 @@ class Navigator @Inject()() {
   private val checkRouteMap: Page => UserAnswers => Call = {
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
     case BankDetailsCheckYourAnswerPage => _ => routes.ConfirmAuthorityController.onPageLoad(CheckMode)
-    case BankDetailsCheckYourAnswerPage => checkBankDetails
+    case ConfirmAuthorityPage           => nextAfterConfirmAuthority(CheckMode)
     case PaymentReferencePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentAmountPage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
@@ -90,17 +91,12 @@ class Navigator @Inject()() {
     }
   }
 
-  private def checkBankDetails(userAnswers: UserAnswers): Call =
-    userAnswers
-      .get(BankDetailsCheckYourAnswerPage)
-      .map { isAuthorised =>
-        if (isAuthorised) {
-          routes.DirectDebitSourceController.onPageLoad(NormalMode)
-        } else {
-          routes.BankApprovalController.onPageLoad()
-        }
-      }
-      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+  private def nextAfterConfirmAuthority(mode: Mode): UserAnswers => Call = ua =>
+    ua.get(ConfirmAuthorityPage) match {
+      case Some(ConfirmAuthority.Yes) => routes.DirectDebitSourceController.onPageLoad(mode)
+      case Some(ConfirmAuthority.No)  => routes.BankApprovalController.onPageLoad()
+      case None                       => routes.JourneyRecoveryController.onPageLoad()
+    }
 
   private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
     val answer: Option[DirectDebitSource] = userAnswers.get(DirectDebitSourcePage)

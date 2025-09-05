@@ -16,26 +16,31 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, IdentifierAction}
+import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import forms.ConfirmAuthorityFormProvider
 import models.{ConfirmAuthority, Mode, UserAnswers}
+import navigation.Navigator
 import pages.ConfirmAuthorityPage
 import play.api.data.Form
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmAuthorityView
 
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmAuthorityController @Inject() (
                                              val controllerComponents: MessagesControllerComponents,
                                              identify: IdentifierAction,
                                              getData: DataRetrievalAction,
                                              formProvider: ConfirmAuthorityFormProvider,
-                                             view: ConfirmAuthorityView
-                                           ) extends FrontendBaseController with I18nSupport {
+                                             requireData: DataRequiredAction,
+                                             sessionRepository: SessionRepository,
+                                             navigator: Navigator,
+                                             view: ConfirmAuthorityView,
+                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   private val form: Form[ConfirmAuthority] = formProvider()
 
@@ -49,14 +54,18 @@ class ConfirmAuthorityController @Inject() (
       Ok(view(preparedForm, mode, routes.BankDetailsCheckYourAnswerController.onPageLoad(mode)))
     }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async { implicit request =>
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     form.bindFromRequest().fold(
       formWithErrors =>
         Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))),
-      {
-        case ConfirmAuthority.Yes => Future.successful(Redirect(routes.DirectDebitSourceController.onPageLoad(mode)))
-        case ConfirmAuthority.No => Future.successful(Redirect(routes.BankApprovalController.onPageLoad()))
-      })
+      value => {
+        val updatedTry = request.userAnswers.set(ConfirmAuthorityPage, value)
+        for {
+          updated <- Future.fromTry(updatedTry)
+          _       <- sessionRepository.set(updated)
+        } yield Redirect(navigator.nextPage(ConfirmAuthorityPage, mode, updated))
+      }
+    )
   }
 }
 

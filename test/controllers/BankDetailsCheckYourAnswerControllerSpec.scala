@@ -43,6 +43,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
   val mockAuditService: AuditService = mock[AuditService]
 
   lazy val bankDetailsCheckYourAnswerRoute = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
+  lazy val ConfirmAuthorityRoute = routes.ConfirmAuthorityController.onPageLoad(NormalMode).url
 
   "BankDetailsCheckYourAnswer Controller" - {
 
@@ -70,10 +71,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         html must include("RG1 8BW")
         html must include("UNITED KINGDOM")
         html must include("Your bank details")
-        html must include("Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?")
-        html must include("You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
-
       }
     }
 
@@ -104,13 +102,11 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         html must include("Account Holder Name")
         html must include("123212")
         html must include("34211234")
-        html must include("Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?")
-        html must include("You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
       }
     }
 
-    "must redirect to the next page when valid data is submitted and send an audit event if yes is selected" in {
+    "must redirect to the next page and send an audit event when Continue is clicked" in {
 
       val mockSessionRepository = mock[SessionRepository]
 
@@ -133,29 +129,12 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       running(application) {
         val request =
           FakeRequest(POST, bankDetailsCheckYourAnswerRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+            .withFormUrlEncodedBody("anything" -> "ignored")
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
         verify(mockAuditService).sendEvent(any())(any(), any(), any())
-      }
-    }
-
-    "must return a Bad Request and errors when invalid data is submitted" in {
-
-      val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true, false))
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, bankDetailsCheckYourAnswerRoute)
-            .withFormUrlEncodedBody(("value", ""))
-
-        val result = route(application, request).value
-        status(result) mustEqual BAD_REQUEST
       }
     }
 
@@ -179,7 +158,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       running(application) {
         val request =
           FakeRequest(POST, bankDetailsCheckYourAnswerRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+            .withFormUrlEncodedBody(("anything" -> "ignored"))
 
         val result = route(application, request).value
 
