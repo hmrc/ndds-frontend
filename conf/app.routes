@@ -44,6 +44,9 @@ GET        /account-not-verified                        controllers.AccountDetai
 GET        /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = NormalMode)
 GET        /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onPageLoad(mode: Mode = CheckMode)
 
+POST       /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
+POST       /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)
+
 GET        /bank-approval                               controllers.BankApprovalController.onPageLoad()
 
 GET        /where-are-you-making-a-payment              controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
