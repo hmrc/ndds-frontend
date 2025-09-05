@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import forms.BankDetailsCheckYourAnswerFormProvider
 import models.responses.{BankAddress, Country}
 import models.{CheckMode, NormalMode, PersonalOrBusinessAccount, YourBankDetailsWithAuddisStatus}
 import navigation.{FakeNavigator, Navigator}
@@ -24,8 +25,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doNothing, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, BankDetailsCheckYourAnswerPage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
-import play.api.mvc.Call
 import play.api.inject.bind
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
@@ -36,6 +37,9 @@ import scala.concurrent.Future
 class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute: Call = Call("GET", "/foo")
+
+  val formProvider = new BankDetailsCheckYourAnswerFormProvider()
+  val form = formProvider()
   val mockAuditService: AuditService = mock[AuditService]
 
   lazy val bankDetailsCheckYourAnswerRoute = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
@@ -44,8 +48,12 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
   "BankDetailsCheckYourAnswer Controller" - {
 
     "must return OK and the correct view for a GET" in {
+
       val userAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+        .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
