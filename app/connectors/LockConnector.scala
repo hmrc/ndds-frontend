@@ -18,7 +18,6 @@ package connectors
 
 import models.responses.LockResponse
 import play.api.Logging
-import play.api.libs.Files.logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2

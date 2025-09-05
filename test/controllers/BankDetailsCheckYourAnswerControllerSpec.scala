@@ -17,13 +17,21 @@
 package controllers
 
 import base.SpecBase
-import models.{CheckMode, NormalMode, YourBankDetailsWithAuddisStatus}
+import models.responses.{BankAddress, Country}
+import models.{CheckMode, NormalMode, PersonalOrBusinessAccount, YourBankDetailsWithAuddisStatus}
+import navigation.{FakeNavigator, Navigator}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{doNothing, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.YourBankDetailsPage
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, BankDetailsCheckYourAnswerPage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.mvc.Call
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import repositories.SessionRepository
 import services.AuditService
+
+import scala.concurrent.Future
 
 class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSugar {
 
