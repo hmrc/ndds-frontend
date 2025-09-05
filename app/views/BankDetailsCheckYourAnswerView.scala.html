@@ -38,6 +38,7 @@
         }
 
         @header1("bankDetailsCheckYourAnswer.heading")
+      
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-two-thirds">
                 @h2("bankDetailsCheckYourAnswer.h2")
@@ -52,18 +53,6 @@
         </div>
 
         @govukSummaryList(list)
-
-        @govukRadios(
-            RadiosViewModel.yesNo(
-                field = form("value"),
-                legend = LegendViewModel(messages("bankDetailsCheckYourAnswer.p1"))
-                .copy(classes = "govuk-!-padding-bottom-3")
-                ).withHint(
-                Hint(
-                content = Messages("bankDetailsCheckYourAnswer.hint")
-                ).copy(classes = "govuk-!-padding-bottom-3")
-            )
-        )
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))

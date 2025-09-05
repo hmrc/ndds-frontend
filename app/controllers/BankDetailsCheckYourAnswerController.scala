@@ -63,25 +63,18 @@ class BankDetailsCheckYourAnswerController @Inject()(
       Ok(view(preparedForm, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val summaryList = buildSummaryList(request.userAnswers)
-      form.bindFromRequest().fold(
-        formWithErrors => {
-          logger.warn("Validation Error on display bank details confirmation page")
-          Future.successful(BadRequest(view(formWithErrors, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode))))
-        },
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, value))
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield {
-            if (value) {
-              auditService.sendEvent(ConfirmBankDetails())
-            }
-            Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
-          }
-      )
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+
+      val confirmed = true
+
+      for {
+        updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, confirmed))
+        _              <- sessionRepository.set(updatedAnswers)
+      } yield {
+        auditService.sendEvent(ConfirmBankDetails())
+        Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
+      }
   }
 
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =

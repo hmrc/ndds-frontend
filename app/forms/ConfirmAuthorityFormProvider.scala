@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import utils.Utils.emptyString
+package forms
 
-@this()
+import forms.mappings.Mappings
+import models.ConfirmAuthority
+import play.api.data.Form
 
-@(
-  msg: String,
-  classes: String = "govuk-heading-xl",
-  id: Option[String] = None
-)(implicit messages: Messages)
+import javax.inject.Inject
 
-<h1 @{id.fold(emptyString)(id => s"id=$id")} class="@classes">@messages(msg)</h1>
+class ConfirmAuthorityFormProvider @Inject() extends Mappings {
+  def apply(): Form[ConfirmAuthority] =
+    Form(
+      "value" -> enumerable[ConfirmAuthority]("confirmYourAuthority.error.required")
+    )
+}

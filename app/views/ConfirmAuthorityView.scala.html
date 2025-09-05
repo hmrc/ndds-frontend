@@ -28,26 +28,20 @@
 
 @layout(pageTitle = title(form, messages("confirmYourAuthority.title")), backLink = Some(call.url)) {
 
-    @formHelper(action = routes.UnauthorisedController.onPageLoad(), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.ConfirmAuthorityController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
-        }
+        @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
+    }
 
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
                 legend = LegendViewModel(messages("confirmYourAuthority.heading")).asPageHeading(),
-                items = Seq(
-                  RadioItem(
-                    value = Some("accountHolder or authorised"),
-                      content = Text("Yes")
-                  ),
-                  RadioItem(
-                    value = Some("accountHolder or authorised"),
-                      content = Text("No")
-                  )
-                )
+                items = ConfirmAuthority.options)
+                .withHint(Hint(
+                content = Messages("confirmYourAuthority.p1"),
+                classes = "govuk-hint-black")
             )
         )
 

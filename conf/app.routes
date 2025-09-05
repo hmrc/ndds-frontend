@@ -18,6 +18,11 @@ GET        /account/signed-out                          controllers.auth.SignedO
 
 GET        /unauthorised                                controllers.UnauthorisedController.onPageLoad()
 
+GET        /confirm-authority                           controllers.ConfirmAuthorityController.onPageLoad(mode: Mode = NormalMode)
+POST       /confirm-authority                           controllers.ConfirmAuthorityController.onSubmit(mode: Mode = NormalMode)
+GET        /change-confirm-authority                    controllers.ConfirmAuthorityController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-confirm-authority                    controllers.ConfirmAuthorityController.onSubmit(mode: Mode = CheckMode)
+
 GET        /your-direct-debit-payment                   controllers.YourDirectDebitInstructionsController.onPageLoad()
 
 GET        /set-up-direct-debit-payment                 controllers.SetupDirectDebitPaymentController.onPageLoad()

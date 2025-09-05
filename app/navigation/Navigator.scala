@@ -33,7 +33,7 @@ class Navigator @Inject()() {
     case PaymentAmountPage => _ => routes.PaymentDateController.onPageLoad(NormalMode)
     case PersonalOrBusinessAccountPage => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
-    case BankDetailsCheckYourAnswerPage => checkBankDetails
+    case BankDetailsCheckYourAnswerPage => _ => routes.ConfirmAuthorityController.onPageLoad(NormalMode)
     case DirectDebitSourcePage => checkDirectDebitSource
     case PaymentPlanTypePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
     case PaymentsFrequencyPage => _ => routes.RegularPaymentAmountController.onPageLoad(NormalMode)
@@ -47,6 +47,7 @@ class Navigator @Inject()() {
 
   private val checkRouteMap: Page => UserAnswers => Call = {
     case YourBankDetailsPage => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
+    case BankDetailsCheckYourAnswerPage => _ => routes.ConfirmAuthorityController.onPageLoad(CheckMode)
     case BankDetailsCheckYourAnswerPage => checkBankDetails
     case PaymentReferencePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentAmountPage => _ => routes.CheckYourAnswersController.onPageLoad()

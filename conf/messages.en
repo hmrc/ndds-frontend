@@ -124,6 +124,10 @@ accountDetailsNotVerified.p2.link = Paying HMRC page
 confirmYourAuthority.title = Confirm your authority
 confirmYourAuthority.heading = Confirm your authority
 confirmYourAuthority.p1 = Confirm that you are the account holder or an authorised signatory, and are able to authorise Direct Debit payments from this account.
+confirmYourAuthority.yes= Yes
+confirmYourAuthority.no= No
+confirmYourAuthority.error.required = You have not confirmed you are the account holder, or an authorised signatory
+confirmYourAuthority.error.inline = Select yes if you are the account holder, or an authorised signatory, and are able to authorise Direct Debit payments from this account
 
 bankDetailsCheckYourAnswer.title = Check your answers
 bankDetailsCheckYourAnswer.heading = Check your answers
