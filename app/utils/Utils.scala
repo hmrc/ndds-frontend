@@ -20,6 +20,7 @@ import java.time.LocalDate
 
 object Utils {
   val emptyString = ""
+  val LockExpirySessionKey = "lockoutExpiryDateTime"
 
   def isTwoDaysPriorPaymentDate(paymentDate: LocalDate): Boolean =
     val currentDate = LocalDate.now()

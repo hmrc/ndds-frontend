@@ -51,5 +51,4 @@ class SetupDirectDebitPaymentController @Inject()(
         case LockedAndUnverified => Future.successful(Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad()))
       }
   }
-
 }

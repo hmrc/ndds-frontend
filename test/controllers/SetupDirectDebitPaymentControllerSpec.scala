@@ -126,7 +126,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).get mustEqual routes.ReachedLimitController.onPageLoad().url
+        redirectLocation(result).get mustEqual routes.AccountDetailsNotVerifiedController.onPageLoad().url
       }
     }
 
@@ -145,7 +145,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).get mustEqual routes.AccountDetailsNotVerifiedController.onPageLoad().url
+        redirectLocation(result).get mustEqual routes.ReachedLimitController.onPageLoad().url
       }
     }
   }

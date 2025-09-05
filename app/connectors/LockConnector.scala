@@ -17,10 +17,11 @@
 package connectors
 
 import models.responses.LockResponse
+import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
@@ -29,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class LockConnector @Inject()(config: ServicesConfig,
                               http: HttpClientV2)
-                              (implicit ec: ExecutionContext) extends HttpReadsInstances {
+                              (implicit ec: ExecutionContext) extends HttpReadsInstances with Logging {
 
   private val lockBaseUrl: String = config.baseUrl("lock") + "/locks/bars"
 
@@ -50,5 +51,21 @@ class LockConnector @Inject()(config: ServicesConfig,
            |  "identifier": "$credId"
            |}
            |""".stripMargin))
-      .execute[LockResponse]
+      .execute[Either[UpstreamErrorResponse, LockResponse]]
+      .flatMap {
+        case Right(resp) =>
+        logger.info(
+          s"""LockService Results:
+             |  • isLocked               = ${resp.isLocked}
+             |  • unverifiable           = ${resp.unverifiable.getOrElse(false)}
+             |  • verifyCalls            = ${resp.verifyCalls}
+             |  • lockoutExpiryDateTime  = ${resp.lockoutExpiryDateTime.map(_.toString).getOrElse("n/a")}
+             |""".stripMargin
+        )
+        logger.debug(s"Lock status: ${Json.stringify(Json.toJson(resp))}")
+        Future.successful(resp)
+        case Left(errorResponse) =>
+          logger.warn(s"[LOCK] ${errorResponse.statusCode} ${errorResponse.message}")
+          Future.failed(errorResponse)
+      }
 }
