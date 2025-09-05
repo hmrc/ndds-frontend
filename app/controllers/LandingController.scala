@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions.IdentifierAction
+import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
@@ -29,14 +30,13 @@ class LandingController @Inject()(nddService: NationalDirectDebitService,
                                   val controllerComponents: MessagesControllerComponents,
                                   identify: IdentifierAction)
                                  (implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport {
+  extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
-    nddService.retrieveAllDirectDebits(request.userId)
-      .map {
+    nddService.retrieveAllDirectDebits(request.userId) map {
         case rdsResponse if rdsResponse.directDebitCount == 0 =>
           Redirect(routes.SetupDirectDebitPaymentController.onPageLoad())
-        case _ =>
+        case response =>
           Redirect(routes.YourDirectDebitInstructionsController.onPageLoad())
       }
   }

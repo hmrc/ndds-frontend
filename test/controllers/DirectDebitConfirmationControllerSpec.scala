@@ -17,8 +17,10 @@
 package controllers
 
 import base.SpecBase
+import models.responses.GenerateDdiRefResponse
+import pages.CheckYourAnswerPage
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.DirectDebitConfirmationView
 
 class DirectDebitConfirmationControllerSpec extends SpecBase {
@@ -26,8 +28,10 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
   "DirectDebitConfirmation Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      val userAnswers = emptyUserAnswers
+        .setOrException(CheckYourAnswerPage, GenerateDdiRefResponse("600002164"))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.DirectDebitConfirmationController.onPageLoad().url)
@@ -40,5 +44,19 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view("600002164", "X00011111A")(request, messages(application)).toString
       }
     }
+
+    "must return error if no ddi reference" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.DirectDebitConfirmationController.onPageLoad().url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("Missing generated DDI reference number")
+
+      }
+    }
+
   }
 }

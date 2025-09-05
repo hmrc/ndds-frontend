@@ -14,16 +14,14 @@
  * limitations under the License.
  *@
 
-@import views.html.components._
+@import views.html.components.*
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList,
-    govukRadios: GovukRadios,
     govukButton: GovukButton,
-    header1:Header1,
+    h1:Header1,
     h2:Header2,
     linkWithHiddenText: LinkWithHiddenText
 )
@@ -31,11 +29,9 @@
 @(form: Form[_], mode: Mode, list: SummaryList, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title")), backLink = Some(call.url)) {
-    @formHelper(action = routes.BankDetailsCheckYourAnswerController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
-        }
+    @h1("bankDetailsCheckYourAnswer.heading")
+    @h2("bankDetailsCheckYourAnswer.h2")
 
         @header1("bankDetailsCheckYourAnswer.heading")
       
@@ -52,10 +48,12 @@
             </div>
         </div>
 
-        @govukSummaryList(list)
+    @govukSummaryList(list)
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))
         )
     }
 }
+
+

@@ -229,6 +229,7 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(YourBankDetailsPage, CheckMode, userAnswers) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
       }
 
+
       "must go from BankDetailsCheckYourAnswersPage to ConfirmAuthorityPage.1" in {
         val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
         navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.ConfirmAuthorityController.onPageLoad(CheckMode)

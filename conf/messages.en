@@ -140,8 +140,6 @@ bankDetailsCheckYourAnswer.account.account.number = Account number
 bankDetailsCheckYourAnswer.account.sort.code = Bank sort code
 bankDetailsCheckYourAnswer.account.bank.name = Bank name
 bankDetailsCheckYourAnswer.account.bank.address = Bank address
-bankDetailsCheckYourAnswer.p1= Are you the account holder or an authorised signatory, and able to authorise Direct Debit payments from this account?
-bankDetailsCheckYourAnswer.hint = You are able to authorise Direct Debit payments for the account either as the account holder or on behalf of the multiple signatories.
 
 bankApproval.title = You need bank approval
 bankApproval.heading = You need bank approval

@@ -17,29 +17,17 @@
 package controllers
 
 import base.SpecBase
-import forms.BankDetailsCheckYourAnswerFormProvider
-import models.responses.{BankAddress, Country}
-import models.{CheckMode, NormalMode, PersonalOrBusinessAccount, YourBankDetailsWithAuddisStatus}
-import navigation.{FakeNavigator, Navigator}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, verify, when}
+import models.{CheckMode, NormalMode, YourBankDetailsWithAuddisStatus}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, BankDetailsCheckYourAnswerPage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
-import play.api.inject.bind
+import pages.YourBankDetailsPage
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import repositories.SessionRepository
 import services.AuditService
-
-import scala.concurrent.Future
 
 class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute: Call = Call("GET", "/foo")
-
-  val formProvider = new BankDetailsCheckYourAnswerFormProvider()
-  val form = formProvider()
   val mockAuditService: AuditService = mock[AuditService]
 
   lazy val bankDetailsCheckYourAnswerRoute = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
@@ -48,12 +36,8 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
   "BankDetailsCheckYourAnswer Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
       val userAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
-        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
-        .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -92,12 +76,9 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         val result = route(application, request).value
 
         status(result) mustEqual OK
+
         val html = contentAsString(result)
         html must include("Check your answers")
-        html must include("BARCLAYS BANK UK PLC")
-        html must include("P.O. Box 44")
-        html must include("RG1 8BW")
-        html must include("UNITED KINGDOM")
         html must include("Your bank details")
         html must include("Account Holder Name")
         html must include("123212")
@@ -139,7 +120,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     }
 
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
@@ -150,6 +130,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
+
 
     "must redirect to Journey Recovery for a POST if no existing data is found" in {
 
