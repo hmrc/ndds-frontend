@@ -54,7 +54,7 @@ class DirectDebitSourceController @Inject()(
         case None => form
         case Some(value) => form.fill(value)
       }
-      Ok(view(preparedForm, mode, routes.BankDetailsCheckYourAnswerController.onPageLoad(mode)))
+      Ok(view(preparedForm, mode, routes.ConfirmAuthorityController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {

@@ -14,32 +14,35 @@
  * limitations under the License.
  *@
 
-@import viewmodels.govuk.hint.HintViewModel
+@import views.html.components.*
 
 @this(
-    layout: templates.Layout,
-    formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
-    govukRadios: GovukRadios,
-    govukButton: GovukButton
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukRadios: GovukRadios,
+        govukButton: GovukButton
 )
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("directDebitSource.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("confirmYourAuthority.title")), backLink = Some(call.url)) {
 
-    @formHelper(action = routes.DirectDebitSourceController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.ConfirmAuthorityController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
-        }
+        @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
+    }
 
         @govukRadios(
             RadiosViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("directDebitSource.heading")).asPageHeading(),
-                items  = DirectDebitSource.options
-            ).withHint(Hint(content = Text(messages("directDebitSource.hint"))))
+                legend = LegendViewModel(messages("confirmYourAuthority.heading")).asPageHeading(),
+                items = ConfirmAuthority.options)
+                .withHint(Hint(
+                content = Messages("confirmYourAuthority.p1"),
+                classes = "govuk-hint-black")
+            )
         )
 
         @govukButton(

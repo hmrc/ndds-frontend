@@ -38,6 +38,7 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
   def onwardRoute = Call("GET", "/foo")
 
   lazy val directDebitSourceRoute = routes.DirectDebitSourceController.onPageLoad(NormalMode).url
+  lazy val ConfirmAuthorityRoute = routes.ConfirmAuthorityController.onPageLoad(NormalMode).url
   lazy val bankDetailsAnswerRoute = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
 
   val formProvider = new DirectDebitSourceFormProvider()
@@ -57,7 +58,7 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[DirectDebitSourceView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", bankDetailsAnswerRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", ConfirmAuthorityRoute))(request, messages(application)).toString
       }
     }
 
@@ -75,7 +76,7 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(DirectDebitSource.values.head), NormalMode, Call("GET", bankDetailsAnswerRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(DirectDebitSource.values.head), NormalMode, Call("GET", ConfirmAuthorityRoute))(request, messages(application)).toString
       }
     }
 
