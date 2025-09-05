@@ -118,7 +118,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         verify(mockAuditService).sendEvent(any())(any(), any(), any())
       }
     }
-
+    
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
       val application = applicationBuilder(userAnswers = None).build()
 

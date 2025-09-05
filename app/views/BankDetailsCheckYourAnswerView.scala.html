@@ -14,46 +14,52 @@
  * limitations under the License.
  *@
 
-@import views.html.components.*
+@import views.html.components._
 
 @this(
-    layout: templates.Layout,
-    formHelper: FormWithCSRF,
-    govukSummaryList: GovukSummaryList,
-    govukButton: GovukButton,
-    h1:Header1,
-    h2:Header2,
-    linkWithHiddenText: LinkWithHiddenText
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukSummaryList: GovukSummaryList,
+        govukButton: GovukButton,
+        header1: Header1,
+        h2: Header2,
+        linkWithHiddenText: LinkWithHiddenText
 )
 
 @(form: Form[_], mode: Mode, list: SummaryList, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title")), backLink = Some(call.url)) {
+@layout(
+    pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title")),
+    backLink  = Some(call.url)
+) {
+    @formHelper(
+        action = routes.BankDetailsCheckYourAnswerController.onSubmit(mode),
+        Symbol("autoComplete") -> "off"
+    ) {
 
-    @h1("bankDetailsCheckYourAnswer.heading")
-    @h2("bankDetailsCheckYourAnswer.h2")
+        @if(form.hasErrors) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
 
         @header1("bankDetailsCheckYourAnswer.heading")
-      
+
         <div class="govuk-grid-row">
             <div class="govuk-grid-column-two-thirds">
-                @h2("bankDetailsCheckYourAnswer.h2")
+            @h2("bankDetailsCheckYourAnswer.h2")
             </div>
             <div class="govuk-grid-column-one-third">
-                @linkWithHiddenText(
-                    url = routes.YourBankDetailsController.onPageLoad(CheckMode).url,
-                    text = "Change",
-                    visuallyHiddenText = Some("bankDetailsCheckYourAnswer.h2")
-                    )
+            @linkWithHiddenText(
+                url = routes.YourBankDetailsController.onPageLoad(CheckMode).url,
+                text = "Change",
+                visuallyHiddenText = Some("bankDetailsCheckYourAnswer.h2")
+            )
             </div>
         </div>
 
-    @govukSummaryList(list)
+        @govukSummaryList(list)
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+        @govukButton(ButtonViewModel(messages("site.continue")))
     }
 }
-
 
