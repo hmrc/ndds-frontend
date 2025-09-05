@@ -21,9 +21,9 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
-import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
-import models.{ChrisSubmissionRequest, DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
+import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
 import play.api.mvc.Request

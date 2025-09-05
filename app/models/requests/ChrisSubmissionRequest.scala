@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package models
+package models.requests
 
 import models.responses.BankAddress
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import play.api.libs.json.{Json, OFormat}
+
 import java.time.LocalDate
 
 case class ChrisSubmissionRequest(
@@ -27,13 +29,17 @@ case class ChrisSubmissionRequest(
                                    yourBankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus,
                                    auddisStatus: Option[Boolean],
                                    planStartDate: Option[PlanStartDateDetails],                       // optional
+                                   planEndDate: Option[LocalDate],                       // optional
                                    paymentDate: Option[PaymentDateDetails],                         // optional
                                    yearEndAndMonth: Option[YearEndAndMonth],              // optional
                                    bankDetails: YourBankDetails,
                                    bankDetailsAddress: BankAddress,
                                    ddiReferenceNo: String,
+                                   paymentReference: Option[String],
                                    bankName: String,
                                    totalAmountDue:Option[BigDecimal],
+                                   paymentAmount:Option[BigDecimal],
+                                   regularPaymentAmount:Option[BigDecimal],
                                    calculation: Option[PaymentPlanCalculation]            // optional
                                  )
 

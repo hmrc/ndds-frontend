@@ -16,8 +16,8 @@
 
 package connectors
 
-import models.{ChrisSubmissionRequest, NddResponse}
-import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.NddResponse
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
 import play.api.Logging
 import play.api.http.Status.OK

@@ -20,11 +20,12 @@ import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.DirectDebitSource.*
-import models.{ChrisSubmissionRequest, DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
-import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, CheckYourAnswerPage, DirectDebitSourcePage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, PaymentsFrequencyPage, PlanStartDatePage, TotalAmountDuePage, YearEndAndMonthPage, YourBankDetailsPage}
+import models.requests.ChrisSubmissionRequest
+import models.{DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
+import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.{AuditService, NationalDirectDebitService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -109,7 +110,11 @@ class CheckYourAnswersController @Inject()(
                                          ): ChrisSubmissionRequest = {
 
     val totalAmountDue = userAnswers.get(TotalAmountDuePage)
+    val paymentAmount = userAnswers.get(PaymentAmountPage)
+    val regularPaymentAmount = userAnswers.get(RegularPaymentAmountPage)
+    val paymentReference = userAnswers.get(PaymentReferencePage)
     val planStartDate = userAnswers.get(PlanStartDatePage)
+    val planEndDate = userAnswers.get(PlanEndDatePage)
     val paymentDate = userAnswers.get(PaymentDatePage)
     val paymentFrequency = userAnswers.get(PaymentsFrequencyPage) // optional
     val yearEndAndMonth = userAnswers.get(YearEndAndMonthPage) // optional
@@ -136,21 +141,24 @@ class CheckYourAnswersController @Inject()(
         case _ =>
           None
       }
-
     ChrisSubmissionRequest(
       serviceType = userAnswers.get(DirectDebitSourcePage).get,
-      paymentPlanType = userAnswers.get(PaymentPlanTypePage).get,
+      paymentPlanType = userAnswers.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePayment),
       paymentFrequency = paymentFrequency,
       yourBankDetailsWithAuddisStatus = bankDetailsWithAuddis,
       auddisStatus = Some(bankDetailsWithAuddis.auddisStatus),
       planStartDate = planStartDate,
+      planEndDate = planEndDate,
       paymentDate = paymentDate,
       yearEndAndMonth = yearEndAndMonth,
       bankDetails = YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(bankDetailsWithAuddis),
       bankDetailsAddress = bankAddress,
       bankName = bankName,
       ddiReferenceNo = ddiReference,
+      paymentReference = paymentReference,
       totalAmountDue = totalAmountDue,
+      paymentAmount = paymentAmount,
+      regularPaymentAmount = regularPaymentAmount,
       calculation = calculationOpt
     )
   }
