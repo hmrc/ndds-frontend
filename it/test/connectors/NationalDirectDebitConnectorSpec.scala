@@ -18,12 +18,16 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathMatching}
 import itutil.ApplicationWithWiremock
-import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YourBankDetailsWithAuddisStatus}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.responses.{BankAddress, Country, EarliestPaymentDate, GenerateDdiRefResponse}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
+import pages.DirectDebitSourcePage
 import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
 import uk.gov.hmrc.http.HeaderCarrier
+
+import java.time.LocalDate
 
 class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
   with Matchers
@@ -161,4 +165,99 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       result.getMessage should include("The future returned an exception")
     }
   }
+
+  "submitChrisData" should {
+
+    val planStartDateDetails = PlanStartDateDetails(
+      enteredDate = LocalDate.of(2025, 9, 1),
+      earliestPlanStartDate = "2025-09-01"
+    )
+
+    val paymentDateDetails = PaymentDateDetails(
+      enteredDate = LocalDate.of(2025, 9, 15),
+      earliestPaymentDate = "2025-09-01"
+    )
+
+    val submission = ChrisSubmissionRequest(
+      serviceType = DirectDebitSource.TC,
+      paymentPlanType = PaymentPlanType.TaxCreditRepaymentPlan,
+      paymentFrequency = Some(PaymentsFrequency.Monthly),
+      yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
+        accountHolderName = "Test",
+        sortCode = "123456",
+        accountNumber = "12345678",
+        auddisStatus = false,
+        accountVerified = false
+      ),
+      planStartDate = Some(planStartDateDetails),
+      planEndDate = None,
+      paymentDate = Some(paymentDateDetails),
+      yearEndAndMonth = None,
+      bankDetailsAddress = BankAddress(
+        lines = Seq("line 1"),
+        town = "Town",
+        country = Country("UK"),
+        postCode = "NE5 2DH"
+      ),
+      ddiReferenceNo = "DDI123456789",
+      paymentReference = Some("testReference"),
+      bankName = "Barclays",
+      totalAmountDue = Some(BigDecimal(200)),
+      paymentAmount = Some(BigDecimal(100.00)),
+      regularPaymentAmount = Some(BigDecimal(90.00)),
+      calculation = None
+    )
+
+
+    "successfully return true when CHRIS submission succeeds with 200 OK" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/chris-submission"))
+          .willReturn(
+            aResponse().withStatus(OK)
+          )
+      )
+
+      val result = connector.submitChrisData(submission).futureValue
+      result shouldBe true
+    }
+
+    "must fail when CHRIS submission returns a non-200 status" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/chris-submission"))
+          .willReturn(
+            aResponse().withStatus(CREATED)
+          )
+      )
+
+      val ex = intercept[Exception](connector.submitChrisData(submission).futureValue)
+      ex.getMessage should include("Unexpected status: 201")
+    }
+
+    "must fail when CHRIS submission returns an UpstreamErrorResponse" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/chris-submission"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+              .withBody("test error")
+          )
+      )
+
+      val ex = intercept[Exception](connector.submitChrisData(submission).futureValue)
+      ex.getMessage should include("status: 500")
+    }
+
+    "must fail when the result is a failed future" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/chris-submission"))
+          .willReturn(
+            aResponse().withStatus(0)
+          )
+      )
+
+      val ex = intercept[Exception](connector.submitChrisData(submission).futureValue)
+      ex.getMessage should include("The future returned an exception")
+    }
+  }
+
 }

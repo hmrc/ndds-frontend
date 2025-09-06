@@ -17,7 +17,10 @@
 package models.requests
 
 import models.responses.BankAddress
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import models.{
+  DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation,
+  PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus
+}
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
@@ -25,22 +28,20 @@ import java.time.LocalDate
 case class ChrisSubmissionRequest(
                                    serviceType: DirectDebitSource,
                                    paymentPlanType: PaymentPlanType,
-                                   paymentFrequency: Option[PaymentsFrequency],            // optional
+                                   paymentFrequency: Option[PaymentsFrequency],
                                    yourBankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus,
-                                   auddisStatus: Option[Boolean],
-                                   planStartDate: Option[PlanStartDateDetails],                       // optional
-                                   planEndDate: Option[LocalDate],                       // optional
-                                   paymentDate: Option[PaymentDateDetails],                         // optional
-                                   yearEndAndMonth: Option[YearEndAndMonth],              // optional
-                                   bankDetails: YourBankDetails,
+                                   planStartDate: Option[PlanStartDateDetails],
+                                   planEndDate: Option[LocalDate],
+                                   paymentDate: Option[PaymentDateDetails],
+                                   yearEndAndMonth: Option[YearEndAndMonth],
                                    bankDetailsAddress: BankAddress,
                                    ddiReferenceNo: String,
                                    paymentReference: Option[String],
                                    bankName: String,
-                                   totalAmountDue:Option[BigDecimal],
-                                   paymentAmount:Option[BigDecimal],
-                                   regularPaymentAmount:Option[BigDecimal],
-                                   calculation: Option[PaymentPlanCalculation]            // optional
+                                   totalAmountDue: Option[BigDecimal],
+                                   paymentAmount: Option[BigDecimal],
+                                   regularPaymentAmount: Option[BigDecimal],
+                                   calculation: Option[PaymentPlanCalculation]
                                  )
 
 object ChrisSubmissionRequest {

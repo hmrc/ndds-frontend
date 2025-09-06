@@ -36,7 +36,6 @@ import views.html.CheckYourAnswersView
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class CheckYourAnswersController @Inject()(
                                             override val messagesApi: MessagesApi,
                                             identify: IdentifierAction,
@@ -48,7 +47,10 @@ class CheckYourAnswersController @Inject()(
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView,
                                             appConfig: FrontendAppConfig
-                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+                                          )(implicit ec: ExecutionContext)
+  extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -80,26 +82,25 @@ class CheckYourAnswersController @Inject()(
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    implicit val ua: UserAnswers = request.userAnswers
+
     for {
       // 1. Generate a new DDI reference
-      reference <- nddService.generateNewDdiReference(
-        request.userAnswers.get(PaymentReferencePage)
-          .getOrElse(throw new Exception("Missing details: PaymentReferencePage"))
-      )
+      reference <- nddService.generateNewDdiReference(required(PaymentReferencePage))
 
-      // 2. Build ChrisSubmissionRequest with calculations
-      submission = buildChrisSubmissionRequest(request.userAnswers, reference.ddiRefNumber)
+      // 2. Build submission
+      submission = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
 
-      // 3. Send to backend
+      // 3. Submit to backend
       _ <- nddService.submitChrisData(submission)
 
-      // 4. Update session with reference
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(CheckYourAnswerPage, reference))
+      // 4. Save updated answers
+      updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
       _ <- sessionRepository.set(updatedAnswers)
-
-      // 5. Audit event
-      _ = auditService.sendSubmitDirectDebitPaymentPlan
     } yield {
+      // 5. Audit event
+      auditService.sendSubmitDirectDebitPaymentPlan
+      logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${submission.serviceType}]")
       Redirect(routes.DirectDebitConfirmationController.onPageLoad())
     }
   }
@@ -108,67 +109,39 @@ class CheckYourAnswersController @Inject()(
                                            userAnswers: UserAnswers,
                                            ddiReference: String
                                          ): ChrisSubmissionRequest = {
-
-    val totalAmountDue = userAnswers.get(TotalAmountDuePage)
-    val paymentAmount = userAnswers.get(PaymentAmountPage)
-    val regularPaymentAmount = userAnswers.get(RegularPaymentAmountPage)
-    val paymentReference = userAnswers.get(PaymentReferencePage)
-    val planStartDate = userAnswers.get(PlanStartDatePage)
-    val planEndDate = userAnswers.get(PlanEndDatePage)
-    val paymentDate = userAnswers.get(PaymentDatePage)
-    val paymentFrequency = userAnswers.get(PaymentsFrequencyPage) // optional
-    val yearEndAndMonth = userAnswers.get(YearEndAndMonthPage) // optional
-
-    val bankDetailsWithAuddis = userAnswers.get(YourBankDetailsPage)
-      .getOrElse(throw new Exception("Missing details: YourBankDetailsPage"))
-
-    val bankName = userAnswers.get(BankDetailsBankNamePage)
-      .getOrElse(throw new Exception("Missing details: BankDetailsBankNamePage"))
-
-    val bankAddress = userAnswers.get(BankDetailsAddressPage)
-      .getOrElse(throw new Exception("Missing details: BankDetailsAddressPage"))
+    implicit val ua: UserAnswers = userAnswers
 
     val calculationOpt: Option[PaymentPlanCalculation] =
-      userAnswers.get(DirectDebitSourcePage) match {
-        case Some(DirectDebitSource.TC) =>
-          userAnswers.get(PaymentPlanTypePage) match {
-            case Some(PaymentPlanType.TaxCreditRepaymentPlan) =>
-              Some(calculateTaxCreditRepaymentPlan(userAnswers))
-            case otherPlan =>
-              logger.debug(s"No calculation needed for TC service with plan [$otherPlan]")
-              None
-          }
-        case _ =>
-          None
-      }
+      for {
+        source <- ua.get(DirectDebitSourcePage) if source == DirectDebitSource.TC
+        plan <- ua.get(PaymentPlanTypePage) if plan == PaymentPlanType.TaxCreditRepaymentPlan
+      } yield calculateTaxCreditRepaymentPlan(ua)
+
     ChrisSubmissionRequest(
-      serviceType = userAnswers.get(DirectDebitSourcePage).get,
-      paymentPlanType = userAnswers.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePayment),
-      paymentFrequency = paymentFrequency,
-      yourBankDetailsWithAuddisStatus = bankDetailsWithAuddis,
-      auddisStatus = Some(bankDetailsWithAuddis.auddisStatus),
-      planStartDate = planStartDate,
-      planEndDate = planEndDate,
-      paymentDate = paymentDate,
-      yearEndAndMonth = yearEndAndMonth,
-      bankDetails = YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(bankDetailsWithAuddis),
-      bankDetailsAddress = bankAddress,
-      bankName = bankName,
-      ddiReferenceNo = ddiReference,
-      paymentReference = paymentReference,
-      totalAmountDue = totalAmountDue,
-      paymentAmount = paymentAmount,
-      regularPaymentAmount = regularPaymentAmount,
-      calculation = calculationOpt
+      serviceType                  = required(DirectDebitSourcePage),
+      paymentPlanType              = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePayment),
+      paymentFrequency             = ua.get(PaymentsFrequencyPage),
+      yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
+      planStartDate                = ua.get(PlanStartDatePage),
+      planEndDate                  = ua.get(PlanEndDatePage),
+      paymentDate                  = ua.get(PaymentDatePage),
+      yearEndAndMonth              = ua.get(YearEndAndMonthPage),
+      bankDetailsAddress           = required(BankDetailsAddressPage),
+      bankName                     = required(BankDetailsBankNamePage),
+      ddiReferenceNo               = ddiReference,
+      paymentReference             = ua.get(PaymentReferencePage),
+      totalAmountDue               = ua.get(TotalAmountDuePage),
+      paymentAmount                = ua.get(PaymentAmountPage),
+      regularPaymentAmount         = ua.get(RegularPaymentAmountPage),
+      calculation                  = calculationOpt
     )
   }
 
-
   private def calculateTaxCreditRepaymentPlan(userAnswers: UserAnswers): PaymentPlanCalculation = {
-    val totalAmountDue = userAnswers.get(TotalAmountDuePage)
-      .getOrElse(throw new Exception("Missing details: TotalAmountDuePage"))
-    val planStartDate = userAnswers.get(PlanStartDatePage)
-      .getOrElse(throw new Exception("Missing details: PlanStartDatePage"))
+    implicit val ua: UserAnswers = userAnswers
+
+    val totalAmountDue = required(TotalAmountDuePage)
+    val planStartDate  = required(PlanStartDatePage)
 
     val regularPaymentAmount = PaymentCalculations.calculateRegularPaymentAmount(
       totalAmountDueInput = totalAmountDue,
@@ -201,11 +174,14 @@ class CheckYourAnswersController @Inject()(
 
     PaymentPlanCalculation(
       regularPaymentAmount = Some(BigDecimal(regularPaymentAmount)),
-      finalPaymentAmount = Some(finalPaymentAmount),
-      secondPaymentDate = Some(secondPaymentDate),
+      finalPaymentAmount   = Some(finalPaymentAmount),
+      secondPaymentDate    = Some(secondPaymentDate),
       penultimatePaymentDate = Some(penultimatePaymentDate),
-      finalPaymentDate = Some(finalPaymentDate)
+      finalPaymentDate     = Some(finalPaymentDate)
     )
   }
+
+  private def required[A](page: QuestionPage[A])(implicit ua: UserAnswers, rds: play.api.libs.json.Reads[A]): A =
+    ua.get(page).getOrElse(throw new Exception(s"Missing details: ${page.toString}"))
 
 }
