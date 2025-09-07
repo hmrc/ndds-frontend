@@ -262,6 +262,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentReferencePage, "testReference")
 
       when(mockNddService.generateNewDdiReference(any())(any())).thenReturn(Future.failed(new Exception("bang")))
+      // Mock CHRIS submission
+      when(mockNddService.submitChrisData(any())(any()))
+        .thenReturn(Future.successful(true))
 
       val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
         .overrides(
@@ -277,44 +280,89 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    //    "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all required data is provided" - {
-    //      "and ddi reference is generated successfully" in {
-    //
-    //        val totalDueAmount = 200
-    //        val incompleteAnswers = emptyUserAnswers
-    //          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
-    //          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-    //          .setOrException(YourBankDetailsPage,
-    //            YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-    //          .setOrException(TotalAmountDuePage, totalDueAmount)
-    //          .setOrException(PlanStartDatePage, planStartDateDetails)
-    //          .setOrException(PaymentReferencePage, "testReference")
-    //          .setOrException(BankDetailsAddressPage,
-    //            BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
-    //          )
-    //          .setOrException(BankDetailsBankNamePage, "Barclays")
-    //
-    //        when(mockNddService.generateNewDdiReference(any())(any())).thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-    //
-    //        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-    //          .overrides(
-    //            bind[AuditService].toInstance(mockAuditService),
-    //            bind[NationalDirectDebitService].toInstance(mockNddService)
-    //          )
-    //          .build()
-    //
-    //        doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
-    //
-    //        running(application) {
-    //          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-    //          val result = route(application, request).value
-    //
-    //          status(result) mustEqual SEE_OTHER
-    //          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-    //          verify(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
-    //        }
-    //      }
-    //  }
+    "must redirect to confirmation page if DirectDebitSource is 'CT' for a POST if all required data is provided" - {
+
+      "and ddi reference is generated successfully" in {
+
+        val paymentAmount = 200
+        val incompleteAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
+          .setOrException(
+            YourBankDetailsPage,
+            YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false)
+          )
+          .setOrException(PaymentAmountPage, paymentAmount)
+          .setOrException(
+            PaymentDatePage,
+            PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-01")
+          )
+          .setOrException(PaymentReferencePage, "testReference")
+          .setOrException(
+            BankDetailsAddressPage,
+            BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
+          )
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+
+        when(mockNddService.generateNewDdiReference(any())(any()))
+          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+
+        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[AuditService].toInstance(mockAuditService) // ✅ override here
+          )
+          .build()
+
+        doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+
+        }
+      }
+
+      "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all required data is provided" in {
+        val totalDueAmount = 200
+        val incompleteAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(YourBankDetailsPage,
+            YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(TotalAmountDuePage, totalDueAmount)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(PaymentReferencePage, "testReference")
+          .setOrException(BankDetailsAddressPage,
+            BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
+          )
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+
+        when(mockNddService.generateNewDdiReference(any())(any())).thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+        // Mock CHRIS submission
+        when(mockNddService.submitChrisData(any())(any()))
+          .thenReturn(Future.successful(true))
+        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+          .overrides(
+            bind[AuditService].toInstance(mockAuditService),
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          )
+          .build()
+
+        doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+          verify(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
+        }
+      }
+    }
 
   }
 }

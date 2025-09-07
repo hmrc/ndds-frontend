@@ -110,7 +110,6 @@ class CheckYourAnswersController @Inject()(
                                            ddiReference: String
                                          ): ChrisSubmissionRequest = {
     implicit val ua: UserAnswers = userAnswers
-
     val calculationOpt: Option[PaymentPlanCalculation] =
       for {
         source <- ua.get(DirectDebitSourcePage) if source == DirectDebitSource.TC
