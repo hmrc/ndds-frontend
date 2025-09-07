@@ -17,13 +17,13 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathMatching}
+import com.github.tomakehurst.wiremock.http.Fault
 import itutil.ApplicationWithWiremock
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YourBankDetailsWithAuddisStatus}
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{BankAddress, Country, EarliestPaymentDate, GenerateDdiRefResponse}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YourBankDetailsWithAuddisStatus}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
-import pages.DirectDebitSourcePage
 import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -251,13 +251,14 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       stubFor(
         post(urlPathMatching("/national-direct-debit/chris-submission"))
           .willReturn(
-            aResponse().withStatus(0)
+            aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER) // Simulate connection drop
           )
       )
 
       val ex = intercept[Exception](connector.submitChrisData(submission).futureValue)
       ex.getMessage should include("The future returned an exception")
     }
+
   }
 
 }
