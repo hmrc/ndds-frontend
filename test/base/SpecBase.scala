@@ -38,7 +38,9 @@ trait SpecBase
     with BeforeAndAfterEach {
 
   val userAnswersId: String = "id"
-
+  
+  val LockExpirySessionKey = "lockoutExpiryDateTime"
+  
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
   def messages(app: Application): Messages = app.injector.instanceOf[MessagesApi].preferred(FakeRequest())
