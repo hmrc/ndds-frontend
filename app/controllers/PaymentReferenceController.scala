@@ -79,14 +79,18 @@ class PaymentReferenceController @Inject()(
       
       result match {
         case None =>
+          println(s"Case None $result")
           Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
         case Some(serviceType) =>
+          println(s"Case Some $result, $serviceType")
           val form = formProvider(Some(serviceType))
           form.bindFromRequest().fold(
             formWithErrors =>
               if (selectedAnswers.contains(MGD) || selectedAnswers.contains(SA) || selectedAnswers.contains(TC)) {
+                println(s"Case Some if $formWithErrors")
                 Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, routes.PaymentPlanTypeController.onPageLoad(mode))))
               } else {
+                println(s"Case Some else $formWithErrors")
                 Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode))))
               },
 

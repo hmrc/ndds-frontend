@@ -16,7 +16,7 @@
 
 package validation
 
-import ReferenceTypeValidator.Validator
+import PaymentReferenceValidator.Validator
 import models.DirectDebitSource
 import models.DirectDebitSource.*
 
@@ -29,10 +29,10 @@ object ReferenceTypeValidatorMap {
       case SA => summon[Validator[SA.type]].validate _
       case SDLT => summon[Validator[SDLT.type]].validate _
       case VAT => summon[Validator[VAT.type]].validate _
-      case NIC => summon[Validator[NIC.type]].validate _
-      case OL => summon[Validator[OL.type]].validate _
       case CT => summon[Validator[CT.type]].validate _
       case TC => summon[Validator[TC.type]].validate _
+      case OL => summon[Validator[OL.type]].validate _
+      case NIC => summon[Validator[NIC.type]].validate _
     }
 
     Some(res)

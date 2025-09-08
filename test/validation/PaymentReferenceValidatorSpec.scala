@@ -16,18 +16,17 @@
 
 package validation
 
+import models.DirectDebitSource.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 
-import models.DirectDebitSource.*
-
-class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
+class PaymentReferenceValidatorSpec extends AnyFreeSpec with Matchers {
   
   "ReferenceType Validator" - {
 
     "must validate PAYE reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[PAYE.type]]
-      val validPAYEReference = Seq("961PX0023480X", "861PV00002023")
+      val validation = summon[PaymentReferenceValidator.Validator[PAYE.type]]
+      val validPAYEReference = Seq("961PX0023480X", "861PV00002023", "N961PX0023480X")
 
       validPAYEReference.foreach(
         ref =>
@@ -36,7 +35,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
 
     }
     "must fail to validate PAYE reference with incorrect format" in {
-      val validation = summon[ReferenceTypeValidator.Validator[PAYE.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[PAYE.type]]
       val invalidPAYEReference = Seq("A961PX0023480X", "ABCPD0020230X", "861PH0020230X")
 
       invalidPAYEReference.foreach(
@@ -46,14 +45,14 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must validate MGD reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[MGD.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[MGD.type]]
       val validMGDReference = "XVM00005554321"
 
       validation.validate(validMGDReference) mustEqual true
     }
 
     "must fail to validate MGD reference with incorrect format" in {
-      val validation = summon[ReferenceTypeValidator.Validator[MGD.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[MGD.type]]
       val invalidMGDReference = Seq("XBM00005554321", "XVX00005554321", "XVM01005554321")
 
       invalidMGDReference.foreach(
@@ -63,7 +62,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must validate SA reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[SA.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[SA.type]]
       val validSAReference = Seq("5829820384K", "5975326728K", "6577919948K", "4091324863K",
         "5028722210K", "5259227426K", "5614425520K", "5882918939K", "6131803582K", "7406205697K",
         "7508225717K", "7638108392K", "8194304206K", "8278617246K", "8737823777K", "8337003895K",
@@ -77,7 +76,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must fail to validate SA reference with incorrect format" in {
-      val validation = summon[ReferenceTypeValidator.Validator[SA.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[SA.type]]
       val invalidSAReference = Seq("1234567890K", "5829820384Z", "5829820384K ", "5829820384K ", " 5829820384K",
         "1829820384K", "5829830384K")
       invalidSAReference.foreach(
@@ -87,7 +86,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must validate CT reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[CT.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[CT.type]]
       Seq("5829820384A001", "5975326728A001", "6577919948A001", "4091324863A001",
         "5028722210A001", "5259227426A001", "5614425520A001", "5882918939A001", "6131803582A001",
         "7406205697A001", "7508225717A001", "7638108392A001", "8194304206A001", "8278617246A001",
@@ -108,7 +107,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must fail to validate CT reference with incorrect format " in {
-       val validation = summon[ReferenceTypeValidator.Validator[CT.type]]
+       val validation = summon[PaymentReferenceValidator.Validator[CT.type]]
        val invalidCTReference = Seq("9111111112A00108A", "1111111112X00108A", "9111111112AX0108A", "9111111112A0X108A",
          "9111111112A00X08A", "9111111112A001X8A", "9111111112A0010XA", "9111111112A00108X")
 
@@ -119,7 +118,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
      }
 
     "must validate SDLT reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[SDLT.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[SDLT.type]]
       val validSDLTReference = Seq("100000511MX", "100000504ML", "100000508MT", "100000513MM", "100000523MP")
 
       validSDLTReference.foreach(
@@ -129,7 +128,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must fail to validate SDLT reference with incorrect format " in {
-      val validation = summon[ReferenceTypeValidator.Validator[SDLT.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[SDLT.type]]
       val validSDLTReference = Seq("100000511MK", "100021504ML", "100000509MT", "100000523MM", "110000523MP")
 
       validSDLTReference.foreach(
@@ -140,7 +139,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
 
 
     "must validate VAT reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[VAT.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[VAT.type]]
       val validVATReference = Seq("562235945", "100212755", "959939732", "562235987", "232457280", "627076730", "754843112",
         "870484115", "917876084", "722786517", "220430231")
 
@@ -151,7 +150,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must invalidate VAT reference with incorrect format" in {
-      val validation = summon[ReferenceTypeValidator.Validator[VAT.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[VAT.type]]
       val invalidVATReference = Seq("562235946", "100212756", "959939832", "562235988", "232457281", "627076740", "754843122",
         "870584115", "917876085", "722786518", "220430232")
 
@@ -163,7 +162,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
 
 
     "must validate NIC reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[NIC.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[NIC.type]]
       val validNICReference = Seq("600340016213526259", "600340016213536354", "601340016113236351", "601340014200236351",
         "601340010200236358")
 
@@ -173,7 +172,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must fail to validate NIC reference with incorrect format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[NIC.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[NIC.type]]
       val invalidNICReference = Seq("600340113213526259", "600340016213536357", "601340016113236451", "601340014200236451",
         "601340010200234358")
 
@@ -183,7 +182,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must validate Other Liability reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[OL.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[OL.type]]
       val validOLReference = Seq(
         "XW200001000187", "XG000001000188", "XS000001000191", "XD000001000195", "XX100001000203", "XN900001000204",
         "XZN10001100205", "XRZ10001100555", "XBN10001100555", "XKK10001100550", "XZK10001100555", "XXX10001110484",
@@ -196,7 +195,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must fail to validate Other Liability reference with incorrect format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[OL.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[OL.type]]
       val invalidOLReference = Seq(
         "XE000001000189", "XG000001000189", "XS000001000193", "XD000001000196", "XW000001000204", "XB000001000205",
         "PH000001000205", "9H000001000205", "XRM00001000205", "XDNA0001000205", "XDN0000100020Z", "XDN00001P00205",
@@ -210,7 +209,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must validate Tax Credit reference with correct format successfully" in {
-      val validation = summon[ReferenceTypeValidator.Validator[TC.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[TC.type]]
       val validTaxCreditReference = "WT447571311207NE"
 
 
@@ -218,7 +217,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     }
 
     "must fail to validate Tax Credit reference with incorrect format" in {
-      val validation = summon[ReferenceTypeValidator.Validator[TC.type]]
+      val validation = summon[PaymentReferenceValidator.Validator[TC.type]]
       val invalidTaxCreditReference = Seq("AB123456310724NC", "ZT23456280724NC")
 
       invalidTaxCreditReference.foreach(
