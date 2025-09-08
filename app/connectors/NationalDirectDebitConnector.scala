@@ -66,7 +66,7 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
 
   def submitChrisData(submission: ChrisSubmissionRequest)
                      (implicit hc: HeaderCarrier): Future[Boolean] = {
-    http.post(url"$nationalDirectDebitBaseUrl/chris-submission")
+    http.post(url"$nationalDirectDebitBaseUrl/chris")
       .withBody(Json.toJson(submission))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {

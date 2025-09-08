@@ -211,7 +211,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
     "successfully return true when CHRIS submission succeeds with 200 OK" in {
       stubFor(
-        post(urlPathMatching("/national-direct-debit/chris-submission"))
+        post(urlPathMatching("/national-direct-debit/chris"))
           .willReturn(
             aResponse().withStatus(OK)
           )
@@ -223,7 +223,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
     "must fail when CHRIS submission returns a non-200 status" in {
       stubFor(
-        post(urlPathMatching("/national-direct-debit/chris-submission"))
+        post(urlPathMatching("/national-direct-debit/chris"))
           .willReturn(
             aResponse().withStatus(CREATED)
           )
@@ -235,7 +235,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
     "must fail when CHRIS submission returns an UpstreamErrorResponse" in {
       stubFor(
-        post(urlPathMatching("/national-direct-debit/chris-submission"))
+        post(urlPathMatching("/national-direct-debit/chris"))
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)
@@ -249,7 +249,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
     "must fail when the result is a failed future" in {
       stubFor(
-        post(urlPathMatching("/national-direct-debit/chris-submission"))
+        post(urlPathMatching("/national-direct-debit/chris"))
           .willReturn(
             aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER) // Simulate connection drop
           )
