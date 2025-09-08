@@ -35,9 +35,9 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
         .verifying(maxLength(MAX_ACCOUNT_HOLDER_NAME_LENGTH, "yourBankDetails.error.accountHolderName.length")),
       "sortCode" -> text("yourBankDetails.error.sortCode.required")
         .verifying(firstError(
-          minLengthWithoutSpaces(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
-          maxLengthWithoutSpaces(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
-          regexp(NumericRegexWithSpaces, "yourBankDetails.error.sortCode.numericOnly")
+          minLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
+          maxLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
+          regexp(NumericRegex, "yourBankDetails.error.sortCode.numericOnly")
         )),
       "accountNumber" -> text("yourBankDetails.error.accountNumber.required")
         .verifying(firstError(
