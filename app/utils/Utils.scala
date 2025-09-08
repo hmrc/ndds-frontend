@@ -23,6 +23,7 @@ import java.time.LocalDate
 
 object Utils {
   val emptyString = ""
+  val LockExpirySessionKey = "lockoutExpiryDateTime"
 
   def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate, nddService: NationalDirectDebitService, userAnswers: UserAnswers): Boolean =
     val currentDate = LocalDate.now()
