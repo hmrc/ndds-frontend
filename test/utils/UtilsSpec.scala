@@ -16,30 +16,50 @@
 
 package utils
 
-import org.scalatestplus.play.PlaySpec
+import models.UserAnswers
+import org.scalatest.funsuite.AnyFunSuite
+import play.api.libs.json.Json
+import services.NationalDirectDebitService
+import org.mockito.Mockito.*
+import org.scalatestplus.mockito.MockitoSugar
 
 import java.time.LocalDate
 
-class UtilsSpec extends PlaySpec {
+class UtilsSpec extends AnyFunSuite with MockitoSugar {
 
-  "UtilsSpec" should {
+    val mockService: NationalDirectDebitService = mock[NationalDirectDebitService]
+  val userAnswersId: String = "id"
+  val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
-    "return true if payment date is prior 2 days from current date" in {
-      val result = Utils.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(1))
+  val expectedUserAnswersChangeMode: UserAnswers = emptyUserAnswers.copy(data =
+    Json.obj(
+      "paymentDate" -> Json.obj(
+        "enteredDate" -> "2025-02-01",
+        "earliestPaymentDate" -> "2025-02-01",
+      )))
 
-      result mustBe true
+    test("return true if payment date is less than a day from current date") {
+      when(mockService.isSinglePaymentPlan(expectedUserAnswersChangeMode)).thenReturn(true)
+
+      val result = Utils.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(1), mockService, expectedUserAnswersChangeMode)
+      assert(result)
     }
 
-    "return false if payment date is equal to 2 days from current date" in {
-      val result = Utils.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(2))
-
-      result mustBe true
+    test("return true if payment date is equal to 2 days from current date") {
+      when(mockService.isSinglePaymentPlan(expectedUserAnswersChangeMode)).thenReturn(true)
+      val result = Utils.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(2), mockService, expectedUserAnswersChangeMode)
+      assert(result)
     }
 
-    "return false if payment date is more than 2 days from current date" in {
-      val result = Utils.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(3))
-
-      result mustBe false
+    test("return false if payment date is more than 2 days from current date") {
+      when(mockService.isSinglePaymentPlan(expectedUserAnswersChangeMode)).thenReturn(true)
+      val result = Utils.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(3), mockService, expectedUserAnswersChangeMode)
+      assert(!result)
     }
-  }
+
+    test("return false if not a single payment date") {
+      when(mockService.isSinglePaymentPlan(expectedUserAnswersChangeMode)).thenReturn(false)
+      val result = Utils.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(1), mockService, expectedUserAnswersChangeMode)
+      assert(!result)
+    }
 }
