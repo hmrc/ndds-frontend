@@ -22,7 +22,8 @@ import controllers.routes
 import models.requests.IdentifierRequest
 import play.api.mvc.Results.*
 import play.api.mvc.*
-import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession, AuthorisationException}
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -42,17 +43,16 @@ class AuthenticatedIdentifierAction @Inject()(
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised().retrieve(Retrievals.credentials) {
-      case Some(credentials) =>
-        block(IdentifierRequest(request, credentials.providerId))
-      case None =>
-        throw new UnauthorizedException("Unable to retrieve credential Id")
+    authorised().retrieve(Retrievals.internalId and Retrievals.credentials) {
+      case Some(internalId) ~ Some(credentials) => block(IdentifierRequest(request, credentials.providerId))
+      case _ => throw new UnauthorizedException("Unable to retrieve credential id")
     } recover {
       case _: NoActiveSession =>
         Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
       case _: AuthorisationException =>
         Redirect(routes.UnauthorisedController.onPageLoad())
     }
+
   }
 }
 

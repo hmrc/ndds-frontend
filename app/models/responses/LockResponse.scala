@@ -29,9 +29,9 @@ case class LockResponse(_id: String,
                         lastUpdated: Option[Instant],
                         lockoutExpiryDateTime: Option[Instant]) {
   val lockStatus: LockStatus = (isLocked, unverifiable) match {
-    case (false, _)      => NotLocked
-    case (_, Some(true)) => LockedAndVerified
-    case (_, _)          => LockedAndUnverified
+    case (false, _)         => NotLocked
+    case (true, Some(true)) => LockedAndUnverified
+    case (true, _)          => LockedAndVerified
   }
 }
 

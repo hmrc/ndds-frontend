@@ -25,17 +25,20 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{PersonalOrBusinessAccountPage, YourBankDetailsPage}
+import play.api.Application
 import play.api.data.Form
+import play.api.http.{HttpFilters, NoHttpFilters}
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
-import services.BarsService
-import uk.gov.hmrc.http.HeaderCarrier
+import services.{BarsService, LockService}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import views.html.YourBankDetailsView
 
+import java.time.Instant
 import scala.concurrent.Future
 
 class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
@@ -75,7 +78,8 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          form, NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
       }
     }
 
@@ -88,7 +92,9 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212", "34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(
+          YourBankDetails("value 1", "123212", "34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))
+          (request, messages(application)).toString
       }
     }
 
@@ -285,5 +291,229 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustEqual BAD_REQUEST
       }
     }
+
+    "onFailedVerification" - {
+
+      "NotLocked stays on page with errors" in new SetUp {
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(models.errors.BarsErrors.BankAccountUnverified)))
+        when(mockLockService.updateLockForUser(any())(any())).thenReturn(Future.successful(notLocked))
+
+        val application: Application = applicationBuilder(userAnswers = Some(ua))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[BarsService].toInstance(mockBarService),
+            bind[LockService].toInstance(mockLockService)
+          ).build()
+
+        running(application) {
+          val request = FakeRequest(POST, yourBankDetailsRoute)
+            .withFormUrlEncodedBody(
+              "accountHolderName" -> "value 1",
+              "sortCode" -> "123212",
+              "accountNumber" -> "34211234",
+              "auddisStatus" -> "true"
+            )
+
+          val result = route(application, request).value
+          status(result) mustEqual BAD_REQUEST
+          contentAsString(result) must include("These account details could not be verified")
+
+          session(result).get(LockExpirySessionKey) mustBe None
+        }
+      }
+
+      "locked + verified & flag=false, redirects to reach-limit" in new SetUp {
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(models.errors.BarsErrors.NameMismatch)))
+        when(mockLockService.updateLockForUser(any())(any())).thenReturn(Future.successful(lockedAndVerified))
+        when(mockLockService.isUserLocked(any())(any())).thenReturn(Future.successful(lockedAndVerified))
+
+        val application: Application = applicationBuilder(userAnswers = Some(ua))
+          .configure(
+            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN",
+          )
+          .overrides(
+            bind[HttpFilters].to[NoHttpFilters],
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[BarsService].toInstance(mockBarService),
+            bind[LockService].toInstance(mockLockService)
+          ).build()
+
+        running(application) {
+          val request = FakeRequest(POST, yourBankDetailsRoute)
+            .withFormUrlEncodedBody(
+              "accountHolderName" -> "value 1",
+              "sortCode" -> "123212",
+              "accountNumber" -> "34211234",
+              "auddisStatus" -> "true"
+            )
+
+          val result = route(application, request).value
+
+          redirectLocation(result).value mustEqual routes.ReachedLimitController.onPageLoad().url
+          session(result).get(LockExpirySessionKey) mustBe Some(expiryDateTime.toString)
+        }
+      }
+
+      "locked + verified & flag=true marks unverified, redirects to account-details-not-verified" in new SetUp {
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(models.errors.BarsErrors.BankAccountUnverified)))
+        when(mockLockService.updateLockForUser(any())(any())).thenReturn(Future.successful(lockedAndVerified))
+        when(mockLockService.markUserAsUnverifiable(any())(any())).thenReturn(Future.successful(lockedAndUnverified))
+
+        val application: Application = applicationBuilder(userAnswers = Some(ua))
+          .configure(
+            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN",
+          )
+          .overrides(
+            bind[HttpFilters].to[NoHttpFilters],
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[BarsService].toInstance(mockBarService),
+            bind[LockService].toInstance(mockLockService)
+          ).build()
+
+        running(application) {
+          val request = FakeRequest(POST, yourBankDetailsRoute)
+            .withFormUrlEncodedBody(
+              "accountHolderName" -> "value 1",
+              "sortCode" -> "123212",
+              "accountNumber" -> "34211234",
+              "auddisStatus" -> "true"
+            )
+
+          val result = route(application, request).value
+          status(result) mustEqual SEE_OTHER
+
+          redirectLocation(result).value mustEqual routes.AccountDetailsNotVerifiedController.onPageLoad().url
+          session(result).get(LockExpirySessionKey) mustBe Some(expiryDateTime.toString)
+        }
+      }
+
+      "locked + unverified, uses status and redirects to account-details-not-verified" in new SetUp {
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(models.errors.BarsErrors.NameMismatch)))
+        when(mockLockService.updateLockForUser(any())(any())).thenReturn(Future.successful(lockedAndUnverified))
+        when(mockLockService.isUserLocked(any())(any())).thenReturn(Future.successful(lockedAndUnverified))
+
+        val application: Application = applicationBuilder(userAnswers = Some(ua))
+          .configure(
+            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN",
+          )
+          .overrides(
+            bind[HttpFilters].to[NoHttpFilters],
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[BarsService].toInstance(mockBarService),
+            bind[LockService].toInstance(mockLockService)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, yourBankDetailsRoute)
+            .withFormUrlEncodedBody(
+              "accountHolderName" -> "value 1",
+              "sortCode" -> "123212",
+              "accountNumber" -> "34211234",
+              "auddisStatus" -> "true"
+            )
+
+          val result = route(application, request).value
+          status(result) mustEqual SEE_OTHER
+
+          redirectLocation(result).value mustEqual routes.AccountDetailsNotVerifiedController.onPageLoad().url
+          session(result).get(LockExpirySessionKey) mustBe Some(expiryDateTime.toString)
+        }
+      }
+
+      "mark returns 409 then falls back to status" in new SetUp {
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockLockService.updateLockForUser(any())(any())).thenReturn(Future.successful(lockedAndVerified))
+        when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(models.errors.BarsErrors.BankAccountUnverified)))
+
+        when(mockLockService.markUserAsUnverifiable(any())(any()))
+          .thenReturn(Future.failed(UpstreamErrorResponse("conflict", Error409, Error409)))
+
+        when(mockLockService.isUserLocked(any())(any())).thenReturn(Future.successful(lockedAndUnverified))
+
+        val application: Application = applicationBuilder(userAnswers = Some(ua))
+          .configure(
+            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN",
+          )
+          .overrides(
+            bind[HttpFilters].to[NoHttpFilters],
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[BarsService].toInstance(mockBarService),
+            bind[LockService].toInstance(mockLockService)
+          ).build()
+
+        running(application) {
+          val request = FakeRequest(POST, yourBankDetailsRoute)
+            .withFormUrlEncodedBody(
+              "accountHolderName" -> "value 1",
+              "sortCode" -> "123212",
+              "accountNumber" -> "34211234",
+              "auddisStatus" -> "true"
+            )
+
+          val result = route(application, request).value
+          status(result) mustEqual SEE_OTHER
+
+          redirectLocation(result).value mustEqual routes.AccountDetailsNotVerifiedController.onPageLoad().url
+          session(result).get(LockExpirySessionKey) mustBe Some(expiryDateTime.toString)
+        }
+      }
+    }
+  }
+
+  trait SetUp {
+    val ua: UserAnswers = userAnswers
+      .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+
+    val Error409 = 409
+    val expiryDateTime: Instant = Instant.parse("2025-09-03T12:00:00Z")
+
+    val mockSessionRepository: SessionRepository = mock[SessionRepository]
+    val mockBarService: BarsService = mock[BarsService]
+    val mockLockService: LockService = mock[LockService]
+
+    val notLocked: LockResponse =
+      LockResponse(
+        "_",
+        0,
+        isLocked = false,
+        unverifiable = None,
+        createdAt = None,
+        lastUpdated = None,
+        lockoutExpiryDateTime = None)
+
+    val lockedAndVerified: LockResponse =
+      LockResponse(
+        "_",
+        0,
+        isLocked = true,
+        unverifiable = Some(false),
+        createdAt = None,
+        lastUpdated = None,
+        lockoutExpiryDateTime = Some(expiryDateTime))
+
+    val lockedAndUnverified: LockResponse =
+      LockResponse(
+        "_",
+        0,
+        isLocked = true,
+        unverifiable = Some(true),
+        createdAt = None,
+        lastUpdated = None,
+        lockoutExpiryDateTime = Some(expiryDateTime))
   }
 }

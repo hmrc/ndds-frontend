@@ -28,12 +28,15 @@ import pages.*
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, RequestHeader, Result}
 import repositories.SessionRepository
 import services.{BarsService, LockService}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourBankDetailsView
+
+import java.time.Instant
+import utils.Utils.LockExpirySessionKey
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -157,18 +160,60 @@ class YourBankDetailsController @Inject()(
       lockResponse   <- lockService.updateLockForUser(credId)
       updatedAnswers <- Future.fromTry(request.userAnswers.set(AccountUnverifiedPage, accountUnverifiedFlag))
       _              <- sessionRepository.set(updatedAnswers)
-    } yield {
-      lockResponse.lockStatus match {
-        case NotLocked =>
-          val formWithErrors = BarsErrorMapper
-            .toFormError(barsError)
-            .foldLeft(form.fill(bankDetails))(_ withError _)
 
-          BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
-
-        case LockedAndVerified | LockedAndUnverified =>
-          Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad())
+      result         <- lockResponse.lockStatus match {
+        case NotLocked           => handleNotLocked(bankDetails, mode, barsError)
+        case LockedAndVerified   => handleLockedAndVerified(credId, accountUnverifiedFlag)
+        case LockedAndUnverified => handleLockedAndUnverified(credId)
       }
+    } yield result
+  }
+
+  private def handleNotLocked(
+                               bankDetails: YourBankDetails,
+                               mode: Mode, barsErrors:
+                               BarsErrors)(implicit request: DataRequest[_]): Future[Result] = {
+    val formWithErrors = BarsErrorMapper
+      .toFormError(barsErrors)
+      .foldLeft(form.fill(bankDetails))(_ withError _)
+
+    Future.successful(
+      BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+    )
+  }
+
+  private def handleLockedAndVerified(
+      credId: String,
+      accountUnverifiedFlag: Boolean)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+
+    if (accountUnverifiedFlag) {
+      lockService
+        .markUserAsUnverifiable(credId)
+        .recoverWith { case e: UpstreamErrorResponse if e.statusCode == 409 => lockService.isUserLocked(credId) }
+        .map(lockResp =>
+          withExpiry(Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad()), lockResp.lockoutExpiryDateTime))
+    } else {
+      lockService
+        .isUserLocked(credId)
+        .map(lockResp =>
+          withExpiry(Redirect(routes.ReachedLimitController.onPageLoad()), lockResp.lockoutExpiryDateTime))
     }
   }
+
+  private def handleLockedAndUnverified(
+
+       credId: String)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+    for {
+      status <- lockService.isUserLocked(credId)
+    } yield withExpiry(
+      Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad()),
+      status.lockoutExpiryDateTime
+    )
+  }
+
+  private def withExpiry(result: Result, expiry: Option[Instant])(implicit request: RequestHeader): Result =
+    expiry match {
+      case Some(dateTime) => result.addingToSession(LockExpirySessionKey -> dateTime.toString)(request)
+      case None           => result
+    }
 }

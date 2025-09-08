@@ -35,10 +35,8 @@ class LandingController @Inject()(nddService: NationalDirectDebitService,
   def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
     nddService.retrieveAllDirectDebits(request.userId) map {
         case rdsResponse if rdsResponse.directDebitCount == 0 =>
-          logger.info(s"rdsResponse: ${rdsResponse}")
           Redirect(routes.SetupDirectDebitPaymentController.onPageLoad())
         case response =>
-          logger.info(s"rdsResponse: ${response}")
           Redirect(routes.YourDirectDebitInstructionsController.onPageLoad())
       }
   }

@@ -18,7 +18,7 @@ package connectors
 
 import models.responses.{Bank, BarsVerificationResponse}
 import play.api.Logging
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, StringContextOps, UpstreamErrorResponse}
@@ -53,13 +53,33 @@ case class BarsConnector @Inject()(
             (implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
     val url = s"$barsBaseUrl/verify/$endpoint"
     logger.info(s"Account validation called with $url")
-
+    logger.info(
+      s"""|
+           |Account Validation Request:
+          |${Json.prettyPrint(requestJson)}
+          |""".stripMargin
+    )
     http
       .post(url"$url")
       .withBody(requestJson)
       .execute[Either[UpstreamErrorResponse, BarsVerificationResponse]]
       .flatMap {
         case Right(verificationData) =>
+          logger.info(
+            s"""|
+        |Account Validation Results:
+                |  • accountNumberIsWellFormatted = ${verificationData.accountNumberIsWellFormatted}
+                |  • sortCodeIsPresentOnEISCD     = ${verificationData.sortCodeIsPresentOnEISCD}
+                |  • sortCodeBankName             = ${verificationData.sortCodeBankName.getOrElse("N/A")}
+                |  • accountExists                = ${verificationData.accountExists}
+                |  • nameMatches                  = ${verificationData.nameMatches}
+                |  • sortCodeSupportsDirectDebit  = ${verificationData.sortCodeSupportsDirectDebit}
+                |  • sortCodeSupportsDirectCredit = ${verificationData.sortCodeSupportsDirectCredit}
+                |  • nonStandardAccountDetailsReq = ${verificationData.nonStandardAccountDetailsRequiredForBacs.getOrElse("N/A")}
+                |  • iban                         = ${verificationData.iban.getOrElse("N/A")}
+                |  • accountName                  = ${verificationData.accountName.getOrElse("N/A")}
+                |""".stripMargin
+          )
           Future.successful(verificationData)
         case Left(errorResponse) =>
           Future.failed(
@@ -69,6 +89,5 @@ case class BarsConnector @Inject()(
           )
       }
   }
-
 
 }
