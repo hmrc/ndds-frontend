@@ -19,7 +19,6 @@ package controllers
 import controllers.actions.*
 import forms.BankDetailsCheckYourAnswerFormProvider
 import models.Mode
-import models.audits.ConfirmBankDetails
 import navigation.Navigator
 import pages.BankDetailsCheckYourAnswerPage
 import play.api.Logging
@@ -27,7 +26,6 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.AuditService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
@@ -42,7 +40,6 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                                       identify: IdentifierAction,
                                                       getData: DataRetrievalAction,
                                                       requireData: DataRequiredAction,
-                                                      auditService: AuditService,
                                                       sessionRepository: SessionRepository,
                                                       navigator: Navigator,
                                                       formProvider: BankDetailsCheckYourAnswerFormProvider,
@@ -60,24 +57,18 @@ class BankDetailsCheckYourAnswerController @Inject()(
         case Some(value) => form.fill(value)
       }
       val summaryList = buildSummaryList(request.userAnswers)
-      //TODO: will be covered in the next page of confirmation
-      auditService.sendEvent(ConfirmBankDetails())
       Ok(view(preparedForm, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode)))
   }
 
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-
       val confirmed = true
 
       for {
         updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, confirmed))
         _              <- sessionRepository.set(updatedAnswers)
-      } yield {
-        auditService.sendEvent(ConfirmBankDetails())
-        Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
-      }
+      } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
   }
 
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =

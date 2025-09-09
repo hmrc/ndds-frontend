@@ -22,7 +22,7 @@ import models.responses.{BankAddress, Country}
 import models.{CheckMode, NormalMode, PersonalOrBusinessAccount, YourBankDetailsWithAuddisStatus}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, verify, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, BankDetailsCheckYourAnswerPage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
 import play.api.inject.bind
@@ -30,7 +30,6 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
-import services.AuditService
 
 import scala.concurrent.Future
 
@@ -40,7 +39,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
 
   val formProvider = new BankDetailsCheckYourAnswerFormProvider()
   val form = formProvider()
-  val mockAuditService: AuditService = mock[AuditService]
 
   lazy val bankDetailsCheckYourAnswerRoute = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
   lazy val ConfirmAuthorityRoute = routes.ConfirmAuthorityController.onPageLoad(NormalMode).url
@@ -48,7 +46,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
   "BankDetailsCheckYourAnswer Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
       val userAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
@@ -59,7 +56,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsCheckYourAnswerRoute)
-
         val result = route(application, request).value
 
         status(result) mustEqual OK
@@ -76,7 +72,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
-
       val userAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
@@ -88,7 +83,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsCheckYourAnswerRoute)
-
         val result = route(application, request).value
 
         status(result) mustEqual OK
@@ -104,9 +98,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
     }
 
     "must redirect to the next page and send an audit event when Continue is clicked" in {
-
       val mockSessionRepository = mock[SessionRepository]
-
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val userAnswers = emptyUserAnswers
@@ -116,12 +108,10 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository),
-          bind[AuditService].toInstance(mockAuditService)
         )
         .build()
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-      doNothing().when(mockAuditService).sendEvent(any())(any(), any(), any())
 
       running(application) {
         val request =
@@ -131,7 +121,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
-        verify(mockAuditService).sendEvent(any())(any(), any(), any())
       }
     }
     

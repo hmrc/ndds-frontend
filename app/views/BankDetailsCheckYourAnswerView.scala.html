@@ -22,8 +22,8 @@
     govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList,
     govukButton: GovukButton,
-    header1:Header1,
-    h2:Header2,
+    h1: Header1,
+    h2: Header2,
     linkWithHiddenText: LinkWithHiddenText
 )
 
@@ -36,20 +36,8 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        @header1("bankDetailsCheckYourAnswer.heading")
-
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                @h2("bankDetailsCheckYourAnswer.h2")
-            </div>
-            <div class="govuk-grid-column-one-third">
-                @linkWithHiddenText(
-                    url = routes.YourBankDetailsController.onPageLoad(CheckMode).url,
-                    text = "Change",
-                    visuallyHiddenText = Some("bankDetailsCheckYourAnswer.h2")
-                    )
-            </div>
-        </div>
+        @h1("bankDetailsCheckYourAnswer.heading")
+        @h2("bankDetailsCheckYourAnswer.h2")
 
         @govukSummaryList(list)
 
