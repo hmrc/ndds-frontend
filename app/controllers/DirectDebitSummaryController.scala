@@ -39,6 +39,6 @@ class DirectDebitSummaryController @Inject()(
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    Future.successful(Ok(view()))
+    Future.successful(Ok(view(routes.YourDirectDebitInstructionsController.onPageLoad())))
   }
 }
