@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -25,7 +24,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSummaryView
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class DirectDebitSummaryController @Inject()(
                                                        override val messagesApi: MessagesApi,
@@ -33,12 +32,20 @@ class DirectDebitSummaryController @Inject()(
                                                        getData: DataRetrievalAction,
                                                        val controllerComponents: MessagesControllerComponents,
                                                        view: DirectDebitSummaryView,
-                                                       appConfig: FrontendAppConfig,
                                                        nddService: NationalDirectDebitService
                                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    Future.successful(Ok(view(routes.YourDirectDebitInstructionsController.onPageLoad())))
+  def onPageLoad(reference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    nddService.retrieveAllDirectDebits(request.userId) map {
+      directDebitDetailsData =>
+        val firstMatchingDebit = directDebitDetailsData.directDebitList
+          .find(_.ddiRefNumber == reference).map(_.toDirectDebitDetails)
+
+        firstMatchingDebit match {
+          case Some(debit) => Ok(view(debit, routes.YourDirectDebitInstructionsController.onPageLoad()))
+          case None => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+    }
   }
 }

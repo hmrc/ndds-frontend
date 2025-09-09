@@ -27,13 +27,47 @@
     govukSummaryList: GovukSummaryList
 )
 
-@(call: Call)(implicit request: Request[_], messages: Messages)
+@(directDebitDetails: DirectDebitDetails, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(call.url)) {
 
     @header1("directDebitPaymentSummary.heading")
     @paragraph("directDebitPaymentSummary.p1")
     @paragraph("directDebitPaymentSummary.p2")
+
+    @govukSummaryList(SummaryList(
+        card = Some(Card(
+            title = Some(CardTitle(
+                content = messages("directDebitPaymentSummary.directDebit.title")
+            ))
+        )),
+        rows = Seq(
+            SummaryListRow(
+                key = Key(
+                    content = messages("directDebitPaymentSummary.directDebit.reference")
+                ),
+                value = Value(
+                    content = HtmlContent(directDebitDetails.directDebitReference)
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("directDebitPaymentSummary.directDebit.accountNumber")
+                ),
+                value = Value(
+                    content = HtmlContent(maskAccountNumber(directDebitDetails.accountNumber))
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("directDebitPaymentSummary.directDebit.sortCode")
+                ),
+                value = Value(
+                    content = HtmlContent(maskSortCode(directDebitDetails.sortCode))
+                )
+            )
+        )
+    ))
 
     <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.activePayment.h1")</h1>
 
