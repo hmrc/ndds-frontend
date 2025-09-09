@@ -100,3 +100,5 @@ GET        /your-saved-direct-debit-payment             controllers.CheckYourAns
 POST       /your-saved-direct-debit-payment             controllers.CheckYourAnswersController.onSubmit()
 
 GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
+
+GET        /payment-plan-amount                         controllers.PaymentPlanAmountController.onPageLoad(mode: Mode = NormalMode)
