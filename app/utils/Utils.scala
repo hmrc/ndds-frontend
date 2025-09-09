@@ -16,7 +16,15 @@
 
 package utils
 
+import models.UserAnswers
+import pages.PaymentPlanTypePage
+import services.NationalDirectDebitService
+
 object Utils {
   val emptyString = ""
   val LockExpirySessionKey = "lockoutExpiryDateTime"
+
+  def amendmentGuardPaymentPlan(nddService : NationalDirectDebitService, userAnswers : UserAnswers): Boolean =
+    if(nddService.isSinglePaymentPlan(userAnswers) || nddService.isBudgetPaymentPlan(userAnswers)) true else false
+
 }
