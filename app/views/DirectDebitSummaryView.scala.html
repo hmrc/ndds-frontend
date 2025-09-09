@@ -1,0 +1,48 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.html.components.*
+@import utils.MaskAndFormatUtils.*
+
+@this(
+    layout: templates.Layout,
+    header1: Header1,
+    paragraph: Paragraph,
+    paragraphMessageWithLink: ParagraphMessageWithLink,
+    govukButton: GovukButton,
+    govukErrorSummary: GovukErrorSummary,
+    govukSummaryList: GovukSummaryList
+)
+
+@()(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = true) {
+
+
+    @header1("yourDirectDebitPaymentSummary.heading")
+    @paragraph("yourDirectDebitPaymentSummary.p1")
+    @paragraph("yourDirectDebitPaymentSummary.p2")
+
+    <h1 class="govuk-heading-m">@messages("yourDirectDebitPaymentSummary.activePayment.h1")</h1>
+
+    <h1 class="govuk-heading-m">@messages("yourDirectDebitPaymentSummary.setupPayment.h1")</h1>
+    @paragraph("yourDirectDebitPaymentSummary.setupPayment.p1")
+    <p class="govuk-inset-text">@messages("yourDirectDebitPaymentSummary.setupPayment.p2")</p>
+
+    @govukButton(
+        ButtonViewModel(messages("yourDirectDebitPaymentSummary.addPaymentButton"))
+    )
+}
