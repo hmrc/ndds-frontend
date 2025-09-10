@@ -79,7 +79,7 @@ class NavigatorSpec extends SpecBase {
         }
       }
 
-      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is CT, NIC, OL, PAYE, SDLT, VAT" in {
+      "must go from DirectDebitSourcePage to PaymentReferencePage if source is CT, NIC, OL, PAYE, SDLT, VAT" in {
         val validSources = Seq(CT, NIC, OL, PAYE, SDLT, VAT)
 
         validSources.foreach { source =>
@@ -229,7 +229,6 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(YourBankDetailsPage, CheckMode, userAnswers) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
       }
 
-
       "must go from BankDetailsCheckYourAnswersPage to ConfirmAuthorityPage.1" in {
         val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, true)
         navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.ConfirmAuthorityController.onPageLoad(CheckMode)
@@ -238,6 +237,24 @@ class NavigatorSpec extends SpecBase {
       "must go from BankDetailsCheckYourAnswersPage to ConfirmAuthorityPage.2" in {
         val checkPage = userAnswers.setOrException(BankDetailsCheckYourAnswerPage, false)
         navigator.nextPage(BankDetailsCheckYourAnswerPage, CheckMode, checkPage) mustBe routes.ConfirmAuthorityController.onPageLoad(CheckMode)
+      }
+
+      "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is MGD, SA, TC" in {
+        val validSources = Seq(MGD, SA, TC)
+
+        validSources.foreach { source =>
+          val ua = userAnswers.set(DirectDebitSourcePage, source).success.value
+          navigator.nextPage(DirectDebitSourcePage, CheckMode, ua) mustBe routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+        }
+      }
+
+      "must go from DirectDebitSourcePage to PaymentReferencePage if source is CT, NIC, OL, PAYE, SDLT, VAT" in {
+        val validSources = Seq(CT, NIC, OL, PAYE, SDLT, VAT)
+
+        validSources.foreach { source =>
+          val ua = userAnswers.set(DirectDebitSourcePage, source).success.value
+          navigator.nextPage(DirectDebitSourcePage, CheckMode, ua) mustBe routes.PaymentReferenceController.onPageLoad(NormalMode)
+        }
       }
 
       "must go from PaymentReferencePage to CheckYourAnswersController in CheckMode" in {
