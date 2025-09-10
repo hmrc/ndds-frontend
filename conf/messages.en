@@ -324,6 +324,5 @@ directDebitPaymentSummary.directDebit.accountNumber = Account number
 directDebitPaymentSummary.directDebit.sortCode = Bank sort code
 directDebitPaymentSummary.activePayment.h1 = Active payment plans
 directDebitPaymentSummary.setupPayment.h1 = Set up a new payment plan
-directDebitPaymentSummary.setupPayment.p1 = To set up a new payment plan follow the 'Add payment plan' link below.
-directDebitPaymentSummary.setupPayment.p2 = Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
+directDebitPaymentSummary.setupPayment.p1 = Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
 directDebitPaymentSummary.addPaymentButton = Add payment plan
