@@ -18,12 +18,14 @@ package utils
 
 import models.UserAnswers
 import services.NationalDirectDebitService
-
 import java.time.LocalDate
 
 object Utils {
   val emptyString = ""
   val LockExpirySessionKey = "lockoutExpiryDateTime"
+
+  def amendmentGuardPaymentPlan(nddService : NationalDirectDebitService, userAnswers : UserAnswers): Boolean =
+    if(nddService.isSinglePaymentPlan(userAnswers) || nddService.isBudgetPaymentPlan(userAnswers)) true else false
 
   def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate, nddService: NationalDirectDebitService, userAnswers: UserAnswers): Boolean =
     val currentDate = LocalDate.now()

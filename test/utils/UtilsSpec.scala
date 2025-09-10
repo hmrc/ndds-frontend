@@ -18,11 +18,10 @@ package utils
 
 import models.UserAnswers
 import org.scalatest.funsuite.AnyFunSuite
-import play.api.libs.json.Json
 import services.NationalDirectDebitService
 import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
-
+import play.api.libs.json.Json
 import java.time.LocalDate
 
 class UtilsSpec extends AnyFunSuite with MockitoSugar {
@@ -30,6 +29,26 @@ class UtilsSpec extends AnyFunSuite with MockitoSugar {
   val mockService: NationalDirectDebitService = mock[NationalDirectDebitService]
   val userAnswersId: String = "id"
   val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
+  val expectedUserAnswers: UserAnswers = emptyUserAnswers
+
+  test("return true if it is a budget payment plan") {
+    when(mockService.isBudgetPaymentPlan(expectedUserAnswers)).thenReturn(true)
+    val result = Utils.amendmentGuardPaymentPlan(mockService, expectedUserAnswers)
+    assert(result)
+  }
+
+  test("return true if it is a single payment plan") {
+    when(mockService.isSinglePaymentPlan(expectedUserAnswers)).thenReturn(true)
+    val result = Utils.amendmentGuardPaymentPlan(mockService, expectedUserAnswers)
+    assert(result)
+  }
+
+  test("return false if it is not a single payment plan or budget payment plan") {
+    when(!(mockService.isSinglePaymentPlan(expectedUserAnswers)) &&
+      !(mockService.isBudgetPaymentPlan(expectedUserAnswers))).thenReturn(false)
+    val result = Utils.amendmentGuardPaymentPlan(mockService, expectedUserAnswers)
+    assert(result)
+  }
 
   val expectedUserAnswersPlanEndDate: UserAnswers = emptyUserAnswers.copy(data =
     Json.obj(
@@ -63,3 +82,4 @@ class UtilsSpec extends AnyFunSuite with MockitoSugar {
     assert(!result)
   }
 }
+
