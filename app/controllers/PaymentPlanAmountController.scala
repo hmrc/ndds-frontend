@@ -17,16 +17,16 @@
 package controllers
 
 import controllers.actions.*
-import forms.PaymentPlanAmountFormProvider
+import forms.amend.PaymentPlanAmountFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.PaymentPlanAmountPage
+import pages.amend.PaymentPlanAmountPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.PaymentPlanAmountView
+import views.html.amend.PaymentPlanAmountView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -53,21 +53,23 @@ class PaymentPlanAmountController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode, routes.YourDirectDebitInstructionsController.onPageLoad()))
+      //TODO: Change the route to PP1 screen once built
+      Ok(view(preparedForm, mode, routes.JourneyRecoveryController.onPageLoad()))
   }
 
-//  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-//    implicit request =>
-//
-//      form.bindFromRequest().fold(
-//        formWithErrors =>
-//          Future.successful(BadRequest(view(formWithErrors, mode, routes.YourDirectDebitInstructionsController.onPageLoad()))),
-//        value =>
-//          for {
-//            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanAmountPage, value))
-//            _              <- sessionRepository.set(updatedAnswers)
-//          } yield Redirect(navigator.nextPage(PaymentPlanAmountPage, mode, updatedAnswers))
-//      )
-//  }
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+
+      form.bindFromRequest().fold(
+        formWithErrors =>
+          //TODO: Change the route to PP1 screen once built
+          Future.successful(BadRequest(view(formWithErrors, mode, routes.JourneyRecoveryController.onPageLoad()))),
+        value =>
+          for {
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanAmountPage, value))
+            _              <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(PaymentPlanAmountPage, mode, updatedAnswers))
+      )
+  }
 
 }

@@ -23,6 +23,7 @@ import pages.*
 import models.*
 import models.DirectDebitSource.*
 import models.PaymentPlanType.*
+import pages.amend.PaymentPlanAmountPage
 
 @Singleton
 class Navigator @Inject()() {
@@ -41,6 +42,8 @@ class Navigator @Inject()() {
     case PlanStartDatePage => userAnswers => checkPlanStartDateLogic(userAnswers)
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
+    //TODO: Change the route to AP1b screen once built
+    case PaymentPlanAmountPage => _ => routes.PaymentDateController.onPageLoad(NormalMode)
     case _ => _ => routes.LandingController.onPageLoad()
   }
 

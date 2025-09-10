@@ -28,6 +28,7 @@
 
 @layout(pageTitle = title(form, messages("paymentAmount.title")), backLink = Some(call.url)) {
 
+ @formHelper(action = routes.PaymentPlanAmountController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
    @if(form.errors.nonEmpty) {
      @govukErrorSummary(ErrorSummaryViewModel(form))
@@ -47,5 +48,5 @@
   @govukButton(
   ButtonViewModel(messages("site.continue"))
   )
-
+}
 }
