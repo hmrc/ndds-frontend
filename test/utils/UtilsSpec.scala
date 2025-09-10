@@ -21,6 +21,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import services.NationalDirectDebitService
 import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
+import java.time.LocalDate
 
 class UtilsSpec extends AnyFunSuite with MockitoSugar {
 
@@ -50,3 +51,37 @@ class UtilsSpec extends AnyFunSuite with MockitoSugar {
   }
   
 }
+
+  val expectedUserAnswersPlanEndDate: UserAnswers = emptyUserAnswers.copy(data =
+    Json.obj(
+      "planEndDate" -> Json.obj(
+        "enteredDate" -> "2025-02-01",
+        "planEndDate" -> "2025-02-01",
+      )))
+
+  test("return true if it is a budget payment plan and planEndDate is less than a day from current date") {
+    when(mockService.isBudgetPaymentPlan(expectedUserAnswersPlanEndDate)).thenReturn(true)
+
+    val result = Utils.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(1), mockService, expectedUserAnswersPlanEndDate)
+    assert(result)
+  }
+
+  test("return true if it is a budget payment plan and plan End date is equal to 3 days from current date") {
+    when(mockService.isBudgetPaymentPlan(expectedUserAnswersPlanEndDate)).thenReturn(true)
+    val result = Utils.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(3), mockService, expectedUserAnswersPlanEndDate)
+    assert(result)
+  }
+
+  test("return false if it is a budget payment plan and plan end date is more than 3 days from current date") {
+    when(mockService.isSinglePaymentPlan(expectedUserAnswersPlanEndDate)).thenReturn(true)
+    val result = Utils.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(4), mockService, expectedUserAnswersPlanEndDate)
+    assert(!result)
+  }
+
+  test("return false if not a budget payment plan") {
+    when(mockService.isBudgetPaymentPlan(expectedUserAnswersPlanEndDate)).thenReturn(false)
+    val result = Utils.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(1), mockService, expectedUserAnswersPlanEndDate)
+    assert(!result)
+  }
+}
+
