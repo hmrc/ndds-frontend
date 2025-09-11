@@ -82,7 +82,7 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   }
 
   def retrieveDirectDebitPaymentPlans(paymentReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
-    http.get(url"$nationalDirectDebitBaseUrl/direct-debit-reference?paymentReference=$paymentReference&maxRecords=$limit")(hc)
+    http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$paymentReference/payment-plans?maxRecords=$limit")(hc)
       .execute[NddDDPaymentPlansResponse]
   }
 }
