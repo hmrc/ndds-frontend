@@ -17,7 +17,6 @@
 package controllers
 
 import base.SpecBase
-import models.DirectDebitDetails
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -38,6 +37,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
     "must return OK and the correct view for a GET with a valid direct debit reference" in {
 
+      val reference = "ref number 1"
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockService)
@@ -46,45 +46,17 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
       running(application) {
 
-        when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-          .thenReturn(Future.successful(nddResponse))
+        when(mockService.retrieveDirectDebitPaymentPlans(any())(any(), any()))
+          .thenReturn(Future.successful(mockDDPaymentPlansResponse))
 
-        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad("122222").url)
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad(reference).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[DirectDebitSummaryView]
-        val directDebitDetails = DirectDebitDetails(
-          directDebitReference ="122222",
-          setupDate="1 February 2024",
-          sortCode = "666666",
-          accountNumber = "00000000",
-          paymentPlans = "0"
-        )
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(directDebitDetails,
+        contentAsString(result) mustEqual view(reference, mockDDPaymentPlansResponse,
           routes.YourDirectDebitInstructionsController.onPageLoad())(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService)
-        )
-        .build()
-
-      running(application) {
-        when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-          .thenReturn(Future.successful(nddResponse))
-
-        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad("invalid direct debit reference").url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }
