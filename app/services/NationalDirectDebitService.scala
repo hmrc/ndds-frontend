@@ -111,7 +111,11 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment)
 
+  def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan)
+
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
   }
+
 }
