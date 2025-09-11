@@ -37,15 +37,19 @@ class DirectDebitSummaryController @Inject()(
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(reference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    nddService.retrieveAllDirectDebits(request.userId) map {
-      directDebitDetailsData =>
-        val firstMatchingDebit = directDebitDetailsData.directDebitList
-          .find(_.ddiRefNumber == reference).map(_.toDirectDebitDetails)
+    nddService.retrieveDirectDebitPaymentPlans(reference) map {
+      ddPaymentPlans =>
+        //val maxLimitReached = ddPaymentPlans.paymentPlanCount > appConfig.maxNumberDDIsAllowed
 
-        firstMatchingDebit match {
-          case Some(debit) => Ok(view(debit, routes.YourDirectDebitInstructionsController.onPageLoad()))
-          case None => Redirect(routes.JourneyRecoveryController.onPageLoad())
-        }
+        Ok(view(reference, ddPaymentPlans, routes.YourDirectDebitInstructionsController.onPageLoad()))
     }
   }
+
+//  def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
+//    nddService.retrieveAllDirectDebits(request.userId) map {
+//      directDebitDetailsData =>
+//        val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
+//        Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
+//    }
+//  }
 }

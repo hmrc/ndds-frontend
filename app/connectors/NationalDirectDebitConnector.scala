@@ -18,7 +18,7 @@ package connectors
 
 import models.NddResponse
 import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -79,5 +79,10 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
           Future.failed(new Exception(s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"))
         case Right(response) => Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
       }
+  }
+
+  def retrieveDirectDebitPaymentPlans(paymentReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
+    http.get(url"$nationalDirectDebitBaseUrl/direct-debit-reference?paymentReference=$paymentReference&maxRecords=$limit")(hc)
+      .execute[NddDDPaymentPlansResponse]
   }
 }

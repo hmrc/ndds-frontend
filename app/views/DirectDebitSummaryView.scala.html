@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import models.responses.*
+@import java.time.format.DateTimeFormatter
 @import views.html.components.*
 @import utils.MaskAndFormatUtils.*
 
@@ -27,7 +29,7 @@
     govukSummaryList: GovukSummaryList
 )
 
-@(directDebitDetails: DirectDebitDetails, call: Call)(implicit request: Request[_], messages: Messages)
+@(reference: String, directDebitDetails: NddDDPaymentPlansResponse, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(call.url)) {
 
@@ -47,7 +49,7 @@
                     content = messages("directDebitPaymentSummary.directDebit.reference")
                 ),
                 value = Value(
-                    content = HtmlContent(directDebitDetails.directDebitReference)
+                    content = HtmlContent(reference)
                 )
             ),
             SummaryListRow(
@@ -55,7 +57,7 @@
                     content = messages("directDebitPaymentSummary.directDebit.accountNumber")
                 ),
                 value = Value(
-                    content = HtmlContent(maskAccountNumber(directDebitDetails.accountNumber))
+                    content = HtmlContent(maskAccountNumber(directDebitDetails.bankAccountNumber))
                 )
             ),
             SummaryListRow(
@@ -63,13 +65,66 @@
                     content = messages("directDebitPaymentSummary.directDebit.sortCode")
                 ),
                 value = Value(
-                    content = HtmlContent(maskSortCode(directDebitDetails.sortCode))
+                    content = HtmlContent(maskSortCode(directDebitDetails.bankSortCode))
                 )
             )
         )
     ))
 
     <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.activePayment.h1")</h1>
+
+    @for(pp <- directDebitDetails.paymentPlanList) {
+        @govukSummaryList(SummaryList(
+            card = Some(Card(
+                title = Some(CardTitle(
+                    content = messages("directDebitPaymentSummary.activePayment.summary.title", pp.paymentReference)
+                )),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = "#",
+                            content = messages("directDebitPaymentSummary.activePayment.summary.action"),
+                            visuallyHiddenText = Some(messages(pp.paymentReference))
+                        )
+                    )
+                ))
+            )),
+            rows = Seq(
+                SummaryListRow(
+                    key = Key(
+                        content = messages("directDebitPaymentSummary.activePayment.summary.planType")
+                    ),
+                    value = Value(
+                        content = HtmlContent(pp.planType)
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")
+                    ),
+                    value = Value(
+                        content = HtmlContent(pp.hodService)
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("directDebitPaymentSummary.activePayment.summary.date")
+                    ),
+                    value = Value(
+                        content = HtmlContent(pp.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("directDebitPaymentSummary.activePayment.summary.amount")
+                    ),
+                    value = Value(
+                        content = HtmlContent(pp.scheduledPaymentAmount.toString)
+                    )
+                )
+            )
+        ))
+    }
 
     <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.setupPayment.h1")</h1>
 
