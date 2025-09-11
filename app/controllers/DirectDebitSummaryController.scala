@@ -44,12 +44,4 @@ class DirectDebitSummaryController @Inject()(
         Ok(view(reference, ddPaymentPlans, routes.YourDirectDebitInstructionsController.onPageLoad()))
     }
   }
-
-//  def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
-//    nddService.retrieveAllDirectDebits(request.userId) map {
-//      directDebitDetailsData =>
-//        val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
-//        Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
-//    }
-//  }
 }
