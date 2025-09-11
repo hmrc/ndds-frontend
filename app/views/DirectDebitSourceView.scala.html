@@ -39,7 +39,7 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("directDebitSource.heading")).asPageHeading(),
                 items  = DirectDebitSource.options
-            ).withHint(HintViewModel(messages("directDebitSource.hint")))
+            ).withHint(Hint(content = Text(messages("directDebitSource.hint"))))
         )
 
         @govukButton(
