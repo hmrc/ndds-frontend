@@ -119,7 +119,7 @@
                         content = messages("directDebitPaymentSummary.activePayment.summary.amount")
                     ),
                     value = Value(
-                        content = HtmlContent(pp.scheduledPaymentAmount.toString)
+                        content = HtmlContent(formatAmount(pp.scheduledPaymentAmount))
                     )
                 )
             )
