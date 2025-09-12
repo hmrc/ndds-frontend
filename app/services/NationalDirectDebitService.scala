@@ -89,6 +89,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   }
 
   private[services] def calculateOffset(auddisStatus: Boolean): Int = {
+    logger.info(s"Calculate offset Auddis flag: $auddisStatus")
     val dynamicDelay = if (auddisStatus) {
       config.paymentDelayDynamicAuddisEnabled
     } else {
