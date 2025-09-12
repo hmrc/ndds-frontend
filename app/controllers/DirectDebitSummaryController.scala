@@ -36,10 +36,10 @@ class DirectDebitSummaryController @Inject()(
                                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(reference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    nddService.retrieveDirectDebitPaymentPlans(reference) map {
+  def onPageLoad(directDebitReference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    nddService.retrieveDirectDebitPaymentPlans(directDebitReference) map {
       ddPaymentPlans =>
-        Ok(view(reference, ddPaymentPlans, routes.YourDirectDebitInstructionsController.onPageLoad()))
+        Ok(view(directDebitReference, ddPaymentPlans, routes.YourDirectDebitInstructionsController.onPageLoad()))
     }
   }
 }

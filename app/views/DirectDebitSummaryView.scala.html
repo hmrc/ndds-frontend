@@ -29,7 +29,7 @@
     govukSummaryList: GovukSummaryList
 )
 
-@(reference: String, directDebitDetails: NddDDPaymentPlansResponse, call: Call)(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(call.url)) {
 
@@ -49,7 +49,7 @@
                     content = messages("directDebitPaymentSummary.directDebit.reference")
                 ),
                 value = Value(
-                    content = HtmlContent(reference)
+                    content = HtmlContent(directDebitReference)
                 )
             ),
             SummaryListRow(

@@ -37,7 +37,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
     "must return OK and the correct view for a GET with a valid direct debit reference" in {
 
-      val reference = "ref number 1"
+      val directDebitReference = "ref number 1"
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockService)
@@ -49,13 +49,13 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
         when(mockService.retrieveDirectDebitPaymentPlans(any())(any(), any()))
           .thenReturn(Future.successful(mockDDPaymentPlansResponse))
 
-        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad(reference).url)
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad(directDebitReference).url)
 
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[DirectDebitSummaryView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(reference, mockDDPaymentPlansResponse,
+        contentAsString(result) mustEqual view(directDebitReference, mockDDPaymentPlansResponse,
           routes.YourDirectDebitInstructionsController.onPageLoad())(request, messages(application)).toString
       }
     }

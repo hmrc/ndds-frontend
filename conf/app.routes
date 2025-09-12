@@ -109,4 +109,4 @@ POST       /your-saved-direct-debit-payment             controllers.CheckYourAns
 
 GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
 
-GET        /direct-debit-payment-summary                controllers.DirectDebitSummaryController.onPageLoad(reference: String)
+GET        /direct-debit-payment-summary                controllers.DirectDebitSummaryController.onPageLoad(directDebitReference: String)
