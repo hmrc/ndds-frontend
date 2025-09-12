@@ -40,8 +40,9 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
   val service = new BarsService(mockConnector, mockConfig)
 
-  val bank = Bank(
+  val bank: Bank = Bank(
     bankName = "Test Bank",
+    ddiVoucherFlag = "N",
     address = BankAddress(
       lines = Seq("123 Bank Street", "Suite 100"),
       town = "London",
@@ -50,7 +51,7 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
     )
   )
 
-  val validBankDetails = YourBankDetails(
+  val validBankDetails: YourBankDetails = YourBankDetails(
     sortCode = "123456",
     accountNumber = "12345678",
     accountHolderName = "John Doe"
