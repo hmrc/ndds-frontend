@@ -18,36 +18,32 @@ package controllers.amend
 
 import base.SpecBase
 import controllers.routes
-import forms.PaymentAmountFormProvider
-import forms.amend.PaymentPlanAmountFormProvider
+import forms.amend.AmendPaymentAmountFormProvider
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.PaymentAmountPage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
-import models.DirectDebitSource.PAYE
-import pages.DirectDebitSourcePage
-import views.html.amend.PaymentPlanAmountView
+import views.html.amend.AmendPaymentAmountView
 
 import scala.concurrent.Future
 import scala.math.BigDecimal.RoundingMode
 
 class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
-  private val formProvider = new PaymentPlanAmountFormProvider()
+  private val formProvider = new AmendPaymentAmountFormProvider()
   private val form = formProvider()
 
   private def onwardRoute = Call("GET", "/foo")
 
   private val validAnswer = BigDecimal(1.00).setScale(2, RoundingMode.HALF_UP)
 
-  private lazy val paymentPlanAmountRoute = routes.PaymentPlanAmountController.onPageLoad(NormalMode).url
+  private lazy val paymentPlanAmountRoute = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
 
   "PaymentPlanAmount Controller" - {
 //TODO: Change the routes to new page PP1
@@ -59,7 +55,7 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val request = FakeRequest(GET, paymentPlanAmountRoute)
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[PaymentPlanAmountView]
+        val view = application.injector.instanceOf[AmendPaymentAmountView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
@@ -96,7 +92,7 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
         val boundForm = form.bind(Map("value" -> "invalid value"))
 
-        val view = application.injector.instanceOf[PaymentPlanAmountView]
+        val view = application.injector.instanceOf[AmendPaymentAmountView]
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST

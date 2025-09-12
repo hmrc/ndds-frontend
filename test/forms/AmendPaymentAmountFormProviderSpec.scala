@@ -16,16 +16,16 @@
 
 package forms
 
-import forms.amend.PaymentPlanAmountFormProvider
+import forms.amend.AmendPaymentAmountFormProvider
 import forms.behaviours.CurrencyFieldBehaviours
 import org.scalacheck.Gen
 import play.api.data.FormError
 
 import scala.math.BigDecimal.RoundingMode
 
-class PaymentPlanFormProviderSpec extends CurrencyFieldBehaviours {
+class AmendPaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
 
-  val provider = new PaymentPlanAmountFormProvider()
+  val provider = new AmendPaymentAmountFormProvider()
   private val form = provider()
   private val min = provider.MIN_AMOUNT
   private val max = provider.MAX_AMOUNT

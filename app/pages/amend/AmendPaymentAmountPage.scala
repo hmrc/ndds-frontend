@@ -19,7 +19,7 @@ package pages.amend
 import pages.QuestionPage
 import play.api.libs.json.JsPath
 
-case object PaymentPlanAmountPage extends QuestionPage[BigDecimal] {
+case object AmendPaymentAmountPage extends QuestionPage[BigDecimal] {
 
   override def path: JsPath = JsPath \ toString
 

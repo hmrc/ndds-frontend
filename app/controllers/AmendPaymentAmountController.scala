@@ -17,30 +17,32 @@
 package controllers
 
 import controllers.actions.*
-import forms.amend.PaymentPlanAmountFormProvider
+import controllers.routes
+import forms.amend.AmendPaymentAmountFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.amend.PaymentPlanAmountPage
+import pages.amend.AmendPaymentAmountPage
+import pages.PaymentAmountPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.amend.PaymentPlanAmountView
+import views.html.amend.AmendPaymentAmountView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaymentPlanAmountController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: PaymentPlanAmountFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: PaymentPlanAmountView
+class AmendPaymentAmountController @Inject()(
+                                              override val messagesApi: MessagesApi,
+                                              sessionRepository: SessionRepository,
+                                              navigator: Navigator,
+                                              identify: IdentifierAction,
+                                              getData: DataRetrievalAction,
+                                              requireData: DataRequiredAction,
+                                              formProvider: AmendPaymentAmountFormProvider,
+                                              val controllerComponents: MessagesControllerComponents,
+                                              view: AmendPaymentAmountView
                                        )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   val form: Form[BigDecimal] = formProvider()
@@ -48,7 +50,8 @@ class PaymentPlanAmountController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val answers = request.userAnswers
-      val preparedForm = answers.get(PaymentPlanAmountPage) match {
+      //TODO: Call this from previous Page pp1
+      val preparedForm = answers.get(PaymentAmountPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
@@ -66,9 +69,9 @@ class PaymentPlanAmountController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode, routes.JourneyRecoveryController.onPageLoad()))),
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanAmountPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PaymentPlanAmountPage, mode, updatedAnswers))
+          } yield Redirect(navigator.nextPage(AmendPaymentAmountPage, mode, updatedAnswers))
       )
   }
 
