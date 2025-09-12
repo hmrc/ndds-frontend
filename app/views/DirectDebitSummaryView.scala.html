@@ -37,12 +37,9 @@
     @paragraph("directDebitPaymentSummary.p1")
     @paragraph("directDebitPaymentSummary.p2")
 
+    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.directDebit.title")</h1>
+
     @govukSummaryList(SummaryList(
-        card = Some(Card(
-            title = Some(CardTitle(
-                content = messages("directDebitPaymentSummary.directDebit.title")
-            ))
-        )),
         rows = Seq(
             SummaryListRow(
                 key = Key(
