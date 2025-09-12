@@ -42,8 +42,9 @@ class Navigator @Inject()() {
     case PlanStartDatePage => userAnswers => checkPlanStartDateLogic(userAnswers)
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
-    //TODO: Change the route to AP1b screen once built
-    case AmendPaymentAmountPage => _ => routes.PaymentDateController.onPageLoad(NormalMode)
+    case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers)
+    //TODO: Change the route to AP2 screen once built
+    case AmendSinglePaymentDatePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
     case _ => _ => routes.LandingController.onPageLoad()
   }
 
@@ -108,5 +109,15 @@ class Navigator @Inject()() {
         routes.CheckYourAnswersController.onPageLoad()
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
+  }
+  
+  private def checkPaymentPlanLogic(userAnswers: UserAnswers): Call ={
+    val paymentPlanType = userAnswers.get(PaymentPlanTypePage)
+    if (paymentPlanType.contains(PaymentPlanType.SinglePayment)) then
+      routes.AmendSinglePaymentDateController.onPageLoad(NormalMode) 
+    else
+      //TODO: Change to AP1c after built
+      routes.PaymentDateController.onPageLoad(NormalMode)
+    
   }
 }

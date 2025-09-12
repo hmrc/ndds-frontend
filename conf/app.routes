@@ -105,3 +105,8 @@ GET        /amend-payment-plan-amount                   controllers.AmendPayment
 POST       /amend-payment-plan-amount                   controllers.AmendPaymentAmountController.onSubmit(mode: Mode = NormalMode)
 GET        /change-amend-payment-plan-amount            controllers.AmendPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-amend-payment-plan-amount            controllers.AmendPaymentAmountController.onSubmit(mode: Mode = CheckMode)
+
+GET        /amend-payment-date                          controllers.AmendSinglePaymentDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /amend-payment-date                          controllers.AmendSinglePaymentDateController.onSubmit(mode: Mode = NormalMode)
+GET        /change-amend-payment-date                   controllers.AmendSinglePaymentDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-amend-payment-date                   controllers.AmendSinglePaymentDateController.onSubmit(mode: Mode = CheckMode)
