@@ -28,7 +28,7 @@ import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Random, Success, Try}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
@@ -37,11 +37,8 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
 
   private val nationalDirectDebitBaseUrl: String = config.baseUrl("national-direct-debit") + "/national-direct-debit"
 
-  // Use this to try different journeys until a real stub exists
-  def limit: Int = if(config.getBoolean("features.existingDirectDebit")) Random.nextInt(3) + 1 else 0
-
-  def retrieveDirectDebits()(implicit hc: HeaderCarrier): Future[NddResponse] = {
-    http.get(url"$nationalDirectDebitBaseUrl/direct-debits?maxRecords=$limit")(hc)
+    def retrieveDirectDebits()(implicit hc: HeaderCarrier): Future[NddResponse] = {
+    http.get(url"$nationalDirectDebitBaseUrl/direct-debits")(hc)
       .execute[NddResponse]
   }
 
