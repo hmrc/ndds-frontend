@@ -17,8 +17,9 @@
 package connectors
 
 import models.NddResponse
-import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
+import play.api.Logging
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -33,7 +34,7 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
                                              http: HttpClientV2)
-                                            (implicit ec: ExecutionContext) extends HttpReadsInstances {
+                                            (implicit ec: ExecutionContext) extends HttpReadsInstances with Logging{
 
   private val nationalDirectDebitBaseUrl: String = config.baseUrl("national-direct-debit") + "/national-direct-debit"
 
@@ -59,6 +60,24 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
         case Right(response) => Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
       }
   }
+
+  def submitChrisData(submission: ChrisSubmissionRequest)
+                     (implicit hc: HeaderCarrier): Future[Boolean] = {
+    http.post(url"$nationalDirectDebitBaseUrl/chris")
+      .withBody(Json.toJson(submission))
+      .execute[Either[UpstreamErrorResponse, HttpResponse]]
+      .flatMap {
+        case Right(response) if response.status == OK =>
+          Future.successful(true)
+        case Left(errorResponse) =>
+          logger.error(s"CHRIS submission failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
+          Future.failed(new Exception(s"CHRIS submission failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))
+        case Right(response) =>
+          logger.error(s"Unexpected CHRIS response status: ${response.status}")
+          Future.failed(new Exception(s"Unexpected status: ${response.status}"))
+      }
+  }
+
 
   def generateNewDdiReference(generateDdiRefRequest: GenerateDdiRefRequest)
                              (implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {

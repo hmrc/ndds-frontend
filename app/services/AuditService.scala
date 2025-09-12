@@ -40,7 +40,6 @@ class AuditService @Inject(
 
   def sendEvent[A <: AuditEvent](auditEvent: A)
                                 (implicit hc: HeaderCarrier, writes: Writes[A], request: Request[_]): Unit = {
-
     val extendedDataEvent = ExtendedDataEvent(
       auditSource = auditSource,
       auditType = auditEvent.auditType,
