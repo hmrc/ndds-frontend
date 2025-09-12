@@ -1,0 +1,133 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.responses.*
+@import java.time.format.DateTimeFormatter
+@import views.html.components.*
+@import utils.MaskAndFormatUtils.*
+
+@this(
+    layout: templates.Layout,
+    header1: Header1,
+    paragraph: Paragraph,
+    paragraphMessageWithLink: ParagraphMessageWithLink,
+    govukButton: GovukButton,
+    govukErrorSummary: GovukErrorSummary,
+    govukSummaryList: GovukSummaryList
+)
+
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse, call: Call)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(call.url)) {
+
+    @header1("directDebitPaymentSummary.heading")
+    @paragraph("directDebitPaymentSummary.p1")
+    @paragraph("directDebitPaymentSummary.p2")
+
+    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.directDebit.title")</h1>
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(
+                    content = messages("directDebitPaymentSummary.directDebit.reference")
+                ),
+                value = Value(
+                    content = HtmlContent(directDebitReference)
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("directDebitPaymentSummary.directDebit.accountNumber")
+                ),
+                value = Value(
+                    content = HtmlContent(maskAccountNumber(directDebitDetails.bankAccountNumber))
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("directDebitPaymentSummary.directDebit.sortCode")
+                ),
+                value = Value(
+                    content = HtmlContent(maskSortCode(directDebitDetails.bankSortCode))
+                )
+            )
+        )
+    ))
+
+    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.activePayment.h1")</h1>
+
+    @for(pp <- directDebitDetails.paymentPlanList) {
+        @govukSummaryList(SummaryList(
+            card = Some(Card(
+                title = Some(CardTitle(
+                    content = messages("directDebitPaymentSummary.activePayment.summary.title", pp.paymentReference)
+                )),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = "#",
+                            content = messages("directDebitPaymentSummary.activePayment.summary.action"),
+                            visuallyHiddenText = Some(messages(pp.paymentReference))
+                        )
+                    )
+                ))
+            )),
+            rows = Seq(
+                SummaryListRow(
+                    key = Key(
+                        content = messages("directDebitPaymentSummary.activePayment.summary.planType")
+                    ),
+                    value = Value(
+                        content = HtmlContent(pp.planType)
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")
+                    ),
+                    value = Value(
+                        content = HtmlContent(pp.hodService)
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("directDebitPaymentSummary.activePayment.summary.date")
+                    ),
+                    value = Value(
+                        content = HtmlContent(pp.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("directDebitPaymentSummary.activePayment.summary.amount")
+                    ),
+                    value = Value(
+                        content = HtmlContent(formatAmount(pp.scheduledPaymentAmount))
+                    )
+                )
+            )
+        ))
+    }
+
+    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.setupPayment.h1")</h1>
+
+    <p class="govuk-inset-text">@messages("directDebitPaymentSummary.setupPayment.p1")</p>
+
+    @govukButton(
+        ButtonViewModel(messages("directDebitPaymentSummary.addPaymentButton"))
+    )
+}
