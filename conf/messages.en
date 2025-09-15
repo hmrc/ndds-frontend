@@ -313,3 +313,5 @@ directDebitConfirmation.downloadButton = Download confirmation
 directDebitConfirmation.pleaseNote = <strong>Please note:</strong> Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
 
 under_construction.heading = Under Construction
+
+amendPaymentAmount.hint = 	e.g. £1000.00
