@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package controllers.amend
+package controllers
 
 import base.SpecBase
 import controllers.routes
-import forms.amend.AmendPaymentAmountFormProvider
+import forms.AmendPaymentAmountFormProvider
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any

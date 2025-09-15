@@ -16,7 +16,6 @@
 
 package forms
 
-import forms.amend.AmendPaymentAmountFormProvider
 import forms.behaviours.CurrencyFieldBehaviours
 import org.scalacheck.Gen
 import play.api.data.FormError
