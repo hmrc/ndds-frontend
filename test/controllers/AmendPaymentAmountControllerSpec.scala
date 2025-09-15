@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.amend
+package controllers
 
 import base.SpecBase
 import controllers.routes
@@ -34,7 +34,7 @@ import views.html.amend.AmendPaymentAmountView
 import scala.concurrent.Future
 import scala.math.BigDecimal.RoundingMode
 
-class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
+class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new AmendPaymentAmountFormProvider()
   private val form = formProvider()

@@ -21,12 +21,15 @@
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    h1: Header1,
+    govukHint: GovukHint,
+    govukWarningText: GovukWarningText
 )
 
 @(form: Form[_], mode: Mode, earliestPaymentDate: String, earliestPaymentDateNumeric: String, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("paymentDate.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("amendPaymentDate.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.AmendSinglePaymentDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
@@ -34,12 +37,26 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
         }
 
+        @h1(messages("amendPaymentDate.heading"))
+
+        @govukHint(
+            HintViewModel(
+                content = HtmlContent(messages("amendPaymentDate.hint"))
+            )
+        )
+
+        @govukWarningText(
+            WarningText(
+                content = HtmlContent(messages("amendPaymentDate.warning"))
+            )
+        )
+
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("paymentDate.heading")).asPageHeading()
+                legend = LegendViewModel(content ="")
             )
-            .withHint(HintViewModel(messages("paymentDate.hint", earliestPaymentDate, earliestPaymentDateNumeric))))
+            .withHint(HintViewModel(HtmlContent(messages(s"amendPaymentDate.hintDate", earliestPaymentDate, earliestPaymentDateNumeric))))
         )
 
         @govukButton(
