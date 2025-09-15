@@ -56,10 +56,11 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
   def submitChrisData(submission: ChrisSubmissionRequest)
                      (implicit hc: HeaderCarrier): Future[Boolean] = {
-    nddConnector.submitChrisData(submission).recover {
-      case ex =>
-        logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
-        false
+    nddConnector.submitChrisData(submission).map { success =>
+      success
+    }.recover { case ex =>
+      logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
+      false
     }
   }
 

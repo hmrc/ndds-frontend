@@ -84,26 +84,37 @@ class CheckYourAnswersController @Inject()(
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     implicit val ua: UserAnswers = request.userAnswers
 
-    for {
-      // 1. Generate a new DDI reference
-      reference <- nddService.generateNewDdiReference(required(PaymentReferencePage))
+    nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
+      val submission = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
 
-      // 2. Build submission
-      submission = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
-
-      // 3. Submit to backend
-      _ <- nddService.submitChrisData(submission)
-
-      // 4. Save updated answers
-      updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
-      _ <- sessionRepository.set(updatedAnswers)
-    } yield {
-      // 5. Audit event
-      auditService.sendSubmitDirectDebitPaymentPlan
-      logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${submission.serviceType}]")
-      Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+      nddService.submitChrisData(submission).flatMap { success =>
+        if (success) {
+          // CHRIS submission succeeded
+          for {
+            updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield {
+            auditService.sendSubmitDirectDebitPaymentPlan
+            logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${submission.serviceType}]")
+            Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+          }
+        } else {
+          // CHRIS submission failed
+          logger.error(s"CHRIS submission failed for DDI Ref [${reference.ddiRefNumber}]")
+          Future.successful(
+            Redirect(routes.JourneyRecoveryController.onPageLoad())
+              .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+          )
+        }
+      }.recover {
+        case ex =>
+          logger.error("CHRIS submission or session update failed", ex)
+          Redirect(routes.JourneyRecoveryController.onPageLoad())
+            .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+      }
     }
   }
+
 
   private def buildChrisSubmissionRequest(
                                            userAnswers: UserAnswers,
