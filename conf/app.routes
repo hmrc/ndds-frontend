@@ -109,4 +109,5 @@ POST       /your-saved-direct-debit-payment             controllers.CheckYourAns
 
 GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
 
-GET        /direct-debit-payment-summary                controllers.DirectDebitSummaryController.onPageLoad(directDebitReference: String)
+GET        /payment-plan/redirect                       controllers.DirectDebitSummaryController.onRedirect(directDebitReference: String)
+GET        /payment-plan/summary_payment_plans          controllers.DirectDebitSummaryController.onPageLoad()

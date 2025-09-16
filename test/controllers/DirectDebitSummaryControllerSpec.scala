@@ -17,12 +17,14 @@
 package controllers
 
 import base.SpecBase
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.DirectDebitReferenceQuery
+import repositories.SessionRepository
 import services.NationalDirectDebitService
 import utils.DirectDebitDetailsData
 import views.html.DirectDebitSummaryView
@@ -34,22 +36,35 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
   "DirectDebitSummary Controller" - {
 
     val mockService = mock[NationalDirectDebitService]
+    val mockSessionRepository = mock[SessionRepository]
 
     "must return OK and the correct view for a GET with a valid direct debit reference" in {
-
       val directDebitReference = "ref number 1"
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      val userAnswersWithDirectDebitReference =
+        emptyUserAnswers
+          .set(
+            DirectDebitReferenceQuery,
+            directDebitReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference))
         .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
           bind[NationalDirectDebitService].toInstance(mockService)
         )
         .build()
 
       running(application) {
 
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
+
         when(mockService.retrieveDirectDebitPaymentPlans(any())(any(), any()))
           .thenReturn(Future.successful(mockDDPaymentPlansResponse))
 
-        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad(directDebitReference).url)
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)
 
         val result = route(application, request).value
 
@@ -57,6 +72,98 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(directDebitReference, mockDDPaymentPlansResponse,
           routes.YourDirectDebitInstructionsController.onPageLoad())(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides().build()
+
+      running(application) {
+
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recover page when UserAnswers is None" in {
+      val application = applicationBuilder(userAnswers = None)
+        .overrides().build()
+
+      running(application) {
+
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to summary payment plans page when a directDebitReference is provided" in {
+      val directDebitReference = "ref number 1"
+      val userAnswersWithDirectDebitReference =
+        emptyUserAnswers
+          .set(
+            DirectDebitReferenceQuery,
+            directDebitReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onRedirect(directDebitReference).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.DirectDebitSummaryController.onPageLoad().url
+
+        verify(mockSessionRepository).set(eqTo(userAnswersWithDirectDebitReference))
+      }
+    }
+
+    "must redirect to summary payment plans page when UserAnswers is None and directDebitReference is provided" in {
+      val directDebitReference = "ref number 1"
+      val userAnswersWithDirectDebitReference =
+        emptyUserAnswers
+          .set(
+            DirectDebitReferenceQuery,
+            directDebitReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(userAnswersWithDirectDebitReference)).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onRedirect(directDebitReference).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.DirectDebitSummaryController.onPageLoad().url
       }
     }
   }

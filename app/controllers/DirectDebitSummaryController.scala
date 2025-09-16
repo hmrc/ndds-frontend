@@ -17,29 +17,55 @@
 package controllers
 
 import controllers.actions.*
+import models.UserAnswers
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
+import queries.DirectDebitReferenceQuery
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSummaryView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class DirectDebitSummaryController @Inject()(
                                                        override val messagesApi: MessagesApi,
                                                        identify: IdentifierAction,
                                                        getData: DataRetrievalAction,
+                                                       requireData: DataRequiredAction,
                                                        val controllerComponents: MessagesControllerComponents,
                                                        view: DirectDebitSummaryView,
-                                                       nddService: NationalDirectDebitService
+                                                       nddService: NationalDirectDebitService,
+                                                       sessionRepository: SessionRepository,
                                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(directDebitReference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    nddService.retrieveDirectDebitPaymentPlans(directDebitReference) map {
-      ddPaymentPlans =>
-        Ok(view(directDebitReference, ddPaymentPlans, routes.YourDirectDebitInstructionsController.onPageLoad()))
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+
+    userAnswers.get(DirectDebitReferenceQuery) match {
+      case Some(reference) =>
+        nddService.retrieveDirectDebitPaymentPlans(reference) map { ddPaymentPlans =>
+          Ok(
+            view(
+              reference,
+              ddPaymentPlans,
+              routes.YourDirectDebitInstructionsController.onPageLoad()
+            )
+          )
+        }
+
+      case None =>
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
+  }
+
+  def onRedirect(directDebitReference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+    for {
+      updatedAnswers <- Future.fromTry(userAnswers.set(DirectDebitReferenceQuery, directDebitReference))
+      _ <- sessionRepository.set(updatedAnswers)
+    } yield Redirect(routes.DirectDebitSummaryController.onPageLoad())
   }
 }

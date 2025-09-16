@@ -323,7 +323,7 @@ directDebitConfirmation.pleaseNote = <strong>Please note:</strong> Once you have
 
 under_construction.heading = Under Construction
 
-directDebitPaymentSummary.title = Summary of payment plans for this Direct Debit
+directDebitPaymentSummary.title = Summary Payment plan
 directDebitPaymentSummary.heading = Summary of payment plans for this Direct Debit
 directDebitPaymentSummary.p1 = Manage your active payment plans by selecting ''Manage plan'' for the relevant payment reference.
 directDebitPaymentSummary.p2 = You can view, amend, cancel or suspend payments depending on the type of payment plan.

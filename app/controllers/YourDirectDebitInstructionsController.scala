@@ -18,14 +18,17 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
+import models.UserAnswers
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.DirectDebitReferenceQuery
+import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourDirectDebitInstructionsView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class YourDirectDebitInstructionsController @Inject()(
                                                        override val messagesApi: MessagesApi,
@@ -34,15 +37,25 @@ class YourDirectDebitInstructionsController @Inject()(
                                                        val controllerComponents: MessagesControllerComponents,
                                                        view: YourDirectDebitInstructionsView,
                                                        appConfig: FrontendAppConfig,
-                                                       nddService: NationalDirectDebitService
+                                                       nddService: NationalDirectDebitService,
+                                                       sessionRepository: SessionRepository
                                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    nddService.retrieveAllDirectDebits(request.userId) map {
-      directDebitDetailsData =>
-        val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
-        Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
+    val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+    cleanseDirectDebitReference(userAnswers).flatMap { _ =>
+      nddService.retrieveAllDirectDebits(request.userId) map {
+        directDebitDetailsData =>
+          val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
+          Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
+      }
     }
   }
+
+  private def cleanseDirectDebitReference(userAnswers: UserAnswers): Future[UserAnswers] =
+    for {
+      updatedUserAnswers <- Future.fromTry(userAnswers.remove(DirectDebitReferenceQuery))
+      _                                     <- sessionRepository.set(updatedUserAnswers)
+    } yield updatedUserAnswers
 }
