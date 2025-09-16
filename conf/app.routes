@@ -101,10 +101,10 @@ POST       /your-saved-direct-debit-payment             controllers.CheckYourAns
 
 GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
 
-GET        /amend-payment-plan-amount                   controllers.AmendPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
-POST       /amend-payment-plan-amount                   controllers.AmendPaymentAmountController.onSubmit(mode: Mode = NormalMode)
-GET        /change-amend-payment-plan-amount            controllers.AmendPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-amend-payment-plan-amount            controllers.AmendPaymentAmountController.onSubmit(mode: Mode = CheckMode)
+GET        /payment-plan/payment-amount-page            controllers.AmendPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST       /payment-plan/payment-amount-page            controllers.AmendPaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET        /change-payment-plan/payment-amount-page     controllers.AmendPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-payment-plan/payment-amount-page     controllers.AmendPaymentAmountController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-plan/start_date_page                controllers.AmendSinglePaymentDateController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-plan/start_date_page                controllers.AmendSinglePaymentDateController.onSubmit(mode: Mode = NormalMode)
