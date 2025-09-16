@@ -314,6 +314,8 @@ directDebitConfirmation.pleaseNote = <strong>Please note:</strong> Once you have
 
 under_construction.heading = Under Construction
 
+amendPaymentAmount.hint = 	e.g. £1000.00
+
 amendPaymentDate.title = start date page
 amendPaymentDate.heading = 	What date are you starting this payment plan?
 amendPaymentDate.hint = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
