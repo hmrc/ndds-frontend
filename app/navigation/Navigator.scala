@@ -42,8 +42,9 @@ class Navigator @Inject()() {
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
     case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers)
-    //TODO: Change the route to AP2 screen once built
+    //TODO: Change the route to AP2 screen once built for AmendSinglePaymentDatePage and AmendPlanEndDatePage
     case AmendSinglePaymentDatePage => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+    case AmendPlanEndDatePage => _ => routes.PaymentsFrequencyController.onPageLoad(NormalMode)
     case _ => _ => routes.LandingController.onPageLoad()
   }
 
@@ -115,8 +116,7 @@ class Navigator @Inject()() {
     if (paymentPlanType.contains(PaymentPlanType.SinglePayment)) then
       routes.AmendSinglePaymentDateController.onPageLoad(NormalMode) 
     else
-      //TODO: Change to AP1c after built
-      routes.PaymentDateController.onPageLoad(NormalMode)
+      routes.AmendPlanEndDateController.onPageLoad(NormalMode)
     
   }
 }

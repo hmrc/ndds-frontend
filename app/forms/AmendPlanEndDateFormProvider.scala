@@ -28,10 +28,10 @@ class AmendPlanEndDateFormProvider @Inject() extends Mappings {
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
       "value" -> localDate(
-        invalidKey     = "amendPlanEndDate.error.invalid",
-        allRequiredKey = "amendPlanEndDate.error.required.all",
-        twoRequiredKey = "amendPlanEndDate.error.required.two",
-        requiredKey    = "amendPlanEndDate.error.required"
+        invalidKey     = "planEndDate.error.invalid",
+        allRequiredKey = "planEndDate.error.required.all",
+        twoRequiredKey = "planEndDate.error.required.two",
+        requiredKey    = "planEndDate.error.required"
       )
     )
 }

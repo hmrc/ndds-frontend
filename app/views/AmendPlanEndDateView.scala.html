@@ -22,7 +22,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("amendPlanEndDate.title"))) {
 
@@ -35,9 +35,19 @@
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("amendPlanEndDate.heading")).asPageHeading()
+                legend = LegendViewModel(messages("planEndDate.heading")).asPageHeading()
+                ).withHint(
+                HintViewModel(
+                    HtmlContent(
+                    Seq(
+                        s"<p >${messages("planEndDate.p1")}</p>",
+                        s"<p >${messages("planEndDate.p2")}</p>",
+                        s"<p>${messages("planEndDate.p3")}</p>",
+                        s"<p class='govuk-!-margin-top-7'>${messages("planEndDate.hint")}</p>",
+                        ).mkString
+                    )
+                )
             )
-            .withHint(HintViewModel(messages("amendPlanEndDate.hint")))
         )
 
         @govukButton(

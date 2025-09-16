@@ -52,7 +52,7 @@ class AmendPlanEndDateController @Inject()(
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      Ok(view(preparedForm, mode,routes.AmendPlanEndDateController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -62,7 +62,7 @@ class AmendPlanEndDateController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode))),
+          Future.successful(BadRequest(view(formWithErrors, mode,routes.AmendPlanEndDateController.onPageLoad(mode)))),
 
         value =>
           for {
