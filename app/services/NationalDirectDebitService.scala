@@ -19,7 +19,7 @@ package services
 import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
-import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.PaymentPlanType.{BudgetPaymentPlan, SinglePayment, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
@@ -31,6 +31,7 @@ import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -97,12 +98,71 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
     config.paymentDelayFixed + dynamicDelay
   }
+  
+  private val iso = DateTimeFormatter.ISO_LOCAL_DATE
+    
+  def paymentDateWithinTwoWorkingDaysFlag(
+                               paymentDate: LocalDate,
+                               userAnswers: UserAnswers
+                             )(implicit hc: HeaderCarrier): Future[Boolean] = {
+    if(!isSinglePaymentPlan(userAnswers)) {
+      Future.successful(false)
+    } else {
+      val today = LocalDate.now
+      val req = WorkingDaysOffsetRequest(
+        baseDate = today.format(iso),
+        offsetWorkingDays = 2
+      )
+      
+      nddConnector.getEarliestPaymentDate(req).map { resp =>
+        val twoWorkingDaysFromNow = LocalDate.parse(resp.date, iso)
+        !paymentDate.isAfter(twoWorkingDaysFromNow)
+      }.recover { case e =>
+      logger.warn(s"twoDaysPrior flag defaults to false due to error: ${e.getMessage}")
+      false
+      }
+    }
+  }
+
+  def planEndWithinThreeWorkingDaysFlag(
+                                         maybePlanEndDate: Option[LocalDate],
+                                         userAnswers: UserAnswers
+                                       )(implicit hc: HeaderCarrier): Future[Boolean] = {
+    if (!isBudgetPaymentPlan(userAnswers)) {
+      Future.successful(false)
+    } else {
+      maybePlanEndDate match {
+        case Some(planEndDate) =>
+          val today = LocalDate.now
+          val req = WorkingDaysOffsetRequest(baseDate = today.format(iso), offsetWorkingDays = 3)
+
+          nddConnector.getEarliestPaymentDate(req).map { resp =>
+            val threeWorkingDays = LocalDate.parse(resp.date, iso)
+            planEndDate.isBefore(threeWorkingDays) || planEndDate.isEqual(threeWorkingDays)
+          }.recover { case e =>
+            logger.warn(s"withinThreeDays flag defaults to false due to error: ${e.getMessage}")
+            false
+          }
+          
+        case None => Future.successful(false)
+      }
+    }
+  }
+  
+  def canAmendPaymentPlan(userAnswers: UserAnswers): Boolean =
+    isSinglePaymentPlan(userAnswers) || isBudgetPaymentPlan(userAnswers)
 
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment)
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan)
+    
+  def isVariablePaymentPlan(userAnswers: UserAnswers): Boolean =
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.VariablePaymentPlan)
+    
+  def isTaxCreditPaymentPlan(userAnswers: UserAnswers): Boolean =
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))

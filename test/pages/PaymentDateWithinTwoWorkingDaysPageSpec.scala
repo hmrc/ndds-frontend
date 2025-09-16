@@ -14,3 +14,21 @@
  * limitations under the License.
  */
 
+package pages
+
+import base.SpecBase
+import play.api.libs.json.JsPath
+
+class PaymentDateWithinTwoWorkingDaysPageSpec extends SpecBase {
+  
+  "PaymentDateWithinTwoWorkingDaysPage" - {
+
+    "have the expected toString value" in {
+      PaymentDateWithinTwoWorkingDaysPage.toString mustBe "paymentDateWithinTwoWorkingDays"
+    }
+
+    "expose the correct JSON path" in {
+      PaymentDateWithinTwoWorkingDaysPage.path mustBe (JsPath \ "paymentDateWithinTwoWorkingDays")
+    }
+  }
+}

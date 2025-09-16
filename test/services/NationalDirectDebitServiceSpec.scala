@@ -22,6 +22,7 @@ import connectors.NationalDirectDebitConnector
 import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.requests.WorkingDaysOffsetRequest
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
@@ -29,6 +30,7 @@ import org.mockito.Mockito.{doNothing, reset, verify, when}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
+import org.scalatest.matchers.should.Matchers.shouldBe
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -37,6 +39,7 @@ import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -63,11 +66,16 @@ class NationalDirectDebitServiceSpec extends SpecBase
   val testSortCode = "123456"
   val testAccountNumber = "12345678"
   val testAccountHolderName = "Jon B Jones"
+
   implicit val request: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, routes.LandingController.onPageLoad().url)
 
   val testBankDetailsAuddisTrue: YourBankDetailsWithAuddisStatus =
-    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName, sortCode = testSortCode, accountNumber = testAccountNumber, auddisStatus = true, false)
+    YourBankDetailsWithAuddisStatus(
+      accountHolderName = testAccountHolderName,
+      sortCode = testSortCode,
+      accountNumber = testAccountNumber,
+      auddisStatus = true, false)
 
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD
@@ -303,7 +311,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         result mustBe GenerateDdiRefResponse("testRes")
       }
-      
+
       "fail when the connector call fails" in {
         when(mockConnector.generateNewDdiReference(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
@@ -313,6 +321,132 @@ class NationalDirectDebitServiceSpec extends SpecBase
         result.getMessage must include("bang")
       }
     }
-  }
 
+    "paymentDateWithinTwoWorkingDaysFlag" - {
+      "should return false when the plan is not a SinglePayment and not call the connector" in {
+        val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+        val result = service.paymentDateWithinTwoWorkingDaysFlag(LocalDate.now.plusDays(1), ua)
+
+        whenReady(result) (_ shouldBe false)
+      }
+
+      "should call the connector and return true if it is a SinglePayment and the payment date is within 2 working days" in {
+        val today = LocalDate.now()
+        val twoWorkingDaysFromNow = today.plusDays(2)
+        val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
+
+        when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(EarliestPaymentDate(date = twoWorkingDaysFromNow.toString)))
+
+        val paymentDate = twoWorkingDaysFromNow
+        val result = service.paymentDateWithinTwoWorkingDaysFlag(paymentDate, ua)
+
+        whenReady(result) (_ shouldBe true)
+      }
+
+      "should return false when paymentDate is after the connectors' two-working-days date" in {
+        val today = LocalDate.now()
+        val twoWorkingDaysFromNow = today.plusDays(2)
+        val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
+
+        when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(EarliestPaymentDate(date = twoWorkingDaysFromNow.toString)))
+
+        val paymentDate = twoWorkingDaysFromNow.plusDays(1)
+        val result = service.paymentDateWithinTwoWorkingDaysFlag(paymentDate, ua)
+
+        whenReady(result) (_ shouldBe false)
+      }
+
+      "should recover to false when the connector call fails" in {
+        val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
+        
+        when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
+          .thenReturn(Future.failed(new RuntimeException("fail")))
+        
+        val result = service.paymentDateWithinTwoWorkingDaysFlag(LocalDate.now.plusDays(1), ua)
+        
+        whenReady(result) (_ shouldBe false)
+      }
+    }
+  }
+  
+  "planEndWithinThreeWorkingDaysFlag" - {
+    "should return false when the plan is not a BudgetPayment and not call the connector" in {
+      val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan).success.value
+      val result = service.planEndWithinThreeWorkingDaysFlag(Some(LocalDate.now.plusDays(1)), ua)
+
+      whenReady(result)(_ shouldBe false)
+    }
+
+    "should call the connector and return true if it is a BudgetPaymentPlan and the payment date is within 3 working days" in {
+      val today = LocalDate.now()
+      val threeWorkingDaysFromNow = today.plusDays(3)
+      val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+
+      when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(EarliestPaymentDate(date = threeWorkingDaysFromNow.toString)))
+
+      val paymentDate = Some(threeWorkingDaysFromNow)
+      val result = service.planEndWithinThreeWorkingDaysFlag(paymentDate, ua)
+
+      whenReady(result)(_ shouldBe true)
+    }
+
+    "should return false when paymentDate is after the connectors' three-working-days date" in {
+      val today = LocalDate.now()
+      val threeWorkingDaysFromNow = today.plusDays(3)
+      val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+
+      when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(EarliestPaymentDate(date = threeWorkingDaysFromNow.toString)))
+
+      val paymentDate = Some(threeWorkingDaysFromNow.plusDays(1))
+      val result = service.planEndWithinThreeWorkingDaysFlag(paymentDate, ua)
+
+      whenReady(result)(_ shouldBe false)
+    }
+
+    "should recover to false when the connector call fails" in {
+      val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+
+      when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
+        .thenReturn(Future.failed(new RuntimeException("fail")))
+
+      val result = service.planEndWithinThreeWorkingDaysFlag(Some(LocalDate.now.plusDays(1)), ua)
+
+      whenReady(result)(_ shouldBe false)
+    }
+  }
+  
+  "canAmendPaymentPlan" - {
+    
+    "return true if it is a budget payment plan" in {
+      val ua = emptyUserAnswers
+        .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .success.value
+
+      service.canAmendPaymentPlan(ua) mustBe true
+    }
+
+    "return true if it is a single payment plan" in {
+      val ua = emptyUserAnswers
+        .set(PaymentPlanTypePage, PaymentPlanType.SinglePayment)
+        .success.value
+      
+      service.canAmendPaymentPlan(ua) mustBe true
+    }
+
+    "return false if it is not a single payment plan or budget payment plan" in {
+      val ua = emptyUserAnswers
+        .set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan)
+        .success.value
+      
+      service.canAmendPaymentPlan(ua) mustBe false
+    }
+    
+    "return false when plan type is missing" in {
+      service.canAmendPaymentPlan(emptyUserAnswers) mustBe false
+    }
+  }
 }

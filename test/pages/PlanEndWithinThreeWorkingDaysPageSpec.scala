@@ -14,3 +14,21 @@
  * limitations under the License.
  */
 
+package pages
+
+import base.SpecBase
+import play.api.libs.json.JsPath
+
+class PlanEndWithinThreeWorkingDaysPageSpec extends SpecBase {
+
+  "PlanEndWithinThreeWorkingDaysPage" - {
+    
+    "have the expected toString value" in {
+      PlanEndWithinThreeWorkingDaysPage.toString mustBe "planEndWithinThreeWorkingDays"
+    }
+
+    "expose the correct JSON path" in {
+      PlanEndWithinThreeWorkingDaysPage.path mustBe (JsPath \ "planEndWithinThreeWorkingDays")
+    }
+  }
+}

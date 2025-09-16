@@ -14,3 +14,13 @@
  * limitations under the License.
  */
 
+package pages
+
+import play.api.libs.json.JsPath
+
+case object PaymentDateWithinTwoWorkingDaysPage extends QuestionPage[Boolean] {
+  
+  override def path: JsPath = JsPath \ toString
+  
+  override def toString: String = "paymentDateWithinTwoWorkingDays"
+}
