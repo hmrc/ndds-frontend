@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathMatching}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, stubFor, urlEqualTo, urlPathMatching}
 import itutil.ApplicationWithWiremock
 import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
@@ -159,6 +159,46 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       val result = intercept[Exception](connector.generateNewDdiReference(requestBody).futureValue)
 
       result.getMessage should include("The future returned an exception")
+    }
+  }
+
+  "retrieveDirectDebitPaymentPlans" should {
+    "successfully retrieve direct debit payment plans" in {
+      val responseJson =
+        """
+          |{
+          |  "bankSortCode": "123456",
+          |  "bankAccountNumber": "12345678",
+          |  "bankAccountName": "Test Name",
+          |  "auDdisFlag": "Y",
+          |  "paymentPlanCount": 1,
+          |  "paymentPlanList": [
+          |    {
+          |      "scheduledPaymentAmount": 100.50,
+          |      "planRefNumber": "plan-123",
+          |      "planType": "STANDARD",
+          |      "paymentReference": "pay-123",
+          |      "hodService": "HMRC",
+          |      "submissionDateTime": "2024-09-15T10:15:30"
+          |    }
+          |  ]
+          |}
+          |""".stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/testRef/payment-plans"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.retrieveDirectDebitPaymentPlans("testRef").futureValue
+
+      result.bankSortCode shouldBe "123456"
+      result.paymentPlanCount shouldBe 1
+      result.paymentPlanList.head.planRefNumber shouldBe "plan-123"
     }
   }
 }
