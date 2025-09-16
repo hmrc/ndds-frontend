@@ -201,4 +201,48 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       result.paymentPlanList.head.planRefNumber shouldBe "plan-123"
     }
   }
+
+  "retrieveDirectDebits" should {
+    "successfully retrieve direct debits" in {
+      val responseJson =
+        """
+          |{
+          |  "directDebitCount": 2,
+          |  "directDebitList": [
+          |    {
+          |      "ddiRefNumber": "DDI123456",
+          |      "submissionDateTime": "2025-09-16T10:15:30",
+          |      "bankSortCode": "123456",
+          |      "bankAccountNumber": "12345678",
+          |      "bankAccountName": "John Doe",
+          |      "auDdisFlag": true,
+          |      "numberOfPayPlans": 2
+          |    },
+          |    {
+          |      "ddiRefNumber": "DDI654321",
+          |      "submissionDateTime": "2025-09-16T11:45:00",
+          |      "bankSortCode": "654321",
+          |      "bankAccountNumber": "87654321",
+          |      "bankAccountName": "Jane Smith",
+          |      "auDdisFlag": false,
+          |      "numberOfPayPlans": 1
+          |    }
+          |  ]
+          |}
+          |""".stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.retrieveDirectDebits().futureValue
+
+      result.directDebitCount shouldBe 2
+    }
+  }
 }
