@@ -23,7 +23,6 @@ import pages.*
 import models.*
 import models.DirectDebitSource.*
 import models.PaymentPlanType.*
-import pages.amend.AmendPaymentAmountPage
 
 @Singleton
 class Navigator @Inject()() {

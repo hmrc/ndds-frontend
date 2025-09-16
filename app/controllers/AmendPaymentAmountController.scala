@@ -18,17 +18,16 @@ package controllers
 
 import controllers.actions.*
 import controllers.routes
-import forms.amend.AmendPaymentAmountFormProvider
+import forms.AmendPaymentAmountFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.amend.AmendPaymentAmountPage
-import pages.PaymentAmountPage
+import pages.{AmendPaymentAmountPage, PaymentAmountPage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.amend.AmendPaymentAmountView
+import views.html.AmendPaymentAmountView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
