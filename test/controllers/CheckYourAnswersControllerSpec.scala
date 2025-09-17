@@ -434,7 +434,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-          //  verify(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
         }
       }
     }

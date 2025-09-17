@@ -85,17 +85,17 @@ class CheckYourAnswersController @Inject()(
     implicit val ua: UserAnswers = request.userAnswers
 
     nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
-      val submission = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
+      val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
 
-      nddService.submitChrisData(submission).flatMap { success =>
+      nddService.submitChrisData(chrisRequest).flatMap { success =>
         if (success) {
-          // CHRIS submission succeeded
+          logger.info(s"CHRIS submission successful for the request")
           for {
             updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
             _ <- sessionRepository.set(updatedAnswers)
           } yield {
             auditService.sendSubmitDirectDebitPaymentPlan
-            logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${submission.serviceType}]")
+            logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
             Redirect(routes.DirectDebitConfirmationController.onPageLoad())
           }
         } else {

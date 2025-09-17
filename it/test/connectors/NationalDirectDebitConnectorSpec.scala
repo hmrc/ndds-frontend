@@ -25,7 +25,7 @@ import models.responses.{BankAddress, Country, EarliestPaymentDate, GenerateDdiR
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YourBankDetailsWithAuddisStatus}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
-import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, OK}
+import play.api.http.Status.{BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, OK}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -298,7 +298,9 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       stubFor(
         post(urlPathMatching("/national-direct-debit/chris"))
           .willReturn(
-            aResponse().withStatus(OK)
+            aResponse()
+              .withStatus(OK)
+              .withBody("true")
           )
       )
 
@@ -310,12 +312,12 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       stubFor(
         post(urlPathMatching("/national-direct-debit/chris"))
           .willReturn(
-            aResponse().withStatus(CREATED)
+            aResponse().withStatus(BAD_REQUEST)
           )
       )
 
       val ex = intercept[Exception](connector.submitChrisData(submission).futureValue)
-      ex.getMessage should include("Unexpected status: 201")
+      ex.getMessage should include("CHRIS submission failed")
     }
 
     "must fail when CHRIS submission returns an UpstreamErrorResponse" in {
