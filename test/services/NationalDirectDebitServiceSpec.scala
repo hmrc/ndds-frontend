@@ -449,4 +449,42 @@ class NationalDirectDebitServiceSpec extends SpecBase
       service.canAmendPaymentPlan(emptyUserAnswers) mustBe false
     }
   }
+  
+  "canCancelPaymentPLan" - {
+    "return true if it is a budget payment plan" in {
+      val ua = emptyUserAnswers
+        .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .success.value
+
+      service.canCancelPaymentPlan(ua) mustBe true
+    }
+
+    "return true if it is a single payment plan" in {
+      val ua = emptyUserAnswers
+        .set(PaymentPlanTypePage, PaymentPlanType.SinglePayment)
+        .success.value
+
+      service.canCancelPaymentPlan(ua) mustBe true
+    }
+
+    "return true if it is a variable payment plan" in {
+      val ua = emptyUserAnswers
+        .set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan)
+        .success.value
+
+      service.canCancelPaymentPlan(ua) mustBe true
+    }
+
+    "return false if it is not a single payment plan or budget payment plan" in {
+      val ua = emptyUserAnswers
+        .set(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+        .success.value
+
+      service.canCancelPaymentPlan(ua) mustBe false
+    }
+
+    "return false when plan type is missing" in {
+      service.canAmendPaymentPlan(emptyUserAnswers) mustBe false
+    }
+  }
 }

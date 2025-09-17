@@ -1,0 +1,177 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.html.components.*
+@import models.responses.*
+@import utils.MaskAndFormatUtils.*
+
+@this(
+    layout: templates.Layout,
+    header1: Header1,
+    header2: Header2,
+    paragraph: Paragraph,
+    govukErrorSummary: GovukErrorSummary,
+    govukSummaryList: GovukSummaryList
+)
+
+@(viewModel: viewmodels.PaymentPlansDetailsViewModel, paymentReference: String, call: Call, userAnswers: UserAnswers)(
+        implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), showBackLink = Some(call.url)) {
+
+    @header1("paymentPlanDetails.heading")
+
+    @paragraph("paymentPlanDetails.p1")
+
+    @paragraph("paymentPlanDetails.p2")
+
+    <p class="govuk-inset-text">@messages("paymentPlanDetails.inset.text")</p>
+
+    @header2("paymentPlanDetails.heading")
+
+    @for(planViewModel <- viewModel.plans) {
+        @defining(planViewModel.plan) { plan =>
+
+            @defining({
+                val df = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")
+
+                val isSingle = plan.planType == "SinglePayment"
+                val isBudget = plan.planType == "budgetPaymentPlan"
+                val hasSusp = plan.suspensionStartDate.isDefined || plan.suspensionEndDate.isDefined
+
+                val b = Seq.newBuilder[SummaryListRow]
+
+                b += SummaryListRow(
+                    key = Key(content = Text(messages("paymentPlan.details.planType"))),
+                    value = Value(content = HtmlContent(plan.planType))
+                )
+                b += SummaryListRow(
+                    key = Key(content = Text(messages("paymentPlan.details.paymentFor"))),
+                    value = Value(content = HtmlContent(plan.hodService))
+                )
+                b += SummaryListRow(
+                    key = Key(content = Text(messages("paymentPlan.details.dateSetUp"))),
+                    value = Value(content = HtmlContent(Option(plan.submissionDateTime).map(_.format(df)).getOrElse("")))
+                )
+
+                if(isSingle) {
+                    plan.initialPaymentAmount.foreach { initialAmount =>
+                        b += SummaryListRow(
+                            key = Key(content = Text(messages("paymentPlan.details.initialAmount"))),
+                            value = Value(content = HtmlContent(initialAmount))
+                        )
+                    }
+                } else {
+                    plan.scheduledPaymentAmount.foreach { scheduledAmount =>
+                        b += SummaryListRow(
+                            key = Key(content = Text(messages("paymentPlan.details.ScheduledAmount"))),
+                            value = Value(content = HtmlContent(scheduledAmount))
+                        )
+                    }
+                }
+
+                plan.initialPaymentStartDate.foreach { initialStart =>
+                    b += SummaryListRow(
+                        key = Key(content = Text(messages("paymentPlan.details.initialStartDate"))),
+                        value = Value(content = HtmlContent(initialStart.format(df)))
+                    )
+                }
+
+                if(!isSingle) {
+                    plan.totalLiability.foreach { totalLiability =>
+                        b += SummaryListRow(
+                            key = Key(content = Text(messages("paymentPlan.details.totalAmountDue"))),
+                            value = Value(content = HtmlContent(totalLiability))
+                        )
+                    }
+                }
+
+                if(isBudget) {
+                    plan.scheduledPaymentFrequency.foreach { scheduledFrequency =>
+                        b += SummaryListRow(
+                            key = Key(content = Text(messages("paymentPlan.details.scheduled.paymentFrequency"))),
+                            value = Value(content = HtmlContent(scheduledFrequency))
+                        )
+                    }
+                }
+
+                if(!isSingle) {
+                    plan.scheduledPaymentStartDate.foreach { startDate =>
+                        b += SummaryListRow(
+                            key = Key(content = Text(messages("paymentPlan.details.scheduled.scheduledPaymentStartDate"))),
+                            value = Value(content = HtmlContent(startDate.format(df)))
+                        )
+                    }
+                }
+
+                plan.scheduledPaymentEndDate.foreach { endDate =>
+                    b += SummaryListRow(
+                        key = Key(content = Text(messages("paymentPlan.details.scheduled.scheduledPaymentEndDate"))),
+                        value = Value(content = HtmlContent(endDate.format(df)))
+                    )
+                }
+
+                if(hasSusp) {
+                    plan.suspensionStartDate.foreach { startDate =>
+                        b += SummaryListRow(
+                            key = Key(content = Text(messages("paymentPlan.details.suspendStartDate"))),
+                            value = Value(content = HtmlContent(startDate.format(df)))
+                        )
+                    }
+                    plan.suspensionEndDate.foreach { endDate =>
+                        b += SummaryListRow(
+                            key = Key(content = Text(messages("paymentPlan.details.suspendEndDate"))),
+                            value = Value(content = HtmlContent(endDate.format(df)))
+                        )
+                    }
+                }
+
+                b.result()
+            }) { summaryRows =>
+
+            @defining({
+                val items =
+                    Seq(
+                        if(planViewModel.showAmend)
+                            Some(ActionItem(href = "#", content = Text(messages("paymentPlan.details.amend")), visuallyHiddenText = Some(messages(""))))
+                        else None,
+                        if(planViewModel.showCancel)
+                            Some(ActionItem(href = "#", content = Text(messages("paymentPlan.details.cancel")), visuallyHiddenText = Some(messages(""))))
+                        else None,
+                        if(planViewModel.showSuspend)
+                            Some(ActionItem(href = "#", content = Text(messages("paymentPlan.details.suspend")), visuallyHiddenText = Some(messages(""))))
+                        else None
+                    ).flatten
+                if(items.nonEmpty) Some(Actions(items = items)) else None
+            }) { maybeActions =>
+
+                @govukSummaryList(
+                    SummaryList(
+                        card = Some(
+                            Card(
+                                title = Some(CardTitle(content = Text(messages("paymentPlan.details.paymentReference", plan.paymentReference)))),
+                                actions = maybeActions
+                            )
+                        ),
+                        rows = summaryRows
+                    )
+                )
+            }
+        }
+    }
+}
+}
+
