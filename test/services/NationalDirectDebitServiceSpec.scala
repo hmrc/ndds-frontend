@@ -35,11 +35,13 @@ import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import repositories.DirectDebitCacheRepository
+import repositories.{DirectDebitCacheRepository, SessionRepository}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 
-import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -59,8 +61,9 @@ class NationalDirectDebitServiceSpec extends SpecBase
   val mockCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   val mockAuditService: AuditService = mock[AuditService]
+  val mockSessionRepo: SessionRepository = mock[SessionRepository]
 
-  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService)
+  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockSessionRepo,mockAuditService)
 
   val testId = "id"
   val testSortCode = "123456"
@@ -325,14 +328,13 @@ class NationalDirectDebitServiceSpec extends SpecBase
     "paymentDateWithinTwoWorkingDaysFlag" - {
       "should return false when the plan is not a SinglePayment and not call the connector" in {
         val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
-        val result = service.paymentDateWithinTwoWorkingDaysFlag(LocalDate.now.plusDays(1), ua)
+        val result = service.paymentDateWithinTwoWorkingDaysFlag(LocalDateTime.now.plusDays(1), ua)
 
         whenReady(result) (_ shouldBe false)
       }
 
       "should call the connector and return true if it is a SinglePayment and the payment date is within 2 working days" in {
-        val today = LocalDate.now()
-        val twoWorkingDaysFromNow = today.plusDays(2)
+        val twoWorkingDaysFromNow = LocalDateTime.now().plusDays(2)
         val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
 
         when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
@@ -345,8 +347,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
       }
 
       "should return false when paymentDate is after the connectors' two-working-days date" in {
-        val today = LocalDate.now()
-        val twoWorkingDaysFromNow = today.plusDays(2)
+        val twoWorkingDaysFromNow = LocalDateTime.now().plusDays(2)
         val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
 
         when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
@@ -364,7 +365,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
         when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new RuntimeException("fail")))
         
-        val result = service.paymentDateWithinTwoWorkingDaysFlag(LocalDate.now.plusDays(1), ua)
+        val result = service.paymentDateWithinTwoWorkingDaysFlag(LocalDateTime.now.plusDays(1), ua)
         
         whenReady(result) (_ shouldBe false)
       }
@@ -374,28 +375,26 @@ class NationalDirectDebitServiceSpec extends SpecBase
   "planEndWithinThreeWorkingDaysFlag" - {
     "should return false when the plan is not a BudgetPayment and not call the connector" in {
       val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan).success.value
-      val result = service.planEndWithinThreeWorkingDaysFlag(Some(LocalDate.now.plusDays(1)), ua)
+      val result = service.planEndWithinThreeWorkingDaysFlag(Some(LocalDateTime.now.plusDays(1)), ua)
 
       whenReady(result)(_ shouldBe false)
     }
 
     "should call the connector and return true if it is a BudgetPaymentPlan and the payment date is within 3 working days" in {
-      val today = LocalDate.now()
-      val threeWorkingDaysFromNow = today.plusDays(3)
+      val threeWorkingDaysFromNow = LocalDateTime.now().plusDays(3)
       val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
 
       when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
         .thenReturn(Future.successful(EarliestPaymentDate(date = threeWorkingDaysFromNow.toString)))
 
-      val paymentDate = Some(threeWorkingDaysFromNow)
+      val paymentDate = Some(threeWorkingDaysFromNow.minusHours(1))
       val result = service.planEndWithinThreeWorkingDaysFlag(paymentDate, ua)
 
       whenReady(result)(_ shouldBe true)
     }
 
     "should return false when paymentDate is after the connectors' three-working-days date" in {
-      val today = LocalDate.now()
-      val threeWorkingDaysFromNow = today.plusDays(3)
+      val threeWorkingDaysFromNow = LocalDateTime.now().plusDays(3)
       val ua = emptyUserAnswers.set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
 
       when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
@@ -413,7 +412,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
       when(mockConnector.getEarliestPaymentDate(any[WorkingDaysOffsetRequest])(any[HeaderCarrier]))
         .thenReturn(Future.failed(new RuntimeException("fail")))
 
-      val result = service.planEndWithinThreeWorkingDaysFlag(Some(LocalDate.now.plusDays(1)), ua)
+      val result = service.planEndWithinThreeWorkingDaysFlag(Some(LocalDateTime.now.plusDays(1)), ua)
 
       whenReady(result)(_ shouldBe false)
     }

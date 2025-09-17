@@ -16,9 +16,7 @@
 
 package models.responses
 
-import play.api.libs.json.OFormat
 import play.api.libs.json.*
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

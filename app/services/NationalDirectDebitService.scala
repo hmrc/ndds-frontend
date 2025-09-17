@@ -35,15 +35,14 @@ import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
 import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.SynchronousQueue
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConnector,
                                            val directDebitCache: DirectDebitCacheRepository,
-                                           sessionRepository: SessionRepository,
                                            config: FrontendAppConfig,
+                                           sessionRepository: SessionRepository,
                                            auditService: AuditService)
                                           (implicit ec: ExecutionContext) extends Logging {
   def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[NddResponse] = {
@@ -104,7 +103,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     config.paymentDelayFixed + dynamicDelay
   }
 
-  private val iso = DateTimeFormatter.ISO_LOCAL_DATE
+  private val iso = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
   def paymentDateWithinTwoWorkingDaysFlag(
                                paymentDate: LocalDateTime,
