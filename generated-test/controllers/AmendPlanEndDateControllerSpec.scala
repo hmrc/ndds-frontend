@@ -29,7 +29,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  val validAnswer = LocalDate.now(ZoneOffset.UTC)
+  val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
 
   lazy val amendPlanEndDateRoute = routes.AmendPlanEndDateController.onPageLoad(NormalMode).url
 
@@ -47,36 +47,50 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       )
 
   "AmendPlanEndDate Controller" - {
+    "onPageLoad" - {
+      "must return OK and the correct view for a GET" in {
 
-    "must return OK and the correct view for a GET" in {
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        running(application) {
+          val result = route(application, getRequest()).value
 
-      running(application) {
-        val result = route(application, getRequest()).value
+          val view = application.injector.instanceOf[AmendPlanEndDateView]
 
-        val view = application.injector.instanceOf[AmendPlanEndDateView]
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(getRequest(), messages(application)).toString
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendPlanEndDateRoute))(getRequest(), messages(application)).toString
+        }
       }
-    }
 
-    "must populate the view correctly on a GET when the question has previously been answered" in {
+      "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(AmendPlanEndDatePage, validAnswer).success.value
+        val userAnswers = UserAnswers(userAnswersId).set(AmendPlanEndDatePage, validAnswer).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
-      running(application) {
-        val view = application.injector.instanceOf[AmendPlanEndDateView]
+        running(application) {
+          val view = application.injector.instanceOf[AmendPlanEndDateView]
 
-        val result = route(application, getRequest()).value
+          val result = route(application, getRequest()).value
 
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode)(getRequest(), messages(application)).toString
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendPlanEndDateRoute))(getRequest(), messages(application)).toString
+        }
       }
-    }
+
+      "must redirect to Journey Recovery for a GET if no existing data is found" in {
+
+        val application = applicationBuilder(userAnswers = None).build()
+
+        running(application) {
+          val result = route(application, getRequest()).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      }
 
     "must redirect to the next page when valid data is submitted" in {
 
@@ -100,47 +114,38 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
+    "onSubmit" - {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val request =
-        FakeRequest(POST, amendPlanEndDateRoute)
-          .withFormUrlEncodedBody(("value", "invalid value"))
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      running(application) {
-        val boundForm = form.bind(Map("value" -> "invalid value"))
+        val request =
+          FakeRequest(POST, amendPlanEndDateRoute)
+            .withFormUrlEncodedBody(("value", "invalid value"))
 
-        val view = application.injector.instanceOf[AmendPlanEndDateView]
+        running(application) {
+          val boundForm = form.bind(Map("value" -> "invalid value"))
 
-        val result = route(application, request).value
+          val view = application.injector.instanceOf[AmendPlanEndDateView]
 
-        status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+          val result = route(application, request).value
+
+          status(result) mustEqual BAD_REQUEST
+          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendPlanEndDateRoute))(request, messages(application)).toString
+        }
       }
-    }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+      "must redirect to Journey Recovery for a POST if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+        val application = applicationBuilder(userAnswers = None).build()
 
-      running(application) {
-        val result = route(application, getRequest()).value
+        running(application) {
+          val result = route(application, postRequest()).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val result = route(application, postRequest()).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
       }
     }
   }

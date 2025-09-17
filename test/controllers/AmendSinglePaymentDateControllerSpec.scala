@@ -33,7 +33,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import views.html.{AmendSinglePaymentDateView, PaymentDateView}
+import views.html.AmendSinglePaymentDateView
 
 import java.time.*
 import scala.concurrent.Future
@@ -117,7 +117,7 @@ class AmendSinglePaymentDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           val result = route(application, getRequest()).value
 
-          val view = application.injector.instanceOf[PaymentDateView]
+          val view = application.injector.instanceOf[AmendSinglePaymentDateView]
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, Call("GET", amendAmountRoute))(getRequest(), messages(application)).toString
@@ -231,7 +231,7 @@ class AmendSinglePaymentDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           val boundForm = form.bind(Map("value" -> "invalid value"))
 
-          val view = application.injector.instanceOf[PaymentDateView]
+          val view = application.injector.instanceOf[AmendSinglePaymentDateView]
 
           val result = route(application, request).value
 
