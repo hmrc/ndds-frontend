@@ -63,4 +63,95 @@
                 )
             )
         ))
+
+        <h1 class="govuk-heading-m">@messages("confirmPaymentPlanAmendment.amendPaymentPlan.title")</h1>
+
+        @govukSummaryList(SummaryList(
+            card = Some(Card(
+                title = Some(CardTitle(
+                    content = Text("Payment reference 115002323023")
+                ))
+            )),
+            rows = Seq(
+                SummaryListRow(
+                    key = Key(
+                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.planType")
+                ),
+                value = Value(
+                    content = HtmlContent("planType")
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentFor")
+                    ),
+                    value = Value(
+                        content = HtmlContent("paymentFor")
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentReference")
+                    ),
+                    value = Value(
+                        content = HtmlContent("paymentReference")
+                    )
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount")
+                    ),
+                    value = Value(
+                        content = HtmlContent("paymentAmount")
+                    ),
+                    actions = Some(Actions(
+                        items = Seq(
+                            ActionItem(
+                                href = "#",
+                                content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount.change"),
+                                visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount.change"))
+                            )
+                        )
+                    ))
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate")
+                    ),
+                    value = Value(
+                        content = HtmlContent("startDate")
+                    ),
+                    actions = Some(Actions(
+                        items = Seq(
+                            ActionItem(
+                                href = "#",
+                                content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate.change"),
+                                visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate.change"))
+                            )
+                        )
+                    ))
+                ),
+                SummaryListRow(
+                    key = Key(
+                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate")
+                    ),
+                    value = Value(
+                        content = HtmlContent("startDate")
+                    ),
+                    actions = Some(Actions(
+                        items = Seq(
+                            ActionItem(
+                                href = "#",
+                                content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.endDate.change"),
+                                visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.endDate.change"))
+                            )
+                        )
+                    ))
+                )
+            )
+        ))
+
+        @govukButton(
+            ButtonViewModel(messages("confirmPaymentPlanAmendment.amendPaymentPlan.continueButton"))
+        )
 }
