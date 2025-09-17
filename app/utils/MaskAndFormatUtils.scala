@@ -16,8 +16,10 @@
 
 package utils
 
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 object MaskAndFormatUtils {
 
@@ -33,5 +35,10 @@ object MaskAndFormatUtils {
   def formatDateToGds(dateStr: String): String = {
     val localDate = LocalDate.parse(dateStr, inputFormatter)
     localDate.format(gdsFormatter)
+  }
+
+  def formatAmount(amount: Double): String = {
+    val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.UK)
+    currencyFormatter.format(amount)
   }
 }

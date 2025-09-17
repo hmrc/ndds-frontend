@@ -16,7 +16,8 @@
 
 package utils
 
-import models.{DirectDebitDetails, NddResponse, NddDetails, UKBankAddress}
+import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan}
+import models.{DirectDebitDetails, NddDetails, NddResponse, UKBankAddress}
 
 import java.time.LocalDateTime
 
@@ -86,6 +87,30 @@ trait DirectDebitDetailsData {
     postCode = "TE1 2XR")
   
   val bankName="Test Bank Name"
+
+  val mockDDPaymentPlansResponse: NddDDPaymentPlansResponse = NddDDPaymentPlansResponse(
+    bankSortCode = "sort code",
+    bankAccountNumber = "account number",
+    bankAccountName = "account name",
+    auDdisFlag = "dd",
+    paymentPlanCount = 2,
+    paymentPlanList = Seq(
+      NddPaymentPlan(
+        scheduledPaymentAmount = 100,
+        planRefNumber = "ref number 1",
+        planType = "type 1",
+        paymentReference = "payment ref 1",
+        hodService = "service 1",
+        submissionDateTime = LocalDateTime.of(2025, 11, 12, 12, 12)),
+      NddPaymentPlan(
+        scheduledPaymentAmount = 100,
+        planRefNumber = "ref number 1",
+        planType = "type 1",
+        paymentReference = "payment ref 1",
+        hodService = "service 1",
+        submissionDateTime = LocalDateTime.of(2025, 12, 12, 12, 12))
+    )
+  )
 }
 
 

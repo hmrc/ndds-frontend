@@ -22,7 +22,7 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
@@ -89,6 +89,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   }
 
   private[services] def calculateOffset(auddisStatus: Boolean): Int = {
+    logger.info(s"Calculate offset Auddis flag: $auddisStatus")
     val dynamicDelay = if (auddisStatus) {
       config.paymentDelayDynamicAuddisEnabled
     } else {
@@ -101,7 +102,14 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment)
 
+  def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan)
+
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
+  }
+
+  def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[NddDDPaymentPlansResponse] = {
+    nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
   }
 }

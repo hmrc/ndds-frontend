@@ -14,31 +14,35 @@
  * limitations under the License.
  *@
 
-@import views.html.components.*
+@import views.html.components._
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
+    govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList,
     govukButton: GovukButton,
-    h1:Header1,
-    h2:Header2,
+    h1: Header1,
+    h2: Header2,
     linkWithHiddenText: LinkWithHiddenText
 )
 
 @(form: Form[_], mode: Mode, list: SummaryList, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title")), backLink = Some(call.url)) {
+    @formHelper(action = routes.BankDetailsCheckYourAnswerController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-    @h1("bankDetailsCheckYourAnswer.heading")
-    @h2("bankDetailsCheckYourAnswer.h2")
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form))
+        }
 
-    @govukSummaryList(list)
+        @h1("bankDetailsCheckYourAnswer.heading")
+        @h2("bankDetailsCheckYourAnswer.h2")
 
-    @govukButton(Button(
-        href = Some(routes.DirectDebitSourceController.onPageLoad(NormalMode).url),
-        content = Text(messages("site.continue")),
-        attributes = Map("id" -> "continue-button")
-    ))
+        @govukSummaryList(list)
 
+        @govukButton(
+            ButtonViewModel(messages("site.continue"))
+        )
+    }
 }
