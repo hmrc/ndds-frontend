@@ -17,43 +17,113 @@
 package controllers
 
 import base.SpecBase
-import models.{CheckMode, NormalMode, YourBankDetailsWithAuddisStatus}
+import forms.BankDetailsCheckYourAnswerFormProvider
+import models.responses.{BankAddress, Country}
+import models.{CheckMode, NormalMode, PersonalOrBusinessAccount, YourBankDetailsWithAuddisStatus}
+import navigation.{FakeNavigator, Navigator}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.YourBankDetailsPage
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, BankDetailsCheckYourAnswerPage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
+import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.AuditService
+import repositories.SessionRepository
+
+import scala.concurrent.Future
 
 class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute: Call = Call("GET", "/foo")
-  val mockAuditService: AuditService = mock[AuditService]
-  lazy val bankDetailsCheckYourAnswerRoute: String = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
+
+  val formProvider = new BankDetailsCheckYourAnswerFormProvider()
+  val form = formProvider()
+
+  lazy val bankDetailsCheckYourAnswerRoute = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
+  lazy val ConfirmAuthorityRoute = routes.ConfirmAuthorityController.onPageLoad(NormalMode).url
 
   "BankDetailsCheckYourAnswer Controller" - {
 
     "must return OK and the correct view for a GET" in {
       val userAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+        .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsCheckYourAnswerRoute)
-
         val result = route(application, request).value
 
+        status(result) mustEqual OK
+
+        val html = contentAsString(result)
+        html must include("Check your answers")
+        html must include("BARCLAYS BANK UK PLC")
+        html must include("P.O. Box 44")
+        html must include("RG1 8BW")
+        html must include("UNITED KINGDOM")
+        html must include("Your bank details")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
+      }
+    }
+
+    "must populate the view correctly on a GET when the question has previously been answered" in {
+      val userAnswers = emptyUserAnswers
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+        .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
+        .set(BankDetailsCheckYourAnswerPage, true).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, bankDetailsCheckYourAnswerRoute)
+        val result = route(application, request).value
 
         status(result) mustEqual OK
 
         val html = contentAsString(result)
         html must include("Check your answers")
         html must include("Your bank details")
+        html must include("Account Holder Name")
+        html must include("123212")
+        html must include("34211234")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
       }
     }
 
+    "must redirect to the next page and send an audit event when Continue is clicked" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val userAnswers = emptyUserAnswers
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true, false))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+          bind[SessionRepository].toInstance(mockSessionRepository),
+        )
+        .build()
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      running(application) {
+        val request =
+          FakeRequest(POST, bankDetailsCheckYourAnswerRoute)
+            .withFormUrlEncodedBody("anything" -> "ignored")
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual onwardRoute.url
+      }
+    }
+    
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -66,5 +136,21 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       }
     }
 
+
+    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, bankDetailsCheckYourAnswerRoute)
+            .withFormUrlEncodedBody(("anything" -> "ignored"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
   }
 }

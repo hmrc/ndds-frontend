@@ -24,20 +24,18 @@ import models.DirectDebitSource.*
 class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
   
   "ReferenceType Validator" - {
-
     "must validate PAYE reference with correct format successfully" in {
       val validation = summon[ReferenceTypeValidator.Validator[PAYE.type]]
-      val validPAYEReference = Seq("961PX0023480X", "861PV00002023", "N961PX0023480X")
-
+      val validPAYEReference = Seq("961PX0023480X", "861PV00002023", "N961PX0023480X", "961PX0023480X")
       validPAYEReference.foreach(
         ref =>
           validation.validate(ref) mustEqual true
       )
-
     }
+
     "must fail to validate PAYE reference with incorrect format" in {
       val validation = summon[ReferenceTypeValidator.Validator[PAYE.type]]
-      val invalidPAYEReference = Seq("A961PX0023480X", "ABCPD0020230X", "861PH0020230X")
+      val invalidPAYEReference = Seq("A961PX0023480X", "ABCPD0020230X", "861PH0020230X", "961PX0Y234809", "961PX1023480X")
 
       invalidPAYEReference.foreach(
         ref =>
@@ -48,7 +46,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
     "must validate MGD reference with correct format successfully" in {
       val validation = summon[ReferenceTypeValidator.Validator[MGD.type]]
       val validMGDReference = "XVM00005554321"
-
       validation.validate(validMGDReference) mustEqual true
     }
 
@@ -73,7 +70,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
       validSAReference.foreach(
         ref => validation.validate(ref) mustEqual true
       )
-
     }
 
     "must fail to validate SA reference with incorrect format" in {
@@ -83,7 +79,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
       invalidSAReference.foreach(
         ref => validation.validate(ref) mustEqual false
       )
-
     }
 
     "must validate CT reference with correct format successfully" in {
@@ -104,7 +99,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
             validation.validate(testVal) mustEqual true
         }
       }
-
     }
 
     "must fail to validate CT reference with incorrect format " in {
@@ -115,7 +109,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
        invalidCTReference.foreach(
          ref => validation.validate(ref) mustEqual false
        )
-
      }
 
     "must validate SDLT reference with correct format successfully" in {
@@ -125,7 +118,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
       validSDLTReference.foreach(
         ref => validation.validate(ref) mustEqual true
       )
-
     }
 
     "must fail to validate SDLT reference with incorrect format " in {
@@ -135,9 +127,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
       validSDLTReference.foreach(
         ref => validation.validate(ref) mustEqual false
       )
-
     }
-
 
     "must validate VAT reference with correct format successfully" in {
       val validation = summon[ReferenceTypeValidator.Validator[VAT.type]]
@@ -147,7 +137,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
       validVATReference.foreach(
         ref => validation.validate(ref) mustEqual true
       )
-
     }
 
     "must invalidate VAT reference with incorrect format" in {
@@ -158,9 +147,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
       invalidVATReference.foreach(
         ref => validation.validate(ref) mustEqual false
       )
-
     }
-
 
     "must validate NIC reference with correct format successfully" in {
       val validation = summon[ReferenceTypeValidator.Validator[NIC.type]]
@@ -213,7 +200,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
       val validation = summon[ReferenceTypeValidator.Validator[TC.type]]
       val validTaxCreditReference = "WT447571311207NE"
 
-
       validation.validate(validTaxCreditReference) mustEqual true
     }
 
@@ -225,8 +211,6 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
         ref => validation.validate(ref) mustEqual false
       )
     }
-
   }
-
 
 }

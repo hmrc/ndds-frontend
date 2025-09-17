@@ -187,6 +187,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       val bank = Bank(
         bankName = "Test Bank",
+        ddiVoucherFlag = "N",
         address = BankAddress(
           lines = Seq("1 Bank Street"),
           town = "London",
