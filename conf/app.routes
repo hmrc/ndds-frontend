@@ -109,6 +109,9 @@ POST       /your-saved-direct-debit-payment             controllers.CheckYourAns
 
 GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
 
+GET        /payment-plan/redirect                       controllers.DirectDebitSummaryController.onRedirect(directDebitReference: String)
+GET        /payment-plan/summary_payment_plans          controllers.DirectDebitSummaryController.onPageLoad()
+
 GET        /payment-plan/payment-amount-page            controllers.AmendPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-plan/payment-amount-page            controllers.AmendPaymentAmountController.onSubmit(mode: Mode = NormalMode)
 GET        /change-payment-plan/payment-amount-page     controllers.AmendPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
