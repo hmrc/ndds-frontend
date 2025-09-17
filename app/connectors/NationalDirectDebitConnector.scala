@@ -21,6 +21,7 @@ import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
 import play.api.http.Status.OK
 import play.api.libs.json.Json
+import play.api.Logging
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -33,7 +34,7 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
                                              http: HttpClientV2)
-                                            (implicit ec: ExecutionContext) extends HttpReadsInstances {
+                                            (implicit ec: ExecutionContext) extends HttpReadsInstances with Logging {
 
   private val nationalDirectDebitBaseUrl: String = config.baseUrl("national-direct-debit") + "/national-direct-debit"
 
@@ -81,5 +82,9 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
     http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans")(hc)
       .execute[NddDDPaymentPlansResponse]
+      .map { response =>
+        logger.info(s"Payment plans response: ${Json.prettyPrint(Json.toJson(response))}")
+        response
+      }
   }
 }
