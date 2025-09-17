@@ -115,3 +115,5 @@ GET        /payment-plan/end_date_page                  controllers.AmendPlanEnd
 POST       /payment-plan/end_date_page                  controllers.AmendPlanEndDateController.onSubmit(mode: Mode = NormalMode)
 GET        /change-payment-plan/end_date_page           controllers.AmendPlanEndDateController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-payment-plan/end_date_page           controllers.AmendPlanEndDateController.onSubmit(mode: Mode = CheckMode)
+
+GET        /payment-plan/confirm-plan-details           controllers.ConfirmPaymentPlanAmendmentController.onPageLoad()

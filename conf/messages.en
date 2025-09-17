@@ -326,3 +326,11 @@ amendPlanEndDate.title = end date page
 amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026
+
+confirmPaymentPlanAmendment.title = Confirm plan page - Amend a payment plan
+confirmPaymentPlanAmendment.heading = Confirm new payment plan details
+confirmPaymentPlanAmendment.p1 = The amendment will remove any suspension you currently have in place. Please check that the details below are correct, then click ''Continue'' to proceed. For security reasons you may be asked to re-authenticate your details.
+confirmPaymentPlanAmendment.directDebit.title = Direct Debit details
+confirmPaymentPlanAmendment.directDebit.reference = Direct Debit details
+confirmPaymentPlanAmendment.directDebit.accountNumber = Account number
+confirmPaymentPlanAmendment.directDebit.sortCode = Bank sort code
