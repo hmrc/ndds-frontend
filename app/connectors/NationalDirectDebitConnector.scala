@@ -100,5 +100,9 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
     http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans")(hc)
       .execute[NddDDPaymentPlansResponse]
+      .map { response =>
+        logger.info(s"Payment plans response: ${Json.prettyPrint(Json.toJson(response))}")
+        response
+      }
   }
 }
