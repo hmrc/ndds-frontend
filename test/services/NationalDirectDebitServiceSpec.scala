@@ -25,7 +25,7 @@ import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, Variab
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{atLeastOnce, doNothing, reset, verify, when}
+import org.mockito.Mockito.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -303,7 +303,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         result mustBe GenerateDdiRefResponse("testRes")
       }
-      
+
       "fail when the connector call fails" in {
         when(mockConnector.generateNewDdiReference(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
