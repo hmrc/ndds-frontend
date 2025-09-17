@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathMatching}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, stubFor, urlEqualTo, urlPathMatching}
 import itutil.ApplicationWithWiremock
 import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
@@ -159,6 +159,90 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       val result = intercept[Exception](connector.generateNewDdiReference(requestBody).futureValue)
 
       result.getMessage should include("The future returned an exception")
+    }
+  }
+
+  "retrieveDirectDebitPaymentPlans" should {
+    "successfully retrieve direct debit payment plans" in {
+      val responseJson =
+        """
+          |{
+          |  "bankSortCode": "123456",
+          |  "bankAccountNumber": "12345678",
+          |  "bankAccountName": "Test Name",
+          |  "auDdisFlag": "Y",
+          |  "paymentPlanCount": 1,
+          |  "paymentPlanList": [
+          |    {
+          |      "scheduledPaymentAmount": 100.50,
+          |      "planRefNumber": "plan-123",
+          |      "planType": "STANDARD",
+          |      "paymentReference": "pay-123",
+          |      "hodService": "HMRC",
+          |      "submissionDateTime": "2024-09-15T10:15:30"
+          |    }
+          |  ]
+          |}
+          |""".stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/testRef/payment-plans"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.retrieveDirectDebitPaymentPlans("testRef").futureValue
+
+      result.bankSortCode shouldBe "123456"
+      result.paymentPlanCount shouldBe 1
+      result.paymentPlanList.head.planRefNumber shouldBe "plan-123"
+    }
+  }
+
+  "retrieveDirectDebits" should {
+    "successfully retrieve direct debits" in {
+      val responseJson =
+        """
+          |{
+          |  "directDebitCount": 2,
+          |  "directDebitList": [
+          |    {
+          |      "ddiRefNumber": "DDI123456",
+          |      "submissionDateTime": "2025-09-16T10:15:30",
+          |      "bankSortCode": "123456",
+          |      "bankAccountNumber": "12345678",
+          |      "bankAccountName": "John Doe",
+          |      "auDdisFlag": true,
+          |      "numberOfPayPlans": 2
+          |    },
+          |    {
+          |      "ddiRefNumber": "DDI654321",
+          |      "submissionDateTime": "2025-09-16T11:45:00",
+          |      "bankSortCode": "654321",
+          |      "bankAccountNumber": "87654321",
+          |      "bankAccountName": "Jane Smith",
+          |      "auDdisFlag": false,
+          |      "numberOfPayPlans": 1
+          |    }
+          |  ]
+          |}
+          |""".stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.retrieveDirectDebits().futureValue
+
+      result.directDebitCount shouldBe 2
     }
   }
 }
