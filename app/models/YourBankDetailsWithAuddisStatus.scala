@@ -16,6 +16,7 @@
 
 package models
 
+import play.api.Logging
 import play.api.libs.json.*
 
 case class YourBankDetailsWithAuddisStatus(
@@ -26,13 +27,14 @@ case class YourBankDetailsWithAuddisStatus(
                                             accountVerified: Boolean
                                           )
 
-object YourBankDetailsWithAuddisStatus {
+object YourBankDetailsWithAuddisStatus extends Logging {
 
   implicit val format: OFormat[YourBankDetailsWithAuddisStatus] = Json.format
 
   def toModelWithAuddisStatus(yourBankDetails: YourBankDetails,
                               auddisStatus: Boolean,
                               accountVerified: Boolean): YourBankDetailsWithAuddisStatus = {
+    logger.info(s"***** Auddis Flag: $auddisStatus")
     YourBankDetailsWithAuddisStatus(
       accountHolderName = yourBankDetails.accountHolderName,
       sortCode = yourBankDetails.sortCode,

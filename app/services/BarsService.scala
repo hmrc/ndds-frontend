@@ -37,9 +37,11 @@ case class BarsService @Inject()(
 
   // --- Validation helpers ---
   private val checkAccountAndName = (accountExists: BarsResponse, nameMatches: BarsResponse) => {
-    if (accountExists == BarsResponse.Indeterminate || nameMatches == BarsResponse.Indeterminate)
+    if (accountExists == BarsResponse.Indeterminate || nameMatches == BarsResponse.Indeterminate) {
       Left(BankAccountUnverified)
-    else Right(())
+    } else {
+      Right(())
+    }
   }
 
   private val checkAccountNumberFormat = (accountNumberIsWellFormatted: BarsResponse) =>
@@ -56,8 +58,11 @@ case class BarsService @Inject()(
 
   private val checkNameMatches = (nameMatches: BarsResponse, accountExists: BarsResponse) =>
     if (nameMatches == BarsResponse.No || nameMatches == BarsResponse.Inapplicable ||
-      (nameMatches == BarsResponse.Indeterminate && accountExists != BarsResponse.Indeterminate)) Left(NameMismatch)
-    else Right(())
+      (nameMatches == BarsResponse.Indeterminate && accountExists != BarsResponse.Indeterminate)) {
+      Left(NameMismatch)
+    } else {
+      Right(())
+    }
 
   private val checkBarsResponseSuccess = (response: BarsVerificationResponse) =>
     (response.accountNumberIsWellFormatted == BarsResponse.Yes || response.accountNumberIsWellFormatted == BarsResponse.Indeterminate) &&

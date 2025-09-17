@@ -35,6 +35,7 @@ object Country {
 
 case class Bank(
                  bankName: String,
+                 ddiVoucherFlag: String,
                  address: BankAddress
                )
 

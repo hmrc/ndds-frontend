@@ -19,10 +19,10 @@ package services
 import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
-import models.PaymentPlanType.{BudgetPaymentPlan, SinglePayment, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, PaymentPlanDetailsResponse, PaymentPlanDetails}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import repositories.SessionRepository
 import pages.{DirectDebitSourcePage, PaymentDateWithinTwoWorkingDaysPage, PaymentPlanTypePage, PlanEndWithinThreeWorkingDaysPage, YourBankDetailsPage}
@@ -40,7 +40,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConnector,
                                            val directDebitCache: DirectDebitCacheRepository,
-                                           sessionRepository: SessionRepository,
                                            config: FrontendAppConfig,
                                            auditService: AuditService)
                                           (implicit ec: ExecutionContext) extends Logging {
@@ -102,110 +101,14 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     config.paymentDelayFixed + dynamicDelay
   }
 
-  private val iso = DateTimeFormatter.ISO_LOCAL_DATE
-
-  def paymentDateWithinTwoWorkingDaysFlag(
-                               paymentDate: LocalDateTime,
-                               userAnswers: UserAnswers
-                             )(implicit hc: HeaderCarrier): Future[Boolean] = {
-    if(!isSinglePaymentPlan(userAnswers)) {
-      Future.successful(false)
-    } else {
-      val today = LocalDateTime.now
-      val req = WorkingDaysOffsetRequest(
-        baseDate = today.format(iso),
-        offsetWorkingDays = 2
-      )
-
-      nddConnector.getEarliestPaymentDate(req).map { resp =>
-        val twoWorkingDaysFromNow = LocalDateTime.parse(resp.date, iso)
-        !paymentDate.isAfter(twoWorkingDaysFromNow)
-      }.recover { case e =>
-      logger.warn(s"twoDaysPrior flag defaults to false due to error: ${e.getMessage}")
-      false
-      }
-    }
-  }
-
-  def planEndWithinThreeWorkingDaysFlag(
-                                         maybePlanEndDate: Option[LocalDateTime],
-                                         userAnswers: UserAnswers
-                                       )(implicit hc: HeaderCarrier): Future[Boolean] = {
-    if (!isBudgetPaymentPlan(userAnswers)) {
-      Future.successful(false)
-    } else {
-      maybePlanEndDate match {
-        case Some(planEndDate) =>
-          val today = LocalDateTime.now
-          val req = WorkingDaysOffsetRequest(baseDate = today.format(iso), offsetWorkingDays = 3)
-
-          nddConnector.getEarliestPaymentDate(req).map { resp =>
-            val threeWorkingDays = LocalDateTime.parse(resp.date, iso)
-            planEndDate.isBefore(threeWorkingDays)
-          }.recover { case e =>
-            logger.warn(s"withinThreeDays flag defaults to false due to error: ${e.getMessage}")
-            false
-          }
-
-        case None => Future.successful(false)
-      }
-    }
-  }
-
-  def saveTwoDaysPriorFlag(value: Boolean)(implicit hc: HeaderCarrier, ua: UserAnswers): Future[UserAnswers] =
-    Future.fromTry(ua.set(PaymentDateWithinTwoWorkingDaysPage, value)).flatMap { updatedUa =>
-      sessionRepository.set(updatedUa).map(_ => updatedUa)
-    }
-
-  def saveEndWithinThreeDaysFlag(value: Boolean)(implicit hc: HeaderCarrier, ua: UserAnswers): Future[UserAnswers] =
-    Future.fromTry(ua.set(PlanEndWithinThreeWorkingDaysPage, value)).flatMap { updatedUa =>
-      sessionRepository.set(updatedUa).map(_ => updatedUa)
-    }
-
-  def canAmendPaymentPlan(userAnswers: UserAnswers): Boolean =
-    isSinglePaymentPlan(userAnswers) || isBudgetPaymentPlan(userAnswers)
-
-  def canCancelPaymentPlan(userAnswers: UserAnswers): Boolean =
-    isSinglePaymentPlan(userAnswers) || isBudgetPaymentPlan(userAnswers) || isVariablePaymentPlan(userAnswers)
-
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment)
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan)
 
-  def isVariablePaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.VariablePaymentPlan)
-
-  def isTaxCreditPaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)
-
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
-  }
-
-  def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanDetailsResponse] = {
-    //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
-    val now = LocalDateTime.now()
-    val plan: PaymentPlanDetails = PaymentPlanDetails(
-      hodService = "NDD",
-      planType = PaymentPlanType.SinglePayment.toString,
-      paymentReference = paymentReference,
-      submissionDateTime = now.minusDays(2),
-      scheduledPaymentAmount = Some("£120.00"),
-      scheduledPaymentStartDate = Some(now.plusDays(10)),
-      initialPaymentStartDate = None,
-      initialPaymentAmount = None,
-      scheduledPaymentEndDate = Some(now.plusMonths(6)),
-      scheduledPaymentFrequency = Some("Monthly"),
-      suspensionStartDate = None,
-      suspensionEndDate = None,
-      balancingPaymentAmount = Some("£60.00"),
-      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-      totalLiability = Some("£780.00"),
-      paymentPlanEditable = true
-    )
-    Future.successful(PaymentPlanDetailsResponse(paymentPlanDetails = List(plan)))
   }
 
 }

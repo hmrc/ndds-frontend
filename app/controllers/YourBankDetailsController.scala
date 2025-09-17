@@ -101,7 +101,7 @@ class YourBankDetailsController @Inject()(
       case Right((verificationResponse, bank)) =>
         onSuccessfulVerification(
           userAnswers,
-          audisFlag   = false,
+          auddisFlag   = if (bank.ddiVoucherFlag == "N") true else false,
           bankDetails = bankDetails,
           bankName    = bank.bankName,
           bankAddress = bank.address
@@ -121,7 +121,7 @@ class YourBankDetailsController @Inject()(
 
   private def onSuccessfulVerification(
                                         userAnswers: UserAnswers,
-                                        audisFlag: Boolean,
+                                        auddisFlag: Boolean,
                                         bankDetails: YourBankDetails,
                                         bankName: String,
                                         bankAddress: BankAddress
@@ -129,7 +129,7 @@ class YourBankDetailsController @Inject()(
     val updatedAnswersTry = for {
       ua1 <- userAnswers.set(
         YourBankDetailsPage,
-        YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, audisFlag, false)
+        YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, auddisFlag, true) //defaulting to true as account successful verified
       )
       ua2 <- ua1.set(BankDetailsBankNamePage, bankName)
       ua3 <- ua2.set(BankDetailsAddressPage, bankAddress)

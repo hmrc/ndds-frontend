@@ -139,6 +139,7 @@ class BarsConnectorSpec
               .withBody(
                 """{
                   "bankName": "Some Bank",
+                  "ddiVoucherFlag": "Y",
                   "address": {
                     "lines": ["123 Bank Street"],
                     "town": "London",
