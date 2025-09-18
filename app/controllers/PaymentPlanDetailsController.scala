@@ -53,7 +53,6 @@ class PaymentPlanDetailsController @Inject()(
               )
             )
           }
-          //Future.successful(Ok(view()))
         case None =>
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
