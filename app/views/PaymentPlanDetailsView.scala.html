@@ -14,14 +14,107 @@
  * limitations under the License.
  *@
 
+@import views.html.components.*
+@import models.responses.*
+@import utils.MaskAndFormatUtils.*
+
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        header1: Header1,
+        header2: Header2,
+        paragraph: Paragraph,
+        govukSummaryList: GovukSummaryList
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title"))) {
 
-    <h1 class="govuk-heading-xl">@messages("paymentPlanDetails.heading")</h1>
+    @header1("paymentPlanDetails.heading")
+
+    @paragraph("paymentPlanDetails.p1")
+
+    @paragraph("paymentPlanDetails.p2")
+
+    <p class="govuk-inset-text">@messages("paymentPlanDetails.inset.text")</p>
+
+    @header2("paymentPlanDetails.heading")
+
+    @govukSummaryList(SummaryList(
+        card = Some(Card(
+            title = Some(CardTitle(
+            content = messages("paymentPlanDetails.details.paymentReference", "1000000")
+        )),
+        actions = Some(Actions(
+            items = Seq(
+                ActionItem(
+                        href = "#",
+                        content = messages("paymentPlanDetails.details.amend"),
+                        visuallyHiddenText = Some(messages("1000000"))
+                    ),
+                ActionItem(
+                        href = "#",
+                        content = messages("paymentPlanDetails.details.cancel"),
+                        visuallyHiddenText = Some(messages("1000000"))
+                    ),
+                ActionItem(
+                        href = "#",
+                        content = messages("paymentPlanDetails.details.suspend"),
+                        visuallyHiddenText = Some(messages("1000000"))
+                    )
+                )
+            ))
+        )),
+        rows = Seq(
+            SummaryListRow(
+                key = Key(
+                    content = messages("paymentPlanDetails.details.planType")
+                ),
+                value = Value(
+                    content = HtmlContent("planType")
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("paymentPlanDetails.details.paymentFor")
+                    ),
+                value = Value(
+                    content = HtmlContent("paymentFor")
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("paymentPlanDetails.details.dateSetUp")
+                ),
+                value = Value(
+                    content = HtmlContent("dateSetUp")
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("paymentPlanDetails.details.regularPaymentAmount")
+                ),
+                value = Value(
+                    content = HtmlContent(formatAmount(250))
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("paymentPlanDetails.details.planStartDate")
+                ),
+                value = Value(
+                    content = HtmlContent("planStartDate")
+                )
+            ),
+            SummaryListRow(
+                key = Key(
+                    content = messages("paymentPlanDetails.details.planEndDate")
+                ),
+                value = Value(
+                    content = HtmlContent("planEndDate")
+                )
+            )
+        )
+    ))
 }
