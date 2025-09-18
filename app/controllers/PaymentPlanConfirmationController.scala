@@ -37,7 +37,7 @@ class PaymentPlanConfirmationController @Inject()(
                                        view: PaymentPlanConfirmationView
                                      ) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData) {
     implicit request =>
       //TODO: Replace CheckYourAnswerPage with AP2 and take paymentAmount and startDate from there
       //val referenceNumber = request.userAnswers.get(CheckYourAnswerPage).getOrElse(throw new Exception("Missing generated DDI reference number"))

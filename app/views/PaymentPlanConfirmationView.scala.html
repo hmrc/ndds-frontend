@@ -24,7 +24,8 @@
         confirmationPanel: ConfirmationPanel,
         mainButton: MainButton,
         govukSummaryList: GovukSummaryList,
-        govukDetails: GovukDetails
+        govukDetails: GovukDetails,
+        govukInsetText: GovukInsetText
 )
 
 @(referenceNumber: String, formattedPaymentAmount: String, formattedStartDate: String, formattedEndDate: String)(implicit request: Request[_], messages: Messages)
@@ -33,8 +34,12 @@
 
     @confirmationPanel(
         title = messages("paymentPlanConfirmation.panel.title"),
-        body = Html(messages("paymentPlanConfirmation.panel.body1", referenceNumber, "paymentPlanConfirmation.panel.body2")),
-        classes = "govuk-!-margin-bottom-9"
+        body = Html(
+                    s"${messages("paymentPlanConfirmation.panel.body1")}" +
+                    s"${messages("paymentPlanConfirmation.panel.strong",referenceNumber)}" +
+                    s"${messages("paymentPlanConfirmation.panel.body2")}"
+                ),
+        classes = "govuk-!-margin-bottom-2"
     )
 
     @paragraph(messages("paymentPlanConfirmation.confirm"))
@@ -43,7 +48,17 @@
 
     @paragraph(messages("paymentPlanConfirmation.p1"))
 
-    @paragraph(messages("paymentPlanConfirmation.pleaseNote"))
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@messages("paymentPlanConfirmation.l1", formattedPaymentAmount, formattedStartDate)</li>
+        <li>@messages("paymentPlanConfirmation.l2")</li>
+        <li>@messages("paymentPlanConfirmation.l3")</li>
+    </ul>
+
+    @govukInsetText(
+        InsetText(
+            content = Text(messages("paymentPlanConfirmation.pleaseNote"))
+        )
+    )
 
     @header2("paymentPlanConfirmation.h2")
 
@@ -75,9 +90,7 @@
         )
     )
 
-    @mainButton(
-        msg = "paymentPlanConfirmation.close",
-        href = Some("#"),
-        classes = "govuk-button--secondary"
+    @govukButton(
+        ButtonViewModel(messages("paymentPlanConfirmation.close"))
     )
 }
