@@ -15,7 +15,6 @@
  *@
 
 @import models.responses.*
-@import models.NormalMode
 @import java.time.format.DateTimeFormatter
 @import views.html.components.*
 @import utils.MaskAndFormatUtils.*
@@ -30,9 +29,9 @@
     govukSummaryList: GovukSummaryList
 )
 
-@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse, call: Call)(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(call.url)) {
+@layout(pageTitle = titleNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
     @header1("directDebitPaymentSummary.heading")
     @paragraph("directDebitPaymentSummary.p1")
@@ -68,7 +67,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url,
+                            href = routes.PaymentPlanDetailsController.onRedirect(pp.paymentReference).url,
                             content = messages("directDebitPaymentSummary.activePayment.summary.action"),
                             visuallyHiddenText = Some(messages(pp.paymentReference))
                         )

@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-package forms
+package queries
 
-import forms.mappings.Mappings
-import play.api.data.Form
-import play.api.i18n.Messages
+import play.api.libs.json.JsPath
 
-import java.time.LocalDate
-import javax.inject.Inject
+case object PaymentReferenceQuery extends Gettable[String] with Settable[String] {
 
-class AmendPlanStartDateFormProvider @Inject()() extends Mappings {
-
-  def apply()(implicit messages: Messages): Form[LocalDate] =
-    Form(
-      "value" -> localDate(
-        invalidKey     = "paymentDate.error.invalid",
-        allRequiredKey = "paymentDate.error.required.all",
-        twoRequiredKey = "paymentDate.error.required.two",
-        requiredKey    = "paymentDate.error.required"
-      )
-    )
+  override def path: JsPath = JsPath \ "paymentReference"
 }

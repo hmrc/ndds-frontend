@@ -58,9 +58,10 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
       running(application) {
 
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
         when(mockSessionRepository.get(any()))
           .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
-
         when(mockService.retrieveDirectDebitPaymentPlans(any())(any(), any()))
           .thenReturn(Future.successful(mockDDPaymentPlansResponse))
 
@@ -70,8 +71,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
         val view = application.injector.instanceOf[DirectDebitSummaryView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(directDebitReference, mockDDPaymentPlansResponse,
-          routes.YourDirectDebitInstructionsController.onPageLoad())(request, messages(application)).toString
+        contentAsString(result) mustEqual view(directDebitReference, mockDDPaymentPlansResponse)(request, messages(application)).toString
       }
     }
 

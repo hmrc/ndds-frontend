@@ -32,7 +32,7 @@ import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.AmendPlanEndDateView
 
-import java.time.{LocalDate, ZoneOffset}
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {

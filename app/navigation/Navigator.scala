@@ -125,10 +125,10 @@ class Navigator @Inject()() {
   
   private def checkPaymentPlanLogic(userAnswers: UserAnswers): Call ={
     val paymentPlanType = userAnswers.get(PaymentPlanTypePage)
-    if (paymentPlanType.contains(PaymentPlanType.SinglePayment)) then
-      routes.AmendPlanStartDateController.onPageLoad(NormalMode) 
-    else
+    if (paymentPlanType.contains(PaymentPlanType.SinglePayment)) {
+      routes.AmendPlanStartDateController.onPageLoad(NormalMode)
+    } else {
       routes.AmendPlanEndDateController.onPageLoad(NormalMode)
-    
+    }
   }
 }

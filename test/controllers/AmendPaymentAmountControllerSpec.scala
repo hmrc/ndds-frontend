@@ -45,8 +45,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
   private lazy val paymentPlanAmountRoute = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
 
   "PaymentPlanAmount Controller" - {
-//TODO: Change the routes to new page PP1
-    lazy val paymentPlanRoute = routes.JourneyRecoveryController.onPageLoad().url
+    lazy val paymentPlanRoute = routes.PaymentPlanDetailsController.onPageLoad().url
     "must return OK and the correct view for a GET" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 

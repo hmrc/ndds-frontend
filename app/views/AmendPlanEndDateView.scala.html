@@ -36,12 +36,12 @@
             DateViewModel(
                 field  = form("value"),
                 legend = LegendViewModel(messages("amendPlanEndDate.heading")).asPageHeading()
-                ).withHint(
+            ).withHint(
                 HintViewModel(
                     HtmlContent(
-                    Seq(
-                        s"<p >${messages("amendPlanEndDate.p1")}</p>",
-                        s"<p class='govuk-!-margin-top-7'>${messages("amendPlanEndDate.hint")}</p>",
+                        Seq(
+                            s"<p >${messages("amendPlanEndDate.p1")}</p>",
+                            s"<p class='govuk-!-margin-top-7'>${messages("amendPlanEndDate.hint")}</p>",
                         ).mkString
                     )
                 )

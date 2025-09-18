@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import views.html.components._
+@import views.html.components.*
 
 @this(
     layout: templates.Layout,
@@ -27,7 +27,7 @@
     govukWarningText: GovukWarningText
 )
 
-@(form: Form[_], mode: Mode, earliestPaymentDate: String, earliestPaymentDateNumeric: String, call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("amendPaymentDate.title")), backLink = Some(call.url)) {
 
@@ -50,9 +50,14 @@
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(content ="")
+                legend = LegendViewModel(messages("amendPlanEndDate.heading")).asPageHeading()
             )
-            .withHint(HintViewModel(HtmlContent(messages(s"amendPaymentDate.hintDate", earliestPaymentDate, earliestPaymentDateNumeric))))
+            .withHint(HintViewModel(HtmlContent(
+                Seq(
+                    s"<p >${messages("amendPlanEndDate.p1")}</p>",
+                    s"<p class='govuk-!-margin-top-7'>${messages("amendPlanEndDate.hint")}</p>",
+                ).mkString
+            )))
         )
 
         @govukButton(
