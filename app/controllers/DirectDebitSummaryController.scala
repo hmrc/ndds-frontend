@@ -30,14 +30,14 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DirectDebitSummaryController @Inject()(
-                                                       override val messagesApi: MessagesApi,
-                                                       identify: IdentifierAction,
-                                                       getData: DataRetrievalAction,
-                                                       val controllerComponents: MessagesControllerComponents,
-                                                       view: DirectDebitSummaryView,
-                                                       nddService: NationalDirectDebitService,
-                                                       sessionRepository: SessionRepository,
-                                                     )(implicit ec: ExecutionContext)
+                                               override val messagesApi: MessagesApi,
+                                               identify: IdentifierAction,
+                                               getData: DataRetrievalAction,
+                                               val controllerComponents: MessagesControllerComponents,
+                                               view: DirectDebitSummaryView,
+                                               nddService: NationalDirectDebitService,
+                                               sessionRepository: SessionRepository,
+                                             )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>

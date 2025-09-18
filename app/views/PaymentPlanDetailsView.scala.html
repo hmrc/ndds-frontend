@@ -47,11 +47,9 @@
 
             @defining({
                 val df = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")
-
                 val isSingle = plan.planType == "SinglePayment"
                 val isBudget = plan.planType == "budgetPaymentPlan"
                 val hasSusp = plan.suspensionStartDate.isDefined || plan.suspensionEndDate.isDefined
-
                 val b = Seq.newBuilder[SummaryListRow]
 
                 b += SummaryListRow(
@@ -141,7 +139,6 @@
 
                 b.result()
             }) { summaryRows =>
-
             @defining({
                 val items =
                     Seq(
@@ -157,21 +154,20 @@
                     ).flatten
                 if(items.nonEmpty) Some(Actions(items = items)) else None
             }) { maybeActions =>
-
-                @govukSummaryList(
-                    SummaryList(
-                        card = Some(
-                            Card(
-                                title = Some(CardTitle(content = Text(messages("paymentPlan.details.paymentReference", plan.paymentReference)))),
-                                actions = maybeActions
-                            )
-                        ),
-                        rows = summaryRows
+                    @govukSummaryList(
+                        SummaryList(
+                            card = Some(
+                                Card(
+                                    title = Some(CardTitle(content = Text(messages("paymentPlan.details.paymentReference", plan.paymentReference)))),
+                                    actions = maybeActions
+                                )
+                            ),
+                            rows = summaryRows
+                        )
                     )
-                )
+                }
             }
         }
     }
-}
 }
 

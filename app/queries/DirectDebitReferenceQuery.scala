@@ -19,6 +19,5 @@ package queries
 import play.api.libs.json.JsPath
 
 case object DirectDebitReferenceQuery extends Gettable[String] with Settable[String] {
-
   override def path: JsPath = JsPath \ "directDebitReference"
 }

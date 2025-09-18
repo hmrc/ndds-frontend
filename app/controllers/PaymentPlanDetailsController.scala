@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions.*
 import models.UserAnswers
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -27,8 +26,6 @@ import models.responses.{PaymentPlanDetails, PaymentPlanDetailsResponse}
 import viewmodels.{PaymentPlanViewModel, PaymentPlansDetailsViewModel}
 import views.html.PaymentPlanDetailsView
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,11 +36,9 @@ class PaymentPlanDetailsController @Inject()(
                                               requireData: DataRequiredAction,
                                               val controllerComponents: MessagesControllerComponents,
                                               view: PaymentPlanDetailsView,
-                                              appConfig: FrontendAppConfig,
                                               nddService: NationalDirectDebitService
                                             )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
-
 
   def onPageLoad(paymentReference: String): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
