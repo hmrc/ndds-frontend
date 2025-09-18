@@ -14,8 +14,9 @@
  * limitations under the License.
  *@
 
-@import views.html.components.*
 @import models.responses.*
+@import java.time.format.DateTimeFormatter
+@import views.html.components.*
 @import utils.MaskAndFormatUtils.*
 
 @this(
@@ -27,7 +28,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(paymentReference: String, paymentPlanDetails: PaymentPlanDetailsResponse)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
 
@@ -44,7 +45,7 @@
     @govukSummaryList(SummaryList(
         card = Some(Card(
             title = Some(CardTitle(
-            content = messages("paymentPlanDetails.details.paymentReference", "1000000")
+            content = messages("paymentPlanDetails.details.paymentReference", paymentReference)
         )),
         actions = Some(Actions(
             items = Seq(
@@ -72,7 +73,7 @@
                     content = messages("paymentPlanDetails.details.planType")
                 ),
                 value = Value(
-                    content = HtmlContent("planType")
+                    content = HtmlContent(paymentPlanDetails.planType)
                 )
             ),
             SummaryListRow(
@@ -80,7 +81,7 @@
                     content = messages("paymentPlanDetails.details.paymentFor")
                     ),
                 value = Value(
-                    content = HtmlContent("paymentFor")
+                    content = HtmlContent(paymentPlanDetails.hodService)
                 )
             ),
             SummaryListRow(
@@ -88,7 +89,7 @@
                     content = messages("paymentPlanDetails.details.dateSetUp")
                 ),
                 value = Value(
-                    content = HtmlContent("dateSetUp")
+                    content = HtmlContent(paymentPlanDetails.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
                 )
             ),
             SummaryListRow(
@@ -96,7 +97,7 @@
                     content = messages("paymentPlanDetails.details.regularPaymentAmount")
                 ),
                 value = Value(
-                    content = HtmlContent(formatAmount(250))
+                    content = HtmlContent(formatAmount(paymentPlanDetails.scheduledPaymentAmount))
                 )
             ),
             SummaryListRow(
@@ -104,7 +105,7 @@
                     content = messages("paymentPlanDetails.details.planStartDate")
                 ),
                 value = Value(
-                    content = HtmlContent("planStartDate")
+                    content = HtmlContent(paymentPlanDetails.scheduledPaymentStartDate.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
                 )
             ),
             SummaryListRow(
@@ -112,7 +113,7 @@
                     content = messages("paymentPlanDetails.details.planEndDate")
                 ),
                 value = Value(
-                    content = HtmlContent("planEndDate")
+                    content = HtmlContent(paymentPlanDetails.scheduledPaymentEndDate.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
                 )
             )
         )

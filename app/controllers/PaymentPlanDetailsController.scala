@@ -23,6 +23,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentReferenceQuery
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentPlanDetailsView
 
@@ -36,6 +37,7 @@ class PaymentPlanDetailsController @Inject()(
                                        requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentPlanDetailsView,
+                                       nddService: NationalDirectDebitService,
                                        sessionRepository: SessionRepository,
                                      ) (implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
@@ -43,7 +45,15 @@ class PaymentPlanDetailsController @Inject()(
     implicit request =>
       request.userAnswers.get(PaymentReferenceQuery) match {
         case Some(reference) =>
-          Future.successful(Ok(view()))
+          nddService.getPaymentPlanDetails(reference) map { paymentPlanDetails =>
+            Ok(
+              view(
+                reference,
+                paymentPlanDetails
+              )
+            )
+          }
+          //Future.successful(Ok(view()))
         case None =>
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
