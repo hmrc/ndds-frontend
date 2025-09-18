@@ -285,7 +285,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
         postCode = "NE5 2DH"
       ),
       ddiReferenceNo = "DDI123456789",
-      paymentReference = Some("testReference"),
+      paymentReference = "testReference",
       bankName = "Barclays",
       totalAmountDue = Some(BigDecimal(200)),
       paymentAmount = Some(BigDecimal(100.00)),
