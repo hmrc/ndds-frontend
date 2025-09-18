@@ -17,7 +17,6 @@
 package controllers
 
 import controllers.actions.*
-import controllers.routes
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
 import navigation.Navigator

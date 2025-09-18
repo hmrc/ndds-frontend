@@ -16,7 +16,6 @@
 
 package pages
 
-import pages.QuestionPage
 import play.api.libs.json.JsPath
 
 case object AmendPaymentAmountPage extends QuestionPage[BigDecimal] {
