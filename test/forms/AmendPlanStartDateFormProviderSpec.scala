@@ -22,7 +22,7 @@ import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 import play.api.data.FormError
 
-class AmendSinglePaymentDateFormProviderSpec extends DateBehaviours {
+class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
 
   private implicit val messages: Messages = stubMessages()
 
@@ -33,7 +33,7 @@ class AmendSinglePaymentDateFormProviderSpec extends DateBehaviours {
     ZoneId.systemDefault()
   )
 
-  private val formProvider = new PaymentDateFormProvider(fixedClock)
+  private val formProvider = new AmendPlanStartDateFormProvider(fixedClock)
 
   ".value" - {
 

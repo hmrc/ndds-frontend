@@ -20,9 +20,9 @@ import models.PaymentDateDetails
 
 import play.api.libs.json.JsPath
 
-case object AmendSinglePaymentDatePage extends QuestionPage[PaymentDateDetails] {
+case object AmendPlanStartDatePage extends QuestionPage[PaymentDateDetails] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "amendSinglePaymentDate"
+  override def toString: String = "amendPlanStartDate"
 }

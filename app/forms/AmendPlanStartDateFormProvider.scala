@@ -24,7 +24,7 @@ import utils.DateFormats
 import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 
-class AmendSinglePaymentDateFormProvider @Inject()(clock: Clock) extends Mappings {
+class AmendPlanStartDateFormProvider @Inject()(clock: Clock) extends Mappings {
 
   def apply(earliestDate: LocalDate, isSinglePlan: Boolean)
            (implicit messages: Messages): Form[LocalDate] = {

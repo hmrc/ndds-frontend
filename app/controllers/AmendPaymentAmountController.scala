@@ -48,7 +48,6 @@ class AmendPaymentAmountController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val answers = request.userAnswers
-      //TODO: Call this from previous Page pp1
       val preparedForm = answers.get(PaymentAmountPage) match {
         case None => form
         case Some(value) => form.fill(value)
@@ -63,7 +62,6 @@ class AmendPaymentAmountController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          //TODO: Change the route to PP1 screen once built
           Future.successful(BadRequest(view(formWithErrors, mode, routes.JourneyRecoveryController.onPageLoad()))),
         value =>
           for {

@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import forms.{AmendSinglePaymentDateFormProvider, PaymentDateFormProvider}
+import forms.AmendPlanStartDateFormProvider
 import models.responses.EarliestPaymentDate
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
@@ -33,18 +33,18 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import views.html.AmendSinglePaymentDateView
+import views.html.AmendPlanStartDateView
 
 import java.time.*
 import scala.concurrent.Future
 
-class AmendSinglePaymentDateControllerSpec extends SpecBase with MockitoSugar {
+class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
   private implicit val messages: Messages = stubMessages()
 
   val fixedInstant: Instant = Instant.parse("2024-07-17T00:00:00Z")
   val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
-  private val formProvider = new AmendSinglePaymentDateFormProvider(fixedClock)
+  private val formProvider = new AmendPlanStartDateFormProvider(fixedClock)
 
   private def form = formProvider(LocalDate.parse(expectedEarliestPaymentDate.date), isSinglePlan = false)
 
@@ -54,7 +54,7 @@ class AmendSinglePaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
   val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
 
-  lazy val amendDateRoute: String = routes.AmendSinglePaymentDateController.onPageLoad(NormalMode).url
+  lazy val amendDateRoute: String = routes.AmendPlanStartDateController.onPageLoad(NormalMode).url
   lazy val amendAmountRoute: String = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
@@ -102,7 +102,7 @@ class AmendSinglePaymentDateControllerSpec extends SpecBase with MockitoSugar {
         "value.year" -> "2025"
       )
 
-  "AmendSinglePaymentDateController" - {
+  "AmendPlanStartDateController" - {
     "onPageLoad" - {
       "must return OK and the correct view for a GET" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
@@ -117,7 +117,7 @@ class AmendSinglePaymentDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           val result = route(application, getRequest()).value
 
-          val view = application.injector.instanceOf[AmendSinglePaymentDateView]
+          val view = application.injector.instanceOf[AmendPlanStartDateView]
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, Call("GET", amendAmountRoute))(getRequest(), messages(application)).toString
@@ -136,7 +136,7 @@ class AmendSinglePaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         running(application) {
-          val view = application.injector.instanceOf[AmendSinglePaymentDateView]
+          val view = application.injector.instanceOf[AmendPlanStartDateView]
 
           val result = route(application, getRequest()).value
 
@@ -231,7 +231,7 @@ class AmendSinglePaymentDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           val boundForm = form.bind(Map("value" -> "invalid value"))
 
-          val view = application.injector.instanceOf[AmendSinglePaymentDateView]
+          val view = application.injector.instanceOf[AmendPlanStartDateView]
 
           val result = route(application, request).value
 

@@ -17,12 +17,12 @@
 package controllers
 
 import controllers.actions.*
-import forms.AmendSinglePaymentDateFormProvider
+import forms.AmendPlanStartDateFormProvider
 
 import javax.inject.Inject
 import models.{Mode, PaymentDateDetails}
 import navigation.Navigator
-import pages.{AmendSinglePaymentDatePage, PaymentDatePage}
+import pages.{AmendPlanStartDatePage, PaymentDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,22 +30,22 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
-import views.html.AmendSinglePaymentDateView
+import views.html.AmendPlanStartDateView
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
-class AmendSinglePaymentDateController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        sessionRepository: SessionRepository,
-                                        navigator: Navigator,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        formProvider: AmendSinglePaymentDateFormProvider,
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: AmendSinglePaymentDateView,
-                                        nddService: NationalDirectDebitService
+class AmendPlanStartDateController @Inject()(
+                                                 override val messagesApi: MessagesApi,
+                                                 sessionRepository: SessionRepository,
+                                                 navigator: Navigator,
+                                                 identify: IdentifierAction,
+                                                 getData: DataRetrievalAction,
+                                                 requireData: DataRequiredAction,
+                                                 formProvider: AmendPlanStartDateFormProvider,
+                                                 val controllerComponents: MessagesControllerComponents,
+                                                 view: AmendPlanStartDateView,
+                                                 nddService: NationalDirectDebitService
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -91,9 +91,9 @@ class AmendSinglePaymentDateController @Inject()(
           value =>
             for {
               earliestPaymentDate <- nddService.getEarliestPaymentDate(request.userAnswers)
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendSinglePaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
               _ <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(navigator.nextPage(AmendSinglePaymentDatePage, mode, updatedAnswers))
+            } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
         )
       }.recoverWith {
         case e =>

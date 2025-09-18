@@ -31,7 +31,7 @@
 
 @layout(pageTitle = title(form, messages("amendPaymentDate.title")), backLink = Some(call.url)) {
 
-    @formHelper(action = routes.AmendSinglePaymentDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.AmendPlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
@@ -40,15 +40,11 @@
         @h1(messages("amendPaymentDate.heading"))
 
         @govukHint(
-            HintViewModel(
-                content = HtmlContent(messages("amendPaymentDate.hint"))
-            )
+            HintViewModel(content = HtmlContent(messages("amendPaymentDate.hint")))
         )
 
         @govukWarningText(
-            WarningText(
-                content = HtmlContent(messages("amendPaymentDate.warning"))
-            )
+            WarningText(content = HtmlContent(messages("amendPaymentDate.warning")))
         )
 
         @govukDateInput(

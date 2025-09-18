@@ -17,9 +17,8 @@
 package controllers
 
 import base.SpecBase
-import controllers.routes
 import forms.AmendPaymentAmountFormProvider
-import models.{NormalMode, UserAnswers}
+import models.NormalMode
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when

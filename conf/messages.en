@@ -344,11 +344,11 @@ directDebitPaymentSummary.addPaymentButton = Add payment plan
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 
-amendPaymentDate.title = start date page
-amendPaymentDate.heading = 	What date are you starting this payment plan?
-amendPaymentDate.hint = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
-amendPaymentDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
-amendPaymentDate.hintDate = e.g. 15 5 2025
+amendPlanStartDate.title = start date page
+amendPlanStartDate.heading = What date are you starting this payment plan?
+amendPlanStartDate.hint = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
+amendPlanStartDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
+amendPlanStartDate.hintDate = e.g. 15 5 2025
 
 amendPlanEndDate.title = end date page
 amendPlanEndDate.heading = What date are you ending this payment plan?

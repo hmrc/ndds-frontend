@@ -18,27 +18,27 @@ package viewmodels.checkAnswers
 
 import controllers.routes
 import models.{CheckMode, UserAnswers}
-import pages.AmendSinglePaymentDatePage
+import pages.AmendPlanStartDatePage
 import play.api.i18n.{Lang, Messages}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DateTimeFormats.dateTimeFormat
 import viewmodels.govuk.summarylist._
 import viewmodels.implicits._
 
-object AmendSinglePaymentDateSummary  {
+object AmendPlanStartDateSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AmendSinglePaymentDatePage).map {
+    answers.get(AmendPlanStartDatePage).map {
       answer =>
 
         implicit val lang: Lang = messages.lang
 
         SummaryListRowViewModel(
-          key     = "amendSinglePaymentDate.checkYourAnswersLabel",
+          key     = "amendPlanStartDate.checkYourAnswersLabel",
           value   = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
           actions = Seq(
-            ActionItemViewModel("site.change", routes.AmendSinglePaymentDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("amendSinglePaymentDate.change.hidden"))
+            ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("amendPlanStartDate.change.hidden"))
           )
         )
     }
