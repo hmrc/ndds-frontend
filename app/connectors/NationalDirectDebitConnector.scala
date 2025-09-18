@@ -18,9 +18,10 @@ package connectors
 
 import models.NddResponse
 import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
 import play.api.http.Status.OK
 import play.api.libs.json.Json
+import play.api.Logging
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -28,20 +29,17 @@ import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Random, Success, Try}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
                                              http: HttpClientV2)
-                                            (implicit ec: ExecutionContext) extends HttpReadsInstances {
+                                            (implicit ec: ExecutionContext) extends HttpReadsInstances with Logging {
 
   private val nationalDirectDebitBaseUrl: String = config.baseUrl("national-direct-debit") + "/national-direct-debit"
 
-  // Use this to try different journeys until a real stub exists
-  def limit: Int = if(config.getBoolean("features.existingDirectDebit")) Random.nextInt(3) + 1 else 0
-
-  def retrieveDirectDebits()(implicit hc: HeaderCarrier): Future[NddResponse] = {
-    http.get(url"$nationalDirectDebitBaseUrl/direct-debits?maxRecords=$limit")(hc)
+    def retrieveDirectDebits()(implicit hc: HeaderCarrier): Future[NddResponse] = {
+    http.get(url"$nationalDirectDebitBaseUrl/direct-debits")(hc)
       .execute[NddResponse]
   }
 
@@ -78,6 +76,15 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
         case Left(errorResponse) =>
           Future.failed(new Exception(s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"))
         case Right(response) => Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
+      }
+  }
+
+  def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
+    http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans")(hc)
+      .execute[NddDDPaymentPlansResponse]
+      .map { response =>
+        logger.info(s"Payment plans response: ${Json.prettyPrint(Json.toJson(response))}")
+        response
       }
   }
 }

@@ -10,6 +10,7 @@ site.start = Start now
 site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
+site.accept.continue = Accept and continue
 
 date.day = Day
 date.month = Month
@@ -120,6 +121,14 @@ accountDetailsNotVerified.heading = Your account details could not be verified
 accountDetailsNotVerified.p1 = You will need to wait until {0} before you enter the details of different bank account
 accountDetailsNotVerified.p2 = If you do not have another bank account you will need to pay using an alternative payment option. You can find more information on this on the
 accountDetailsNotVerified.p2.link = Paying HMRC page
+
+confirmYourAuthority.title = Confirm your authority
+confirmYourAuthority.heading = Confirm your authority
+confirmYourAuthority.p1 = Confirm that you are the account holder or an authorised signatory, and are able to authorise Direct Debit payments from this account.
+confirmYourAuthority.yes= Yes
+confirmYourAuthority.no= No
+confirmYourAuthority.error.required = You have not confirmed you are the account holder, or an authorised signatory
+confirmYourAuthority.error.inline = Select yes if you are the account holder, or an authorised signatory, and are able to authorise Direct Debit payments from this account
 
 bankDetailsCheckYourAnswer.title = Check your answers
 bankDetailsCheckYourAnswer.heading = Check your answers
@@ -313,6 +322,25 @@ directDebitConfirmation.downloadButton = Download confirmation
 directDebitConfirmation.pleaseNote = <strong>Please note:</strong> Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
 
 under_construction.heading = Under Construction
+
+directDebitPaymentSummary.title = Summary Payment plan
+directDebitPaymentSummary.heading = Summary of payment plans for this Direct Debit
+directDebitPaymentSummary.p1 = Manage your active payment plans by selecting ''Manage plan'' for the relevant payment reference.
+directDebitPaymentSummary.p2 = You can view, amend, cancel or suspend payments depending on the type of payment plan.
+directDebitPaymentSummary.directDebit.title = Direct Debit details
+directDebitPaymentSummary.directDebit.reference = Direct Debit reference
+directDebitPaymentSummary.directDebit.accountNumber = Account number
+directDebitPaymentSummary.directDebit.sortCode = Bank sort code
+directDebitPaymentSummary.activePayment.h1 = Active payment plans
+directDebitPaymentSummary.activePayment.summary.title = Payment reference: {0}
+directDebitPaymentSummary.activePayment.summary.action = Manage plan
+directDebitPaymentSummary.activePayment.summary.planType = Plan type
+directDebitPaymentSummary.activePayment.summary.paymentFor = Payment for
+directDebitPaymentSummary.activePayment.summary.date = Date set up
+directDebitPaymentSummary.activePayment.summary.amount = Payment amount
+directDebitPaymentSummary.setupPayment.h1 = Set up a new payment plan
+directDebitPaymentSummary.setupPayment.p1 = Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
+directDebitPaymentSummary.addPaymentButton = Add payment plan
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 
