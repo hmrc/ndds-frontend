@@ -139,7 +139,7 @@ class CheckYourAnswersController @Inject()(
       bankDetailsAddress           = required(BankDetailsAddressPage),
       bankName                     = required(BankDetailsBankNamePage),
       ddiReferenceNo               = ddiReference,
-      paymentReference             = ua.get(PaymentReferencePage),
+      paymentReference             = required(PaymentReferencePage),
       totalAmountDue               = ua.get(TotalAmountDuePage),
       paymentAmount                = ua.get(PaymentAmountPage),
       regularPaymentAmount         = ua.get(RegularPaymentAmountPage),
