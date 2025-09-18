@@ -341,3 +341,6 @@ directDebitPaymentSummary.activePayment.summary.amount = Payment amount
 directDebitPaymentSummary.setupPayment.h1 = Set up a new payment plan
 directDebitPaymentSummary.setupPayment.p1 = Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
 directDebitPaymentSummary.addPaymentButton = Add payment plan
+
+paymentPlanDetails.title = paymentPlanDetails
+paymentPlanDetails.heading = paymentPlanDetails
