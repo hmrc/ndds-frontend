@@ -27,7 +27,7 @@
         govukDetails: GovukDetails
 )
 
-@(referenceNumber: String, serviceNumber: String)(implicit request: Request[_], messages: Messages)
+@(referenceNumber: String, formattedPaymentAmount: String, formattedStartDate: String, formattedEndDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("paymentPlanConfirmation.title")), showBackLink = false) {
 
@@ -43,25 +43,35 @@
 
     @paragraph(messages("paymentPlanConfirmation.p1"))
 
-    @ul(
-        Seq(
-            @li(messages("paymentPlanConfirmation.l1", paymentAmount, startDate)),
-            @li(messages("paymentPlanConfirmation.l2")),
-            @li(messages("paymentPlanConfirmation.l3"))
-        ),
-        Map("class" -> "govuk-list govuk-list--bullet")
-    )
-
     @paragraph(messages("paymentPlanConfirmation.pleaseNote"))
 
     @header2("paymentPlanConfirmation.h2")
 
-    @govukSummaryList(list)
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(Text(messages("paymentPlanConfirmation.reference"))),
+                value = Value(Text(referenceNumber))
+            ),
+            SummaryListRow(
+                key = Key(Text(messages("paymentPlanConfirmation.amount"))),
+                value = Value(Text(formattedPaymentAmount))
+            ),
+            SummaryListRow(
+                key = Key(Text(messages("paymentPlanConfirmation.startDate"))),
+                value = Value(Text(formattedStartDate))
+            ),
+            SummaryListRow(
+                key = Key(Text(messages("paymentPlanConfirmation.endDate"))),
+                value = Value(Text(formattedEndDate))
+            )
+        )
+    ))
 
     @govukDetails(
         Details(
-            summary = Some(Content(Text(Messages("paymentPlanConfirmation.print")))),
-            content = Content(Text(Messages("paymentPlanConfirmation.printDetails")))
+            summary = Text(messages("paymentPlanConfirmation.print")),
+            content =Text(messages("paymentPlanConfirmation.printDetails"))
         )
     )
 

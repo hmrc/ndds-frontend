@@ -16,7 +16,12 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.text.NumberFormat
+import java.util.Locale
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -34,6 +39,18 @@ class PaymentPlanConfirmationController @Inject()(
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      Ok(view())
+      //TODO: Replace CheckYourAnswerPage with AP2 and take paymentAmount and startDate from there
+      //val referenceNumber = request.userAnswers.get(CheckYourAnswerPage).getOrElse(throw new Exception("Missing generated DDI reference number"))
+      //val paymentAmount =  request.userAnswers.get(AP2Page).getOrElse(throw new Exception("Missing payment amount"))
+      //val startDate =  request.userAnswers.get(AP2Page).getOrElse(throw new Exception("Missing start date"))
+      //val endDate =  request.userAnswers.get(AP2Page).getOrElse(throw new Exception("Missing end date"))
+      val referenceNumber = "123456789K"
+      val paymentAmount: BigDecimal = BigDecimal("1000.00")
+      val formattedPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(paymentAmount)
+      val startDate: LocalDate = LocalDate.of(2025, 9, 3)
+      val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+      val endDate: LocalDate = LocalDate.of(2025,11,11)
+      val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+      Ok(view(referenceNumber, formattedPaymentAmount,formattedStartDate,formattedEndDate))
   }
 }
