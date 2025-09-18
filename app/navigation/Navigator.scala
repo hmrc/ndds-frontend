@@ -46,7 +46,7 @@ class Navigator @Inject()() {
     case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers)
     //TODO: Change the route to AP2 screen once built for AmendSinglePaymentDatePage and AmendPlanEndDatePage
     case AmendSinglePaymentDatePage => _ => routes.JourneyRecoveryController.onPageLoad()
-    case AmendPlanEndDatePage => _ => routes.JourneyRecoveryController.onPageLoad()
+    case AmendPlanEndDatePage => _ => routes.ConfirmPaymentPlanAmendmentController.onPageLoad()
     case _ => _ => routes.LandingController.onPageLoad()
   }
 

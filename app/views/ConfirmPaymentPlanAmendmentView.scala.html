@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import models.CheckMode
 @import views.html.components.*
 @import utils.MaskAndFormatUtils.*
 
@@ -26,7 +27,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: DirectDebitDetails, paymentPlanSummaryListRow: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("confirmPaymentPlanAmendment.title"))) {
 
@@ -42,7 +43,7 @@
                         content = messages("confirmPaymentPlanAmendment.directDebit.reference")
                     ),
                     value = Value(
-                        content = HtmlContent("directDebitReference")
+                        content = HtmlContent(directDebitDetails.directDebitReference)
                     )
                 ),
                 SummaryListRow(
@@ -50,7 +51,7 @@
                         content = messages("confirmPaymentPlanAmendment.directDebit.accountNumber")
                     ),
                     value = Value(
-                        content = HtmlContent(maskAccountNumber("bankAccountNumber"))
+                        content = HtmlContent(maskAccountNumber(directDebitDetails.accountNumber))
                     )
                 ),
                 SummaryListRow(
@@ -58,7 +59,7 @@
                         content = messages("confirmPaymentPlanAmendment.directDebit.sortCode")
                     ),
                     value = Value(
-                        content = HtmlContent(maskSortCode("bankSortCode"))
+                        content = HtmlContent(maskSortCode(directDebitDetails.sortCode))
                     )
                 )
             )
@@ -107,7 +108,7 @@
                     actions = Some(Actions(
                         items = Seq(
                             ActionItem(
-                                href = "#",
+                                href = routes.AmendPaymentAmountController.onPageLoad(CheckMode).url,
                                 content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount.change"),
                                 visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount.change"))
                             )
@@ -124,7 +125,7 @@
                     actions = Some(Actions(
                         items = Seq(
                             ActionItem(
-                                href = "#",
+                                href = routes.AmendSinglePaymentDateController.onPageLoad(CheckMode).url,
                                 content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate.change"),
                                 visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate.change"))
                             )
@@ -133,7 +134,7 @@
                 ),
                 SummaryListRow(
                     key = Key(
-                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate")
+                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.endDate")
                     ),
                     value = Value(
                         content = HtmlContent("startDate")
@@ -141,7 +142,7 @@
                     actions = Some(Actions(
                         items = Seq(
                             ActionItem(
-                                href = "#",
+                                href = routes.AmendPlanEndDateController.onPageLoad(CheckMode).url,
                                 content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.endDate.change"),
                                 visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.endDate.change"))
                             )
@@ -150,6 +151,16 @@
                 )
             )
         ))
+
+        @govukSummaryList(SummaryList(
+            card = Some(Card(
+                title = Some(CardTitle(
+                content = Text("Payment reference 115002323023")
+                ))
+            )),
+            rows = paymentPlanSummaryListRow
+        ))
+
 
         @govukButton(
             ButtonViewModel(messages("confirmPaymentPlanAmendment.amendPaymentPlan.continueButton"))

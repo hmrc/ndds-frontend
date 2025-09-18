@@ -16,12 +16,19 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
+import models.UserAnswers
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.DirectDebitReferenceQuery
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.checkAnswers.{PaymentAmountSummary, AmendSinglePaymentDateSummary, AmendPlanEndDateSummary}
 import views.html.ConfirmPaymentPlanAmendmentView
+
+import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmPaymentPlanAmendmentController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -29,11 +36,36 @@ class ConfirmPaymentPlanAmendmentController @Inject()(
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: ConfirmPaymentPlanAmendmentView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                       view: ConfirmPaymentPlanAmendmentView,
+                                       nddService: NationalDirectDebitService
+                                     ) (implicit ec: ExecutionContext)
+  extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      Ok(view())
+      val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      userAnswers.get(DirectDebitReferenceQuery) match {
+        case Some(reference) =>
+          nddService.retrieveAllDirectDebits(request.userId) map { directDebitDetailsData =>
+            val firstMatchingDebit = directDebitDetailsData.directDebitList
+              .find(_.ddiRefNumber == reference).map(_.toDirectDebitDetails)
+            firstMatchingDebit match {
+              case Some(debit) => {
+
+                val paymentPlanSummaryListRow = Seq(
+                  PaymentAmountSummary.row(userAnswers),
+                  AmendSinglePaymentDateSummary.row(userAnswers),
+                  AmendPlanEndDateSummary.row(userAnswers)
+                ).flatten
+
+                Ok(view(reference, debit, paymentPlanSummaryListRow))
+              }
+              case None => Redirect(routes.JourneyRecoveryController.onPageLoad())
+            }
+          }
+
+        case None =>
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
   }
 }
