@@ -16,12 +16,18 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentReferenceQuery
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentPlanDetailsView
+
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class PaymentPlanDetailsController @Inject()(
                                        override val messagesApi: MessagesApi,
@@ -29,11 +35,24 @@ class PaymentPlanDetailsController @Inject()(
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
-                                       view: PaymentPlanDetailsView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                       view: PaymentPlanDetailsView,
+                                       sessionRepository: SessionRepository,
+                                     ) (implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      Ok(view())
+      request.userAnswers.get(PaymentReferenceQuery) match {
+        case Some(reference) =>
+          Future.successful(Ok(view()))
+        case None =>
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+  }
+
+  def onRedirect(paymentReference: String): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferenceQuery, paymentReference))
+      _ <- sessionRepository.set(updatedAnswers)
+    } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
   }
 }

@@ -29,7 +29,7 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title"))) {
+@layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
 
     @header1("paymentPlanDetails.heading")
 
