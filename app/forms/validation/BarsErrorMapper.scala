@@ -42,7 +42,7 @@ object BarsErrorMapper {
       case DetailsVerificationFailed =>
         Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
 
-      case _ => Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
+      case null => Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
     }
   }
 }
