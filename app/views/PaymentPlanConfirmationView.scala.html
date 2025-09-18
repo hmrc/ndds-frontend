@@ -90,7 +90,8 @@
         )
     )
 
-    @govukButton(
-        ButtonViewModel(messages("paymentPlanConfirmation.close"))
-    )
+    @govukButton(Button(
+        href = Some(routes.DirectDebitSummaryController.onPageLoad().url),
+        content = Text(messages("paymentPlanConfirmation.close"))
+    ))
 }
