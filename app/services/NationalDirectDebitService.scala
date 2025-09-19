@@ -134,7 +134,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
     val planDetails = PaymentPlanDetailsResponse(
       hodService = "NDD",
-      planType = PaymentPlanType.BudgetPaymentPlan.toString,
+      planType = PaymentPlanType.SinglePayment.toString,
       paymentReference = paymentReference,
       submissionDateTime = now.minusDays(5),
       scheduledPaymentAmount = 120.00,

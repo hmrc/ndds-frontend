@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils
 import views.html.PaymentPlanDetailsView
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, LocalDate}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
@@ -85,12 +85,16 @@ class PaymentPlanDetailsController @Inject()(
             PaymentPlanType.enumerable.withName(paymentPlanDetails.planType).get
 
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypePage, paymentPlanType))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, paymentPlanDetails.planType))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, paymentPlanDetails.scheduledPaymentAmount))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentPlanDetails.scheduledPaymentStartDate))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentPlanDetails.scheduledPaymentEndDate))
+            //updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanTypePage, paymentPlanType))
             cachedAnswers <- cachePaymentPlanResponse(samplePaymentPlanResponse, updatedAnswers)
             _ <- sessionRepository.set(cachedAnswers)
           } yield {
             val showActions =
-              if (Utils.amendmentGuardPaymentPlan(nddService, cachedAnswers)) {
+              if (Utils.amendPaymentPlanGuard(nddService, cachedAnswers)) {
                 if (paymentPlanDetails.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
                   val isThreeDayPrior = Utils.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate,
                     nddService, cachedAnswers)
@@ -137,7 +141,7 @@ class PaymentPlanDetailsController @Inject()(
         ua1 <- userAnswers.set(PaymentReferencePage, paymentPlan.paymentReference)
         ua2 <- ua1.set(PaymentPlanTypePage, paymentPlanType)
         ua3 <- ua2.set(TotalAmountDuePage, paymentPlan.totalLiability)
-        ua4 <- ua3.set(AmendPaymentAmountPage, paymentPlan.initialPaymentAmount)
+        ua4 <- ua3.set(AmendPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
         ua5 <- ua4.set(RegularPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
         ua6 <- ua5.set(PlanStartDatePage, PlanStartDateDetails(
           paymentPlan.initialPaymentStartDate.toLocalDate,
