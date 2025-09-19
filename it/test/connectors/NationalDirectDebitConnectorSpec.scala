@@ -51,7 +51,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       )
 
       val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
-      val result = connector.getEarliestPaymentDate(requestBody).futureValue
+      val result = connector.getFutureWorkingDays(requestBody).futureValue
 
       result shouldBe EarliestPaymentDate("2024-12-28")
     }
@@ -66,7 +66,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       )
 
       val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
-      val result = intercept[Exception](connector.getEarliestPaymentDate(requestBody).futureValue)
+      val result = intercept[Exception](connector.getFutureWorkingDays(requestBody).futureValue)
 
       result.getMessage should include("Unexpected status code: 201")
     }
@@ -82,7 +82,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       )
 
       val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
-      val result = intercept[Exception](connector.getEarliestPaymentDate(requestBody).futureValue)
+      val result = intercept[Exception](connector.getFutureWorkingDays(requestBody).futureValue)
 
       result.getMessage should include("Response body: 'test error', status code: 500")
     }
@@ -97,7 +97,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       )
 
       val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
-      val result = intercept[Exception](connector.getEarliestPaymentDate(requestBody).futureValue)
+      val result = intercept[Exception](connector.getFutureWorkingDays(requestBody).futureValue)
 
       result.getMessage should include("The future returned an exception")
     }

@@ -17,6 +17,8 @@
 package controllers
 
 import controllers.actions.*
+import models.PaymentPlanType
+import pages.PaymentPlanTypePage
 
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -25,6 +27,7 @@ import queries.PaymentReferenceQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Utils
 import views.html.PaymentPlanDetailsView
 
 import javax.inject.Inject
