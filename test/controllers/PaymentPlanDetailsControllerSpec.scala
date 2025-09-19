@@ -17,13 +17,25 @@
 package controllers
 
 import base.SpecBase
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.{verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
+import play.api.inject.bind
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import queries.PaymentReferenceQuery
+import repositories.SessionRepository
+import services.NationalDirectDebitService
 import views.html.PaymentPlanDetailsView
+
+import scala.concurrent.Future
 
 class PaymentPlanDetailsControllerSpec extends SpecBase {
 
   "PaymentPlanDetails Controller" - {
+
+    val mockService = mock[NationalDirectDebitService]
+    val mockSessionRepository = mock[SessionRepository]
 
     "must return OK and the correct view for a GET" in {
 
@@ -39,6 +51,53 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
 //        status(result) mustEqual OK
 //        contentAsString(result) mustEqual view()(request, messages(application)).toString
 //      }
+    }
+
+    "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides().build()
+
+      running(application) {
+
+        val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Payment Plan Details page when a PaymentReferenceQuery is provided" in {
+      val paymentReference = "paymentReference"
+      val userAnswersWithPaymentReference =
+        emptyUserAnswers
+          .set(
+            PaymentReferenceQuery,
+            paymentReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onRedirect(paymentReference).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.PaymentPlanDetailsController.onPageLoad().url
+
+        verify(mockSessionRepository).set(eqTo(userAnswersWithPaymentReference))
+      }
     }
   }
 }
