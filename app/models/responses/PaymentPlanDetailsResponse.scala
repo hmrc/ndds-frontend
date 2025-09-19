@@ -18,7 +18,7 @@ package models.responses
 
 import play.api.libs.json.*
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, LocalDate}
 import java.time.format.DateTimeFormatter
 
 implicit val localDateTimeFormat: Format[LocalDateTime] = {
@@ -32,10 +32,10 @@ case class PaymentPlanDetailsResponse(
                                paymentReference: String,
                                submissionDateTime: LocalDateTime,
                                scheduledPaymentAmount: Double,
-                               scheduledPaymentStartDate: LocalDateTime,
+                               scheduledPaymentStartDate: LocalDate,
                                initialPaymentStartDate: Option[String],
                                initialPaymentAmount: Option[String],
-                               scheduledPaymentEndDate: LocalDateTime,
+                               scheduledPaymentEndDate: LocalDate,
                                scheduledPaymentFrequency: Option[String],
                                suspensionStartDate: Option[LocalDateTime],
                                suspensionEndDate: Option[LocalDateTime],

@@ -66,13 +66,13 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   }
 
 
-  def getEarliestPaymentDate(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
+  def calculateFutureWorkingDays(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)
       .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
     val offsetWorkingDays = calculateOffset(auddisStatus)
     val currentDate = LocalDate.now().toString
 
-    nddConnector.getEarliestPaymentDate(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
   }
 
   def getEarliestPlanStartDate(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
@@ -86,7 +86,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     val offsetWorkingDays = calculateOffset(auddisStatus, paymentPlanType, directDebitSource)
     val currentDate = LocalDate.now().toString
 
-    nddConnector.getEarliestPaymentDate(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
   }
 
   private[services] def calculateOffset(auddisStatus: Boolean, paymentPlanType: PaymentPlanType, directDebitSource: DirectDebitSource): Int = {
@@ -129,16 +129,19 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanDetailsResponse] = {
     //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
     val now = LocalDateTime.now()
+
+    val currentDate = LocalDate.now()
+
     val planDetails = PaymentPlanDetailsResponse(
       hodService = "NDD",
-      planType = PaymentPlanType.SinglePayment.toString,
+      planType = PaymentPlanType.BudgetPaymentPlan.toString,
       paymentReference = paymentReference,
       submissionDateTime = now.minusDays(5),
       scheduledPaymentAmount = 120.00,
-      scheduledPaymentStartDate = now.plusDays(10),
+      scheduledPaymentStartDate = currentDate.plusDays(5),
       initialPaymentStartDate = None,
       initialPaymentAmount = None,
-      scheduledPaymentEndDate = now.plusMonths(6),
+      scheduledPaymentEndDate = currentDate.plusDays(4),//,currentDate.plusMonths(6),
       scheduledPaymentFrequency = Some("Monthly"),
       suspensionStartDate = None,
       suspensionEndDate = None,
