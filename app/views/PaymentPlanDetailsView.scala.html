@@ -28,7 +28,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(paymentReference: String, paymentPlanDetails: PaymentPlanDetailsResponse)(implicit request: Request[_], messages: Messages)
+@(paymentReference: String, paymentPlanDetails: PaymentPlanDetailsResponse, showActions: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
 
@@ -47,25 +47,28 @@
             title = Some(CardTitle(
             content = messages("paymentPlanDetails.details.paymentReference", paymentReference)
         )),
-        actions = Some(Actions(
-            items = Seq(
-                ActionItem(
-                        href = "#",
-                        content = messages("paymentPlanDetails.details.amend"),
-                        visuallyHiddenText = Some(messages("1000000"))
+        actions =
+            if (showActions) {
+                Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = "#",
+                            content = messages("paymentPlanDetails.details.amend"),
+                            visuallyHiddenText = Some(messages("1000000"))
                     ),
-                ActionItem(
-                        href = "#",
-                        content = messages("paymentPlanDetails.details.cancel"),
-                        visuallyHiddenText = Some(messages("1000000"))
-                    ),
-                ActionItem(
-                        href = "#",
-                        content = messages("paymentPlanDetails.details.suspend"),
-                        visuallyHiddenText = Some(messages("1000000"))
+                        ActionItem(
+                            href = "#",
+                            content = messages("paymentPlanDetails.details.cancel"),
+                            visuallyHiddenText = Some(messages("1000000"))
+                        ),
+                        ActionItem(
+                            href = "#",
+                            content = messages("paymentPlanDetails.details.suspend"),
+                            visuallyHiddenText = Some(messages("1000000"))
+                        )
                     )
-                )
-            ))
+                ))
+            } else None
         )),
         rows = Seq(
             SummaryListRow(

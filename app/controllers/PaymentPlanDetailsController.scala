@@ -48,13 +48,29 @@ class PaymentPlanDetailsController @Inject()(
     implicit request =>
       request.userAnswers.get(PaymentReferenceQuery) match {
         case Some(reference) =>
-          nddService.getPaymentPlanDetails(reference) map { paymentPlanDetails =>
-            Ok(
-              view(
+          nddService.getPaymentPlanDetails(reference) flatMap { paymentPlanDetails =>
+            val paymentPlanType: PaymentPlanType =
+              PaymentPlanType.enumerable.withName(paymentPlanDetails.planType).get
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypePage, paymentPlanType))
+              _ <- sessionRepository.set(updatedAnswers)
+            } yield {
+              val showActions =
+                if (Utils.amendmentGuardPaymentPlan(nddService, updatedAnswers)) {
+                  if (paymentPlanDetails.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
+                    !Utils.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentStartDate, nddService, updatedAnswers)
+                  } else {
+                    !Utils.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate, nddService, updatedAnswers)
+                  }
+                } else {
+                  false
+                }
+              Ok(view(
                 reference,
-                paymentPlanDetails
-              )
-            )
+                paymentPlanDetails,
+                showActions
+              ))
+            }
           }
         case None =>
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
