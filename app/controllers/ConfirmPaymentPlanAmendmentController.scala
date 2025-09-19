@@ -58,7 +58,8 @@ class ConfirmPaymentPlanAmendmentController @Inject()(
                   AmendPlanEndDateSummary.row(userAnswers)
                 ).flatten
 
-                Ok(view(reference, debit, paymentPlanSummaryListRow))
+                //Ok(view(reference, debit, paymentPlanSummaryListRow))
+                Ok(view(reference, debit))
               }
               case None => Redirect(routes.JourneyRecoveryController.onPageLoad())
             }

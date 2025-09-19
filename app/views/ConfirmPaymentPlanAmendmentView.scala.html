@@ -27,7 +27,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(directDebitReference: String, directDebitDetails: DirectDebitDetails, paymentPlanSummaryListRow: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: DirectDebitDetails)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("confirmPaymentPlanAmendment.title"))) {
 
@@ -151,16 +151,6 @@
                 )
             )
         ))
-
-        @govukSummaryList(SummaryList(
-            card = Some(Card(
-                title = Some(CardTitle(
-                content = Text("Payment reference 115002323023")
-                ))
-            )),
-            rows = paymentPlanSummaryListRow
-        ))
-
 
         @govukButton(
             ButtonViewModel(messages("confirmPaymentPlanAmendment.amendPaymentPlan.continueButton"))
