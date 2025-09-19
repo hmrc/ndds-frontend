@@ -128,11 +128,14 @@ class PaymentPlanDetailsController @Inject()(
     val paymentPlan = response.paymentPlanDetails
     val directDebit = response.directDebitDetails
 
+    val paymentPlanType: PaymentPlanType =
+      PaymentPlanType.enumerable.withName(paymentPlan.planType).get
+
     val updatedAnswersTry: Try[UserAnswers] =
       for {
         ua1 <- userAnswers.set(PaymentReferencePage, paymentPlan.paymentReference)
-        //ua2 <- ua1.set(PaymentPlanTypePage, paymentPlan.planType) // TODO: map planType string dynamically
-        ua3 <- ua1.set(TotalAmountDuePage, paymentPlan.totalLiability)
+        ua2 <- ua1.set(PaymentPlanTypePage, paymentPlanType)
+        ua3 <- ua2.set(TotalAmountDuePage, paymentPlan.totalLiability)
         ua4 <- ua3.set(AmendPaymentAmountPage, paymentPlan.initialPaymentAmount)
         ua5 <- ua4.set(RegularPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
         ua6 <- ua5.set(PlanStartDatePage, PlanStartDateDetails(
