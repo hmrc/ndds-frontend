@@ -49,8 +49,8 @@ class PaymentPlanDetailsController @Inject()(
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     request.userAnswers.get(PaymentReferenceQuery) match {
-      case Some(reference) =>
-        nddService.getPaymentPlanDetails(reference).flatMap { paymentPlanDetails =>
+      case Some(paymentReference) =>
+        nddService.getPaymentPlanDetails(paymentReference).flatMap { paymentPlanDetails =>
 
           val samplePaymentPlanResponse: PaymentPlanResponse =
             PaymentPlanResponse(
@@ -61,11 +61,11 @@ class PaymentPlanDetailsController @Inject()(
                 auddisFlag = true
               ),
               paymentPlanDetails = PaymentPlanDetails(
-                hodService = "SA",
-                planType = "BudgetPaymentPlan",
-                paymentReference = "PR123456789",
-                submissionDateTime = LocalDateTime.now().minusYears(1),
-                scheduledPaymentAmount = BigDecimal(150.50),
+                hodService = paymentPlanDetails.hodService,
+                planType = paymentPlanDetails.planType,
+                paymentReference = paymentReference,
+                submissionDateTime = paymentPlanDetails.submissionDateTime,
+                scheduledPaymentAmount = paymentPlanDetails.scheduledPaymentAmount,
                 scheduledPaymentStartDate = LocalDateTime.now().minusMonths(7),
                 initialPaymentStartDate = LocalDateTime.now().plusDays(1),
                 initialPaymentAmount = BigDecimal(50.00),
@@ -91,15 +91,15 @@ class PaymentPlanDetailsController @Inject()(
             val showActions =
               if (Utils.amendmentGuardPaymentPlan(nddService, updatedAnswers)) {
                 if (paymentPlanDetails.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
-                  !Utils.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentStartDate, nddService, updatedAnswers)
+                  !Utils.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentStartDate, nddService, cachedAnswers)
                 } else {
-                  !Utils.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate, nddService, updatedAnswers)
+                  !Utils.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate, nddService, cachedAnswers)
                 }
               } else {
                 false
               }
 
-            Ok(view(reference, paymentPlanDetails, showActions))
+            Ok(view(paymentReference, paymentPlanDetails, showActions))
           }
         }
 
