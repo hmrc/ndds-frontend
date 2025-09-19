@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package utils
+package pages
 
-object Utils {
-  val emptyString = ""
-  val LockExpirySessionKey = "lockoutExpiryDateTime"
+import java.time.LocalDate
+import play.api.libs.json.JsPath
+
+case object AmendPlanEndDatePage extends QuestionPage[LocalDate] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "amendPlanEndDate"
 }
-

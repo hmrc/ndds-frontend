@@ -61,9 +61,7 @@
     @for(dd <- directDebitDetails) {
         @govukSummaryList(SummaryList(
             card = Some(Card(
-                title = Some(CardTitle(
-                    content = Text(dd.directDebitReference)
-                )),
+                title = Some(CardTitle(content = Text(dd.directDebitReference))),
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
@@ -76,44 +74,24 @@
             )),
             rows = Seq(
                 SummaryListRow(
-                    key = Key(
-                        content = messages("yourDirectDebitInstructions.dl.direct.debit.reference")
-                    ),
-                    value = Value(
-                        content = HtmlContent(dd.directDebitReference)
-                    )
+                    key = Key(content = messages("yourDirectDebitInstructions.dl.direct.debit.reference")),
+                    value = Value(content = HtmlContent(dd.directDebitReference))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("yourDirectDebitInstructions.dl.date.setup")
-                    ),
-                    value = Value(
-                        content = HtmlContent(dd.setupDate)
-                    )
+                    key = Key(content = messages("yourDirectDebitInstructions.dl.date.setup")),
+                    value = Value(content = HtmlContent(dd.setupDate))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("yourDirectDebitInstructions.dl.sort.code")
-                    ),
-                    value = Value(
-                        content = HtmlContent(maskSortCode(dd.sortCode))
-                    )
+                    key = Key(content = messages("yourDirectDebitInstructions.dl.sort.code")),
+                    value = Value(content = HtmlContent(maskSortCode(dd.sortCode)))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("yourDirectDebitInstructions.dl.account.number")
-                    ),
-                    value = Value(
-                        content = HtmlContent(maskAccountNumber(dd.accountNumber))
-                    )
+                    key = Key(content = messages("yourDirectDebitInstructions.dl.account.number")),
+                    value = Value(content = HtmlContent(maskAccountNumber(dd.accountNumber)))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("yourDirectDebitInstructions.dl.payment.plans")
-                    ),
-                    value = Value(
-                        content = HtmlContent(dd.paymentPlans)
-                    )
+                    key = Key(content = messages("yourDirectDebitInstructions.dl.payment.plans")),
+                    value = Value(content = HtmlContent(dd.paymentPlans))
                 )
             )
         ))

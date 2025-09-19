@@ -20,7 +20,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
 import java.time.{Instant, LocalDateTime}
-import java.time.format.DateTimeFormatter
 
 class NddModelsSpec extends AnyWordSpec with Matchers {
 

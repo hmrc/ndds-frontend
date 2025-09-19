@@ -29,9 +29,9 @@
     govukSummaryList: GovukSummaryList
 )
 
-@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse, call: Call)(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(call.url)) {
+@layout(pageTitle = titleNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
     @header1("directDebitPaymentSummary.heading")
     @paragraph("directDebitPaymentSummary.p1")
@@ -42,28 +42,16 @@
     @govukSummaryList(SummaryList(
         rows = Seq(
             SummaryListRow(
-                key = Key(
-                    content = messages("directDebitPaymentSummary.directDebit.reference")
-                ),
-                value = Value(
-                    content = HtmlContent(directDebitReference)
-                )
+                key = Key(content = messages("directDebitPaymentSummary.directDebit.reference")),
+                value = Value(content = HtmlContent(directDebitReference))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("directDebitPaymentSummary.directDebit.accountNumber")
-                ),
-                value = Value(
-                    content = HtmlContent(maskAccountNumber(directDebitDetails.bankAccountNumber))
-                )
+                key = Key(content = messages("directDebitPaymentSummary.directDebit.accountNumber")),
+                value = Value(content = HtmlContent(maskAccountNumber(directDebitDetails.bankAccountNumber)))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("directDebitPaymentSummary.directDebit.sortCode")
-                ),
-                value = Value(
-                    content = HtmlContent(maskSortCode(directDebitDetails.bankSortCode))
-                )
+                key = Key(content = messages("directDebitPaymentSummary.directDebit.sortCode")),
+                value = Value(content = HtmlContent(maskSortCode(directDebitDetails.bankSortCode)))
             )
         )
     ))
@@ -79,7 +67,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = "#",
+                            href = routes.PaymentPlanDetailsController.onRedirect(pp.paymentReference).url,
                             content = messages("directDebitPaymentSummary.activePayment.summary.action"),
                             visuallyHiddenText = Some(messages(pp.paymentReference))
                         )
@@ -88,36 +76,20 @@
             )),
             rows = Seq(
                 SummaryListRow(
-                    key = Key(
-                        content = messages("directDebitPaymentSummary.activePayment.summary.planType")
-                    ),
-                    value = Value(
-                        content = HtmlContent(pp.planType)
-                    )
+                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.planType")),
+                    value = Value(content = HtmlContent(pp.planType))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")
-                    ),
-                    value = Value(
-                        content = HtmlContent(pp.hodService)
-                    )
+                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")),
+                    value = Value(content = HtmlContent(pp.hodService))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("directDebitPaymentSummary.activePayment.summary.date")
-                    ),
-                    value = Value(
-                        content = HtmlContent(pp.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
-                    )
+                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.date")),
+                    value = Value(content = HtmlContent(pp.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("directDebitPaymentSummary.activePayment.summary.amount")
-                    ),
-                    value = Value(
-                        content = HtmlContent(formatAmount(pp.scheduledPaymentAmount))
-                    )
+                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.amount")),
+                    value = Value(content = HtmlContent(formatAmount(pp.scheduledPaymentAmount)))
                 )
             )
         ))
