@@ -140,7 +140,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       scheduledPaymentStartDate = currentDate.plusDays(5),
       initialPaymentStartDate = None,
       initialPaymentAmount = None,
-      scheduledPaymentEndDate = currentDate.plusDays(4),//,currentDate.plusMonths(6),
+      scheduledPaymentEndDate = currentDate.plusMonths(6),
       scheduledPaymentFrequency = Some("Monthly"),
       suspensionStartDate = None,
       suspensionEndDate = None,
