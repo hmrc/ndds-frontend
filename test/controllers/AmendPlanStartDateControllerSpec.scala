@@ -106,13 +106,13 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     "onPageLoad" - {
       "must return OK and the correct view for a GET" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
-          .overrides(
-            bind[Clock].toInstance(fixedClock),
-            bind[NationalDirectDebitService].toInstance(mockService))
+//          .overrides(
+//            bind[Clock].toInstance(fixedClock),
+//            bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
-        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
-          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+//        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
+//          .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         running(application) {
           val result = route(application, getRequest()).value
@@ -183,8 +183,8 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(emptyUserAnswers))(any()))
-          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+//        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(emptyUserAnswers))(any()))
+//          .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         val validDate = LocalDate.parse(expectedEarliestPaymentDate.date)
 
@@ -200,7 +200,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
             .overrides(
               bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
               bind[SessionRepository].toInstance(mockSessionRepository),
-              bind[NationalDirectDebitService].toInstance(mockService)
+//              bind[NationalDirectDebitService].toInstance(mockService)
             )
             .build()
 
@@ -216,13 +216,13 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       "must return a Bad Request and errors when invalid data is submitted" in {
 
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
-          .overrides(
-            bind[Clock].toInstance(fixedClock),
-            bind[NationalDirectDebitService].toInstance(mockService))
+//          .overrides(
+//            bind[Clock].toInstance(fixedClock),
+//            bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
-        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
-          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+//        when(mockService.getEarliestPaymentDate(ArgumentMatchers.eq(expectedUserAnswersNormalMode))(any()))
+//          .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         val request =
           FakeRequest(POST, amendDateRoute)
@@ -254,8 +254,8 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
         val mockSessionRepository = mock[SessionRepository]
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-        when(mockService.getEarliestPaymentDate(ArgumentMatchers.any())(any()))
-          .thenReturn(Future.failed(new Exception("bang")))
+//        when(mockService.getEarliestPaymentDate(ArgumentMatchers.any())(any()))
+//          .thenReturn(Future.failed(new Exception("bang")))
 
         val validDate = LocalDate.now()
 

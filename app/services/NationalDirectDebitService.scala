@@ -107,7 +107,6 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     } else {
       config.paymentDelayDynamicAuddisNotEnabled
     }
-
     config.paymentDelayFixed + dynamicDelay
   }
 
@@ -126,6 +125,25 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
   }
 
+  def isTwoDaysPriorPaymentDate(plannedStarDate: LocalDate,
+                                userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    val currentDate = LocalDate.now().toString
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2)).map {
+      futureWorkingDays => plannedStarDate.isBefore(LocalDate.parse(futureWorkingDays.date).plusDays(3))
+    }
+  }
+
+  def amendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =
+    if (isSinglePaymentPlan(userAnswers) || isBudgetPaymentPlan(userAnswers)) true else false
+
+  def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate,
+                                  userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    val currentDate = LocalDate.now().toString
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map {
+      futureWorkingDays => planEndDate.isBefore(LocalDate.parse(futureWorkingDays.date).plusDays(4))
+    }
+  }
+
   def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanDetailsResponse] = {
     //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
     val now = LocalDateTime.now()
@@ -137,11 +155,11 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       planType = PaymentPlanType.SinglePayment.toString,
       paymentReference = paymentReference,
       submissionDateTime = now.minusDays(5),
-      scheduledPaymentAmount = 120.00,
-      scheduledPaymentStartDate = currentDate.plusDays(5),
+      scheduledPaymentAmount = 3900.00,
+      scheduledPaymentStartDate = currentDate.plusDays(4),
       initialPaymentStartDate = None,
       initialPaymentAmount = None,
-      scheduledPaymentEndDate = currentDate.plusDays(4),//,currentDate.plusMonths(6),
+      scheduledPaymentEndDate = currentDate.plusDays(2),
       scheduledPaymentFrequency = Some("Monthly"),
       suspensionStartDate = None,
       suspensionEndDate = None,

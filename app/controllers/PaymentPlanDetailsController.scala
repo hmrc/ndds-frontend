@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.*
-import models.{PaymentDateDetails, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.*
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import pages.*
 
@@ -25,15 +25,14 @@ import javax.inject.Inject
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{PaymentReferenceQuery, PaymentPlanTypeQuery}
+import queries.{PaymentPlanTypeQuery, PaymentReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Utils
 import views.html.PaymentPlanDetailsView
-
-import java.time.{LocalDateTime, LocalDate}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.*
+import java.time.LocalDateTime
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Try
 
 class PaymentPlanDetailsController @Inject()(
@@ -81,32 +80,24 @@ class PaymentPlanDetailsController @Inject()(
               )
             )
 
-          val paymentPlanType: PaymentPlanType =
-            PaymentPlanType.enumerable.withName(paymentPlanDetails.planType).get
-
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, paymentPlanDetails.planType))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, paymentPlanDetails.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentPlanDetails.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentPlanDetails.scheduledPaymentEndDate))
-            //updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanTypePage, paymentPlanType))
             cachedAnswers <- cachePaymentPlanResponse(samplePaymentPlanResponse, updatedAnswers)
             _ <- sessionRepository.set(cachedAnswers)
           } yield {
             val showActions =
-              if (Utils.amendPaymentPlanGuard(nddService, cachedAnswers)) {
-                if (paymentPlanDetails.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
-                  val isThreeDayPrior = Utils.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate,
-                    nddService, cachedAnswers)
-                  !isThreeDayPrior
-                } else {
-                  val isTwoDayPrior = Utils.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate,
-                    nddService, cachedAnswers)
-                  !isTwoDayPrior
-                }
-              } else {
-                false
+              val flag: Future[Boolean] = paymentPlanDetails.planType match {
+                case PaymentPlanType.BudgetPaymentPlan.toString =>
+                  nddService.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate, cachedAnswers)
+                case PaymentPlanType.SinglePayment.toString =>
+                  nddService.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate, cachedAnswers)
+                case PaymentPlanType.VariablePaymentPlan.toString => Future.successful(false)
+                case _ => Future.successful(false)
               }
+              !Await.result(flag, 5.seconds)
 
             Ok(view(paymentReference, paymentPlanDetails, showActions))
           }

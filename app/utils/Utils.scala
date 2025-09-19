@@ -16,39 +16,8 @@
 
 package utils
 
-import models.UserAnswers
-import models.requests.WorkingDaysOffsetRequest
-import services.NationalDirectDebitService
-
-import java.time.LocalDate
-
 object Utils {
   val emptyString = ""
   val LockExpirySessionKey = "lockoutExpiryDateTime"
-
-  def isTwoDaysPriorPaymentDate(plannedStarDate: LocalDate, nddService: NationalDirectDebitService, userAnswers: UserAnswers): Boolean =
-    val currentDate = LocalDate.now()
-    //val futureDate = nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2))
-    val isSinglePlan = nddService.isSinglePaymentPlan(userAnswers)
-    
-    if (isSinglePlan) {
-      if (plannedStarDate.isBefore(currentDate.plusDays(3))) true else false
-    } else {
-      false
-    }
-
-  def amendPaymentPlanGuard(nddService : NationalDirectDebitService, userAnswers : UserAnswers): Boolean =
-    if (nddService.isSinglePaymentPlan(userAnswers) || nddService.isBudgetPaymentPlan(userAnswers)) true else false
-
-  def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate, nddService: NationalDirectDebitService, userAnswers: UserAnswers): Boolean =
-    val currentDate = LocalDate.now()
-    //val futureDate = nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3))
-    val isBudgetPlan = nddService.isBudgetPaymentPlan(userAnswers)
-
-    if (isBudgetPlan) {
-      if (planEndDate.isBefore(currentDate.plusDays(4))) true else false
-    } else {
-      false
-    }
 }
 

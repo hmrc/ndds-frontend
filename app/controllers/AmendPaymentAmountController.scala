@@ -54,7 +54,7 @@ class AmendPaymentAmountController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val answers = request.userAnswers
-      if (Utils.amendPaymentPlanGuard(nddsService, answers)) {
+      if (nddsService.amendPaymentPlanGuard(answers)) {
         val preparedForm = answers.get(AmendPaymentAmountPage) match {
           case None => form
           case Some(value) => form.fill(value)
