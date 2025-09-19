@@ -21,7 +21,7 @@ import models.UserAnswers
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
-import queries.DirectDebitReferenceQuery
+import queries.{DirectDebitReferenceQuery, PaymentReferenceQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSummaryView
@@ -42,19 +42,18 @@ class DirectDebitSummaryController @Inject()(
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
-        nddService.retrieveDirectDebitPaymentPlans(reference) map { ddPaymentPlans =>
-          Ok(
-            view(
-              reference,
-              ddPaymentPlans,
-              routes.YourDirectDebitInstructionsController.onPageLoad()
+        cleansePaymentReference(userAnswers).flatMap { _ =>
+          nddService.retrieveDirectDebitPaymentPlans(reference) map { ddPaymentPlans =>
+            Ok(
+              view(
+                reference,
+                ddPaymentPlans
+              )
             )
-          )
+          }
         }
-
       case None =>
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
@@ -67,4 +66,10 @@ class DirectDebitSummaryController @Inject()(
       _ <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.DirectDebitSummaryController.onPageLoad())
   }
+
+  private def cleansePaymentReference(userAnswers: UserAnswers): Future[UserAnswers] =
+    for {
+      updatedUserAnswers <- Future.fromTry(userAnswers.remove(PaymentReferenceQuery))
+      _ <- sessionRepository.set(updatedUserAnswers)
+    } yield updatedUserAnswers
 }

@@ -64,20 +64,20 @@ class UtilsSpec extends AnyFunSuite with MockitoSugar {
 
   test("return true if it is a budget payment plan") {
     when(mockService.isBudgetPaymentPlan(expectedUserAnswers)).thenReturn(true)
-    val result = Utils.amendmentGuardPaymentPlan(mockService, expectedUserAnswers)
+    val result = Utils.amendPaymentPlanGuard(mockService, expectedUserAnswers)
     assert(result)
   }
 
   test("return true if it is a single payment plan") {
     when(mockService.isSinglePaymentPlan(expectedUserAnswers)).thenReturn(true)
-    val result = Utils.amendmentGuardPaymentPlan(mockService, expectedUserAnswers)
+    val result = Utils.amendPaymentPlanGuard(mockService, expectedUserAnswers)
     assert(result)
   }
 
   test("return false if it is not a single payment plan or budget payment plan") {
     when(!(mockService.isSinglePaymentPlan(expectedUserAnswers)) &&
       !(mockService.isBudgetPaymentPlan(expectedUserAnswers))).thenReturn(false)
-    val result = Utils.amendmentGuardPaymentPlan(mockService, expectedUserAnswers)
+    val result = Utils.amendPaymentPlanGuard(mockService, expectedUserAnswers)
     assert(result)
   }
 

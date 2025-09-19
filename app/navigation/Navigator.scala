@@ -23,6 +23,7 @@ import pages.*
 import models.*
 import models.DirectDebitSource.*
 import models.PaymentPlanType.*
+import queries.PaymentPlanTypeQuery
 
 @Singleton
 class Navigator @Inject()() {
@@ -43,6 +44,10 @@ class Navigator @Inject()() {
     case PlanStartDatePage => userAnswers => checkPlanStartDateLogic(userAnswers)
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
+    case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers)
+    //TODO: Change the route to AP2 screen once built for AmendSinglePaymentDatePage and AmendPlanEndDatePage
+    case AmendPlanStartDatePage => _ => routes.ConfirmPaymentPlanAmendmentController.onPageLoad()
+    case AmendPlanEndDatePage => _ => routes.ConfirmPaymentPlanAmendmentController.onPageLoad()
     case _ => _ => routes.LandingController.onPageLoad()
   }
 
@@ -115,6 +120,15 @@ class Navigator @Inject()() {
         routes.PlanEndDateController.onPageLoad(NormalMode)
       case (Some(PAYE), _) | (Some(MGD), Some(VariablePaymentPlan)) | (Some(TC), Some(TaxCreditRepaymentPlan)) =>
         routes.CheckYourAnswersController.onPageLoad()
+      case _ => routes.JourneyRecoveryController.onPageLoad()
+    }
+  }
+  
+  private def checkPaymentPlanLogic(userAnswers: UserAnswers): Call ={
+    val paymentPlanType = userAnswers.get(PaymentPlanTypeQuery)
+    paymentPlanType match {
+      case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+      case Some(PaymentPlanType.SinglePayment.toString) => routes.AmendPlanStartDateController.onPageLoad(NormalMode)
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }
