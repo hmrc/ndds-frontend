@@ -1,6 +1,20 @@
-package controllers
+/*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import java.time.{LocalDate, ZoneOffset}
+package controllers
 
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
@@ -14,10 +28,11 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.AmendPlanEndDateView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
@@ -32,6 +47,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
 
   lazy val amendPlanEndDateRoute = routes.AmendPlanEndDateController.onPageLoad(NormalMode).url
+  lazy val amendPaymentAmountRoute = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers = UserAnswers(userAnswersId)
 
@@ -58,7 +74,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val view = application.injector.instanceOf[AmendPlanEndDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendPlanEndDateRoute))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -74,7 +90,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendPlanEndDateRoute))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -90,7 +106,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      }
+    }
 
     "must redirect to the next page when valid data is submitted" in {
 
@@ -132,7 +148,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendPlanEndDateRoute))(request, messages(application)).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
         }
       }
 

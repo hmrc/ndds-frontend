@@ -17,15 +17,19 @@
 package controllers
 
 import controllers.actions.*
-import controllers.routes
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
+import utils.Utils
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, PaymentAmountPage}
+import pages.AmendPaymentAmountPage
+import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentPlanTypeQuery
 import repositories.SessionRepository
+import services.NationalDirectDebitService
+import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPaymentAmountView
 
@@ -40,23 +44,28 @@ class AmendPaymentAmountController @Inject()(
                                               getData: DataRetrievalAction,
                                               requireData: DataRequiredAction,
                                               formProvider: AmendPaymentAmountFormProvider,
+                                              nddsService: NationalDirectDebitService,
                                               val controllerComponents: MessagesControllerComponents,
                                               view: AmendPaymentAmountView
-                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[BigDecimal] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val answers = request.userAnswers
-      //TODO: Call this from previous Page pp1
-      val preparedForm = answers.get(PaymentAmountPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
+      if (Utils.amendPaymentPlanGuard(nddsService, answers)) {
+        val preparedForm = answers.get(AmendPaymentAmountPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
+        }
 
-      //TODO: Change the route to PP1 screen once built
-      Ok(view(preparedForm, mode, routes.JourneyRecoveryController.onPageLoad()))
+        Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
+      } else {
+        val paymentPlanType = answers.get(PaymentPlanTypeQuery).getOrElse("Missing plan type from user answers")
+        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
+        throw new InternalServerException("NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
+      }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -64,8 +73,7 @@ class AmendPaymentAmountController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          //TODO: Change the route to PP1 screen once built
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.JourneyRecoveryController.onPageLoad()))),
+          Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentPlanDetailsController.onPageLoad()))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))

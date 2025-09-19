@@ -81,7 +81,7 @@ personalOrBusinessAccount.heading = Is this a personal or business account?
 personalOrBusinessAccount.personal = Personal
 personalOrBusinessAccount.business = Business
 personalOrBusinessAccount.checkYourAnswersLabel = Is this a personal or business account?
-personalOrBusinessAccount.error.required = Select an account type
+personalOrBusinessAccount.error.required = Select an account type.
 personalOrBusinessAccount.change.hidden = PersonalOrBusinessAccount
 
 yourBankDetails.title = What are your bank details?
@@ -197,7 +197,7 @@ paymentReference.vat.hint = Your Value Added Tax (VAT) payment reference is the 
 paymentAmount.title = What amount do you want to pay?
 paymentAmount.heading = What amount do you want to pay?
 paymentAmount.checkYourAnswersLabel = Payment amount
-paymentAmount.error.nonNumeric = Enter a valid amount in the correct format
+paymentAmount.error.nonNumeric = Enter a valid amount
 paymentAmount.error.required = Enter an amount
 paymentAmount.hint = Must be pounds and pence value. For example, 1000.00
 paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
@@ -342,15 +342,31 @@ directDebitPaymentSummary.setupPayment.h1 = Set up a new payment plan
 directDebitPaymentSummary.setupPayment.p1 = Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
 directDebitPaymentSummary.addPaymentButton = Add payment plan
 
+paymentPlanDetails.title = Payment Plan Details
+paymentPlanDetails.heading = Payment plan details
+paymentPlanDetails.p1 = You can amend the details of your payment plan, or cancel it if it is no longer required, by following either the ''Amend payment plan'' or ''Cancel payment plan'' links below.
+paymentPlanDetails.p2 = If you wish to suspend your payment plan please follow the ''Suspend payment plan'' link below.
+paymentPlanDetails.inset.text = Payments due within the next 3 working days will not be affected by any changes made.
+paymentPlanDetails.details.paymentReference = Payment reference: {0}
+paymentPlanDetails.details.amend = Amend
+paymentPlanDetails.details.cancel = Cancel
+paymentPlanDetails.details.suspend = Suspend
+paymentPlanDetails.details.planType = Plan type
+paymentPlanDetails.details.paymentFor = Payment for
+paymentPlanDetails.details.dateSetUp = Date set up
+paymentPlanDetails.details.regularPaymentAmount = Regular payment amount
+paymentPlanDetails.details.planStartDate = Plan start date
+paymentPlanDetails.details.planEndDate = Plan end date
+
 amendPaymentAmount.hint = 	e.g. £1000.00
 
-amendPaymentDate.title = start date page
-amendPaymentDate.heading = 	What date are you starting this payment plan?
-amendPaymentDate.hint = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
-amendPaymentDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
-amendPaymentDate.hintDate = e.g. 15 5 2025
+amendPlanStartDate.title = Plan start date
+amendPlanStartDate.heading = What date are you starting this payment plan?
+amendPlanStartDate.p1 = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
+amendPlanStartDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
+amendPlanStartDate.hint = e.g. 15 5 2025
 
-amendPlanEndDate.title = end date page
+amendPlanEndDate.title = Plan end date
 amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026

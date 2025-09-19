@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package pages
+package queries
 
 import play.api.libs.json.JsPath
 
-case object AmendPaymentAmountPage extends QuestionPage[BigDecimal] {
+case object PaymentPlanTypeQuery extends Gettable[String] with Settable[String] {
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "paymentPlanAmount"
+  override def path: JsPath = JsPath \ "planType"
 }

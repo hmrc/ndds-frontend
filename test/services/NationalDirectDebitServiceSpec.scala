@@ -25,7 +25,7 @@ import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, Variab
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, reset, verify, when}
+import org.mockito.Mockito.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -127,16 +127,16 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getEarliestPaymentDate(any())(any()))
+        when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
 
-        val result = service.getEarliestPaymentDate(expectedUserAnswers).futureValue
+        val result = service.calculateFutureWorkingDays(expectedUserAnswers).futureValue
 
         result mustBe EarliestPaymentDate("2025-12-25")
       }
 
       "fail when auddis status is not in user answers" in {
-        val result = intercept[Exception](service.getEarliestPaymentDate(emptyUserAnswers).futureValue)
+        val result = intercept[Exception](service.calculateFutureWorkingDays(emptyUserAnswers).futureValue)
 
         result.getMessage must include("YourBankDetailsPage details missing from user answers")
       }
@@ -146,10 +146,10 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getEarliestPaymentDate(any())(any()))
+        when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
-        val result = intercept[Exception](service.getEarliestPaymentDate(expectedUserAnswers).futureValue)
+        val result = intercept[Exception](service.calculateFutureWorkingDays(expectedUserAnswers).futureValue)
 
         result.getMessage must include("bang")
       }
@@ -164,7 +164,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getEarliestPaymentDate(any())(any()))
+        when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
 
         val result = service.getEarliestPlanStartDate(expectedUserAnswers).futureValue
@@ -207,7 +207,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getEarliestPaymentDate(any())(any()))
+        when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
         val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
@@ -303,7 +303,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         result mustBe GenerateDdiRefResponse("testRes")
       }
-      
+
       "fail when the connector call fails" in {
         when(mockConnector.generateNewDdiReference(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
@@ -313,6 +313,69 @@ class NationalDirectDebitServiceSpec extends SpecBase
         result.getMessage must include("bang")
       }
     }
+
+    "submitChrisData" - {
+
+      val planStartDateDetails = models.PlanStartDateDetails(
+        enteredDate = java.time.LocalDate.of(2025, 9, 1),
+        earliestPlanStartDate = "2025-09-01"
+      )
+
+      val paymentDateDetails = models.PaymentDateDetails(
+        enteredDate = java.time.LocalDate.of(2025, 9, 15),
+        earliestPaymentDate = "2025-09-01"
+      )
+
+      val chrisSubmission = models.requests.ChrisSubmissionRequest(
+        serviceType = DirectDebitSource.TC,
+        paymentPlanType = PaymentPlanType.TaxCreditRepaymentPlan,
+        paymentFrequency = Some(models.PaymentsFrequency.Monthly),
+        yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
+          accountHolderName = "Test",
+          sortCode = "123456",
+          accountNumber = "12345678",
+          auddisStatus = false,
+          accountVerified = false
+        ),
+        planStartDate = Some(planStartDateDetails),
+        planEndDate = None,
+        paymentDate = Some(paymentDateDetails),
+        yearEndAndMonth = None,
+        bankDetailsAddress = models.responses.BankAddress(
+          lines = Seq("line 1"),
+          town = "Town",
+          country = models.responses.Country("UK"),
+          postCode = "NE5 2DH"
+        ),
+        ddiReferenceNo = "DDI123456789",
+        paymentReference = Some("testReference"),
+        bankName = "Barclays",
+        totalAmountDue = Some(BigDecimal(200)),
+        paymentAmount = Some(BigDecimal(100)),
+        regularPaymentAmount = Some(BigDecimal(90)),
+        calculation = None
+      )
+
+      "must return true when CHRIS submission succeeds" in {
+        when(mockConnector.submitChrisData(any[models.requests.ChrisSubmissionRequest]())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(true))
+
+        val result = service.submitChrisData(chrisSubmission).futureValue
+        result mustBe true
+
+        verify(mockConnector, atLeastOnce()).submitChrisData(any[models.requests.ChrisSubmissionRequest]())(any[HeaderCarrier])
+      }
+
+      "must return false when CHRIS submission fails with exception" in {
+        when(mockConnector.submitChrisData(any[models.requests.ChrisSubmissionRequest]())(any[HeaderCarrier]))
+          .thenReturn(Future.failed(new Exception("submission failed")))
+
+        val result = service.submitChrisData(chrisSubmission).futureValue
+        result mustBe false
+        verify(mockConnector, atLeastOnce()).submitChrisData(any[models.requests.ChrisSubmissionRequest]())(any[HeaderCarrier])
+      }
+    }
+
   }
 
 }

@@ -19,35 +19,19 @@ package forms
 import forms.mappings.Mappings
 import play.api.data.Form
 import play.api.i18n.Messages
-import utils.DateFormats
 
-import java.time.{Clock, LocalDate}
+import java.time.LocalDate
 import javax.inject.Inject
 
-class AmendSinglePaymentDateFormProvider @Inject()(clock: Clock) extends Mappings {
+class AmendPlanStartDateFormProvider @Inject()() extends Mappings {
 
-  def apply(earliestDate: LocalDate, isSinglePlan: Boolean)
-           (implicit messages: Messages): Form[LocalDate] = {
-
-    val today = LocalDate.now(clock)
-    val maxDateForSinglePlan = today.plusYears(1)
-
+  def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
-      "value" -> customPaymentDate(
+      "value" -> localDate(
         invalidKey     = "paymentDate.error.invalid",
         allRequiredKey = "paymentDate.error.required.all",
         twoRequiredKey = "paymentDate.error.required.two",
-        requiredKey    = "paymentDate.error.required",
-        dateFormats    = DateFormats.defaultDateFormats
+        requiredKey    = "paymentDate.error.required"
       )
-        .verifying(
-          "paymentDate.error.beforeEarliest",
-          date => !date.isBefore(earliestDate)
-        )
-        .verifying(
-          "paymentDate.error.tooFarInFuture",
-          date => !isSinglePlan || !date.isAfter(maxDateForSinglePlan)
-        )
     )
-  }
 }

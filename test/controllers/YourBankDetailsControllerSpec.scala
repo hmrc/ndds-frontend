@@ -162,8 +162,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must call BARService and handle response on valid POST submission" in {
-
+    "must call BARService and handle response on valid POST submission for auddis flag true" in {
       val ua = userAnswers
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
 
@@ -214,6 +213,66 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
             "sortCode" -> "123212",
             "accountNumber" -> "34211234",
             "auddisStatus" -> "true"
+          )
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual onwardRoute.url
+      }
+    }
+
+    "must call BARService and handle response on valid POST submission for auddis flag false" in {
+      val ua = userAnswers
+        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+
+      val mockSessionRepository = mock[SessionRepository]
+      val mockBarService = mock[BarsService]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val barResponse = BarsVerificationResponse(
+        accountNumberIsWellFormatted = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
+        sortCodeBankName = Some("Test Bank"),
+        accountExists = BarsResponse.Yes,
+        nameMatches = BarsResponse.Yes,
+        sortCodeSupportsDirectDebit = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        nonStandardAccountDetailsRequiredForBacs = Some(BarsResponse.No),
+        iban = Some("GB29NWBK60161331926819"),
+        accountName = Some("John Doe")
+      )
+
+      val bank = Bank(
+        bankName = "Test Bank",
+        ddiVoucherFlag = "Y",
+        address = BankAddress(
+          lines = Seq("1 Bank Street"),
+          town = "London",
+          country = Country("UK"),
+          postCode = "EC1A 1AA"
+        )
+      )
+
+      when(mockBarService.barsVerification(any[String], any[YourBankDetails])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Right((barResponse, bank))))
+
+      val application = applicationBuilder(userAnswers = Some(ua))
+        .overrides(
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[BarsService].toInstance(mockBarService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, yourBankDetailsRoute)
+          .withFormUrlEncodedBody(
+            "accountHolderName" -> "value 1",
+            "sortCode" -> "123212",
+            "accountNumber" -> "34211234",
+            "auddisStatus" -> "false"
           )
 
         val result = route(application, request).value
