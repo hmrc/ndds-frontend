@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.DirectDebitReferenceQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.{PaymentAmountSummary, AmendSinglePaymentDateSummary, AmendPlanEndDateSummary}
+import viewmodels.checkAnswers.{PaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary}
 import views.html.ConfirmPaymentPlanAmendmentView
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,11 +52,11 @@ class ConfirmPaymentPlanAmendmentController @Inject()(
             firstMatchingDebit match {
               case Some(debit) => {
 
-                val paymentPlanSummaryListRow = Seq(
-                  PaymentAmountSummary.row(userAnswers),
-                  AmendSinglePaymentDateSummary.row(userAnswers),
-                  AmendPlanEndDateSummary.row(userAnswers)
-                ).flatten
+//                val paymentPlanSummaryListRow = Seq(
+//                  PaymentAmountSummary.row(userAnswers),
+//                  AmendSinglePaymentDateSummary.row(userAnswers),
+//                  AmendPlanEndDateSummary.row(userAnswers)
+//                ).flatten
 
                 //Ok(view(reference, debit, paymentPlanSummaryListRow))
                 Ok(view(reference, debit))
