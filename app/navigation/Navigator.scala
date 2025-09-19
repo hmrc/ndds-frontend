@@ -23,6 +23,7 @@ import pages.*
 import models.*
 import models.DirectDebitSource.*
 import models.PaymentPlanType.*
+import queries.PaymentPlanTypeQuery
 
 @Singleton
 class Navigator @Inject()() {
@@ -124,11 +125,11 @@ class Navigator @Inject()() {
   }
   
   private def checkPaymentPlanLogic(userAnswers: UserAnswers): Call ={
-    val paymentPlanType = userAnswers.get(PaymentPlanTypePage)
-    if (paymentPlanType.contains(PaymentPlanType.SinglePayment)) {
-      routes.AmendPlanStartDateController.onPageLoad(NormalMode)
-    } else {
-      routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+    val paymentPlanType = userAnswers.get(PaymentPlanTypeQuery)
+    paymentPlanType match {
+      case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+      case Some(PaymentPlanType.SinglePayment.toString) => routes.AmendPlanStartDateController.onPageLoad(NormalMode)
+      case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }
 }

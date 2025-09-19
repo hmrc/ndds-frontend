@@ -27,10 +27,11 @@ import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
 import play.api.mvc.Request
+import queries.PaymentPlanTypeQuery
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
-import java.time.{LocalDateTime, LocalDate}
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -110,11 +111,12 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     config.paymentDelayFixed + dynamicDelay
   }
 
+  //PaymentPlanTypePage used for setup journey and PaymentPlanTypeQuery used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment)
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.SinglePayment.toString
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan)
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
@@ -129,7 +131,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     val now = LocalDateTime.now()
     val planDetails = PaymentPlanDetailsResponse(
       hodService = "NDD",
-      planType = PaymentPlanType.BudgetPaymentPlan.toString,
+      planType = PaymentPlanType.SinglePayment.toString,
       paymentReference = paymentReference,
       submissionDateTime = now.minusDays(5),
       scheduledPaymentAmount = 120.00,

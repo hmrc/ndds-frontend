@@ -17,10 +17,10 @@
 package controllers
 
 import controllers.actions.*
-import pages.AmendPaymentAmountPage
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentReferenceQuery
+import queries.{PaymentReferenceQuery, PaymentPlanTypeQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -46,10 +46,10 @@ class PaymentPlanDetailsController @Inject()(
         case Some(reference) =>
           nddService.getPaymentPlanDetails(reference) flatMap { paymentPlanDetails =>
             for {
-//              updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, paymentPlanDetails.planType))
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, paymentPlanDetails.scheduledPaymentAmount))
-//              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentPlanDetails.scheduledPaymentStartDate))
-//              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentPlanDetails.scheduledPaymentEndDate))
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, paymentPlanDetails.planType))
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, paymentPlanDetails.scheduledPaymentAmount))
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentPlanDetails.scheduledPaymentStartDate.toLocalDate))
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentPlanDetails.scheduledPaymentEndDate.toLocalDate))
               _ <- sessionRepository.set(updatedAnswers)
             } yield Ok(view(reference, paymentPlanDetails))
           }

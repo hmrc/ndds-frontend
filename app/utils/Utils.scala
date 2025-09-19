@@ -34,7 +34,7 @@ object Utils {
       false
     }
 
-  def amendmentGuardPaymentPlan(nddService : NationalDirectDebitService, userAnswers : UserAnswers): Boolean =
+  def amendPaymentPlanGuard(nddService : NationalDirectDebitService, userAnswers : UserAnswers): Boolean =
     if (nddService.isSinglePaymentPlan(userAnswers) || nddService.isBudgetPaymentPlan(userAnswers)) true else false
 
   def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate, nddService: NationalDirectDebitService, userAnswers: UserAnswers): Boolean =

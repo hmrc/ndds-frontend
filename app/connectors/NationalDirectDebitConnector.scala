@@ -73,7 +73,7 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
           logger.error(s"CHRIS submission failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
           Future.failed(new Exception(s"CHRIS submission failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))
         case Right(response) =>
-          logger.error(s"Unexpected CHRIS response status: ${response.status}")
+          logger.error(s"Unexpected CHRIS response error status: ${response.status}")
           Future.failed(new Exception(s"Unexpected status: ${response.status}"))
       }
   }

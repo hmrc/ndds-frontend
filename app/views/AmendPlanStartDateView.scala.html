@@ -29,35 +29,26 @@
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("amendPaymentDate.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("amendPlanStartDate.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.AmendPlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
-
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
         }
 
-        @h1(messages("amendPaymentDate.heading"))
-
+        @h1(messages("amendPlanStartDate.heading"))
         @govukHint(
-            HintViewModel(content = HtmlContent(messages("amendPaymentDate.hint")))
+            HintViewModel(content = HtmlContent(messages("amendPlanStartDate.p1")))
         )
-
         @govukWarningText(
-            WarningText(content = HtmlContent(messages("amendPaymentDate.warning")))
+            WarningText(content = HtmlContent(messages("amendPlanStartDate.warning")))
         )
 
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("amendPlanEndDate.heading")).asPageHeading()
-            )
-            .withHint(HintViewModel(HtmlContent(
-                Seq(
-                    s"<p >${messages("amendPlanEndDate.p1")}</p>",
-                    s"<p class='govuk-!-margin-top-7'>${messages("amendPlanEndDate.hint")}</p>",
-                ).mkString
-            )))
+                legend = LegendViewModel(content="")
+            ).withHint(HintViewModel(HtmlContent(messages(s"amendPlanStartDate.hint"))))
         )
 
         @govukButton(

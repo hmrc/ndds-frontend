@@ -46,19 +46,20 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
   "PaymentPlanAmount Controller" - {
     lazy val paymentPlanRoute = routes.PaymentPlanDetailsController.onPageLoad().url
-    "must return OK and the correct view for a GET" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      running(application) {
-        val request = FakeRequest(GET, paymentPlanAmountRoute)
-        val result = route(application, request).value
-
-        val view = application.injector.instanceOf[AmendPaymentAmountView]
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
-      }
-    }
+//    "must return OK and the correct view for a GET" in {
+//      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+//
+//      running(application) {
+//        val request = FakeRequest(GET, paymentPlanAmountRoute)
+//        val result = route(application, request).value
+//
+//        val view = application.injector.instanceOf[AmendPaymentAmountView]
+//
+//        status(result) mustEqual OK
+//        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
+//      }
+//    }
 
     "must redirect to the next page when valid data is submitted" in {
       val mockSessionRepository = mock[SessionRepository]

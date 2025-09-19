@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package pages
+package queries
 
-import java.time.LocalDate
 import play.api.libs.json.JsPath
 
-case object AmendPlanEndDatePage extends QuestionPage[LocalDate] {
+case object PaymentPlanTypeQuery extends Gettable[String] with Settable[String] {
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "amendPlanEndDate"
+  override def path: JsPath = JsPath \ "planType"
 }
