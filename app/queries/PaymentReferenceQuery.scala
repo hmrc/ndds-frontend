@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package pages
-
-import models.PaymentDateDetails
+package queries
 
 import play.api.libs.json.JsPath
 
-case object AmendSinglePaymentDatePage extends QuestionPage[PaymentDateDetails] {
+case object PaymentReferenceQuery extends Gettable[String] with Settable[String] {
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "amendSinglePaymentDate"
+  override def path: JsPath = JsPath \ "paymentReference"
 }

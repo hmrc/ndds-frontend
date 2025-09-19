@@ -21,8 +21,8 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
-import models.requests.{GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetailsResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
@@ -30,7 +30,7 @@ import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
-import java.time.LocalDate
+import java.time.{LocalDateTime, LocalDate}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -53,6 +53,17 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         Future.successful(response)
     }
   }
+
+  def submitChrisData(submission: ChrisSubmissionRequest)
+                     (implicit hc: HeaderCarrier): Future[Boolean] = {
+    nddConnector.submitChrisData(submission).map { success =>
+      success
+    }.recover { case ex =>
+      logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
+      false
+    }
+  }
+
 
   def getEarliestPaymentDate(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)
@@ -111,5 +122,29 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
   def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[NddDDPaymentPlansResponse] = {
     nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
+  }
+
+  def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanDetailsResponse] = {
+    //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
+    val now = LocalDateTime.now()
+    val planDetails = PaymentPlanDetailsResponse(
+      hodService = "NDD",
+      planType = PaymentPlanType.BudgetPaymentPlan.toString,
+      paymentReference = paymentReference,
+      submissionDateTime = now.minusDays(5),
+      scheduledPaymentAmount = 120.00,
+      scheduledPaymentStartDate = now.plusDays(10),
+      initialPaymentStartDate = None,
+      initialPaymentAmount = None,
+      scheduledPaymentEndDate = now.plusMonths(6),
+      scheduledPaymentFrequency = Some("Monthly"),
+      suspensionStartDate = None,
+      suspensionEndDate = None,
+      balancingPaymentAmount = Some("£60.00"),
+      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
+      totalLiability = Some("£780.00"),
+      paymentPlanEditable = true
+    )
+    Future.successful(planDetails)
   }
 }

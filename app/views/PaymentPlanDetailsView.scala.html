@@ -1,0 +1,98 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.responses.*
+@import java.time.format.DateTimeFormatter
+@import views.html.components.*
+@import utils.MaskAndFormatUtils.*
+@import models.NormalMode
+
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        header1: Header1,
+        header2: Header2,
+        paragraph: Paragraph,
+        govukSummaryList: GovukSummaryList
+)
+
+@(paymentReference: String, paymentPlanDetails: PaymentPlanDetailsResponse)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
+
+    @header1("paymentPlanDetails.heading")
+
+    @paragraph("paymentPlanDetails.p1")
+
+    @paragraph("paymentPlanDetails.p2")
+
+    <p class="govuk-inset-text">@messages("paymentPlanDetails.inset.text")</p>
+
+    @header2("paymentPlanDetails.heading")
+
+    @govukSummaryList(SummaryList(
+        card = Some(Card(
+            title = Some(CardTitle(
+            content = messages("paymentPlanDetails.details.paymentReference", paymentReference)
+        )),
+        actions = Some(Actions(
+            items = Seq(
+                ActionItem(
+                        href = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url,
+                        content = messages("paymentPlanDetails.details.amend"),
+                        visuallyHiddenText = Some(messages("1000000"))
+                    ),
+                ActionItem(
+                        href = "#",
+                        content = messages("paymentPlanDetails.details.cancel"),
+                        visuallyHiddenText = Some(messages("1000000"))
+                    ),
+                ActionItem(
+                        href = "#",
+                        content = messages("paymentPlanDetails.details.suspend"),
+                        visuallyHiddenText = Some(messages("1000000"))
+                    )
+                )
+            ))
+        )),
+        rows = Seq(
+            SummaryListRow(
+                key = Key(content = messages("paymentPlanDetails.details.planType")),
+                value = Value(content = HtmlContent(paymentPlanDetails.planType))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("paymentPlanDetails.details.paymentFor")),
+                value = Value(content = HtmlContent(paymentPlanDetails.hodService))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("paymentPlanDetails.details.dateSetUp")),
+                value = Value(content = HtmlContent(paymentPlanDetails.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("paymentPlanDetails.details.regularPaymentAmount")),
+                value = Value(content = HtmlContent(formatAmount(paymentPlanDetails.scheduledPaymentAmount)))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("paymentPlanDetails.details.planStartDate")),
+                value = Value(content = HtmlContent(paymentPlanDetails.scheduledPaymentStartDate.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("paymentPlanDetails.details.planEndDate")),
+                value = Value(content = HtmlContent(paymentPlanDetails.scheduledPaymentEndDate.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
+            )
+        )
+    ))
+}

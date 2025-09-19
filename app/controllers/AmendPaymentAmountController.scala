@@ -17,11 +17,10 @@
 package controllers
 
 import controllers.actions.*
-import controllers.routes
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, PaymentAmountPage}
+import pages.AmendPaymentAmountPage
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -49,14 +48,12 @@ class AmendPaymentAmountController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val answers = request.userAnswers
-      //TODO: Call this from previous Page pp1
-      val preparedForm = answers.get(PaymentAmountPage) match {
+      val preparedForm = answers.get(AmendPaymentAmountPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
 
-      //TODO: Change the route to PP1 screen once built
-      Ok(view(preparedForm, mode, routes.JourneyRecoveryController.onPageLoad()))
+      Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -64,8 +61,7 @@ class AmendPaymentAmountController @Inject()(
 
       form.bindFromRequest().fold(
         formWithErrors =>
-          //TODO: Change the route to PP1 screen once built
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.JourneyRecoveryController.onPageLoad()))),
+          Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentPlanDetailsController.onPageLoad()))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))

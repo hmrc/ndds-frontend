@@ -16,8 +16,9 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.AmendPlanEndDateFormProvider
+
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
@@ -46,23 +47,21 @@ class AmendPlanEndDateController @Inject()(
     implicit request =>
 
       val form = formProvider()
-
       val preparedForm = request.userAnswers.get(AmendPlanEndDatePage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode,routes.AmendPlanEndDateController.onPageLoad(mode)))
+      Ok(view(preparedForm, mode,routes.AmendPaymentAmountController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
 
       val form = formProvider()
-
       form.bindFromRequest().fold(
         formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode,routes.AmendPlanEndDateController.onPageLoad(mode)))),
+          Future.successful(BadRequest(view(formWithErrors, mode,routes.AmendPaymentAmountController.onPageLoad(mode)))),
 
         value =>
           for {
