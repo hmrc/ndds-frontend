@@ -28,7 +28,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(paymentReference: String, paymentPlanDetails: PaymentPlanDetailsResponse, showActions: Boolean)(implicit request: Request[_], messages: Messages)
+@(paymentReference: String, paymentPlanDetails: PaymentPlanDetailsResponse, showActions: Boolean, showCancelAction: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
 
@@ -48,25 +48,25 @@
             content = messages("paymentPlanDetails.details.paymentReference", paymentReference)
         )),
         actions =
-            if (showActions) {
+            if (showActions || showCancelAction) {
                 Some(Actions(
                     items = Seq(
-                        ActionItem(
+                        if (showActions) ActionItem(
                             href = "#",
                             content = messages("paymentPlanDetails.details.amend"),
                             visuallyHiddenText = Some(messages("1000000"))
-                    ),
-                        ActionItem(
+                        ) else null,
+                        if (showActions || showCancelAction) ActionItem(
                             href = "#",
                             content = messages("paymentPlanDetails.details.cancel"),
                             visuallyHiddenText = Some(messages("1000000"))
-                        ),
-                        ActionItem(
+                        ) else null,
+                        if (showActions) ActionItem(
                             href = "#",
                             content = messages("paymentPlanDetails.details.suspend"),
                             visuallyHiddenText = Some(messages("1000000"))
-                        )
-                    )
+                        ) else null
+                    ).filter(_ != null) // remove the nulls
                 ))
             } else None
         )),
