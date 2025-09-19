@@ -19,7 +19,7 @@ package controllers
 import controllers.actions.*
 import models.{PaymentDateDetails, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetailsWithAuddisStatus}
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
-import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, PlanStartDatePage, RegularPaymentAmountPage, TotalAmountDuePage, YourBankDetailsPage}
+import pages.*
 
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -85,15 +85,19 @@ class PaymentPlanDetailsController @Inject()(
 
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypePage, paymentPlanType))
-            _ <- sessionRepository.set(updatedAnswers)
             cachedAnswers <- cachePaymentPlanResponse(samplePaymentPlanResponse, updatedAnswers)
+            _ <- sessionRepository.set(cachedAnswers)
           } yield {
             val showActions =
-              if (Utils.amendmentGuardPaymentPlan(nddService, updatedAnswers)) {
+              if (Utils.amendmentGuardPaymentPlan(nddService, cachedAnswers)) {
                 if (paymentPlanDetails.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
-                  !Utils.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentStartDate, nddService, cachedAnswers)
+                  val isThreeDayPrior = Utils.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate,
+                    nddService, cachedAnswers)
+                  !isThreeDayPrior
                 } else {
-                  !Utils.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate, nddService, cachedAnswers)
+                  val isTwoDayPrior = Utils.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate,
+                    nddService, cachedAnswers)
+                  !isTwoDayPrior
                 }
               } else {
                 false
@@ -108,7 +112,8 @@ class PaymentPlanDetailsController @Inject()(
     }
   }
 
-  def onRedirect(paymentReference: String): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+  def onRedirect(paymentReference: String): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferenceQuery, paymentReference))
       _ <- sessionRepository.set(updatedAnswers)
@@ -126,8 +131,8 @@ class PaymentPlanDetailsController @Inject()(
     val updatedAnswersTry: Try[UserAnswers] =
       for {
         ua1 <- userAnswers.set(PaymentReferencePage, paymentPlan.paymentReference)
-        ua2 <- ua1.set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan) // TODO: map planType string dynamically
-        ua3 <- ua2.set(TotalAmountDuePage, paymentPlan.totalLiability)
+        //ua2 <- ua1.set(PaymentPlanTypePage, paymentPlan.planType) // TODO: map planType string dynamically
+        ua3 <- ua1.set(TotalAmountDuePage, paymentPlan.totalLiability)
         ua4 <- ua3.set(AmendPaymentAmountPage, paymentPlan.initialPaymentAmount)
         ua5 <- ua4.set(RegularPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
         ua6 <- ua5.set(PlanStartDatePage, PlanStartDateDetails(
