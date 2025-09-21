@@ -112,7 +112,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
   //PaymentPlanTypePage used for setup journey and PaymentPlanTypeQuery used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.SinglePayment.toString
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
@@ -125,19 +125,17 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
   }
 
-  def isTwoDaysPriorPaymentDate(plannedStarDate: LocalDate,
-                                userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def amendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =
+    isSinglePaymentPlan(userAnswers) || isBudgetPaymentPlan(userAnswers)
+
+  def isTwoDaysPriorPaymentDate(planStarDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now().toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2)).map {
-      futureWorkingDays => plannedStarDate.isBefore(LocalDate.parse(futureWorkingDays.date).plusDays(3))
+      futureWorkingDays => planStarDate.isBefore(LocalDate.parse(futureWorkingDays.date).plusDays(3))
     }
   }
 
-  def amendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =
-    if (isSinglePaymentPlan(userAnswers) || isBudgetPaymentPlan(userAnswers)) true else false
-
-  def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate,
-                                  userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now().toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map {
       futureWorkingDays => planEndDate.isBefore(LocalDate.parse(futureWorkingDays.date).plusDays(4))
@@ -152,7 +150,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
     val planDetails = PaymentPlanDetailsResponse(
       hodService = "NDD",
-      planType = PaymentPlanType.SinglePayment.toString,
+      planType = PaymentPlanType.SinglePaymentPlan.toString,
       paymentReference = paymentReference,
       submissionDateTime = now.minusDays(5),
       scheduledPaymentAmount = 3900.00,

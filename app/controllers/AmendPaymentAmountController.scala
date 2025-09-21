@@ -19,7 +19,6 @@ package controllers
 import controllers.actions.*
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
-import utils.Utils
 import navigation.Navigator
 import pages.AmendPaymentAmountPage
 import play.api.Logging

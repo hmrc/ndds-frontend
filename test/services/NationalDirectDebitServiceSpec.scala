@@ -23,20 +23,23 @@ import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
-import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
+import queries.PaymentPlanTypeQuery
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -314,8 +317,105 @@ class NationalDirectDebitServiceSpec extends SpecBase
       }
     }
 
-    "submitChrisData" - {
+    "amendPaymentPlanGuard" - {
+      "must return true if single payment for set up journey" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan).success.value
+        val result = service.amendPaymentPlanGuard(expectedUserAnswers)
+        result mustBe true
+      }
 
+      "must return true if single payment for amend journey" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypeQuery, PaymentPlanType.SinglePaymentPlan.toString).success.value
+        val result = service.amendPaymentPlanGuard(expectedUserAnswers)
+        result mustBe true
+      }
+
+      "must return true if budget payment for set up journey" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+        val result = service.amendPaymentPlanGuard(expectedUserAnswers)
+        result mustBe true
+      }
+
+      "must return true if budget payment for amend journey" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypeQuery, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+        val result = service.amendPaymentPlanGuard(expectedUserAnswers)
+        result mustBe true
+      }
+
+      "must return false if variable payment for set up journey" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan).success.value
+        val result = service.amendPaymentPlanGuard(expectedUserAnswers)
+        result mustBe false
+      }
+
+      "must return false if variable payment for amend journey" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypeQuery, PaymentPlanType.VariablePaymentPlan.toString).success.value
+        val result = service.amendPaymentPlanGuard(expectedUserAnswers)
+        result mustBe false
+      }
+
+      "must return false if tax credit repayment payment for set up journey" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan).success.value
+        val result = service.amendPaymentPlanGuard(expectedUserAnswers)
+        result mustBe false
+      }
+
+      "must return false if payment plan is empty for amend journey" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypeQuery, "").success.value
+        val result = service.amendPaymentPlanGuard(expectedUserAnswers)
+        result mustBe false
+      }
+    }
+
+    "isTwoDaysPriorPaymentDate" - {
+      "must return true future working days" in {
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().plusDays(3).toString)))
+
+        val result = service.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(1)).futureValue
+
+        result mustBe true
+      }
+
+      "must return false future working days" in {
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().plusDays(1).toString)))
+
+        val result = service.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(4)).futureValue
+
+        result mustBe false
+      }
+    }
+
+    "isThreeDaysPriorPlanEndDate" - {
+      "must return true future working days" in {
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().plusDays(3).toString)))
+
+        val result = service.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(1)).futureValue
+
+        result mustBe true
+      }
+
+      "must return false future working days" in {
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().plusDays(1).toString)))
+
+        val result = service.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(5)).futureValue
+
+        result mustBe false
+      }
+    }
+
+    "submitChrisData" - {
       val planStartDateDetails = models.PlanStartDateDetails(
         enteredDate = java.time.LocalDate.of(2025, 9, 1),
         earliestPlanStartDate = "2025-09-01"

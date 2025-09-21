@@ -91,9 +91,9 @@ class PaymentPlanDetailsController @Inject()(
             val showActions =
               val flag: Future[Boolean] = paymentPlanDetails.planType match {
                 case PaymentPlanType.BudgetPaymentPlan.toString =>
-                  nddService.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate, cachedAnswers)
-                case PaymentPlanType.SinglePayment.toString =>
-                  nddService.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate, cachedAnswers)
+                  nddService.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate)
+                case PaymentPlanType.SinglePaymentPlan.toString =>
+                  nddService.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate)
                 case PaymentPlanType.VariablePaymentPlan.toString => Future.successful(false)
                 case _ => Future.successful(false)
               }
