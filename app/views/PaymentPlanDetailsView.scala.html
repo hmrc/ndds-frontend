@@ -86,7 +86,7 @@
             ),
             SummaryListRow(
                 key = Key(content = messages("paymentPlanDetails.details.regularPaymentAmount")),
-                value = Value(content = HtmlContent(formatAmount(paymentPlanDetails.scheduledPaymentAmount)))
+                value = Value(content = HtmlContent(formatAmount(paymentPlanDetails.scheduledPaymentAmount.toDouble)))
             ),
             SummaryListRow(
                 key = Key(content = messages("paymentPlanDetails.details.planStartDate")),

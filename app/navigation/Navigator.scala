@@ -125,7 +125,7 @@ class Navigator @Inject()() {
   }
   
   private def checkPaymentPlanLogic(userAnswers: UserAnswers): Call ={
-    val paymentPlanType = userAnswers.get(PaymentPlanTypeQuery)
+    val paymentPlanType = userAnswers.get(AmendPaymentPlanTypePage)
     paymentPlanType match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(NormalMode)
       case Some(PaymentPlanType.SinglePayment.toString) => routes.AmendPlanStartDateController.onPageLoad(NormalMode)

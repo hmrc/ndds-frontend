@@ -16,144 +16,132 @@
 
 package controllers
 
-import controllers.actions.*
-import models.{PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, UserAnswers, YourBankDetailsWithAuddisStatus}
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
-import pages.*
-
+import controllers.actions._
 import javax.inject.Inject
-import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{PaymentPlanTypeQuery, PaymentReferenceQuery}
+import models.*
+import models.responses.{PaymentPlanDetailsResponse, PaymentPlanResponse}
+import pages.*
+import play.api.i18n.I18nSupport
+import play.api.mvc.*
+import queries.PaymentReferenceQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils
 import views.html.PaymentPlanDetailsView
 
-import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
+import java.time.{LocalDate, LocalDateTime}
 
 class PaymentPlanDetailsController @Inject()(
-                                              override val messagesApi: MessagesApi,
+                                              val controllerComponents: MessagesControllerComponents,
                                               identify: IdentifierAction,
                                               getData: DataRetrievalAction,
                                               requireData: DataRequiredAction,
-                                              val controllerComponents: MessagesControllerComponents,
-                                              view: PaymentPlanDetailsView,
+                                              sessionRepository: SessionRepository,
                                               nddService: NationalDirectDebitService,
-                                              sessionRepository: SessionRepository
+                                              view: PaymentPlanDetailsView
                                             )(implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport {
+  extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    request.userAnswers.get(PaymentReferenceQuery) match {
-      case Some(paymentReference) =>
-        nddService.getPaymentPlanDetails(paymentReference).flatMap { paymentPlanDetails =>
+  def onPageLoad(): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+      request.userAnswers.get(PaymentReferenceQuery) match {
+        case Some(paymentReference) =>
+          nddService.getPaymentPlanDetails(paymentReference).flatMap { response =>
+            val plan        = response.paymentPlanDetails
+            val directDebit = response.directDebitDetails
 
-          val samplePaymentPlanResponse: PaymentPlanResponse =
-            PaymentPlanResponse(
-              directDebitDetails = DirectDebitDetails(
-                bankSortCode = "123456",
-                bankAccountNumber = "12345678",
-                bankAccountName = "John Doe",
-                auddisFlag = true
-              ),
-              paymentPlanDetails = PaymentPlanDetails(
-                hodService = paymentPlanDetails.hodService,
-                planType = paymentPlanDetails.planType,
-                paymentReference = paymentReference,
-                submissionDateTime = Some(paymentPlanDetails.submissionDateTime),
-                scheduledPaymentAmount = Some(paymentPlanDetails.scheduledPaymentAmount),
-                scheduledPaymentStartDate =  Some(LocalDateTime.now().minusMonths(7)),
-                initialPaymentStartDate =  Some(LocalDateTime.now().plusDays(1)),
-                initialPaymentAmount =  Some(BigDecimal(50.00)),
-                scheduledPaymentEndDate =  Some(LocalDate.now().plusMonths(12)),
-                scheduledPaymentFrequency =  Some(PaymentsFrequency.Weekly),
-                  suspensionStartDate = None,
-                suspensionEndDate = None,
-                balancingPaymentAmount = Some(BigDecimal(25.00)),
-                balancingPaymentDate = Some(LocalDateTime.now().plusMonths(13)),
-                totalLiability = Some(BigDecimal(1825.50)),
-                paymentPlanEditable = true
-              )
+            // Map PaymentPlanDetails → PaymentPlanDetailsResponse for the view
+            val planForView = PaymentPlanDetailsResponse(
+              hodService = plan.hodService,
+              planType = plan.planType,
+              paymentReference = plan.paymentReference,
+              submissionDateTime = plan.submissionDateTime.getOrElse(LocalDateTime.now),
+              scheduledPaymentAmount = plan.scheduledPaymentAmount,
+              scheduledPaymentStartDate = plan.scheduledPaymentStartDate.getOrElse(LocalDate.now),
+              initialPaymentStartDate = plan.initialPaymentStartDate,
+              initialPaymentAmount = plan.initialPaymentAmount,
+              scheduledPaymentEndDate = plan.scheduledPaymentEndDate.getOrElse(LocalDate.now),
+              scheduledPaymentFrequency = plan.scheduledPaymentFrequency.map(_.toString),
+              suspensionStartDate = plan.suspensionStartDate,
+              suspensionEndDate = plan.suspensionEndDate,
+              balancingPaymentAmount = plan.balancingPaymentAmount,
+              balancingPaymentDate = plan.balancingPaymentDate,
+              totalLiability = plan.totalLiability,
+              paymentPlanEditable = plan.paymentPlanEditable
             )
+            println("***********************" + Utils.amendPaymentPlanGuard(nddService, request.userAnswers))
+            // Update UserAnswers consistently
+            val updatedAnswersTry: Try[UserAnswers] = for {
+              updatedAnswer <- request.userAnswers.set(PaymentReferencePage, plan.paymentReference)
+              updatedAnswer <- updatedAnswer.set(AmendPaymentPlanTypePage, plan.planType)
+              updatedAnswer <- updatedAnswer.set(TotalAmountDuePage, plan.totalLiability.getOrElse(BigDecimal(0)))
+              updatedAnswer <- updatedAnswer.set(AmendPaymentAmountPage, plan.scheduledPaymentAmount)
+              updatedAnswer <- updatedAnswer.set(AmendPlanEndDatePage, plan.scheduledPaymentEndDate.getOrElse(LocalDate.now()))
+              updatedAnswer <- updatedAnswer.set(RegularPaymentAmountPage, plan.scheduledPaymentAmount)
+              updatedAnswer <- updatedAnswer.set(
+                YourBankDetailsPage,
+                YourBankDetailsWithAuddisStatus(
+                  accountHolderName = directDebit.bankAccountName,
+                  sortCode          = directDebit.bankSortCode,
+                  accountNumber     = directDebit.bankAccountNumber,
+                  auddisStatus      = directDebit.auddisFlag,
+                  accountVerified   = false
+                )
+              )
+            } yield updatedAnswer
 
-          val paymentPlanType: PaymentPlanType =
-            PaymentPlanType.enumerable.withName(paymentPlanDetails.planType).get
+            updatedAnswersTry match {
+              case Success(updatedAnswers) =>
+                sessionRepository.set(updatedAnswers).map { _ =>
+                  // Determine showActions based on plan type and utils
 
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, paymentPlanDetails.planType))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, paymentPlanDetails.scheduledPaymentAmount))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentPlanDetails.scheduledPaymentStartDate))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentPlanDetails.scheduledPaymentEndDate))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanTypePage, paymentPlanType))
-            cachedAnswers <- cachePaymentPlanResponse(samplePaymentPlanResponse, updatedAnswers)
-            _ <- sessionRepository.set(cachedAnswers)
-          } yield {
-            val showActions =
-              if (Utils.amendPaymentPlanGuard(nddService, cachedAnswers)) {
-                if (paymentPlanDetails.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
-                  val isThreeDayPrior = Utils.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate,
-                    nddService, cachedAnswers)
-                  !isThreeDayPrior
-                } else {
-                  val isTwoDayPrior = Utils.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate,
-                    nddService, cachedAnswers)
-                  !isTwoDayPrior
+                  val showActions = if (Utils.amendPaymentPlanGuard(nddService, updatedAnswers)) {
+                    if (plan.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
+                      val isThreeDayPrior = Utils.isThreeDaysPriorPlanEndDate(
+                        plan.scheduledPaymentEndDate.getOrElse(LocalDate.now),
+                        nddService,
+                        updatedAnswers
+                      )
+                      !isThreeDayPrior
+                    } else {
+                      val isTwoDayPrior = Utils.isTwoDaysPriorPaymentDate(
+                        plan.scheduledPaymentStartDate.getOrElse(LocalDate.now),
+                        nddService,
+                        updatedAnswers
+                      )
+                      !isTwoDayPrior
+                    }
+                  } else false
+
+                  Ok(view(paymentReference, planForView, showActions))
                 }
-              } else {
-                false
-              }
 
-            Ok(view(paymentReference, paymentPlanDetails, showActions))
+              case Failure(ex) =>
+                Future.failed(ex)
+            }
           }
-        }
 
-      case None =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        case None =>
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
     }
-  }
 
   def onRedirect(paymentReference: String): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-    for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferenceQuery, paymentReference))
-      _ <- sessionRepository.set(updatedAnswers)
-    } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
-  }
+      val updatedAnswersTry: Try[UserAnswers] =
+        request.userAnswers.set(PaymentReferenceQuery, paymentReference)
 
-  private def cachePaymentPlanResponse(
-                                        response: PaymentPlanResponse,
-                                        userAnswers: UserAnswers
-                                      ): Future[UserAnswers] = {
-
-    val paymentPlan = response.paymentPlanDetails
-    val directDebit = response.directDebitDetails
-    //val paymentPlanType: PaymentPlanType = PaymentPlanType.enumerable.withName(paymentPlan.planType).get
-
-    for {
-      updatedAnswer <- Future.fromTry(userAnswers.set(PaymentReferencePage, paymentPlan.paymentReference))
-      updatedAnswer <- Future.fromTry(updatedAnswer.set(AmendPaymentPlanTypePage, paymentPlan.planType))
-      updatedAnswer <- Future.fromTry(updatedAnswer.set(AmendTotalAmountDuePage, paymentPlan.totalLiability))
-      updatedAnswer <- Future.fromTry(updatedAnswer.set(AmendPaymentAmountPage, paymentPlan.scheduledPaymentAmount.getOrElse(0)))
-      updatedAnswer <- Future.fromTry(
-        updatedAnswer.set(
-          YourBankDetailsPage,
-          YourBankDetailsWithAuddisStatus(
-            accountHolderName = directDebit.bankAccountName,
-            sortCode = directDebit.bankSortCode,
-            accountNumber = directDebit.bankAccountNumber,
-            auddisStatus = directDebit.auddisFlag,
-            accountVerified = true
+      updatedAnswersTry match {
+        case Success(updatedAnswers) =>
+          sessionRepository.set(updatedAnswers).map(_ =>
+            Redirect(routes.PaymentPlanDetailsController.onPageLoad())
           )
-        )
-      )
-      _ <- sessionRepository.set(updatedAnswer)
-    } yield updatedAnswer
-  }
-
-
+        case Failure(ex) =>
+          Future.failed(ex)
+      }
+    }
 }

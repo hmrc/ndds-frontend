@@ -31,17 +31,17 @@ case class PaymentPlanDetailsResponse(
                                planType: String,
                                paymentReference: String,
                                submissionDateTime: LocalDateTime,
-                               scheduledPaymentAmount: Double,
+                               scheduledPaymentAmount: BigDecimal,
                                scheduledPaymentStartDate: LocalDate,
-                               initialPaymentStartDate: Option[String],
-                               initialPaymentAmount: Option[String],
+                               initialPaymentStartDate: Option[LocalDateTime],
+                               initialPaymentAmount: Option[BigDecimal],
                                scheduledPaymentEndDate: LocalDate,
                                scheduledPaymentFrequency: Option[String],
                                suspensionStartDate: Option[LocalDateTime],
                                suspensionEndDate: Option[LocalDateTime],
-                               balancingPaymentAmount: Option[String],
+                               balancingPaymentAmount: Option[BigDecimal],
                                balancingPaymentDate: Option[LocalDateTime],
-                               totalLiability: Option[String],
+                               totalLiability: Option[BigDecimal],
                                paymentPlanEditable: Boolean
                              )
 

@@ -22,9 +22,9 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetailsResponse}
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
-import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanDetailsResponse, PaymentPlanResponse}
+import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
+import pages.{AmendPaymentPlanTypePage, DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
 import play.api.mvc.Request
 import queries.PaymentPlanTypeQuery
@@ -113,10 +113,14 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
   //PaymentPlanTypePage used for setup journey and PaymentPlanTypeQuery used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePayment) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.SinglePayment.toString
+    userAnswers.get(AmendPaymentPlanTypePage).exists(_.toString == PaymentPlanType.SinglePayment.toString) ||
+      userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.SinglePayment.toString
 
-  def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
+  def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean = {
+    userAnswers.get(AmendPaymentPlanTypePage).exists(_.toString == PaymentPlanType.BudgetPaymentPlan.toString) ||
+      userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
+  }
+
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
@@ -126,30 +130,61 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
   }
 
-  def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanDetailsResponse] = {
+  def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanResponse] = {
     //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
+
+
     val now = LocalDateTime.now()
 
     val currentDate = LocalDate.now()
 
-    val planDetails = PaymentPlanDetailsResponse(
-      hodService = "CESA",
-      planType = PaymentPlanType.BudgetPaymentPlan.toString,
-      paymentReference = paymentReference,
-      submissionDateTime = now.minusDays(5),
-      scheduledPaymentAmount = 120.00,
-      scheduledPaymentStartDate = currentDate.plusDays(5),
-      initialPaymentStartDate = None,
-      initialPaymentAmount = None,
-      scheduledPaymentEndDate = currentDate.plusDays(4),//,currentDate.plusMonths(6),
-      scheduledPaymentFrequency = Some("Monthly"),
-      suspensionStartDate = None,
-      suspensionEndDate = None,
-      balancingPaymentAmount = Some("£60.00"),
-      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-      totalLiability = Some("£780.00"),
-      paymentPlanEditable = true
-    )
-    Future.successful(planDetails)
+    val samplePaymentPlanResponse: PaymentPlanResponse =
+      PaymentPlanResponse(
+        directDebitDetails = DirectDebitDetails(
+          bankSortCode = "123456",
+          bankAccountNumber = "12345678",
+          bankAccountName = "John Doe",
+          auddisFlag = true
+        ),
+        paymentPlanDetails = PaymentPlanDetails(
+          hodService = "CESA",
+          planType = PaymentPlanType.BudgetPaymentPlan.toString,
+          paymentReference = paymentReference,
+          submissionDateTime = Some(now.minusDays(5)),
+          scheduledPaymentAmount =120.00,
+          scheduledPaymentStartDate = Some(LocalDate.now().minusMonths(8)),
+          initialPaymentStartDate = Some(LocalDateTime.now().plusDays(1)),
+          initialPaymentAmount = Some(BigDecimal(50.00)),
+          scheduledPaymentEndDate = Some(LocalDate.now().plusMonths(12)),
+          scheduledPaymentFrequency = Some(PaymentsFrequency.Weekly),
+          suspensionStartDate = None,
+          suspensionEndDate = None,
+          balancingPaymentAmount = Some(BigDecimal(25.00)),
+          balancingPaymentDate = Some(LocalDateTime.now().plusMonths(13)),
+          totalLiability = Some(BigDecimal(1825.50)),
+          paymentPlanEditable = true
+        )
+      )
+
+
+//    val planDetails = PaymentPlanDetailsResponse(
+//      hodService = "CESA",
+//      planType = PaymentPlanType.BudgetPaymentPlan.toString,
+//      paymentReference = paymentReference,
+//      submissionDateTime = now.minusDays(5),
+//      scheduledPaymentAmount = 120.00,
+//      scheduledPaymentStartDate = currentDate.plusDays(5),
+//      initialPaymentStartDate = None,
+//      initialPaymentAmount = None,
+//      scheduledPaymentEndDate = currentDate.plusDays(4),//,currentDate.plusMonths(6),
+//      scheduledPaymentFrequency = Some("Monthly"),
+//      suspensionStartDate = None,
+//      suspensionEndDate = None,
+//      balancingPaymentAmount = Some("£60.00"),
+//      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
+//      totalLiability = Some("£780.00"),
+//      paymentPlanEditable = true
+//    )
+    Future.successful(samplePaymentPlanResponse)
   }
 }
