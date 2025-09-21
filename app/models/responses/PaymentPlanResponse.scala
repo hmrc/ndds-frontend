@@ -16,6 +16,7 @@
 
 package models.responses
 
+import models.PaymentsFrequency
 import play.api.libs.json.{Json, OFormat}
 
 case class DirectDebitDetails(
@@ -33,18 +34,18 @@ case class PaymentPlanDetails(
                                hodService: String,
                                planType: String,
                                paymentReference: String,
-                               submissionDateTime: java.time.LocalDateTime,
-                               scheduledPaymentAmount: BigDecimal,
-                               scheduledPaymentStartDate: java.time.LocalDateTime,
-                               initialPaymentStartDate: java.time.LocalDateTime,
-                               initialPaymentAmount: BigDecimal,
-                               scheduledPaymentEndDate: java.time.LocalDateTime,
-                               scheduledPaymentFrequency: String,
+                               submissionDateTime: Option[java.time.LocalDateTime],
+                               scheduledPaymentAmount: Option[BigDecimal],
+                               scheduledPaymentStartDate: Option[java.time.LocalDateTime],
+                               initialPaymentStartDate: Option[java.time.LocalDateTime],
+                               initialPaymentAmount: Option[BigDecimal],
+                               scheduledPaymentEndDate: Option[java.time.LocalDate],
+                               scheduledPaymentFrequency: Option[PaymentsFrequency],
                                suspensionStartDate: Option[java.time.LocalDateTime],
                                suspensionEndDate: Option[java.time.LocalDateTime],
                                balancingPaymentAmount: Option[BigDecimal],
                                balancingPaymentDate: Option[java.time.LocalDateTime],
-                               totalLiability: BigDecimal,
+                               totalLiability: Option[BigDecimal],
                                paymentPlanEditable: Boolean
                              )
 

@@ -389,3 +389,7 @@ confirmPaymentPlanAmendment.amendPaymentPlan.startDate.change = Change
 confirmPaymentPlanAmendment.amendPaymentPlan.endDate = Plan end date
 confirmPaymentPlanAmendment.amendPaymentPlan.endDate.change = Change
 confirmPaymentPlanAmendment.amendPaymentPlan.continueButton = Continue
+
+confirmPaymentPlanAmendmentController.checkYourAnswersLabel = Plan type
+amendPaymentFor.checkYourAnswersLabel = Payment for
+amendPaymentReference.checkYourAnswersLabel = Payment reference

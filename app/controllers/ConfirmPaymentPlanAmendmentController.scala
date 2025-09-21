@@ -18,16 +18,15 @@ package controllers
 
 import controllers.actions.*
 import models.UserAnswers
-
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.DirectDebitReferenceQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.{PaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary}
+import viewmodels.checkAnswers.{AmendPaymentReferenceSummary, PaymentAmountSummary, RegularPaymentAmountSummary}
 import views.html.ConfirmPaymentPlanAmendmentView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmPaymentPlanAmendmentController @Inject()(
@@ -52,14 +51,16 @@ class ConfirmPaymentPlanAmendmentController @Inject()(
             firstMatchingDebit match {
               case Some(debit) => {
 
-//                val paymentPlanSummaryListRow = Seq(
-//                  PaymentAmountSummary.row(userAnswers),
-//                  AmendSinglePaymentDateSummary.row(userAnswers),
-//                  AmendPlanEndDateSummary.row(userAnswers)
-//                ).flatten
+                val rows = Seq(
+                //  AmendPaymentPlanTypeSummary.row(userAnswers),
+                  //AmendDirectDebitSourceSummary.row(userAnswers),
+                  AmendPaymentReferenceSummary.row(userAnswers),
+                  RegularPaymentAmountSummary.row(userAnswers),
+                  PaymentAmountSummary.row(userAnswers),
+                ).flatten
 
                 //Ok(view(reference, debit, paymentPlanSummaryListRow))
-                Ok(view(reference, debit))
+                Ok(view(reference, debit, rows))
               }
               case None => Redirect(routes.JourneyRecoveryController.onPageLoad())
             }

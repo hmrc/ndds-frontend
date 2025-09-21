@@ -133,8 +133,8 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     val currentDate = LocalDate.now()
 
     val planDetails = PaymentPlanDetailsResponse(
-      hodService = "NDD",
-      planType = PaymentPlanType.SinglePayment.toString,
+      hodService = "CESA",
+      planType = PaymentPlanType.BudgetPaymentPlan.toString,
       paymentReference = paymentReference,
       submissionDateTime = now.minusDays(5),
       scheduledPaymentAmount = 120.00,

@@ -27,7 +27,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(directDebitReference: String, directDebitDetails: DirectDebitDetails)(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: DirectDebitDetails, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("confirmPaymentPlanAmendment.title"))) {
 
@@ -66,90 +66,14 @@
         ))
 
         <h1 class="govuk-heading-m">@messages("confirmPaymentPlanAmendment.amendPaymentPlan.title")</h1>
-
-        @govukSummaryList(SummaryList(
-            card = Some(Card(
-                title = Some(CardTitle(
+            @govukSummaryList(SummaryList(
+                    card = Some(Card(
+                    title = Some(CardTitle(
                     content = Text("Payment reference 115002323023")
-                ))
-            )),
-            rows = Seq(
-                SummaryListRow(
-                    key = Key(
-                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.planType")
-                ),
-                value = Value(
-                    content = HtmlContent("planType")
-                    )
-                ),
-                SummaryListRow(
-                    key = Key(
-                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentFor")
-                    ),
-                    value = Value(
-                        content = HtmlContent("paymentFor")
-                    )
-                ),
-                SummaryListRow(
-                    key = Key(
-                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentReference")
-                    ),
-                    value = Value(
-                        content = HtmlContent("paymentReference")
-                    )
-                ),
-                SummaryListRow(
-                    key = Key(
-                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount")
-                    ),
-                    value = Value(
-                        content = HtmlContent("paymentAmount")
-                    ),
-                    actions = Some(Actions(
-                        items = Seq(
-                            ActionItem(
-                                href = routes.AmendPaymentAmountController.onPageLoad(CheckMode).url,
-                                content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount.change"),
-                                visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount.change"))
-                            )
-                        )
                     ))
-                ),
-                SummaryListRow(
-                    key = Key(
-                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate")
-                    ),
-                    value = Value(
-                        content = HtmlContent("startDate")
-                    ),
-                    actions = Some(Actions(
-                        items = Seq(
-                            ActionItem(
-                                href = routes.AmendPlanStartDateController.onPageLoad(CheckMode).url,
-                                content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate.change"),
-                                visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.startDate.change"))
-                            )
-                        )
-                    ))
-                ),
-                SummaryListRow(
-                    key = Key(
-                        content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.endDate")
-                    ),
-                    value = Value(
-                        content = HtmlContent("startDate")
-                    ),
-                    actions = Some(Actions(
-                        items = Seq(
-                            ActionItem(
-                                href = routes.AmendPlanEndDateController.onPageLoad(CheckMode).url,
-                                content = messages("confirmPaymentPlanAmendment.amendPaymentPlan.endDate.change"),
-                                visuallyHiddenText = Some(messages("confirmPaymentPlanAmendment.amendPaymentPlan.endDate.change"))
-                            )
-                        )
-                    ))
-                )
-            )
+                    )),
+            rows = rows
+
         ))
 
         @govukButton(
