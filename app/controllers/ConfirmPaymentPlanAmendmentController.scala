@@ -23,7 +23,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.DirectDebitReferenceQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.{AmendPaymentReferenceSummary, PaymentAmountSummary, RegularPaymentAmountSummary}
+import viewmodels.checkAnswers.{AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, AmendPaymentReferenceSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, PaymentAmountSummary, RegularPaymentAmountSummary}
 import views.html.ConfirmPaymentPlanAmendmentView
 
 import javax.inject.Inject
@@ -52,11 +52,13 @@ class ConfirmPaymentPlanAmendmentController @Inject()(
               case Some(debit) => {
 
                 val rows = Seq(
-                //  AmendPaymentPlanTypeSummary.row(userAnswers),
-                  //AmendDirectDebitSourceSummary.row(userAnswers),
+                  AmendPaymentPlanTypeSummary.row(userAnswers),
+                  AmendPaymentPlanSourceSummary.row(userAnswers),
                   AmendPaymentReferenceSummary.row(userAnswers),
                   RegularPaymentAmountSummary.row(userAnswers),
                   PaymentAmountSummary.row(userAnswers),
+                  AmendPlanStartDateSummary.row(userAnswers),
+                  AmendPlanEndDateSummary.row(userAnswers),
                 ).flatten
 
                 //Ok(view(reference, debit, paymentPlanSummaryListRow))

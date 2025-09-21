@@ -16,10 +16,9 @@
 
 package controllers
 
-import controllers.actions._
-import javax.inject.Inject
+import controllers.actions.*
 import models.*
-import models.responses.{PaymentPlanDetailsResponse, PaymentPlanResponse}
+import models.responses.PaymentPlanDetailsResponse
 import pages.*
 import play.api.i18n.I18nSupport
 import play.api.mvc.*
@@ -28,11 +27,13 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils
+import utils.Utils.listHodServices
 import views.html.PaymentPlanDetailsView
 
+import java.time.{LocalDate, LocalDateTime}
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
-import java.time.{LocalDate, LocalDateTime}
 
 class PaymentPlanDetailsController @Inject()(
                                               val controllerComponents: MessagesControllerComponents,
@@ -51,10 +52,16 @@ class PaymentPlanDetailsController @Inject()(
       request.userAnswers.get(PaymentReferenceQuery) match {
         case Some(paymentReference) =>
           nddService.getPaymentPlanDetails(paymentReference).flatMap { response =>
-            val plan        = response.paymentPlanDetails
+
+
+            val plan = response.paymentPlanDetails
             val directDebit = response.directDebitDetails
 
-            // Map PaymentPlanDetails → PaymentPlanDetailsResponse for the view
+            val maybeSource: Option[DirectDebitSource] = {
+              listHodServices.find { case (_, v) => v.equalsIgnoreCase(plan.hodService) }
+                .map(_._1)
+            }
+
             val planForView = PaymentPlanDetailsResponse(
               hodService = plan.hodService,
               planType = plan.planType,
@@ -73,23 +80,24 @@ class PaymentPlanDetailsController @Inject()(
               totalLiability = plan.totalLiability,
               paymentPlanEditable = plan.paymentPlanEditable
             )
-            println("***********************" + Utils.amendPaymentPlanGuard(nddService, request.userAnswers))
             // Update UserAnswers consistently
             val updatedAnswersTry: Try[UserAnswers] = for {
               updatedAnswer <- request.userAnswers.set(PaymentReferencePage, plan.paymentReference)
+              updatedAnswer <- request.userAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString)
               updatedAnswer <- updatedAnswer.set(AmendPaymentPlanTypePage, plan.planType)
               updatedAnswer <- updatedAnswer.set(TotalAmountDuePage, plan.totalLiability.getOrElse(BigDecimal(0)))
               updatedAnswer <- updatedAnswer.set(AmendPaymentAmountPage, plan.scheduledPaymentAmount)
+              updatedAnswer <- updatedAnswer.set(AmendPlanStartDatePage, plan.scheduledPaymentStartDate.getOrElse(LocalDate.now()))
               updatedAnswer <- updatedAnswer.set(AmendPlanEndDatePage, plan.scheduledPaymentEndDate.getOrElse(LocalDate.now()))
               updatedAnswer <- updatedAnswer.set(RegularPaymentAmountPage, plan.scheduledPaymentAmount)
               updatedAnswer <- updatedAnswer.set(
                 YourBankDetailsPage,
                 YourBankDetailsWithAuddisStatus(
                   accountHolderName = directDebit.bankAccountName,
-                  sortCode          = directDebit.bankSortCode,
-                  accountNumber     = directDebit.bankAccountNumber,
-                  auddisStatus      = directDebit.auddisFlag,
-                  accountVerified   = false
+                  sortCode = directDebit.bankSortCode,
+                  accountNumber = directDebit.bankAccountNumber,
+                  auddisStatus = directDebit.auddisFlag,
+                  accountVerified = false
                 )
               )
             } yield updatedAnswer

@@ -16,13 +16,25 @@
 
 package utils
 
-import models.UserAnswers
+import models.{DirectDebitSource, UserAnswers}
 import models.requests.WorkingDaysOffsetRequest
 import services.NationalDirectDebitService
 
 import java.time.LocalDate
 
 object Utils {
+
+  val listHodServices: Map[DirectDebitSource, String] = Map(
+    DirectDebitSource.CT -> "COTA",
+    DirectDebitSource.PAYE -> "PAYE",
+    DirectDebitSource.SA -> "CESA",
+    DirectDebitSource.TC -> "NTC",
+    DirectDebitSource.VAT -> "VAT",
+    DirectDebitSource.MGD -> "MGD",
+    DirectDebitSource.NIC -> "NIDN",
+    DirectDebitSource.OL -> "SAFE",
+    DirectDebitSource.SDLT -> "SDLT"
+  )
   val emptyString = ""
   val LockExpirySessionKey = "lockoutExpiryDateTime"
 

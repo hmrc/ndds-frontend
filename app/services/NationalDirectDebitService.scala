@@ -22,7 +22,7 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanDetailsResponse, PaymentPlanResponse}
+import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.{AmendPaymentPlanTypePage, DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
@@ -133,10 +133,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanResponse] = {
     //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
 
-
     val now = LocalDateTime.now()
-
-    val currentDate = LocalDate.now()
 
     val samplePaymentPlanResponse: PaymentPlanResponse =
       PaymentPlanResponse(
@@ -151,7 +148,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           planType = PaymentPlanType.BudgetPaymentPlan.toString,
           paymentReference = paymentReference,
           submissionDateTime = Some(now.minusDays(5)),
-          scheduledPaymentAmount =120.00,
+          scheduledPaymentAmount = 120.00,
           scheduledPaymentStartDate = Some(LocalDate.now().minusMonths(8)),
           initialPaymentStartDate = Some(LocalDateTime.now().plusDays(1)),
           initialPaymentAmount = Some(BigDecimal(50.00)),
@@ -167,24 +164,24 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       )
 
 
-//    val planDetails = PaymentPlanDetailsResponse(
-//      hodService = "CESA",
-//      planType = PaymentPlanType.BudgetPaymentPlan.toString,
-//      paymentReference = paymentReference,
-//      submissionDateTime = now.minusDays(5),
-//      scheduledPaymentAmount = 120.00,
-//      scheduledPaymentStartDate = currentDate.plusDays(5),
-//      initialPaymentStartDate = None,
-//      initialPaymentAmount = None,
-//      scheduledPaymentEndDate = currentDate.plusDays(4),//,currentDate.plusMonths(6),
-//      scheduledPaymentFrequency = Some("Monthly"),
-//      suspensionStartDate = None,
-//      suspensionEndDate = None,
-//      balancingPaymentAmount = Some("£60.00"),
-//      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-//      totalLiability = Some("£780.00"),
-//      paymentPlanEditable = true
-//    )
+    //    val planDetails = PaymentPlanDetailsResponse(
+    //      hodService = "CESA",
+    //      planType = PaymentPlanType.BudgetPaymentPlan.toString,
+    //      paymentReference = paymentReference,
+    //      submissionDateTime = now.minusDays(5),
+    //      scheduledPaymentAmount = 120.00,
+    //      scheduledPaymentStartDate = currentDate.plusDays(5),
+    //      initialPaymentStartDate = None,
+    //      initialPaymentAmount = None,
+    //      scheduledPaymentEndDate = currentDate.plusDays(4),//,currentDate.plusMonths(6),
+    //      scheduledPaymentFrequency = Some("Monthly"),
+    //      suspensionStartDate = None,
+    //      suspensionEndDate = None,
+    //      balancingPaymentAmount = Some("£60.00"),
+    //      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
+    //      totalLiability = Some("£780.00"),
+    //      paymentPlanEditable = true
+    //    )
     Future.successful(samplePaymentPlanResponse)
   }
 }

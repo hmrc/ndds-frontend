@@ -34,7 +34,7 @@
         @header1("confirmPaymentPlanAmendment.heading")
         @paragraph("confirmPaymentPlanAmendment.p1")
 
-        <h1 class="govuk-heading-m">@messages("confirmPaymentPlanAmendment.directDebit.title")</h1>
+        <h2 class="govuk-heading-m">@messages("confirmPaymentPlanAmendment.directDebit.h2")</h2>
 
         @govukSummaryList(SummaryList(
             rows = Seq(
@@ -65,7 +65,7 @@
             )
         ))
 
-        <h1 class="govuk-heading-m">@messages("confirmPaymentPlanAmendment.amendPaymentPlan.title")</h1>
+        <h2 class="govuk-heading-m">@messages("confirmPaymentPlanAmendment.amendPaymentPlan.h2")</h2>
             @govukSummaryList(SummaryList(
                     card = Some(Card(
                     title = Some(CardTitle(
