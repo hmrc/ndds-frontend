@@ -66,10 +66,10 @@ class PaymentPlanDetailsController @Inject()(
                 paymentReference = paymentReference,
                 submissionDateTime = paymentPlanDetails.submissionDateTime,
                 scheduledPaymentAmount = paymentPlanDetails.scheduledPaymentAmount,
-                scheduledPaymentStartDate = LocalDateTime.now().minusMonths(7),
+                scheduledPaymentStartDate = paymentPlanDetails.scheduledPaymentStartDate,
                 initialPaymentStartDate = LocalDateTime.now().plusDays(1),
                 initialPaymentAmount = BigDecimal(50.00),
-                scheduledPaymentEndDate = LocalDateTime.now().plusMonths(12),
+                scheduledPaymentEndDate = paymentPlanDetails.scheduledPaymentEndDate,
                 scheduledPaymentFrequency = "Monthly",
                 suspensionStartDate = None,
                 suspensionEndDate = None,
@@ -90,14 +90,17 @@ class PaymentPlanDetailsController @Inject()(
           } yield {
             val showActions =
               val flag: Future[Boolean] = paymentPlanDetails.planType match {
-                case PaymentPlanType.BudgetPaymentPlan.toString =>
-                  nddService.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate)
                 case PaymentPlanType.SinglePaymentPlan.toString =>
                   nddService.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate)
+                case PaymentPlanType.BudgetPaymentPlan.toString =>
+                  for {
+                    isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate)
+                    isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate)
+                  } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
                 case PaymentPlanType.VariablePaymentPlan.toString => Future.successful(false)
                 case _ => Future.successful(false)
               }
-              !Await.result(flag, 5.seconds)
+              Await.result(flag, 5.seconds)
 
             val showCancelAction = PaymentPlanType.VariablePaymentPlan.toString == paymentPlanDetails.planType
             Ok(view(paymentReference, paymentPlanDetails, showActions, showCancelAction))
@@ -137,12 +140,12 @@ class PaymentPlanDetailsController @Inject()(
         ua5 <- ua4.set(RegularPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
         ua6 <- ua5.set(PlanStartDatePage, PlanStartDateDetails(
           paymentPlan.initialPaymentStartDate.toLocalDate,
-          earliestPlanStartDate = paymentPlan.scheduledPaymentStartDate.toLocalDate.toString
+          earliestPlanStartDate = paymentPlan.scheduledPaymentStartDate.toString
         ))
-        ua7 <- ua6.set(AmendPlanEndDatePage, paymentPlan.scheduledPaymentEndDate.toLocalDate)
+        ua7 <- ua6.set(AmendPlanEndDatePage, paymentPlan.scheduledPaymentEndDate)
         ua8 <- ua7.set(PaymentDatePage, PaymentDateDetails(
-          enteredDate = paymentPlan.scheduledPaymentStartDate.toLocalDate,
-          earliestPaymentDate = paymentPlan.scheduledPaymentStartDate.toLocalDate.toString
+          enteredDate = paymentPlan.scheduledPaymentStartDate,
+          earliestPaymentDate = paymentPlan.scheduledPaymentStartDate.toString
         ))
         ua9 <- ua8.set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus(
           accountHolderName = directDebit.bankAccountName,

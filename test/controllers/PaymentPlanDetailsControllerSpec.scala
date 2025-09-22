@@ -65,9 +65,9 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
         when(mockService.getPaymentPlanDetails(any()))
           .thenReturn(Future.successful(mockPaymentPlanDetailResponse))
         when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
-          .thenReturn(Future.successful(true))
-        when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
           .thenReturn(Future.successful(false))
+        when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
+          .thenReturn(Future.successful(true))
 
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
 
