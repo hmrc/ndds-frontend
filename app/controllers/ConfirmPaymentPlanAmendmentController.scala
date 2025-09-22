@@ -18,26 +18,29 @@ package controllers
 
 import controllers.actions.*
 import models.UserAnswers
+import pages.AmendPaymentPlanTypePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.DirectDebitReferenceQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.{AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, AmendPaymentReferenceSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, PaymentAmountSummary, RegularPaymentAmountSummary}
+import viewmodels.checkAnswers.{
+  AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary,
+  AmendPaymentReferenceSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, PaymentAmountSummary, RegularPaymentAmountSummary
+}
 import views.html.ConfirmPaymentPlanAmendmentView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmPaymentPlanAmendmentController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: ConfirmPaymentPlanAmendmentView,
-                                       nddService: NationalDirectDebitService
-                                     ) (implicit ec: ExecutionContext)
+                                                       override val messagesApi: MessagesApi,
+                                                       identify: IdentifierAction,
+                                                       getData: DataRetrievalAction,
+                                                       val controllerComponents: MessagesControllerComponents,
+                                                       view: ConfirmPaymentPlanAmendmentView,
+                                                       nddService: NationalDirectDebitService
+                                                     )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
@@ -51,17 +54,29 @@ class ConfirmPaymentPlanAmendmentController @Inject()(
             firstMatchingDebit match {
               case Some(debit) => {
 
-                val rows = Seq(
-                  AmendPaymentPlanTypeSummary.row(userAnswers),
-                  AmendPaymentPlanSourceSummary.row(userAnswers),
-                  AmendPaymentReferenceSummary.row(userAnswers),
-                  RegularPaymentAmountSummary.row(userAnswers),
-                  PaymentAmountSummary.row(userAnswers),
-                  AmendPlanStartDateSummary.row(userAnswers),
-                  AmendPlanEndDateSummary.row(userAnswers),
-                ).flatten
+                val rows = userAnswers.get(AmendPaymentPlanTypePage) match {
+                  case Some("budgetPaymentPlan") =>
+                    Seq(
+                      AmendPaymentPlanTypeSummary.row(userAnswers),
+                      AmendPaymentPlanSourceSummary.row(userAnswers),
+                      AmendPaymentReferenceSummary.row(userAnswers),
+                      RegularPaymentAmountSummary.row(userAnswers),
+                      PaymentAmountSummary.row(userAnswers),
+                      AmendPlanEndDateSummary.row(userAnswers),
+                    ).flatten
 
-                //Ok(view(reference, debit, paymentPlanSummaryListRow))
+                  case _ =>
+                    Seq(
+                      AmendPaymentPlanTypeSummary.row(userAnswers),
+                      AmendPaymentPlanSourceSummary.row(userAnswers),
+                      AmendPaymentReferenceSummary.row(userAnswers),
+                      RegularPaymentAmountSummary.row(userAnswers),
+                      PaymentAmountSummary.row(userAnswers),
+                      AmendPlanStartDateSummary.row(userAnswers),
+
+                    ).flatten
+                }
+
                 Ok(view(reference, debit, rows))
               }
               case None => Redirect(routes.JourneyRecoveryController.onPageLoad())
