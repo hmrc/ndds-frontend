@@ -19,11 +19,11 @@
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
+    mainErrorSummary: components.MainErrorSummary,
     govukDateInput: GovukDateInput,
     govukButton: GovukButton,
     h1: Header1,
-    govukHint: GovukHint,
+    p: Paragraph,
     govukWarningText: GovukWarningText
 )
 
@@ -32,14 +32,11 @@
 @layout(pageTitle = title(form, messages("amendPlanStartDate.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.AmendPlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
-        }
+        @mainErrorSummary(form)
 
         @h1(messages("amendPlanStartDate.heading"))
-        @govukHint(
-            HintViewModel(content = HtmlContent(messages("amendPlanStartDate.p1")))
-        )
+        @p(messages("amendPlanStartDate.p1"))
+
         @govukWarningText(
             WarningText(content = HtmlContent(messages("amendPlanStartDate.warning")))
         )
