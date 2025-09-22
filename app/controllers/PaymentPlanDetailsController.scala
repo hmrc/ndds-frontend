@@ -53,13 +53,25 @@ class PaymentPlanDetailsController @Inject()(
         nddService.getPaymentPlanDetails(paymentReference).flatMap { response =>
 
           val planDetail = response.paymentPlanDetails
+          val directDebit = response.directDebitDetails
 
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, planDetail.planType))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
-            cachedAnswers <- cachePaymentPlanResponse(response, updatedAnswers)
+            updatedAnswer <- Future.fromTry(updatedAnswers.set(PaymentReferencePage, planDetail.paymentReference))
+            updatedAnswer <- Future.fromTry(updatedAnswer.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(BigDecimal(0))))
+            updatedAnswer <- Future.fromTry(updatedAnswer.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
+            cachedAnswers <- Future.fromTry(updatedAnswer.set(
+              YourBankDetailsPage,
+              YourBankDetailsWithAuddisStatus(
+                accountHolderName = directDebit.bankAccountName,
+                sortCode = directDebit.bankSortCode,
+                accountNumber = directDebit.bankAccountNumber,
+                auddisStatus = directDebit.auddisFlag,
+                accountVerified = false
+              ) ))
             _ <- sessionRepository.set(cachedAnswers)
           } yield {
             val showActions =
@@ -92,47 +104,5 @@ class PaymentPlanDetailsController @Inject()(
       updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferenceQuery, paymentReference))
       _ <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
-  }
-
-  private def cachePaymentPlanResponse(
-                                        response: PaymentPlanResponse,
-                                        userAnswers: UserAnswers
-                                      ): Future[UserAnswers] = {
-
-    val paymentPlan = response.paymentPlanDetails
-    val directDebit = response.directDebitDetails
-
-    val paymentPlanType: PaymentPlanType =
-      PaymentPlanType.enumerable.withName(paymentPlan.planType).get
-
-    val updatedAnswersTry: Try[UserAnswers] =
-      for {
-        ua1 <- userAnswers.set(PaymentReferencePage, paymentPlan.paymentReference)
-        ua2 <- ua1.set(PaymentPlanTypePage, paymentPlanType)
-        ua3 <- ua2.set(TotalAmountDuePage, paymentPlan.totalLiability.getOrElse(0))
-        ua4 <- ua3.set(AmendPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
-        ua5 <- ua4.set(RegularPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
-        ua6 <- ua5.set(PlanStartDatePage, PlanStartDateDetails(
-          paymentPlan.initialPaymentStartDate.toLocalDate,
-          earliestPlanStartDate = paymentPlan.scheduledPaymentStartDate.toString
-        ))
-        ua7 <- ua6.set(AmendPlanEndDatePage, paymentPlan.scheduledPaymentEndDate)
-        ua8 <- ua7.set(PaymentDatePage, PaymentDateDetails(
-          enteredDate = paymentPlan.scheduledPaymentStartDate,
-          earliestPaymentDate = paymentPlan.scheduledPaymentStartDate.toString
-        ))
-        ua9 <- ua8.set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus(
-          accountHolderName = directDebit.bankAccountName,
-          sortCode = directDebit.bankSortCode,
-          accountNumber = directDebit.bankAccountNumber,
-          auddisStatus = directDebit.auddisFlag,
-          accountVerified = false
-        ))
-      } yield ua9
-
-    updatedAnswersTry match {
-      case scala.util.Success(updated) => sessionRepository.set(updated).map(_ => updated)
-      case scala.util.Failure(ex) => Future.failed(ex)
-    }
   }
 }
