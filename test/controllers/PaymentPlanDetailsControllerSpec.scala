@@ -38,7 +38,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
     val mockService = mock[NationalDirectDebitService]
     val mockSessionRepository = mock[SessionRepository]
 
-    "must return OK and the correct view for a GET with a valid direct payment Reference" in {
+    "must return OK and the correct view for a GET with a SinglePayment Plan" in {
       val paymentReference = "paymentReference"
       val userAnswersWithPaymentReference =
         emptyUserAnswers
@@ -63,9 +63,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
         when(mockSessionRepository.get(any()))
           .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
         when(mockService.getPaymentPlanDetails(any()))
-          .thenReturn(Future.successful(mockPaymentPlanDetailResponse))
-        when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
-          .thenReturn(Future.successful(false))
+          .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
         when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
           .thenReturn(Future.successful(true))
 
@@ -75,8 +73,122 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
 
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        println(contentAsString(result))
-        contentAsString(result) mustEqual view(paymentReference, mockPaymentPlanDetailResponse, true, false)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(paymentReference, mockSinglePaymentPlanDetailResponse, true, false)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with a BudgetPayment Plan" in {
+      val paymentReference = "paymentReference"
+      val userAnswersWithPaymentReference =
+        emptyUserAnswers
+          .set(
+            PaymentReferenceQuery,
+            paymentReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+        when(mockService.getPaymentPlanDetails(any()))
+          .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
+        when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
+          .thenReturn(Future.successful(true))
+        when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
+          .thenReturn(Future.successful(true))
+
+        val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[PaymentPlanDetailsView]
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(paymentReference, mockBudgetPaymentPlanDetailResponse, true, false)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with a Variable Plan" in {
+      val paymentReference = "paymentReference"
+      val userAnswersWithPaymentReference =
+        emptyUserAnswers
+          .set(
+            PaymentReferenceQuery,
+            paymentReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+        when(mockService.getPaymentPlanDetails(any()))
+          .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
+
+        val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[PaymentPlanDetailsView]
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(paymentReference, mockVariablePaymentPlanDetailResponse, false, true)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with a Tax Credit Repayment Plan" in {
+      val paymentReference = "paymentReference"
+      val userAnswersWithPaymentReference =
+        emptyUserAnswers
+          .set(
+            PaymentReferenceQuery,
+            paymentReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+        when(mockService.getPaymentPlanDetails(any()))
+          .thenReturn(Future.successful(mockTaxCreditRepaymentPlanDetailResponse))
+
+        val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[PaymentPlanDetailsView]
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(paymentReference, mockTaxCreditRepaymentPlanDetailResponse, false, false)(request, messages(application)).toString
       }
     }
 
