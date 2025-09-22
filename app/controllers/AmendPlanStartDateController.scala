@@ -47,33 +47,18 @@ class AmendPlanStartDateController @Inject()(
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request => {
-//        nddService.getEarliestPaymentDate(request.userAnswers) map { earliestPaymentDate =>
-//          val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers)
-
-//          val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
-          val form = formProvider()
-          val preparedForm = request.userAnswers.get(AmendPlanStartDatePage) match {
-            case None => form
-            case Some(value) => form.fill(value)
-          }
-
-          Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
-//          Ok(view(preparedForm, mode,
-//            DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
-//            DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
-//            routes.AmendPaymentAmountController.onPageLoad(mode)
-//          ))
-//        } recover { case e =>
-//          logger.warn(s"Unexpected error: $e")
-//          Redirect(routes.JourneyRecoveryController.onPageLoad())
-//        }
+      val form = formProvider()
+      val preparedForm = request.userAnswers.get(AmendPlanStartDatePage) match {
+        case None => form
+        case Some(value) => form.fill(value)
       }
+
+      Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-//      nddService.getEarliestPaymentDate(request.userAnswers).flatMap { earliestPaymentDate =>
-//        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers)
       val form = formProvider()
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -85,28 +70,5 @@ class AmendPlanStartDateController @Inject()(
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
       )
-//        val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
-
-//        form.bindFromRequest().fold(
-//          formWithErrors =>
-//            nddService.getEarliestPaymentDate(request.userAnswers).map { earliestPaymentDate =>
-//              BadRequest(view(formWithErrors, mode,
-//                DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
-//                DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
-//                routes.AmendPaymentAmountController.onPageLoad(mode)
-//              ))
-//            },
-//          value =>
-//            for {
-//              earliestPaymentDate <- nddService.getEarliestPaymentDate(request.userAnswers)
-//              updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
-//              _ <- sessionRepository.set(updatedAnswers)
-//            } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
-//        )
-//      }.recoverWith {
-//        case e =>
-//          logger.warn(s"Unexpected error: $e")
-//          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-//      }
   }
 }

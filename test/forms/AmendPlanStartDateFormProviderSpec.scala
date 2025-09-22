@@ -16,7 +16,7 @@
 
 package forms
 
-import java.time.{Clock, LocalDate, ZoneId}
+import java.time.LocalDate
 import forms.behaviours.DateBehaviours
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
@@ -27,10 +27,6 @@ class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
 
   // Use fixed clock so tests are deterministic
   private val fixedDate = LocalDate.of(2025, 8, 6)
-  private val fixedClock = Clock.fixed(
-    fixedDate.atStartOfDay(ZoneId.systemDefault()).toInstant,
-    ZoneId.systemDefault()
-  )
 
   private val formProvider = new AmendPlanStartDateFormProvider()
 
@@ -67,7 +63,6 @@ class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
 //    }
 
     "bind when date is exactly on the earliest allowed date" in {
-      val earliestDate = fixedDate
       val form = formProvider()
       val result = form.bind(
         Map("value.day" -> "6", "value.month" -> "8", "value.year" -> "2025")

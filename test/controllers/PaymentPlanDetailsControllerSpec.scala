@@ -87,7 +87,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
       running(application) {
 
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
-
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER

@@ -16,7 +16,7 @@
 
 package utils
 
-import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan, PaymentPlanDetailsResponse, PaymentPlanResponse}
+import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan, PaymentPlanDetailsResponse}
 import models.{DirectDebitDetails, NddDetails, NddResponse, PaymentPlanType, UKBankAddress}
 
 import java.time.{LocalDate, LocalDateTime}
