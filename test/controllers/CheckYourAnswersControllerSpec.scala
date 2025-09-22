@@ -74,7 +74,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
     "must return OK and the correct view if MGD selected and type is single for a GET" in {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePayment)
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
         .setOrException(PaymentReferencePage, "1234567")
         .setOrException(PaymentAmountPage, 123.01)
         .setOrException(PaymentDatePage, paymentDateDetails)

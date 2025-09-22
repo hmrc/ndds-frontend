@@ -42,28 +42,16 @@
     @govukSummaryList(SummaryList(
         rows = Seq(
             SummaryListRow(
-                key = Key(
-                    content = messages("directDebitPaymentSummary.directDebit.reference")
-                ),
-                value = Value(
-                    content = HtmlContent(directDebitReference)
-                )
+                key = Key(content = messages("directDebitPaymentSummary.directDebit.reference")),
+                value = Value(content = HtmlContent(directDebitReference))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("directDebitPaymentSummary.directDebit.accountNumber")
-                ),
-                value = Value(
-                    content = HtmlContent(maskAccountNumber(directDebitDetails.bankAccountNumber))
-                )
+                key = Key(content = messages("directDebitPaymentSummary.directDebit.accountNumber")),
+                value = Value(content = HtmlContent(maskAccountNumber(directDebitDetails.bankAccountNumber)))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("directDebitPaymentSummary.directDebit.sortCode")
-                ),
-                value = Value(
-                    content = HtmlContent(maskSortCode(directDebitDetails.bankSortCode))
-                )
+                key = Key(content = messages("directDebitPaymentSummary.directDebit.sortCode")),
+                value = Value(content = HtmlContent(maskSortCode(directDebitDetails.bankSortCode)))
             )
         )
     ))
@@ -88,36 +76,20 @@
             )),
             rows = Seq(
                 SummaryListRow(
-                    key = Key(
-                        content = messages("directDebitPaymentSummary.activePayment.summary.planType")
-                    ),
-                    value = Value(
-                        content = HtmlContent(pp.planType)
-                    )
+                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.planType")),
+                    value = Value(content = HtmlContent(pp.planType))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")
-                    ),
-                    value = Value(
-                        content = HtmlContent(pp.hodService)
-                    )
+                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")),
+                    value = Value(content = HtmlContent(pp.hodService))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("directDebitPaymentSummary.activePayment.summary.date")
-                    ),
-                    value = Value(
-                        content = HtmlContent(pp.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
-                    )
+                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.date")),
+                    value = Value(content = HtmlContent(pp.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
                 ),
                 SummaryListRow(
-                    key = Key(
-                        content = messages("directDebitPaymentSummary.activePayment.summary.amount")
-                    ),
-                    value = Value(
-                        content = HtmlContent(formatAmount(pp.scheduledPaymentAmount))
-                    )
+                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.amount")),
+                    value = Value(content = HtmlContent(formatAmount(pp.scheduledPaymentAmount)))
                 )
             )
         ))

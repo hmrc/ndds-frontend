@@ -81,7 +81,7 @@ personalOrBusinessAccount.heading = Is this a personal or business account?
 personalOrBusinessAccount.personal = Personal
 personalOrBusinessAccount.business = Business
 personalOrBusinessAccount.checkYourAnswersLabel = Is this a personal or business account?
-personalOrBusinessAccount.error.required = Select an account type
+personalOrBusinessAccount.error.required = Select an account type.
 personalOrBusinessAccount.change.hidden = PersonalOrBusinessAccount
 
 yourBankDetails.title = What are your bank details?
@@ -197,7 +197,7 @@ paymentReference.vat.hint = Your Value Added Tax (VAT) payment reference is the 
 paymentAmount.title = What amount do you want to pay?
 paymentAmount.heading = What amount do you want to pay?
 paymentAmount.checkYourAnswersLabel = Payment amount
-paymentAmount.error.nonNumeric = Enter a valid amount in the correct format
+paymentAmount.error.nonNumeric = Enter a valid amount
 paymentAmount.error.required = Enter an amount
 paymentAmount.hint = Must be pounds and pence value. For example, 1000.00
 paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
@@ -357,3 +357,16 @@ paymentPlanDetails.details.dateSetUp = Date set up
 paymentPlanDetails.details.regularPaymentAmount = Regular payment amount
 paymentPlanDetails.details.planStartDate = Plan start date
 paymentPlanDetails.details.planEndDate = Plan end date
+
+amendPaymentAmount.hint = 	e.g. £1000.00
+
+amendPlanStartDate.title = Plan start date
+amendPlanStartDate.heading = What date are you starting this payment plan?
+amendPlanStartDate.p1 = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
+amendPlanStartDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
+amendPlanStartDate.hint = e.g. 15 5 2025
+
+amendPlanEndDate.title = Plan end date
+amendPlanEndDate.heading = What date are you ending this payment plan?
+amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
+amendPlanEndDate.hint = e.g. 16 6 2026

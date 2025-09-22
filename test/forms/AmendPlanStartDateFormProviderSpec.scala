@@ -16,21 +16,21 @@
 
 package forms
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZoneOffset}
 import forms.behaviours.DateBehaviours
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
-class PlanEndDateFormProviderSpec extends DateBehaviours {
+class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
   private implicit val messages: Messages = stubMessages()
-  private val endDate = LocalDate.of(2024, 4, 6)
-  private val form = new PlanEndDateFormProvider()(endDate)
+  private val startDate = LocalDate.of(2024, 4, 6)
+  private val form = new AmendPlanStartDateFormProvider()()
 
   "PlanEndDateFormProvider" - {
 
     "must bind valid dates after or equal to the plan start date" in {
-      val validDate = endDate
+      val validDate = startDate
       val result = form.bind(
         Map(
           "value.day" -> validDate.getDayOfMonth.toString,
@@ -41,33 +41,23 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
       result.errors mustBe empty
     }
 
-    "must fail to bind dates before the plan start date" in {
-      val invalidDate = endDate.minusDays(1)
-      val result = form.bind(
-        Map(
-          "value.day" -> invalidDate.getDayOfMonth.toString,
-          "value.month" -> invalidDate.getMonthValue.toString,
-          "value.year" -> invalidDate.getYear.toString
-        )
+    ".value" - {
+      val validData = datesBetween(
+        min = LocalDate.of(2000, 1, 1),
+        max = LocalDate.now(ZoneOffset.UTC)
       )
-      result.errors must contain(FormError("value", "planEndDate.error.beforeOrEqualStartDate"))
+
+      behave like dateField(form, "value", validData)
+
+      "fail to bind an empty date" in {
+        val result = form.bind(Map.empty[String, String])
+        result.errors must contain theSameElementsAs Seq(
+          FormError("value.day", "date.error.day"),
+          FormError("value.month", "date.error.month"),
+          FormError("value.year", "date.error.year")
+        )
+      }
     }
 
-    "must bind successfully when date is left blank (optional)" in {
-      val result = form.bind(Map.empty[String, String])
-      result.errors mustBe empty
-      result.value.flatten mustBe None
-    }
-
-    "must fail with required error if partially completed" in {
-      val result = form.bind(
-        Map(
-          "value.day" -> "",
-          "value.month" -> "4",
-          "value.year" -> ""
-        )
-      )
-      result.errors must contain(FormError("value", "planEndDate.error.incomplete", Seq("date.error.day", "date.error.year")))
-    }
   }
 }

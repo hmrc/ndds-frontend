@@ -18,6 +18,7 @@
 @import java.time.format.DateTimeFormatter
 @import views.html.components.*
 @import utils.MaskAndFormatUtils.*
+@import models.NormalMode
 
 @this(
         layout: templates.Layout,
@@ -28,7 +29,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(paymentReference: String, paymentPlanDetails: PaymentPlanDetailsResponse, showActions: Boolean, showCancelAction: Boolean)(implicit request: Request[_], messages: Messages)
+@(paymentReference: String, paymentPlanDetails: PaymentPlanDetails, showActions: Boolean, showCancelAction: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
 
@@ -52,7 +53,7 @@
                 Some(Actions(
                     items = Seq(
                         if (showActions) ActionItem(
-                            href = "#",
+                            href = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url,
                             content = messages("paymentPlanDetails.details.amend"),
                             visuallyHiddenText = Some(messages("1000000"))
                         ) else null,
@@ -72,52 +73,28 @@
         )),
         rows = Seq(
             SummaryListRow(
-                key = Key(
-                    content = messages("paymentPlanDetails.details.planType")
-                ),
-                value = Value(
-                    content = HtmlContent(paymentPlanDetails.planType)
-                )
+                key = Key(content = messages("paymentPlanDetails.details.planType")),
+                value = Value(content = HtmlContent(paymentPlanDetails.planType))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("paymentPlanDetails.details.paymentFor")
-                    ),
-                value = Value(
-                    content = HtmlContent(paymentPlanDetails.hodService)
-                )
+                key = Key(content = messages("paymentPlanDetails.details.paymentFor")),
+                value = Value(content = HtmlContent(paymentPlanDetails.hodService))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("paymentPlanDetails.details.dateSetUp")
-                ),
-                value = Value(
-                    content = HtmlContent(paymentPlanDetails.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
-                )
+                key = Key(content = messages("paymentPlanDetails.details.dateSetUp")),
+                value = Value(content = HtmlContent(paymentPlanDetails.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("paymentPlanDetails.details.regularPaymentAmount")
-                ),
-                value = Value(
-                    content = HtmlContent(formatAmount(paymentPlanDetails.scheduledPaymentAmount))
-                )
+                key = Key(content = messages("paymentPlanDetails.details.regularPaymentAmount")),
+                value = Value(content = HtmlContent(formatAmount(paymentPlanDetails.scheduledPaymentAmount)))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("paymentPlanDetails.details.planStartDate")
-                ),
-                value = Value(
-                    content = HtmlContent(paymentPlanDetails.scheduledPaymentStartDate.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
-                )
+                key = Key(content = messages("paymentPlanDetails.details.planStartDate")),
+                value = Value(content = HtmlContent(paymentPlanDetails.scheduledPaymentStartDate.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
             ),
             SummaryListRow(
-                key = Key(
-                    content = messages("paymentPlanDetails.details.planEndDate")
-                ),
-                value = Value(
-                    content = HtmlContent(paymentPlanDetails.scheduledPaymentEndDate.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
-                )
+                key = Key(content = messages("paymentPlanDetails.details.planEndDate")),
+                value = Value(content = HtmlContent(paymentPlanDetails.scheduledPaymentEndDate.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
             )
         )
     ))
