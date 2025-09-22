@@ -18,9 +18,9 @@ package controllers
 
 import controllers.actions.*
 import models.*
-import models.responses.PaymentPlanDetailsResponse
+import models.responses.PaymentPlanDetails
 import pages.*
-import play.api.i18n.I18nSupport
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc.*
 import queries.PaymentReferenceQuery
 import repositories.SessionRepository
@@ -30,10 +30,14 @@ import utils.Utils
 import utils.Utils.listHodServices
 import views.html.PaymentPlanDetailsView
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
+import utils.MaskAndFormatUtils.formatAmount
 
 class PaymentPlanDetailsController @Inject()(
                                               val controllerComponents: MessagesControllerComponents,
@@ -49,41 +53,24 @@ class PaymentPlanDetailsController @Inject()(
 
   def onPageLoad(): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
+      implicit val messages: Messages = messagesApi.preferred(request)
+
       request.userAnswers.get(PaymentReferenceQuery) match {
         case Some(paymentReference) =>
           nddService.getPaymentPlanDetails(paymentReference).flatMap { response =>
 
-
             val plan = response.paymentPlanDetails
             val directDebit = response.directDebitDetails
 
-            val maybeSource: Option[DirectDebitSource] = {
+            val rows: Seq[SummaryListRow] = buildSummaryRows(plan)
+
+            val maybeSource: Option[DirectDebitSource] =
               listHodServices.find { case (_, v) => v.equalsIgnoreCase(plan.hodService) }
                 .map(_._1)
-            }
 
-            val planForView = PaymentPlanDetailsResponse(
-              hodService = plan.hodService,
-              planType = plan.planType,
-              paymentReference = plan.paymentReference,
-              submissionDateTime = plan.submissionDateTime.getOrElse(LocalDateTime.now),
-              scheduledPaymentAmount = plan.scheduledPaymentAmount,
-              scheduledPaymentStartDate = plan.scheduledPaymentStartDate.getOrElse(LocalDate.now),
-              initialPaymentStartDate = plan.initialPaymentStartDate,
-              initialPaymentAmount = plan.initialPaymentAmount,
-              scheduledPaymentEndDate = plan.scheduledPaymentEndDate.getOrElse(LocalDate.now),
-              scheduledPaymentFrequency = plan.scheduledPaymentFrequency.map(_.toString),
-              suspensionStartDate = plan.suspensionStartDate,
-              suspensionEndDate = plan.suspensionEndDate,
-              balancingPaymentAmount = plan.balancingPaymentAmount,
-              balancingPaymentDate = plan.balancingPaymentDate,
-              totalLiability = plan.totalLiability,
-              paymentPlanEditable = plan.paymentPlanEditable
-            )
-            // Update UserAnswers consistently
             val updatedAnswersTry: Try[UserAnswers] = for {
               updatedAnswer <- request.userAnswers.set(PaymentReferencePage, plan.paymentReference)
-              updatedAnswer <- request.userAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString)
+              updatedAnswer <- updatedAnswer.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString)
               updatedAnswer <- updatedAnswer.set(AmendPaymentPlanTypePage, plan.planType)
               updatedAnswer <- updatedAnswer.set(TotalAmountDuePage, plan.totalLiability.getOrElse(BigDecimal(0)))
               updatedAnswer <- updatedAnswer.set(AmendPaymentAmountPage, plan.scheduledPaymentAmount)
@@ -106,28 +93,9 @@ class PaymentPlanDetailsController @Inject()(
               case Success(updatedAnswers) =>
                 sessionRepository.set(updatedAnswers).map { _ =>
                   // Determine showActions based on plan type and utils
-
-                  val showActions = if (Utils.amendPaymentPlanGuard(nddService, updatedAnswers)) {
-                    if (plan.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
-                      val isThreeDayPrior = Utils.isThreeDaysPriorPlanEndDate(
-                        plan.scheduledPaymentEndDate.getOrElse(LocalDate.now),
-                        nddService,
-                        updatedAnswers
-                      )
-                      !isThreeDayPrior
-                    } else {
-                      val isTwoDayPrior = Utils.isTwoDaysPriorPaymentDate(
-                        plan.scheduledPaymentStartDate.getOrElse(LocalDate.now),
-                        nddService,
-                        updatedAnswers
-                      )
-                      !isTwoDayPrior
-                    }
-                  } else false
-
-                  Ok(view(paymentReference, planForView, showActions))
+                  val showActions = determineShowActions(plan, nddService, updatedAnswers)
+                  Ok(view(paymentReference, rows, showActions))
                 }
-
               case Failure(ex) =>
                 Future.failed(ex)
             }
@@ -152,4 +120,72 @@ class PaymentPlanDetailsController @Inject()(
           Future.failed(ex)
       }
     }
+
+
+  private def determineShowActions(
+                                    plan: PaymentPlanDetails,
+                                    nddService: NationalDirectDebitService,
+                                    updatedAnswers: UserAnswers
+                                  ): Boolean = {
+    if (Utils.amendPaymentPlanGuard(nddService, updatedAnswers)) {
+      if (plan.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
+        val isThreeDayPrior = Utils.isThreeDaysPriorPlanEndDate(
+          plan.scheduledPaymentEndDate.getOrElse(LocalDate.now),
+          nddService,
+          updatedAnswers
+        )
+        !isThreeDayPrior
+      } else {
+        val isTwoDayPrior = Utils.isTwoDaysPriorPaymentDate(
+          plan.scheduledPaymentStartDate.getOrElse(LocalDate.now),
+          nddService,
+          updatedAnswers
+        )
+        !isTwoDayPrior
+      }
+    } else {
+      false
+    }
+  }
+
+  // 🔹 Extracted helper function
+  private def buildSummaryRows(plan: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {
+    val dateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")
+
+    Seq(
+      SummaryListRow(
+        key = Key(content = Text(messages("paymentPlanDetails.details.planType"))),
+        value = Value(content = HtmlContent(plan.planType))
+      ),
+      SummaryListRow(
+        key = Key(content = Text(messages("paymentPlanDetails.details.paymentFor"))),
+        value = Value(content = HtmlContent(plan.hodService.toUpperCase))
+      ),
+      SummaryListRow(
+        key = Key(content = Text(messages("paymentPlanDetails.details.dateSetUp"))),
+        value = Value(content = HtmlContent(
+          plan.submissionDateTime.getOrElse(LocalDateTime.now).format(dateFormatter)
+        ))
+      ),
+      SummaryListRow(
+        key = Key(content = Text(messages("paymentPlanDetails.details.regularPaymentAmount"))),
+        value = Value(content = HtmlContent(
+          formatAmount(plan.scheduledPaymentAmount.toDouble)
+        ))
+      ),
+      SummaryListRow(
+        key = Key(content = Text(messages("paymentPlanDetails.details.planStartDate"))),
+        value = Value(content = HtmlContent(
+          plan.scheduledPaymentStartDate.getOrElse(LocalDate.now).format(dateFormatter)
+        ))
+      ),
+      SummaryListRow(
+        key = Key(content = Text(messages("paymentPlanDetails.details.planEndDate"))),
+        value = Value(content = HtmlContent(
+          plan.scheduledPaymentEndDate.getOrElse(LocalDate.now).format(dateFormatter)
+        ))
+      )
+    )
+  }
+
 }
