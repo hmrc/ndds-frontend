@@ -50,60 +50,34 @@ class PaymentPlanDetailsController @Inject()(
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     request.userAnswers.get(PaymentReferenceQuery) match {
       case Some(paymentReference) =>
-        nddService.getPaymentPlanDetails(paymentReference).flatMap { paymentPlanDetails =>
+        nddService.getPaymentPlanDetails(paymentReference).flatMap { response =>
 
-          val samplePaymentPlanResponse: PaymentPlanResponse =
-            PaymentPlanResponse(
-              directDebitDetails = DirectDebitDetails(
-                bankSortCode = "123456",
-                bankAccountNumber = "12345678",
-                bankAccountName = "John Doe",
-                auddisFlag = true
-              ),
-              paymentPlanDetails = PaymentPlanDetails(
-                hodService = paymentPlanDetails.hodService,
-                planType = paymentPlanDetails.planType,
-                paymentReference = paymentReference,
-                submissionDateTime = paymentPlanDetails.submissionDateTime,
-                scheduledPaymentAmount = paymentPlanDetails.scheduledPaymentAmount,
-                scheduledPaymentStartDate = paymentPlanDetails.scheduledPaymentStartDate,
-                initialPaymentStartDate = LocalDateTime.now().plusDays(1),
-                initialPaymentAmount = BigDecimal(50.00),
-                scheduledPaymentEndDate = paymentPlanDetails.scheduledPaymentEndDate,
-                scheduledPaymentFrequency = "Monthly",
-                suspensionStartDate = None,
-                suspensionEndDate = None,
-                balancingPaymentAmount = Some(BigDecimal(25.00)),
-                balancingPaymentDate = Some(LocalDateTime.now().plusMonths(13)),
-                totalLiability = BigDecimal(1825.50),
-                paymentPlanEditable = true
-              )
-            )
+          val planDetail = response.paymentPlanDetails
 
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, paymentPlanDetails.planType))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, paymentPlanDetails.scheduledPaymentAmount))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentPlanDetails.scheduledPaymentStartDate))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentPlanDetails.scheduledPaymentEndDate))
-            cachedAnswers <- cachePaymentPlanResponse(samplePaymentPlanResponse, updatedAnswers)
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, planDetail.planType))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
+            cachedAnswers <- cachePaymentPlanResponse(response, updatedAnswers)
             _ <- sessionRepository.set(cachedAnswers)
           } yield {
             val showActions =
-              val flag: Future[Boolean] = paymentPlanDetails.planType match {
+              val flag: Future[Boolean] = planDetail.planType match {
                 case PaymentPlanType.SinglePaymentPlan.toString =>
-                  nddService.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate)
+                  nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
                 case PaymentPlanType.BudgetPaymentPlan.toString =>
                   for {
-                    isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(paymentPlanDetails.scheduledPaymentStartDate)
-                    isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(paymentPlanDetails.scheduledPaymentEndDate)
+                    isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
+                    isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(planDetail.scheduledPaymentEndDate)
                   } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
                 case PaymentPlanType.VariablePaymentPlan.toString => Future.successful(false)
                 case _ => Future.successful(false)
               }
               Await.result(flag, 5.seconds)
 
-            val showCancelAction = PaymentPlanType.VariablePaymentPlan.toString == paymentPlanDetails.planType
-            Ok(view(paymentReference, paymentPlanDetails, showActions, showCancelAction))
+            val showCancelAction = PaymentPlanType.VariablePaymentPlan.toString == planDetail.planType
+            Ok(view(paymentReference, planDetail, showActions, showCancelAction))
           }
         }
 
@@ -135,7 +109,7 @@ class PaymentPlanDetailsController @Inject()(
       for {
         ua1 <- userAnswers.set(PaymentReferencePage, paymentPlan.paymentReference)
         ua2 <- ua1.set(PaymentPlanTypePage, paymentPlanType)
-        ua3 <- ua2.set(TotalAmountDuePage, paymentPlan.totalLiability)
+        ua3 <- ua2.set(TotalAmountDuePage, paymentPlan.totalLiability.getOrElse(0))
         ua4 <- ua3.set(AmendPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
         ua5 <- ua4.set(RegularPaymentAmountPage, paymentPlan.scheduledPaymentAmount)
         ua6 <- ua5.set(PlanStartDatePage, PlanStartDateDetails(

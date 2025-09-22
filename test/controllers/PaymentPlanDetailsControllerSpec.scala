@@ -26,12 +26,12 @@ import play.api.test.Helpers.*
 import queries.PaymentReferenceQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import utils.DirectDebitDetailsData
+import utils.PaymentPlanData
 import views.html.PaymentPlanDetailsView
 
 import scala.concurrent.Future
 
-class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsData {
+class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
 
   "PaymentPlanDetails Controller" - {
 
@@ -73,7 +73,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
 
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, mockSinglePaymentPlanDetailResponse, true, false)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(paymentReference, mockSinglePaymentPlanDetailResponse.paymentPlanDetails, true, false)(request, messages(application)).toString
       }
     }
 
@@ -114,7 +114,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
 
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, mockBudgetPaymentPlanDetailResponse, true, false)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(paymentReference, mockBudgetPaymentPlanDetailResponse.paymentPlanDetails, true, false)(request, messages(application)).toString
       }
     }
 
@@ -151,7 +151,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
 
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, mockVariablePaymentPlanDetailResponse, false, true)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(paymentReference, mockVariablePaymentPlanDetailResponse.paymentPlanDetails, false, true)(request, messages(application)).toString
       }
     }
 
@@ -188,7 +188,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsD
 
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentReference, mockTaxCreditRepaymentPlanDetailResponse, false, false)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(paymentReference, mockTaxCreditRepaymentPlanDetailResponse.paymentPlanDetails, false, false)(request, messages(application)).toString
       }
     }
 

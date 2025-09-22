@@ -29,7 +29,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(paymentReference: String, paymentPlanDetails: PaymentPlanDetailsResponse, showActions: Boolean, showCancelAction: Boolean)(implicit request: Request[_], messages: Messages)
+@(paymentReference: String, paymentPlanDetails: PaymentPlanDetails, showActions: Boolean, showCancelAction: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
 
