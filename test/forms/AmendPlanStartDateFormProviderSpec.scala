@@ -16,97 +16,48 @@
 
 package forms
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZoneOffset}
 import forms.behaviours.DateBehaviours
+import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
 class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
-
   private implicit val messages: Messages = stubMessages()
+  private val startDate = LocalDate.of(2024, 4, 6)
+  private val form = new AmendPlanStartDateFormProvider()()
 
-  // Use fixed clock so tests are deterministic
-  private val fixedDate = LocalDate.of(2025, 8, 6)
+  "PlanEndDateFormProvider" - {
 
-  private val formProvider = new AmendPlanStartDateFormProvider()
+    "must bind valid dates after or equal to the plan start date" in {
+      val validDate = startDate
+      val result = form.bind(
+        Map(
+          "value.day" -> validDate.getDayOfMonth.toString,
+          "value.month" -> validDate.getMonthValue.toString,
+          "value.year" -> validDate.getYear.toString
+        )
+      )
+      result.errors mustBe empty
+    }
 
-  ".value" - {
+    ".value" - {
+      val validData = datesBetween(
+        min = LocalDate.of(2000, 1, 1),
+        max = LocalDate.now(ZoneOffset.UTC)
+      )
 
-    val earliestDate = fixedDate.minusDays(30)
-    val validData = datesBetween(
-      min = earliestDate,
-      max = fixedDate
-    )
-
-    "bind valid dates correctly" - {
-      val form = formProvider()
       behave like dateField(form, "value", validData)
-    }
 
-//    "fail to bind an empty date" in {
-//      val form = formProvider()
-//      val result = form.bind(Map.empty[String, String])
-//      result.errors must contain theSameElementsAs Seq(
-//        FormError("value.day", "date.error.day"),
-//        FormError("value.month", "date.error.month"),
-//        FormError("value.year", "date.error.year")
-//      )
-//    }
-
-//    "fail when date is before earliest allowed date" in {
-//      val earliestDate = fixedDate
-//      val form = formProvider()
-//      val result = form.bind(
-//        Map("value.day" -> "5", "value.month" -> "8", "value.year" -> "2025") // 2025-08-05
-//      )
-//      result.errors must contain only FormError("value", "paymentDate.error.beforeEarliest")
-//    }
-
-    "bind when date is exactly on the earliest allowed date" in {
-      val form = formProvider()
-      val result = form.bind(
-        Map("value.day" -> "6", "value.month" -> "8", "value.year" -> "2025")
-      )
-      result.errors mustBe empty
-    }
-
-    "bind when date is exactly 1 year in future for SINGLE plan" in {
-      val form = formProvider()
-      val oneYearLater = fixedDate.plusYears(1) // 2026-08-06
-      val result = form.bind(
-        Map(
-          "value.day" -> oneYearLater.getDayOfMonth.toString,
-          "value.month" -> oneYearLater.getMonthValue.toString,
-          "value.year" -> oneYearLater.getYear.toString
+      "fail to bind an empty date" in {
+        val result = form.bind(Map.empty[String, String])
+        result.errors must contain theSameElementsAs Seq(
+          FormError("value.day", "date.error.day"),
+          FormError("value.month", "date.error.month"),
+          FormError("value.year", "date.error.year")
         )
-      )
-      result.errors mustBe empty
+      }
     }
 
-//    "fail when date is more than 1 year in future for SINGLE plan" in {
-//      val form = formProvider()
-//      val futureDate = fixedDate.plusYears(1).plusDays(1) // 2026-08-07
-//      val result = form.bind(
-//        Map(
-//          "value.day" -> futureDate.getDayOfMonth.toString,
-//          "value.month" -> futureDate.getMonthValue.toString,
-//          "value.year" -> futureDate.getYear.toString
-//        )
-//      )
-//      result.errors must contain only FormError("value", "paymentDate.error.tooFarInFuture")
-//    }
-
-    "not enforce max future date when plan is not SINGLE" in {
-      val form = formProvider()
-      val futureDate = fixedDate.plusYears(5)
-      val result = form.bind(
-        Map(
-          "value.day" -> futureDate.getDayOfMonth.toString,
-          "value.month" -> futureDate.getMonthValue.toString,
-          "value.year" -> futureDate.getYear.toString
-        )
-      )
-      result.errors mustBe empty
-    }
   }
 }

@@ -30,7 +30,6 @@ import play.api.test.Helpers.*
 import queries.PaymentPlanTypeQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import uk.gov.hmrc.http.InternalServerException
 import views.html.AmendPaymentAmountView
 
 import scala.concurrent.Future
