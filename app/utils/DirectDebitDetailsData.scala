@@ -16,10 +16,10 @@
 
 package utils
 
-import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan}
-import models.{DirectDebitDetails, NddDetails, NddResponse, UKBankAddress}
+import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan, PaymentPlanDetailsResponse, PaymentPlanResponse}
+import models.{DirectDebitDetails, NddDetails, NddResponse, PaymentPlanType, UKBankAddress}
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 trait DirectDebitDetailsData {
 
@@ -111,6 +111,30 @@ trait DirectDebitDetailsData {
         submissionDateTime = LocalDateTime.of(2025, 12, 12, 12, 12))
     )
   )
+
+  val now = LocalDateTime.now()
+
+  val currentDate = LocalDate.now()
+
+  val mockPaymentPlanDetailResponse: PaymentPlanDetailsResponse =
+    PaymentPlanDetailsResponse(
+      hodService = "NDD",
+      planType = PaymentPlanType.SinglePayment.toString,
+      paymentReference = "paymentReference",
+      submissionDateTime = now.minusDays(5),
+      scheduledPaymentAmount = 120.00,
+      scheduledPaymentStartDate = currentDate.plusDays(5),
+      initialPaymentStartDate = None,
+      initialPaymentAmount = None,
+      scheduledPaymentEndDate = currentDate.plusMonths(6),
+      scheduledPaymentFrequency = Some("Monthly"),
+      suspensionStartDate = None,
+      suspensionEndDate = None,
+      balancingPaymentAmount = Some("£60.00"),
+      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
+      totalLiability = Some("£780.00"),
+      paymentPlanEditable = true
+    )
 }
 
 

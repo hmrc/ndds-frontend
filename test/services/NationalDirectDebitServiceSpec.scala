@@ -127,16 +127,16 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getEarliestPaymentDate(any())(any()))
+        when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
 
-        val result = service.getEarliestPaymentDate(expectedUserAnswers).futureValue
+        val result = service.calculateFutureWorkingDays(expectedUserAnswers).futureValue
 
         result mustBe EarliestPaymentDate("2025-12-25")
       }
 
       "fail when auddis status is not in user answers" in {
-        val result = intercept[Exception](service.getEarliestPaymentDate(emptyUserAnswers).futureValue)
+        val result = intercept[Exception](service.calculateFutureWorkingDays(emptyUserAnswers).futureValue)
 
         result.getMessage must include("YourBankDetailsPage details missing from user answers")
       }
@@ -146,10 +146,10 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getEarliestPaymentDate(any())(any()))
+        when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
-        val result = intercept[Exception](service.getEarliestPaymentDate(expectedUserAnswers).futureValue)
+        val result = intercept[Exception](service.calculateFutureWorkingDays(expectedUserAnswers).futureValue)
 
         result.getMessage must include("bang")
       }
@@ -164,7 +164,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getEarliestPaymentDate(any())(any()))
+        when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
 
         val result = service.getEarliestPlanStartDate(expectedUserAnswers).futureValue
@@ -207,7 +207,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getEarliestPaymentDate(any())(any()))
+        when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
         val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
