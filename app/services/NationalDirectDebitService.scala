@@ -132,7 +132,11 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   def isTwoDaysPriorPaymentDate(planStarDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now().toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2)).map {
-      futureWorkingDays => planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
+      futureWorkingDays => {
+        val twoDaysPrior = planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
+        logger.info(s"twoDaysPrior flag is set to: $twoDaysPrior")
+        twoDaysPrior
+      }
     }
   }
 
@@ -140,8 +144,9 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     val currentDate = LocalDate.now().toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map {
       futureWorkingDays => {
-        val temp =  planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
-        temp
+        val isThreeDaysPrior =  planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
+        logger.info(s"planEndWithinThreeDays flag is set to: $isThreeDaysPrior")
+        isThreeDaysPrior
       }
     }
   }
