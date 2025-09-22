@@ -16,10 +16,10 @@
 
 package utils
 
-import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan, PaymentPlanDetailsResponse}
-import models.{DirectDebitDetails, NddDetails, NddResponse, PaymentPlanType, UKBankAddress}
+import models.responses.{ NddDDPaymentPlansResponse, NddPaymentPlan}
+import models.{DirectDebitDetails, NddDetails, NddResponse, UKBankAddress}
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 
 trait DirectDebitDetailsData {
 
@@ -77,7 +77,7 @@ trait DirectDebitDetailsData {
       )
     )
   )
-  
+
   val ukBankAddress:UKBankAddress =UKBankAddress(
     addressLine1 =  "Address line 1",
     addressLine2 = Some( "Address line 2"),
@@ -85,7 +85,7 @@ trait DirectDebitDetailsData {
     addressLine4 = Some( "Address line 4"),
     addressLine5 = Some( "Address line 5"),
     postCode = "TE1 2XR")
-  
+
   val bankName="Test Bank Name"
 
   val mockDDPaymentPlansResponse: NddDDPaymentPlansResponse = NddDDPaymentPlansResponse(
@@ -111,30 +111,6 @@ trait DirectDebitDetailsData {
         submissionDateTime = LocalDateTime.of(2025, 12, 12, 12, 12))
     )
   )
-
-  val now = LocalDateTime.now()
-
-  val currentDate = LocalDate.now()
-
-  val mockPaymentPlanDetailResponse: PaymentPlanDetailsResponse =
-    PaymentPlanDetailsResponse(
-      hodService = "NDD",
-      planType = PaymentPlanType.SinglePaymentPlan.toString,
-      paymentReference = "paymentReference",
-      submissionDateTime = now.minusDays(5),
-      scheduledPaymentAmount = 120.00,
-      scheduledPaymentStartDate = currentDate.plusDays(5),
-      initialPaymentStartDate = None,
-      initialPaymentAmount = None,
-      scheduledPaymentEndDate = currentDate.plusMonths(6),
-      scheduledPaymentFrequency = Some("Monthly"),
-      suspensionStartDate = None,
-      suspensionEndDate = None,
-      balancingPaymentAmount = Some("£60.00"),
-      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-      totalLiability = Some("£780.00"),
-      paymentPlanEditable = true
-    )
 }
 
 
