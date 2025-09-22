@@ -119,7 +119,7 @@ trait DirectDebitDetailsData {
   val mockPaymentPlanDetailResponse: PaymentPlanDetailsResponse =
     PaymentPlanDetailsResponse(
       hodService = "NDD",
-      planType = PaymentPlanType.SinglePayment.toString,
+      planType = PaymentPlanType.SinglePaymentPlan.toString,
       paymentReference = "paymentReference",
       submissionDateTime = now.minusDays(5),
       scheduledPaymentAmount = 120.00,
