@@ -107,6 +107,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     } else {
       config.paymentDelayDynamicAuddisNotEnabled
     }
+
     config.paymentDelayFixed + dynamicDelay
   }
 

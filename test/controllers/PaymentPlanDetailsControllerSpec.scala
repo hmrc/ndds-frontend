@@ -26,31 +26,58 @@ import play.api.test.Helpers.*
 import queries.PaymentReferenceQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
+import utils.DirectDebitDetailsData
 import views.html.PaymentPlanDetailsView
 
 import scala.concurrent.Future
 
-class PaymentPlanDetailsControllerSpec extends SpecBase {
+class PaymentPlanDetailsControllerSpec extends SpecBase with DirectDebitDetailsData {
 
   "PaymentPlanDetails Controller" - {
 
     val mockService = mock[NationalDirectDebitService]
     val mockSessionRepository = mock[SessionRepository]
 
-    "must return OK and the correct view for a GET" in {
+    "must return OK and the correct view for a GET with a valid direct payment Reference" in {
+      val paymentReference = "paymentReference"
+      val userAnswersWithPaymentReference =
+        emptyUserAnswers
+          .set(
+            PaymentReferenceQuery,
+            paymentReference
+          )
+          .success
+          .value
 
-//      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-//
-//      running(application) {
-//        val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
-//
-//        val result = route(application, request).value
-//
-//        val view = application.injector.instanceOf[PaymentPlanDetailsView]
-//
-//        status(result) mustEqual OK
-//        contentAsString(result) mustEqual view()(request, messages(application)).toString
-//      }
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+        when(mockService.getPaymentPlanDetails(any()))
+          .thenReturn(Future.successful(mockPaymentPlanDetailResponse))
+        when(mockService.isSinglePaymentPlan(any()))
+          .thenReturn(true)
+        when(mockService.isBudgetPaymentPlan(any()))
+          .thenReturn(false)
+
+        val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[PaymentPlanDetailsView]
+        status(result) mustEqual OK
+        println(contentAsString(result))
+        contentAsString(result) mustEqual view(paymentReference, mockPaymentPlanDetailResponse, true, false)(request, messages(application)).toString
+      }
     }
 
     "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {

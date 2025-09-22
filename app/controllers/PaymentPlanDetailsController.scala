@@ -99,7 +99,8 @@ class PaymentPlanDetailsController @Inject()(
               }
               !Await.result(flag, 5.seconds)
 
-            Ok(view(paymentReference, paymentPlanDetails, showActions))
+            val showCancelAction = PaymentPlanType.VariablePaymentPlan.toString == paymentPlanType.toString
+            Ok(view(paymentReference, paymentPlanDetails, showActions, showCancelAction))
           }
         }
 
