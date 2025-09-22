@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.{NddDAO, NddResponse, NddDetails}
+import models.{NddDAO, NddDetails, NddResponse}
 import org.mockito.Mockito.when
 import org.mongodb.scala.model.Filters
 import org.scalactic.source.Position
