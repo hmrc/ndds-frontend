@@ -22,7 +22,7 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanDetailsResponse, PaymentPlanResponse}
+import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
@@ -184,24 +184,6 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           paymentPlanEditable = true
         )
       )
-//    val planDetails = PaymentPlanDetailsResponse(
-//      hodService = "NDD",
-//      planType = PaymentPlanType.BudgetPaymentPlan.toString,
-//      paymentReference = paymentReference,
-//      submissionDateTime = now.minusDays(5),
-//      scheduledPaymentAmount = 3900.00,
-//      scheduledPaymentStartDate = currentDate.plusDays(2),
-//      initialPaymentStartDate = None,
-//      initialPaymentAmount = None,
-//      scheduledPaymentEndDate = currentDate.plusDays(4),
-//      scheduledPaymentFrequency = Some("Monthly"),
-//      suspensionStartDate = None,
-//      suspensionEndDate = None,
-//      balancingPaymentAmount = Some("£60.00"),
-//      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-//      totalLiability = Some("£780.00"),
-//      paymentPlanEditable = true
-//    )
     Future.successful(samplePaymentPlanResponse)
   }
 }

@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import models.*
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.responses.PaymentPlanResponse
 import pages.*
 
 import javax.inject.Inject
@@ -31,7 +31,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.PaymentPlanDetailsView
 import scala.concurrent.duration.*
-import java.time.LocalDateTime
+
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Try
 

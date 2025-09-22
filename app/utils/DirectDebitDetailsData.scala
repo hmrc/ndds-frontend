@@ -19,7 +19,7 @@ package utils
 import models.responses.{ NddDDPaymentPlansResponse, NddPaymentPlan}
 import models.{DirectDebitDetails, NddDetails, NddResponse, UKBankAddress}
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 
 trait DirectDebitDetailsData {
 
@@ -111,97 +111,6 @@ trait DirectDebitDetailsData {
         submissionDateTime = LocalDateTime.of(2025, 12, 12, 12, 12))
     )
   )
-
-//  private val now = LocalDateTime.now()
-//
-//  private val currentDate = LocalDate.now()
-//
-//  val mockSinglePaymentPlanDetailResponse: PaymentPlanResponse =
-//    PaymentPlanResponse(
-//      directDebitDetails = DirectDebitDetails(
-//        bankSortCode = "123456",
-//        bankAccountNumber = "12345678",
-//        bankAccountName = "John Doe",
-//        auddisFlag = true
-//      ),
-//      paymentPlanDetails = PaymentPlanDetails(
-//      hodService = "NDD",
-//      planType = PaymentPlanType.SinglePaymentPlan.toString,
-//      paymentReference = "paymentReference",
-//      submissionDateTime = now.minusDays(5),
-//      scheduledPaymentAmount = 120.00,
-//      scheduledPaymentStartDate = currentDate.plusDays(5),
-//      initialPaymentStartDate = None,
-//      initialPaymentAmount = None,
-//      scheduledPaymentEndDate = currentDate.plusMonths(6),
-//      scheduledPaymentFrequency = Some("Monthly"),
-//      suspensionStartDate = None,
-//      suspensionEndDate = None,
-//      balancingPaymentAmount = Some("£60.00"),
-//      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-//      totalLiability = Some("£780.00"),
-//      paymentPlanEditable = true
-//    )
-
-//  val mockBudgetPaymentPlanDetailResponse: PaymentPlanDetailsResponse =
-//    PaymentPlanDetailsResponse(
-//      hodService = "NDD",
-//      planType = PaymentPlanType.BudgetPaymentPlan.toString,
-//      paymentReference = "paymentReference",
-//      submissionDateTime = now.minusDays(5),
-//      scheduledPaymentAmount = 120.00,
-//      scheduledPaymentStartDate = currentDate.plusDays(5),
-//      initialPaymentStartDate = None,
-//      initialPaymentAmount = None,
-//      scheduledPaymentEndDate = currentDate.plusMonths(6),
-//      scheduledPaymentFrequency = Some("Monthly"),
-//      suspensionStartDate = None,
-//      suspensionEndDate = None,
-//      balancingPaymentAmount = Some("£60.00"),
-//      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-//      totalLiability = Some("£780.00"),
-//      paymentPlanEditable = true
-//    )
-//
-//  val mockVariablePaymentPlanDetailResponse: PaymentPlanDetailsResponse =
-//    PaymentPlanDetailsResponse(
-//      hodService = "NDD",
-//      planType = PaymentPlanType.VariablePaymentPlan.toString,
-//      paymentReference = "paymentReference",
-//      submissionDateTime = now.minusDays(5),
-//      scheduledPaymentAmount = 120.00,
-//      scheduledPaymentStartDate = currentDate.plusDays(5),
-//      initialPaymentStartDate = None,
-//      initialPaymentAmount = None,
-//      scheduledPaymentEndDate = currentDate.plusMonths(6),
-//      scheduledPaymentFrequency = Some("Monthly"),
-//      suspensionStartDate = None,
-//      suspensionEndDate = None,
-//      balancingPaymentAmount = Some("£60.00"),
-//      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-//      totalLiability = Some("£780.00"),
-//      paymentPlanEditable = true
-//    )
-//
-//  val mockTaxCreditRepaymentPlanDetailResponse: PaymentPlanDetailsResponse =
-//    PaymentPlanDetailsResponse(
-//      hodService = "NDD",
-//      planType = PaymentPlanType.TaxCreditRepaymentPlan.toString,
-//      paymentReference = "paymentReference",
-//      submissionDateTime = now.minusDays(5),
-//      scheduledPaymentAmount = 120.00,
-//      scheduledPaymentStartDate = currentDate.plusDays(5),
-//      initialPaymentStartDate = None,
-//      initialPaymentAmount = None,
-//      scheduledPaymentEndDate = currentDate.plusMonths(6),
-//      scheduledPaymentFrequency = Some("Monthly"),
-//      suspensionStartDate = None,
-//      suspensionEndDate = None,
-//      balancingPaymentAmount = Some("£60.00"),
-//      balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-//      totalLiability = Some("£780.00"),
-//      paymentPlanEditable = true
-//    )
 }
 
 
