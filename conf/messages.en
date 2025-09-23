@@ -176,6 +176,53 @@ paymentPlanType.taxCreditRepaymentPlan = A Tax Credit repayment plan
 paymentPlanType.checkYourAnswersLabel = What type of payment plan are you selecting?
 paymentPlanType.error.required = Select one option.
 paymentPlanType.change.hidden = PaymentPlanType
+paymentPlan.collapsable = Help choosing your payment plan type
+
+
+
+
+
+paymentPlan.collapsable.mgd          = <b>Select payment plan (Machine Games Duty)<b>
+paymentPlan.collapsable.mgd.p1       =
+paymentPlan.collapsable.mgd.single   = <b>Single payment plan<b>
+paymentPlan.collapsable.mgd.p2       =
+paymentPlan.collapsable.mgd.variable = <b>Variable payment plan<b>
+paymentPlan.collapsable.mgd.p3       =
+paymentPlan.collapsable.mgd.p4       =
+paymentPlan.collapsable.mgd.p5       =
+paymentPlan.collapsable.mgd.p6       =
+paymentPlan.collapsable.mgd.b1       =
+paymentPlan.collapsable.mgd.b2       =
+paymentPlan.collapsable.mgd.b3       =
+paymentPlan.collapsable.mgd.b4       =
+
+paymentPlan.collapsable.sa        = <b>Select payment plan (Self Assessment)<b>
+paymentPlan.collapsable.sa.p1     = There are two different payment plans available: single payment plan, and the budget payment plan. Select your payment plan then click 'Next'.
+paymentPlan.collapsable.sa.single = <b>Single payment plan<b>
+paymentPlan.collapsable.sa.p2     = If your liability is due, you can make a single payment on a specific date.
+paymentPlan.collapsable.sa.budget = <b>BudgetPayment plan<b>
+paymentPlan.collapsable.sa.p3     = If you want to pay in advance of your due liability you can set up a budget payment plan. This allows you to make regular payments towards a future Self Assessment liability. It helps reduce the amount you have to pay on the due date by spreading your payments.
+paymentPlan.collapsable.sa.p4     = HMRC collect payments by Direct Debit, as instructed by you, and the advance payments reduce what you have to pay on 31 January and 31 July. You manage the budget payment plan online and you:
+paymentPlan.collapsable.sa.b1     = decide the regular weekly or monthly amount you want to pay
+paymentPlan.collapsable.sa.b2     = can change your regular payment amount
+paymentPlan.collapsable.sa.b3     = are free to take a break and suspend payment
+paymentPlan.collapsable.sa.b4     = can cancel the plan at any time
+paymentPlan.collapsable.sa.p5     = The budget payment plan does not mean you can delay payment beyond the due date. You must ensure any balance still owing (after taking into account your budget payment plan payments) is paid by the due date. Any payment made after the due date will attract interest.
+paymentPlan.collapsable.sa.p6     = If you currently owe money for Self Assessment telephone the HMRC Payment Helpline on 0845 366 1208. They will advise you about bringing your affairs up to date and tell you how a budget payment plan can help you.
+
+paymentPlan.collapsable.tc        = <b>Select payment plan (Tax Credits)<b>
+paymentPlan.collapsable.tc.p1     = There are two different payment plans: the single payment plan, and the Tax Credit repayment plan. Select your payment plan to use to repay your Tax Credit overpayment, then click 'Next'.
+paymentPlan.collapsable.tc.single = <b>Single payment plan<b>
+paymentPlan.collapsable.tc.p2     = This plan allows you to set up a single payment, on a specific date, to ensure payment reaches HMRC on time.
+paymentPlan.collapsable.credit    = <b>Tax Credit repayment plan<b>
+paymentPlan.collapsable.tc.p3     = You can spread your Tax Credit repayment over a 12-month period.
+paymentPlan.collapsable.tc.p4     = To set up your repayment plan online:
+paymentPlan.collapsable.tc.b1     = let HMRC know your payment reference, and the amount you have to pay. Note: Your payment reference and the amount due are on the green 'Payslip' at the foot of your 'Notice to Pay'
+paymentPlan.collapsable.tc.b2     = choose the date (within 30 days) you want to start paying from
+paymentPlan.collapsable.tc.p5     = Then, the Confirmation/Advance Notice summarises:
+paymentPlan.collapsable.tc.b3     = 12 payments to be collected
+paymentPlan.collapsable.tc.b4     = the dates payments will leave your bank account
+paymentPlan.collapsable.tc.p6     = If neither of these two plans are suitable, telephone the HMRC Payment Helpline on 0845 366 1208.
 
 paymentReference.title = What is your payment reference?
 paymentReference.heading = What is your payment reference?
