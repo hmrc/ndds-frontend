@@ -19,23 +19,21 @@ package viewmodels.checkAnswers
 import controllers.routes
 import models.{CheckMode, UserAnswers}
 import pages.AmendPlanStartDatePage
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.DateTimeFormats.dateTimeFormat
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
+
+import java.time.format.DateTimeFormatter
 
 object AmendPlanStartDateSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPlanStartDatePage).map {
       answer =>
-
-        implicit val lang: Lang = messages.lang
-
         SummaryListRowViewModel(
           key     = "amendPlanStartDate.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.format(dateTimeFormat())),
+          ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
           actions = Seq(
             ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("amendPlanStartDate.change.hidden"))

@@ -410,7 +410,7 @@ confirmPaymentPlanAmendment.directDebit.sortCode = Bank sort code
 confirmPaymentPlanAmendment.amendPaymentPlan.h2 = Amended Payment plan details
 confirmPaymentPlanAmendment.amendPaymentPlan.planType = Plan type
 confirmPaymentPlanAmendment.amendPaymentPlan.paymentFor = Payment for
-confirmPaymentPlanAmendment.amendPaymentPlan.paymentReference = Payment reference
+confirmPaymentPlanAmendment.amendPaymentPlan.paymentReference = Payment reference {0}
 confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount = Regular payment amount
 confirmPaymentPlanAmendment.amendPaymentPlan.paymentAmount.change = Change
 confirmPaymentPlanAmendment.amendPaymentPlan.startDate = Plan start date
@@ -421,8 +421,12 @@ confirmPaymentPlanAmendment.amendPaymentPlan.continueButton = Continue
 
 confirmAmendPaymentPlanType.checkYourAnswersLabel = Plan type
 confirmAmendPaymentPlanType.budgetPaymentPlan  = Budget payment
+confirmAmendPaymentPlanType.singlePaymentPlan = Single payment
+confirmAmendPaymentPlanType.summary.link = Why can't I edit all information?
+confirmAmendPaymentPlanType.summary.content = TODO
+
 amendPaymentFor.checkYourAnswersLabel = Payment for
 amendPaymentReference.checkYourAnswersLabel = Payment reference
 amendPlanStartDate.checkYourAnswersLabel = Plan start date
 amendPlanEndDate.checkYourAnswersLabel = Plane end date
- confirmAmendPaymentPlanType.singlePaymentPlan = Single payment
+amendPaymentAmount.checkYourAnswersLabel = Regular payment amount
