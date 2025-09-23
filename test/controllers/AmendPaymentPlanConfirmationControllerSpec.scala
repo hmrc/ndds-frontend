@@ -17,11 +17,11 @@
 package controllers
 
 import base.SpecBase
-import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import models.{DirectDebitDetails, NormalMode, UserAnswers}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.ArgumentMatchers.any
+import models.{NormalMode, UserAnswers}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{AmendPaymentPlanSourcePage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, PaymentAmountPage, PaymentReferencePage}
+import pages.{AmendPaymentPlanSourcePage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, PaymentAmountPage, PaymentReferencePage}
 import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -29,10 +29,9 @@ import play.api.test.Helpers.*
 import queries.DirectDebitReferenceQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import uk.gov.hmrc.govukfrontend.views.Aliases.SummaryList
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DirectDebitDetailsData
-import viewmodels.checkAnswers.{AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, AmendPaymentReferenceSummary, AmendPlanEndDateSummary, PaymentAmountSummary, RegularPaymentAmountSummary}
+import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
 
 import java.time.LocalDate
@@ -45,7 +44,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
     val mockService = mock[NationalDirectDebitService]
     val mockSessionRepository = mock[SessionRepository]
 
-    def createSummaryList(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
+    def createSummaryListForBudgetPaymentPlan(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
@@ -53,6 +52,17 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         RegularPaymentAmountSummary.row(userAnswers)(messages(app)),
         PaymentAmountSummary.row(userAnswers)(messages(app)),
         AmendPlanEndDateSummary.row(userAnswers)(messages(app))
+      ).flatten
+    }
+
+    def createSummaryListForOtherPaymentPlans(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
+      Seq(
+        AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
+        AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
+        AmendPaymentReferenceSummary.row(userAnswers)(messages(app)),
+        RegularPaymentAmountSummary.row(userAnswers)(messages(app)),
+        PaymentAmountSummary.row(userAnswers)(messages(app)),
+        AmendPlanStartDateSummary.row(userAnswers)(messages(app))
       ).flatten
     }
 
@@ -117,7 +127,82 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         when(mockService.retrieveAllDirectDebits(any())(any(), any()))
           .thenReturn(Future.successful(nddResponse))
 
-        val summaryListRows = createSummaryList(userAnswers, application)
+        val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, application)
+        val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
+
+        val result = route(application, request).value
+
+        val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
+        status(result) mustEqual OK
+
+        val directDebitDetails = nddResponse.directDebitList.head.toDirectDebitDetails
+
+        contentAsString(result) mustEqual view(NormalMode, directDebitReference, directDebitDetails, summaryListRows)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with a Single Payment Plan" in {
+      val directDebitReference = "122222"
+      val userAnswers =
+        emptyUserAnswers
+          .set(
+            DirectDebitReferenceQuery,
+            directDebitReference
+          )
+          .success
+          .value
+          .set(
+            AmendPaymentPlanTypePage,
+            "SinglePaymentPlan"
+          )
+          .success
+          .value
+          .set(
+            AmendPaymentPlanSourcePage,
+            "paymentPlaneSource"
+          )
+          .success
+          .value
+          .set(
+            PaymentReferencePage,
+            "paymentPlaneSource"
+          )
+          .success
+          .value
+          .set(
+            PaymentReferencePage,
+            "paymentReference"
+          )
+          .success
+          .value
+          .set(
+            PaymentAmountPage,
+            150.0
+          )
+          .success
+          .value
+          .set(
+            AmendPlanStartDatePage,
+            LocalDate.now().plusDays(4)
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(userAnswers)))
+        when(mockService.retrieveAllDirectDebits(any())(any(), any()))
+          .thenReturn(Future.successful(nddResponse))
+
+        val summaryListRows = createSummaryListForOtherPaymentPlans(userAnswers, application)
         val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
 
         val result = route(application, request).value
