@@ -169,7 +169,7 @@ directDebitSource.change.hidden = DirectDebitSource
 
 paymentPlanType.title = What type of payment plan are you selecting?
 paymentPlanType.heading = What type of payment plan are you selecting?
-paymentPlanType.singlePayment = A single payment
+paymentPlanType.singlePaymentPlan = A single payment
 paymentPlanType.variablePaymentPlan = A variable payment plan
 paymentPlanType.budgetPaymentPlan = A budget payment plan
 paymentPlanType.taxCreditRepaymentPlan = A Tax Credit repayment plan
