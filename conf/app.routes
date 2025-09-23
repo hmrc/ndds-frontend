@@ -132,4 +132,4 @@ POST       /change-payment-plan/end-date                controllers.AmendPlanEnd
 
 GET        /payment-plan/confirm-plan-details           controllers.ConfirmPaymentPlanAmendmentController.onPageLoad()
 
-GET        /payment-plan/payment_plan_confirmation      controllers.PaymentPlanConfirmationController.onPageLoad()
+GET        /payment-plan/payment-plan-confirmation      controllers.AmendPaymentPlanUpdateController.onPageLoad()

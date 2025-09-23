@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import views.html.components._
+@import views.html.components.*
 
 @this(
         layout: templates.Layout,
@@ -30,54 +30,54 @@
 
 @(referenceNumber: String, formattedPaymentAmount: String, formattedStartDate: String, formattedEndDate: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("paymentPlanConfirmation.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
     @confirmationPanel(
-        title = messages("paymentPlanConfirmation.panel.title"),
+        title = messages("amendPaymentPlanUpdate.panel.title"),
         body = Html(
-                    s"${messages("paymentPlanConfirmation.panel.body1")}" +
-                    s"${messages("paymentPlanConfirmation.panel.strong",referenceNumber)}" +
-                    s"${messages("paymentPlanConfirmation.panel.body2")}"
+                    s"${messages("amendPaymentPlanUpdate.panel.body1")}" +
+                    s"${messages("amendPaymentPlanUpdate.panel.strong",referenceNumber)}" +
+                    s"${messages("amendPaymentPlanUpdate.panel.body2")}"
                 ),
         classes = "govuk-!-margin-bottom-2"
     )
 
-    @paragraph(messages("paymentPlanConfirmation.confirm"))
+    @paragraph(messages("amendPaymentPlanUpdate.confirm"))
 
-    @header2("paymentPlanConfirmation.h1")
+    @header2("amendPaymentPlanUpdate.h1")
 
-    @paragraph(messages("paymentPlanConfirmation.p1"))
+    @paragraph(messages("amendPaymentPlanUpdate.p1"))
 
     <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("paymentPlanConfirmation.l1", formattedPaymentAmount, formattedStartDate)</li>
-        <li>@messages("paymentPlanConfirmation.l2")</li>
-        <li>@messages("paymentPlanConfirmation.l3")</li>
+        <li>@messages("amendPaymentPlanUpdate.l1", formattedPaymentAmount, formattedStartDate)</li>
+        <li>@messages("amendPaymentPlanUpdate.l2")</li>
+        <li>@messages("amendPaymentPlanUpdate.l3")</li>
     </ul>
 
     @govukInsetText(
         InsetText(
-            content = Text(messages("paymentPlanConfirmation.pleaseNote"))
+            content = Text(messages("amendPaymentPlanUpdate.pleaseNote"))
         )
     )
 
-    @header2("paymentPlanConfirmation.h2")
+    @header2("amendPaymentPlanUpdate.h2")
 
     @govukSummaryList(SummaryList(
         rows = Seq(
             SummaryListRow(
-                key = Key(Text(messages("paymentPlanConfirmation.reference"))),
+                key = Key(Text(messages("amendPaymentPlanUpdate.reference"))),
                 value = Value(Text(referenceNumber))
             ),
             SummaryListRow(
-                key = Key(Text(messages("paymentPlanConfirmation.amount"))),
+                key = Key(Text(messages("amendPaymentPlanUpdate.amount"))),
                 value = Value(Text(formattedPaymentAmount))
             ),
             SummaryListRow(
-                key = Key(Text(messages("paymentPlanConfirmation.startDate"))),
+                key = Key(Text(messages("amendPaymentPlanUpdate.startDate"))),
                 value = Value(Text(formattedStartDate))
             ),
             SummaryListRow(
-                key = Key(Text(messages("paymentPlanConfirmation.endDate"))),
+                key = Key(Text(messages("amendPaymentPlanUpdate.endDate"))),
                 value = Value(Text(formattedEndDate))
             )
         )
@@ -85,13 +85,13 @@
 
     @govukDetails(
         Details(
-            summary = Text(messages("paymentPlanConfirmation.print")),
-            content =Text(messages("paymentPlanConfirmation.printDetails"))
+            summary = Text(messages("amendPaymentPlanUpdate.print")),
+            content =Text(messages("amendPaymentPlanUpdate.printDetails"))
         )
     )
 
     @govukButton(Button(
         href = Some(routes.DirectDebitSummaryController.onPageLoad().url),
-        content = Text(messages("paymentPlanConfirmation.close"))
+        content = Text(messages("amendPaymentPlanUpdate.close"))
     ))
 }

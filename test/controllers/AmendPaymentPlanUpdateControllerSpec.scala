@@ -19,13 +19,13 @@ package controllers
 import base.SpecBase
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.PaymentPlanConfirmationView
+import views.html.AmendPaymentPlanUpdateView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
 
-class PaymentPlanConfirmationControllerSpec extends SpecBase {
+class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
 
   "PaymentPlanConfirmation Controller" - {
 
@@ -44,11 +44,11 @@ class PaymentPlanConfirmationControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.PaymentPlanConfirmationController.onPageLoad().url)
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[PaymentPlanConfirmationView]
+        val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(referenceNumber, formattedPaymentAmount, formattedStartDate, formattedEndDate)(request, messages(application)).toString
@@ -60,7 +60,7 @@ class PaymentPlanConfirmationControllerSpec extends SpecBase {
 //      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 //
 //      running(application) {
-//        val request = FakeRequest(GET, routes.PaymentPlanConfirmationController.onPageLoad().url)
+//        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
 //        val result = intercept[Exception](route(application, request).value.futureValue)
 //
 //        result.getMessage must include("Missing generated Payment reference number")
