@@ -18,10 +18,9 @@ package controllers
 
 import controllers.actions.*
 import models.{Mode, UserAnswers}
-import pages.AmendPaymentPlanTypePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.DirectDebitReferenceQuery
+import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery}
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
@@ -51,27 +50,22 @@ class AmendPaymentPlanConfirmationController @Inject()(
               .find(_.ddiRefNumber == reference).map(_.toDirectDebitDetails)
             firstMatchingDebit match {
               case Some(debit) => {
-
-                val rows = userAnswers.get(AmendPaymentPlanTypePage) match {
+                val rows = userAnswers.get(PaymentPlanTypeQuery) match {
                   case Some("budgetPaymentPlan") =>
                     Seq(
                       AmendPaymentPlanTypeSummary.row(userAnswers),
                       AmendPaymentPlanSourceSummary.row(userAnswers),
                       AmendPaymentReferenceSummary.row(userAnswers),
-                      RegularPaymentAmountSummary.row(userAnswers),
-                      PaymentAmountSummary.row(userAnswers),
+                      AmendRegularPaymentAmountSummary.row(userAnswers),
                       AmendPlanEndDateSummary.row(userAnswers),
                     ).flatten
-
                   case _ =>
                     Seq(
                       AmendPaymentPlanTypeSummary.row(userAnswers),
                       AmendPaymentPlanSourceSummary.row(userAnswers),
                       AmendPaymentReferenceSummary.row(userAnswers),
-                      RegularPaymentAmountSummary.row(userAnswers),
-                      PaymentAmountSummary.row(userAnswers),
+                      AmendRegularPaymentAmountSummary.row(userAnswers),
                       AmendPlanStartDateSummary.row(userAnswers),
-
                     ).flatten
                 }
 
@@ -118,7 +112,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
       //            .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
       //      }
       //    }
-      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad())) // change to next will keep commented code as we may need in next ticket
+      Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
   //  }
   }
 

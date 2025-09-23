@@ -56,10 +56,10 @@ class PaymentPlanDetailsController @Inject()(
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
-            updatedAnswer <- Future.fromTry(updatedAnswers.set(PaymentReferencePage, planDetail.paymentReference))
-            updatedAnswer <- Future.fromTry(updatedAnswer.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(BigDecimal(0))))
-            updatedAnswer <- Future.fromTry(updatedAnswer.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
-            cachedAnswers <- Future.fromTry(updatedAnswer.set(
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferencePage, planDetail.paymentReference))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(BigDecimal(0))))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
+            cachedAnswers <- Future.fromTry(updatedAnswers.set(
               YourBankDetailsPage,
               YourBankDetailsWithAuddisStatus(
                 accountHolderName = directDebit.bankAccountName,

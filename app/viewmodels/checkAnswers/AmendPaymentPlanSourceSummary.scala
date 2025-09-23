@@ -29,9 +29,8 @@ object AmendPaymentPlanSourceSummary  {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPaymentPlanSourcePage).map {
       answer =>
-
         SummaryListRowViewModel(
-          key     = "amendPaymentFor.checkYourAnswersLabel",
+          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor",
           value   = ValueViewModel(HtmlFormat.escape(answer.toUpperCase).toString),
           actions = Seq.empty
         )

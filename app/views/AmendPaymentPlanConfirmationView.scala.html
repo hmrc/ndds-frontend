@@ -30,18 +30,18 @@
 
 @(mode: Mode, directDebitReference: String, directDebitDetails: DirectDebitDetails, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("confirmPaymentPlanAmendment.title"))) {
+@layout(pageTitle = titleNoForm(messages("amendPaymentPlanConfirmation.title"))) {
 @formHelper(action = routes.AmendPaymentPlanConfirmationController.onSubmit(mode), Symbol("autoComplete") -> "off") {
-        @header1("confirmPaymentPlanAmendment.heading")
-        @paragraph("confirmPaymentPlanAmendment.p1")
+        @header1("amendPaymentPlanConfirmation.heading")
+        @paragraph("amendPaymentPlanConfirmation.p1")
 
-        <h2 class="govuk-heading-m">@messages("confirmPaymentPlanAmendment.directDebit.h2")</h2>
+        <h2 class="govuk-heading-m">@messages("amendPaymentPlanConfirmation.directDebit.h2")</h2>
 
         @govukSummaryList(SummaryList(
             rows = Seq(
                 SummaryListRow(
                     key = Key(
-                        content = messages("confirmPaymentPlanAmendment.directDebit.reference")
+                        content = messages("amendPaymentPlanConfirmation.directDebit.reference")
                     ),
                     value = Value(
                         content = HtmlContent(directDebitDetails.directDebitReference)
@@ -49,7 +49,7 @@
                 ),
                 SummaryListRow(
                     key = Key(
-                        content = messages("confirmPaymentPlanAmendment.directDebit.accountNumber")
+                        content = messages("amendPaymentPlanConfirmation.directDebit.accountNumber")
                     ),
                     value = Value(
                         content = HtmlContent(maskAccountNumber(directDebitDetails.accountNumber))
@@ -57,7 +57,7 @@
                 ),
                 SummaryListRow(
                     key = Key(
-                        content = messages("confirmPaymentPlanAmendment.directDebit.sortCode")
+                        content = messages("amendPaymentPlanConfirmation.directDebit.sortCode")
                     ),
                     value = Value(
                         content = HtmlContent(maskSortCode(directDebitDetails.sortCode))
@@ -66,19 +66,19 @@
             )
         ))
 
-        <h2 class="govuk-heading-m">@messages("confirmPaymentPlanAmendment.amendPaymentPlan.h2")</h2>
-            @govukSummaryList(SummaryList(
-                    card = Some(Card(
-                    title = Some(CardTitle(
-                    content = Text("Payment reference 115002323023")
-                    ))
-                    )),
-            rows = rows
+        <h2 class="govuk-heading-m">@messages("amendPaymentPlanConfirmation.amendPaymentPlan.h2")</h2>
 
+        @govukSummaryList(SummaryList(
+            card = Some(Card(
+                title = Some(CardTitle(
+                    content = Text("Payment reference: 115002323023")
+                ))
+            )),
+            rows = rows
         ))
 
         @govukButton(
-            ButtonViewModel(messages("confirmPaymentPlanAmendment.amendPaymentPlan.continueButton"))
+            ButtonViewModel(messages("amendPaymentPlanConfirmation.amendPaymentPlan.continueButton"))
         )
     }
 }

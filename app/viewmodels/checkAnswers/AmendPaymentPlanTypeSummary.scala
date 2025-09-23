@@ -30,15 +30,9 @@ object AmendPaymentPlanTypeSummary {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPaymentPlanTypePage).map {
       answer =>
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"confirmAmendPaymentPlanType.$answer"))
-          )
-        )
-
         SummaryListRowViewModel(
-          key = "confirmAmendPaymentPlanType.checkYourAnswersLabel",
-          value = value,
+          key = "amendPaymentPlanConfirmation.amendPaymentPlan.planType",
+          value = ValueViewModel(HtmlFormat.escape(answer).toString),
           actions = Seq.empty
         )
     }

@@ -34,11 +34,11 @@ object AmendPlanEndDateSummary  {
         implicit val lang: Lang = messages.lang
 
         SummaryListRowViewModel(
-          key     = "amendPlanEndDate.checkYourAnswersLabel",
+          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
           value   = ValueViewModel(answer.format(dateTimeFormat())),
           actions = Seq(
             ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("amendPlanEndDate.change.hidden"))
+              .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
           )
         )
     }
