@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.*
-import models.{Mode, UserAnswers}
+import models.Mode
 import pages.AmendPaymentPlanTypePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -41,9 +41,9 @@ class AmendPaymentPlanConfirmationController @Inject()(
                                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+      val userAnswers = request.userAnswers
       userAnswers.get(DirectDebitReferenceQuery) match {
         case Some(reference) =>
           nddService.retrieveAllDirectDebits(request.userId) map { directDebitDetailsData =>

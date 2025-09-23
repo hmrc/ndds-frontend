@@ -17,19 +17,66 @@
 package controllers
 
 import base.SpecBase
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import models.NormalMode
+import org.mockito.Mockito.{verify, when}
+import org.scalatestplus.mockito.MockitoSugar.mock
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.DirectDebitReferenceQuery
+import repositories.SessionRepository
+import services.NationalDirectDebitService
+import utils.DirectDebitDetailsData
 
-class AmendPaymentPlanConfirmationControllerSpec extends SpecBase {
+import scala.concurrent.Future
+
+class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDebitDetailsData{
 
   "PaymentPlanDetails Controller" - {
+
+    val mockService = mock[NationalDirectDebitService]
+    val mockSessionRepository = mock[SessionRepository]
 
     "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides().build()
 
       running(application) {
+
+        val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recover page when DirectDebitReferenceQuery is not correct" in {
+      val directDebitReference = "invalid ref number"
+      val userAnswersWithDirectDebitReference =
+        emptyUserAnswers
+          .set(
+            DirectDebitReferenceQuery,
+            directDebitReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
+        when(mockService.retrieveAllDirectDebits(any())(any(), any()))
+          .thenReturn(Future.successful(nddResponse))
 
         val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
 
