@@ -18,25 +18,25 @@ package controllers
 
 import controllers.actions.*
 import models.{Mode, UserAnswers}
-import pages.{AmendPaymentPlanTypePage, PaymentReferencePage}
+import pages.AmendPaymentPlanTypePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.DirectDebitReferenceQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
-import views.html.ConfirmPaymentPlanAmendmentView
+import views.html.AmendPaymentPlanConfirmationView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ConfirmPaymentPlanAmendmentController @Inject()(
+class AmendPaymentPlanConfirmationController @Inject()(
                                                        override val messagesApi: MessagesApi,
                                                        identify: IdentifierAction,
                                                        getData: DataRetrievalAction,
                                                        requireData: DataRequiredAction,
                                                        val controllerComponents: MessagesControllerComponents,
-                                                       view: ConfirmPaymentPlanAmendmentView,
+                                                       view: AmendPaymentPlanConfirmationView,
                                                        nddService: NationalDirectDebitService
                                                      )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport {
@@ -87,9 +87,9 @@ class ConfirmPaymentPlanAmendmentController @Inject()(
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    implicit val ua: UserAnswers = request.userAnswers
+   // implicit val ua: UserAnswers = request.userAnswers
 
-    nddService.generateNewDdiReference(PaymentReferencePage).flatMap { reference =>
+   // nddService.generateNewDdiReference(PaymentReferencePage).flatMap { reference =>
       //      val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
       //
       //      nddService.submitChrisData(chrisRequest).flatMap { success =>
@@ -118,8 +118,8 @@ class ConfirmPaymentPlanAmendmentController @Inject()(
       //            .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
       //      }
       //    }
-      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad())) // change to next
-    }
+      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad())) // change to next will keep commented code as we may need in next ticket
+  //  }
   }
 
 }

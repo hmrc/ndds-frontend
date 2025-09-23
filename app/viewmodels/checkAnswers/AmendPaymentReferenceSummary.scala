@@ -16,8 +16,7 @@
 
 package viewmodels.checkAnswers
 
-import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.UserAnswers
 import pages.PaymentReferencePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat

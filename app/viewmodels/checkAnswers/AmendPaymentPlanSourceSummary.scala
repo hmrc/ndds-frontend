@@ -16,9 +16,8 @@
 
 package viewmodels.checkAnswers
 
-import controllers.routes
-import models.{CheckMode, UserAnswers}
-import pages.{AmendPaymentPlanSourcePage, PaymentReferencePage}
+import models.UserAnswers
+import pages.AmendPaymentPlanSourcePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
