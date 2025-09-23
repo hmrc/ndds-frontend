@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.AmendPaymentAmountFormProvider
-import models.NormalMode
+import models.{NormalMode, PaymentPlanType}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -27,7 +27,9 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.PaymentPlanTypeQuery
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import views.html.AmendPaymentAmountView
 
 import scala.concurrent.Future
@@ -39,24 +41,64 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
   private val form = formProvider()
 
   private def onwardRoute = Call("GET", "/foo")
-
   private val validAnswer = BigDecimal(1.00).setScale(2, RoundingMode.HALF_UP)
-
   private lazy val paymentPlanAmountRoute = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
 
   "PaymentPlanAmount Controller" - {
     lazy val paymentPlanRoute = routes.PaymentPlanDetailsController.onPageLoad().url
-    "must return OK and the correct view for a GET" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+    val mockService = mock[NationalDirectDebitService]
+
+    "must return OK and the correct view for a GET with SinglePaymentPlan" in {
+      val userAnswersWithSinglePaymentPlan =
+        emptyUserAnswers.set(PaymentPlanTypeQuery, PaymentPlanType.SinglePaymentPlan.toString).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePaymentPlan))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val request = FakeRequest(GET, paymentPlanAmountRoute)
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[AmendPaymentAmountView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
+      val userAnswersWithBudgetPaymentPlan =
+        emptyUserAnswers.set(PaymentPlanTypeQuery, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPaymentPlan))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val request = FakeRequest(GET, paymentPlanAmountRoute)
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[AmendPaymentAmountView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+      val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanAmountRoute)
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[AmendPaymentAmountView]
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
@@ -95,18 +137,6 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request = FakeRequest(GET, paymentPlanAmountRoute)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 

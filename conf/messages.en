@@ -81,7 +81,7 @@ personalOrBusinessAccount.heading = Is this a personal or business account?
 personalOrBusinessAccount.personal = Personal
 personalOrBusinessAccount.business = Business
 personalOrBusinessAccount.checkYourAnswersLabel = Is this a personal or business account?
-personalOrBusinessAccount.error.required = Select an account type
+personalOrBusinessAccount.error.required = Select an account type.
 personalOrBusinessAccount.change.hidden = PersonalOrBusinessAccount
 
 yourBankDetails.title = What are your bank details?
@@ -360,13 +360,13 @@ paymentPlanDetails.details.planEndDate = Plan end date
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 
-amendPlanStartDate.title = start date page
+amendPlanStartDate.title = Plan start date
 amendPlanStartDate.heading = What date are you starting this payment plan?
-amendPlanStartDate.hint = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
+amendPlanStartDate.p1 = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
 amendPlanStartDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
-amendPlanStartDate.hintDate = e.g. 15 5 2025
+amendPlanStartDate.hint = e.g. 15 5 2025
 
-amendPlanEndDate.title = end date page
+amendPlanEndDate.title = Plan end date
 amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026

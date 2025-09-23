@@ -32,7 +32,6 @@ class PaymentPlanConfirmationController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: PaymentPlanConfirmationView
                                      ) extends FrontendBaseController with I18nSupport {

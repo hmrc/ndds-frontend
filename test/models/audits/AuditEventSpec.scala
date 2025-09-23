@@ -17,7 +17,7 @@
 package models.audits
 
 import base.SpecBase
-import models.PaymentPlanType.{BudgetPaymentPlan, SinglePayment, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import play.api.libs.json.Json
 
 class AuditEventSpec extends SpecBase {
@@ -26,7 +26,7 @@ class AuditEventSpec extends SpecBase {
     "paymentPlanTypeWrites method" - {
       "must write PaymentPlanType correctly" in {
         val testCases = Seq(
-          SinglePayment -> "SINGLE",
+          SinglePaymentPlan -> "SINGLE",
           VariablePaymentPlan -> "VPP",
           BudgetPaymentPlan -> "BUDGET",
           TaxCreditRepaymentPlan -> "TIME_TO_PAY"

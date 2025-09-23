@@ -23,6 +23,7 @@ import pages.*
 import models.*
 import models.DirectDebitSource.*
 import models.PaymentPlanType.*
+import queries.PaymentPlanTypeQuery
 
 @Singleton
 class Navigator @Inject()() {
@@ -44,7 +45,6 @@ class Navigator @Inject()() {
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
     case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers)
-    //TODO: Change the route to AP2 screen once built for AmendPlanStartDatePage and AmendPlanEndDatePage
     case AmendPlanStartDatePage => _ => routes.JourneyRecoveryController.onPageLoad()
     case AmendPlanEndDatePage => _ => routes.JourneyRecoveryController.onPageLoad()
     case _ => _ => routes.LandingController.onPageLoad()
@@ -79,11 +79,11 @@ class Navigator @Inject()() {
     val optPaymentType = userAnswers.get(PaymentPlanTypePage)
     sourceType match {
       case Some(OL) | Some(NIC) | Some(CT) | Some(SDLT) | Some(VAT) => routes.PaymentAmountController.onPageLoad(NormalMode)
-      case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+      case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
-      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+      case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
-      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.SinglePayment) =>
+      case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.VariablePaymentPlan) =>
         routes.PlanStartDateController.onPageLoad(NormalMode)
@@ -124,11 +124,11 @@ class Navigator @Inject()() {
   }
   
   private def checkPaymentPlanLogic(userAnswers: UserAnswers): Call ={
-    val paymentPlanType = userAnswers.get(PaymentPlanTypePage)
-    if (paymentPlanType.contains(PaymentPlanType.SinglePayment)) {
-      routes.AmendPlanStartDateController.onPageLoad(NormalMode)
-    } else {
-      routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+    val paymentPlanType = userAnswers.get(PaymentPlanTypeQuery)
+    paymentPlanType match {
+      case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+      case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(NormalMode)
+      case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }
 }

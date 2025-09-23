@@ -36,7 +36,7 @@ case class ChrisSubmissionRequest(
                                    yearEndAndMonth: Option[YearEndAndMonth],
                                    bankDetailsAddress: BankAddress,
                                    ddiReferenceNo: String,
-                                   paymentReference: Option[String],
+                                   paymentReference: String,
                                    bankName: String,
                                    totalAmountDue: Option[BigDecimal],
                                    paymentAmount: Option[BigDecimal],

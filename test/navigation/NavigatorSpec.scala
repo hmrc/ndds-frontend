@@ -98,13 +98,13 @@ class NavigatorSpec extends SpecBase {
         }
       }
 
-      "must go from PaymentReferencePage to PaymentAmountController for MGD, SA, TC with SinglePayment" in {
+      "must go from PaymentReferencePage to PaymentAmountController for MGD, SA, TC with SinglePaymentPlan" in {
         val sources = Seq(MGD, SA, TC)
 
         sources.foreach { source =>
           val ua = userAnswers
             .set(DirectDebitSourcePage, source).success.value
-            .set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
+            .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan).success.value
           navigator.nextPage(PaymentReferencePage, NormalMode, ua) mustBe
             routes.PaymentAmountController.onPageLoad(NormalMode)
         }
@@ -129,7 +129,7 @@ class NavigatorSpec extends SpecBase {
         sources.foreach { source =>
           val ua = userAnswers
             .set(DirectDebitSourcePage, source).success.value
-            .set(PaymentPlanTypePage, PaymentPlanType.SinglePayment).success.value
+            .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan).success.value
           navigator.nextPage(PaymentAmountPage, NormalMode, ua) mustBe
             routes.PaymentDateController.onPageLoad(NormalMode)
         }
@@ -198,12 +198,12 @@ class NavigatorSpec extends SpecBase {
 
       "must go from PlanStartDatePage to JourneyRecoveryController for all other combinations" in {
         val invalidCombinations = Seq(
-          (SA, PaymentPlanType.SinglePayment),
-          (MGD, PaymentPlanType.SinglePayment),
+          (SA, PaymentPlanType.SinglePaymentPlan),
+          (MGD, PaymentPlanType.SinglePaymentPlan),
           (MGD, PaymentPlanType.BudgetPaymentPlan),
-          (TC, PaymentPlanType.SinglePayment),
+          (TC, PaymentPlanType.SinglePaymentPlan),
           (TC, PaymentPlanType.VariablePaymentPlan),
-          (CT, PaymentPlanType.SinglePayment),
+          (CT, PaymentPlanType.SinglePaymentPlan),
           (CT, PaymentPlanType.VariablePaymentPlan),
           (CT, PaymentPlanType.BudgetPaymentPlan),
           (CT, PaymentPlanType.TaxCreditRepaymentPlan)
