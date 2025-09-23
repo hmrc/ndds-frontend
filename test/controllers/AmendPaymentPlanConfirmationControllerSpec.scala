@@ -37,7 +37,7 @@ import views.html.AmendPaymentPlanConfirmationView
 import java.time.LocalDate
 import scala.concurrent.Future
 
-class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDebitDetailsData{
+class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDebitDetailsData {
 
   "PaymentPlanDetails Controller" - {
 
@@ -125,7 +125,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .success
             .value
             .set(
-              AmendPlanEndDatePage,
+              AmendPlanStartDatePage,
               LocalDate.now().plusDays(4)
             )
             .success
@@ -155,129 +155,95 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         }
       }
 
-//      "must return OK and the correct view for a GET with a Single Payment Plan" in {
-//        val directDebitReference = "122222"
-//        val userAnswers =
-//          emptyUserAnswers
-//            .set(
-//              DirectDebitReferenceQuery,
-//              directDebitReference
-//            )
-//            .success
-//            .value
-//            .set(
-//              AmendPaymentPlanTypePage,
-//              "SinglePaymentPlan"
-//            )
-//            .success
-//            .value
-//            .set(
-//              AmendPaymentPlanSourcePage,
-//              "paymentPlaneSource"
-//            )
-//            .success
-//            .value
-//            .set(
-//              PaymentReferencePage,
-//              "paymentPlaneSource"
-//            )
-//            .success
-//            .value
-//            .set(
-//              PaymentReferencePage,
-//              "paymentReference"
-//            )
-//            .success
-//            .value
-//            .set(
-//              PaymentAmountPage,
-//              150.0
-//            )
-//            .success
-//            .value
-//            .set(
-//              AmendPlanStartDatePage,
-//              LocalDate.now().plusDays(4)
-//            )
-//            .success
-//            .value
-//
-//        val application = applicationBuilder(userAnswers = Some(userAnswers))
-//          .overrides(
-//            bind[SessionRepository].toInstance(mockSessionRepository),
-//            bind[NationalDirectDebitService].toInstance(mockService)
-//          )
-//          .build()
-//
-//        running(application) {
-//
-//          when(mockSessionRepository.get(any()))
-//            .thenReturn(Future.successful(Some(userAnswers)))
-//          when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-//            .thenReturn(Future.successful(nddResponse))
-//
-//          val summaryListRows = createSummaryListForOtherPaymentPlans(userAnswers, application)
-//          val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
-//
-//          val result = route(application, request).value
-//
-//          val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
-//          status(result) mustEqual OK
-//
-//          val directDebitDetails = nddResponse.directDebitList.head.toDirectDebitDetails
-//
-//          contentAsString(result) mustEqual view(NormalMode, directDebitReference, directDebitDetails, summaryListRows)(request, messages(application)).toString
-//        }
-//      }
-//
-//      "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
-//        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-//          .overrides().build()
-//
-//        running(application) {
-//
-//          val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
-//
-//          val result = route(application, request).value
-//
-//          status(result) mustEqual SEE_OTHER
-//          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-//        }
-//      }
-//
-//      "must redirect to Journey Recover page when DirectDebitReferenceQuery is not correct" in {
-//        val directDebitReference = "invalid ref number"
-//        val userAnswersWithDirectDebitReference =
-//          emptyUserAnswers
-//            .set(
-//              DirectDebitReferenceQuery,
-//              directDebitReference
-//            )
-//            .success
-//            .value
-//
-//        val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference))
-//          .overrides(
-//            bind[SessionRepository].toInstance(mockSessionRepository),
-//            bind[NationalDirectDebitService].toInstance(mockService)
-//          )
-//          .build()
-//
-//        running(application) {
-//
-//          when(mockSessionRepository.get(any()))
-//            .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
-//          when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-//            .thenReturn(Future.successful(nddResponse))
-//
-//          val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
-//
-//          val result = route(application, request).value
-//
-//          status(result) mustEqual SEE_OTHER
-//          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-//        }
-//      }
+      "must return OK and the correct view for a GET with a Single Payment Plan" in {
+        val directDebitReference = "122222"
+        val paymentReference = "paymentReference"
+        val userAnswers =
+          emptyUserAnswers
+            .set(
+              YourBankDetailsPage,
+              YourBankDetailsWithAuddisStatus(
+                accountHolderName = "account name",
+                sortCode = "sort code",
+                accountNumber = "account number",
+                auddisStatus = false,
+                accountVerified = false
+              )
+            )
+            .success
+            .value
+            .set(
+              DirectDebitReferenceQuery,
+              directDebitReference
+            )
+            .success
+            .value
+            .set(
+              PaymentReferenceQuery,
+              "payment reference"
+            )
+            .success
+            .value
+            .set(
+              PaymentPlanTypeQuery,
+              "singlePaymentPlan"
+            )
+            .success
+            .value
+            .set(
+              AmendPaymentPlanTypePage,
+              "singlePaymentPlan"
+            )
+            .success
+            .value
+            .set(
+              AmendPaymentPlanSourcePage,
+              "paymentPlaneSource"
+            )
+            .success
+            .value
+            .set(
+              PaymentReferencePage,
+              paymentReference
+            )
+            .success
+            .value
+            .set(
+              AmendPaymentAmountPage,
+              150.0
+            )
+            .success
+            .value
+            .set(
+              AmendPlanEndDatePage,
+              LocalDate.now().plusDays(4)
+            )
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+
+          val summaryListRows = createSummaryListForOtherPaymentPlans(userAnswers, application)
+          val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(NormalMode, paymentReference, directDebitReference, "sort code",
+            "account number", summaryListRows, routes.AmendPlanStartDateController.onPageLoad(NormalMode))(request, messages(application)).toString
+        }
+      }
     }
   }
 }
