@@ -51,7 +51,6 @@ class PaymentPlanDetailsController @Inject()(
 
           val planDetail = response.paymentPlanDetails
           val directDebit = response.directDebitDetails
-
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, planDetail.planType))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
@@ -102,4 +101,5 @@ class PaymentPlanDetailsController @Inject()(
       _ <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
   }
+
 }

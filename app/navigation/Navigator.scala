@@ -45,8 +45,8 @@ class Navigator @Inject()() {
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
     case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers)
-    case AmendPlanStartDatePage => _ => routes.JourneyRecoveryController.onPageLoad()
-    case AmendPlanEndDatePage => _ => routes.JourneyRecoveryController.onPageLoad()
+    case AmendPlanStartDatePage => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+    case AmendPlanEndDatePage => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case _ => _ => routes.LandingController.onPageLoad()
   }
 

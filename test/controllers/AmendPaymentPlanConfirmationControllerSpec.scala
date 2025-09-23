@@ -17,27 +17,26 @@
 package controllers
 
 import base.SpecBase
+import models.NormalMode
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import views.html.ConfirmPaymentPlanAmendmentView
+import play.api.test.Helpers.*
 
-class ConfirmPaymentPlanAmendmentControllerSpec extends SpecBase {
+class AmendPaymentPlanConfirmationControllerSpec extends SpecBase {
 
-  "ConfirmPaymentPlanAmendment Controller" - {
+  "PaymentPlanDetails Controller" - {
 
-    "must return OK and the correct view for a GET" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+    "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides().build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.ConfirmPaymentPlanAmendmentController.onPageLoad().url)
+
+        val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[ConfirmPaymentPlanAmendmentView]
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

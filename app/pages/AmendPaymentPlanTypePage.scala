@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package utils
+package pages
 
-import models.DirectDebitSource
+import play.api.libs.json.JsPath
 
-object Utils {
-  val emptyString = ""
-  val LockExpirySessionKey = "lockoutExpiryDateTime"
+case object AmendPaymentPlanTypePage extends QuestionPage[String] {
 
-  val listHodServices: Map[DirectDebitSource, String] = Map(
-    DirectDebitSource.CT -> "COTA",
-    DirectDebitSource.PAYE -> "PAYE",
-    DirectDebitSource.SA -> "CESA",
-    DirectDebitSource.TC -> "NTC",
-    DirectDebitSource.VAT -> "VAT",
-    DirectDebitSource.MGD -> "MGD",
-    DirectDebitSource.NIC -> "NIDN",
-    DirectDebitSource.OL -> "SAFE",
-    DirectDebitSource.SDLT -> "SDLT"
-  )
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "amendPaymentPlaneType"
 }
-
