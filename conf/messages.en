@@ -371,6 +371,35 @@ amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026
 
+paymentPlanDetails.title = Payment Plan Details
+paymentPlanDetails.heading = Payment plan details
+paymentPlanDetails.p1 = You can amend the details of your payment plan, or cancel it if it is no longer required, by following either the ''Amend payment plan'' or ''Cancel payment plan'' links below.
+paymentPlanDetails.p2 = If you wish to suspend your payment plan please follow the ''Suspend payment plan'' link below.
+paymentPlanDetails.inset.text = Payments due within the next 3 working days will not be affected by any changes made.
+paymentPlanDetails.details.paymentReference = Payment reference: {0}
+paymentPlanDetails.details.amend = Amend
+paymentPlanDetails.details.cancel = Cancel
+paymentPlanDetails.details.suspend = Suspend
+paymentPlanDetails.details.planType = Plan type
+paymentPlanDetails.details.paymentFor = Payment for
+paymentPlanDetails.details.dateSetUp = Date set up
+paymentPlanDetails.details.regularPaymentAmount = Regular payment amount
+paymentPlanDetails.details.planStartDate = Plan start date
+paymentPlanDetails.details.planEndDate = Plan end date
+
+amendPaymentAmount.hint = 	e.g. £1000.00
+
+amendPlanStartDate.title = Plan start date
+amendPlanStartDate.heading = What date are you starting this payment plan?
+amendPlanStartDate.p1 = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
+amendPlanStartDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
+amendPlanStartDate.hint = e.g. 15 5 2025
+
+amendPlanEndDate.title = Plan end date
+amendPlanEndDate.heading = What date are you ending this payment plan?
+amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
+amendPlanEndDate.hint = e.g. 16 6 2026
+
 confirmPaymentPlanAmendment.title = Confirm plan page - Amend a payment plan
 confirmPaymentPlanAmendment.heading = Confirm new payment plan details
 confirmPaymentPlanAmendment.p1 = The amendment will remove any suspension you currently have in place. Please check that the details below are correct, then click ''Continue'' to proceed. For security reasons you may be asked to re-authenticate your details.
@@ -396,3 +425,4 @@ amendPaymentFor.checkYourAnswersLabel = Payment for
 amendPaymentReference.checkYourAnswersLabel = Payment reference
 amendPlanStartDate.checkYourAnswersLabel = Plan start date
 amendPlanEndDate.checkYourAnswersLabel = Plane end date
+ confirmAmendPaymentPlanType.singlePaymentPlan = Single payment

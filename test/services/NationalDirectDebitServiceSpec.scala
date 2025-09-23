@@ -23,14 +23,13 @@ import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
-import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
-import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
@@ -378,18 +377,18 @@ class NationalDirectDebitServiceSpec extends SpecBase
     "isTwoDaysPriorPaymentDate" - {
       "must return true future working days" in {
         when(mockConnector.getFutureWorkingDays(any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().plusDays(3).toString)))
+          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().toString)))
 
-        val result = service.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(1)).futureValue
+        val result = service.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(2)).futureValue
 
         result mustBe true
       }
 
       "must return false future working days" in {
         when(mockConnector.getFutureWorkingDays(any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().plusDays(1).toString)))
+          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().toString)))
 
-        val result = service.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(4)).futureValue
+        val result = service.isTwoDaysPriorPaymentDate(LocalDate.now().plusDays(0)).futureValue
 
         result mustBe false
       }
@@ -398,18 +397,18 @@ class NationalDirectDebitServiceSpec extends SpecBase
     "isThreeDaysPriorPlanEndDate" - {
       "must return true future working days" in {
         when(mockConnector.getFutureWorkingDays(any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().plusDays(3).toString)))
+          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().toString)))
 
-        val result = service.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(1)).futureValue
+        val result = service.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(3)).futureValue
 
         result mustBe true
       }
 
       "must return false future working days" in {
         when(mockConnector.getFutureWorkingDays(any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().plusDays(1).toString)))
+          .thenReturn(Future.successful(EarliestPaymentDate(LocalDate.now().toString)))
 
-        val result = service.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(5)).futureValue
+        val result = service.isThreeDaysPriorPlanEndDate(LocalDate.now().plusDays(0)).futureValue
 
         result mustBe false
       }
@@ -448,7 +447,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
           postCode = "NE5 2DH"
         ),
         ddiReferenceNo = "DDI123456789",
-        paymentReference = Some("testReference"),
+        paymentReference = "testReference",
         bankName = "Barclays",
         totalAmountDue = Some(BigDecimal(200)),
         paymentAmount = Some(BigDecimal(100)),

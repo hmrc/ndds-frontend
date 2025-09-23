@@ -18,7 +18,6 @@ package utils
 
 import models.responses.{ NddDDPaymentPlansResponse, NddPaymentPlan}
 import models.{DirectDebitDetails, NddDetails, NddResponse, UKBankAddress}
-
 import java.time.LocalDateTime
 
 trait DirectDebitDetailsData {
@@ -111,6 +110,7 @@ trait DirectDebitDetailsData {
         submissionDateTime = LocalDateTime.of(2025, 12, 12, 12, 12))
     )
   )
+
 }
 
 

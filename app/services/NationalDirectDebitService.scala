@@ -31,7 +31,7 @@ import queries.PaymentPlanTypeQuery
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{LocalDateTime, LocalDate}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -64,7 +64,6 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       false
     }
   }
-
 
   def calculateFutureWorkingDays(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)
@@ -154,7 +153,6 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanResponse] = {
     //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
     val now = LocalDateTime.now()
-
     val currentDate = LocalDate.now()
 
     val samplePaymentPlanResponse: PaymentPlanResponse =
@@ -167,7 +165,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
-          planType = PaymentPlanType.BudgetPaymentPlan.toString,
+          planType = PaymentPlanType.SinglePaymentPlan.toString,
           paymentReference = paymentReference,
           submissionDateTime = now.minusDays(5), //Some(now.minusDays(5)),
           scheduledPaymentAmount = 120.00,

@@ -20,6 +20,7 @@
 
 @this(
         layout: templates.Layout,
+        formHelper: FormWithCSRF,
         header1: Header1,
         paragraph: Paragraph,
         govukButton: GovukButton,
@@ -27,10 +28,10 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(directDebitReference: String, directDebitDetails: DirectDebitDetails, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(mode: Mode, directDebitReference: String, directDebitDetails: DirectDebitDetails, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("confirmPaymentPlanAmendment.title"))) {
-
+@formHelper(action = routes.ConfirmPaymentPlanAmendmentController.onSubmit(mode), Symbol("autoComplete") -> "off") {
         @header1("confirmPaymentPlanAmendment.heading")
         @paragraph("confirmPaymentPlanAmendment.p1")
 
@@ -79,4 +80,5 @@
         @govukButton(
             ButtonViewModel(messages("confirmPaymentPlanAmendment.amendPaymentPlan.continueButton"))
         )
+    }
 }

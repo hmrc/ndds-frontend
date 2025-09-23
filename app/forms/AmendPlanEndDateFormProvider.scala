@@ -19,6 +19,7 @@ package forms
 import forms.mappings.Mappings
 import play.api.data.Form
 import play.api.i18n.Messages
+import utils.DateFormats
 
 import java.time.LocalDate
 import javax.inject.Inject
@@ -27,11 +28,12 @@ class AmendPlanEndDateFormProvider @Inject() extends Mappings {
 
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
-      "value" -> localDate(
+      "value" -> customPaymentDate(
         invalidKey     = "planEndDate.error.invalid",
         allRequiredKey = "planEndDate.error.required.all",
         twoRequiredKey = "planEndDate.error.required.two",
-        requiredKey    = "planEndDate.error.required"
+        requiredKey    = "planEndDate.error.required",
+        dateFormats    = DateFormats.defaultDateFormats
       )
     )
 }

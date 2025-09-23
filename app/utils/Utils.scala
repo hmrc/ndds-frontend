@@ -16,8 +16,23 @@
 
 package utils
 
+import models.DirectDebitSource
+
 object Utils {
   val emptyString = ""
   val LockExpirySessionKey = "lockoutExpiryDateTime"
+
+  val listHodServices: Map[DirectDebitSource, String] = Map(
+    DirectDebitSource.CT -> "COTA",
+    DirectDebitSource.PAYE -> "PAYE",
+    DirectDebitSource.SA -> "CESA",
+    DirectDebitSource.TC -> "NTC",
+    DirectDebitSource.VAT -> "VAT",
+    DirectDebitSource.MGD -> "MGD",
+    DirectDebitSource.NIC -> "NIDN",
+    DirectDebitSource.OL -> "SAFE",
+    DirectDebitSource.SDLT -> "SDLT"
+  )
+  
 }
 

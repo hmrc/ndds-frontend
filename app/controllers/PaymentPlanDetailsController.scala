@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions.*
 import models.*
-import models.responses.PaymentPlanResponse
 import pages.*
 
 import javax.inject.Inject
@@ -29,11 +28,11 @@ import queries.{PaymentPlanTypeQuery, PaymentReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Utils.listHodServices
 import views.html.PaymentPlanDetailsView
-import scala.concurrent.duration.*
 
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.Try
 
 class PaymentPlanDetailsController @Inject()(
                                               override val messagesApi: MessagesApi,
@@ -54,9 +53,15 @@ class PaymentPlanDetailsController @Inject()(
 
           val planDetail = response.paymentPlanDetails
           val directDebit = response.directDebitDetails
+          
+          val maybeSource: Option[DirectDebitSource] =
+            listHodServices.find { case (_, v) => v.equalsIgnoreCase(planDetail.hodService) }
+              .map(_._1)
 
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, planDetail.planType))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
@@ -105,4 +110,5 @@ class PaymentPlanDetailsController @Inject()(
       _ <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
   }
+
 }
