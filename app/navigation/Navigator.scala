@@ -23,7 +23,6 @@ import pages.*
 import models.*
 import models.DirectDebitSource.*
 import models.PaymentPlanType.*
-import queries.PaymentPlanTypeQuery
 
 @Singleton
 class Navigator @Inject()() {
@@ -44,7 +43,7 @@ class Navigator @Inject()() {
     case PlanStartDatePage => userAnswers => checkPlanStartDateLogic(userAnswers)
     case PlanEndDatePage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
-    case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers)
+    case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
     case AmendPlanStartDatePage => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case AmendPlanEndDatePage => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case _ => _ => routes.LandingController.onPageLoad()
@@ -64,10 +63,10 @@ class Navigator @Inject()() {
     case PaymentsFrequencyPage => _ => routes.CheckYourAnswersController.onPageLoad()
     case RegularPaymentAmountPage => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage => _ => routes.CheckYourAnswersController.onPageLoad()
-    case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers)
-    case AmendPlanStartDatePage => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
-    case AmendPlanEndDatePage => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
-    case _ => _ => routes.LandingController.onPageLoad()
+    case AmendPaymentAmountPage => userAnswers => checkPaymentPlanLogic(userAnswers, CheckMode)
+    case AmendPlanStartDatePage => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+    case AmendPlanEndDatePage => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+    case _ => _ => routes.LandingController.onPageLoad() 
   }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
@@ -126,11 +125,11 @@ class Navigator @Inject()() {
     }
   }
   
-  private def checkPaymentPlanLogic(userAnswers: UserAnswers): Call ={
-    val paymentPlanType = userAnswers.get(PaymentPlanTypeQuery)
+  private def checkPaymentPlanLogic(userAnswers: UserAnswers, mode: Mode): Call ={
+    val paymentPlanType = userAnswers.get(AmendPaymentPlanTypePage)
     paymentPlanType match {
-      case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(NormalMode)
-      case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(NormalMode)
+      case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(mode)
+      case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(mode)
       case _ => routes.JourneyRecoveryController.onPageLoad()
     }
   }

@@ -23,11 +23,11 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
+import pages.AmendPaymentPlanTypePage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentPlanTypeQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import views.html.AmendPaymentAmountView
@@ -50,7 +50,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET with SinglePaymentPlan" in {
       val userAnswersWithSinglePaymentPlan =
-        emptyUserAnswers.set(PaymentPlanTypeQuery, PaymentPlanType.SinglePaymentPlan.toString).success.value
+        emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
       val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePaymentPlan))
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockService)
@@ -71,7 +71,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
       val userAnswersWithBudgetPaymentPlan =
-        emptyUserAnswers.set(PaymentPlanTypeQuery, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+        emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
       val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPaymentPlan))
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockService)

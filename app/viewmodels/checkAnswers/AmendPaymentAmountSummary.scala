@@ -16,28 +16,26 @@
 
 package viewmodels.checkAnswers
 
+import config.CurrencyFormatter.currencyFormat
 import controllers.routes
 import models.{CheckMode, UserAnswers}
-import pages.AmendPlanStartDatePage
+import pages.AmendPaymentAmountPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-import java.time.format.DateTimeFormatter
-
-object AmendPlanStartDateSummary  {
+object AmendPaymentAmountSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AmendPlanStartDatePage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key     = "amendPlanStartDate.checkYourAnswersLabel",
-          ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
-          )
+    answers.get(AmendPaymentAmountPage).map { amount =>
+      SummaryListRowViewModel(
+        key     = "amendPaymentAmount.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(amount)),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPaymentAmount.change.hidden"))
         )
+      )
     }
 }

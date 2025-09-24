@@ -17,26 +17,186 @@
 package controllers
 
 import base.SpecBase
-import models.NormalMode
+import org.mockito.ArgumentMatchers.any
+import models.{NormalMode, UserAnswers, YourBankDetailsWithAuddisStatus}
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.*
+import play.api.Application
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.{DirectDebitReferenceQuery, PaymentReferenceQuery}
+import repositories.SessionRepository
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.DirectDebitDetailsData
+import viewmodels.checkAnswers.*
+import views.html.AmendPaymentPlanConfirmationView
 
-class AmendPaymentPlanConfirmationControllerSpec extends SpecBase {
+import java.time.LocalDate
+import scala.concurrent.Future
+
+class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDebitDetailsData {
 
   "PaymentPlanDetails Controller" - {
 
-    "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides().build()
+    val mockSessionRepository = mock[SessionRepository]
 
-      running(application) {
+    def createSummaryListForBudgetPaymentPlan(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
+      Seq(
+        AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
+        AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
+        AmendPaymentReferenceSummary.row(userAnswers)(messages(app)),
+        AmendPaymentAmountSummary.row(userAnswers)(messages(app)),
+        AmendPlanEndDateSummary.row(userAnswers)(messages(app))
+      ).flatten
+    }
 
-        val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
+    def createSummaryListForOtherPaymentPlans(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
+      Seq(
+        AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
+        AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
+        AmendPaymentReferenceSummary.row(userAnswers)(messages(app)),
+        AmendPaymentAmountSummary.row(userAnswers)(messages(app)),
+        AmendPlanStartDateSummary.row(userAnswers)(messages(app))
+      ).flatten
+    }
 
-        val result = route(application, request).value
+    "onPageLoad" - {
+      "must return OK and the correct view for a GET with a Budget Payment Plan" in {
+        val directDebitReference = "122222"
+        val paymentReference = "paymentReference"
+        val userAnswers =
+          emptyUserAnswers
+            .set(
+              YourBankDetailsPage,
+              YourBankDetailsWithAuddisStatus(
+                accountHolderName = "account name",
+                sortCode = "sort code",
+                accountNumber = "account number",
+                auddisStatus = false,
+                accountVerified = false
+              )
+            ).success.value
+            .set(
+              DirectDebitReferenceQuery,
+              directDebitReference
+            ).success.value
+            .set(
+              PaymentReferenceQuery,
+              "payment reference"
+            ).success.value
+            .set(
+              AmendPaymentPlanTypePage,
+              "budgetPaymentPlan"
+            ).success.value
+            .set(
+              AmendPaymentPlanSourcePage,
+              "paymentPlaneSource"
+            ).success.value
+            .set(
+              PaymentReferencePage,
+              paymentReference
+            ).success.value
+            .set(
+              AmendPaymentAmountPage,
+              150.0
+            ).success.value
+            .set(
+              AmendPlanStartDatePage,
+              LocalDate.now().plusDays(4)
+            ).success.value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+
+          val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, application)
+          val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(NormalMode, paymentReference, directDebitReference, "sort code",
+            "account number", summaryListRows, routes.AmendPlanEndDateController.onPageLoad(NormalMode))(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct view for a GET with a Single Payment Plan" in {
+        val directDebitReference = "122222"
+        val paymentReference = "paymentReference"
+        val userAnswers =
+          emptyUserAnswers
+            .set(
+              YourBankDetailsPage,
+              YourBankDetailsWithAuddisStatus(
+                accountHolderName = "account name",
+                sortCode = "sort code",
+                accountNumber = "account number",
+                auddisStatus = false,
+                accountVerified = false
+              )
+            ).success.value
+            .set(
+              DirectDebitReferenceQuery,
+              directDebitReference
+            ).success.value
+            .set(
+              PaymentReferenceQuery,
+              "payment reference"
+            ).success.value
+            .set(
+              AmendPaymentPlanTypePage,
+              "singlePaymentPlan"
+            ).success.value
+            .set(
+              AmendPaymentPlanSourcePage,
+              "paymentPlanSource"
+            ).success.value
+            .set(
+              PaymentReferencePage,
+              paymentReference
+            ).success.value
+            .set(
+              AmendPaymentAmountPage,
+              150.0
+            ).success.value
+            .set(
+              AmendPlanEndDatePage,
+              LocalDate.now().plusDays(4)
+            ).success.value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+
+          val summaryListRows = createSummaryListForOtherPaymentPlans(userAnswers, application)
+          val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(NormalMode, paymentReference, directDebitReference, "sort code",
+            "account number", summaryListRows, routes.AmendPlanStartDateController.onPageLoad(NormalMode))(request, messages(application)).toString
+        }
       }
     }
   }
