@@ -18,7 +18,7 @@ package services
 
 import com.google.inject.{Inject, Singleton}
 import models.DirectDebitSource.{MGD, SA, TC}
-import models.PaymentPlanType.SinglePayment
+import models.PaymentPlanType.SinglePaymentPlan
 import models.audits.{AuditEvent, SubmitDirectDebitPaymentPlan}
 import models.requests.DataRequest
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PaymentReferencePage}
@@ -59,7 +59,7 @@ class AuditService @Inject(
     val paymentPlanType = paymentPlanSource match {
       case MGD | TC | SA =>
         request.userAnswers.get(PaymentPlanTypePage).getOrElse(throw new Exception("PaymentPlanTypePage details missing from user answers"))
-      case _ => SinglePayment
+      case _ => SinglePaymentPlan
     }
 
     sendEvent(SubmitDirectDebitPaymentPlan(paymentReference, paymentPlanType))

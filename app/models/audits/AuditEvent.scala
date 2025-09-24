@@ -17,7 +17,7 @@
 package models.audits
 
 import models.PaymentPlanType
-import models.PaymentPlanType.{BudgetPaymentPlan, SinglePayment, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import play.api.libs.json.*
 
 sealed trait AuditEvent {
@@ -50,7 +50,7 @@ case class SubmitDirectDebitPaymentPlan(paymentReference: String, planType: Paym
 
 object SubmitDirectDebitPaymentPlan {
   private implicit val paymentPlanTypeWrites: Writes[PaymentPlanType] = Writes {
-    case SinglePayment => JsString("SINGLE")
+    case SinglePaymentPlan => JsString("SINGLE")
     case VariablePaymentPlan => JsString("VPP")
     case BudgetPaymentPlan => JsString("BUDGET")
     case TaxCreditRepaymentPlan => JsString("TIME_TO_PAY")

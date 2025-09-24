@@ -43,8 +43,8 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
       .execute[NddResponse]
   }
 
-  def getEarliestPaymentDate(workingDaysOffsetRequest: WorkingDaysOffsetRequest)
-                            (implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
+  def getFutureWorkingDays(workingDaysOffsetRequest: WorkingDaysOffsetRequest)
+                          (implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     http
       .post(url"$nationalDirectDebitBaseUrl/direct-debits/future-working-days")
       .withBody(Json.toJson(workingDaysOffsetRequest))
@@ -73,7 +73,7 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
           logger.error(s"CHRIS submission failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
           Future.failed(new Exception(s"CHRIS submission failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))
         case Right(response) =>
-          logger.error(s"Unexpected CHRIS response status: ${response.status}")
+          logger.error(s"Unexpected CHRIS response error status: ${response.status}")
           Future.failed(new Exception(s"Unexpected status: ${response.status}"))
       }
   }
@@ -100,9 +100,5 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
     http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans")(hc)
       .execute[NddDDPaymentPlansResponse]
-      .map { response =>
-        logger.info(s"Payment plans response: ${Json.prettyPrint(Json.toJson(response))}")
-        response
-      }
   }
 }
