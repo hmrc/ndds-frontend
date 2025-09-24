@@ -24,6 +24,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object AmendPlanStartDateSummary  {
@@ -40,4 +41,11 @@ object AmendPlanStartDateSummary  {
           )
         )
     }
+
+  def row(value: LocalDate)(implicit messages: Messages): SummaryListRow =
+    SummaryListRowViewModel(
+      key = "paymentPlanDetails.details.planStartDate",
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      actions = Seq.empty
+    )
 }

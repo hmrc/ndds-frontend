@@ -29,6 +29,7 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils.listHodServices
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, DateSetupSummary}
 import views.html.PaymentPlanDetailsView
 
 import scala.concurrent.duration.*
@@ -94,7 +95,17 @@ class PaymentPlanDetailsController @Inject()(
               Await.result(flag, 5.seconds)
 
             val showCancelAction = PaymentPlanType.VariablePaymentPlan.toString == planDetail.planType
-            Ok(view(paymentReference, planDetail, showActions, showCancelAction))
+
+            val summaryRows = Seq(
+              AmendPaymentPlanTypeSummary.row(planDetail.planType),
+              AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+              DateSetupSummary.row(planDetail.submissionDateTime),
+              AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
+              AmendPlanStartDateSummary.row(planDetail.scheduledPaymentStartDate),
+              AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
+            )
+
+            Ok(view(paymentReference, showActions, showCancelAction, summaryRows))
           }
         }
 

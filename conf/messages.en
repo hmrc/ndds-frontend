@@ -342,22 +342,6 @@ directDebitPaymentSummary.setupPayment.h1 = Set up a new payment plan
 directDebitPaymentSummary.setupPayment.p1 = Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
 directDebitPaymentSummary.addPaymentButton = Add payment plan
 
-paymentPlanDetails.title = Payment Plan Details
-paymentPlanDetails.heading = Payment plan details
-paymentPlanDetails.p1 = You can amend the details of your payment plan, or cancel it if it is no longer required, by following either the ''Amend payment plan'' or ''Cancel payment plan'' links below.
-paymentPlanDetails.p2 = If you wish to suspend your payment plan please follow the ''Suspend payment plan'' link below.
-paymentPlanDetails.inset.text = Payments due within the next 3 working days will not be affected by any changes made.
-paymentPlanDetails.details.paymentReference = Payment reference: {0}
-paymentPlanDetails.details.amend = Amend
-paymentPlanDetails.details.cancel = Cancel
-paymentPlanDetails.details.suspend = Suspend
-paymentPlanDetails.details.planType = Plan type
-paymentPlanDetails.details.paymentFor = Payment for
-paymentPlanDetails.details.dateSetUp = Date set up
-paymentPlanDetails.details.regularPaymentAmount = Regular payment amount
-paymentPlanDetails.details.planStartDate = Plan start date
-paymentPlanDetails.details.planEndDate = Plan end date
-
 amendPaymentAmount.hint = 	e.g. £1000.00
 
 amendPlanStartDate.title = Plan start date
@@ -380,10 +364,13 @@ paymentPlanDetails.details.paymentReference = Payment reference: {0}
 paymentPlanDetails.details.amend = Amend
 paymentPlanDetails.details.cancel = Cancel
 paymentPlanDetails.details.suspend = Suspend
-paymentPlanDetails.details.planType = Plan type
+paymentPlanDetails.details.planType.label = Plan type
+paymentPlanDetails.details.planType.budgetPaymentPlan  = Budget payment
+paymentPlanDetails.details.planType.singlePaymentPlan = Single payment
 paymentPlanDetails.details.paymentFor = Payment for
 paymentPlanDetails.details.dateSetUp = Date set up
-paymentPlanDetails.details.regularPaymentAmount = Regular payment amount
+paymentPlanDetails.details.amount.budgetPaymentPlan = Regular payment amount
+paymentPlanDetails.details.amount.singlePaymentPlan = Payment amount
 paymentPlanDetails.details.planStartDate = Plan start date
 paymentPlanDetails.details.planEndDate = Plan end date
 
@@ -430,3 +417,5 @@ amendPaymentReference.checkYourAnswersLabel = Payment reference
 amendPlanStartDate.checkYourAnswersLabel = Plan start date
 amendPlanEndDate.checkYourAnswersLabel = Plane end date
 amendPaymentAmount.checkYourAnswersLabel = Regular payment amount
+amendPaymentAmount.checkYourAnswersLabel.paymentAmount = Payment amount
+amendPaymentAmount.checkYourAnswersLabel.regularPayment = Regular payment amount

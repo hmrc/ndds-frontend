@@ -16,32 +16,20 @@
 
 package viewmodels.checkAnswers
 
-import models.UserAnswers
-import pages.AmendPaymentPlanSourcePage
 import play.api.i18n.Messages
-import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object AmendPaymentPlanSourceSummary  {
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AmendPaymentPlanSourcePage).map {
-      answer =>
+object DateSetupSummary {
 
-        SummaryListRowViewModel(
-          key     = "amendPaymentFor.checkYourAnswersLabel",
-          value   = ValueViewModel(HtmlFormat.escape(answer.toUpperCase).toString),
-          actions = Seq.empty
-        )
-    }
-
-  def row(value: String)(implicit messages: Messages): SummaryListRow = {
+  def row(value: LocalDateTime)(implicit messages: Messages): SummaryListRow =
     SummaryListRowViewModel(
-      key = "amendPaymentFor.checkYourAnswersLabel",
-      value = ValueViewModel(HtmlFormat.escape(value.toUpperCase).toString),
+      key = "paymentDate.checkYourAnswersLabel",
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
       actions = Seq.empty
     )
-  }
 }

@@ -42,4 +42,18 @@ object AmendPaymentPlanTypeSummary {
           actions = Seq.empty
         )
     }
+
+  def row(planType: String)(implicit messages: Messages): SummaryListRow = {
+    val value = ValueViewModel(
+      HtmlContent(
+        HtmlFormat.escape(messages(s"paymentPlanDetails.details.planType.$planType"))
+      )
+    )
+
+    SummaryListRowViewModel(
+      key = "paymentPlanDetails.details.planType.label",
+      value = value,
+      actions = Seq.empty
+    )
+  }
 }

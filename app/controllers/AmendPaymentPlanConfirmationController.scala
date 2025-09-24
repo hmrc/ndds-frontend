@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.*
-import models.{DirectDebitDetails, Mode, PaymentPlanType}
+import models.{Mode, PaymentPlanType}
 import pages.{AmendPaymentPlanTypePage, YourBankDetailsPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}

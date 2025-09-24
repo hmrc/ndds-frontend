@@ -24,20 +24,28 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-object AmendPlanEndDateSummary  {
+object AmendPlanEndDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPlanEndDatePage).map {
       answer =>
         SummaryListRowViewModel(
-          key     = "amendPlanEndDate.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+          key = "amendPlanEndDate.checkYourAnswersLabel",
+          value = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
           actions = Seq(
             ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("amendPlanEndDate.change.hidden"))
           )
         )
     }
+
+  def row(value: LocalDate)(implicit messages: Messages): SummaryListRow =
+    SummaryListRowViewModel(
+      key = "paymentPlanDetails.details.planEndDate",
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      actions = Seq.empty
+    )
 }

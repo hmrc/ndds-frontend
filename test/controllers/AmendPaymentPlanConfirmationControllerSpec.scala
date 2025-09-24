@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchers.any
 import models.{NormalMode, UserAnswers, YourBankDetailsWithAuddisStatus}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanSourcePage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, PaymentAmountPage, PaymentReferencePage, YourBankDetailsPage}
+import pages.*
 import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
