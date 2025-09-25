@@ -40,7 +40,6 @@ class AccountDetailsNotVerifiedController @Inject()(
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       lockService.isUserLocked(request.userId) map { response =>
-        println(s"Response: ${response}")
         val formattedDate = response.lockoutExpiryDateTime
           .map(LocalDateTime.ofInstant(_, ZoneOffset.UTC))
           .map(DateTimeFormats.formattedDateTime)
