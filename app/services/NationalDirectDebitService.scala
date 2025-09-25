@@ -19,7 +19,7 @@ package services
 import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
-import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
@@ -27,7 +27,7 @@ import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequenc
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.{ExistingPaymentAmountQuery, PaymentPlanTypeQuery, ExistingPlanEndDateQuery, ExistingPlanStartDateQuery}
+import queries.PaymentPlanTypeQuery
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 

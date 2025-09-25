@@ -128,7 +128,9 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer),
+            NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(),
+            messages(application)).toString
         }
       }
 
@@ -244,8 +246,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val view = application.injector.instanceOf[AmendPlanStartDateView]
-
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
 
@@ -265,8 +265,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val view = application.injector.instanceOf[AmendPlanStartDateView]
-
           val request = postRequestWithDate(amendedValidAnswer)
           val result = route(application, request).value
 
@@ -286,8 +284,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val view = application.injector.instanceOf[AmendPlanStartDateView]
-
           val request = postRequestWithDate(amendedValidAnswer)
           val result = route(application, request).value
 
@@ -300,6 +296,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
         val mockSessionRepository = mock[SessionRepository]
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockService.amendmentMade(any[UserAnswers])).thenReturn(true)
 
         val validDate = LocalDate.now()
 

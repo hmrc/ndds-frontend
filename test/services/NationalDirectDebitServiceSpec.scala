@@ -571,6 +571,27 @@ class NationalDirectDebitServiceSpec extends SpecBase
       service.amendmentMade(userAnswers) shouldBe false
     }
     
+    "amountChanged returns true when existing amount is missing" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+
+    "startDateChanged returns true when existing amount is missing" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPlanStartDatePage, start1).success.value
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+
+    "endDateChanged returns true when existing amount is missing" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(AmendPlanEndDatePage, start1).success.value
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+    
   }
   
 }
