@@ -48,6 +48,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
         PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
+        AmendPlanStartDateSummary.rowData(userAnswers)(messages(app)),
         AmendPaymentAmountSummary.row("budgetPaymentPlan", userAnswers)(messages(app)),
         AmendPlanEndDateSummary.row(userAnswers)(messages(app))
       ).flatten
@@ -58,6 +59,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
         PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
+        AmendPlanEndDateSummary.rowData(userAnswers)(messages(app)),
         AmendPaymentAmountSummary.row("singlePaymentPlan", userAnswers)(messages(app)),
         AmendPlanStartDateSummary.row(userAnswers)(messages(app))
       ).flatten

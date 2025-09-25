@@ -50,6 +50,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
             AmendPaymentPlanTypeSummary.row(userAnswers),
             AmendPaymentPlanSourceSummary.row(userAnswers),
             PaymentsFrequencySummary.rowData(userAnswers),
+            AmendPlanStartDateSummary.rowData(userAnswers),
             AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers),
             AmendPlanEndDateSummary.row(userAnswers),
           ).flatten, routes.AmendPlanEndDateController.onPageLoad(mode))
@@ -58,6 +59,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
             AmendPaymentPlanTypeSummary.row(userAnswers),
             AmendPaymentPlanSourceSummary.row(userAnswers),
             PaymentsFrequencySummary.rowData(userAnswers),
+            AmendPlanEndDateSummary.rowData(userAnswers),
             AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers),
             AmendPlanStartDateSummary.row(userAnswers),
           ).flatten, routes.AmendPlanStartDateController.onPageLoad(mode))

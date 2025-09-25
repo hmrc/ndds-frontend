@@ -48,4 +48,17 @@ object AmendPlanEndDateSummary {
       value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
       actions = Seq.empty
     )
+
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
+    val dateText = answers
+      .get(AmendPlanEndDatePage)
+      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .getOrElse("")
+
+    Some(SummaryListRowViewModel(
+      key = "amendPlanEndDate.checkYourAnswersLabel",
+      ValueViewModel(dateText),
+      actions = Seq.empty
+    ))
+  }
 }
