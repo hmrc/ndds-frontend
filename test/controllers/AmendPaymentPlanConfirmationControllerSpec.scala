@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{NormalMode, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.{NormalMode, PaymentsFrequency, UserAnswers, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -47,6 +47,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
+        PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
         AmendPaymentAmountSummary.row("budgetPaymentPlan", userAnswers)(messages(app)),
         AmendPlanEndDateSummary.row(userAnswers)(messages(app))
       ).flatten
@@ -56,6 +57,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
+        PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
         AmendPaymentAmountSummary.row("singlePaymentPlan", userAnswers)(messages(app)),
         AmendPlanStartDateSummary.row(userAnswers)(messages(app))
       ).flatten
@@ -124,6 +126,12 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               AmendPlanStartDatePage,
               LocalDate.now().plusDays(4)
+            )
+            .success
+            .value
+            .set(
+              PaymentsFrequencyPage,
+              PaymentsFrequency.Weekly
             )
             .success
             .value
@@ -214,6 +222,12 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               AmendPlanEndDatePage,
               LocalDate.now().plusDays(4)
+            )
+            .success
+            .value
+            .set(
+              PaymentsFrequencyPage,
+              PaymentsFrequency.Weekly
             )
             .success
             .value

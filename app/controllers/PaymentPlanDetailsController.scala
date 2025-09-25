@@ -59,6 +59,8 @@ class PaymentPlanDetailsController @Inject()(
             listHodServices.find { case (_, v) => v.equalsIgnoreCase(planDetail.hodService) }
               .map(_._1)
 
+          val frequency = PaymentsFrequency.fromString(planDetail.scheduledPaymentFrequency.get)
+
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypeQuery, planDetail.planType))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
@@ -69,6 +71,7 @@ class PaymentPlanDetailsController @Inject()(
             updatedAnswer <- Future.fromTry(updatedAnswers.set(PaymentReferencePage, planDetail.paymentReference))
             updatedAnswer <- Future.fromTry(updatedAnswer.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(BigDecimal(0))))
             updatedAnswer <- Future.fromTry(updatedAnswer.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
+            updatedAnswer <- Future.fromTry(updatedAnswer.set(PaymentsFrequencyPage, frequency.get))
             cachedAnswers <- Future.fromTry(updatedAnswer.set(
               YourBankDetailsPage,
               YourBankDetailsWithAuddisStatus(
