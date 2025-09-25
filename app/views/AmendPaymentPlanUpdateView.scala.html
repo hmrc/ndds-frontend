@@ -28,7 +28,7 @@
         govukInsetText: GovukInsetText
 )
 
-@(referenceNumber: String, formattedPaymentAmount: String, formattedStartDate: String, formattedEndDate: String)(implicit request: Request[_], messages: Messages)
+@(paymentRef: String, regularPaymentAmount: String, startDate: String, endDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
@@ -36,7 +36,7 @@
         title = messages("amendPaymentPlanUpdate.panel.title"),
         body = Html(
                     s"${messages("amendPaymentPlanUpdate.panel.body1")}" +
-                    s"${messages("amendPaymentPlanUpdate.panel.strong",referenceNumber)}" +
+                    s"${messages("amendPaymentPlanUpdate.panel.strong",paymentRef)}" +
                     s"${messages("amendPaymentPlanUpdate.panel.body2")}"
                 ),
         classes = "govuk-!-margin-bottom-2"
@@ -49,7 +49,7 @@
     @paragraph(messages("amendPaymentPlanUpdate.p1"))
 
     <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("amendPaymentPlanUpdate.l1", formattedPaymentAmount, formattedStartDate)</li>
+        <li>@messages("amendPaymentPlanUpdate.l1", regularPaymentAmount, startDate)</li>
         <li>@messages("amendPaymentPlanUpdate.l2")</li>
         <li>@messages("amendPaymentPlanUpdate.l3")</li>
     </ul>
@@ -66,19 +66,19 @@
         rows = Seq(
             SummaryListRow(
                 key = Key(Text(messages("amendPaymentPlanUpdate.reference"))),
-                value = Value(Text(referenceNumber))
+                value = Value(Text(paymentRef))
             ),
             SummaryListRow(
                 key = Key(Text(messages("amendPaymentPlanUpdate.amount"))),
-                value = Value(Text(formattedPaymentAmount))
+                value = Value(Text(regularPaymentAmount))
             ),
             SummaryListRow(
                 key = Key(Text(messages("amendPaymentPlanUpdate.startDate"))),
-                value = Value(Text(formattedStartDate))
+                value = Value(Text(startDate))
             ),
             SummaryListRow(
                 key = Key(Text(messages("amendPaymentPlanUpdate.endDate"))),
-                value = Value(Text(formattedEndDate))
+                value = Value(Text(endDate))
             )
         )
     ))

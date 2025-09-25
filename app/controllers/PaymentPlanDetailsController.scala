@@ -27,7 +27,10 @@ import queries.PaymentReferenceQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Utils.listHodServices
+import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
+
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -50,14 +53,21 @@ class PaymentPlanDetailsController @Inject()(
 
           val planDetail = response.paymentPlanDetails
           val directDebit = response.directDebitDetails
+          val maybeSource: Option[DirectDebitSource] =
+            listHodServices.find { case (_, v) => v.equalsIgnoreCase(planDetail.hodService) }
+              .map(_._1)
+          val frequency = PaymentsFrequency.fromString(planDetail.scheduledPaymentFrequency.get)
+
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferencePage, planDetail.paymentReference))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferenceQuery, planDetail.paymentReference))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(BigDecimal(0))))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
             cachedAnswers <- Future.fromTry(updatedAnswers.set(
               YourBankDetailsPage,
               YourBankDetailsWithAuddisStatus(
@@ -84,7 +94,17 @@ class PaymentPlanDetailsController @Inject()(
               Await.result(flag, 5.seconds)
 
             val showCancelAction = PaymentPlanType.VariablePaymentPlan.toString == planDetail.planType
-            Ok(view(paymentReference, planDetail, showActions, showCancelAction))
+
+            val summaryRows = Seq(
+              AmendPaymentPlanTypeSummary.row(planDetail.planType),
+              AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+              DateSetupSummary.row(planDetail.submissionDateTime),
+              AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
+              AmendPlanStartDateSummary.row(planDetail.scheduledPaymentStartDate),
+              AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
+            )
+
+            Ok(view(paymentReference, showActions, showCancelAction, summaryRows))
           }
         }
 

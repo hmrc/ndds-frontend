@@ -17,9 +17,12 @@
 package controllers
 
 import base.SpecBase
+import pages.{AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import queries.PaymentReferenceQuery
 import views.html.AmendPaymentPlanUpdateView
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
@@ -29,19 +32,21 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
 
   "PaymentPlanConfirmation Controller" - {
 
-    "must return OK and the correct view for a GET" in {
-      //TODO: get payment reference from ap2
-      //      val userAnswers = emptyUserAnswers
-      //        .setOrException(CheckYourAnswerPage, GenerateDdiRefResponse("600002164"))
+    val regPaymentAmount: BigDecimal = BigDecimal("1000.00")
+    val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(regPaymentAmount)
+    val startDate: LocalDate = LocalDate.of(2025, 10, 2)
+    val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+    val endDate: LocalDate = LocalDate.of(2025, 10, 25)
+    val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
-      val referenceNumber = "123456789K"
-      val paymentAmount: BigDecimal = BigDecimal("1000.00")
-      val formattedPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(paymentAmount)
-      val startDate: LocalDate = LocalDate.of(2025, 9, 3)
-      val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-      val endDate: LocalDate = LocalDate.of(2025, 11, 11)
-      val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+    "must return OK and the correct view for a GET" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentReferenceQuery, "123456789K").success.value
+        .set(RegularPaymentAmountPage, regPaymentAmount).success.value
+        .set(AmendPlanStartDatePage, startDate).success.value
+        .set(AmendPlanEndDatePage, endDate).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
@@ -51,21 +56,65 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(referenceNumber, formattedPaymentAmount, formattedStartDate, formattedEndDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, formattedEndDate)(request, messages(application)).toString
       }
     }
 
-//    "must return error if no payment reference" in {
-//
-//      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-//
-//      running(application) {
-//        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-//        val result = intercept[Exception](route(application, request).value.futureValue)
-//
-//        result.getMessage must include("Missing generated Payment reference number")
-//
-//      }
-//    }
+    "must return error if no payment reference" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("Missing payment reference from session")
+      }
+    }
+
+    "must return error if no reg payment amount" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentReferenceQuery, "123456789K").success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("Missing regular payment amount from session")
+      }
+    }
+
+    "must return error if no start date" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentReferenceQuery, "123456789K").success.value
+        .set(RegularPaymentAmountPage, regPaymentAmount).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("Missing start date from session")
+      }
+    }
+
+    "must return error if no end date" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentReferenceQuery, "123456789K").success.value
+        .set(RegularPaymentAmountPage, regPaymentAmount).success.value
+        .set(AmendPlanStartDatePage, startDate).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("Missing end date from session")
+      }
+    }
+
   }
 }

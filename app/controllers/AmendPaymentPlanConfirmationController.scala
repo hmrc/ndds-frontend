@@ -49,30 +49,27 @@ class AmendPaymentPlanConfirmationController @Inject()(
           (Seq(
             AmendPaymentPlanTypeSummary.row(userAnswers),
             AmendPaymentPlanSourceSummary.row(userAnswers),
-            AmendPaymentReferenceSummary.row(userAnswers),
-            AmendPaymentAmountSummary.row(userAnswers),
+            PaymentsFrequencySummary.rowData(userAnswers),
+            AmendPlanStartDateSummary.rowData(userAnswers),
+            AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers),
             AmendPlanEndDateSummary.row(userAnswers),
           ).flatten, routes.AmendPlanEndDateController.onPageLoad(mode))
         case _ =>
           (Seq(
             AmendPaymentPlanTypeSummary.row(userAnswers),
             AmendPaymentPlanSourceSummary.row(userAnswers),
-            AmendPaymentReferenceSummary.row(userAnswers),
-            AmendPaymentAmountSummary.row(userAnswers),
+            PaymentsFrequencySummary.rowData(userAnswers),
+            AmendPlanEndDateSummary.rowData(userAnswers),
+            AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers),
             AmendPlanStartDateSummary.row(userAnswers),
           ).flatten, routes.AmendPlanStartDateController.onPageLoad(mode))
       }
       for {
-        bankDetailsWithAuddisStatus <-
-          Future.fromTry(Try(userAnswers.get(YourBankDetailsPage).get))
-        directDebitReference <-
-          Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
-        paymentReference <-
-          Future.fromTry(Try(userAnswers.get(PaymentReferenceQuery).get))
-        planType <-
-          Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
+        bankDetailsWithAuddisStatus <- Future.fromTry(Try(userAnswers.get(YourBankDetailsPage).get))
+        directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
+        paymentReference <- Future.fromTry(Try(userAnswers.get(PaymentReferenceQuery).get))
+        planType <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
       } yield {
-
         Ok(view(mode, paymentReference, directDebitReference, bankDetailsWithAuddisStatus.sortCode,
           bankDetailsWithAuddisStatus.accountNumber,rows, backLink))
       }
@@ -80,39 +77,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-   // implicit val ua: UserAnswers = request.userAnswers
-
-   // nddService.generateNewDdiReference(PaymentReferencePage).flatMap { reference =>
-      //      val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
-      //
-      //      nddService.submitChrisData(chrisRequest).flatMap { success =>
-      //        if (success) {
-      //          logger.info(s"CHRIS submission successful for the request")
-      //          for {
-      //            updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
-      //            _ <- sessionRepository.set(updatedAnswers)
-      //          } yield {
-      //            auditService.sendSubmitDirectDebitPaymentPlan
-      //            logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
-      //            Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-      //          }
-      //        } else {
-      //          // CHRIS submission failed
-      //          logger.error(s"CHRIS submission failed for DDI Ref [${reference.ddiRefNumber}]")
-      //          Future.successful(
-      //            Redirect(routes.JourneyRecoveryController.onPageLoad())
-      //              .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
-      //          )
-      //        }
-      //      }.recover {
-      //        case ex =>
-      //          logger.error("CHRIS submission or session update failed", ex)
-      //          Redirect(routes.JourneyRecoveryController.onPageLoad())
-      //            .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
-      //      }
-      //    }
       Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
-  //  }
   }
 
 }

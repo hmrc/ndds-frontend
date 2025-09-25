@@ -17,39 +17,49 @@
 package controllers
 
 import controllers.actions.*
-import java.time.LocalDate
+import pages.{AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+
 import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
-
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentReferenceQuery
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPaymentPlanUpdateView
+
+import scala.concurrent.Future
 
 class AmendPaymentPlanUpdateController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
+                                       requireData: DataRequiredAction,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: AmendPaymentPlanUpdateView
-                                     ) extends FrontendBaseController with I18nSupport {
+                                     )
+  extends FrontendBaseController with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData) {
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      //TODO: Replace CheckYourAnswerPage with AP2 and take paymentAmount and startDate from there
-      //val referenceNumber = request.userAnswers.get(CheckYourAnswerPage).getOrElse(throw new Exception("Missing generated DDI reference number"))
-      //val paymentAmount =  request.userAnswers.get(AP2Page).getOrElse(throw new Exception("Missing payment amount"))
-      //val startDate =  request.userAnswers.get(AP2Page).getOrElse(throw new Exception("Missing start date"))
-      //val endDate =  request.userAnswers.get(AP2Page).getOrElse(throw new Exception("Missing end date"))
-      val referenceNumber = "123456789K"
-      val paymentAmount: BigDecimal = BigDecimal("1000.00")
-      val formattedPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(paymentAmount)
-      val startDate: LocalDate = LocalDate.of(2025, 9, 3)
+      val userAnswers = request.userAnswers
+      val paymentReference = userAnswers.get(PaymentReferenceQuery).getOrElse {
+        throw new Exception("Missing payment reference from session")
+      }
+      val regularPaymentAmount = userAnswers.get(RegularPaymentAmountPage).getOrElse {
+        throw new Exception("Missing regular payment amount from session")
+      }
+      val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(regularPaymentAmount)
+      val startDate = userAnswers.get(AmendPlanStartDatePage).getOrElse {
+        throw new Exception("Missing start date from session")
+      }
       val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-      val endDate: LocalDate = LocalDate.of(2025,11,11)
+      val endDate = userAnswers.get(AmendPlanEndDatePage).getOrElse {
+        throw new Exception("Missing end date from session")
+      }
       val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-      Ok(view(referenceNumber, formattedPaymentAmount,formattedStartDate,formattedEndDate))
+
+      Future.successful(Ok(view(paymentReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate)))
   }
 }

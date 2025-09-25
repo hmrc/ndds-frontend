@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-package queries
+package viewmodels.checkAnswers
 
-import play.api.libs.json.JsPath
+import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-case object PaymentPlanTypeQuery extends Gettable[String] with Settable[String] {
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-  override def path: JsPath = JsPath \ "planType"
+object DateSetupSummary {
+
+  def row(value: LocalDateTime)(implicit messages: Messages): SummaryListRow =
+    SummaryListRowViewModel(
+      key = "paymentPlanDetails.details.dateSetUp",
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      actions = Seq.empty
+    )
 }

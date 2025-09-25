@@ -17,8 +17,8 @@
 package controllers
 
 import base.SpecBase
+import models.{NormalMode, PaymentsFrequency, UserAnswers, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
-import models.{NormalMode, UserAnswers, YourBankDetailsWithAuddisStatus}
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
@@ -46,18 +46,20 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
-        AmendPaymentReferenceSummary.row(userAnswers)(messages(app)),
-        AmendPaymentAmountSummary.row(userAnswers)(messages(app)),
+        PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
+        AmendPlanStartDateSummary.rowData(userAnswers)(messages(app)),
+        AmendPaymentAmountSummary.row("budgetPaymentPlan", userAnswers)(messages(app)),
         AmendPlanEndDateSummary.row(userAnswers)(messages(app))
       ).flatten
     }
 
-    def createSummaryListForOtherPaymentPlans(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
+    def createSummaryListForSinglePaymentPlans(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
-        AmendPaymentReferenceSummary.row(userAnswers)(messages(app)),
-        AmendPaymentAmountSummary.row(userAnswers)(messages(app)),
+        PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
+        AmendPlanEndDateSummary.rowData(userAnswers)(messages(app)),
+        AmendPaymentAmountSummary.row("singlePaymentPlan", userAnswers)(messages(app)),
         AmendPlanStartDateSummary.row(userAnswers)(messages(app))
       ).flatten
     }
@@ -105,7 +107,15 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               AmendPlanStartDatePage,
               LocalDate.now().plusDays(4)
-            ).success.value
+            )
+            .success
+            .value
+            .set(
+              PaymentsFrequencyPage,
+              PaymentsFrequency.Weekly
+            )
+            .success
+            .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -173,7 +183,15 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               AmendPlanEndDatePage,
               LocalDate.now().plusDays(4)
-            ).success.value
+            )
+            .success
+            .value
+            .set(
+              PaymentsFrequencyPage,
+              PaymentsFrequency.Weekly
+            )
+            .success
+            .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -186,7 +204,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           when(mockSessionRepository.get(any()))
             .thenReturn(Future.successful(Some(userAnswers)))
 
-          val summaryListRows = createSummaryListForOtherPaymentPlans(userAnswers, application)
+          val summaryListRows = createSummaryListForSinglePaymentPlans(userAnswers, application)
           val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
 
           val result = route(application, request).value
@@ -196,6 +214,24 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           contentAsString(result) mustEqual view(NormalMode, paymentReference, directDebitReference, "sort code",
             "account number", summaryListRows, routes.AmendPlanStartDateController.onPageLoad(NormalMode))(request, messages(application)).toString
+        }
+      }
+    }
+
+    "onSubmit" - {
+      "must redirect to JourneyRecoveryController" in {
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+        running(application) {
+
+          val request = FakeRequest(POST, routes.AmendPaymentPlanConfirmationController.onSubmit(NormalMode).url)
+
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+
+          redirectLocation(result).value mustEqual routes.AmendPaymentPlanUpdateController.onPageLoad().url
         }
       }
     }

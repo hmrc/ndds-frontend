@@ -20,6 +20,7 @@ import models.UserAnswers
 import pages.AmendPaymentPlanTypePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
@@ -35,4 +36,18 @@ object AmendPaymentPlanTypeSummary {
           actions = Seq.empty
         )
     }
+
+  def row(planType: String)(implicit messages: Messages): SummaryListRow = {
+    val value = ValueViewModel(
+      HtmlContent(
+        HtmlFormat.escape(messages(s"paymentPlanDetails.details.planType.$planType"))
+      )
+    )
+
+    SummaryListRowViewModel(
+      key = "paymentPlanDetails.details.planType.label",
+      value = value,
+      actions = Seq.empty
+    )
+  }
 }

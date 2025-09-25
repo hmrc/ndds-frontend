@@ -35,4 +35,12 @@ object AmendPaymentPlanSourceSummary  {
           actions = Seq.empty
         )
     }
+
+  def row(value: String)(implicit messages: Messages): SummaryListRow = {
+    SummaryListRowViewModel(
+      key = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor",
+      value = ValueViewModel(HtmlFormat.escape(value.toUpperCase).toString),
+      actions = Seq.empty
+    )
+  }
 }

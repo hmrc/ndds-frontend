@@ -16,26 +16,46 @@
 
 package viewmodels.checkAnswers
 
-import config.CurrencyFormatter.currencyFormat
 import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, PaymentPlanType, UserAnswers}
 import pages.AmendPaymentAmountPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.MaskAndFormatUtils.*
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
 object AmendPaymentAmountSummary {
 
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(planType: String, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
+    val label = if (PaymentPlanType.BudgetPaymentPlan.toString == planType) {
+      "paymentPlanDetails.details.amount.budgetPaymentPlan"
+    } else {
+      "paymentPlanDetails.details.amount.singlePaymentPlan"
+    }
+
     answers.get(AmendPaymentAmountPage).map { amount =>
       SummaryListRowViewModel(
-        key     = "amendPaymentAmount.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(amount)),
+        key = label,
+        value = ValueViewModel(formatAmount(amount.doubleValue)),
         actions = Seq(
           ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("amendPaymentAmount.change.hidden"))
         )
       )
     }
+  }
+
+  def row(planType: String, amount: BigDecimal)(implicit messages: Messages): SummaryListRow = {
+    val label = if(PaymentPlanType.BudgetPaymentPlan.toString == planType) {
+      "paymentPlanDetails.details.amount.budgetPaymentPlan"
+    } else {
+      "paymentPlanDetails.details.amount.singlePaymentPlan"
+    }
+    SummaryListRowViewModel(
+      key = label,
+      value = ValueViewModel(formatAmount(amount.doubleValue)),
+      actions = Seq.empty
+    )
+  }
 }

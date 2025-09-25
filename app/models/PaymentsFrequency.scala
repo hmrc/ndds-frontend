@@ -42,4 +42,7 @@ object PaymentsFrequency extends Enumerable.Implicits {
 
   implicit val enumerable: Enumerable[PaymentsFrequency] =
     Enumerable(values.map(v => v.toString -> v): _*)
+
+  def fromString(str: String): Option[PaymentsFrequency] =
+    values.find(_.toString.equalsIgnoreCase(str))
 }

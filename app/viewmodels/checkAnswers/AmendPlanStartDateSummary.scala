@@ -24,6 +24,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object AmendPlanStartDateSummary  {
@@ -32,7 +33,7 @@ object AmendPlanStartDateSummary  {
     answers.get(AmendPlanStartDatePage).map {
       answer =>
         SummaryListRowViewModel(
-          key     = "amendPlanStartDate.checkYourAnswersLabel",
+          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
           ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
           actions = Seq(
             ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
@@ -40,4 +41,24 @@ object AmendPlanStartDateSummary  {
           )
         )
     }
+
+  def row(value: LocalDate)(implicit messages: Messages): SummaryListRow =
+    SummaryListRowViewModel(
+      key = "paymentPlanDetails.details.planStartDate",
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      actions = Seq.empty
+    )
+
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
+    val dateText = answers
+      .get(AmendPlanStartDatePage)
+      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .getOrElse("")
+
+    Some(SummaryListRowViewModel(
+      key = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
+      ValueViewModel(dateText),
+      actions = Seq.empty
+    ))
+  }
 }

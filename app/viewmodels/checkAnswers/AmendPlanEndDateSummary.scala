@@ -24,20 +24,41 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-object AmendPlanEndDateSummary  {
+object AmendPlanEndDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPlanEndDatePage).map {
       answer =>
         SummaryListRowViewModel(
-          key     = "amendPlanEndDate.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+          key = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
+          value = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
           actions = Seq(
             ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
           )
         )
     }
+
+  def row(value: LocalDate)(implicit messages: Messages): SummaryListRow =
+    SummaryListRowViewModel(
+      key = "paymentPlanDetails.details.planEndDate",
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      actions = Seq.empty
+    )
+
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
+    val dateText = answers
+      .get(AmendPlanEndDatePage)
+      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .getOrElse("")
+
+    Some(SummaryListRowViewModel(
+      key = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
+      ValueViewModel(dateText),
+      actions = Seq.empty
+    ))
+  }
 }
