@@ -16,45 +16,52 @@
 
 package utils
 
+import config.FrontendAppConfig
+
 import java.util.Base64
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+import javax.inject.Inject
 
-object MacGenerator {
+class MacGenerator @Inject()(appConfig: FrontendAppConfig) {
 
   private val Algorithm = "HmacSHA1"
-
+  
   def generateMac(
                    accountName: String,
                    accountNumber: String,
                    sortCode: String,
-                   addressLine1: String,
+                   lines: Seq[String],
                    addressLine2: String,
                    postcode: String,
                    bankName: String,
-                   bacsNumber: String,
-                   secretKey: String
+                   bacsNumber: String
                  ): String = {
-    // 1. Build key=value string in defined order
+    
     val dataString =
-      s"accountName=$accountName" +
-        s"accountNumber=$accountNumber" +
-        s"sortCode=$sortCode" +
-        s"addressLine1=$addressLine1" +
-        s"addressLine2=$addressLine2" +
-        s"postcode=$postcode" +
-        s"bankName=$bankName" +
-        s"bacsNumber=$bacsNumber"
+      Seq(
+        accountName,
+        accountNumber,
+        sortCode,
+        lines.mkString(" "),
+        addressLine2,
+        postcode,
+        bankName,
+        bacsNumber
+      ).mkString("&")
 
-    // 2. Convert to UTF-8 bytes
+    // Convert to UTF-8 bytes
     val bytes = dataString.getBytes("UTF-8")
 
-    // 3. Init HMAC with secret key
-    val secretKeySpec = new SecretKeySpec(secretKey.getBytes("UTF-8"), Algorithm)
+    // Decode Base64 secret key from config
+    val secretKeyBytes = Base64.getDecoder.decode(appConfig.macKey)
+    val secretKeySpec = new SecretKeySpec(secretKeyBytes, Algorithm)
+
+    // Init HMAC
     val mac = Mac.getInstance(Algorithm)
     mac.init(secretKeySpec)
 
-    // 4. Generate and Base64 encode
+    // Generate MAC and Base64 encode
     val rawMac = mac.doFinal(bytes)
     Base64.getEncoder.encodeToString(rawMac)
   }
