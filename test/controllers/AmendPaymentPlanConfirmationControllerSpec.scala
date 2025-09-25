@@ -17,8 +17,8 @@
 package controllers
 
 import base.SpecBase
-import org.mockito.ArgumentMatchers.any
 import models.{NormalMode, UserAnswers, YourBankDetailsWithAuddisStatus}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
@@ -28,7 +28,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery, PaymentReferenceQuery}
 import repositories.SessionRepository
-import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DirectDebitDetailsData
 import viewmodels.checkAnswers.*
@@ -48,18 +47,16 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
-        AmendPaymentReferenceSummary.row(userAnswers)(messages(app)),
-        AmendPaymentAmountSummary.row(userAnswers)(messages(app)),
+        AmendPaymentAmountSummary.row("budgetPaymentPlan", userAnswers)(messages(app)),
         AmendPlanEndDateSummary.row(userAnswers)(messages(app))
       ).flatten
     }
 
-    def createSummaryListForOtherPaymentPlans(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
+    def createSummaryListForSinglePaymentPlans(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
-        AmendPaymentReferenceSummary.row(userAnswers)(messages(app)),
-        AmendPaymentAmountSummary.row(userAnswers)(messages(app)),
+        AmendPaymentAmountSummary.row("singlePaymentPlan", userAnswers)(messages(app)),
         AmendPlanStartDateSummary.row(userAnswers)(messages(app))
       ).flatten
     }
@@ -232,7 +229,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           when(mockSessionRepository.get(any()))
             .thenReturn(Future.successful(Some(userAnswers)))
 
-          val summaryListRows = createSummaryListForOtherPaymentPlans(userAnswers, application)
+          val summaryListRows = createSummaryListForSinglePaymentPlans(userAnswers, application)
           val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
 
           val result = route(application, request).value

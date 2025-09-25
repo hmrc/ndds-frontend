@@ -49,16 +49,14 @@ class AmendPaymentPlanConfirmationController @Inject()(
           (Seq(
             AmendPaymentPlanTypeSummary.row(userAnswers),
             AmendPaymentPlanSourceSummary.row(userAnswers),
-            AmendPaymentReferenceSummary.row(userAnswers),
-            AmendPaymentAmountSummary.row(userAnswers),
+            AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers),
             AmendPlanEndDateSummary.row(userAnswers),
           ).flatten, routes.AmendPlanEndDateController.onPageLoad(mode))
         case _ =>
           (Seq(
             AmendPaymentPlanTypeSummary.row(userAnswers),
             AmendPaymentPlanSourceSummary.row(userAnswers),
-            AmendPaymentReferenceSummary.row(userAnswers),
-            AmendPaymentAmountSummary.row(userAnswers),
+            AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers),
             AmendPlanStartDateSummary.row(userAnswers),
           ).flatten, routes.AmendPlanStartDateController.onPageLoad(mode))
       }
