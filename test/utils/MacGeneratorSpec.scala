@@ -37,7 +37,7 @@ class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {
       val accountNumber = "12345678"
       val sortCode      = "112233"
       val lines         = Seq("10 Downing Street", "Flat 2")
-      val addressLine2  = "London"
+      val town          = "London"
       val postcode      = "SW1A 2AA"
       val bankName      = "Bank of Scala"
       val bacsNumber    = "111222"
@@ -47,7 +47,7 @@ class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {
         accountNumber,
         sortCode,
         lines,
-        addressLine2,
+        town,
         postcode,
         bankName,
         bacsNumber

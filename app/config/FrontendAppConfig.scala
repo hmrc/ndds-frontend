@@ -78,9 +78,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val macKey: String =
     configuration.get[String]("mac.key")
 
-  lazy val bacsNumber: BigDecimal =
-    BigDecimal(configuration.get[String]("barsClient.serviceUserNumber"))
-
+  lazy val bacsNumber: String =
+    configuration.get[String]("barsClient.serviceUserNumber")
+  
   lazy val tcMonthsUntilSecondPayment: Int =
     configuration.get[Int]("paymentSchedule.tc.monthsUntilSecondPayment")
 

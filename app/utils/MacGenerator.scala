@@ -26,29 +26,31 @@ import javax.inject.Inject
 class MacGenerator @Inject()(appConfig: FrontendAppConfig) {
 
   private val Algorithm = "HmacSHA1"
-  
+
   def generateMac(
                    accountName: String,
                    accountNumber: String,
                    sortCode: String,
                    lines: Seq[String],
-                   addressLine2: String,
+                   town:String,
                    postcode: String,
                    bankName: String,
                    bacsNumber: String
                  ): String = {
-    
+
     val dataString =
       Seq(
         accountName,
         accountNumber,
         sortCode,
         lines.mkString(" "),
-        addressLine2,
+        town,
         postcode,
         bankName,
         bacsNumber
       ).mkString("&")
+
+    println("*********************** "+dataString)
 
     // Convert to UTF-8 bytes
     val bytes = dataString.getBytes("UTF-8")

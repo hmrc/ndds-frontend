@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
 import forms.BankDetailsCheckYourAnswerFormProvider
 import models.Mode
@@ -28,6 +29,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.MacGenerator
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.BankDetailsCheckYourAnswerView
@@ -44,7 +46,9 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                                       navigator: Navigator,
                                                       formProvider: BankDetailsCheckYourAnswerFormProvider,
                                                       val controllerComponents: MessagesControllerComponents,
-                                                      view: BankDetailsCheckYourAnswerView
+                                                      view: BankDetailsCheckYourAnswerView,
+                                                      macGenerator:MacGenerator,
+                                                      appConfig: FrontendAppConfig
                                                     ) (implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
@@ -65,10 +69,38 @@ class BankDetailsCheckYourAnswerController @Inject()(
     (identify andThen getData andThen requireData).async { implicit request =>
       val confirmed = true
 
+      generateMacFromAnswers(request.userAnswers).foreach { mac =>
+        logger.info(s"Generated MAC*******: $mac")
+      }
+
       for {
         updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, confirmed))
         _              <- sessionRepository.set(updatedAnswers)
       } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
+  }
+
+
+  private def generateMacFromAnswers(answers: models.UserAnswers): Option[String] = {
+    val maybeBankAddress = answers.get(pages.BankDetailsAddressPage) // BankAddress
+    val maybeBankName = answers.get(pages.BankDetailsBankNamePage) // String
+    val maybeBankDetails = answers.get(pages.YourBankDetailsPage) // YourBankDetails
+
+    (maybeBankAddress, maybeBankName, maybeBankDetails) match {
+      case (Some(bankAddress), Some(bankName), Some(details)) =>
+        val mac = macGenerator.generateMac(
+          accountName = details.accountHolderName,
+          accountNumber = details.accountNumber,
+          sortCode = details.sortCode,
+          lines = bankAddress.lines,
+          town = bankAddress.town,
+          postcode = bankAddress.postCode,
+          bankName = bankName,
+          bacsNumber = appConfig.bacsNumber
+        )
+        Some(mac)
+      case _ =>
+        None
+    }
   }
 
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =
