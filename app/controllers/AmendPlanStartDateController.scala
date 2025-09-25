@@ -27,6 +27,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPlanStartDateView
 
@@ -41,6 +42,7 @@ class AmendPlanStartDateController @Inject()(
                                                  getData: DataRetrievalAction,
                                                  requireData: DataRequiredAction,
                                                  formProvider: AmendPlanStartDateFormProvider,
+                                                 nddService: NationalDirectDebitService,
                                                  val controllerComponents: MessagesControllerComponents,
                                                  view: AmendPlanStartDateView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
@@ -59,16 +61,25 @@ class AmendPlanStartDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val form = formProvider()
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
+      
+          val form = formProvider()
+          form.bindFromRequest().fold(
+            formWithErrors =>
+              Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
 
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
-      )
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
+                _ <- sessionRepository.set(updatedAnswers)
+              } yield {
+                if (nddService.amendmentMade(updatedAnswers)) {
+                  Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
+                } else {
+                  val key = "amendment.noChange"
+                  val errorForm = form.fill(value).withError("value", key)
+                  BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+                }
+              }
+          )
+      }
   }
-}

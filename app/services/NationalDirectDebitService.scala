@@ -19,19 +19,19 @@ package services
 import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
-import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
-import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, UserAnswers}
+import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.PaymentPlanTypeQuery
+import queries.{ExistingPaymentAmountQuery, PaymentPlanTypeQuery, ExistingPlanEndDateQuery, ExistingPlanStartDateQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
-import java.time.{LocalDateTime, LocalDate}
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -184,4 +184,40 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       )
     Future.successful(samplePaymentPlanResponse)
   }
+
+  def amendmentMade(ua: UserAnswers): Boolean = {
+    ua.get(PaymentPlanTypeQuery) match {
+      case Some("singlePaymentPlan") => amountChanged(ua) || startDateChanged(ua)
+      case Some("budgetPaymentPlan") => amountChanged(ua) || endDateChanged(ua)
+      case _ =>
+        logger.warn(s"Unexpected / missing plan type in amend journey; applying permissive check.")
+        amountChanged(ua) || startDateChanged(ua) || endDateChanged(ua)
+    }
+  }
+
+  private def amountChanged(ua: UserAnswers): Boolean = {
+    (ua.get(AmendPaymentAmountPage), ua.get(PaymentAmountPage)) match {
+      case (Some(amend), Some(exist)) => amend.compare(exist) != 0
+      case (Some(_), None) => true
+      case _ => false
+    }
+  }
+
+  private def startDateChanged(ua: UserAnswers): Boolean = {
+    (ua.get(AmendPlanStartDatePage), ua.get(PlanStartDatePage)) match {
+      case (Some(amendedStart: LocalDate), Some(existingDetails: PlanStartDateDetails)) =>
+        amendedStart != existingDetails.enteredDate
+      case (Some(_), None) => true
+      case _ => false
+    }
+  }
+
+  private def endDateChanged(ua: UserAnswers): Boolean = {
+    (ua.get(AmendPlanEndDatePage), ua.get(PlanEndDatePage)) match {
+      case (Some(amendedEnd), Some(existingEnd)) => amendedEnd != existingEnd
+      case (Some(_), None) => true
+      case _ => false
+    }
+  }
+
 }

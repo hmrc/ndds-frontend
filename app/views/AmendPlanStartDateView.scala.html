@@ -19,8 +19,8 @@
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    mainErrorSummary: components.MainErrorSummary,
     govukDateInput: GovukDateInput,
+    govukErrorSummary: GovukErrorSummary,
     govukButton: GovukButton,
     h1: Header1,
     p: Paragraph,
@@ -32,20 +32,24 @@
 @layout(pageTitle = title(form, messages("amendPlanStartDate.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.AmendPlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
-        @mainErrorSummary(form)
 
-        @h1(messages("amendPlanStartDate.heading"))
-        @p(messages("amendPlanStartDate.p1"))
-
-        @govukWarningText(
-            WarningText(content = HtmlContent(messages("amendPlanStartDate.warning")))
-        )
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
+        }
 
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(content="")
-            ).withHint(HintViewModel(HtmlContent(messages(s"amendPlanStartDate.hint"))))
+                legend = LegendViewModel(content="amendPlanStartDate.heading").asPageHeading()
+            ).withHint(HintViewModel(HtmlContent(Seq
+                    (
+                      s"<p class='govuk-!-margin-top-7 govuk-hint-black'>${messages("amendPlanStartDate.p1")}</p>",
+                      govukWarningText(
+                        WarningText(content = HtmlContent(messages("amendPlanStartDate.warning")))
+                      ),
+                      s"<p class='govuk-!-margin-top-7'>${messages("amendPlanStartDate.hint")}</p>"
+                    ).mkString
+            )))
         )
 
         @govukButton(

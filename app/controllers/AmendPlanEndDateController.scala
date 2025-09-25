@@ -26,6 +26,7 @@ import pages.AmendPlanEndDatePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPlanEndDateView
 
@@ -39,6 +40,7 @@ class AmendPlanEndDateController @Inject()(
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
                                         formProvider: AmendPlanEndDateFormProvider,
+                                        nddService: NationalDirectDebitService,
                                         val controllerComponents: MessagesControllerComponents,
                                         view: AmendPlanEndDateView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
@@ -67,7 +69,15 @@ class AmendPlanEndDateController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+          } yield {
+            if (nddService.amendmentMade(updatedAnswers)) {
+              Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+            } else {
+              val key = "amendment.noChange"
+              val errorForm = form.fill(value).withError("value", key)
+              BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+            }
+          }
       )
   }
 }

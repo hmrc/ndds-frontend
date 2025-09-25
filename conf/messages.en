@@ -360,6 +360,8 @@ paymentPlanDetails.details.planEndDate = Plan end date
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 
+amendment.noChange = ERROR: You have made no amendments.  Please check the details you have entered.
+
 amendPlanStartDate.title = Plan start date
 amendPlanStartDate.heading = What date are you starting this payment plan?
 amendPlanStartDate.p1 = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.

@@ -27,9 +27,10 @@ import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, Your
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers.{should, shouldBe}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
@@ -37,6 +38,7 @@ import queries.PaymentPlanTypeQuery
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
+import models.PlanStartDateDetails
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.global
@@ -73,6 +75,9 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD
+  
+  val singlePlan = "singlePaymentPlan"
+  val budgetPlan = "budgetPaymentPlan"
 
   "NationalDirectDebitService" - {
     "retrieve" - {
@@ -476,5 +481,96 @@ class NationalDirectDebitServiceSpec extends SpecBase
     }
 
   }
+  
+  "amendmentMade" - {
 
+    val today = LocalDate.now()
+    val start0 = today.plusDays(1)
+    val start1 = today.plusDays(2)
+    val end0 = today.plusMonths(1)
+    val end1 = today.plusMonths(2)
+    val earliestStart = today.plusDays(3).toString
+
+    "return true when amount changed for a single plan" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(PaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(PlanStartDatePage, PlanStartDateDetails(start0, earliestStart)).success.value
+
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+
+    "return true when date changed for a single plan" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(PaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(PlanStartDatePage, PlanStartDateDetails(start0, earliestStart)).success.value
+        .set(AmendPlanStartDatePage, start1).success.value
+
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+
+    "return true when both amount and date are changed for single plan" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(PaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(PlanStartDatePage, PlanStartDateDetails(start0, earliestStart)).success.value
+        .set(AmendPlanStartDatePage, start1).success.value
+
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+
+    "return false when neither amount nor date are changed for a single plan" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(PaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(PlanStartDatePage, PlanStartDateDetails(start0, earliestStart)).success.value
+
+      service.amendmentMade(userAnswers) shouldBe false
+    }
+
+    "return true when amount changed for budget plan" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(PaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(PlanEndDatePage, end0).success.value
+      
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+    
+    "return true when date changed for budget plan" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(PaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(PlanEndDatePage, end0).success.value
+        .set(AmendPlanEndDatePage, end1).success.value
+      
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+    
+    "return true when both amount and date are changed for a budget plan" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(PaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(PlanEndDatePage, end0).success.value
+        .set(AmendPlanEndDatePage, end1).success.value
+
+      service.amendmentMade(userAnswers) shouldBe true
+    }
+    
+    "return false when neither amount nor date are changed for a budget plan" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(PaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(PlanEndDatePage, end0).success.value
+
+      service.amendmentMade(userAnswers) shouldBe false
+    }
+    
+  }
+  
 }
