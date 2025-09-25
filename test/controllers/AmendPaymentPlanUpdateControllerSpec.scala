@@ -17,10 +17,16 @@
 package controllers
 
 import base.SpecBase
-import pages.{AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+import models.PaymentPlanType
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.any
+import org.scalatestplus.mockito.MockitoSugar
+import pages.{AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentReferenceQuery
+import services.NationalDirectDebitService
 import views.html.AmendPaymentPlanUpdateView
 
 import java.time.LocalDate
@@ -28,10 +34,10 @@ import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
 
-class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
+class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
 
   "PaymentPlanConfirmation Controller" - {
-
+    val mockService = mock[NationalDirectDebitService]
     val regPaymentAmount: BigDecimal = BigDecimal("1000.00")
     val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(regPaymentAmount)
     val startDate: LocalDate = LocalDate.of(2025, 10, 2)
@@ -45,14 +51,16 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
         .set(RegularPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
         .set(AmendPlanEndDatePage, endDate).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
 
       running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-
         val result = route(application, request).value
-
         val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
 
         status(result) mustEqual OK
@@ -61,7 +69,10 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
     }
 
     "must return error if no payment reference" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val userAnswers = emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
@@ -74,6 +85,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
     "must return error if no reg payment amount" in {
       val userAnswers = emptyUserAnswers
         .set(PaymentReferenceQuery, "123456789K").success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -89,6 +101,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
       val userAnswers = emptyUserAnswers
         .set(PaymentReferenceQuery, "123456789K").success.value
         .set(RegularPaymentAmountPage, regPaymentAmount).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -105,6 +118,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
         .set(PaymentReferenceQuery, "123456789K").success.value
         .set(RegularPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -113,6 +127,24 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
         val result = intercept[Exception](route(application, request).value.futureValue)
 
         result.getMessage must include("Missing end date from session")
+      }
+    }
+
+    "must return error if amend payment plan guard returns false" in {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentReferenceQuery, "123456789K").success.value
+        .set(RegularPaymentAmountPage, regPaymentAmount).success.value
+        .set(AmendPlanStartDatePage, startDate).success.value
+        .set(AmendPlanEndDatePage, endDate).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("Missing payment plan type from session")
       }
     }
 

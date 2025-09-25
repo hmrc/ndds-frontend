@@ -26,6 +26,7 @@ import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentReferenceQuery
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPaymentPlanUpdateView
 
@@ -36,6 +37,7 @@ class AmendPaymentPlanUpdateController @Inject()(
                                        identify: IdentifierAction,
                                        getData: DataRetrievalAction,
                                        requireData: DataRequiredAction,
+                                       nddsService: NationalDirectDebitService,
                                        val controllerComponents: MessagesControllerComponents,
                                        view: AmendPaymentPlanUpdateView
                                      )
@@ -44,22 +46,26 @@ class AmendPaymentPlanUpdateController @Inject()(
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val userAnswers = request.userAnswers
-      val paymentReference = userAnswers.get(PaymentReferenceQuery).getOrElse {
-        throw new Exception("Missing payment reference from session")
-      }
-      val regularPaymentAmount = userAnswers.get(RegularPaymentAmountPage).getOrElse {
-        throw new Exception("Missing regular payment amount from session")
-      }
-      val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(regularPaymentAmount)
-      val startDate = userAnswers.get(AmendPlanStartDatePage).getOrElse {
-        throw new Exception("Missing start date from session")
-      }
-      val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-      val endDate = userAnswers.get(AmendPlanEndDatePage).getOrElse {
-        throw new Exception("Missing end date from session")
-      }
-      val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+      if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+        val paymentReference = userAnswers.get(PaymentReferenceQuery).getOrElse {
+          throw new Exception("Missing payment reference from session")
+        }
+        val regularPaymentAmount = userAnswers.get(RegularPaymentAmountPage).getOrElse {
+          throw new Exception("Missing regular payment amount from session")
+        }
+        val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(regularPaymentAmount)
+        val startDate = userAnswers.get(AmendPlanStartDatePage).getOrElse {
+          throw new Exception("Missing start date from session")
+        }
+        val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        val endDate = userAnswers.get(AmendPlanEndDatePage).getOrElse {
+          throw new Exception("Missing end date from session")
+        }
+        val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
-      Future.successful(Ok(view(paymentReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate)))
+        Future.successful(Ok(view(paymentReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate)))
+      } else {
+        throw new Exception("Missing payment plan type from session")
+      }
   }
 }
