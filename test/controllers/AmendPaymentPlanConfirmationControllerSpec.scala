@@ -242,5 +242,23 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         }
       }
     }
+
+    "onSubmit" - {
+      "must redirect to JourneyRecoveryController" in {
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+        running(application) {
+
+          val request = FakeRequest(POST, routes.AmendPaymentPlanConfirmationController.onSubmit(NormalMode).url)
+
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+    }
   }
 }

@@ -21,6 +21,7 @@ import controllers.routes
 import pages.*
 import models.*
 import models.DirectDebitSource.*
+import queries.PaymentPlanTypeQuery
 
 class NavigatorSpec extends SpecBase {
 
@@ -216,6 +217,40 @@ class NavigatorSpec extends SpecBase {
             routes.JourneyRecoveryController.onPageLoad()
         }
       }
+
+      "Amend Journey " - {
+
+        "must go from a AmendPaymentAmountPage to AmendPlanStartDatePage" in {
+          val ua = userAnswers
+            .set(PaymentPlanTypeQuery, PaymentPlanType.SinglePaymentPlan.toString).success.value
+
+          navigator.nextPage(AmendPaymentAmountPage, NormalMode, ua) mustBe
+            routes.AmendPlanStartDateController.onPageLoad(NormalMode)
+        }
+
+        "must go from a AmendPaymentAmountPage to AmendPlanEndDatePage" in {
+          val ua = userAnswers
+            .set(PaymentPlanTypeQuery, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+
+          navigator.nextPage(AmendPaymentAmountPage, NormalMode, ua) mustBe
+            routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+        }
+
+        "must go from a AmendPaymentAmountPage to Journey Recovery Page" in {
+          navigator.nextPage(AmendPaymentAmountPage, NormalMode, userAnswers) mustBe
+            routes.JourneyRecoveryController.onPageLoad()
+        }
+
+        "must go from a AmendPlanStartDatePage to CheckYourAnswersPage" in {
+          navigator.nextPage(AmendPlanStartDatePage, NormalMode, userAnswers) mustBe
+            routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+        }
+
+        "must go from a AmendPlanEndDatePage to CheckYourAnswersPage" in {
+          navigator.nextPage(AmendPlanEndDatePage, NormalMode, userAnswers) mustBe
+            routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+        }
+      }
     }
 
     "in Check mode" - {
@@ -293,6 +328,40 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(YearEndAndMonthPage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
+      "Amend Journey " - {
+
+        "must go from a AmendPaymentAmountPage to AmendPlanStartDatePage" in {
+          val ua = userAnswers
+            .set(PaymentPlanTypeQuery, PaymentPlanType.SinglePaymentPlan.toString).success.value
+
+          navigator.nextPage(AmendPaymentAmountPage, CheckMode, ua) mustBe
+            routes.AmendPlanStartDateController.onPageLoad(CheckMode)
+        }
+
+        "must go from a AmendPaymentAmountPage to AmendPlanEndDatePage" in {
+          val ua = userAnswers
+            .set(PaymentPlanTypeQuery, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+
+          navigator.nextPage(AmendPaymentAmountPage, CheckMode, ua) mustBe
+            routes.AmendPlanEndDateController.onPageLoad(CheckMode)
+        }
+
+        "must go from a AmendPaymentAmountPage to Journey Recovery Page" in {
+          navigator.nextPage(AmendPaymentAmountPage, CheckMode, userAnswers) mustBe
+            routes.JourneyRecoveryController.onPageLoad()
+        }
+
+        "must go from a AmendPlanStartDatePage to CheckYourAnswersPage" in {
+          navigator.nextPage(AmendPlanStartDatePage, CheckMode, userAnswers) mustBe
+            routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+        }
+
+        "must go from a AmendPlanEndDatePage to CheckYourAnswersPage" in {
+          navigator.nextPage(AmendPlanEndDatePage, CheckMode, userAnswers) mustBe
+            routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+        }
+
+      }
     }
   }
 }
