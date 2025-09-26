@@ -22,7 +22,8 @@
     govukErrorSummary: GovukErrorSummary,
     mainErrorSummary: components.MainErrorSummary,
     govukDateInput: GovukDateInput,
-    govukButton: GovukButton,
+    govukWarningText: GovukWarningText,
+    govukButton: GovukButton
 )
 
 @(form: Form[_], mode: Mode, earliestPaymentDate: String, earliestPaymentDateNumeric: String, call: Call)(implicit request: Request[_], messages: Messages)
@@ -37,8 +38,15 @@
             DateViewModel(
                 field  = form("value"),
                 legend = LegendViewModel(messages("paymentDate.heading")).asPageHeading()
-            )
-            .withHint(HintViewModel(HtmlContent(messages("paymentDate.hint", earliestPaymentDate, earliestPaymentDateNumeric))))
+            ).withHint(HintViewModel(HtmlContent(Seq
+                (
+                    s"<p class='govuk-body'>${messages("paymentDate.p1")}</p>",
+                    govukWarningText(
+                        WarningText(content = HtmlContent(messages("paymentDate.warning")))
+                    ),
+                    messages("paymentDate.hint", earliestPaymentDate, earliestPaymentDateNumeric)
+                ).mkString
+            )))
         )
 
         @govukButton(

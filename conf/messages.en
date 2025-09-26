@@ -206,7 +206,9 @@ paymentAmount.change.hidden =  Payment amount
 
 paymentDate.title = What date are you making this payment?
 paymentDate.heading = What date are you making this payment?
-paymentDate.hint = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. The payment date must be within the next 12 months.<br><br>Please note: If your payment is late you may be liable to pay interest and/or surcharge.<br> <br> The earliest date you can enter as your payment date is {0} <br><br> For example, {1}
+paymentDate.p1 = This is the earliest date that HMRC will collect payment from your account. <br/><br/> The payment date must be within the next 12 months.
+paymentDate.warning = If your payment is late you may be liable to pay interest or surcharge.
+paymentDate.hint = The earliest date you can start is {0}. Enter the date as numbers, for example {1}.
 paymentDate.checkYourAnswersLabel = Payment date
 paymentDate.error.required.all = Enter the payment date
 paymentDate.error.required.two = The payment date must include {0} and {1}
