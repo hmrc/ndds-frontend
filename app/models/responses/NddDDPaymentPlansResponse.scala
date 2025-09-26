@@ -16,6 +16,8 @@
 
 package models.responses
 
+import models.PaymentPlanType
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
 
 import java.time.LocalDateTime
@@ -28,8 +30,23 @@ case class NddPaymentPlan(scheduledPaymentAmount: Double,
                           submissionDateTime: LocalDateTime)
 
 object NddPaymentPlan {
-  implicit val format: OFormat[NddPaymentPlan] = Json.format[NddPaymentPlan]
-  java.time.Month.values()
+  private val planTypeMapping: Map[String, String] = Map(
+    "01" -> PaymentPlanType.SinglePaymentPlan.toString,
+    "02" -> PaymentPlanType.BudgetPaymentPlan.toString,
+    "03" -> PaymentPlanType.TaxCreditRepaymentPlan.toString,
+    "04" -> PaymentPlanType.VariablePaymentPlan.toString
+  )
+
+  implicit val reads: Reads[NddPaymentPlan] = (
+    (__ \ "scheduledPaymentAmount").read[Double] and
+      (__ \ "planRefNumber").read[String] and
+      (__ \ "planType").read[String].map(code => planTypeMapping.getOrElse(code, "unknownPlanType")) and
+      (__ \ "paymentReference").read[String] and
+      (__ \ "hodService").read[String] and
+      (__ \ "submissionDateTime").read[LocalDateTime]
+    )(NddPaymentPlan.apply _)
+
+  implicit val writes: OWrites[NddPaymentPlan] = Json.writes[NddPaymentPlan]
 }
 
 
@@ -41,8 +58,5 @@ case class NddDDPaymentPlansResponse(bankSortCode: String,
                                      paymentPlanList: Seq[NddPaymentPlan])
 
 object NddDDPaymentPlansResponse {
-
-  import NddPaymentPlan.format
-
   implicit val format: OFormat[NddDDPaymentPlansResponse] = Json.format[NddDDPaymentPlansResponse]
 }

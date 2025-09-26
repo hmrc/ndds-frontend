@@ -16,8 +16,7 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, stubFor, urlEqualTo, urlPathMatching}
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathMatching}
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
 import itutil.ApplicationWithWiremock
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
@@ -176,12 +175,36 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
           |  "bankAccountNumber": "12345678",
           |  "bankAccountName": "Test Name",
           |  "auDdisFlag": "Y",
-          |  "paymentPlanCount": 1,
+          |  "paymentPlanCount": 4,
           |  "paymentPlanList": [
           |    {
           |      "scheduledPaymentAmount": 100.50,
           |      "planRefNumber": "plan-123",
-          |      "planType": "STANDARD",
+          |      "planType": "01",
+          |      "paymentReference": "pay-123",
+          |      "hodService": "HMRC",
+          |      "submissionDateTime": "2024-09-15T10:15:30"
+          |    },
+          |    {
+          |      "scheduledPaymentAmount": 100.50,
+          |      "planRefNumber": "plan-123",
+          |      "planType": "02",
+          |      "paymentReference": "pay-123",
+          |      "hodService": "HMRC",
+          |      "submissionDateTime": "2024-09-15T10:15:30"
+          |    },
+          |    {
+          |      "scheduledPaymentAmount": 100.50,
+          |      "planRefNumber": "plan-123",
+          |      "planType": "03",
+          |      "paymentReference": "pay-123",
+          |      "hodService": "HMRC",
+          |      "submissionDateTime": "2024-09-15T10:15:30"
+          |    },
+          |    {
+          |      "scheduledPaymentAmount": 100.50,
+          |      "planRefNumber": "plan-123",
+          |      "planType": "04",
           |      "paymentReference": "pay-123",
           |      "hodService": "HMRC",
           |      "submissionDateTime": "2024-09-15T10:15:30"
@@ -202,8 +225,11 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       val result = connector.retrieveDirectDebitPaymentPlans("testRef").futureValue
 
       result.bankSortCode shouldBe "123456"
-      result.paymentPlanCount shouldBe 1
-      result.paymentPlanList.head.planRefNumber shouldBe "plan-123"
+      result.paymentPlanCount shouldBe 4
+      result.paymentPlanList.head.planType shouldBe PaymentPlanType.SinglePaymentPlan.toString
+      result.paymentPlanList(1).planType shouldBe PaymentPlanType.BudgetPaymentPlan.toString
+      result.paymentPlanList(2).planType shouldBe PaymentPlanType.TaxCreditRepaymentPlan.toString
+      result.paymentPlanList(3).planType shouldBe PaymentPlanType.VariablePaymentPlan.toString
     }
   }
 
