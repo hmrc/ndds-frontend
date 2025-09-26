@@ -42,7 +42,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
   private val mockAuditService: AuditService = mock[AuditService]
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
-  
+  private val mockMacGenerator: MacGenerator = mock[MacGenerator]
+
 
   "Check Your Answers Controller" - {
 
@@ -209,13 +210,22 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         )
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-        .setOrException(pages.MacValuePage, "valid-mac") // <-- add this
+        .setOrException(pages.MacValuePage, "valid-mac")
 
       when(mockNddService.generateNewDdiReference(any())(any()))
         .thenReturn(Future.successful(GenerateDdiRefResponse("fakeRef")))
+      when(
+        mockMacGenerator.generateMac(
+          any[String], any[String], any[String], any[Seq[String]],
+          any[String], any[String], any[String], any[String]
+        )
+      ).thenReturn("valid-mac")
 
       val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-        .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService),
+          bind[MacGenerator].toInstance(mockMacGenerator)
+        )
         .build()
 
       running(application) {
@@ -236,9 +246,20 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(PaymentReferencePage, "testRef")
+        .setOrException(pages.MacValuePage, "valid-mac")
+
+        when(
+          mockMacGenerator.generateMac(
+            any[String], any[String], any[String], any[Seq[String]],
+            any[String], any[String], any[String], any[String]
+          )
+        ).thenReturn("valid-mac")
 
       val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-        .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService),
+          bind[MacGenerator].toInstance(mockMacGenerator)
+        )
         .build()
 
       running(application) {
@@ -254,20 +275,33 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
     "must redirect to Journey Recovery for a POST if Ddi reference number is not obtained successfully" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(PaymentReferencePage, "testReference")
+        .setOrException(pages.MacValuePage, "valid-mac")
 
       when(mockNddService.generateNewDdiReference(any())(any()))
         .thenReturn(Future.failed(new Exception("bang")))
       when(mockNddService.submitChrisData(any())(any()))
         .thenReturn(Future.successful(true))
 
+      when(
+        mockMacGenerator.generateMac(
+          any[String], any[String], any[String], any[Seq[String]],
+          any[String], any[String], any[String], any[String]
+        )
+      ).thenReturn("valid-mac")
+
       val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-        .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService),
+          bind[MacGenerator].toInstance(mockMacGenerator)
+        )
         .build()
 
       running(application) {
         val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = intercept[Exception](route(application, request).value.futureValue)
-        result.getMessage must include("bang")
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
@@ -287,18 +321,28 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
             PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-01")
           )
           .setOrException(PaymentReferencePage, "testReference")
+          .setOrException(pages.MacValuePage, "valid-mac")
           .setOrException(
             BankDetailsAddressPage,
             BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
           )
           .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(pages.MacValuePage, "valid-mac")
 
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+        when(
+          mockMacGenerator.generateMac(
+            any[String], any[String], any[String], any[Seq[String]],
+            any[String], any[String], any[String], any[String]
+          )
+        ).thenReturn("valid-mac")
+
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator),
             bind[AuditService].toInstance(mockAuditService)
           )
           .build()
@@ -325,6 +369,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(BankDetailsAddressPage,
             BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
           .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(pages.MacValuePage, "valid-mac")
+
 
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -363,6 +409,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
             BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
           )
           .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(pages.MacValuePage, "valid-mac")
+
 
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -370,10 +418,19 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(false))
 
+        when(
+          mockMacGenerator.generateMac(
+            any[String], any[String], any[String], any[Seq[String]],
+            any[String], any[String], any[String], any[String]
+          )
+        ).thenReturn("valid-mac")
+
+
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
             bind[AuditService].toInstance(mockAuditService),
-            bind[NationalDirectDebitService].toInstance(mockNddService)
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator)
           )
           .build()
 
@@ -399,15 +456,25 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(BankDetailsAddressPage,
             BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
           .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(pages.MacValuePage, "valid-mac")
+
 
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
+        when(
+          mockMacGenerator.generateMac(
+            any[String], any[String], any[String], any[Seq[String]],
+            any[String], any[String], any[String], any[String]
+          )
+        ).thenReturn("valid-mac")
+
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
             bind[AuditService].toInstance(mockAuditService),
+            bind[MacGenerator].toInstance(mockMacGenerator),
             bind[NationalDirectDebitService].toInstance(mockNddService)
           )
           .build()
