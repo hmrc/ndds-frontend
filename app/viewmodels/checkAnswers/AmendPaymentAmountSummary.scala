@@ -37,7 +37,7 @@ object AmendPaymentAmountSummary {
     answers.get(AmendPaymentAmountPage).map { amount =>
       SummaryListRowViewModel(
         key = label,
-        value = ValueViewModel(formatAmount(amount.doubleValue)),
+        value = ValueViewModel(formatAmount(amount)),
         actions = Seq(
           ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("amendPaymentAmount.change.hidden"))
@@ -54,7 +54,7 @@ object AmendPaymentAmountSummary {
     }
     SummaryListRowViewModel(
       key = label,
-      value = ValueViewModel(formatAmount(amount.doubleValue)),
+      value = ValueViewModel(formatAmount(amount)),
       actions = Seq.empty
     )
   }

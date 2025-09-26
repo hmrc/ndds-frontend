@@ -160,7 +160,8 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           bankSortCode = "123456",
           bankAccountNumber = "12345678",
           bankAccountName = "John Doe",
-          auddisFlag = true
+          auddisFlag = true,
+          submissionDateTime = LocalDateTime.now()
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",

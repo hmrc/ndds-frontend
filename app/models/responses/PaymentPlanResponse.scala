@@ -16,13 +16,15 @@
 
 package models.responses
 
+import java.time.{LocalDate, LocalDateTime}
 import play.api.libs.json.{Json, OFormat}
 
 case class DirectDebitDetails(
                                bankSortCode: String,
                                bankAccountNumber: String,
                                bankAccountName: String,
-                               auddisFlag: Boolean
+                               auddisFlag: Boolean,
+                               submissionDateTime: LocalDateTime
                              )
 
 object DirectDebitDetails {
@@ -33,17 +35,17 @@ case class PaymentPlanDetails(
                                hodService: String,
                                planType: String,
                                paymentReference: String,
-                               submissionDateTime: java.time.LocalDateTime,
+                               submissionDateTime: LocalDateTime,
                                scheduledPaymentAmount: Double,
-                               scheduledPaymentStartDate: java.time.LocalDate,
-                               initialPaymentStartDate: java.time.LocalDate,
+                               scheduledPaymentStartDate: LocalDate,
+                               initialPaymentStartDate: LocalDate,
                                initialPaymentAmount: BigDecimal,
-                               scheduledPaymentEndDate: java.time.LocalDate,
+                               scheduledPaymentEndDate: LocalDate,
                                scheduledPaymentFrequency: String,
-                               suspensionStartDate: java.time.LocalDate,
-                               suspensionEndDate: java.time.LocalDate,
+                               suspensionStartDate: LocalDate,
+                               suspensionEndDate: LocalDate,
                                balancingPaymentAmount: BigDecimal,
-                               balancingPaymentDate: java.time.LocalDate,
+                               balancingPaymentDate: LocalDate,
                                totalLiability: BigDecimal,
                                paymentPlanEditable: Boolean
                              )

@@ -33,7 +33,8 @@ trait PaymentPlanData {
         bankSortCode = "123456",
         bankAccountNumber = "12345678",
         bankAccountName = "John Doe",
-        auddisFlag = true
+        auddisFlag = true,
+        submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService = "NDD",
@@ -61,7 +62,8 @@ trait PaymentPlanData {
         bankSortCode = "123456",
         bankAccountNumber = "12345678",
         bankAccountName = "John Doe",
-        auddisFlag = true
+        auddisFlag = true,
+        submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService = "NDD",
@@ -89,7 +91,8 @@ trait PaymentPlanData {
         bankSortCode = "123456",
         bankAccountNumber = "12345678",
         bankAccountName = "John Doe",
-        auddisFlag = true
+        auddisFlag = true,
+        submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService = "NDD",
@@ -117,7 +120,8 @@ trait PaymentPlanData {
         bankSortCode = "123456",
         bankAccountNumber = "12345678",
         bankAccountName = "John Doe",
-        auddisFlag = true
+        auddisFlag = true,
+        submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService = "NDD",

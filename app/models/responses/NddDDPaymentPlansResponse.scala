@@ -22,7 +22,7 @@ import play.api.libs.json.*
 
 import java.time.LocalDateTime
 
-case class NddPaymentPlan(scheduledPaymentAmount: Double,
+case class NddPaymentPlan(scheduledPaymentAmount: BigDecimal,
                           planRefNumber: String,
                           planType: String,
                           paymentReference: String,
@@ -38,7 +38,7 @@ object NddPaymentPlan {
   )
 
   implicit val reads: Reads[NddPaymentPlan] = (
-    (__ \ "scheduledPaymentAmount").read[Double] and
+    (__ \ "scheduledPaymentAmount").read[BigDecimal] and
       (__ \ "planRefNumber").read[String] and
       (__ \ "planType").read[String].map(code => planTypeMapping.getOrElse(code, "unknownPlanType")) and
       (__ \ "paymentReference").read[String] and
