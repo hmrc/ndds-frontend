@@ -22,7 +22,7 @@ import forms.AmendPlanStartDateFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.AmendPlanStartDatePage
+import pages.{AmendPlanStartDatePage, ExistingAmendPlanEndDatePage, ExistingAmendPlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -50,11 +50,10 @@ class AmendPlanStartDateController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request => {
       val form = formProvider()
-      val preparedForm = request.userAnswers.get(AmendPlanStartDatePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
+      val preparedForm = request.userAnswers.get(ExistingAmendPlanStartDatePage)
+        .orElse(request.userAnswers.get(AmendPlanStartDatePage))
+        .fold(form)(form.fill)
+      
       Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
     }
   }
@@ -69,7 +68,7 @@ class AmendPlanStartDateController @Inject()(
 
             value =>
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(ExistingAmendPlanEndDatePage, value))
                 _ <- sessionRepository.set(updatedAnswers)
               } yield {
                 if (nddService.amendmentMade(updatedAnswers)) {

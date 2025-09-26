@@ -22,7 +22,9 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
+import models.responses.{DirectDebitDetails, EarliestPaymentDate,
+  GenerateDdiRefResponse, NddDDPaymentPlansResponse,
+  PaymentPlanDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, UserAnswers}
 import pages.*
 import play.api.Logging
@@ -165,7 +167,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
-          planType = PaymentPlanType.BudgetPaymentPlan.toString,
+          planType = PaymentPlanType.SinglePaymentPlan.toString,
           paymentReference = paymentReference,
           submissionDateTime = now.minusDays(5), //Some(now.minusDays(5)),
           scheduledPaymentAmount = 120.00,
@@ -196,7 +198,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   }
 
   private def amountChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPaymentAmountPage), ua.get(PaymentAmountPage)) match {
+    (ua.get(AmendPaymentAmountPage), ua.get(ExistingAmendPaymentAmountPage)) match {
       case (Some(amend), Some(exist)) => amend.compare(exist) != 0
       case (Some(_), None) => true
       case _ => false
@@ -204,17 +206,16 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   }
 
   private def startDateChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPlanStartDatePage), ua.get(PlanStartDatePage)) match {
-      case (Some(amendedStart: LocalDate), Some(existingDetails: PlanStartDateDetails)) =>
-        amendedStart != existingDetails.enteredDate
+    (ua.get(AmendPlanStartDatePage), ua.get(ExistingAmendPlanStartDatePage)) match {
+      case (Some(amend), Some(exist)) => amend != exist
       case (Some(_), None) => true
       case _ => false
     }
   }
 
   private def endDateChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPlanEndDatePage), ua.get(PlanEndDatePage)) match {
-      case (Some(amendedEnd), Some(existingEnd)) => amendedEnd != existingEnd
+    (ua.get(AmendPlanEndDatePage), ua.get(ExistingAmendPlanEndDatePage)) match {
+      case (Some(amend), Some(exist)) => amend != exist
       case (Some(_), None) => true
       case _ => false
     }
