@@ -130,12 +130,13 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
       }
     }
 
-    "must return error if amend payment plan guard returns false" in {
+    "must return NDDS error if amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
         .set(PaymentReferenceQuery, "123456789K").success.value
         .set(RegularPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
         .set(AmendPlanEndDatePage, endDate).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -144,7 +145,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
         val result = intercept[Exception](route(application, request).value.futureValue)
 
-        result.getMessage must include("Missing payment plan type from session")
+        result.getMessage must include("NDDS Payment Plan Guard: Cannot amend this plan type: taxCreditRepaymentPlan")
       }
     }
 

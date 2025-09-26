@@ -17,7 +17,8 @@
 package controllers
 
 import controllers.actions.*
-import pages.{AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+import pages.{AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+import play.api.Logging
 
 import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
@@ -41,7 +42,7 @@ class AmendPaymentPlanUpdateController @Inject()(
                                        val controllerComponents: MessagesControllerComponents,
                                        view: AmendPaymentPlanUpdateView
                                      )
-  extends FrontendBaseController with I18nSupport {
+  extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
@@ -65,7 +66,9 @@ class AmendPaymentPlanUpdateController @Inject()(
 
         Future.successful(Ok(view(paymentReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate)))
       } else {
-        throw new Exception("Missing payment plan type from session")
+        val paymentPlanType = userAnswers.get(AmendPaymentPlanTypePage).getOrElse("Missing plan type from user answers")
+        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
+        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
       }
   }
 }

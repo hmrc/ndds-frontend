@@ -27,7 +27,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPaymentAmountView
 
@@ -61,7 +60,7 @@ class AmendPaymentAmountController @Inject()(
       } else {
         val paymentPlanType = answers.get(AmendPaymentPlanTypePage).getOrElse("Missing plan type from user answers")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
-        throw new InternalServerException("NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
+        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
       }
   }
 

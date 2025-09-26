@@ -56,7 +56,7 @@ class PaymentPlanDetailsController @Inject()(
           val maybeSource: Option[DirectDebitSource] =
             listHodServices.find { case (_, v) => v.equalsIgnoreCase(planDetail.hodService) }
               .map(_._1)
-          val frequency = PaymentsFrequency.fromString(planDetail.scheduledPaymentFrequency.get)
+          val frequency = PaymentsFrequency.fromString(planDetail.scheduledPaymentFrequency)
 
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
@@ -65,7 +65,7 @@ class PaymentPlanDetailsController @Inject()(
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferenceQuery, planDetail.paymentReference))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(BigDecimal(0))))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
             cachedAnswers <- Future.fromTry(updatedAnswers.set(

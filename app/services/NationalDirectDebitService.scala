@@ -164,20 +164,20 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
-          planType = PaymentPlanType.SinglePaymentPlan.toString,
-          paymentReference = paymentReference,
-          submissionDateTime = now.minusDays(5), //Some(now.minusDays(5)),
-          scheduledPaymentAmount = 120.00,
-          scheduledPaymentStartDate = currentDate.plusDays(6), //Some(LocalDate.now().minusMonths(8)),
-          initialPaymentStartDate = now.plusDays(5),//Some(LocalDateTime.now().plusDays(1)),
-          initialPaymentAmount = Some(BigDecimal(50.00)),
-          scheduledPaymentEndDate = currentDate.plusDays(7), //Some(LocalDate.now().plusMonths(12)),
-          scheduledPaymentFrequency = Some(PaymentsFrequency.Weekly.toString),
-          suspensionStartDate = None,
-          suspensionEndDate = None,
-          balancingPaymentAmount = Some(BigDecimal(25.00)),
-          balancingPaymentDate = Some(LocalDateTime.now().plusMonths(13)),
-          totalLiability =  Some(780.00), //Some(BigDecimal(1825.50)),
+          planType = PaymentPlanType.VariablePaymentPlan.toString,
+          paymentReference = paymentReference, //Payment reference
+          submissionDateTime = now.minusDays(5), //Date set up
+          scheduledPaymentAmount = 120.00, //Payment amount or Regular payment amount or Monthly payment amount
+          scheduledPaymentStartDate = currentDate.plusDays(4), //Payment date or Plan start date
+          scheduledPaymentEndDate = currentDate.plusDays(5), //Plan end date
+          scheduledPaymentFrequency = PaymentsFrequency.Weekly.toString, //Frequency of payments
+          suspensionStartDate = currentDate.plusDays(2), //Suspend start date
+          suspensionEndDate = currentDate.plusDays(4), //Suspend end date
+          balancingPaymentAmount = BigDecimal(25.00), //Final payment amount
+          totalLiability =  780.00, //Total amount due
+          balancingPaymentDate = currentDate.plusMonths(13),
+          initialPaymentStartDate = currentDate.plusDays(5),
+          initialPaymentAmount = BigDecimal(50.00),
           paymentPlanEditable = true
         )
       )
