@@ -16,8 +16,39 @@
 
 package utils
 
+import models.UserAnswers
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
+
 object Utils {
   val emptyString = ""
   val LockExpirySessionKey = "lockoutExpiryDateTime"
+
+  def generateMacFromAnswers(
+                              answers: UserAnswers,
+                              macGenerator: MacGenerator,
+                              bacsNumber: String
+                            ): Option[String] = {
+    val maybeBankAddress = answers.get(BankDetailsAddressPage)   // BankAddress
+    val maybeBankName    = answers.get(BankDetailsBankNamePage) // String
+    val maybeBankDetails = answers.get(YourBankDetailsPage)     // YourBankDetails
+
+    (maybeBankAddress, maybeBankName, maybeBankDetails) match {
+      case (Some(bankAddress), Some(bankName), Some(details)) =>
+        Some(
+          macGenerator.generateMac(
+            accountName   = details.accountHolderName,
+            accountNumber = details.accountNumber,
+            sortCode      = details.sortCode,
+            lines         = bankAddress.lines,
+            town          = bankAddress.town,
+            postcode      = bankAddress.postCode,
+            bankName      = bankName,
+            bacsNumber    = bacsNumber
+          )
+        )
+      case _ =>
+        None
+    }
+  }
 }
 

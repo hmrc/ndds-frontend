@@ -30,6 +30,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MacGenerator
+import utils.Utils.generateMacFromAnswers
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.BankDetailsCheckYourAnswerView
@@ -69,39 +70,24 @@ class BankDetailsCheckYourAnswerController @Inject()(
     (identify andThen getData andThen requireData).async { implicit request =>
       val confirmed = true
 
-      generateMacFromAnswers(request.userAnswers).foreach { mac =>
-        logger.info(s"Generated MAC*******: $mac")
+      generateMacFromAnswers(request.userAnswers, macGenerator, appConfig.bacsNumber ) match {
+        case Some(mac) =>
+          logger.info(s"Generated MAC*******: $mac")
+
+          for {
+            updatedAnswers <- Future.fromTry(
+              request.userAnswers
+                .set(BankDetailsCheckYourAnswerPage, confirmed)
+                .flatMap(_.set(pages.MacValuePage, mac)) // persist MAC #1
+            )
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
+
+        case None =>
+          logger.error("Could not generate MAC – missing bank details")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
-
-      for {
-        updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, confirmed))
-        _              <- sessionRepository.set(updatedAnswers)
-      } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
-  }
-
-
-  private def generateMacFromAnswers(answers: models.UserAnswers): Option[String] = {
-    val maybeBankAddress = answers.get(pages.BankDetailsAddressPage) // BankAddress
-    val maybeBankName = answers.get(pages.BankDetailsBankNamePage) // String
-    val maybeBankDetails = answers.get(pages.YourBankDetailsPage) // YourBankDetails
-
-    (maybeBankAddress, maybeBankName, maybeBankDetails) match {
-      case (Some(bankAddress), Some(bankName), Some(details)) =>
-        val mac = macGenerator.generateMac(
-          accountName = details.accountHolderName,
-          accountNumber = details.accountNumber,
-          sortCode = details.sortCode,
-          lines = bankAddress.lines,
-          town = bankAddress.town,
-          postcode = bankAddress.postCode,
-          bankName = bankName,
-          bacsNumber = appConfig.bacsNumber
-        )
-        Some(mac)
-      case _ =>
-        None
     }
-  }
 
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =
     SummaryListViewModel(
