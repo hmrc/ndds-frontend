@@ -23,7 +23,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, PaymentAmountPage, PlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, NewAmendPaymentAmountPage, NewAmendPlanEndDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -48,7 +48,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   def onwardRoute = Call("GET", "/foo")
 
   val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
-  val amendedValidAnswer: LocalDate = LocalDate.of(2025, 2, 2)
+  val newValidAnswer: LocalDate = LocalDate.of(2025, 2, 2)
 
   lazy val amendPlanEndDateRoute = routes.AmendPlanEndDateController.onPageLoad(NormalMode).url
   lazy val amendPlanEndDateRoutePost = routes.AmendPlanEndDateController.onSubmit(NormalMode).url
@@ -173,10 +173,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       "must return a Bad Request with amendment.noChange when no amendment is made" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanTypeQuery, budgetPlan).success.value
-          .set(PaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(PlanEndDatePage, validAnswer).success.value
+          .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
+          .set(NewAmendPlanEndDatePage, validAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -197,16 +197,14 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       "must redirect when amendment in amount is detected" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanTypeQuery, budgetPlan).success.value
-          .set(PaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(200.00)).success.value
-          .set(PlanEndDatePage, validAnswer).success.value
+          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
+          .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
+          .set(NewAmendPlanEndDatePage, validAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val view = application.injector.instanceOf[AmendPlanEndDateView]
-
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
           
@@ -218,17 +216,15 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       "must redirect when amendment in date is detected" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanTypeQuery, budgetPlan).success.value
-          .set(PaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(PlanEndDatePage, validAnswer).success.value
-          .set(AmendPlanEndDatePage, amendedValidAnswer).success.value
+          .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+          .set(AmendPlanEndDatePage, validAnswer).success.value
+          .set(NewAmendPlanEndDatePage, newValidAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val view = application.injector.instanceOf[AmendPlanEndDateView]
-
-          val request = postRequestWithDate(amendedValidAnswer)
+          val request = postRequestWithDate(newValidAnswer)
           val result = route(application, request).value
           
           status(result) mustEqual SEE_OTHER
@@ -239,17 +235,15 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       "must redirect when amendment in amount and date detected" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanTypeQuery, budgetPlan).success.value
-          .set(PaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(200.00)).success.value
-          .set(PlanEndDatePage, validAnswer).success.value
-          .set(AmendPlanEndDatePage, amendedValidAnswer).success.value
+          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
+          .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
+          .set(AmendPlanEndDatePage, validAnswer).success.value
+          .set(NewAmendPlanEndDatePage, newValidAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val view = application.injector.instanceOf[AmendPlanEndDateView]
-
-          val request = postRequestWithDate(amendedValidAnswer)
+          val request = postRequestWithDate(newValidAnswer)
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER

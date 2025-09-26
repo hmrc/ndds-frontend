@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package queries
+package pages
 
-import pages.QuestionPage
-
-import java.time.LocalDate
 import play.api.libs.json.JsPath
 
-case object ExistingPaymentAmountQuery extends QuestionPage[BigDecimal] {
+import java.time.LocalDate
 
-  override def path: JsPath = JsPath \ "existing" \ "paymentAmount"
+case object NewAmendPlanEndDatePage extends QuestionPage[LocalDate] {
 
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "existingAmendPlanEndDate"
 }

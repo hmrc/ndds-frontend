@@ -22,7 +22,7 @@ import forms.AmendPlanEndDateFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPlanEndDatePage, ExistingAmendPlanEndDatePage}
+import pages.{AmendPlanEndDatePage, NewAmendPlanEndDatePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -50,7 +50,7 @@ class AmendPlanEndDateController @Inject()(
 
       val form = formProvider()
       val preparedForm =
-        request.userAnswers.get(ExistingAmendPlanEndDatePage)
+        request.userAnswers.get(NewAmendPlanEndDatePage)
           .orElse(request.userAnswers.get(AmendPlanEndDatePage))
           .fold(form)(form.fill)
 
@@ -67,7 +67,7 @@ class AmendPlanEndDateController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ExistingAmendPlanEndDatePage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(NewAmendPlanEndDatePage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield {
             if (nddService.amendmentMade(updatedAnswers)) {
