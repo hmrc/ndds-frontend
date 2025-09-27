@@ -164,7 +164,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
-          planType = PaymentPlanType.VariablePaymentPlan.toString,
+          planType = PaymentPlanType.BudgetPaymentPlan.toString,
           paymentReference = paymentReference, //Payment reference
           submissionDateTime = now.minusDays(5), //Date set up
           scheduledPaymentAmount = 120.00, //Payment amount or Regular payment amount or Monthly payment amount

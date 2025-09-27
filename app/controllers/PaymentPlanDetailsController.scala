@@ -26,9 +26,10 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentReferenceQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils.listHodServices
-import viewmodels.checkAnswers.*
+import viewmodels.checkAnswers.{AmendPlanStartDateSummary, *}
 import views.html.PaymentPlanDetailsView
 
 import scala.concurrent.duration.*
@@ -50,7 +51,6 @@ class PaymentPlanDetailsController @Inject()(
     request.userAnswers.get(PaymentReferenceQuery) match {
       case Some(paymentReference) =>
         nddService.getPaymentPlanDetails(paymentReference).flatMap { response =>
-
           val planDetail = response.paymentPlanDetails
           val directDebit = response.directDebitDetails
           val maybeSource: Option[DirectDebitSource] =
@@ -79,35 +79,60 @@ class PaymentPlanDetailsController @Inject()(
               ) ))
             _ <- sessionRepository.set(cachedAnswers)
           } yield {
-            val showActions =
-              val flag: Future[Boolean] = planDetail.planType match {
-                case PaymentPlanType.SinglePaymentPlan.toString =>
-                  nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
-                case PaymentPlanType.BudgetPaymentPlan.toString =>
-                  for {
-                    isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
-                    isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(planDetail.scheduledPaymentEndDate)
-                  } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
-                case PaymentPlanType.VariablePaymentPlan.toString => Future.successful(false)
-                case _ => Future.successful(false)
-              }
-              Await.result(flag, 5.seconds)
+            val flag = planDetail.planType match {
+              case PaymentPlanType.SinglePaymentPlan.toString =>
+                nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
 
-            val showCancelAction = PaymentPlanType.VariablePaymentPlan.toString == planDetail.planType
+              case PaymentPlanType.BudgetPaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
+                for {
+                  isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
+                  isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(planDetail.scheduledPaymentEndDate)
+                } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
 
-            val summaryRows = Seq(
-              AmendPaymentPlanTypeSummary.row(planDetail.planType),
-              AmendPaymentPlanSourceSummary.row(planDetail.hodService),
-              DateSetupSummary.row(planDetail.submissionDateTime),
-              AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
-              AmendPlanStartDateSummary.row(planDetail.scheduledPaymentStartDate),
-              AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
-            )
+              case _ => Future.successful(false) //For Taxcredit repayment plan
+            }
 
-            Ok(view(paymentReference, showActions, showCancelAction, summaryRows))
+            val summaryRows = planDetail.planType match {
+              case PaymentPlanType.SinglePaymentPlan.toString =>
+                Seq(
+                  AmendPaymentPlanTypeSummary.row(planDetail.planType),
+                  AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+                  DateSetupSummary.row(planDetail.submissionDateTime),
+                  AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
+                  AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)
+                )
+              case PaymentPlanType.BudgetPaymentPlan.toString =>
+                Seq(
+                  AmendPaymentPlanTypeSummary.row(planDetail.planType),
+                  AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+                  DateSetupSummary.row(planDetail.submissionDateTime),
+                  TotalAmountDueSummary.row(planDetail.totalLiability),
+                  MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount),
+                  FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount),
+                  AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
+                  AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
+                  PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
+                  AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
+                  AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true),
+                  AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false),
+                )
+              case _ => //For Variable and Tax repayment plan
+                Seq(
+                  AmendPaymentPlanTypeSummary.row(planDetail.planType),
+                  AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+                  DateSetupSummary.row(planDetail.submissionDateTime),
+                  TotalAmountDueSummary.row(planDetail.totalLiability),
+                  MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount),
+                  FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount),
+                  AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
+                  AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
+                )
+            }
+
+            val showActions = Await.result(flag, 5.seconds)
+            Ok(view(planDetail.planType, paymentReference, showActions, summaryRows))
           }
         }
-
       case None =>
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
@@ -120,5 +145,57 @@ class PaymentPlanDetailsController @Inject()(
       _ <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
   }
+
+//  private def checkPlanAndRows(
+//                                nddService: NationalDirectDebitService,
+//                                planDetail: PaymentPlanDetails
+//                              )(implicit hc: HeaderCarrier, rh: play.api.mvc.RequestHeader): Future[(Boolean, Seq[SummaryListRow])] = {
+//
+//    planDetail.planType match {
+//      case PaymentPlanType.SinglePaymentPlan.toString =>
+//        nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate).map { flag =>
+//          (flag,
+//            Seq(
+//              AmendPaymentPlanTypeSummary.row(planDetail.planType),
+//              AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+//              DateSetupSummary.row(planDetail.submissionDateTime),
+//              AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
+//              AmendPlanStartDateSummary.row(planDetail.scheduledPaymentStartDate)
+//              // AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate) // commented out
+//            )
+//          )
+//        }
+//
+//      case PaymentPlanType.BudgetPaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
+//        for {
+//          isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
+//          isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(planDetail.scheduledPaymentEndDate)
+//        } yield (
+//          isTwoDaysBeforeStart && isThreeDaysBeforeEnd,
+//          Seq(
+//            AmendPaymentPlanTypeSummary.row(planDetail.planType),
+//            AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+//            DateSetupSummary.row(planDetail.submissionDateTime),
+//            AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
+//            // AmendPlanStartDateSummary.row(planDetail.scheduledPaymentStartDate), // commented out
+//            AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)
+//          )
+//        )
+//
+//      case _ =>
+//        Future.successful(
+//          (false,
+//            Seq(
+//              AmendPaymentPlanTypeSummary.row(planDetail.planType),
+//              AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+//              DateSetupSummary.row(planDetail.submissionDateTime),
+//              AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)
+//              // AmendPlanStartDateSummary.row(planDetail.scheduledPaymentStartDate), // commented out
+//              // AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate) // commented out
+//            )
+//          )
+//        )
+//    }
+//  }
 
 }

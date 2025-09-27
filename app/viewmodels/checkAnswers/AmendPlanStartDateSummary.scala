@@ -17,7 +17,7 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, PaymentPlanType, UserAnswers}
 import pages.AmendPlanStartDatePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -42,9 +42,14 @@ object AmendPlanStartDateSummary  {
         )
     }
 
-  def row(value: LocalDate)(implicit messages: Messages): SummaryListRow =
+  def row(planType: String, value: LocalDate)(implicit messages: Messages): SummaryListRow =
+    val label = if(PaymentPlanType.SinglePaymentPlan.toString == planType) {
+      "paymentPlanDetails.details.date"
+    } else {
+      "paymentPlanDetails.details.startDate"
+    }
     SummaryListRowViewModel(
-      key = "paymentPlanDetails.details.planStartDate",
+      key = label,
       value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
       actions = Seq.empty
     )
