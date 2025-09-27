@@ -3,8 +3,6 @@ import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
-lazy val appName: String = "ndds-frontend"
-
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "3.3.6"
 
@@ -14,7 +12,9 @@ lazy val microservice = (project in file("."))
   .settings(inConfig(Test)(testSettings): _*)
   .settings(ThisBuild / useSuperShell := false)
   .settings(
-    name := appName,
+    name := "ndds-frontend",
+    PlayKeys.playDefaultPort := 6990,
+    sCoverageSettings,
     scalaSettings,
     defaultSettings(),
     libraryDependencies ++= AppDependencies(),
@@ -23,6 +23,7 @@ lazy val microservice = (project in file("."))
     Runtime / fork := true,
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
+    Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
     RoutesKeys.routesImport ++= Seq(
       "models._",
       "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl"
@@ -39,12 +40,6 @@ lazy val microservice = (project in file("."))
       "controllers.routes._",
       "viewmodels.govuk.all._"
     ),
-    PlayKeys.playDefaultPort := 6990,
-    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;" +
-      ".*Routes.*;.*viewmodels.*;.*views.*",
-    ScoverageKeys.coverageMinimumStmtTotal := 70,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",
@@ -52,8 +47,6 @@ lazy val microservice = (project in file("."))
       "-Wconf:src=routes/.*:s",
       "-Wconf:msg=Flag.*repeatedly:s"
     ),
-    libraryDependencies ++= AppDependencies(),
-    retrieveManaged := true,
     pipelineStages := Seq(digest),
     Assets / pipelineStages := Seq(concat)
   )
@@ -67,3 +60,13 @@ lazy val it =
   (project in file("it"))
     .enablePlugins(PlayScala)
     .dependsOn(microservice % "test->test")
+
+lazy val sCoverageSettings = {
+  Seq(
+    ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;config;" +
+      ".*Routes*.*;.*viewmodels.*;.*views.*;testOnlyDoNotUseInAppConf.*;",
+    ScoverageKeys.coverageMinimumStmtTotal := 70,
+    ScoverageKeys.coverageFailOnMinimum := true,
+    ScoverageKeys.coverageHighlighting := true
+  )
+}
