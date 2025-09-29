@@ -167,7 +167,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
-          planType = PaymentPlanType.BudgetPaymentPlan.toString,
+          planType = PaymentPlanType.SinglePaymentPlan.toString,
           paymentReference = paymentReference,
           submissionDateTime = now.minusDays(5), //Some(now.minusDays(5)),
           scheduledPaymentAmount = 120.00,
@@ -219,6 +219,26 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       case (None, Some(_)) => true
       case _ => false
     }
+  }
+
+  def isDuplicatePaymentPlan(ua: UserAnswers): Boolean = {
+    if((amountChanged(ua) || startDateChanged(ua)) && isSinglePaymentPlan(ua)) {
+      val count = ua.get(DirectDebitSummaryPage).get
+      println("Reached here and count is "+count)
+      if(count > 1) {
+//        val request = 
+//        nddConnector.isDuplicatePlan(ua.get(DirectDebitReferencePage).get,)
+        true
+      } else
+        false
+
+    }
+    else if (amountChanged(ua) && isBudgetPaymentPlan(ua)){
+      true
+    }
+    else{
+        false
+      }
   }
 
 }

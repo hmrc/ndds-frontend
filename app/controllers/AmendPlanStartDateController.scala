@@ -72,6 +72,8 @@ class AmendPlanStartDateController @Inject()(
                 _ <- sessionRepository.set(updatedAnswers)
               } yield {
                 if (nddService.amendmentMade(updatedAnswers)) {
+                  val flag = nddService.isDuplicatePaymentPlan(updatedAnswers)
+                  println("Reached here and flag is " + flag)
                   Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
                 } else {
                   val key = "amendment.noChange"
