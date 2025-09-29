@@ -91,6 +91,7 @@ class CheckYourAnswersController @Inject()(
 
       (ua.get(pages.MacValuePage), maybeMac2) match {
         case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
+          logger.info(s"MAC validation successful")
           nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
             val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
 
@@ -122,7 +123,7 @@ class CheckYourAnswersController @Inject()(
           }
 
         case (Some(mac1), Some(mac2)) =>
-          logger.error(s"MAC validation failed. MAC1=[$mac1], MAC2=[$mac2]")
+          logger.error(s"MAC validation failed")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
 
         case _ =>
