@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, NewAmendPaymentAmountPage, NewAmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage, NewAmendPaymentAmountPage, NewAmendPlanStartDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -35,7 +35,6 @@ import play.api.test.Helpers.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import views.html.AmendPlanStartDateView
-import queries.PaymentPlanTypeQuery
 
 import java.time.*
 import scala.concurrent.Future
@@ -64,7 +63,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   lazy val amendPaymentAmountRoute: String = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
   
   /** TODO TO be replaced with PP2 route */
-  lazy val tempProblemPage: String = routes.JourneyRecoveryController.onPageLoad().url
+  lazy val planConfirmationPage: String = routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url
   
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
@@ -211,7 +210,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must return a Bad Request with amendment.noChange when no amendment is made" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, singlePlan).success.value
+          .set(AmendPaymentPlanTypePage, singlePlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPlanStartDatePage, validAnswer).success.value
@@ -235,7 +234,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must redirect when amendment in amount is detected" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, singlePlan).success.value
+          .set(AmendPaymentPlanTypePage, singlePlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
           .set(AmendPlanStartDatePage, validAnswer).success.value
@@ -248,13 +247,13 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual tempProblemPage
+          redirectLocation(result).value mustEqual planConfirmationPage
         }
       }
 
       "must redirect when amendment in date is detected" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, singlePlan).success.value
+          .set(AmendPaymentPlanTypePage, singlePlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPlanStartDatePage, validAnswer).success.value
@@ -267,13 +266,13 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual tempProblemPage
+          redirectLocation(result).value mustEqual planConfirmationPage
         }
       }
 
       "must redirect when amendment in amount and date is detected" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, singlePlan).success.value
+          .set(AmendPaymentPlanTypePage, singlePlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
           .set(AmendPlanStartDatePage, validAnswer).success.value
@@ -286,7 +285,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual tempProblemPage
+          redirectLocation(result).value mustEqual planConfirmationPage
         }
       }
 

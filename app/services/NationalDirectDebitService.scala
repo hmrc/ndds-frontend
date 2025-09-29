@@ -188,7 +188,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
 
   def amendmentMade(ua: UserAnswers): Boolean = {
-    ua.get(PaymentPlanTypeQuery) match {
+    ua.get(AmendPaymentPlanTypePage) match {
       case Some("singlePaymentPlan") => amountChanged(ua) || startDateChanged(ua)
       case Some("budgetPaymentPlan") => amountChanged(ua) || endDateChanged(ua)
       case _ =>

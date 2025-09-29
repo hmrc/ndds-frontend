@@ -528,7 +528,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "return true when amount changed for a single plan" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(PlanStartDatePage, PlanStartDateDetails(start0, earliestStart)).success.value
@@ -538,7 +538,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "return true when date changed for a single plan" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
         .set(NewAmendPlanStartDatePage, start1).success.value
@@ -548,7 +548,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "return true when both amount and date are changed for single plan" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
@@ -559,7 +559,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "return false when neither amount nor date are changed for a single plan" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
@@ -570,7 +570,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "return true when amount changed for budget plan" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(PlanEndDatePage, end0).success.value
@@ -580,7 +580,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
     
     "return true when date changed for budget plan" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
         .set(NewAmendPlanEndDatePage, end1).success.value
@@ -590,7 +590,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
     
     "return true when both amount and date are changed for a budget plan" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
@@ -601,7 +601,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
     
     "return false when neither amount nor date are changed for a budget plan" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
@@ -612,7 +612,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
     
     "amountChanged returns true when existing amount is missing" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .remove(AmendPaymentAmountPage).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
       service.amendmentMade(userAnswers) shouldBe true
@@ -620,7 +620,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "startDateChanged returns true when existing amount is missing" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .remove(AmendPlanStartDatePage).success.value
         .set(NewAmendPlanStartDatePage, start1).success.value
       service.amendmentMade(userAnswers) shouldBe true
@@ -628,7 +628,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "endDateChanged returns true when existing amount is missing" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .remove(AmendPlanEndDatePage).success.value
         .set(NewAmendPlanEndDatePage, start1).success.value
       service.amendmentMade(userAnswers) shouldBe true
