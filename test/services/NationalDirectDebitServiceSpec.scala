@@ -22,7 +22,7 @@ import connectors.NationalDirectDebitConnector
 import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
@@ -34,7 +34,6 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.PaymentPlanTypeQuery
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
@@ -71,7 +70,8 @@ class NationalDirectDebitServiceSpec extends SpecBase
     FakeRequest(GET, routes.LandingController.onPageLoad().url)
 
   val testBankDetailsAuddisTrue: YourBankDetailsWithAuddisStatus =
-    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName, sortCode = testSortCode, accountNumber = testAccountNumber, auddisStatus = true, false)
+    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName, sortCode = testSortCode,
+      accountNumber = testAccountNumber, auddisStatus = true, false)
 
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD
@@ -80,7 +80,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
   val budgetPlan = "budgetPaymentPlan"
 
   "NationalDirectDebitService" - {
-    "retrieve" - {
+    "retrieveDirectDebits" - {
       "should retrieve existing details from Cache first" in {
         when(mockCache.retrieveCache(any()))
           .thenReturn(Future.successful(nddResponse.directDebitList))
@@ -188,6 +188,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         result.getMessage must include("YourBankDetailsPage details missing from user answers")
       }
+
       "fail when payment plan type is not in user answers" in {
         val expectedUserAnswers = emptyUserAnswers
           .set(DirectDebitSourcePage, testDirectDebitSource).success.value
@@ -197,6 +198,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         result.getMessage must include("PaymentPlanTypePage details missing from user answers")
       }
+
       "fail when direct debit source is not in user answers" in {
         val expectedUserAnswers = emptyUserAnswers
           .set(PaymentPlanTypePage, testPaymentPlanType).success.value
@@ -206,6 +208,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         result.getMessage must include("DirectDebitSourcePage details missing from user answers")
       }
+
       "fail when the connector call fails" in {
         val expectedUserAnswers = emptyUserAnswers
           .set(PaymentPlanTypePage, testPaymentPlanType).success.value
@@ -257,6 +260,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         service.calculateOffset(auddisStatus, VariablePaymentPlan, MGD) mustBe expected
       }
+
       "successfully calculate the offset when auddis status is enabled and source is self assessment" in {
         val auddisStatus = true
 
@@ -267,6 +271,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         service.calculateOffset(auddisStatus, BudgetPaymentPlan, SA) mustBe expected
       }
+
       "successfully calculate the offset when auddis status is not enabled and source is tax credits" in {
         val auddisStatus = false
         val expectedVariableDelay = 8
@@ -278,6 +283,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         service.calculateOffset(auddisStatus, BudgetPaymentPlan, SA) mustBe expected
       }
+
       "successfully calculate the offset when auddis status is enabled and source is tax credits" in {
         val auddisStatus = true
 
@@ -288,6 +294,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
         service.calculateOffset(auddisStatus, TaxCreditRepaymentPlan, TC) mustBe expected
       }
+
       "successfully calculate the offset when auddis status is not enabled and source is self assessment" in {
         val auddisStatus = false
         val expectedVariableDelay = 8
@@ -321,6 +328,34 @@ class NationalDirectDebitServiceSpec extends SpecBase
       }
     }
 
+    "retrieveDirectDebitPaymentPlans" - {
+      "must successfully return the direct debit payment plans" in {
+        val paymentPlanResponse = NddDDPaymentPlansResponse(
+          bankSortCode = "123456",
+          bankAccountNumber = "12345678",
+          bankAccountName = "MyBankAcc",
+          auDdisFlag = "01",
+          paymentPlanCount = 2,
+          paymentPlanList = Seq.empty)
+
+        when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
+          .thenReturn(Future.successful(paymentPlanResponse))
+
+        val result = service.retrieveDirectDebitPaymentPlans("testRef").futureValue
+
+        result mustBe paymentPlanResponse
+      }
+
+      "fail when the connector call fails" in {
+        when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.retrieveDirectDebitPaymentPlans("testRef").futureValue)
+
+        result.getMessage must include("bang")
+      }
+    }
+
     "amendPaymentPlanGuard" - {
       "must return true if single payment for set up journey" in {
         val expectedUserAnswers = emptyUserAnswers
@@ -331,7 +366,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       "must return true if single payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, PaymentPlanType.SinglePaymentPlan.toString).success.value
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe true
       }
@@ -345,7 +380,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       "must return true if budget payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe true
       }
@@ -359,7 +394,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       "must return false if variable payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, PaymentPlanType.VariablePaymentPlan.toString).success.value
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString).success.value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe false
       }
@@ -373,7 +408,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       "must return false if payment plan is empty for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, "").success.value
+          .set(AmendPaymentPlanTypePage, "").success.value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe false
       }
