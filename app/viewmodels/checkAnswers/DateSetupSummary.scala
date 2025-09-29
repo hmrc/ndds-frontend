@@ -16,35 +16,20 @@
 
 package viewmodels.checkAnswers
 
-import config.CurrencyFormatter.currencyFormat
-import models.UserAnswers
-import pages.TotalAmountDuePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-import scala.math.BigDecimal.RoundingMode
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-object MonthlyPaymentAmountDueSummary  {
+object DateSetupSummary {
 
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(TotalAmountDuePage).map { totalAmount =>
-      val monthlyPayment = (totalAmount / 12).setScale(2, RoundingMode.DOWN)
-
-      SummaryListRowViewModel(
-        key     = "totalAmountDue.monthly.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(monthlyPayment)),
-        actions = Seq.empty
-      )
-    }
-
-  def row(amount: BigDecimal)(implicit messages: Messages): SummaryListRow =
+  def row(value: LocalDateTime)(implicit messages: Messages): SummaryListRow =
     SummaryListRowViewModel(
-      key = "totalAmountDue.monthly.checkYourAnswersLabel",
-      value = ValueViewModel(formatAmount(amount.doubleValue)),
+      key = "paymentPlanDetails.details.dateSetUp",
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
       actions = Seq.empty
     )
-
 }
