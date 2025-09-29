@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package utils
+package viewmodels.checkAnswers
 
-import models.DirectDebitSource
+import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object Utils {
-  val emptyString = ""
-  val LockExpirySessionKey = "lockoutExpiryDateTime"
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-  val listHodServices: Map[DirectDebitSource, String] = Map(
-    DirectDebitSource.CT -> "COTA",
-    DirectDebitSource.PAYE -> "PAYE",
-    DirectDebitSource.SA -> "CESA",
-    DirectDebitSource.TC -> "NTC",
-    DirectDebitSource.VAT -> "VAT",
-    DirectDebitSource.MGD -> "MGD",
-    DirectDebitSource.NIC -> "NIDN",
-    DirectDebitSource.OL -> "SAFE",
-    DirectDebitSource.SDLT -> "SDLT"
-  )
+object DateSetupSummary {
+
+  def row(value: LocalDateTime)(implicit messages: Messages): SummaryListRow =
+    SummaryListRowViewModel(
+      key = "paymentPlanDetails.details.dateSetUp",
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      actions = Seq.empty
+    )
 }
-

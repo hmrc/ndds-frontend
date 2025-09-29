@@ -16,27 +16,23 @@
 
 package viewmodels.checkAnswers
 
-import config.CurrencyFormatter.currencyFormat
-import controllers.routes
-import models.{CheckMode, UserAnswers}
-import pages.RegularPaymentAmountPage
+import models.UserAnswers
+import pages.PaymentReferencePage
 import play.api.i18n.Messages
+import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object RegularPaymentAmountSummary  {
+object AmendPaymentReferenceSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(RegularPaymentAmountPage).map {
+    answers.get(PaymentReferencePage).map {
       answer =>
         SummaryListRowViewModel(
-          key     = "regularPaymentAmount.checkYourAnswersLabel",
-          value   = ValueViewModel(currencyFormat(answer)),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.RegularPaymentAmountController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("regularPaymentAmount.change.hidden"))
-          )
+          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference",
+          value   = ValueViewModel(HtmlFormat.escape(answer).toString),
+          actions = Seq.empty
         )
     }
 }
