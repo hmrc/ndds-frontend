@@ -360,12 +360,12 @@ paymentPlanDetails.details.paymentFor = Payment for
 paymentPlanDetails.details.dateSetUp = Date set up
 paymentPlanDetails.details.amount.budgetPaymentPlan = Regular payment amount
 paymentPlanDetails.details.amount.singlePaymentPlan = Payment amount
-paymentPlanDetails.details.startDate = Payment start date
+paymentPlanDetails.details.startDate = Plan start date
 paymentPlanDetails.details.date = Payment date
 paymentPlanDetails.details.planStartDate = Plan start date
 paymentPlanDetails.details.planEndDate = Plan end date
-paymentPlanDetails.details.suspendStartDate = Suspend Start Date
-paymentPlanDetails.details.suspendEndDate = Suspend End Date
+paymentPlanDetails.details.suspendStartDate = Suspend start date
+paymentPlanDetails.details.suspendEndDate = Suspend end date
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 

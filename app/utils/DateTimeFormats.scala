@@ -40,7 +40,7 @@ object DateTimeFormats {
     LocalDate.now().format(formatter)
   }
 
-  def formattedDateTime(dateTime: ZonedDateTime): String = { //example: 24 July 2020, 16:29pm to display in BST format
+  def formattedDateTime(dateTime: ZonedDateTime): String = { //example: 24 July 2020, 16:29pm in local zone BST time (ZonedDateTime)
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mma")
     val extractDateSuffix = """(.*)(am|pm|AM|PM)""".r
 

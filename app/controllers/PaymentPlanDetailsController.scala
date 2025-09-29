@@ -118,14 +118,14 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
           TotalAmountDueSummary.row(planDetail.totalLiability),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount),
+          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
+          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
-          AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true),
-          AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false),
+          AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true), //true for start
+          AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false), //false for end
         )
       case _ => //For Variable and Tax repayment plan
         Seq(
@@ -133,8 +133,8 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
           TotalAmountDueSummary.row(planDetail.totalLiability),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount),
+          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
+          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
         )

@@ -41,6 +41,20 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
     val mockService = mock[NationalDirectDebitService]
     val mockSessionRepository = mock[SessionRepository]
 
+    def varRepaySummaryList(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+      val planDetail = paymentPlanData.paymentPlanDetails
+      Seq(
+        AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
+        AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
+        DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
+        TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
+        MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability)(messages(app)),
+        FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability)(messages(app)),
+        AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
+        AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
+      )
+    }
+
     "must return OK and the correct view for a GET with a SinglePayment Plan" in {
       def summaryList(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
         val planDetail = paymentPlanData.paymentPlanDetails
@@ -59,9 +73,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           .set(
             PaymentReferenceQuery,
             paymentReference
-          )
-          .success
-          .value
+          ).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
         .overrides(
@@ -71,7 +83,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
         .build()
 
       running(application) {
-
         when(mockSessionRepository.set(any()))
           .thenReturn(Future.successful(true))
         when(mockSessionRepository.get(any()))
@@ -82,11 +93,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           .thenReturn(Future.successful(true))
 
         val summaryListRows = summaryList(mockSinglePaymentPlanDetailResponse, application)
-
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
-
         val result = route(application, request).value
-
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
         contentAsString(result) mustEqual view("singlePaymentPlan", paymentReference, true, summaryListRows)(request, messages(application)).toString
@@ -101,8 +109,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
           DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
           TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
+          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability)(messages(app)),
+          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability)(messages(app)),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency)(messages(app)),
@@ -117,9 +125,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           .set(
             PaymentReferenceQuery,
             paymentReference
-          )
-          .success
-          .value
+          ).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
         .overrides(
@@ -129,7 +135,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
         .build()
 
       running(application) {
-
         when(mockSessionRepository.set(any()))
           .thenReturn(Future.successful(true))
         when(mockSessionRepository.get(any()))
@@ -142,11 +147,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           .thenReturn(Future.successful(true))
 
         val summaryListRows = summaryList(mockBudgetPaymentPlanDetailResponse, application)
-
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
-
         val result = route(application, request).value
-
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
         contentAsString(result) mustEqual view("budgetPaymentPlan", paymentReference, true, summaryListRows)(request, messages(application)).toString
@@ -154,28 +156,13 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
     }
 
     "must return OK and the correct view for a GET with a Variable Plan" in {
-      def summaryList(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
-        val planDetail = paymentPlanData.paymentPlanDetails
-        Seq(
-          AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
-          AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
-          DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
-          TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
-          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
-        )
-      }
       val paymentReference = "paymentReference"
       val userAnswersWithPaymentReference =
         emptyUserAnswers
           .set(
             PaymentReferenceQuery,
             paymentReference
-          )
-          .success
-          .value
+          ).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
         .overrides(
@@ -185,7 +172,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
         .build()
 
       running(application) {
-
         when(mockSessionRepository.set(any()))
           .thenReturn(Future.successful(true))
         when(mockSessionRepository.get(any()))
@@ -193,12 +179,9 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
         when(mockService.getPaymentPlanDetails(any()))
           .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
 
-        val summaryListRows = summaryList(mockVariablePaymentPlanDetailResponse, application)
-
+        val summaryListRows = varRepaySummaryList(mockVariablePaymentPlanDetailResponse, application)
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
-
         val result = route(application, request).value
-
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
         contentAsString(result) mustEqual view("variablePaymentPlan", paymentReference, true, summaryListRows)(request, messages(application)).toString
@@ -206,28 +189,13 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
     }
 
     "must return OK and the correct view for a GET with a Tax Credit Repayment Plan" in {
-      def summaryList(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
-        val planDetail = paymentPlanData.paymentPlanDetails
-        Seq(
-          AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
-          AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
-          DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
-          TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
-          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app))
-        )
-      }
       val paymentReference = "paymentReference"
       val userAnswersWithPaymentReference =
         emptyUserAnswers
           .set(
             PaymentReferenceQuery,
             paymentReference
-          )
-          .success
-          .value
+          ).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
         .overrides(
@@ -237,7 +205,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
         .build()
 
       running(application) {
-
         when(mockSessionRepository.set(any()))
           .thenReturn(Future.successful(true))
         when(mockSessionRepository.get(any()))
@@ -246,11 +213,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           .thenReturn(Future.successful(mockTaxCreditRepaymentPlanDetailResponse))
 
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
-
-        val summaryListRows = summaryList(mockTaxCreditRepaymentPlanDetailResponse, application)
-
+        val summaryListRows = varRepaySummaryList(mockTaxCreditRepaymentPlanDetailResponse, application)
         val result = route(application, request).value
-
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
         contentAsString(result) mustEqual view("taxCreditRepaymentPlan", paymentReference, false, summaryListRows)(request, messages(application)).toString
@@ -262,7 +226,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
         .overrides().build()
 
       running(application) {
-
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
         val result = route(application, request).value
 
@@ -278,9 +241,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           .set(
             PaymentReferenceQuery,
             paymentReference
-          )
-          .success
-          .value
+          ).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
         .overrides(
@@ -289,13 +250,9 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
         .build()
 
       running(application) {
-
         when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
-
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onRedirect(paymentReference).url)
-
         val result = route(application, request).value
-
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.PaymentPlanDetailsController.onPageLoad().url
 
