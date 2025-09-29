@@ -24,7 +24,7 @@ import pages.*
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentReferenceQuery
+import queries.{DateSetupQuery, PaymentReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -62,11 +62,14 @@ class PaymentPlanDetailsController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(DateSetupQuery, planDetail.submissionDateTime))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferenceQuery, planDetail.paymentReference))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(MonthlyPaymentAmountPage, planDetail.scheduledPaymentAmount))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(FinalPaymentAmountPage, planDetail.balancingPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
             cachedAnswers <- Future.fromTry(updatedAnswers.set(YourBankDetailsPage,
@@ -115,8 +118,8 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
           TotalAmountDueSummary.row(planDetail.totalLiability),
-          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount),
-          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
@@ -130,8 +133,8 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
           TotalAmountDueSummary.row(planDetail.totalLiability),
-          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount),
-          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
         )

@@ -101,8 +101,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
           DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
           TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
-          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency)(messages(app)),
@@ -161,8 +161,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
           DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
           TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
-          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
         )
@@ -213,8 +213,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
           DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
           TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
-          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount)(messages(app)),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount)(messages(app)),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app))
         )

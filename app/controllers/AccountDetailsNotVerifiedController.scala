@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
 import views.html.AccountDetailsNotVerifiedView
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
@@ -41,7 +41,7 @@ class AccountDetailsNotVerifiedController @Inject()(
     implicit request =>
       lockService.isUserLocked(request.userId) map { response =>
         val formattedDate = response.lockoutExpiryDateTime
-          .map(LocalDateTime.ofInstant(_, ZoneOffset.UTC))
+          .map(_.atZone(ZoneId.of("Europe/London")))
           .map(DateTimeFormats.formattedDateTime)
           .getOrElse(throw Exception("Locked user has no expiry time"))
 

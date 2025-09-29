@@ -17,11 +17,12 @@
 package controllers
 
 import controllers.actions.*
-import models.{Mode, PaymentPlanType}
-import pages.{AmendPaymentPlanTypePage, YourBankDetailsPage}
-import play.api.i18n.{I18nSupport, MessagesApi}
+import models.{Mode, PaymentPlanType, UserAnswers}
+import pages.{AmendPaymentPlanTypePage, FinalPaymentAmountPage, MonthlyPaymentAmountPage, TotalAmountDuePage, YourBankDetailsPage}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{DirectDebitReferenceQuery, PaymentReferenceQuery}
+import queries.{DateSetupQuery, DirectDebitReferenceQuery, PaymentReferenceQuery}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
@@ -49,20 +50,29 @@ class AmendPaymentPlanConfirmationController @Inject()(
           (Seq(
             AmendPaymentPlanTypeSummary.row(userAnswers),
             AmendPaymentPlanSourceSummary.row(userAnswers),
+            userAnswers.get(DateSetupQuery).map(DateSetupSummary.row).getOrElse(""),
+            userAnswers.get(TotalAmountDuePage).map(TotalAmountDueSummary.row).getOrElse(""),
+            userAnswers.get(MonthlyPaymentAmountPage).map(MonthlyPaymentAmountSummary.row).getOrElse(""),
+            userAnswers.get(FinalPaymentAmountPage).map(FinalPaymentAmountSummary.row).getOrElse(""),
+//            DateSetupSummary.row(userAnswers.get(DateSetupQuery).map),
+//            TotalAmountDueSummary.row(userAnswers.get(TotalAmountDuePage).get),
+//            MonthlyPaymentAmountSummary.row(userAnswers.get(MonthlyPaymentAmountPage).get),
+//            FinalPaymentAmountSummary.row(userAnswers.get(FinalPaymentAmountPage).get),
             PaymentsFrequencySummary.rowData(userAnswers),
             AmendPlanStartDateSummary.rowData(userAnswers),
             AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers),
             AmendPlanEndDateSummary.row(userAnswers),
-          ).flatten, routes.AmendPlanEndDateController.onPageLoad(mode))
+          ), routes.AmendPlanEndDateController.onPageLoad(mode))
         case _ =>
           (Seq(
             AmendPaymentPlanTypeSummary.row(userAnswers),
             AmendPaymentPlanSourceSummary.row(userAnswers),
-            PaymentsFrequencySummary.rowData(userAnswers),
+            userAnswers.get(DateSetupQuery).map(DateSetupSummary.row).getOrElse(""),
+//            DateSetupSummary.row(userAnswers.get(DateSetupQuery).get),
             AmendPlanEndDateSummary.rowData(userAnswers),
             AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers),
             AmendPlanStartDateSummary.row(userAnswers),
-          ).flatten, routes.AmendPlanStartDateController.onPageLoad(mode))
+          ), routes.AmendPlanStartDateController.onPageLoad(mode))
       }
       for {
         bankDetailsWithAuddisStatus <- Future.fromTry(Try(userAnswers.get(YourBankDetailsPage).get))

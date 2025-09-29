@@ -25,26 +25,26 @@ import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object FinalPaymentAmountDueSummary {
+import scala.math.BigDecimal.RoundingMode
+
+object MonthlyPaymentAmountSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TotalAmountDuePage).map { totalAmount =>
-      val monthlyPayment = (totalAmount / 12).setScale(2, BigDecimal.RoundingMode.DOWN)
-      val finalPayment = totalAmount - (monthlyPayment * 11)
+      val monthlyPayment = (totalAmount / 12).setScale(2, RoundingMode.DOWN)
+
       SummaryListRowViewModel(
-        key     = "totalAmountDue.final.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(finalPayment)),
+        key     = "totalAmountDue.monthly.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(monthlyPayment)),
         actions = Seq.empty
       )
     }
 
-  def row(amount: BigDecimal)(implicit messages: Messages): SummaryListRow = {
+  def row(amount: BigDecimal)(implicit messages: Messages): SummaryListRow =
     SummaryListRowViewModel(
-      key = "totalAmountDue.final.checkYourAnswersLabel",
+      key = "totalAmountDue.monthly.checkYourAnswersLabel",
       value = ValueViewModel(formatAmount(amount.doubleValue)),
       actions = Seq.empty
     )
-  }
 
 }
-
