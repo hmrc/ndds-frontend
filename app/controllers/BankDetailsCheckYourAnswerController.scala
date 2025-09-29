@@ -72,13 +72,13 @@ class BankDetailsCheckYourAnswerController @Inject()(
 
       generateMacFromAnswers(request.userAnswers, macGenerator, appConfig.bacsNumber ) match {
         case Some(mac) =>
-          logger.info(s"Generated MAC*******: $mac")
+          logger.info(s"Generated MAC successfully")
 
           for {
             updatedAnswers <- Future.fromTry(
               request.userAnswers
                 .set(BankDetailsCheckYourAnswerPage, confirmed)
-                .flatMap(_.set(pages.MacValuePage, mac)) // persist MAC #1
+                .flatMap(_.set(pages.MacValuePage, mac))
             )
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
