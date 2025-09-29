@@ -28,9 +28,9 @@ object Utils {
                               macGenerator: MacGenerator,
                               bacsNumber: String
                             ): Option[String] = {
-    val maybeBankAddress = answers.get(BankDetailsAddressPage)   // BankAddress
-    val maybeBankName    = answers.get(BankDetailsBankNamePage) // String
-    val maybeBankDetails = answers.get(YourBankDetailsPage)     // YourBankDetails
+    val maybeBankAddress = answers.get(BankDetailsAddressPage)
+    val maybeBankName    = answers.get(BankDetailsBankNamePage)
+    val maybeBankDetails = answers.get(YourBankDetailsPage)
 
     (maybeBankAddress, maybeBankName, maybeBankDetails) match {
       case (Some(bankAddress), Some(bankName), Some(details)) =>

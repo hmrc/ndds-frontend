@@ -443,6 +443,39 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
+      "must redirect to Journey Recovery for a POST if the generated MAC does not match the stored MAC" in {
+        val userAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
+          .setOrException(PaymentReferencePage, "testReference")
+          .setOrException(pages.MacValuePage, "stored-mac")
+
+        when(mockNddService.generateNewDdiReference(any())(any()))
+          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+
+        when(
+          mockMacGenerator.generateMac(
+            any[String], any[String], any[String], any[Seq[String]],
+            any[String], any[String], any[String], any[String]
+          )
+        ).thenReturn("generated-mac")
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+
       "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all required data is provided" in {
         val totalDueAmount = 200
         val incompleteAnswers = emptyUserAnswers

@@ -87,12 +87,10 @@ class CheckYourAnswersController @Inject()(
     (identify andThen getData andThen requireData).async { implicit request =>
       implicit val ua: UserAnswers = request.userAnswers
 
-      // Generate MAC #2 from current answers
-      val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber) // or appConfig.bacsNumber
+      val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
 
       (ua.get(pages.MacValuePage), maybeMac2) match {
         case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-          // ✅ MACs match, proceed with submission
           nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
             val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
 
@@ -109,7 +107,6 @@ class CheckYourAnswersController @Inject()(
                   Redirect(routes.DirectDebitConfirmationController.onPageLoad())
                 }
               } else {
-                // ❌ CHRIS submission failed
                 logger.error(s"CHRIS submission failed for DDI Ref [${reference.ddiRefNumber}]")
                 Future.successful(
                   Redirect(routes.JourneyRecoveryController.onPageLoad())
@@ -125,12 +122,10 @@ class CheckYourAnswersController @Inject()(
           }
 
         case (Some(mac1), Some(mac2)) =>
-          // ❌ MAC mismatch
           logger.error(s"MAC validation failed. MAC1=[$mac1], MAC2=[$mac2]")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
 
         case _ =>
-          // ❌ Missing MAC
           logger.error("MAC generation failed or MAC1 not found in UserAnswers")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }

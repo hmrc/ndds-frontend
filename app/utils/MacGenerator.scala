@@ -49,21 +49,14 @@ class MacGenerator @Inject()(appConfig: FrontendAppConfig) {
         bankName,
         bacsNumber
       ).mkString("&")
-
-    println("*********************** "+dataString)
-
-    // Convert to UTF-8 bytes
+    
     val bytes = dataString.getBytes("UTF-8")
-
-    // Decode Base64 secret key from config
     val secretKeyBytes = Base64.getDecoder.decode(appConfig.macKey)
     val secretKeySpec = new SecretKeySpec(secretKeyBytes, Algorithm)
-
-    // Init HMAC
+    
     val mac = Mac.getInstance(Algorithm)
     mac.init(secretKeySpec)
-
-    // Generate MAC and Base64 encode
+    
     val rawMac = mac.doFinal(bytes)
     Base64.getEncoder.encodeToString(rawMac)
   }
