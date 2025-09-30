@@ -34,6 +34,7 @@ import utils.Utils.listHodServices
 import viewmodels.checkAnswers.{AmendPlanStartDateSummary, *}
 import views.html.PaymentPlanDetailsView
 
+import java.time.LocalDate
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -67,7 +68,7 @@ class PaymentPlanDetailsController @Inject()(
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferenceQuery, planDetail.paymentReference))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(0)))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(MonthlyPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(FinalPaymentAmountPage, planDetail.balancingPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
@@ -116,24 +117,24 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
-          TotalAmountDueSummary.row(planDetail.totalLiability),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
+          TotalAmountDueSummary.row(planDetail.totalLiability.getOrElse(BigDecimal(0))),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability.getOrElse(0)),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability.getOrElse(0)),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
           PaymentsFrequencySummary.row2(planDetail.scheduledPaymentFrequency),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
           AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true), //true for start
-          AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false), //false for end
+          AmendSuspendDateSummary.row(planDetail.suspensionEndDate.getOrElse(LocalDate.now), false), //false for end
         )
       case _ => //For Variable and Tax repayment plan
         Seq(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
-          TotalAmountDueSummary.row(planDetail.totalLiability),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
+          TotalAmountDueSummary.row(planDetail.totalLiability.getOrElse(BigDecimal(0))),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability.getOrElse(0)),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability.getOrElse(0)),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
         )

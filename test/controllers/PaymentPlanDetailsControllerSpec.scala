@@ -33,6 +33,7 @@ import utils.PaymentPlanData
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
@@ -47,9 +48,9 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
         AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
         AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
         DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
-        TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-        MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability)(messages(app)),
-        FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability)(messages(app)),
+        TotalAmountDueSummary.row(planDetail.totalLiability.getOrElse(BigDecimal(0)))(messages(app)),
+        MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability.getOrElse(0))(messages(app)),
+        FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability.getOrElse(0))(messages(app)),
         AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
         AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
       )
@@ -108,15 +109,15 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
           AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
           DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
-          TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability)(messages(app)),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability)(messages(app)),
+          TotalAmountDueSummary.row(planDetail.totalLiability.getOrElse(BigDecimal(0)))(messages(app)),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability.getOrElse(0))(messages(app)),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability.getOrElse(0))(messages(app)),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
           PaymentsFrequencySummary.row2(planDetail.scheduledPaymentFrequency)(messages(app)),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)(messages(app)),
           AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true)(messages(app)),
-          AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false)(messages(app)),
+          AmendSuspendDateSummary.row(planDetail.suspensionEndDate.getOrElse(LocalDate.now), false)(messages(app)),
         )
       }
       val paymentReference = "paymentReference"
