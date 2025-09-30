@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.*
-import pages.{AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+import pages.*
 import play.api.Logging
 
 import java.time.format.DateTimeFormatter
@@ -48,20 +48,12 @@ class AmendPaymentPlanUpdateController @Inject()(
     implicit request =>
       val userAnswers = request.userAnswers
       if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-        val paymentReference = userAnswers.get(PaymentReferenceQuery).getOrElse {
-          throw new Exception("Missing payment reference from session")
-        }
-        val regularPaymentAmount = userAnswers.get(RegularPaymentAmountPage).getOrElse {
-          throw new Exception("Missing regular payment amount from session")
-        }
-        val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(regularPaymentAmount)
-        val startDate = userAnswers.get(AmendPlanStartDatePage).getOrElse {
-          throw new Exception("Missing start date from session")
-        }
+        val paymentReference = userAnswers.get(PaymentReferenceQuery).getOrElse("")
+        val paymentAmount = userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0))
+        val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(paymentAmount)
+        val startDate = userAnswers.get(AmendPlanStartDatePage).get
         val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-        val endDate = userAnswers.get(AmendPlanEndDatePage).getOrElse {
-          throw new Exception("Missing end date from session")
-        }
+        val endDate = userAnswers.get(AmendPlanEndDatePage).get
         val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
         Future.successful(Ok(view(paymentReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate)))

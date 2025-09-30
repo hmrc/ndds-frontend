@@ -46,7 +46,7 @@ object AmendPaymentAmountSummary {
     }
   }
 
-  def row(planType: String, amount: BigDecimal)(implicit messages: Messages): SummaryListRow = {
+  def row(planType: String, amount: BigDecimal, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
     val label = if(PaymentPlanType.BudgetPaymentPlan.toString == planType) {
       "paymentPlanDetails.details.amount.budgetPaymentPlan"
     } else {
@@ -55,7 +55,14 @@ object AmendPaymentAmountSummary {
     SummaryListRowViewModel(
       key = label,
       value = ValueViewModel(formatAmount(amount.doubleValue)),
-      actions = Seq.empty
+      actions = if (showChange) {
+        Seq(
+          ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPaymentAmount.change.hidden"))
+        )
+      } else {
+        Seq.empty
+      }
     )
   }
 }

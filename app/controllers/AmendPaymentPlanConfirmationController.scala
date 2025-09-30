@@ -56,17 +56,17 @@ class AmendPaymentPlanConfirmationController @Inject()(
             FinalPaymentAmountSummary.row(userAnswers.get(FinalPaymentAmountPage).getOrElse(0), userAnswers.get(TotalAmountDuePage).getOrElse(0)),
             PaymentsFrequencySummary.row2(userAnswers.get(PaymentsFrequencyPage).get.toString),
             AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers.get(AmendPlanStartDatePage).getOrElse(LocalDate.now())),
-            AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0))),
-            AmendPlanEndDateSummary.row(userAnswers.get(AmendPlanEndDatePage).getOrElse(LocalDate.now())),
+            AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0)), true),
+            AmendPlanEndDateSummary.row(userAnswers.get(AmendPlanEndDatePage).getOrElse(LocalDate.now()), true),
           ), routes.AmendPlanEndDateController.onPageLoad(mode))
         case _ =>
           (Seq(
             AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
             AmendPaymentPlanSourceSummary.row(userAnswers.get(AmendPaymentPlanSourcePage).getOrElse("")),
             DateSetupSummary.row(userAnswers.get(DateSetupQuery).getOrElse(LocalDateTime.now())),
-            AmendPlanEndDateSummary.row(userAnswers.get(AmendPlanEndDatePage).getOrElse(LocalDate.now())),
-            AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0))),
-            AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers.get(AmendPlanStartDatePage).getOrElse(LocalDate.now())),
+//            AmendPlanEndDateSummary.row(userAnswers.get(AmendPlanEndDatePage).getOrElse(LocalDate.now())),
+            AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0)), true),
+            AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers.get(AmendPlanStartDatePage).getOrElse(LocalDate.now()), true),
           ), routes.AmendPlanStartDateController.onPageLoad(mode))
       }
       for {
