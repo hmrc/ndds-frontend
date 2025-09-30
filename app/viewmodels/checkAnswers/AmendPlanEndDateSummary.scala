@@ -42,11 +42,18 @@ object AmendPlanEndDateSummary {
         )
     }
 
-  def row(value: LocalDate)(implicit messages: Messages): SummaryListRow =
+  def row(value: LocalDate, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow =
     SummaryListRowViewModel(
       key = "paymentPlanDetails.details.planEndDate",
       value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
-      actions = Seq.empty
+      actions = if (showChange) {
+        Seq(
+          ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
+        )
+      } else {
+        Seq.empty
+      }
     )
 
   def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {

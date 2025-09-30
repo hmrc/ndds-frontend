@@ -55,8 +55,8 @@ class YourDirectDebitInstructionsController @Inject()(
 
   private def cleanseDirectDebitReference(userAnswers: UserAnswers): Future[UserAnswers] =
     for {
-      userAnswersWithoutDirectDebitReference <- Future.fromTry(userAnswers.remove(DirectDebitReferenceQuery))
-      userAnswersPaymentReference <- Future.fromTry(userAnswersWithoutDirectDebitReference.remove(PaymentReferenceQuery))
-      _                                     <- sessionRepository.set(userAnswersPaymentReference)
+      userAnswersWithoutDirectDebitReference  <- Future.fromTry(userAnswers.remove(DirectDebitReferenceQuery))
+      userAnswersPaymentReference             <- Future.fromTry(userAnswersWithoutDirectDebitReference.remove(PaymentReferenceQuery))
+      _                                       <- sessionRepository.set(userAnswersPaymentReference)
     } yield userAnswersPaymentReference
 }

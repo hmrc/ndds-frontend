@@ -22,15 +22,15 @@ import models.{CheckMode, UserAnswers}
 import pages.TotalAmountDuePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import utils.MaskAndFormatUtils.formatAmount
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
 object TotalAmountDueSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TotalAmountDuePage).map {
       answer =>
-
         SummaryListRowViewModel(
           key     = "totalAmountDue.checkYourAnswersLabel",
           value   = ValueViewModel(currencyFormat(answer)),
@@ -40,4 +40,20 @@ object TotalAmountDueSummary  {
           )
         )
     }
+
+  def row(amount: BigDecimal)(implicit messages: Messages): SummaryListRow =
+    if (amount.equals(BigDecimal(0))) {
+      SummaryListRowViewModel(
+        key = "totalAmountDue.checkYourAnswersLabel",
+        value = ValueViewModel(""),
+        actions = Seq.empty
+      )
+    } else {
+      SummaryListRowViewModel(
+        key = "totalAmountDue.checkYourAnswersLabel",
+        value = ValueViewModel(formatAmount(amount.doubleValue)),
+        actions = Seq.empty
+      )
+    }
+
 }

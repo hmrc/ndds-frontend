@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sbt coverage test coverageOff coverageReport
+sbt compile coverage test coverageReport dependencyUpdates

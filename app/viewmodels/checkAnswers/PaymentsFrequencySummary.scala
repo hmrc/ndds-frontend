@@ -31,7 +31,6 @@ object PaymentsFrequencySummary  {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PaymentsFrequencyPage).map {
       answer =>
-
         val value = ValueViewModel(
           HtmlContent(
             HtmlFormat.escape(messages(s"paymentsFrequency.$answer"))
@@ -63,4 +62,13 @@ object PaymentsFrequencySummary  {
           actions = Seq.empty
         )
     }
+
+  def row2(value: String)(implicit messages: Messages): SummaryListRow = {
+    SummaryListRowViewModel(
+      key = "paymentsFrequency.checkYourAnswersLabel",
+      value = ValueViewModel(HtmlFormat.escape(value).toString),
+      actions = Seq.empty
+    )
+  }
+
 }

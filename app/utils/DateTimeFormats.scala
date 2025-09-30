@@ -19,7 +19,7 @@ package utils
 import play.api.i18n.Lang
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{LocalDate, ZonedDateTime}
 import java.util.Locale
 
 object DateTimeFormats {
@@ -40,7 +40,7 @@ object DateTimeFormats {
     LocalDate.now().format(formatter)
   }
 
-  def formattedDateTime(dateTime: LocalDateTime): String = { //example: 24 July 2020, 16:29pm
+  def formattedDateTime(dateTime: ZonedDateTime): String = { //example: 24 July 2020, 16:29pm in local zone BST time (ZonedDateTime)
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mma")
     val extractDateSuffix = """(.*)(am|pm|AM|PM)""".r
 

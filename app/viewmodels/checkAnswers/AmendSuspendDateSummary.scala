@@ -16,38 +16,26 @@
 
 package viewmodels.checkAnswers
 
-import models.UserAnswers
-import pages.AmendPaymentPlanTypePage
 import play.api.i18n.Messages
-import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object AmendPaymentPlanTypeSummary {
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AmendPaymentPlanTypePage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key = "paymentPlanDetails.details.planType.label",
-          value = ValueViewModel(HtmlFormat.escape(answer).toString),
-          actions = Seq.empty
-        )
+object AmendSuspendDateSummary  {
+
+  def row(value: LocalDate, isStartDate: Boolean)(implicit messages: Messages): SummaryListRow =
+    val label = if(isStartDate) {
+      "paymentPlanDetails.details.suspendStartDate"
+    } else {
+      "paymentPlanDetails.details.suspendEndDate"
     }
-
-  def row(planType: String)(implicit messages: Messages): SummaryListRow = {
-    val value = ValueViewModel(
-      HtmlContent(
-        HtmlFormat.escape(messages(s"paymentPlanDetails.details.planType.$planType"))
-      )
-    )
-
     SummaryListRowViewModel(
-      key = "paymentPlanDetails.details.planType.label",
-      value = value,
+      key = label,
+      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
       actions = Seq.empty
     )
-  }
+
 }

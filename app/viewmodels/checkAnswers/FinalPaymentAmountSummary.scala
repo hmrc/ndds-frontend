@@ -21,21 +21,36 @@ import models.UserAnswers
 import pages.TotalAmountDuePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-import scala.math.BigDecimal.RoundingMode
-
-object MonthlyPaymentAmountDueSummary  {
+object FinalPaymentAmountSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TotalAmountDuePage).map { totalAmount =>
-      val monthlyPayment = (totalAmount / 12).setScale(2, RoundingMode.DOWN)
-
+      val monthlyPayment = (totalAmount / 12).setScale(2, BigDecimal.RoundingMode.DOWN)
+      val finalPayment = totalAmount - (monthlyPayment * 11)
       SummaryListRowViewModel(
-        key     = "totalAmountDue.monthly.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(monthlyPayment)),
+        key     = "totalAmountDue.final.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(finalPayment)),
         actions = Seq.empty
       )
     }
+
+  def row(amount: BigDecimal, totalDue: BigDecimal)(implicit messages: Messages): SummaryListRow =
+    if (totalDue.equals(BigDecimal(0))) {
+      SummaryListRowViewModel(
+        key = "totalAmountDue.final.checkYourAnswersLabel",
+        value = ValueViewModel(""),
+        actions = Seq.empty
+      )
+    } else {
+      SummaryListRowViewModel(
+        key = "totalAmountDue.final.checkYourAnswersLabel",
+        value = ValueViewModel(formatAmount(amount.doubleValue)),
+        actions = Seq.empty
+      )
+    }
+
 }

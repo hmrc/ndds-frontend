@@ -18,9 +18,9 @@ package pages
 
 import play.api.libs.json.JsPath
 
-case object AmendPaymentPlanSourcePage extends QuestionPage[String] {
+case object FinalPaymentAmountPage extends QuestionPage[BigDecimal] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "paymentPlanSource"
+  override def toString: String = "totalAmountDue"
 }
