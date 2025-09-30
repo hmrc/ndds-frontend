@@ -33,7 +33,8 @@ import utils.{DateTimeFormats, PaymentCalculations}
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
-
+import utils.MacGenerator
+import utils.Utils.generateMacFromAnswers
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject()(
@@ -46,7 +47,8 @@ class CheckYourAnswersController @Inject()(
                                             sessionRepository: SessionRepository,
                                             val controllerComponents: MessagesControllerComponents,
                                             view: CheckYourAnswersView,
-                                            appConfig: FrontendAppConfig
+                                            appConfig: FrontendAppConfig,
+                                            macGenerator:MacGenerator
                                           )(implicit ec: ExecutionContext)
   extends FrontendBaseController
     with I18nSupport
@@ -81,39 +83,54 @@ class CheckYourAnswersController @Inject()(
       Ok(view(list, currentDate))
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    implicit val ua: UserAnswers = request.userAnswers
+  def onSubmit(): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+      implicit val ua: UserAnswers = request.userAnswers
 
-    nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
-      val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
+      val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
 
-      nddService.submitChrisData(chrisRequest).flatMap { success =>
-        if (success) {
-          logger.info(s"CHRIS submission successful for the request")
-          for {
-            updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
-            _ <- sessionRepository.set(updatedAnswers)
-          } yield {
-            auditService.sendSubmitDirectDebitPaymentPlan
-            logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
-            Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+      (ua.get(pages.MacValuePage), maybeMac2) match {
+        case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
+          logger.info(s"MAC validation successful")
+          nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
+            val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
+
+            nddService.submitChrisData(chrisRequest).flatMap { success =>
+              if (success) {
+                logger.info(s"CHRIS submission successful for DDI Ref [${reference.ddiRefNumber}]")
+
+                for {
+                  updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
+                  _ <- sessionRepository.set(updatedAnswers)
+                } yield {
+                  auditService.sendSubmitDirectDebitPaymentPlan
+                  logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
+                  Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+                }
+              } else {
+                logger.error(s"CHRIS submission failed for DDI Ref [${reference.ddiRefNumber}]")
+                Future.successful(
+                  Redirect(routes.JourneyRecoveryController.onPageLoad())
+                    .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+                )
+              }
+            }.recover {
+              case ex =>
+                logger.error("CHRIS submission or session update failed", ex)
+                Redirect(routes.JourneyRecoveryController.onPageLoad())
+                  .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+            }
           }
-        } else {
-          // CHRIS submission failed
-          logger.error(s"CHRIS submission failed for DDI Ref [${reference.ddiRefNumber}]")
-          Future.successful(
-            Redirect(routes.JourneyRecoveryController.onPageLoad())
-              .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
-          )
-        }
-      }.recover {
-        case ex =>
-          logger.error("CHRIS submission or session update failed", ex)
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
-            .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+
+        case (Some(mac1), Some(mac2)) =>
+          logger.error(s"MAC validation failed")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+
+        case _ =>
+          logger.error("MAC generation failed or MAC1 not found in UserAnswers")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
-  }
 
 
   private def buildChrisSubmissionRequest(
@@ -129,7 +146,7 @@ class CheckYourAnswersController @Inject()(
 
     ChrisSubmissionRequest(
       serviceType                  = required(DirectDebitSourcePage),
-      paymentPlanType              = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePayment),
+      paymentPlanType              = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan),
       paymentFrequency             = ua.get(PaymentsFrequencyPage),
       yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
       planStartDate                = ua.get(PlanStartDatePage),
@@ -139,7 +156,7 @@ class CheckYourAnswersController @Inject()(
       bankDetailsAddress           = required(BankDetailsAddressPage),
       bankName                     = required(BankDetailsBankNamePage),
       ddiReferenceNo               = ddiReference,
-      paymentReference             = ua.get(PaymentReferencePage),
+      paymentReference             = required(PaymentReferencePage),
       totalAmountDue               = ua.get(TotalAmountDuePage),
       paymentAmount                = ua.get(PaymentAmountPage),
       regularPaymentAmount         = ua.get(RegularPaymentAmountPage),

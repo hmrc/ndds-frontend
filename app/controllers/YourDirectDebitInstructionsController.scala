@@ -21,7 +21,7 @@ import controllers.actions.*
 import models.UserAnswers
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.DirectDebitReferenceQuery
+import queries.{DirectDebitReferenceQuery, PaymentReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -55,7 +55,8 @@ class YourDirectDebitInstructionsController @Inject()(
 
   private def cleanseDirectDebitReference(userAnswers: UserAnswers): Future[UserAnswers] =
     for {
-      updatedUserAnswers <- Future.fromTry(userAnswers.remove(DirectDebitReferenceQuery))
-      _                                     <- sessionRepository.set(updatedUserAnswers)
-    } yield updatedUserAnswers
+      userAnswersWithoutDirectDebitReference <- Future.fromTry(userAnswers.remove(DirectDebitReferenceQuery))
+      userAnswersPaymentReference <- Future.fromTry(userAnswersWithoutDirectDebitReference.remove(PaymentReferenceQuery))
+      _                                     <- sessionRepository.set(userAnswersPaymentReference)
+    } yield userAnswersPaymentReference
 }

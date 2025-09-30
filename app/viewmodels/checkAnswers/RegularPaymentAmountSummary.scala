@@ -30,7 +30,6 @@ object RegularPaymentAmountSummary  {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(RegularPaymentAmountPage).map {
       answer =>
-
         SummaryListRowViewModel(
           key     = "regularPaymentAmount.checkYourAnswersLabel",
           value   = ValueViewModel(currencyFormat(answer)),

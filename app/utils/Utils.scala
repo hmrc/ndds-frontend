@@ -16,35 +16,53 @@
 
 package utils
 
+import models.DirectDebitSource
+
 import models.UserAnswers
-import services.NationalDirectDebitService
-import java.time.LocalDate
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
 
 object Utils {
   val emptyString = ""
   val LockExpirySessionKey = "lockoutExpiryDateTime"
 
-  def isTwoDaysPriorPaymentDate(paymentDate: LocalDate, nddService: NationalDirectDebitService, userAnswers: UserAnswers): Boolean =
-    val currentDate = LocalDate.now()
-    val isSinglePlan = nddService.isSinglePaymentPlan(userAnswers)
-    
-    if (isSinglePlan) {
-      if (paymentDate.isBefore(currentDate.plusDays(3))) true else false
-    } else {
-      false
+  val listHodServices: Map[DirectDebitSource, String] = Map(
+    DirectDebitSource.CT -> "COTA",
+    DirectDebitSource.PAYE -> "PAYE",
+    DirectDebitSource.SA -> "CESA",
+    DirectDebitSource.TC -> "NTC",
+    DirectDebitSource.VAT -> "VAT",
+    DirectDebitSource.MGD -> "MGD",
+    DirectDebitSource.NIC -> "NIDN",
+    DirectDebitSource.OL -> "SAFE",
+    DirectDebitSource.SDLT -> "SDLT"
+  )
+
+  def generateMacFromAnswers(
+                              answers: UserAnswers,
+                              macGenerator: MacGenerator,
+                              bacsNumber: String
+                            ): Option[String] = {
+    val maybeBankAddress = answers.get(BankDetailsAddressPage)
+    val maybeBankName    = answers.get(BankDetailsBankNamePage)
+    val maybeBankDetails = answers.get(YourBankDetailsPage)
+
+    (maybeBankAddress, maybeBankName, maybeBankDetails) match {
+      case (Some(bankAddress), Some(bankName), Some(details)) =>
+        Some(
+          macGenerator.generateMac(
+            accountName   = details.accountHolderName,
+            accountNumber = details.accountNumber,
+            sortCode      = details.sortCode,
+            lines         = bankAddress.lines,
+            town          = bankAddress.town,
+            postcode      = bankAddress.postCode,
+            bankName      = bankName,
+            bacsNumber    = bacsNumber
+          )
+        )
+      case _ =>
+        None
     }
-
-  def amendmentGuardPaymentPlan(nddService : NationalDirectDebitService, userAnswers : UserAnswers): Boolean =
-    if(nddService.isSinglePaymentPlan(userAnswers) || nddService.isBudgetPaymentPlan(userAnswers)) true else false
-
-  def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate, nddService: NationalDirectDebitService, userAnswers: UserAnswers): Boolean =
-    val currentDate = LocalDate.now()
-    val isBudgetPlan = nddService.isBudgetPaymentPlan(userAnswers)
-
-    if (isBudgetPlan) {
-      if (planEndDate.isBefore(currentDate.plusDays(4))) true else false
-    } else {
-      false
-    }
+  }
 }
 
