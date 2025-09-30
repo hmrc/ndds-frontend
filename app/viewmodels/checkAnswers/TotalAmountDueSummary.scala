@@ -31,7 +31,6 @@ object TotalAmountDueSummary  {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TotalAmountDuePage).map {
       answer =>
-
         SummaryListRowViewModel(
           key     = "totalAmountDue.checkYourAnswersLabel",
           value   = ValueViewModel(currencyFormat(answer)),
@@ -43,10 +42,18 @@ object TotalAmountDueSummary  {
     }
 
   def row(amount: BigDecimal)(implicit messages: Messages): SummaryListRow =
-    SummaryListRowViewModel(
-      key = "totalAmountDue.checkYourAnswersLabel",
-      value = ValueViewModel(formatAmount(amount.doubleValue)),
-      actions = Seq.empty
-    )
+    if (amount.equals(BigDecimal(0))) {
+      SummaryListRowViewModel(
+        key = "totalAmountDue.checkYourAnswersLabel",
+        value = ValueViewModel(""),
+        actions = Seq.empty
+      )
+    } else {
+      SummaryListRowViewModel(
+        key = "totalAmountDue.checkYourAnswersLabel",
+        value = ValueViewModel(formatAmount(amount.doubleValue)),
+        actions = Seq.empty
+      )
+    }
 
 }
