@@ -18,7 +18,7 @@ package connectors
 
 import models.NddResponse
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanResponse}
 import play.api.Logging
 import play.api.http.Status.OK
 import play.api.libs.json.Json
@@ -100,5 +100,11 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
     http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans")(hc)
       .execute[NddDDPaymentPlansResponse]
+  }
+
+  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier):
+  Future[PaymentPlanResponse] = {
+    http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans/$paymentPlanReference")(hc)
+      .execute[PaymentPlanResponse]
   }
 }

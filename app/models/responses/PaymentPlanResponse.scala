@@ -16,16 +16,17 @@
 
 package models.responses
 
-import java.time.{LocalDate, LocalDateTime}
-import play.api.libs.json.{Json, OFormat}
+import models.PaymentPlanType
 
-case class DirectDebitDetails(
-                               bankSortCode: String,
-                               bankAccountNumber: String,
-                               bankAccountName: String,
-                               auddisFlag: Boolean,
-                               submissionDateTime: LocalDateTime
-                             )
+import java.time.{LocalDate, LocalDateTime}
+import play.api.libs.functional.syntax.*
+import play.api.libs.json.*
+
+case class DirectDebitDetails(bankSortCode: Option[String],
+                             bankAccountNumber: Option[String],
+                             bankAccountName: Option[String],
+                             auDdisFlag: Boolean,
+                             submissionDateTime: LocalDateTime)
 
 object DirectDebitDetails {
   implicit val format: OFormat[DirectDebitDetails] = Json.format
@@ -43,15 +44,43 @@ case class PaymentPlanDetails(
                                scheduledPaymentEndDate: LocalDate,
                                scheduledPaymentFrequency: String,
                                suspensionStartDate: LocalDate,
-                               suspensionEndDate: LocalDate,
+                               suspensionEndDate: Option[LocalDate],
                                balancingPaymentAmount: BigDecimal,
                                balancingPaymentDate: LocalDate,
-                               totalLiability: BigDecimal,
+                               totalLiability: Option[BigDecimal],
                                paymentPlanEditable: Boolean
                              )
 
 object PaymentPlanDetails {
-  implicit val format: OFormat[PaymentPlanDetails] = Json.format
+  private val planTypeMapping: Map[String, String] = Map(
+    "01" -> PaymentPlanType.SinglePaymentPlan.toString,
+    "02" -> PaymentPlanType.BudgetPaymentPlan.toString,
+    "03" -> PaymentPlanType.TaxCreditRepaymentPlan.toString,
+    "04" -> PaymentPlanType.VariablePaymentPlan.toString
+  )
+
+  implicit val reads: Reads[PaymentPlanDetails] = (
+    (__ \ "hodService").read[String] and
+      (__ \ "planType").read[String].map(code => planTypeMapping.getOrElse(code, "unknownPlanType")) and
+      (__ \ "paymentReference").read[String] and
+      (__ \ "submissionDateTime").read[LocalDateTime] and
+      (__ \ "scheduledPaymentAmount").read[Double] and
+      (__ \ "scheduledPaymentStartDate").read[LocalDate] and
+      (__ \ "initialPaymentStartDate").read[LocalDate] and
+      (__ \ "initialPaymentAmount").read[BigDecimal] and
+      (__ \ "scheduledPaymentEndDate").read[LocalDate] and
+      (__ \ "scheduledPaymentFrequency").read[String] and
+      (__ \ "suspensionStartDate").read[LocalDate] and
+      (__ \ "suspensionEndDate").readNullable[LocalDate] and
+      (__ \ "balancingPaymentAmount").read[BigDecimal] and
+      (__ \ "balancingPaymentDate").read[LocalDate] and
+      (__ \ "totalLiability").readNullable[BigDecimal] and
+      (__ \ "paymentPlanEditable").read[Boolean]
+    )(PaymentPlanDetails.apply _)
+
+  implicit val writes: OWrites[PaymentPlanDetails] = Json.writes[PaymentPlanDetails]
+
+  implicit val format: OFormat[PaymentPlanDetails] = OFormat(reads, writes)
 }
 
 case class PaymentPlanResponse(

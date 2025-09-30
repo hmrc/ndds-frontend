@@ -30,10 +30,10 @@ trait PaymentPlanData {
   val mockSinglePaymentPlanDetailResponse: PaymentPlanResponse =
     PaymentPlanResponse(
       directDebitDetails = DirectDebitDetails(
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = "John Doe",
-        auddisFlag = true,
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
         submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
@@ -48,10 +48,10 @@ trait PaymentPlanData {
         scheduledPaymentEndDate = currentDate.plusMonths(6),
         scheduledPaymentFrequency = "Monthly",
         suspensionStartDate = currentDate.plusDays(5),
-        suspensionEndDate = currentDate.plusDays(15),
+        suspensionEndDate = None,
         balancingPaymentAmount = 60.00,
         balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
-        totalLiability = 780.00,
+        totalLiability = None,
         paymentPlanEditable = true
       )
     )
@@ -59,10 +59,10 @@ trait PaymentPlanData {
   val mockBudgetPaymentPlanDetailResponse: PaymentPlanResponse =
     PaymentPlanResponse(
       directDebitDetails = DirectDebitDetails(
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = "John Doe",
-        auddisFlag = true,
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
         submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
@@ -77,10 +77,10 @@ trait PaymentPlanData {
         scheduledPaymentEndDate = currentDate.plusMonths(6),
         scheduledPaymentFrequency = "Monthly",
         suspensionStartDate = currentDate.plusDays(5),
-        suspensionEndDate = currentDate.plusDays(15),
+        suspensionEndDate = None,
         balancingPaymentAmount = 60.00,
         balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
-        totalLiability = 780.00,
+        totalLiability = None,
         paymentPlanEditable = true
       )
     )
@@ -88,10 +88,10 @@ trait PaymentPlanData {
   val mockVariablePaymentPlanDetailResponse: PaymentPlanResponse =
     PaymentPlanResponse(
       directDebitDetails = DirectDebitDetails(
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = "John Doe",
-        auddisFlag = true,
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
         submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
@@ -106,10 +106,10 @@ trait PaymentPlanData {
         scheduledPaymentEndDate = currentDate.plusMonths(6),
         scheduledPaymentFrequency = "Monthly",
         suspensionStartDate = currentDate.plusDays(5),
-        suspensionEndDate = currentDate.plusDays(15),
+        suspensionEndDate = None,
         balancingPaymentAmount = 60.00,
         balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
-        totalLiability = 780.00,
+        totalLiability = None,
         paymentPlanEditable = true
       )
     )
@@ -117,10 +117,10 @@ trait PaymentPlanData {
   val mockTaxCreditRepaymentPlanDetailResponse: PaymentPlanResponse =
     PaymentPlanResponse(
       directDebitDetails = DirectDebitDetails(
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = "John Doe",
-        auddisFlag = true,
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
         submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
@@ -135,10 +135,10 @@ trait PaymentPlanData {
         scheduledPaymentEndDate = currentDate.plusMonths(6),
         scheduledPaymentFrequency = "Monthly",
         suspensionStartDate = currentDate.plusDays(5),
-        suspensionEndDate = currentDate.plusDays(15),
+        suspensionEndDate = None,
         balancingPaymentAmount = 60.00,
         balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
-        totalLiability = 780.00,
+        totalLiability = None,
         paymentPlanEditable = true
       )
     )

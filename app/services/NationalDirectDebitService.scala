@@ -157,10 +157,10 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     val samplePaymentPlanResponse: PaymentPlanResponse =
       PaymentPlanResponse(
         directDebitDetails = DirectDebitDetails(
-          bankSortCode = "123456",
-          bankAccountNumber = "12345678",
-          bankAccountName = "John Doe",
-          auddisFlag = true,
+          bankSortCode = Some("123456"),
+          bankAccountNumber = Some("12345678"),
+          bankAccountName = Some("John Doe"),
+          auDdisFlag = true,
           submissionDateTime = LocalDateTime.now()
         ),
         paymentPlanDetails = PaymentPlanDetails(
@@ -173,9 +173,9 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           scheduledPaymentEndDate = currentDate.plusDays(5), //Plan end date
           scheduledPaymentFrequency = PaymentsFrequency.Weekly.toString, //Frequency of payments
           suspensionStartDate = currentDate.plusDays(2), //Suspend start date
-          suspensionEndDate = currentDate.plusDays(4), //Suspend end date
+          suspensionEndDate = None, //Suspend end date
           balancingPaymentAmount = BigDecimal(25.00), //Final payment amount
-          totalLiability =  780.00, //Total amount due
+          totalLiability = None, //Total amount due
           balancingPaymentDate = currentDate.plusMonths(13),
           initialPaymentStartDate = currentDate.plusDays(5),
           initialPaymentAmount = BigDecimal(50.00),

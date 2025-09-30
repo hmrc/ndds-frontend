@@ -65,16 +65,15 @@ class PaymentPlanDetailsController @Inject()(
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferenceQuery, planDetail.paymentReference))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
             cachedAnswers <- Future.fromTry(updatedAnswers.set(
               YourBankDetailsPage,
               YourBankDetailsWithAuddisStatus(
-                accountHolderName = directDebit.bankAccountName,
-                sortCode = directDebit.bankSortCode,
-                accountNumber = directDebit.bankAccountNumber,
-                auddisStatus = directDebit.auddisFlag,
+                accountHolderName = directDebit.bankAccountName.getOrElse(""),
+                sortCode = directDebit.bankSortCode.getOrElse(""),
+                accountNumber = directDebit.bankAccountNumber.getOrElse(""),
+                auddisStatus = directDebit.auDdisFlag,
                 accountVerified = false
               ) ))
             _ <- sessionRepository.set(cachedAnswers)
