@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package queries
+package viewmodels.govuk
 
-import play.api.libs.json.JsPath
+import play.twirl.api.Html
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
+import uk.gov.hmrc.govukfrontend.views.Aliases.Details
 
-case object PaymentPlanTypeQuery extends Gettable[String] with Settable[String] {
+object details extends DetailsFluency
 
-  override def path: JsPath = JsPath \ "planType"
+trait DetailsFluency {
+
+  object DetailsViewModel {
+    def apply(summary: Html, content: Html): Details = Details(
+      summary = HtmlContent(summary),
+      content = HtmlContent(content)
+    )
+  }
 }

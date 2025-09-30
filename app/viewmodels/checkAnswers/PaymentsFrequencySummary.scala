@@ -47,4 +47,29 @@ object PaymentsFrequencySummary  {
           )
         )
     }
+
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PaymentsFrequencyPage).map {
+      answer =>
+        val value = ValueViewModel(
+          HtmlContent(
+            HtmlFormat.escape(messages(s"paymentsFrequency.$answer"))
+          )
+        )
+
+        SummaryListRowViewModel(
+          key     = "paymentsFrequency.checkYourAnswersLabel",
+          value   = value,
+          actions = Seq.empty
+        )
+    }
+
+  def row(value: String)(implicit messages: Messages): SummaryListRow = {
+    SummaryListRowViewModel(
+      key = "paymentsFrequency.checkYourAnswersLabel",
+      value = ValueViewModel(HtmlFormat.escape(value).toString),
+      actions = Seq.empty
+    )
+  }
+
 }

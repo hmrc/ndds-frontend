@@ -135,7 +135,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
         val validDate = LocalDate.parse(expectedEarliestPaymentDate.date)
-
         val postRequest = FakeRequest(POST, amendDateRoute)
           .withFormUrlEncodedBody(
             "value.day" -> validDate.getDayOfMonth.toString,
@@ -158,14 +157,12 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           redirectLocation(result).value mustEqual onwardRoute.url
         }
       }
-
-
+      
       "must return a Bad Request and errors when invalid data is submitted" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
           .build()
 
-        val request =
-          FakeRequest(POST, amendDateRoute)
+        val request = FakeRequest(POST, amendDateRoute)
             .withFormUrlEncodedBody(("value", "invalid value"))
 
         running(application) {
@@ -196,7 +193,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
         val validDate = LocalDate.now()
-
         val postRequest = FakeRequest(POST, amendDateRoute)
           .withFormUrlEncodedBody(
             "value.day" -> validDate.getDayOfMonth.toString,
@@ -216,7 +212,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, postRequest).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url
         }
       }
 

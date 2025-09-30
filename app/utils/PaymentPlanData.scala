@@ -42,15 +42,15 @@ trait PaymentPlanData {
         submissionDateTime = now.minusDays(5),
         scheduledPaymentAmount = 120.00,
         scheduledPaymentStartDate = currentDate.plusDays(5),
-        initialPaymentStartDate = now,
-        initialPaymentAmount = None,
+        initialPaymentStartDate = currentDate,
+        initialPaymentAmount = BigDecimal(25.00),
         scheduledPaymentEndDate = currentDate.plusMonths(6),
-        scheduledPaymentFrequency = Some("Monthly"),
-        suspensionStartDate = None,
-        suspensionEndDate = None,
-        balancingPaymentAmount = Some(60.00),
-        balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-        totalLiability = Some(780.00),
+        scheduledPaymentFrequency = "Monthly",
+        suspensionStartDate = currentDate.plusDays(5),
+        suspensionEndDate = currentDate.plusDays(15),
+        balancingPaymentAmount = 60.00,
+        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
+        totalLiability = 780.00,
         paymentPlanEditable = true
       )
     )
@@ -70,15 +70,15 @@ trait PaymentPlanData {
         submissionDateTime = now.minusDays(5),
         scheduledPaymentAmount = 120.00,
         scheduledPaymentStartDate = currentDate.plusDays(5),
-        initialPaymentStartDate = now,
-        initialPaymentAmount = None,
+        initialPaymentStartDate = currentDate,
+        initialPaymentAmount = BigDecimal(25.00),
         scheduledPaymentEndDate = currentDate.plusMonths(6),
-        scheduledPaymentFrequency = Some("Monthly"),
-        suspensionStartDate = None,
-        suspensionEndDate = None,
-        balancingPaymentAmount = Some(60.00),
-        balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-        totalLiability = Some(780.00),
+        scheduledPaymentFrequency = "Monthly",
+        suspensionStartDate = currentDate.plusDays(5),
+        suspensionEndDate = currentDate.plusDays(15),
+        balancingPaymentAmount = 60.00,
+        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
+        totalLiability = 780.00,
         paymentPlanEditable = true
       )
     )
@@ -98,15 +98,15 @@ trait PaymentPlanData {
         submissionDateTime = now.minusDays(5),
         scheduledPaymentAmount = 120.00,
         scheduledPaymentStartDate = currentDate.plusDays(5),
-        initialPaymentStartDate = now,
-        initialPaymentAmount = None,
+        initialPaymentStartDate = currentDate,
+        initialPaymentAmount = BigDecimal(25.00),
         scheduledPaymentEndDate = currentDate.plusMonths(6),
-        scheduledPaymentFrequency = Some("Monthly"),
-        suspensionStartDate = None,
-        suspensionEndDate = None,
-        balancingPaymentAmount = Some(60.00),
-        balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-        totalLiability = Some(780.00),
+        scheduledPaymentFrequency = "Monthly",
+        suspensionStartDate = currentDate.plusDays(5),
+        suspensionEndDate = currentDate.plusDays(15),
+        balancingPaymentAmount = 60.00,
+        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
+        totalLiability = 780.00,
         paymentPlanEditable = true
       )
     )
@@ -126,18 +126,16 @@ trait PaymentPlanData {
         submissionDateTime = now.minusDays(5),
         scheduledPaymentAmount = 120.00,
         scheduledPaymentStartDate = currentDate.plusDays(5),
-        initialPaymentStartDate = now,
-        initialPaymentAmount = None,
+        initialPaymentStartDate = currentDate,
+        initialPaymentAmount = BigDecimal(25.00),
         scheduledPaymentEndDate = currentDate.plusMonths(6),
-        scheduledPaymentFrequency = Some("Monthly"),
-        suspensionStartDate = None,
-        suspensionEndDate = None,
-        balancingPaymentAmount = Some(60.00),
-        balancingPaymentDate = Some(now.plusMonths(6).plusDays(10)),
-        totalLiability = Some(780.00),
+        scheduledPaymentFrequency = "Monthly",
+        suspensionStartDate = currentDate.plusDays(5),
+        suspensionEndDate = currentDate.plusDays(15),
+        balancingPaymentAmount = 60.00,
+        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
+        totalLiability = 780.00,
         paymentPlanEditable = true
       )
     )
 }
-
-

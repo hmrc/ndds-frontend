@@ -24,14 +24,13 @@ import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
-import pages.{DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import pages.{AmendPaymentPlanTypePage, DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
 import play.api.mvc.Request
-import queries.PaymentPlanTypeQuery
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
-import java.time.{LocalDateTime, LocalDate}
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -110,12 +109,12 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     config.paymentDelayFixed + dynamicDelay
   }
 
-  //PaymentPlanTypePage used for setup journey and PaymentPlanTypeQuery used for Amend journey
+  //PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers.get(AmendPaymentPlanTypePage).getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers.get(AmendPaymentPlanTypePage).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
@@ -166,22 +165,23 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
           planType = PaymentPlanType.BudgetPaymentPlan.toString,
-          paymentReference = paymentReference,
-          submissionDateTime = now.minusDays(5), //Some(now.minusDays(5)),
-          scheduledPaymentAmount = 120.00,
-          scheduledPaymentStartDate = currentDate.plusDays(3), //Some(LocalDate.now().minusMonths(8)),
-          initialPaymentStartDate = now.plusDays(5),//Some(LocalDateTime.now().plusDays(1)),
-          initialPaymentAmount = Some(BigDecimal(50.00)),
-          scheduledPaymentEndDate = currentDate.plusDays(4), //Some(LocalDate.now().plusMonths(12)),
-          scheduledPaymentFrequency = Some(PaymentsFrequency.Weekly.toString),
-          suspensionStartDate = None,
-          suspensionEndDate = None,
-          balancingPaymentAmount = Some(BigDecimal(25.00)),
-          balancingPaymentDate = Some(LocalDateTime.now().plusMonths(13)),
-          totalLiability =  Some(780.00), //Some(BigDecimal(1825.50)),
+          paymentReference = paymentReference, //Payment reference
+          submissionDateTime = now.minusDays(5), //Date set up
+          scheduledPaymentAmount = 120.00, //Payment amount or Regular payment amount or Monthly payment amount
+          scheduledPaymentStartDate = currentDate.plusDays(4), //Payment date or Plan start date
+          scheduledPaymentEndDate = currentDate.plusDays(5), //Plan end date
+          scheduledPaymentFrequency = PaymentsFrequency.Weekly.toString, //Frequency of payments
+          suspensionStartDate = currentDate.plusDays(2), //Suspend start date
+          suspensionEndDate = currentDate.plusDays(4), //Suspend end date
+          balancingPaymentAmount = BigDecimal(25.00), //Final payment amount
+          totalLiability =  0.00, //Total amount due
+          balancingPaymentDate = currentDate.plusMonths(13),
+          initialPaymentStartDate = currentDate.plusDays(5),
+          initialPaymentAmount = BigDecimal(50.00),
           paymentPlanEditable = true
         )
       )
     Future.successful(samplePaymentPlanResponse)
   }
+
 }

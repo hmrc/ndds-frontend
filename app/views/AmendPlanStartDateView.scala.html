@@ -21,10 +21,10 @@
     formHelper: FormWithCSRF,
     mainErrorSummary: components.MainErrorSummary,
     govukDateInput: GovukDateInput,
+    govukWarningText: GovukWarningText,
     govukButton: GovukButton,
     h1: Header1,
-    p: Paragraph,
-    govukWarningText: GovukWarningText
+    p: Paragraph
 )
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)

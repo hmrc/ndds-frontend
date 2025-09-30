@@ -36,15 +36,15 @@ case class PaymentPlanDetails(
                                submissionDateTime: java.time.LocalDateTime,
                                scheduledPaymentAmount: Double,
                                scheduledPaymentStartDate: java.time.LocalDate,
-                               initialPaymentStartDate: java.time.LocalDateTime,
-                               initialPaymentAmount: Option[BigDecimal],
+                               initialPaymentStartDate: java.time.LocalDate,
+                               initialPaymentAmount: BigDecimal,
                                scheduledPaymentEndDate: java.time.LocalDate,
-                               scheduledPaymentFrequency: Option[String],
-                               suspensionStartDate: Option[java.time.LocalDateTime],
-                               suspensionEndDate: Option[java.time.LocalDateTime],
-                               balancingPaymentAmount: Option[BigDecimal],
-                               balancingPaymentDate: Option[java.time.LocalDateTime],
-                               totalLiability: Option[BigDecimal],
+                               scheduledPaymentFrequency: String,
+                               suspensionStartDate: java.time.LocalDate,
+                               suspensionEndDate: java.time.LocalDate,
+                               balancingPaymentAmount: BigDecimal,
+                               balancingPaymentDate: java.time.LocalDate,
+                               totalLiability: BigDecimal,
                                paymentPlanEditable: Boolean
                              )
 

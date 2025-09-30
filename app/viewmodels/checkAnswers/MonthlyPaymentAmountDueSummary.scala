@@ -21,6 +21,7 @@ import models.UserAnswers
 import pages.TotalAmountDuePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
@@ -35,6 +36,21 @@ object MonthlyPaymentAmountDueSummary  {
       SummaryListRowViewModel(
         key     = "totalAmountDue.monthly.checkYourAnswersLabel",
         value   = ValueViewModel(currencyFormat(monthlyPayment)),
+        actions = Seq.empty
+      )
+    }
+
+  def row(amount: BigDecimal, totalDue: BigDecimal)(implicit messages: Messages): SummaryListRow =
+    if (totalDue.equals(BigDecimal(0))) {
+      SummaryListRowViewModel(
+        key = "totalAmountDue.monthly.checkYourAnswersLabel",
+        value = ValueViewModel(""),
+        actions = Seq.empty
+      )
+    } else {
+      SummaryListRowViewModel(
+        key = "totalAmountDue.monthly.checkYourAnswersLabel",
+        value = ValueViewModel(formatAmount(amount.doubleValue)),
         actions = Seq.empty
       )
     }

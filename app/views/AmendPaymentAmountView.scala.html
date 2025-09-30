@@ -34,19 +34,19 @@
      @govukErrorSummary(ErrorSummaryViewModel(form))
    }
 
-  @govukInput(
-   InputViewModel(
-   field = form("value"),
-   label = LabelViewModel(messages("paymentAmount.heading"))
-          .asPageHeading().withCssClass("govuk-fieldset__legend--l"),
-  )
-  .withPrefix(PrefixOrSuffix(content = "£"))
-  .withWidth(Fixed10)
-  .withHint(HintViewModel(HtmlContent(messages("amendPaymentAmount.hint"))))
-  )
+   @govukInput(
+     InputViewModel(
+     field = form("value"),
+     label = LabelViewModel(messages("paymentAmount.heading"))
+            .asPageHeading().withCssClass("govuk-fieldset__legend--l"),
+     )
+    .withPrefix(PrefixOrSuffix(content = "£"))
+    .withWidth(Fixed10)
+    .withHint(HintViewModel(HtmlContent(messages("amendPaymentAmount.hint"))))
+   )
 
-  @govukButton(
-  ButtonViewModel(messages("site.continue"))
-  )
-}
+   @govukButton(
+     ButtonViewModel(messages("site.continue"))
+   )
+ }
 }
