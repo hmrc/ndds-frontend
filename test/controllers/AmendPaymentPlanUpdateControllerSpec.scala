@@ -21,7 +21,7 @@ import models.PaymentPlanType
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -48,7 +48,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
     "must return OK and the correct view for a GET" in {
       val userAnswers = emptyUserAnswers
         .set(PaymentReferenceQuery, "123456789K").success.value
-        .set(RegularPaymentAmountPage, regPaymentAmount).success.value
+        .set(AmendPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
         .set(AmendPlanEndDatePage, endDate).success.value
         .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value

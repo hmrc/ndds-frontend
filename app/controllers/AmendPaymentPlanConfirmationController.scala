@@ -17,9 +17,9 @@
 package controllers
 
 import controllers.actions.*
-import models.{Mode, PaymentPlanType, UserAnswers}
-import pages.{AmendPaymentPlanTypePage, FinalPaymentAmountPage, MonthlyPaymentAmountPage, TotalAmountDuePage, YourBankDetailsPage}
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import models.{Mode, PaymentPlanType}
+import pages.*
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DateSetupQuery, DirectDebitReferenceQuery, PaymentReferenceQuery}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -27,6 +27,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
 
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -38,8 +39,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
                                                        requireData: DataRequiredAction,
                                                        val controllerComponents: MessagesControllerComponents,
                                                        view: AmendPaymentPlanConfirmationView,
-                                                     )(implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport {
+                                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
@@ -48,30 +48,25 @@ class AmendPaymentPlanConfirmationController @Inject()(
       val (rows, backLink) = userAnswers.get(AmendPaymentPlanTypePage) match {
         case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
           (Seq(
-            AmendPaymentPlanTypeSummary.row(userAnswers),
-            AmendPaymentPlanSourceSummary.row(userAnswers),
-            userAnswers.get(DateSetupQuery).map(DateSetupSummary.row).getOrElse(""),
-            userAnswers.get(TotalAmountDuePage).map(TotalAmountDueSummary.row).getOrElse(""),
-            userAnswers.get(MonthlyPaymentAmountPage).map(MonthlyPaymentAmountSummary.row).getOrElse(""),
-            userAnswers.get(FinalPaymentAmountPage).map(FinalPaymentAmountSummary.row).getOrElse(""),
-//            DateSetupSummary.row(userAnswers.get(DateSetupQuery).map),
-//            TotalAmountDueSummary.row(userAnswers.get(TotalAmountDuePage).get),
-//            MonthlyPaymentAmountSummary.row(userAnswers.get(MonthlyPaymentAmountPage).get),
-//            FinalPaymentAmountSummary.row(userAnswers.get(FinalPaymentAmountPage).get),
-            PaymentsFrequencySummary.rowData(userAnswers),
-            AmendPlanStartDateSummary.rowData(userAnswers),
-            AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers),
-            AmendPlanEndDateSummary.row(userAnswers),
+            AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+            AmendPaymentPlanSourceSummary.row(userAnswers.get(AmendPaymentPlanSourcePage).getOrElse("")),
+            DateSetupSummary.row(userAnswers.get(DateSetupQuery).getOrElse(LocalDateTime.now())),
+            TotalAmountDueSummary.row(userAnswers.get(TotalAmountDuePage).getOrElse(BigDecimal(0))),
+            MonthlyPaymentAmountSummary.row(userAnswers.get(MonthlyPaymentAmountPage).getOrElse(0), userAnswers.get(TotalAmountDuePage).getOrElse(0)),
+            FinalPaymentAmountSummary.row(userAnswers.get(FinalPaymentAmountPage).getOrElse(0), userAnswers.get(TotalAmountDuePage).getOrElse(0)),
+            PaymentsFrequencySummary.row2(userAnswers.get(PaymentsFrequencyPage).get.toString),
+            AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers.get(AmendPlanStartDatePage).getOrElse(LocalDate.now())),
+            AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0))),
+            AmendPlanEndDateSummary.row(userAnswers.get(AmendPlanEndDatePage).getOrElse(LocalDate.now())),
           ), routes.AmendPlanEndDateController.onPageLoad(mode))
         case _ =>
           (Seq(
-            AmendPaymentPlanTypeSummary.row(userAnswers),
-            AmendPaymentPlanSourceSummary.row(userAnswers),
-            userAnswers.get(DateSetupQuery).map(DateSetupSummary.row).getOrElse(""),
-//            DateSetupSummary.row(userAnswers.get(DateSetupQuery).get),
-            AmendPlanEndDateSummary.rowData(userAnswers),
-            AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers),
-            AmendPlanStartDateSummary.row(userAnswers),
+            AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+            AmendPaymentPlanSourceSummary.row(userAnswers.get(AmendPaymentPlanSourcePage).getOrElse("")),
+            DateSetupSummary.row(userAnswers.get(DateSetupQuery).getOrElse(LocalDateTime.now())),
+            AmendPlanEndDateSummary.row(userAnswers.get(AmendPlanEndDatePage).getOrElse(LocalDate.now())),
+            AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0))),
+            AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers.get(AmendPlanStartDatePage).getOrElse(LocalDate.now())),
           ), routes.AmendPlanStartDateController.onPageLoad(mode))
       }
       for {
@@ -81,7 +76,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
         planType <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
       } yield {
         Ok(view(mode, paymentReference, directDebitReference, bankDetailsWithAuddisStatus.sortCode,
-          bankDetailsWithAuddisStatus.accountNumber,rows, backLink))
+          bankDetailsWithAuddisStatus.accountNumber, rows, backLink))
       }
     }
   }

@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{NormalMode, PaymentsFrequency, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.{NormalMode, PaymentPlanType, PaymentsFrequency, UserAnswers, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -48,7 +48,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
         PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
         AmendPlanStartDateSummary.rowData(userAnswers)(messages(app)),
-        AmendPaymentAmountSummary.row("budgetPaymentPlan", userAnswers)(messages(app)),
+        AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers)(messages(app)),
         AmendPlanEndDateSummary.row(userAnswers)(messages(app))
       ).flatten
     }
@@ -59,7 +59,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
         PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
         AmendPlanEndDateSummary.rowData(userAnswers)(messages(app)),
-        AmendPaymentAmountSummary.row("singlePaymentPlan", userAnswers)(messages(app)),
+        AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, userAnswers)(messages(app)),
         AmendPlanStartDateSummary.row(userAnswers)(messages(app))
       ).flatten
     }
@@ -85,20 +85,28 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
               directDebitReference
             ).success.value
             .set(
-              PaymentReferenceQuery,
-              "payment reference"
+              PaymentReferencePage,
+              paymentReference
             ).success.value
             .set(
               AmendPaymentPlanTypePage,
-              "budgetPaymentPlan"
+              "Budget payment"
             ).success.value
             .set(
               AmendPaymentPlanSourcePage,
-              "paymentPlaneSource"
+              "paymentPlanSource"
             ).success.value
             .set(
-              PaymentReferencePage,
-              paymentReference
+              TotalAmountDuePage,
+              1500.0
+            ).success.value
+            .set(
+              MonthlyPaymentAmountPage,
+              190.0
+            ).success.value
+            .set(
+              FinalPaymentAmountPage,
+              190.0
             ).success.value
             .set(
               AmendPaymentAmountPage,
@@ -107,15 +115,15 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               AmendPlanStartDatePage,
               LocalDate.now().plusDays(4)
-            )
-            .success
-            .value
+            ).success.value
+            .set(
+              AmendPlanEndDatePage,
+              LocalDate.now().plusDays(5)
+            ).success.value
             .set(
               PaymentsFrequencyPage,
               PaymentsFrequency.Weekly
-            )
-            .success
-            .value
+            ).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -130,9 +138,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, application)
           val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
-
           val result = route(application, request).value
-
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
@@ -166,7 +172,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             ).success.value
             .set(
               AmendPaymentPlanTypePage,
-              "singlePaymentPlan"
+              PaymentPlanType.SinglePaymentPlan.toString
             ).success.value
             .set(
               AmendPaymentPlanSourcePage,
