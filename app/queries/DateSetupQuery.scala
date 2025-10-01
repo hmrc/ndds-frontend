@@ -22,6 +22,6 @@ import java.time.LocalDateTime
 
 case object DateSetupQuery extends Gettable[LocalDateTime] with Settable[LocalDateTime] {
 
-  override def path: JsPath = JsPath \ "directDebitReference"
+  override def path: JsPath = JsPath \ "dateSetup"
   
 }

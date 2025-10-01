@@ -25,7 +25,7 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentReferenceQuery
+import queries.PaymentPlanReferenceQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -72,7 +72,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
       val userAnswersWithPaymentReference =
         emptyUserAnswers
           .set(
-            PaymentReferenceQuery,
+            PaymentPlanReferenceQuery,
             paymentReference
           ).success.value
 
@@ -124,7 +124,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
       val userAnswersWithPaymentReference =
         emptyUserAnswers
           .set(
-            PaymentReferenceQuery,
+            PaymentPlanReferenceQuery,
             paymentReference
           ).success.value
 
@@ -161,7 +161,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
       val userAnswersWithPaymentReference =
         emptyUserAnswers
           .set(
-            PaymentReferenceQuery,
+            PaymentPlanReferenceQuery,
             paymentReference
           ).success.value
 
@@ -194,7 +194,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
       val userAnswersWithPaymentReference =
         emptyUserAnswers
           .set(
-            PaymentReferenceQuery,
+            PaymentPlanReferenceQuery,
             paymentReference
           ).success.value
 
@@ -240,7 +240,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
       val userAnswersWithPaymentReference =
         emptyUserAnswers
           .set(
-            PaymentReferenceQuery,
+            PaymentPlanReferenceQuery,
             paymentReference
           ).success.value
 

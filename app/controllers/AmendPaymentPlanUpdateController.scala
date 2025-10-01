@@ -26,7 +26,7 @@ import java.util.Locale
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentReferenceQuery
+import queries.PaymentPlanReferenceQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPaymentPlanUpdateView
@@ -48,7 +48,7 @@ class AmendPaymentPlanUpdateController @Inject()(
     implicit request =>
       val userAnswers = request.userAnswers
       if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-        val paymentReference = userAnswers.get(PaymentReferenceQuery).getOrElse("")
+        val paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse("")
         val paymentAmount = userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0))
         val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(paymentAmount)
         val startDate = userAnswers.get(AmendPlanStartDatePage).get
@@ -56,11 +56,11 @@ class AmendPaymentPlanUpdateController @Inject()(
         val endDate = userAnswers.get(AmendPlanEndDatePage).get
         val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
-        Future.successful(Ok(view(paymentReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate)))
+        Future.successful(Ok(view(paymentPlanReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate)))
       } else {
         val paymentPlanType = userAnswers.get(AmendPaymentPlanTypePage).getOrElse("Missing plan type from user answers")
-        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
-        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
+        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $paymentPlanType")
+        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $paymentPlanType")
       }
   }
 }

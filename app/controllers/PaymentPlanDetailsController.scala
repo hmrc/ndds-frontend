@@ -24,14 +24,14 @@ import pages.*
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{DateSetupQuery, PaymentReferenceQuery}
+import queries.{DateSetupQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils.listHodServices
-import viewmodels.checkAnswers.{AmendPlanStartDateSummary, *}
+import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
 import java.time.LocalDate
@@ -51,9 +51,9 @@ class PaymentPlanDetailsController @Inject()(
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    request.userAnswers.get(PaymentReferenceQuery) match {
-      case Some(paymentReference) =>
-        nddService.getPaymentPlanDetails(paymentReference).flatMap { response =>
+    request.userAnswers.get(PaymentPlanReferenceQuery) match {
+      case Some(paymentPlanReference) =>
+        nddService.getPaymentPlanDetails(paymentPlanReference).flatMap { response =>
           val planDetail = response.paymentPlanDetails
           val directDebit = response.directDebitDetails
           val maybeSource: Option[DirectDebitSource] =
@@ -67,7 +67,7 @@ class PaymentPlanDetailsController @Inject()(
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferenceQuery, planDetail.paymentReference))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanReferenceQuery, planDetail.paymentReference))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(0)))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(MonthlyPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(FinalPaymentAmountPage, planDetail.balancingPaymentAmount))
@@ -86,7 +86,7 @@ class PaymentPlanDetailsController @Inject()(
             val flag: Future[Boolean] = calculateShowAction(nddService, planDetail)
             val showActions = Await.result(flag, 5.seconds)
             val summaryRows: Seq[SummaryListRow] = buildSummaryRows(planDetail)
-            Ok(view(planDetail.planType, paymentReference, showActions, summaryRows))
+            Ok(view(planDetail.planType, paymentPlanReference, showActions, summaryRows))
           }
         }
       case None =>
@@ -94,10 +94,10 @@ class PaymentPlanDetailsController @Inject()(
     }
   }
 
-  def onRedirect(paymentReference: String): Action[AnyContent] =
+  def onRedirect(paymentPlanReference: String): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
     for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferenceQuery, paymentReference))
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanReferenceQuery, paymentPlanReference))
       _ <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
   }

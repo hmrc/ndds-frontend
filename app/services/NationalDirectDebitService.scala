@@ -149,7 +149,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     }
   }
 
-  def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanResponse] = {
+  def getPaymentPlanDetails(paymentPlanReference: String): Future[PaymentPlanResponse] = {
     //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
     val now = LocalDateTime.now()
     val currentDate = LocalDate.now()
@@ -166,7 +166,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
           planType = PaymentPlanType.SinglePaymentPlan.toString,
-          paymentReference = paymentReference, //Payment reference
+          paymentReference = paymentPlanReference, //Payment reference
           submissionDateTime = now.minusDays(5), //Date set up
           scheduledPaymentAmount = 120.00, //Payment amount or Regular payment amount or Monthly payment amount
           scheduledPaymentStartDate = currentDate.plusDays(4), //Payment date or Plan start date

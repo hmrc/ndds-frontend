@@ -21,7 +21,7 @@ import models.{Mode, PaymentPlanType}
 import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{DateSetupQuery, DirectDebitReferenceQuery, PaymentReferenceQuery}
+import queries.{DateSetupQuery, DirectDebitReferenceQuery, PaymentPlanReferenceQuery}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
@@ -72,10 +72,10 @@ class AmendPaymentPlanConfirmationController @Inject()(
       for {
         bankDetailsWithAuddisStatus <- Future.fromTry(Try(userAnswers.get(YourBankDetailsPage).get))
         directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
-        paymentReference <- Future.fromTry(Try(userAnswers.get(PaymentReferenceQuery).get))
+        paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
         planType <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
       } yield {
-        Ok(view(mode, paymentReference, directDebitReference, bankDetailsWithAuddisStatus.sortCode,
+        Ok(view(mode, paymentPlanReference, directDebitReference, bankDetailsWithAuddisStatus.sortCode,
           bankDetailsWithAuddisStatus.accountNumber, rows, backLink))
       }
     }

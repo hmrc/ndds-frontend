@@ -25,7 +25,7 @@ import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDate
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentReferenceQuery
+import queries.PaymentPlanReferenceQuery
 import services.NationalDirectDebitService
 import views.html.AmendPaymentPlanUpdateView
 
@@ -47,7 +47,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentReferenceQuery, "123456789K").success.value
+        .set(PaymentPlanReferenceQuery, "123456789K").success.value
         .set(AmendPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
         .set(AmendPlanEndDatePage, endDate).success.value
@@ -132,7 +132,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
 
     "must return NDDS error if amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
-        .set(PaymentReferenceQuery, "123456789K").success.value
+        .set(PaymentPlanReferenceQuery, "123456789K").success.value
         .set(RegularPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
         .set(AmendPlanEndDatePage, endDate).success.value

@@ -18,7 +18,7 @@ package queries
 
 import play.api.libs.json.JsPath
 
-case object PaymentReferenceQuery extends Gettable[String] with Settable[String] {
+case object PaymentPlanReferenceQuery extends Gettable[String] with Settable[String] {
 
-  override def path: JsPath = JsPath \ "paymentReference"
+  override def path: JsPath = JsPath \ "paymentPlanReference"
 }
