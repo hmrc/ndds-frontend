@@ -91,7 +91,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           PaymentsFrequencySummary.row(paymentPlan.scheduledPaymentFrequency),
           AmendPlanStartDateSummary.row(
             PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPlanStartDatePage).getOrElse(LocalDate.now())
+            userAnswers.get(AmendPlanStartDatePage)
           ),
           AmendPaymentAmountSummary.row(
             PaymentPlanType.BudgetPaymentPlan.toString,
@@ -116,7 +116,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           ),
           AmendPlanStartDateSummary.row(
             PaymentPlanType.SinglePaymentPlan.toString,
-            userAnswers.get(AmendPlanStartDatePage).getOrElse(LocalDate.now()),
+            userAnswers.get(AmendPlanStartDatePage),
             true
           )
         ), routes.AmendPlanStartDateController.onPageLoad(mode))

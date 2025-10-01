@@ -61,7 +61,10 @@ class PaymentPlanDetailsController @Inject()(
               case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
               case None         => Future.successful(updatedAnswers)
             }
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
+            updatedAnswers <- planDetail.scheduledPaymentStartDate match {
+              case Some(startDate) => Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, startDate))
+              case None         => Future.successful(updatedAnswers)
+            }
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
             //updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanReferenceQuery, planDetail.paymentReference))
             //updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(0)))
@@ -141,11 +144,19 @@ class PaymentPlanDetailsController @Inject()(
                                  (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] = {
     planDetail.planType match {
       case PaymentPlanType.SinglePaymentPlan.toString =>
-        nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
+        nddService.isTwoDaysPriorPaymentDate(
+          planDetail.scheduledPaymentStartDate.getOrElse(
+            throw new IllegalStateException("scheduledPaymentStartDate is missing")
+          )
+        )
 
       case PaymentPlanType.BudgetPaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
         for {
-          isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
+          isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(
+            planDetail.scheduledPaymentStartDate.getOrElse(
+              throw new IllegalStateException("scheduledPaymentStartDate is missing")
+            )
+          )
           isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(planDetail.scheduledPaymentEndDate)
         } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
 

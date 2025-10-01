@@ -38,7 +38,7 @@ case class PaymentPlanDetails(
                                paymentReference: String,
                                submissionDateTime: LocalDateTime,
                                scheduledPaymentAmount: Option[BigDecimal],
-                               scheduledPaymentStartDate: LocalDate,
+                               scheduledPaymentStartDate: Option[LocalDate],
                                initialPaymentStartDate: Option[LocalDate],
                                initialPaymentAmount: Option[BigDecimal],
                                scheduledPaymentEndDate: LocalDate,
@@ -77,7 +77,7 @@ object PaymentPlanDetails {
       (__ \ "paymentReference").read[String] and
       (__ \ "submissionDateTime").read[LocalDateTime] and
       (__ \ "scheduledPaymentAmount").readNullable[BigDecimal] and
-      (__ \ "scheduledPaymentStartDate").read[LocalDate] and
+      (__ \ "scheduledPaymentStartDate").readNullable[LocalDate] and
       (__ \ "initialPaymentStartDate").readNullable[LocalDate] and
       (__ \ "initialPaymentAmount").readNullable[BigDecimal] and
       (__ \ "scheduledPaymentEndDate").read[LocalDate] and
