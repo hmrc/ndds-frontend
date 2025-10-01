@@ -24,7 +24,7 @@ import pages.*
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{DateSetupQuery, PaymentPlanReferenceQuery}
+import queries.{DateSetupQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -61,27 +61,28 @@ class PaymentPlanDetailsController @Inject()(
           val frequency = PaymentsFrequency.fromString(planDetail.scheduledPaymentFrequency)
 
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(DateSetupQuery, planDetail.submissionDateTime))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
+            //updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString))
+            //updatedAnswers <- Future.fromTry(updatedAnswers.set(DateSetupQuery, planDetail.submissionDateTime))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanReferenceQuery, planDetail.paymentReference))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(0)))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(MonthlyPaymentAmountPage, planDetail.scheduledPaymentAmount))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(FinalPaymentAmountPage, planDetail.balancingPaymentAmount))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
-            cachedAnswers <- Future.fromTry(updatedAnswers.set(YourBankDetailsPage,
-              YourBankDetailsWithAuddisStatus(
-                accountHolderName = directDebit.bankAccountName.getOrElse(""),
-                sortCode = directDebit.bankSortCode.getOrElse(""),
-                accountNumber = directDebit.bankAccountNumber.getOrElse(""),
-                auddisStatus = directDebit.auDdisFlag,
-                accountVerified = false
-              )
-            ))
-            _ <- sessionRepository.set(cachedAnswers)
+            //updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanReferenceQuery, planDetail.paymentReference))
+            //updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(0)))
+            //updatedAnswers <- Future.fromTry(updatedAnswers.set(MonthlyPaymentAmountPage, planDetail.scheduledPaymentAmount))
+            //updatedAnswers <- Future.fromTry(updatedAnswers.set(FinalPaymentAmountPage, planDetail.balancingPaymentAmount))
+            //updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
+//            cachedAnswers <- Future.fromTry(updatedAnswers.set(YourBankDetailsPage,
+//              YourBankDetailsWithAuddisStatus(
+//                accountHolderName = directDebit.bankAccountName.getOrElse(""),
+//                sortCode = directDebit.bankSortCode.getOrElse(""),
+//                accountNumber = directDebit.bankAccountNumber.getOrElse(""),
+//                auddisStatus = directDebit.auDdisFlag,
+//                accountVerified = false
+//              )
+//            ))
+            _ <- sessionRepository.set(updatedAnswers)
           } yield {
             val flag: Future[Boolean] = calculateShowAction(nddService, planDetail)
             val showActions = Await.result(flag, 5.seconds)
@@ -117,12 +118,12 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
-          TotalAmountDueSummary.row(planDetail.totalLiability.getOrElse(BigDecimal(0))),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability.getOrElse(0)),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability.getOrElse(0)),
+          TotalAmountDueSummary.row(planDetail.totalLiability),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
-          PaymentsFrequencySummary.row2(planDetail.scheduledPaymentFrequency),
+          PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
           AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true), //true for start
           AmendSuspendDateSummary.row(planDetail.suspensionEndDate.getOrElse(LocalDate.now), false), //false for end
@@ -132,9 +133,9 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
-          TotalAmountDueSummary.row(planDetail.totalLiability.getOrElse(BigDecimal(0))),
-          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability.getOrElse(0)),
-          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability.getOrElse(0)),
+          TotalAmountDueSummary.row(planDetail.totalLiability),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
         )

@@ -32,25 +32,26 @@ object FinalPaymentAmountSummary {
       val monthlyPayment = (totalAmount / 12).setScale(2, BigDecimal.RoundingMode.DOWN)
       val finalPayment = totalAmount - (monthlyPayment * 11)
       SummaryListRowViewModel(
-        key     = "totalAmountDue.final.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(finalPayment)),
+        key = "totalAmountDue.final.checkYourAnswersLabel",
+        value = ValueViewModel(currencyFormat(finalPayment)),
         actions = Seq.empty
       )
     }
 
-  def row(amount: BigDecimal, totalDue: BigDecimal)(implicit messages: Messages): SummaryListRow =
-    if (totalDue.equals(BigDecimal(0))) {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.final.checkYourAnswersLabel",
-        value = ValueViewModel(""),
-        actions = Seq.empty
-      )
-    } else {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.final.checkYourAnswersLabel",
-        value = ValueViewModel(formatAmount(amount.doubleValue)),
-        actions = Seq.empty
-      )
+  def row(amount: BigDecimal, totalDue: Option[BigDecimal])(implicit messages: Messages): SummaryListRow =
+    totalDue.filter(_ > 0) match {
+      case Some(_) =>
+        SummaryListRowViewModel(
+          key = "totalAmountDue.final.checkYourAnswersLabel",
+          value = ValueViewModel(formatAmount(amount.doubleValue)),
+          actions = Seq.empty
+        )
+      case None =>
+        SummaryListRowViewModel(
+          key = "totalAmountDue.final.checkYourAnswersLabel",
+          value = ValueViewModel(""),
+          actions = Seq.empty
+        )
     }
 
 }

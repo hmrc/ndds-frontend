@@ -41,19 +41,19 @@ object TotalAmountDueSummary  {
         )
     }
 
-  def row(amount: BigDecimal)(implicit messages: Messages): SummaryListRow =
-    if (amount.equals(BigDecimal(0))) {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.checkYourAnswersLabel",
-        value = ValueViewModel(""),
-        actions = Seq.empty
-      )
-    } else {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.checkYourAnswersLabel",
-        value = ValueViewModel(formatAmount(amount.doubleValue)),
-        actions = Seq.empty
-      )
+  def row(amount: Option[BigDecimal])(implicit messages: Messages): SummaryListRow =
+    amount.filter(_ > 0) match {
+      case Some(value) =>
+        SummaryListRowViewModel(
+          key = "totalAmountDue.checkYourAnswersLabel",
+          value = ValueViewModel(formatAmount(value)),
+          actions = Seq.empty
+        )
+      case None =>
+        SummaryListRowViewModel(
+          key = "totalAmountDue.checkYourAnswersLabel",
+          value = ValueViewModel(""),
+          actions = Seq.empty
+        )
     }
-
 }

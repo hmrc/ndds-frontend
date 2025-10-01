@@ -27,30 +27,31 @@ import viewmodels.implicits.*
 
 import scala.math.BigDecimal.RoundingMode
 
-object MonthlyPaymentAmountSummary  {
+object MonthlyPaymentAmountSummary {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TotalAmountDuePage).map { totalAmount =>
       val monthlyPayment = (totalAmount / 12).setScale(2, RoundingMode.DOWN)
 
       SummaryListRowViewModel(
-        key     = "totalAmountDue.monthly.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(monthlyPayment)),
+        key = "totalAmountDue.monthly.checkYourAnswersLabel",
+        value = ValueViewModel(currencyFormat(monthlyPayment)),
         actions = Seq.empty
       )
     }
 
-  def row(amount: BigDecimal, totalDue: BigDecimal)(implicit messages: Messages): SummaryListRow =
-    if (totalDue.equals(BigDecimal(0))) {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.monthly.checkYourAnswersLabel",
-        value = ValueViewModel(""),
-        actions = Seq.empty
-      )
-    } else {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.monthly.checkYourAnswersLabel",
-        value = ValueViewModel(formatAmount(amount.doubleValue)),
-        actions = Seq.empty
-      )
+  def row(amount: BigDecimal, totalDue: Option[BigDecimal])(implicit messages: Messages): SummaryListRow =
+    totalDue.filter(_ > 0) match {
+      case Some(_) =>
+        SummaryListRowViewModel(
+          key = "totalAmountDue.monthly.checkYourAnswersLabel",
+          value = ValueViewModel(formatAmount(amount.doubleValue)),
+          actions = Seq.empty
+        )
+      case None =>
+        SummaryListRowViewModel(
+          key = "totalAmountDue.monthly.checkYourAnswersLabel",
+          value = ValueViewModel(""),
+          actions = Seq.empty
+        )
     }
 }

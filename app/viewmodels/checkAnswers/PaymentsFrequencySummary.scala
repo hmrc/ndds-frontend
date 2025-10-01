@@ -63,7 +63,7 @@ object PaymentsFrequencySummary  {
         )
     }
 
-  def row2(value: String)(implicit messages: Messages): SummaryListRow = {
+  def row(value: String)(implicit messages: Messages): SummaryListRow = {
     SummaryListRowViewModel(
       key = "paymentsFrequency.checkYourAnswersLabel",
       value = ValueViewModel(HtmlFormat.escape(value).toString),
