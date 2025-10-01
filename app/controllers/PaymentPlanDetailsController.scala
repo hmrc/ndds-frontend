@@ -20,21 +20,18 @@ import controllers.actions.*
 import models.*
 import models.responses.PaymentPlanDetails
 import pages.*
-
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{DateSetupQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Utils.listHodServices
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
-import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -55,11 +52,6 @@ class PaymentPlanDetailsController @Inject()(
       case Some(paymentPlanReference) =>
         nddService.getPaymentPlanDetails(paymentPlanReference).flatMap { response =>
           val planDetail = response.paymentPlanDetails
-          val directDebit = response.directDebitDetails
-          val maybeSource: Option[DirectDebitSource] =
-            listHodServices.find { case (_, v) => v.equalsIgnoreCase(planDetail.hodService) }.map(_._1)
-          val frequency = PaymentsFrequency.fromString(planDetail.scheduledPaymentFrequency)
-
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))

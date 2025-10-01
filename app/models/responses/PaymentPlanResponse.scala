@@ -45,8 +45,8 @@ case class PaymentPlanDetails(
                                scheduledPaymentFrequency: String,
                                suspensionStartDate: Option[LocalDate],
                                suspensionEndDate: Option[LocalDate],
-                               balancingPaymentAmount: BigDecimal,
-                               balancingPaymentDate: LocalDate,
+                               balancingPaymentAmount: Option[BigDecimal],
+                               balancingPaymentDate: Option[LocalDate],
                                totalLiability: Option[BigDecimal],
                                paymentPlanEditable: Boolean
                              )
@@ -72,8 +72,8 @@ object PaymentPlanDetails {
       (__ \ "scheduledPaymentFrequency").read[String] and
       (__ \ "suspensionStartDate").readNullable[LocalDate] and
       (__ \ "suspensionEndDate").readNullable[LocalDate] and
-      (__ \ "balancingPaymentAmount").read[BigDecimal] and
-      (__ \ "balancingPaymentDate").read[LocalDate] and
+      (__ \ "balancingPaymentAmount").readNullable[BigDecimal] and
+      (__ \ "balancingPaymentDate").readNullable[LocalDate] and
       (__ \ "totalLiability").readNullable[BigDecimal] and
       (__ \ "paymentPlanEditable").read[Boolean]
     )(PaymentPlanDetails.apply _)

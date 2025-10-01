@@ -174,9 +174,9 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           scheduledPaymentFrequency = PaymentsFrequency.Weekly.toString, //Frequency of payments
           suspensionStartDate = Some(currentDate.plusDays(2)), //Suspend start date
           suspensionEndDate = None, //Suspend end date
-          balancingPaymentAmount = BigDecimal(25.00), //Final payment amount
+          balancingPaymentAmount = Some(BigDecimal(25.00)), //Final payment amount
           totalLiability = None, //Total amount due
-          balancingPaymentDate = currentDate.plusMonths(13),
+          balancingPaymentDate = Some(currentDate.plusMonths(13)),
           initialPaymentStartDate = Some(currentDate.plusDays(5)),
           initialPaymentAmount = Some(BigDecimal(50.00)),
           paymentPlanEditable = true

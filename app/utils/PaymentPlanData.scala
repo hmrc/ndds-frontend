@@ -49,8 +49,8 @@ trait PaymentPlanData {
         scheduledPaymentFrequency = "Monthly",
         suspensionStartDate = Some(currentDate.plusDays(5)),
         suspensionEndDate = None,
-        balancingPaymentAmount = 60.00,
-        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
         totalLiability = None,
         paymentPlanEditable = true
       )
@@ -78,8 +78,8 @@ trait PaymentPlanData {
         scheduledPaymentFrequency = "Monthly",
         suspensionStartDate = Some(currentDate.plusDays(5)),
         suspensionEndDate = None,
-        balancingPaymentAmount = 60.00,
-        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
         totalLiability = None,
         paymentPlanEditable = true
       )
@@ -107,8 +107,8 @@ trait PaymentPlanData {
         scheduledPaymentFrequency = "Monthly",
         suspensionStartDate = Some(currentDate.plusDays(5)),
         suspensionEndDate = None,
-        balancingPaymentAmount = 60.00,
-        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
         totalLiability = None,
         paymentPlanEditable = true
       )
@@ -136,8 +136,8 @@ trait PaymentPlanData {
         scheduledPaymentFrequency = "Monthly",
         suspensionStartDate = Some(currentDate.plusDays(5)),
         suspensionEndDate = None,
-        balancingPaymentAmount = 60.00,
-        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
         totalLiability = None,
         paymentPlanEditable = true
       )

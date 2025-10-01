@@ -38,20 +38,19 @@ object FinalPaymentAmountSummary {
       )
     }
 
-  def row(amount: BigDecimal, totalDue: Option[BigDecimal])(implicit messages: Messages): SummaryListRow =
-    totalDue.filter(_ > 0) match {
-      case Some(_) =>
-        SummaryListRowViewModel(
-          key = "totalAmountDue.final.checkYourAnswersLabel",
-          value = ValueViewModel(formatAmount(amount.doubleValue)),
-          actions = Seq.empty
-        )
-      case None =>
-        SummaryListRowViewModel(
-          key = "totalAmountDue.final.checkYourAnswersLabel",
-          value = ValueViewModel(""),
-          actions = Seq.empty
-        )
-    }
+  def row(amount: Option[BigDecimal], totalDue: Option[BigDecimal])(implicit messages: Messages): SummaryListRow = {
+    val displayValue =
+      if (totalDue.exists(_ > 0) && amount.isDefined) {
+        formatAmount(amount.get.doubleValue)
+      } else {
+        ""
+      }
+
+    SummaryListRowViewModel(
+      key = "totalAmountDue.final.checkYourAnswersLabel",
+      value = ValueViewModel(displayValue),
+      actions = Seq.empty
+    )
+  }
 
 }

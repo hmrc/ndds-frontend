@@ -33,7 +33,6 @@ import utils.PaymentPlanData
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
-import java.time.LocalDate
 import scala.concurrent.Future
 
 class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
@@ -117,7 +116,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase with PaymentPlanData {
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency)(messages(app)),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)(messages(app)),
           AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true)(messages(app)),
-          AmendSuspendDateSummary.row(planDetail.suspensionEndDate.getOrElse(LocalDate.now), false)(messages(app)),
+          AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false)(messages(app)),
         )
       }
       val paymentReference = "paymentReference"
