@@ -75,6 +75,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val tcNumberOfEqualPayments: Int =
     configuration.get[Int]("paymentSchedule.tc.numberOfEqualPayments")
 
+  lazy val macKey: String =
+    configuration.get[String]("mac.key")
+
+  lazy val bacsNumber: String =
+    configuration.get[String]("barsClient.serviceUserNumber")
+  
   lazy val tcMonthsUntilSecondPayment: Int =
     configuration.get[Int]("paymentSchedule.tc.monthsUntilSecondPayment")
 
