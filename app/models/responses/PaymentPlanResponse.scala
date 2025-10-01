@@ -41,7 +41,7 @@ case class PaymentPlanDetails(
                                scheduledPaymentStartDate: Option[LocalDate],
                                initialPaymentStartDate: Option[LocalDate],
                                initialPaymentAmount: Option[BigDecimal],
-                               scheduledPaymentEndDate: LocalDate,
+                               scheduledPaymentEndDate: Option[LocalDate],
                                scheduledPaymentFrequency: Option[String],
                                suspensionStartDate: Option[LocalDate],
                                suspensionEndDate: Option[LocalDate],
@@ -80,7 +80,7 @@ object PaymentPlanDetails {
       (__ \ "scheduledPaymentStartDate").readNullable[LocalDate] and
       (__ \ "initialPaymentStartDate").readNullable[LocalDate] and
       (__ \ "initialPaymentAmount").readNullable[BigDecimal] and
-      (__ \ "scheduledPaymentEndDate").read[LocalDate] and
+      (__ \ "scheduledPaymentEndDate").readNullable[LocalDate] and
       (__ \ "scheduledPaymentFrequency").readNullable[String].map { code =>
         code.flatMap(c => paymentFrequencyMapping.get(c).orElse(Some(c)))
       } and

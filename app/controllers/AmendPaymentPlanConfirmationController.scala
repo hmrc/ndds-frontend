@@ -99,7 +99,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
             true
           ),
           AmendPlanEndDateSummary.row(
-            userAnswers.get(AmendPlanEndDatePage).getOrElse(LocalDate.now()),
+            userAnswers.get(AmendPlanEndDatePage),
             true
           )
         ), routes.AmendPlanEndDateController.onPageLoad(mode))

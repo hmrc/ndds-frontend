@@ -55,31 +55,22 @@ class PaymentPlanDetailsController @Inject()(
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
-            //updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString))
-            //updatedAnswers <- Future.fromTry(updatedAnswers.set(DateSetupQuery, planDetail.submissionDateTime))
             updatedAnswers <- planDetail.scheduledPaymentAmount match {
               case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
-              case None         => Future.successful(updatedAnswers)
+              case None         => Future.failed(
+                new IllegalStateException("scheduledPaymentAmount is missing when updating AmendPaymentAmountPage")
+              )
             }
             updatedAnswers <- planDetail.scheduledPaymentStartDate match {
               case Some(startDate) => Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, startDate))
+              case None         => Future.failed(
+                new IllegalStateException("scheduledPaymentStartDate is missing when updating AmendPlanStartDatePage")
+              )
+            }
+            updatedAnswers <- planDetail.scheduledPaymentEndDate match {
+              case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
               case None         => Future.successful(updatedAnswers)
             }
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
-            //updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanReferenceQuery, planDetail.paymentReference))
-            //updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability.getOrElse(0)))
-            //updatedAnswers <- Future.fromTry(updatedAnswers.set(MonthlyPaymentAmountPage, planDetail.scheduledPaymentAmount))
-            //updatedAnswers <- Future.fromTry(updatedAnswers.set(FinalPaymentAmountPage, planDetail.balancingPaymentAmount))
-            //updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
-//            cachedAnswers <- Future.fromTry(updatedAnswers.set(YourBankDetailsPage,
-//              YourBankDetailsWithAuddisStatus(
-//                accountHolderName = directDebit.bankAccountName.getOrElse(""),
-//                sortCode = directDebit.bankSortCode.getOrElse(""),
-//                accountNumber = directDebit.bankAccountNumber.getOrElse(""),
-//                auddisStatus = directDebit.auDdisFlag,
-//                accountVerified = false
-//              )
-//            ))
             _ <- sessionRepository.set(updatedAnswers)
           } yield {
             val flag: Future[Boolean] = calculateShowAction(nddService, planDetail)
@@ -157,7 +148,11 @@ class PaymentPlanDetailsController @Inject()(
               throw new IllegalStateException("scheduledPaymentStartDate is missing")
             )
           )
-          isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(planDetail.scheduledPaymentEndDate)
+          isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(
+            planDetail.scheduledPaymentEndDate.getOrElse(
+              throw new IllegalStateException("scheduledPaymentEndDate is missing")
+            )
+          )
         } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
 
       case _ => Future.successful(false) //For TaxCredit repayment plan

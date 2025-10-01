@@ -170,7 +170,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           submissionDateTime = now.minusDays(5), //Date set up
           scheduledPaymentAmount = Some(120.00), //Payment amount or Regular payment amount or Monthly payment amount
           scheduledPaymentStartDate = Some(currentDate.plusDays(4)), //Payment date or Plan start date
-          scheduledPaymentEndDate = currentDate.plusDays(5), //Plan end date
+          scheduledPaymentEndDate = Some(currentDate.plusDays(5)), //Plan end date
           scheduledPaymentFrequency = Some("Weekly"), //Frequency of payments
           suspensionStartDate = Some(currentDate.plusDays(2)), //Suspend start date
           suspensionEndDate = None, //Suspend end date
