@@ -17,32 +17,30 @@
 package models.requests
 
 import models.responses.BankAddress
-import models.{
-  DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation,
-  PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus
-}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-case class ChrisSubmissionRequest(
-                                   serviceType: DirectDebitSource,
-                                   paymentPlanType: PaymentPlanType,
+case class AmendChrisSubmissionRequest(
+                                   serviceType: String,
+                                   paymentPlanType: String,
                                    paymentFrequency: Option[PaymentsFrequency],
                                    yourBankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus,
-                                   planStartDate: Option[PlanStartDateDetails],
+                                   planStartDate: Option[LocalDate],
                                    planEndDate: Option[LocalDate],
                                    paymentDate: Option[PaymentDateDetails],
                                    yearEndAndMonth: Option[YearEndAndMonth],
+                                   bankDetailsAddress: Option[BankAddress],
                                    ddiReferenceNo: String,
                                    paymentReference: String,
+                                   bankName: Option[String],
                                    totalAmountDue: Option[BigDecimal],
                                    paymentAmount: Option[BigDecimal],
                                    regularPaymentAmount: Option[BigDecimal],
-                                   calculation: Option[PaymentPlanCalculation],
-                                   amendPlan: Boolean = false
+                                   calculation: Option[PaymentPlanCalculation]
                                  )
 
-object ChrisSubmissionRequest {
-  implicit val format: OFormat[ChrisSubmissionRequest] = Json.format[ChrisSubmissionRequest]
+object AmendChrisSubmissionRequest {
+  implicit val format: OFormat[AmendChrisSubmissionRequest] = Json.format[AmendChrisSubmissionRequest]
 }

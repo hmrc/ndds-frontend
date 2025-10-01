@@ -21,7 +21,7 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.requests.{AmendChrisSubmissionRequest, ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.{AmendPaymentPlanTypePage, DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
@@ -57,6 +57,16 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   def submitChrisData(submission: ChrisSubmissionRequest)
                      (implicit hc: HeaderCarrier): Future[Boolean] = {
     nddConnector.submitChrisData(submission).map { success =>
+      success
+    }.recover { case ex =>
+      logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
+      false
+    }
+  }
+
+  def submitAmendChrisData(submission: AmendChrisSubmissionRequest)
+                     (implicit hc: HeaderCarrier): Future[Boolean] = {
+    nddConnector.amendSubmitChrisData(submission).map { success =>
       success
     }.recover { case ex =>
       logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)

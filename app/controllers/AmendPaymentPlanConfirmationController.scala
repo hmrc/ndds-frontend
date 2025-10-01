@@ -17,11 +17,16 @@
 package controllers
 
 import controllers.actions.*
-import models.{Mode, PaymentPlanType}
-import pages.{AmendPaymentPlanTypePage, YourBankDetailsPage}
+import models.PaymentPlanType.AmendPaymentPlan
+import models.requests.{AmendChrisSubmissionRequest, ChrisSubmissionRequest}
+import models.{DirectDebitSource, Mode, PaymentPlanType, UserAnswers, PlanStartDateDetails}
+import pages.{AmendPaymentPlanSourcePage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, BankDetailsAddressPage, BankDetailsBankNamePage, PaymentAmountPage, PaymentReferencePage, PaymentsFrequencyPage, QuestionPage, RegularPaymentAmountPage, TotalAmountDuePage, YourBankDetailsPage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentReferenceQuery}
+import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
@@ -37,8 +42,10 @@ class AmendPaymentPlanConfirmationController @Inject()(
                                                        requireData: DataRequiredAction,
                                                        val controllerComponents: MessagesControllerComponents,
                                                        view: AmendPaymentPlanConfirmationView,
+                                                       nddService: NationalDirectDebitService,
+                                                       sessionRepository: SessionRepository,
                                                      )(implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport {
+  extends FrontendBaseController with I18nSupport with Logging{
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request => {
@@ -76,8 +83,71 @@ class AmendPaymentPlanConfirmationController @Inject()(
     }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-      Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+      val ua = request.userAnswers
+
+      ua.get(DirectDebitReferenceQuery) match {
+        case Some(ddiReference) =>
+          val chrisRequest = buildChrisSubmissionRequest(ua, ddiReference)
+
+          println("****************************************" + chrisRequest)
+
+          nddService.submitChrisData(chrisRequest).flatMap { success =>
+            if (success) {
+              logger.info(s"CHRIS submission successful for DDI Ref [$ddiReference]")
+              Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
+            } else {
+              logger.error(s"CHRIS submission failed for DDI Ref [$ddiReference]")
+              Future.successful(
+                Redirect(routes.JourneyRecoveryController.onPageLoad())
+                  .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+              )
+            }
+          }
+
+        case None =>
+          logger.error("Missing DirectDebitReference in UserAnswers")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    }
+
+
+  private def buildChrisSubmissionRequest(
+                                           userAnswers: UserAnswers,
+                                           ddiReference: String
+                                         ): ChrisSubmissionRequest = {
+    implicit val ua: UserAnswers = userAnswers
+    val serviceTypeStr: String = ua.get(AmendPaymentPlanSourcePage).getOrElse("SA") // fallback if missing
+    val serviceType: DirectDebitSource = DirectDebitSource.objectMap.getOrElse(serviceTypeStr, DirectDebitSource.SA)
+    val planStartDateDetails: Option[PlanStartDateDetails] = ua.get(AmendPlanStartDatePage).map { date =>
+      PlanStartDateDetails(
+        enteredDate = date,
+        earliestPlanStartDate = date.toString // you can adjust this if you have a different logic
+      )
+    }
+
+    ChrisSubmissionRequest(
+      serviceType = serviceType,
+      paymentPlanType = PaymentPlanType.AmendPaymentPlan,
+      paymentFrequency = ua.get(PaymentsFrequencyPage),
+      yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
+      planStartDate = planStartDateDetails,
+      planEndDate = ua.get(AmendPlanEndDatePage),
+      paymentDate = None,
+      yearEndAndMonth = None,
+      ddiReferenceNo = ddiReference,
+      paymentReference = required(PaymentReferencePage),
+      totalAmountDue = ua.get(TotalAmountDuePage),
+      paymentAmount = ua.get(PaymentAmountPage),
+      regularPaymentAmount = ua.get(RegularPaymentAmountPage),
+      calculation = None,
+      amendPlan = true
+    )
   }
+
+  private def required[A](page: QuestionPage[A])(implicit ua: UserAnswers, rds: play.api.libs.json.Reads[A]): A =
+    ua.get(page).getOrElse(throw new Exception(s"Missing details: ${page.toString}"))
+
 
 }

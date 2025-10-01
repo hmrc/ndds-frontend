@@ -136,8 +136,6 @@ class CheckYourAnswersController @Inject()(
       planEndDate                  = ua.get(PlanEndDatePage),
       paymentDate                  = ua.get(PaymentDatePage),
       yearEndAndMonth              = ua.get(YearEndAndMonthPage),
-      bankDetailsAddress           = required(BankDetailsAddressPage),
-      bankName                     = required(BankDetailsBankNamePage),
       ddiReferenceNo               = ddiReference,
       paymentReference             = required(PaymentReferencePage),
       totalAmountDue               = ua.get(TotalAmountDuePage),
