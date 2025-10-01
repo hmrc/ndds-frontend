@@ -126,7 +126,7 @@ class PaymentPlanDetailsController @Inject()(
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
           AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true), //true for start
-          AmendSuspendDateSummary.row(planDetail.suspensionEndDate.getOrElse(LocalDate.now), false), //false for end
+          AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false), //false for end
         )
       case _ => //For Variable and Tax repayment plan
         Seq(

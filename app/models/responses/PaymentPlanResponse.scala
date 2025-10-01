@@ -39,11 +39,11 @@ case class PaymentPlanDetails(
                                submissionDateTime: LocalDateTime,
                                scheduledPaymentAmount: Double,
                                scheduledPaymentStartDate: LocalDate,
-                               initialPaymentStartDate: LocalDate,
-                               initialPaymentAmount: BigDecimal,
+                               initialPaymentStartDate: Option[LocalDate],
+                               initialPaymentAmount: Option[BigDecimal],
                                scheduledPaymentEndDate: LocalDate,
                                scheduledPaymentFrequency: String,
-                               suspensionStartDate: LocalDate,
+                               suspensionStartDate: Option[LocalDate],
                                suspensionEndDate: Option[LocalDate],
                                balancingPaymentAmount: BigDecimal,
                                balancingPaymentDate: LocalDate,
@@ -66,11 +66,11 @@ object PaymentPlanDetails {
       (__ \ "submissionDateTime").read[LocalDateTime] and
       (__ \ "scheduledPaymentAmount").read[Double] and
       (__ \ "scheduledPaymentStartDate").read[LocalDate] and
-      (__ \ "initialPaymentStartDate").read[LocalDate] and
-      (__ \ "initialPaymentAmount").read[BigDecimal] and
+      (__ \ "initialPaymentStartDate").readNullable[LocalDate] and
+      (__ \ "initialPaymentAmount").readNullable[BigDecimal] and
       (__ \ "scheduledPaymentEndDate").read[LocalDate] and
       (__ \ "scheduledPaymentFrequency").read[String] and
-      (__ \ "suspensionStartDate").read[LocalDate] and
+      (__ \ "suspensionStartDate").readNullable[LocalDate] and
       (__ \ "suspensionEndDate").readNullable[LocalDate] and
       (__ \ "balancingPaymentAmount").read[BigDecimal] and
       (__ \ "balancingPaymentDate").read[LocalDate] and

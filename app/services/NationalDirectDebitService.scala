@@ -172,13 +172,13 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           scheduledPaymentStartDate = currentDate.plusDays(4), //Payment date or Plan start date
           scheduledPaymentEndDate = currentDate.plusDays(5), //Plan end date
           scheduledPaymentFrequency = PaymentsFrequency.Weekly.toString, //Frequency of payments
-          suspensionStartDate = currentDate.plusDays(2), //Suspend start date
+          suspensionStartDate = Some(currentDate.plusDays(2)), //Suspend start date
           suspensionEndDate = None, //Suspend end date
           balancingPaymentAmount = BigDecimal(25.00), //Final payment amount
           totalLiability = None, //Total amount due
           balancingPaymentDate = currentDate.plusMonths(13),
-          initialPaymentStartDate = currentDate.plusDays(5),
-          initialPaymentAmount = BigDecimal(50.00),
+          initialPaymentStartDate = Some(currentDate.plusDays(5)),
+          initialPaymentAmount = Some(BigDecimal(50.00)),
           paymentPlanEditable = true
         )
       )
