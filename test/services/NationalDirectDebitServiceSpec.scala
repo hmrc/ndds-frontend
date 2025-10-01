@@ -475,15 +475,8 @@ class NationalDirectDebitServiceSpec extends SpecBase
         planEndDate = None,
         paymentDate = Some(paymentDateDetails),
         yearEndAndMonth = None,
-        bankDetailsAddress = models.responses.BankAddress(
-          lines = Seq("line 1"),
-          town = "Town",
-          country = models.responses.Country("UK"),
-          postCode = "NE5 2DH"
-        ),
         ddiReferenceNo = "DDI123456789",
         paymentReference = "testReference",
-        bankName = "Barclays",
         totalAmountDue = Some(BigDecimal(200)),
         paymentAmount = Some(BigDecimal(100)),
         regularPaymentAmount = Some(BigDecimal(90)),

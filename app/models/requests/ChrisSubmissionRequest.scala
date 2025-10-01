@@ -28,6 +28,7 @@ import java.time.LocalDate
 case class ChrisSubmissionRequest(
                                    serviceType: DirectDebitSource,
                                    paymentPlanType: PaymentPlanType,
+                                   paymentPlanReferenceNumber:Option[String],
                                    paymentFrequency: Option[PaymentsFrequency],
                                    yourBankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus,
                                    planStartDate: Option[PlanStartDateDetails],

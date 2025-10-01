@@ -19,8 +19,8 @@ package controllers
 import controllers.actions.*
 import models.PaymentPlanType.AmendPaymentPlan
 import models.requests.{AmendChrisSubmissionRequest, ChrisSubmissionRequest}
-import models.{DirectDebitSource, Mode, PaymentPlanType, UserAnswers, PlanStartDateDetails}
-import pages.{AmendPaymentPlanSourcePage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, BankDetailsAddressPage, BankDetailsBankNamePage, PaymentAmountPage, PaymentReferencePage, PaymentsFrequencyPage, QuestionPage, RegularPaymentAmountPage, TotalAmountDuePage, YourBankDetailsPage}
+import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers}
+import pages.{AmendPaymentPlanSourcePage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, BankDetailsAddressPage, BankDetailsBankNamePage, PaymentAmountPage, PaymentPlanReferenceNumberPage, PaymentReferencePage, PaymentsFrequencyPage, QuestionPage, RegularPaymentAmountPage, TotalAmountDuePage, YourBankDetailsPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -129,8 +129,9 @@ class AmendPaymentPlanConfirmationController @Inject()(
 
     ChrisSubmissionRequest(
       serviceType = serviceType,
-      paymentPlanType = PaymentPlanType.AmendPaymentPlan,
+      paymentPlanType = PaymentPlanType.BudgetPaymentPlan,
       paymentFrequency = ua.get(PaymentsFrequencyPage),
+      paymentPlanReferenceNumber = ua.get(PaymentPlanReferenceNumberPage),
       yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
       planStartDate = planStartDateDetails,
       planEndDate = ua.get(AmendPlanEndDatePage),

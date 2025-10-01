@@ -147,6 +147,7 @@ class CheckYourAnswersController @Inject()(
     ChrisSubmissionRequest(
       serviceType                  = required(DirectDebitSourcePage),
       paymentPlanType              = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan),
+      paymentPlanReferenceNumber    = None,
       paymentFrequency             = ua.get(PaymentsFrequencyPage),
       yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
       planStartDate                = ua.get(PlanStartDatePage),
