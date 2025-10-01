@@ -17,16 +17,20 @@
 package controllers
 
 import base.SpecBase
-import models.PaymentPlanType
+import models.{PaymentPlanType, UserAnswers}
+import models.responses.PaymentPlanResponse
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentPlanReferenceQuery
 import services.NationalDirectDebitService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, PaymentReferenceSummary}
 import views.html.AmendPaymentPlanUpdateView
 
 import java.time.LocalDate
@@ -46,6 +50,27 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
     val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
     "must return OK and the correct view for a GET" in {
+
+      def summaryList(userAnswers: UserAnswers, paymentPlanReference: String, app: Application): Seq[SummaryListRow] = {
+        val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
+        val planStartDate = userAnswers.get(AmendPlanStartDatePage)
+        val planEndDate = userAnswers.get(AmendPlanEndDatePage)
+
+        Seq(
+          PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
+          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)(messages(app)),
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate)(messages(app)),
+          AmendPlanEndDateSummary.row(planEndDate)(messages(app)),
+        )
+      }
+
+//      PaymentReferenceSummary.row(paymentPlanReference)
+//      ,
+//      AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)
+//      ,
+//      AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate)
+//      ,
+//      AmendPlanEndDateSummary.row(planEndDate)
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanReferenceQuery, "123456789K").success.value
         .set(AmendPaymentAmountPage, regPaymentAmount).success.value
@@ -63,8 +88,10 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         val result = route(application, request).value
         val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
 
+        val summaryListRows = summaryList(userAnswers, "123456789K", application)
+
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, formattedEndDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, formattedEndDate, summaryListRows)(request, messages(application)).toString
       }
     }
 

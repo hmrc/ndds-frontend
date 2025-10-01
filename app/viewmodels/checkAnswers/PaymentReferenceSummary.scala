@@ -40,4 +40,12 @@ object PaymentReferenceSummary  {
           )
         )
     }
+
+  def row(paymentPlanReference: String)(implicit messages: Messages): SummaryListRow ={
+        SummaryListRowViewModel(
+          key = "paymentReference.checkYourAnswersLabel",
+          value = ValueViewModel(HtmlFormat.escape(paymentPlanReference).toString),
+          actions = Seq.empty
+        )
+    }
 }

@@ -17,20 +17,22 @@
 package controllers
 
 import controllers.actions.*
+import models.{PaymentPlanType, UserAnswers}
 import pages.*
 import play.api.Logging
-
-import java.time.format.DateTimeFormatter
-import java.text.NumberFormat
-import java.util.Locale
-import javax.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanReferenceQuery
 import services.NationalDirectDebitService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanUpdateView
 
+import java.text.NumberFormat
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import javax.inject.Inject
 import scala.concurrent.Future
 
 class AmendPaymentPlanUpdateController @Inject()(
@@ -56,11 +58,38 @@ class AmendPaymentPlanUpdateController @Inject()(
         val endDate = userAnswers.get(AmendPlanEndDatePage).get
         val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
-        Future.successful(Ok(view(paymentPlanReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate)))
+        val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
+
+        Future.successful(Ok(view(paymentPlanReference, formattedRegPaymentAmount, formattedStartDate, formattedEndDate, summaryRows)))
       } else {
         val paymentPlanType = userAnswers.get(AmendPaymentPlanTypePage).getOrElse("Missing plan type from user answers")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $paymentPlanType")
         throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $paymentPlanType")
       }
+  }
+
+  private def buildSummaryRows(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
+
+    val planTypeOpt = userAnswers.get(AmendPaymentPlanTypePage)
+    val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
+    val planStartDate = userAnswers.get(AmendPlanStartDatePage)
+    val planEndDate = userAnswers.get(AmendPlanEndDatePage)
+
+    planTypeOpt match {
+      case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
+        Seq(
+          PaymentReferenceSummary.row(paymentPlanReference),
+          AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount),
+          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate)
+        )
+      case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
+        Seq(
+          PaymentReferenceSummary.row(paymentPlanReference),
+          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate),
+          AmendPlanEndDateSummary.row(planEndDate)
+        )
+      case _ => throw new IllegalStateException("Plan type is missing or invalid")
+    }
   }
 }
