@@ -149,7 +149,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     }
   }
 
-  def getPaymentPlanDetails(paymentPlanReference: String): Future[PaymentPlanResponse] = {
+  def getPaymentPlanDetails2(paymentPlanReference: String): Future[PaymentPlanResponse] = {
     //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
     val now = LocalDateTime.now()
     val currentDate = LocalDate.now()
@@ -185,4 +185,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     Future.successful(samplePaymentPlanResponse)
   }
 
+  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[PaymentPlanResponse] = {
+    nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
+  }
 }

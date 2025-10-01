@@ -22,7 +22,7 @@ import models.responses.PaymentPlanDetails
 import pages.*
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -48,9 +48,9 @@ class PaymentPlanDetailsController @Inject()(
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    request.userAnswers.get(PaymentPlanReferenceQuery) match {
-      case Some(paymentPlanReference) =>
-        nddService.getPaymentPlanDetails(paymentPlanReference).flatMap { response =>
+    (request.userAnswers.get(DirectDebitReferenceQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
+      case (Some(directDebitReference), Some(paymentPlanReference)) =>
+        nddService.getPaymentPlanDetails(directDebitReference, paymentPlanReference).flatMap { response =>
           val planDetail = response.paymentPlanDetails
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
@@ -79,7 +79,7 @@ class PaymentPlanDetailsController @Inject()(
             Ok(view(planDetail.planType, paymentPlanReference, showActions, summaryRows))
           }
         }
-      case None =>
+      case _ =>
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
