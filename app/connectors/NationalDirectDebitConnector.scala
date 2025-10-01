@@ -17,7 +17,7 @@
 package connectors
 
 import models.NddResponse
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
 import play.api.Logging
 import play.api.http.Status.OK
@@ -100,5 +100,29 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
     http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans")(hc)
       .execute[NddDDPaymentPlansResponse]
+  }
+
+  def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)
+                     (implicit hc: HeaderCarrier): Future[Boolean] = {
+    http.post(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/duplicate-plan-check")
+      .withBody(Json.toJson(request))
+      .execute[Either[UpstreamErrorResponse, HttpResponse]]
+      .flatMap {
+          case Right(response) if response.status == OK =>
+            (response.json \ "isDuplicate").asOpt[Boolean] match {
+              case Some(value) => Future.successful(true)
+              case None =>
+                val msg = s"Missing or invalid 'isDuplicate' field in response: ${response.body}"
+                logger.error(msg)
+                Future.failed(new Exception(msg))
+            }
+        case Left(errorResponse) =>
+          logger.error(s"Request failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
+          Future.failed(new Exception(s"Request failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))
+
+        case Right(response) =>
+          logger.error(s"Unexpected response error status: ${response.status}")
+          Future.failed(new Exception(s"Unexpected status: ${response.status}"))
+      }
   }
 }

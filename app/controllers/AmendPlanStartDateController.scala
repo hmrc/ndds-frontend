@@ -60,7 +60,7 @@ class AmendPlanStartDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      
+
           val form = formProvider()
           form.bindFromRequest().fold(
             formWithErrors =>
@@ -72,8 +72,11 @@ class AmendPlanStartDateController @Inject()(
                 _ <- sessionRepository.set(updatedAnswers)
               } yield {
                 if (nddService.amendmentMade(updatedAnswers)) {
+                  //TODO: will be used to show a warning screen later for amending duplicate plan
                   val flag = nddService.isDuplicatePaymentPlan(updatedAnswers)
-                  println("Reached here and flag is " + flag)
+                  flag.map { value =>
+                    println(s"Duplicate check response is $value")
+                  }
                   Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
                 } else {
                   val key = "amendment.noChange"

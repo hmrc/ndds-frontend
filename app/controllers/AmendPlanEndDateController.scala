@@ -71,6 +71,11 @@ class AmendPlanEndDateController @Inject()(
             _              <- sessionRepository.set(updatedAnswers)
           } yield {
             if (nddService.amendmentMade(updatedAnswers)) {
+              //TODO: will be used to show a warning screen later for amending duplicate plan
+              val flag = nddService.isDuplicatePaymentPlan(updatedAnswers)
+              flag.map { value =>
+                println(s"Duplicate check response is $value")
+              }
               Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
             } else {
               val key = "amendment.noChange"

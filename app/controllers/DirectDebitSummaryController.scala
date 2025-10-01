@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import models.UserAnswers
-import pages.{DirectDebitReferencePage, DirectDebitSummaryPage}
+import pages.DirectDebitSummaryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
@@ -44,19 +44,19 @@ class DirectDebitSummaryController @Inject()(
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     userAnswers.get(DirectDebitReferenceQuery) match {
-      case Some(reference) =>
+      case Some(paymentRefNumber) =>
         cleansePaymentReference(userAnswers).flatMap { _ =>
-          nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
+          nddService.retrieveDirectDebitPaymentPlans(paymentRefNumber).flatMap { ddPaymentPlans =>
             for {
               updatedAnswers <- Future.fromTry(userAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
-              updatedAnswers <- Future.fromTry(userAnswers.set(DirectDebitReferenceQuery,reference))
-              cachedAnswers  <- Future.fromTry(updatedAnswers.set(DirectDebitReferencePage, reference))
+              updatedAnswers <- Future.fromTry(userAnswers.set(DirectDebitReferenceQuery,paymentRefNumber))
+              
               cachedAnswers  <- Future.fromTry(updatedAnswers.set(DirectDebitSummaryPage, ddPaymentPlans.paymentPlanCount))
               _              <- sessionRepository.set(cachedAnswers)
             } yield {
               Ok(
                 view(
-                  reference,
+                  paymentRefNumber,
                   ddPaymentPlans
                 )
               )

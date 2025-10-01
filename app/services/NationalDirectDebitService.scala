@@ -21,17 +21,16 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{DirectDebitDetails, EarliestPaymentDate,
-  GenerateDdiRefResponse, NddDDPaymentPlansResponse,
-  PaymentPlanDetails, PaymentPlanResponse}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
+import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.PaymentPlanTypeQuery
+import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
+import utils.Utils
 
 import java.time.{LocalDate, LocalDateTime}
 import javax.inject.{Inject, Singleton}
@@ -145,7 +144,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     val currentDate = LocalDate.now().toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map {
       futureWorkingDays => {
-        val isThreeDaysPrior =  planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
+        val isThreeDaysPrior = planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
         logger.info(s"planEndWithinThreeDays flag is set to: $isThreeDaysPrior")
         isThreeDaysPrior
       }
@@ -167,12 +166,12 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
-          planType = PaymentPlanType.SinglePaymentPlan.toString,
+          planType = PaymentPlanType.BudgetPaymentPlan.toString,
           paymentReference = paymentReference,
           submissionDateTime = now.minusDays(5), //Some(now.minusDays(5)),
           scheduledPaymentAmount = 120.00,
           scheduledPaymentStartDate = currentDate.plusDays(3), //Some(LocalDate.now().minusMonths(8)),
-          initialPaymentStartDate = now.plusDays(5),//Some(LocalDateTime.now().plusDays(1)),
+          initialPaymentStartDate = now.plusDays(5), //Some(LocalDateTime.now().plusDays(1)),
           initialPaymentAmount = Some(BigDecimal(50.00)),
           scheduledPaymentEndDate = currentDate.plusDays(4), //Some(LocalDate.now().plusMonths(12)),
           scheduledPaymentFrequency = Some(PaymentsFrequency.Weekly.toString),
@@ -180,7 +179,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           suspensionEndDate = None,
           balancingPaymentAmount = Some(BigDecimal(25.00)),
           balancingPaymentDate = Some(LocalDateTime.now().plusMonths(13)),
-          totalLiability =  Some(780.00), //Some(BigDecimal(1825.50)),
+          totalLiability = Some(780.00), //Some(BigDecimal(1825.50)),
           paymentPlanEditable = true
         )
       )
@@ -221,24 +220,24 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     }
   }
 
-  def isDuplicatePaymentPlan(ua: UserAnswers): Boolean = {
-    if((amountChanged(ua) || startDateChanged(ua)) && isSinglePaymentPlan(ua)) {
-      val count = ua.get(DirectDebitSummaryPage).get
-      println("Reached here and count is "+count)
-      if(count > 1) {
-//        val request = 
-//        nddConnector.isDuplicatePlan(ua.get(DirectDebitReferencePage).get,)
-        true
-      } else
-        false
+  def isDuplicatePaymentPlan(ua: UserAnswers)
+                            (implicit hc: HeaderCarrier, request: Request[_]): Future[Boolean] = {
+    if (
+      (amountChanged(ua) && (isSinglePaymentPlan(ua) || isBudgetPaymentPlan(ua))) ||
+        (isSinglePaymentPlan(ua) && startDateChanged(ua))
+    ) {
+      val countPaymentPlans = ua.get(DirectDebitSummaryPage).get
 
-    }
-    else if (amountChanged(ua) && isBudgetPaymentPlan(ua)){
-      true
-    }
-    else{
-        false
+      if (countPaymentPlans > 1) {
+        val request: PaymentPlanDuplicateCheckRequest =
+          Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
+
+        nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
+      } else {
+        Future.successful(false)
       }
+    } else {
+      Future.successful(false)
+    }
   }
-
 }

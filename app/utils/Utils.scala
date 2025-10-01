@@ -16,8 +16,30 @@
 
 package utils
 
+import models.requests.PaymentPlanDuplicateCheckRequest
+import models.{PaymentPlanType, PaymentsFrequency, UserAnswers}
+
 object Utils {
   val emptyString = ""
   val LockExpirySessionKey = "lockoutExpiryDateTime"
+
+  def buildPaymentPlanCheckRequest(
+                                    userAnswers: UserAnswers,
+                                    directDebitRef: String
+                                  ): PaymentPlanDuplicateCheckRequest = {
+    implicit val ua: UserAnswers = userAnswers
+
+    PaymentPlanDuplicateCheckRequest(
+      //TODO: Temp data with be replaced with actual data
+      directDebitReference = directDebitRef,
+      paymentPlanReference = "payment ref 123",
+      planType = PaymentPlanType.SinglePaymentPlan.toString,
+      paymentService = "CESA",
+      paymentReference = "payment ref",
+      paymentAmount =  120.00,
+      totalLiability = Some(780.00),
+      paymentFrequency = Some(PaymentsFrequency.Weekly.toString)
+    )
+  }
 }
 

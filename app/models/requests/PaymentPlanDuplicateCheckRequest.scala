@@ -18,24 +18,17 @@ package models.requests
 
 import play.api.libs.json.{Json, OFormat}
 
-case class PaymentPlanInfo(
-                               paymentPlanReference: String,
-                               planType: String,
-                               paymentService: String,
-                               paymentReference: String,
-                               paymentAmount: Double,
-                               totalLiability: Option[BigDecimal],
-                               paymentFrequency: String
+case class PaymentPlanDuplicateCheckRequest(
+                                             directDebitReference: String,
+                                             paymentPlanReference: String,
+                                             planType: String,
+                                             paymentService: String,
+                                             paymentReference: String,
+                                             paymentAmount: Double,
+                                             totalLiability: Option[BigDecimal],
+                                             paymentFrequency: Option[String]
                              )
 
-object PaymentPlanInfo {
-  implicit val format: OFormat[PaymentPlanInfo] = Json.format
-}
-
-case class PaymentPlanDuplicateCheckRequest(
-                                paymentPlanInfo: PaymentPlanInfo
-                              )
-
 object PaymentPlanDuplicateCheckRequest {
-  implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format
+  implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format[PaymentPlanDuplicateCheckRequest]
 }
