@@ -166,12 +166,12 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
           planType = PaymentPlanType.BudgetPaymentPlan.toString,
-          paymentReference = paymentPlanReference, //Payment reference
+          paymentReference = "paymentReference", //Payment reference
           submissionDateTime = now.minusDays(5), //Date set up
           scheduledPaymentAmount = 120.00, //Payment amount or Regular payment amount or Monthly payment amount
           scheduledPaymentStartDate = currentDate.plusDays(4), //Payment date or Plan start date
           scheduledPaymentEndDate = currentDate.plusDays(5), //Plan end date
-          scheduledPaymentFrequency = PaymentsFrequency.Weekly.toString, //Frequency of payments
+          scheduledPaymentFrequency = Some("Weekly"), //Frequency of payments
           suspensionStartDate = Some(currentDate.plusDays(2)), //Suspend start date
           suspensionEndDate = None, //Suspend end date
           balancingPaymentAmount = Some(BigDecimal(25.00)), //Final payment amount

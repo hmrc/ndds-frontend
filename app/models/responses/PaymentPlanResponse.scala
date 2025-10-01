@@ -16,7 +16,7 @@
 
 package models.responses
 
-import models.PaymentPlanType
+import models.{PaymentPlanType, PaymentsFrequency}
 
 import java.time.{LocalDate, LocalDateTime}
 import play.api.libs.functional.syntax.*
@@ -42,7 +42,7 @@ case class PaymentPlanDetails(
                                initialPaymentStartDate: Option[LocalDate],
                                initialPaymentAmount: Option[BigDecimal],
                                scheduledPaymentEndDate: LocalDate,
-                               scheduledPaymentFrequency: String,
+                               scheduledPaymentFrequency: Option[String],
                                suspensionStartDate: Option[LocalDate],
                                suspensionEndDate: Option[LocalDate],
                                balancingPaymentAmount: Option[BigDecimal],
@@ -59,9 +59,21 @@ object PaymentPlanDetails {
     "04" -> PaymentPlanType.VariablePaymentPlan.toString
   )
 
+  private val paymentFrequencyMapping: Map[String, String] = Map(
+    "1" -> PaymentsFrequency.FortNightly.toString,
+    "2" -> PaymentsFrequency.Weekly.toString,
+    "3" -> PaymentsFrequency.FourWeekly.toString,
+    "5" -> PaymentsFrequency.Monthly.toString,
+    "6" -> PaymentsFrequency.Quarterly.toString,
+    "7" -> PaymentsFrequency.SixMonthly.toString,
+    "9" -> PaymentsFrequency.Annually.toString
+  )
+
   implicit val reads: Reads[PaymentPlanDetails] = (
     (__ \ "hodService").read[String] and
-      (__ \ "planType").read[String].map(code => planTypeMapping.getOrElse(code, "unknownPlanType")) and
+      (__ \ "planType").read[String].map { code =>
+        planTypeMapping.getOrElse(code, code)
+      } and
       (__ \ "paymentReference").read[String] and
       (__ \ "submissionDateTime").read[LocalDateTime] and
       (__ \ "scheduledPaymentAmount").read[Double] and
@@ -69,7 +81,9 @@ object PaymentPlanDetails {
       (__ \ "initialPaymentStartDate").readNullable[LocalDate] and
       (__ \ "initialPaymentAmount").readNullable[BigDecimal] and
       (__ \ "scheduledPaymentEndDate").read[LocalDate] and
-      (__ \ "scheduledPaymentFrequency").read[String] and
+      (__ \ "scheduledPaymentFrequency").readNullable[String].map { code =>
+        code.flatMap(c => paymentFrequencyMapping.get(c).orElse(Some(c)))
+      } and
       (__ \ "suspensionStartDate").readNullable[LocalDate] and
       (__ \ "suspensionEndDate").readNullable[LocalDate] and
       (__ \ "balancingPaymentAmount").readNullable[BigDecimal] and

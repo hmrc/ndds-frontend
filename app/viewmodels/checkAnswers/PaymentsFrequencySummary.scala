@@ -63,10 +63,12 @@ object PaymentsFrequencySummary  {
         )
     }
 
-  def row(value: String)(implicit messages: Messages): SummaryListRow = {
+  def row(value: Option[String])(implicit messages: Messages): SummaryListRow = {
+    val displayValue = value.getOrElse("")
+
     SummaryListRowViewModel(
       key = "paymentsFrequency.checkYourAnswersLabel",
-      value = ValueViewModel(HtmlFormat.escape(value).toString),
+      value = ValueViewModel(HtmlFormat.escape(displayValue).toString),
       actions = Seq.empty
     )
   }
