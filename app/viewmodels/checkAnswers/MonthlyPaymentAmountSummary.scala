@@ -39,12 +39,13 @@ object MonthlyPaymentAmountSummary {
       )
     }
 
-  def row(amount: BigDecimal, totalDue: Option[BigDecimal])(implicit messages: Messages): SummaryListRow =
+  def row(amount: Option[BigDecimal], totalDue: Option[BigDecimal])(implicit messages: Messages): SummaryListRow =
     totalDue.filter(_ > 0) match {
       case Some(_) =>
+        val displayValue = amount.map(a => formatAmount(a)).getOrElse("")
         SummaryListRowViewModel(
           key = "totalAmountDue.monthly.checkYourAnswersLabel",
-          value = ValueViewModel(formatAmount(amount.doubleValue)),
+          value = ValueViewModel(displayValue),
           actions = Seq.empty
         )
       case None =>

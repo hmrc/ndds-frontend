@@ -46,15 +46,16 @@ object AmendPaymentAmountSummary {
     }
   }
 
-  def row(planType: String, amount: BigDecimal, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
+  def row(planType: String, amount: Option[BigDecimal], showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
     val label = if(PaymentPlanType.BudgetPaymentPlan.toString == planType) {
       "paymentPlanDetails.details.amount.budgetPaymentPlan"
     } else {
       "paymentPlanDetails.details.amount.singlePaymentPlan"
     }
+    val displayValue = amount.map(a => formatAmount(a)).getOrElse("")
     SummaryListRowViewModel(
       key = label,
-      value = ValueViewModel(formatAmount(amount)),
+      value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
           ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)

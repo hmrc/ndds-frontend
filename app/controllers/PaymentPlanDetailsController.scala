@@ -57,7 +57,10 @@ class PaymentPlanDetailsController @Inject()(
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
             //updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString))
             //updatedAnswers <- Future.fromTry(updatedAnswers.set(DateSetupQuery, planDetail.submissionDateTime))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
+            updatedAnswers <- planDetail.scheduledPaymentAmount match {
+              case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
+              case None         => Future.successful(updatedAnswers)
+            }
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
             //updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanReferenceQuery, planDetail.paymentReference))

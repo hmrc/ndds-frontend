@@ -84,7 +84,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
         (Seq(
           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
           AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
-          DateSetupSummary.row(paymentPlan.submissionDateTime),
+          //DateSetupSummary.row(paymentPlan.submissionDateTime),
           TotalAmountDueSummary.row(paymentPlan.totalLiability),
           MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability),
           FinalPaymentAmountSummary.row(paymentPlan.balancingPaymentAmount, paymentPlan.totalLiability),
@@ -95,7 +95,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           ),
           AmendPaymentAmountSummary.row(
             PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0)),
+            userAnswers.get(AmendPaymentAmountPage),
             true
           ),
           AmendPlanEndDateSummary.row(
@@ -111,7 +111,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           DateSetupSummary.row(paymentPlan.submissionDateTime),
           AmendPaymentAmountSummary.row(
             PaymentPlanType.SinglePaymentPlan.toString,
-            userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0)),
+            userAnswers.get(AmendPaymentAmountPage),
             true
           ),
           AmendPlanStartDateSummary.row(
