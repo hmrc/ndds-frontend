@@ -26,7 +26,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode, earliestPaymentDate: String, earliestPaymentDateNumeric: String, call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, earliestPaymentDateNumeric: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("paymentDate.title")), backLink = Some(call.url)) {
 
@@ -44,7 +44,7 @@
                     govukWarningText(
                         WarningText(content = HtmlContent(messages("paymentDate.warning")))
                     ),
-                    messages("paymentDate.hint", earliestPaymentDate, earliestPaymentDateNumeric)
+                    messages("paymentDate.hint", earliestPaymentDateNumeric)
                 ).mkString
             )))
         )
