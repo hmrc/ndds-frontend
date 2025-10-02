@@ -42,16 +42,25 @@ object AmendPlanStartDateSummary  {
         )
     }
 
-  def row(planType: String, value: LocalDate)(implicit messages: Messages): SummaryListRow =
+  def row(planType: String, value: Option[LocalDate], showChange: Boolean = false)(implicit messages: Messages): SummaryListRow =
     val label = if(PaymentPlanType.SinglePaymentPlan.toString == planType) {
       "paymentPlanDetails.details.date"
     } else {
       "paymentPlanDetails.details.startDate"
     }
+
+    val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern("d MMM yyyy"))).getOrElse("")
     SummaryListRowViewModel(
       key = label,
-      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
-      actions = Seq.empty
+      value = ValueViewModel(displayValue),
+      actions = if (showChange) {
+        Seq(
+          ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
+        )
+      } else {
+        Seq.empty
+      }
     )
 
   def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {

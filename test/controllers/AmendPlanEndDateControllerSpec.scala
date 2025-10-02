@@ -18,22 +18,18 @@ package controllers
 
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
-import models.{NormalMode, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.NormalMode
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, UpdatedAmendPaymentAmountPage, UpdatedAmendPlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
 import play.api.i18n.Messages
-import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import repositories.SessionRepository
+import queries.PaymentPlanDetailsQuery
 import views.html.AmendPlanEndDateView
 
-import java.time.LocalDate
-import scala.concurrent.Future
+import java.time.{LocalDate, LocalDateTime}
 
 class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
@@ -42,21 +38,12 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private val formProvider = new AmendPlanEndDateFormProvider()
   private def form = formProvider()
 
-  val budgetPlan = "budgetPaymentPlan"
-
-  def onwardRoute = Call("GET", "/foo")
-
-  val validAnswer: LocalDate = LocalDate.of(2025, 2, 1)
-  val newValidAnswer: LocalDate = LocalDate.of(2025, 2, 2)
+  val validAnswer: LocalDate = LocalDate.now()
 
   lazy val amendPlanEndDateRoute = routes.AmendPlanEndDateController.onPageLoad(NormalMode).url
   lazy val amendPlanEndDateRoutePost = routes.AmendPlanEndDateController.onSubmit(NormalMode).url
   lazy val amendPaymentAmountRoute = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
-
-  /** TODO TO be replaced with PP2 route */
   lazy val planConfirmationPage = routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url
-
-  override val emptyUserAnswers = UserAnswers(userAnswersId)
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, amendPlanEndDateRoute)
@@ -80,12 +67,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   "AmendPlanEndDate Controller" - {
     "onPageLoad" - {
       "must return OK and the correct view for a GET" in {
-
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         running(application) {
           val result = route(application, getRequest()).value
-
           val view = application.injector.instanceOf[AmendPlanEndDateView]
 
           status(result) mustEqual OK
@@ -94,14 +79,11 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must populate the view correctly on a GET when the question has previously been answered" in {
-
-        val userAnswers = UserAnswers(userAnswersId).set(AmendPlanEndDatePage, validAnswer).success.value
-
+        val userAnswers = emptyUserAnswers.set(AmendPlanEndDatePage, validAnswer).success.value
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
           val view = application.injector.instanceOf[AmendPlanEndDateView]
-
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
@@ -112,7 +94,6 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
@@ -122,35 +103,37 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
         }
       }
-
-    }
-
-    "must redirect to the next page when valid data is submitted" in {
-
-      val mockSessionRepository = mock[SessionRepository]
-
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
-
-      running(application) {
-        val result = route(application, postRequest()).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
-      }
     }
 
     "onSubmit" - {
+      val directDebitDetails = DirectDebitDetails(
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("UK Bank"),
+        auDdisFlag = true,
+        submissionDateTime = LocalDateTime.now()
+      )
+      val planDetails = PaymentPlanDetails(
+        hodService = "SA",
+        planType = "Single payment",
+        paymentReference = "987654321K",
+        submissionDateTime = LocalDateTime.now(),
+        scheduledPaymentAmount = Some(BigDecimal(1500)),
+        scheduledPaymentStartDate = Some(LocalDate.now()),
+        scheduledPaymentEndDate = Some(LocalDate.now()),
+        scheduledPaymentFrequency = Some("Monthly"),
+        initialPaymentStartDate = Some(LocalDate.now()),
+        initialPaymentAmount = Some(BigDecimal(1500)),
+        suspensionStartDate = Some(LocalDate.now()),
+        suspensionEndDate = Some(LocalDate.now()),
+        balancingPaymentAmount = Some(BigDecimal(1500)),
+        balancingPaymentDate = Some(LocalDate.now()),
+        totalLiability = Some(BigDecimal(1500)),
+        paymentPlanEditable = true
+      )
+      val paymentPlanResponse = PaymentPlanResponse(directDebitDetails, planDetails)
 
       "must return a Bad Request and errors when invalid data is submitted" in {
-
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
         val request =
@@ -159,9 +142,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           val boundForm = form.bind(Map("value" -> "invalid value"))
-
           val view = application.injector.instanceOf[AmendPlanEndDateView]
-
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
@@ -169,19 +150,17 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return a Bad Request with amendment.noChange when no amendment is made" in {
+      "must return a Bad Request when no amendment is made" in {
         val userAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentAmountPage, BigDecimal(1500)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(UpdatedAmendPlanEndDatePage, validAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
           val view = application.injector.instanceOf[AmendPlanEndDateView]
-
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
 
@@ -193,56 +172,53 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must redirect when amendment in amount is detected" in {
+      "must return to next page when payment amount is updated" in {
         val userAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(UpdatedAmendPaymentAmountPage, BigDecimal(200.00)).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentAmountPage, BigDecimal(1900)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(UpdatedAmendPlanEndDatePage, validAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
-          
+
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual planConfirmationPage
         }
       }
 
-      "must redirect when amendment in date is detected" in {
+      "must return to next page when payment plan end date is updated" in {
         val userAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(UpdatedAmendPlanEndDatePage, newValidAnswer).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentAmountPage, BigDecimal(1500)).success.value
+          .set(AmendPlanEndDatePage, validAnswer.plusDays(3)).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val request = postRequestWithDate(newValidAnswer)
+          val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = route(application, request).value
-          
+
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual planConfirmationPage
         }
       }
 
-      "must redirect when amendment in amount and date detected" in {
+      "must return to next page when payment amount and plan end date is updated" in {
         val userAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(UpdatedAmendPaymentAmountPage, BigDecimal(200.00)).success.value
-          .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(UpdatedAmendPlanEndDatePage, newValidAnswer).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentAmountPage, BigDecimal(1900)).success.value
+          .set(AmendPlanEndDatePage, validAnswer.plusDays(3)).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
-          val request = postRequestWithDate(newValidAnswer)
+          val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
@@ -251,7 +227,6 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {

@@ -52,9 +52,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
       val userAnswersWithSinglePaymentPlan =
         emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
       val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePaymentPlan))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService)
-        )
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       running(application) {
@@ -88,6 +86,21 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
+      }
+    }
+
+    "must return NDDS error if amend payment plan guard returns false" in {
+      val userAnswers = emptyUserAnswers
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+        val request = FakeRequest(GET, routes.AmendPaymentAmountController.onPageLoad(NormalMode).url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("NDDS Payment Plan Guard: Cannot amend this plan type: taxCreditRepaymentPlan")
       }
     }
 
@@ -152,21 +165,6 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must return NDDS error if amend payment plan guard returns false" in {
-      val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-      running(application) {
-        when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
-        val request = FakeRequest(GET, routes.AmendPaymentAmountController.onPageLoad(NormalMode).url)
-        val result = intercept[Exception](route(application, request).value.futureValue)
-
-        result.getMessage must include("NDDS Payment Plan Guard: Cannot amend this plan type: taxCreditRepaymentPlan")
       }
     }
 

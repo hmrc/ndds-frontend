@@ -16,9 +16,10 @@
 
 package queries
 
+import models.responses.PaymentPlanResponse
 import play.api.libs.json.JsPath
 
-case object PaymentReferenceQuery extends Gettable[String] with Settable[String] {
+case object PaymentPlanDetailsQuery extends Gettable[PaymentPlanResponse] with Settable[PaymentPlanResponse] {
 
-  override def path: JsPath = JsPath \ "paymentReference"
+  override def path: JsPath = JsPath \ "planDetails"
 }

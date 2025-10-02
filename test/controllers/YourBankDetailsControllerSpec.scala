@@ -283,8 +283,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must handle BARService failure and call onFailedVerification when Left returned" in {
-      val ua = userAnswers
-        .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
+      val ua = userAnswers.setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
 
       val mockSessionRepository = mock[SessionRepository]
       val mockBarService = mock[BarsService]

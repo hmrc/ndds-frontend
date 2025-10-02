@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, UpdatedAmendPaymentAmountPage, AmendPaymentPlanTypePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -50,10 +50,12 @@ class AmendPaymentAmountController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val answers = request.userAnswers
+
       if (nddsService.amendPaymentPlanGuard(answers)) {
-        val preparedForm: Form[BigDecimal] = answers.get(UpdatedAmendPaymentAmountPage)
-            .orElse(answers.get(AmendPaymentAmountPage))
-            .fold(form)(form.fill)
+        val preparedForm = answers.get(AmendPaymentAmountPage) match {
+          case None => form
+          case Some(value) => form.fill(value)
+        }
 
         Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
       } else {
@@ -71,7 +73,7 @@ class AmendPaymentAmountController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentPlanDetailsController.onPageLoad()))),
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(UpdatedAmendPaymentAmountPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(AmendPaymentAmountPage, mode, updatedAnswers))
       )

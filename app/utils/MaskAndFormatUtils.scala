@@ -37,7 +37,7 @@ object MaskAndFormatUtils {
     localDate.format(gdsFormatter)
   }
 
-  def formatAmount(amount: Double): String = {
+  def formatAmount(amount: BigDecimal): String = {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.UK)
     currencyFormatter.format(amount)
   }

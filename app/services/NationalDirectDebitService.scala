@@ -22,11 +22,9 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{DirectDebitDetails, EarliestPaymentDate,
-  GenerateDdiRefResponse, NddDDPaymentPlansResponse,
-  PaymentPlanDetails, PaymentPlanResponse}
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.*
+import models.responses.*
+import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import play.api.Logging
 import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
@@ -151,7 +149,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     }
   }
 
-  def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanResponse] = {
+  def getPaymentPlanDetails2(paymentPlanReference: String): Future[PaymentPlanResponse] = {
     //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
     val now = LocalDateTime.now()
     val currentDate = LocalDate.now()
@@ -159,77 +157,36 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     val samplePaymentPlanResponse: PaymentPlanResponse =
       PaymentPlanResponse(
         directDebitDetails = DirectDebitDetails(
-          bankSortCode = "123456",
-          bankAccountNumber = "12345678",
-          bankAccountName = "John Doe",
-          auddisFlag = true
+          bankSortCode = Some("123456"),
+          bankAccountNumber = Some("12345678"),
+          bankAccountName = Some("John Doe"),
+          auDdisFlag = true,
+          submissionDateTime = LocalDateTime.now()
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
           planType = PaymentPlanType.SinglePaymentPlan.toString,
-          paymentReference = paymentReference, //Payment reference
+          paymentReference = "paymentReference", //Payment reference
           submissionDateTime = now.minusDays(5), //Date set up
-          scheduledPaymentAmount = 120.00, //Payment amount or Regular payment amount or Monthly payment amount
-          scheduledPaymentStartDate = currentDate.plusDays(4), //Payment date or Plan start date
-          scheduledPaymentEndDate = currentDate.plusDays(5), //Plan end date
-          scheduledPaymentFrequency = PaymentsFrequency.Weekly.toString, //Frequency of payments
-          suspensionStartDate = currentDate.plusDays(2), //Suspend start date
-          suspensionEndDate = currentDate.plusDays(4), //Suspend end date
-          balancingPaymentAmount = BigDecimal(25.00), //Final payment amount
-          totalLiability =  0.00, //Total amount due
-          balancingPaymentDate = currentDate.plusMonths(13),
-          initialPaymentStartDate = currentDate.plusDays(5),
-          initialPaymentAmount = BigDecimal(50.00),
+          scheduledPaymentAmount = Some(120.00), //Payment amount or Regular payment amount or Monthly payment amount
+          scheduledPaymentStartDate = Some(currentDate.plusDays(4)), //Payment date or Plan start date
+          scheduledPaymentEndDate = Some(currentDate.plusDays(5)), //Plan end date
+          scheduledPaymentFrequency = Some("Weekly"), //Frequency of payments
+          suspensionStartDate = Some(currentDate.plusDays(2)), //Suspend start date
+          suspensionEndDate = None, //Suspend end date
+          balancingPaymentAmount = Some(BigDecimal(25.00)), //Final payment amount
+          totalLiability = None, //Total amount due
+          balancingPaymentDate = Some(currentDate.plusMonths(13)),
+          initialPaymentStartDate = Some(currentDate.plusDays(5)),
+          initialPaymentAmount = Some(BigDecimal(50.00)),
           paymentPlanEditable = true
         )
       )
     Future.successful(samplePaymentPlanResponse)
   }
 
-  def isAmendmentMade(userAnswers: UserAnswers): Future[UserAnswers] = {
-    val ua = isAmountAmended(userAnswers)
-    val updatedAnswers = if (isSinglePaymentPlan(ua)) {
-      isStartDateAmended(ua)
-    } else {
-      isEndDateAmended(ua)
-    }
-    Future.successful(updatedAnswers)
-  }
-
-  private def isAmountAmended(ua: UserAnswers): UserAnswers = {
-    val current = ua.get(AmendPaymentAmountPage)
-    val updated = ua.get(UpdatedAmendPaymentAmountPage)
-
-    if (current != updated) {
-      println(s"******** current Amount: ${current}, updated: ${updated}")
-      ua.set(AmendPaymentAmountPage, updated.getOrElse(BigDecimal(0))).getOrElse(ua)
-    } else {
-      ua
-    }
-  }
-
-  private def isStartDateAmended(ua: UserAnswers): UserAnswers = {
-    val current = ua.get(AmendPlanStartDatePage)
-    val updated = ua.get(UpdatedAmendPlanStartDatePage)
-
-    if (current != updated) {
-      println(s"************* current start: ${current}, updated: ${updated}")
-      ua.set(AmendPlanStartDatePage, updated.getOrElse(LocalDate.now())).getOrElse(ua)
-    } else {
-      ua
-    }
-  }
-
-  private def isEndDateAmended(ua: UserAnswers): UserAnswers = {
-    val current = ua.get(AmendPlanEndDatePage)
-    val updated = ua.get(UpdatedAmendPlanEndDatePage)
-
-    if (current != updated) {
-      println(s"*********** current end: ${current}, updated: ${updated}")
-      ua.set(AmendPlanEndDatePage, updated.getOrElse(LocalDate.now())).getOrElse(ua)
-    } else {
-      ua
-    }
+  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[PaymentPlanResponse] = {
+    nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
 }

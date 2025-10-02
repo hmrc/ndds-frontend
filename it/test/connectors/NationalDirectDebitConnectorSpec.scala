@@ -16,8 +16,7 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, stubFor, urlEqualTo, urlPathMatching}
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlPathMatching}
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
 import itutil.ApplicationWithWiremock
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
@@ -176,12 +175,36 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
           |  "bankAccountNumber": "12345678",
           |  "bankAccountName": "Test Name",
           |  "auDdisFlag": "Y",
-          |  "paymentPlanCount": 1,
+          |  "paymentPlanCount": 4,
           |  "paymentPlanList": [
           |    {
           |      "scheduledPaymentAmount": 100.50,
           |      "planRefNumber": "plan-123",
-          |      "planType": "STANDARD",
+          |      "planType": "01",
+          |      "paymentReference": "pay-123",
+          |      "hodService": "HMRC",
+          |      "submissionDateTime": "2024-09-15T10:15:30"
+          |    },
+          |    {
+          |      "scheduledPaymentAmount": 100.50,
+          |      "planRefNumber": "plan-123",
+          |      "planType": "02",
+          |      "paymentReference": "pay-123",
+          |      "hodService": "HMRC",
+          |      "submissionDateTime": "2024-09-15T10:15:30"
+          |    },
+          |    {
+          |      "scheduledPaymentAmount": 100.50,
+          |      "planRefNumber": "plan-123",
+          |      "planType": "03",
+          |      "paymentReference": "pay-123",
+          |      "hodService": "HMRC",
+          |      "submissionDateTime": "2024-09-15T10:15:30"
+          |    },
+          |    {
+          |      "scheduledPaymentAmount": 100.50,
+          |      "planRefNumber": "plan-123",
+          |      "planType": "04",
           |      "paymentReference": "pay-123",
           |      "hodService": "HMRC",
           |      "submissionDateTime": "2024-09-15T10:15:30"
@@ -202,8 +225,11 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       val result = connector.retrieveDirectDebitPaymentPlans("testRef").futureValue
 
       result.bankSortCode shouldBe "123456"
-      result.paymentPlanCount shouldBe 1
-      result.paymentPlanList.head.planRefNumber shouldBe "plan-123"
+      result.paymentPlanCount shouldBe 4
+      result.paymentPlanList.head.planType shouldBe PaymentPlanType.SinglePaymentPlan.toString
+      result.paymentPlanList(1).planType shouldBe PaymentPlanType.BudgetPaymentPlan.toString
+      result.paymentPlanList(2).planType shouldBe PaymentPlanType.TaxCreditRepaymentPlan.toString
+      result.paymentPlanList(3).planType shouldBe PaymentPlanType.VariablePaymentPlan.toString
     }
   }
 
@@ -348,4 +374,59 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
   }
 
+  "getPaymentPlanDetails" should {
+    "successfully retrieve payment plan details" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "CESA",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "1",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+        """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.directDebitDetails.bankSortCode shouldBe Some("123456")
+      result.directDebitDetails.bankAccountName shouldBe None
+      result.directDebitDetails.auDdisFlag shouldBe true
+
+      result.paymentPlanDetails.hodService shouldBe "CESA"
+      result.paymentPlanDetails.planType shouldBe PaymentPlanType.SinglePaymentPlan.toString
+      result.paymentPlanDetails.suspensionEndDate shouldBe None
+      result.paymentPlanDetails.totalLiability shouldBe None
+    }
+  }
 }
