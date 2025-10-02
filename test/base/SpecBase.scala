@@ -17,7 +17,8 @@
 package base
 
 import controllers.actions.*
-import models.UserAnswers
+import models.{PaymentPlanType, UserAnswers}
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -27,6 +28,8 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
+
+import java.time.{LocalDate, LocalDateTime}
 
 trait SpecBase
   extends AnyFreeSpec
@@ -40,6 +43,39 @@ trait SpecBase
   val userAnswersId: String = "id"
   
   val LockExpirySessionKey = "lockoutExpiryDateTime"
+
+  private val now = LocalDateTime.now()
+
+  private val currentDate = LocalDate.now()
+
+  val dummyPlanDetailResponse: PaymentPlanResponse =
+    PaymentPlanResponse(
+      directDebitDetails = DirectDebitDetails(
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
+        submissionDateTime = now.minusDays(5)
+      ),
+      paymentPlanDetails = PaymentPlanDetails(
+        hodService = "NDD",
+        planType = "dummyPlan",
+        paymentReference = "paymentReference",
+        submissionDateTime = now.minusDays(5),
+        scheduledPaymentAmount = Some(120.00),
+        scheduledPaymentStartDate = Some(currentDate.plusDays(5)),
+        initialPaymentStartDate = Some(currentDate),
+        initialPaymentAmount = Some(BigDecimal(25.00)),
+        scheduledPaymentEndDate = Some(currentDate.plusMonths(6)),
+        scheduledPaymentFrequency = Some("Monthly"),
+        suspensionStartDate = Some(currentDate.plusDays(5)),
+        suspensionEndDate = None,
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
+        totalLiability = None,
+        paymentPlanEditable = true
+      )
+    )
   
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
