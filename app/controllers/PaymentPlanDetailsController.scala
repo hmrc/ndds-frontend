@@ -67,7 +67,7 @@ class PaymentPlanDetailsController @Inject()(
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferenceQuery, planDetail.paymentReference))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
+//            updatedAnswers <- Future.fromTry(updatedAnswers.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
             cachedAnswers <- Future.fromTry(updatedAnswers.set(YourBankDetailsPage,
               YourBankDetailsWithAuddisStatus(

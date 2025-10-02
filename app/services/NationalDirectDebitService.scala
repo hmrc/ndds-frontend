@@ -166,7 +166,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
-          planType = PaymentPlanType.BudgetPaymentPlan.toString,
+          planType = PaymentPlanType.SinglePaymentPlan.toString,
           paymentReference = paymentReference, //Payment reference
           submissionDateTime = now.minusDays(5), //Date set up
           scheduledPaymentAmount = 120.00, //Payment amount or Regular payment amount or Monthly payment amount
@@ -186,38 +186,49 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     Future.successful(samplePaymentPlanResponse)
   }
 
+  def isAmendmentMade(userAnswers: UserAnswers): Future[UserAnswers] = {
+    val ua = isAmountAmended(userAnswers)
+    val updatedAnswers = if (isSinglePaymentPlan(ua)) {
+      isStartDateAmended(ua)
+    } else {
+      isEndDateAmended(ua)
+    }
+    Future.successful(updatedAnswers)
+  }
 
-  def amendmentMade(ua: UserAnswers): Boolean = {
-    ua.get(AmendPaymentPlanTypePage) match {
-      case Some("singlePaymentPlan") => amountChanged(ua) || startDateChanged(ua)
-      case Some("budgetPaymentPlan") => amountChanged(ua) || endDateChanged(ua)
-      case _ =>
-        logger.warn(s"Unexpected / missing plan type in amend journey; applying permissive check.")
-        amountChanged(ua) || startDateChanged(ua) || endDateChanged(ua)
+  private def isAmountAmended(ua: UserAnswers): UserAnswers = {
+    val current = ua.get(AmendPaymentAmountPage)
+    val updated = ua.get(UpdatedAmendPaymentAmountPage)
+
+    if (current != updated) {
+      println(s"******** current Amount: ${current}, updated: ${updated}")
+      ua.set(AmendPaymentAmountPage, updated.getOrElse(BigDecimal(0))).getOrElse(ua)
+    } else {
+      ua
     }
   }
 
-  private def amountChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPaymentAmountPage), ua.get(NewAmendPaymentAmountPage)) match {
-      case (Some(amend), Some(newAmend)) => amend.compare(newAmend) != 0
-      case (None, Some(_)) => true
-      case _ => false
+  private def isStartDateAmended(ua: UserAnswers): UserAnswers = {
+    val current = ua.get(AmendPlanStartDatePage)
+    val updated = ua.get(UpdatedAmendPlanStartDatePage)
+
+    if (current != updated) {
+      println(s"************* current start: ${current}, updated: ${updated}")
+      ua.set(AmendPlanStartDatePage, updated.getOrElse(LocalDate.now())).getOrElse(ua)
+    } else {
+      ua
     }
   }
 
-  private def startDateChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPlanStartDatePage), ua.get(NewAmendPlanStartDatePage)) match {
-      case (Some(amend), Some(newAmend)) => amend != newAmend
-      case (None, Some(_)) => true
-      case _ => false
-    }
-  }
+  private def isEndDateAmended(ua: UserAnswers): UserAnswers = {
+    val current = ua.get(AmendPlanEndDatePage)
+    val updated = ua.get(UpdatedAmendPlanEndDatePage)
 
-  private def endDateChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPlanEndDatePage), ua.get(NewAmendPlanEndDatePage)) match {
-      case (Some(amend), Some(newAmend)) => amend != newAmend
-      case (None, Some(_)) => true
-      case _ => false
+    if (current != updated) {
+      println(s"*********** current end: ${current}, updated: ${updated}")
+      ua.set(AmendPlanEndDatePage, updated.getOrElse(LocalDate.now())).getOrElse(ua)
+    } else {
+      ua
     }
   }
 

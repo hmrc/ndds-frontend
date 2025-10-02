@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage, NewAmendPaymentAmountPage, NewAmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage, UpdatedAmendPaymentAmountPage, UpdatedAmendPlanStartDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -212,9 +212,9 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val userAnswers = emptyUserAnswers
           .set(AmendPaymentPlanTypePage, singlePlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+          .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPlanStartDatePage, validAnswer).success.value
-          .set(NewAmendPlanStartDatePage, validAnswer).success.value
+          .set(UpdatedAmendPlanStartDatePage, validAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -236,9 +236,9 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val userAnswers = emptyUserAnswers
           .set(AmendPaymentPlanTypePage, singlePlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
+          .set(UpdatedAmendPaymentAmountPage, BigDecimal(200.00)).success.value
           .set(AmendPlanStartDatePage, validAnswer).success.value
-          .set(NewAmendPlanStartDatePage, validAnswer).success.value
+          .set(UpdatedAmendPlanStartDatePage, validAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -255,9 +255,9 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val userAnswers = emptyUserAnswers
           .set(AmendPaymentPlanTypePage, singlePlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+          .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPlanStartDatePage, validAnswer).success.value
-          .set(NewAmendPlanStartDatePage, newValidAnswer).success.value
+          .set(UpdatedAmendPlanStartDatePage, newValidAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -274,9 +274,9 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val userAnswers = emptyUserAnswers
           .set(AmendPaymentPlanTypePage, singlePlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
+          .set(UpdatedAmendPaymentAmountPage, BigDecimal(200.00)).success.value
           .set(AmendPlanStartDatePage, validAnswer).success.value
-          .set(NewAmendPlanStartDatePage, newValidAnswer).success.value
+          .set(UpdatedAmendPlanStartDatePage, newValidAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -293,7 +293,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
         val mockSessionRepository = mock[SessionRepository]
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-        when(mockService.amendmentMade(any[UserAnswers])).thenReturn(true)
+        when(mockService.isAmendmentMade(any[UserAnswers])).thenReturn(true)
 
         val validDate = LocalDate.now()
 

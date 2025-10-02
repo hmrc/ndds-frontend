@@ -69,6 +69,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
         directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
         paymentReference <- Future.fromTry(Try(userAnswers.get(PaymentReferenceQuery).get))
         planType <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
+
       } yield {
         Ok(view(mode, paymentReference, directDebitReference, bankDetailsWithAuddisStatus.sortCode,
           bankDetailsWithAuddisStatus.accountNumber,rows, backLink))

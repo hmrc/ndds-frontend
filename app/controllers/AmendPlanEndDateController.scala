@@ -22,7 +22,7 @@ import forms.AmendPlanEndDateFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPlanEndDatePage, NewAmendPlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, UpdatedAmendPlanEndDatePage, UpdatedAmendPaymentAmountPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -50,7 +50,7 @@ class AmendPlanEndDateController @Inject()(
 
       val form = formProvider()
       val preparedForm =
-        request.userAnswers.get(NewAmendPlanEndDatePage)
+        request.userAnswers.get(UpdatedAmendPlanEndDatePage)
           .orElse(request.userAnswers.get(AmendPlanEndDatePage))
           .fold(form)(form.fill)
 
@@ -59,7 +59,6 @@ class AmendPlanEndDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-
       val form = formProvider()
       form.bindFromRequest().fold(
         formWithErrors =>
@@ -67,12 +66,20 @@ class AmendPlanEndDateController @Inject()(
 
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(NewAmendPlanEndDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+//            updatedAnswers  <- Future.fromTry(request.userAnswers.set(UpdatedAmendPlanEndDatePage, value))
+            updatedAnswers    <- request.userAnswers
+                                .set(UpdatedAmendPlanEndDatePage, value)
+                                .map(nddService.isAmendmentMade)
+                                .getOrElse(Future.successful(request.userAnswers))
+            _               <- sessionRepository.set(updatedAnswers)
           } yield {
-            if (nddService.amendmentMade(updatedAnswers)) {
-              Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+            println(s"*********** updatedAnswers: ${updatedAnswers}")
+            if (updatedAnswers.get(AmendPaymentAmountPage) != updatedAnswers.get(UpdatedAmendPaymentAmountPage) ||
+              updatedAnswers.get(AmendPlanEndDatePage) != updatedAnswers.get(UpdatedAmendPlanEndDatePage)) {
+              println("Amount Amended")
+              Redirect(navigator.nextPage(UpdatedAmendPlanEndDatePage, mode, updatedAnswers))
             } else {
+              println("Amount Not Amended")
               val key = "amendment.noChange"
               val errorForm = form.fill(value).withError("value", key)
               BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))

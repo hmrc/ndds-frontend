@@ -517,7 +517,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
   }
   
-  "amendmentMade" - {
+  "isAmendmentMade" - {
 
     val today = LocalDate.now()
     val start0 = today.plusDays(1)
@@ -530,10 +530,10 @@ class NationalDirectDebitServiceSpec extends SpecBase
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
-        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(PlanStartDatePage, PlanStartDateDetails(start0, earliestStart)).success.value
 
-      service.amendmentMade(userAnswers) shouldBe true
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
 
     "return true when date changed for a single plan" in {
@@ -541,41 +541,41 @@ class NationalDirectDebitServiceSpec extends SpecBase
         .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
-        .set(NewAmendPlanStartDatePage, start1).success.value
+        .set(UpdatedAmendPlanStartDatePage, start1).success.value
 
-      service.amendmentMade(userAnswers) shouldBe true
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
 
     "return true when both amount and date are changed for single plan" in {
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
-        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
         .set(AmendPlanStartDatePage, start1).success.value
 
-      service.amendmentMade(userAnswers) shouldBe true
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
 
     "return false when neither amount nor date are changed for a single plan" in {
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
-        .set(NewAmendPaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(UpdatedAmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
-        .set(NewAmendPlanStartDatePage, start0).success.value
+        .set(UpdatedAmendPlanStartDatePage, start0).success.value
 
-      service.amendmentMade(userAnswers) shouldBe false
+      service.isAmendmentMade(userAnswers) shouldBe false
     }
 
     "return true when amount changed for budget plan" in {
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
-        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(PlanEndDatePage, end0).success.value
       
-      service.amendmentMade(userAnswers) shouldBe true
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
     
     "return true when date changed for budget plan" in {
@@ -583,55 +583,55 @@ class NationalDirectDebitServiceSpec extends SpecBase
         .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
-        .set(NewAmendPlanEndDatePage, end1).success.value
+        .set(UpdatedAmendPlanEndDatePage, end1).success.value
       
-      service.amendmentMade(userAnswers) shouldBe true
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
     
     "return true when both amount and date are changed for a budget plan" in {
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
-        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
-        .set(NewAmendPlanEndDatePage, end1).success.value
+        .set(UpdatedAmendPlanEndDatePage, end1).success.value
 
-      service.amendmentMade(userAnswers) shouldBe true
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
     
     "return false when neither amount nor date are changed for a budget plan" in {
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
-        .set(NewAmendPaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(UpdatedAmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
-        .set(NewAmendPlanEndDatePage, end0).success.value
+        .set(UpdatedAmendPlanEndDatePage, end0).success.value
 
-      service.amendmentMade(userAnswers) shouldBe false
+      service.isAmendmentMade(userAnswers) shouldBe false
     }
     
     "amountChanged returns true when existing amount is missing" in {
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .remove(AmendPaymentAmountPage).success.value
-        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
-      service.amendmentMade(userAnswers) shouldBe true
+        .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
 
     "startDateChanged returns true when existing amount is missing" in {
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, singlePlan).success.value
         .remove(AmendPlanStartDatePage).success.value
-        .set(NewAmendPlanStartDatePage, start1).success.value
-      service.amendmentMade(userAnswers) shouldBe true
+        .set(UpdatedAmendPlanStartDatePage, start1).success.value
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
 
     "endDateChanged returns true when existing amount is missing" in {
       val userAnswers = emptyUserAnswers
         .set(AmendPaymentPlanTypePage, budgetPlan).success.value
         .remove(AmendPlanEndDatePage).success.value
-        .set(NewAmendPlanEndDatePage, start1).success.value
-      service.amendmentMade(userAnswers) shouldBe true
+        .set(UpdatedAmendPlanEndDatePage, start1).success.value
+      service.isAmendmentMade(userAnswers) shouldBe true
     }
     
   }

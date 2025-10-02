@@ -22,7 +22,7 @@ import forms.AmendPlanStartDateFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPlanStartDatePage, NewAmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, UpdatedAmendPlanStartDatePage, UpdatedAmendPaymentAmountPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -50,7 +50,7 @@ class AmendPlanStartDateController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request => {
       val form = formProvider()
-      val preparedForm = request.userAnswers.get(NewAmendPlanStartDatePage)
+      val preparedForm = request.userAnswers.get(UpdatedAmendPlanStartDatePage)
         .orElse(request.userAnswers.get(AmendPlanStartDatePage))
         .fold(form)(form.fill)
 
@@ -60,25 +60,30 @@ class AmendPlanStartDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      
-          val form = formProvider()
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
+      val form = formProvider()
+      form.bindFromRequest().fold(
+        formWithErrors =>
+          Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
 
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(NewAmendPlanStartDatePage, value))
-                _ <- sessionRepository.set(updatedAnswers)
-              } yield {
-                if (nddService.amendmentMade(updatedAnswers)) {
-                  Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
-                } else {
-                  val key = "amendment.noChange"
-                  val errorForm = form.fill(value).withError("value", key)
-                  BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
-                }
-              }
-          )
+        value =>
+          for {
+//                updatedAnswers <- Future.fromTry(request.userAnswers.set(UpdatedAmendPlanStartDatePage, value))
+            updatedAnswers    <- request.userAnswers
+              .set(UpdatedAmendPlanStartDatePage, value)
+              .map(nddService.isAmendmentMade)
+              .getOrElse(Future.successful(request.userAnswers))
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield {
+            println(s"*********** updatedAnswers: ${updatedAnswers}")
+            if (updatedAnswers.get(AmendPaymentAmountPage) != updatedAnswers.get(UpdatedAmendPaymentAmountPage) ||
+              updatedAnswers.get(AmendPlanStartDatePage) != updatedAnswers.get(UpdatedAmendPlanStartDatePage)) {
+              Redirect(navigator.nextPage(UpdatedAmendPlanStartDatePage, mode, updatedAnswers))
+            } else {
+              val key = "amendment.noChange"
+              val errorForm = form.fill(value).withError("value", key)
+              BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+            }
+          }
+        )
       }
   }

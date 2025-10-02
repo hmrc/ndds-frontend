@@ -23,7 +23,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, NewAmendPaymentAmountPage, NewAmendPlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, UpdatedAmendPaymentAmountPage, UpdatedAmendPlanEndDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -173,9 +173,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val userAnswers = emptyUserAnswers
           .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+          .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(NewAmendPlanEndDatePage, validAnswer).success.value
+          .set(UpdatedAmendPlanEndDatePage, validAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -197,9 +197,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val userAnswers = emptyUserAnswers
           .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
+          .set(UpdatedAmendPaymentAmountPage, BigDecimal(200.00)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(NewAmendPlanEndDatePage, validAnswer).success.value
+          .set(UpdatedAmendPlanEndDatePage, validAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -216,9 +216,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val userAnswers = emptyUserAnswers
           .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+          .set(UpdatedAmendPaymentAmountPage, BigDecimal(120.00)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(NewAmendPlanEndDatePage, newValidAnswer).success.value
+          .set(UpdatedAmendPlanEndDatePage, newValidAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -235,9 +235,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val userAnswers = emptyUserAnswers
           .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
+          .set(UpdatedAmendPaymentAmountPage, BigDecimal(200.00)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(NewAmendPlanEndDatePage, newValidAnswer).success.value
+          .set(UpdatedAmendPlanEndDatePage, newValidAnswer).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
