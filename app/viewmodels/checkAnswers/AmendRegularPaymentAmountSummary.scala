@@ -19,41 +19,24 @@ package viewmodels.checkAnswers
 import config.CurrencyFormatter.currencyFormat
 import controllers.routes
 import models.{CheckMode, UserAnswers}
-import pages.TotalAmountDuePage
+import pages.RegularPaymentAmountPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object TotalAmountDueSummary  {
+object AmendRegularPaymentAmountSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(TotalAmountDuePage).map {
+    answers.get(RegularPaymentAmountPage).map {
       answer =>
         SummaryListRowViewModel(
-          key     = "totalAmountDue.checkYourAnswersLabel",
+          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount",
           value   = ValueViewModel(currencyFormat(answer)),
           actions = Seq(
-            ActionItemViewModel("site.change", routes.TotalAmountDueController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("totalAmountDue.change.hidden"))
+            ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount"))
           )
         )
     }
-
-  def row(amount: BigDecimal)(implicit messages: Messages): SummaryListRow =
-    if (amount.equals(BigDecimal(0))) {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.checkYourAnswersLabel",
-        value = ValueViewModel(""),
-        actions = Seq.empty
-      )
-    } else {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.checkYourAnswersLabel",
-        value = ValueViewModel(formatAmount(amount.doubleValue)),
-        actions = Seq.empty
-      )
-    }
-
 }

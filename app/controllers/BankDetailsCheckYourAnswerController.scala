@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
 import forms.BankDetailsCheckYourAnswerFormProvider
 import models.Mode
@@ -28,6 +29,8 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.MacGenerator
+import utils.Utils.generateMacFromAnswers
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.BankDetailsCheckYourAnswerView
@@ -44,7 +47,9 @@ class BankDetailsCheckYourAnswerController @Inject()(
                                                       navigator: Navigator,
                                                       formProvider: BankDetailsCheckYourAnswerFormProvider,
                                                       val controllerComponents: MessagesControllerComponents,
-                                                      view: BankDetailsCheckYourAnswerView
+                                                      view: BankDetailsCheckYourAnswerView,
+                                                      macGenerator:MacGenerator,
+                                                      appConfig: FrontendAppConfig
                                                     ) (implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   val form: Form[Boolean] = formProvider()
@@ -65,11 +70,24 @@ class BankDetailsCheckYourAnswerController @Inject()(
     (identify andThen getData andThen requireData).async { implicit request =>
       val confirmed = true
 
-      for {
-        updatedAnswers <- Future.fromTry(request.userAnswers.set(BankDetailsCheckYourAnswerPage, confirmed))
-        _              <- sessionRepository.set(updatedAnswers)
-      } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
-  }
+      generateMacFromAnswers(request.userAnswers, macGenerator, appConfig.bacsNumber ) match {
+        case Some(mac) =>
+          logger.info(s"Generated MAC successfully")
+
+          for {
+            updatedAnswers <- Future.fromTry(
+              request.userAnswers
+                .set(BankDetailsCheckYourAnswerPage, confirmed)
+                .flatMap(_.set(pages.MacValuePage, mac))
+            )
+            _ <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
+
+        case None =>
+          logger.error("Could not generate MAC – missing bank details")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    }
 
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =
     SummaryListViewModel(

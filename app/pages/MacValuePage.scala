@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package queries
+package pages
 
 import play.api.libs.json.JsPath
 
-case object PaymentPlanTypeQuery extends Gettable[String] with Settable[String] {
+case object MacValuePage extends QuestionPage[String] {
 
-  override def path: JsPath = JsPath \ "planType"
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "macValue"
 }

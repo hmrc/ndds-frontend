@@ -20,15 +20,13 @@ import controllers.actions.*
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.AmendPaymentAmountPage
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentPlanTypeQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import uk.gov.hmrc.http.InternalServerException
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPaymentAmountView
 
@@ -47,7 +45,6 @@ class AmendPaymentAmountController @Inject()(
                                               val controllerComponents: MessagesControllerComponents,
                                               view: AmendPaymentAmountView
                                        )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
-
   val form: Form[BigDecimal] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
@@ -61,9 +58,9 @@ class AmendPaymentAmountController @Inject()(
 
         Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
       } else {
-        val paymentPlanType = answers.get(PaymentPlanTypeQuery).getOrElse("Missing plan type from user answers")
+        val paymentPlanType = answers.get(AmendPaymentPlanTypePage).getOrElse("Missing plan type from user answers")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
-        throw new InternalServerException("NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
+        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
       }
   }
 
