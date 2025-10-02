@@ -102,20 +102,27 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
       .execute[NddDDPaymentPlansResponse]
   }
 
-  def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)
-                     (implicit hc: HeaderCarrier): Future[Boolean] = {
+  def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)(implicit hc: HeaderCarrier): Future[Boolean] = {
     http.post(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/duplicate-plan-check")
       .withBody(Json.toJson(request))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
-          case Right(response) if response.status == OK =>
-            (response.json \ "isDuplicate").asOpt[Boolean] match {
-              case Some(value) => Future.successful(true)
-              case None =>
-                val msg = s"Missing or invalid 'isDuplicate' field in response: ${response.body}"
-                logger.error(msg)
-                Future.failed(new Exception(msg))
-            }
+        case Right(response) if response.status == OK =>
+          val json = response.json
+          val isDuplicateOpt = response.json.validate[Boolean].asOpt
+              .orElse((json \ "isDuplicate").asOpt[String].flatMap {
+                case "true" => Some(true)
+                case "false" => Some(false)
+                case _ => None
+              })
+
+          isDuplicateOpt match {
+            case Some(value) => Future.successful(value)
+            case None =>
+              val msg = s"Missing or invalid 'isDuplicate' field in response: ${response.body}"
+              logger.error(msg)
+              Future.failed(new Exception(msg))
+          }
         case Left(errorResponse) =>
           logger.error(s"Request failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
           Future.failed(new Exception(s"Request failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))

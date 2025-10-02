@@ -37,8 +37,8 @@ object Utils {
       paymentService = "CESA",
       paymentReference = "payment ref",
       paymentAmount =  120.00,
-      totalLiability = Some(780.00),
-      paymentFrequency = Some(PaymentsFrequency.Weekly.toString)
+      totalLiability = 780.00,
+      paymentFrequency = "WEEKLY"
     )
   }
 }

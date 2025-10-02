@@ -166,7 +166,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         ),
         paymentPlanDetails = PaymentPlanDetails(
           hodService = "CESA",
-          planType = PaymentPlanType.BudgetPaymentPlan.toString,
+          planType = PaymentPlanType.SinglePaymentPlan.toString,
           paymentReference = paymentReference,
           submissionDateTime = now.minusDays(5), //Some(now.minusDays(5)),
           scheduledPaymentAmount = 120.00,
@@ -232,7 +232,9 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
         val request: PaymentPlanDuplicateCheckRequest =
           Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
 
-        nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
+        val flag = nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
+        println("flag is "+flag)
+        flag
       } else {
         Future.successful(false)
       }
