@@ -73,9 +73,9 @@ class CheckYourAnswersController @Inject()(
           RegularPaymentAmountSummary.row(request.userAnswers),
           showStartDate,
           PlanEndDateSummary.row(request.userAnswers),
-          MonthlyPaymentAmountDueSummary.row(request.userAnswers),
+          MonthlyPaymentAmountSummary.row(request.userAnswers),
           FinalPaymentDateSummary.row(request.userAnswers, appConfig),
-          FinalPaymentAmountDueSummary.row(request.userAnswers)
+          FinalPaymentAmountSummary.row(request.userAnswers)
         ).flatten
       )
 
@@ -148,7 +148,7 @@ class CheckYourAnswersController @Inject()(
       serviceType                  = required(DirectDebitSourcePage),
       paymentPlanType              = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan),
       paymentPlanReferenceNumber    = None,
-      paymentFrequency             = ua.get(PaymentsFrequencyPage),
+      paymentFrequency             = Some(ua.get(PaymentsFrequencyPage).toString),
       yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
       planStartDate                = ua.get(PlanStartDatePage),
       planEndDate                  = ua.get(PlanEndDatePage),

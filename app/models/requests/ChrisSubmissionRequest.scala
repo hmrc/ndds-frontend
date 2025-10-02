@@ -29,7 +29,7 @@ case class ChrisSubmissionRequest(
                                    serviceType: DirectDebitSource,
                                    paymentPlanType: PaymentPlanType,
                                    paymentPlanReferenceNumber:Option[String],
-                                   paymentFrequency: Option[PaymentsFrequency],
+                                   paymentFrequency: Option[String],
                                    yourBankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus,
                                    planStartDate: Option[PlanStartDateDetails],
                                    planEndDate: Option[LocalDate],

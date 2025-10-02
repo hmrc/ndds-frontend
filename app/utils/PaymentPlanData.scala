@@ -30,27 +30,28 @@ trait PaymentPlanData {
   val mockSinglePaymentPlanDetailResponse: PaymentPlanResponse =
     PaymentPlanResponse(
       directDebitDetails = DirectDebitDetails(
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = "John Doe",
-        auddisFlag = true
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
+        submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService = "NDD",
         planType = PaymentPlanType.SinglePaymentPlan.toString,
         paymentReference = "paymentReference",
         submissionDateTime = now.minusDays(5),
-        scheduledPaymentAmount = 120.00,
-        scheduledPaymentStartDate = currentDate.plusDays(5),
-        initialPaymentStartDate = currentDate,
-        initialPaymentAmount = BigDecimal(25.00),
-        scheduledPaymentEndDate = currentDate.plusMonths(6),
-        scheduledPaymentFrequency = "Monthly",
-        suspensionStartDate = currentDate.plusDays(5),
-        suspensionEndDate = currentDate.plusDays(15),
-        balancingPaymentAmount = 60.00,
-        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
-        totalLiability = 780.00,
+        scheduledPaymentAmount = Some(120.00),
+        scheduledPaymentStartDate = Some(currentDate.plusDays(5)),
+        initialPaymentStartDate = Some(currentDate),
+        initialPaymentAmount = Some(BigDecimal(25.00)),
+        scheduledPaymentEndDate = Some(currentDate.plusMonths(6)),
+        scheduledPaymentFrequency = Some("Monthly"),
+        suspensionStartDate = Some(currentDate.plusDays(5)),
+        suspensionEndDate = None,
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
+        totalLiability = None,
         paymentPlanEditable = true
       )
     )
@@ -58,27 +59,28 @@ trait PaymentPlanData {
   val mockBudgetPaymentPlanDetailResponse: PaymentPlanResponse =
     PaymentPlanResponse(
       directDebitDetails = DirectDebitDetails(
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = "John Doe",
-        auddisFlag = true
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
+        submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService = "NDD",
         planType = PaymentPlanType.BudgetPaymentPlan.toString,
         paymentReference = "paymentReference",
         submissionDateTime = now.minusDays(5),
-        scheduledPaymentAmount = 120.00,
-        scheduledPaymentStartDate = currentDate.plusDays(5),
-        initialPaymentStartDate = currentDate,
-        initialPaymentAmount = BigDecimal(25.00),
-        scheduledPaymentEndDate = currentDate.plusMonths(6),
-        scheduledPaymentFrequency = "Monthly",
-        suspensionStartDate = currentDate.plusDays(5),
-        suspensionEndDate = currentDate.plusDays(15),
-        balancingPaymentAmount = 60.00,
-        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
-        totalLiability = 780.00,
+        scheduledPaymentAmount = Some(120.00),
+        scheduledPaymentStartDate = Some(currentDate.plusDays(5)),
+        initialPaymentStartDate = Some(currentDate),
+        initialPaymentAmount = Some(BigDecimal(25.00)),
+        scheduledPaymentEndDate = Some(currentDate.plusMonths(6)),
+        scheduledPaymentFrequency = Some("Monthly"),
+        suspensionStartDate = Some(currentDate.plusDays(5)),
+        suspensionEndDate = None,
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
+        totalLiability = None,
         paymentPlanEditable = true
       )
     )
@@ -86,27 +88,28 @@ trait PaymentPlanData {
   val mockVariablePaymentPlanDetailResponse: PaymentPlanResponse =
     PaymentPlanResponse(
       directDebitDetails = DirectDebitDetails(
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = "John Doe",
-        auddisFlag = true
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
+        submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService = "NDD",
         planType = PaymentPlanType.VariablePaymentPlan.toString,
         paymentReference = "paymentReference",
         submissionDateTime = now.minusDays(5),
-        scheduledPaymentAmount = 120.00,
-        scheduledPaymentStartDate = currentDate.plusDays(5),
-        initialPaymentStartDate = currentDate,
-        initialPaymentAmount = BigDecimal(25.00),
-        scheduledPaymentEndDate = currentDate.plusMonths(6),
-        scheduledPaymentFrequency = "Monthly",
-        suspensionStartDate = currentDate.plusDays(5),
-        suspensionEndDate = currentDate.plusDays(15),
-        balancingPaymentAmount = 60.00,
-        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
-        totalLiability = 780.00,
+        scheduledPaymentAmount = Some(120.00),
+        scheduledPaymentStartDate = Some(currentDate.plusDays(5)),
+        initialPaymentStartDate = Some(currentDate),
+        initialPaymentAmount = Some(BigDecimal(25.00)),
+        scheduledPaymentEndDate = Some(currentDate.plusMonths(6)),
+        scheduledPaymentFrequency = Some("Monthly"),
+        suspensionStartDate = Some(currentDate.plusDays(5)),
+        suspensionEndDate = None,
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
+        totalLiability = None,
         paymentPlanEditable = true
       )
     )
@@ -114,27 +117,28 @@ trait PaymentPlanData {
   val mockTaxCreditRepaymentPlanDetailResponse: PaymentPlanResponse =
     PaymentPlanResponse(
       directDebitDetails = DirectDebitDetails(
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = "John Doe",
-        auddisFlag = true
+        bankSortCode = Some("123456"),
+        bankAccountNumber = Some("12345678"),
+        bankAccountName = Some("John Doe"),
+        auDdisFlag = true,
+        submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService = "NDD",
         planType = PaymentPlanType.TaxCreditRepaymentPlan.toString,
         paymentReference = "paymentReference",
         submissionDateTime = now.minusDays(5),
-        scheduledPaymentAmount = 120.00,
-        scheduledPaymentStartDate = currentDate.plusDays(5),
-        initialPaymentStartDate = currentDate,
-        initialPaymentAmount = BigDecimal(25.00),
-        scheduledPaymentEndDate = currentDate.plusMonths(6),
-        scheduledPaymentFrequency = "Monthly",
-        suspensionStartDate = currentDate.plusDays(5),
-        suspensionEndDate = currentDate.plusDays(15),
-        balancingPaymentAmount = 60.00,
-        balancingPaymentDate = currentDate.plusMonths(6).plusDays(10),
-        totalLiability = 780.00,
+        scheduledPaymentAmount = Some(120.00),
+        scheduledPaymentStartDate = Some(currentDate.plusDays(5)),
+        initialPaymentStartDate = Some(currentDate),
+        initialPaymentAmount = Some(BigDecimal(25.00)),
+        scheduledPaymentEndDate = Some(currentDate.plusMonths(6)),
+        scheduledPaymentFrequency = Some("Monthly"),
+        suspensionStartDate = Some(currentDate.plusDays(5)),
+        suspensionEndDate = None,
+        balancingPaymentAmount = Some(60.00),
+        balancingPaymentDate = Some(currentDate.plusMonths(6).plusDays(10)),
+        totalLiability = None,
         paymentPlanEditable = true
       )
     )
