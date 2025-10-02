@@ -403,7 +403,7 @@ amendPaymentPlanConfirmation.amendPaymentPlan.endDate = Plan end date
 amendPaymentPlanConfirmation.amendPaymentPlan.endDate.change = Change
 amendPaymentPlanConfirmation.amendPaymentPlan.continueButton = Continue
 amendPaymentPlanConfirmation.summary.link = Why can't I edit all information?
-amendPaymentPlanConfirmation.summary.content = For your plan type or payment you will need to contact us directly to change certain details like your Direct Debit reference, account number, or payment reference. These are set when your plan is first created and require verification for security reasons. You can change payment amounts and dates online, but other changes must be made by calling our customer service team on 0845 366 1208.
+amendPaymentPlanConfirmation.summary.content = You can change payment amounts and dates online, but you''ll need to contact us to change details that were set when your plan was created. This is for verification and security reasons. Call our customer service team on 0845 366 1208.
 
 amendPaymentPlanUpdate.title = Payment plan updated
 amendPaymentPlanUpdate.panel.title = Payment plan updated
