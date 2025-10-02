@@ -149,7 +149,8 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     }
   }
 
-  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[PaymentPlanResponse] = {
+  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)
+                           (implicit hc: HeaderCarrier, request: Request[_]): Future[PaymentPlanResponse] = {
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 }
