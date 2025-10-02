@@ -34,11 +34,12 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.PaymentPlanTypeQuery
+import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery, PaymentReferenceQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 import models.PlanStartDateDetails
+import models.requests.PaymentPlanDuplicateCheckRequest
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.global
@@ -75,7 +76,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD
-  
+
   val singlePlan = "singlePaymentPlan"
   val budgetPlan = "budgetPaymentPlan"
 
@@ -481,7 +482,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
     }
 
   }
-  
+
   "amendmentMade" - {
 
     val today = LocalDate.now()
@@ -539,20 +540,20 @@ class NationalDirectDebitServiceSpec extends SpecBase
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(PlanEndDatePage, end0).success.value
-      
+
       service.amendmentMade(userAnswers) shouldBe true
     }
-    
+
     "return true when date changed for budget plan" in {
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanTypeQuery, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
         .set(NewAmendPlanEndDatePage, end1).success.value
-      
+
       service.amendmentMade(userAnswers) shouldBe true
     }
-    
+
     "return true when both amount and date are changed for a budget plan" in {
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanTypeQuery, budgetPlan).success.value
@@ -563,7 +564,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       service.amendmentMade(userAnswers) shouldBe true
     }
-    
+
     "return false when neither amount nor date are changed for a budget plan" in {
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanTypeQuery, budgetPlan).success.value
@@ -574,7 +575,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       service.amendmentMade(userAnswers) shouldBe false
     }
-    
+
     "amountChanged returns true when existing amount is missing" in {
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanTypeQuery, singlePlan).success.value
@@ -598,7 +599,66 @@ class NationalDirectDebitServiceSpec extends SpecBase
         .set(NewAmendPlanEndDatePage, start1).success.value
       service.amendmentMade(userAnswers) shouldBe true
     }
-    
+
   }
-  
+
+  //  "isDuplicatePaymentPlan" - {
+  //
+  //    val today = LocalDate.now()
+  //    val start0 = today.plusDays(1)
+  //    val start1 = today.plusDays(2)
+  //    val end0 = today.plusMonths(1)
+  //    val end1 = today.plusMonths(2)
+  //    val earliestStart = today.plusDays(3).toString
+  //
+  //    "return true when amount changed and is a single payment plan and connector returns true" in {
+  //      val userAnswers = emptyUserAnswers
+  //        .set(PaymentPlanTypeQuery, singlePlan).success.value
+  //        .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
+  //        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+  //        .set(PlanStartDatePage, PlanStartDateDetails(start0, earliestStart)).success.value
+  //        .set(DirectDebitReferenceQuery, "reference 1").success.value
+  //        .set(PaymentReferenceQuery, "PR001").success.value
+  //
+  //
+  //      val dummyRequest = PaymentPlanDuplicateCheckRequest(
+  //        directDebitReference = "default ref 1",
+  //        paymentPlanReference = "plan-abc",
+  //        planType = "Weekly",
+  //        paymentService = "CESA",
+  //        paymentReference = "ref-xyz",
+  //        paymentAmount = 123.45,
+  //        totalLiability = 1000.0,
+  //        paymentFrequency = "WEEKLY"
+  //      )
+  //
+  //      when(mockConnector.isDuplicatePaymentPlan(("default ref 1"), (dummyRequest)))
+  //        .thenReturn(Future.successful(true))
+  //
+  //      service.isDuplicatePaymentPlan("default ref 1", dummyRequest).map { result =>
+  //        result mustBe true
+  //      }
+  //    }
+  //
+  //    "return false when connector returns false" in {
+  //      val dummyRequest = PaymentPlanDuplicateCheckRequest(
+  //        directDebitReference = "default ref 1",
+  //        paymentPlanReference = "plan-def",
+  //        planType = "Monthly",
+  //        paymentService = "CESA",
+  //        paymentReference = "ref-abc",
+  //        paymentAmount = 99.99,
+  //        totalLiability = 500.0,
+  //        paymentFrequency = "MONTHLY"
+  //      )
+  //
+  //      when(mockConnector.isDuplicatePaymentPlan(("default ref 1"), (dummyRequest)))
+  //        .thenReturn(Future.successful(false))
+  //
+  //      service.isDuplicatePaymentPlan("default ref 1", dummyRequest).map { result =>
+  //        result mustBe false
+  //      }
+  //    }
+  //  }
+
 }

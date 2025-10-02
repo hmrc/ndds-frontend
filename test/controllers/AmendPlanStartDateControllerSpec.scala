@@ -16,11 +16,14 @@
 
 package controllers
 
+sealed trait Mode
+
 import base.SpecBase
 import forms.AmendPlanStartDateFormProvider
 import models.responses.EarliestPaymentDate
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
+import net.sourceforge.htmlunit.corejs.javascript.Token
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -29,13 +32,14 @@ import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, NewAmendPaymentAmo
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import views.html.AmendPlanStartDateView
 import queries.PaymentPlanTypeQuery
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.*
 import scala.concurrent.Future
@@ -294,9 +298,13 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
         val mockSessionRepository = mock[SessionRepository]
+        implicit val hc: HeaderCarrier = HeaderCarrier()
+        implicit val request: Request[_] = FakeRequest()
+        
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
         when(mockService.amendmentMade(any[UserAnswers])).thenReturn(true)
-
+        when(mockService.isDuplicatePaymentPlan(any[UserAnswers])).thenReturn(true)
+        
         val validDate = LocalDate.now()
 
         val postRequest = FakeRequest(POST, amendStartDateRoutePost)

@@ -367,11 +367,12 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withBody("true")
+              .withHeader("Content-Type", "application/json")
+              .withBody("true") // JSON boolean
           )
       )
 
-      val result = connector.isDuplicatePaymentPlan("testRef",duplicateCheckRequest).futureValue
+      val result = connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue
       result shouldBe true
     }
 
