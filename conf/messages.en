@@ -410,6 +410,7 @@ amendPaymentPlanUpdate.panel.title = Payment plan updated
 amendPaymentPlanUpdate.panel.body1 = Your payment reference
 amendPaymentPlanUpdate.panel.strong = <br><strong>{0}</strong>
 amendPaymentPlanUpdate.panel.body2 = <br>has been successfully updated
+amendPaymentPlanUpdate.confirm = We''ve sent a confirmation email to your registered email address.
 amendPaymentPlanUpdate.h1 = What happens next
 amendPaymentPlanUpdate.p1 = Your updated payment plan will take effect from your next scheduled payment date.
 amendPaymentPlanUpdate.l1 = Your new payment amount of {0} will be collected monthly starting {1}
