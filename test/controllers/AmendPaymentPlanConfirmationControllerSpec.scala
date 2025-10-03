@@ -210,15 +210,10 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
-          println("result string: " + contentAsString(result))
-
-          val viewString = view(NormalMode, paymentPlanReference, directDebitReference,
+          contentAsString(result) mustEqual view(NormalMode, paymentPlanReference, directDebitReference,
             mockSinglePaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
             mockSinglePaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,
             summaryListRows, routes.AmendPlanStartDateController.onPageLoad(NormalMode))(request, messages(application)).toString
-          println("view string: " + viewString)
-
-          contentAsString(result) mustEqual viewString
         }
       }
     }
