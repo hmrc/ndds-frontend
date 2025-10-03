@@ -82,7 +82,7 @@ object Utils {
       planType = PaymentPlanType.SinglePaymentPlan.toString,
       paymentService = DirectDebitSource.SA.toString,
       paymentReference = userAnswers.get(PaymentReferencePage).get,
-      paymentAmount =  BigDecimal(120.00),
+      paymentAmount = BigDecimal(120.00),
       totalLiability = BigDecimal(780.00),
       paymentFrequency = PaymentsFrequency.Weekly.toString
     )

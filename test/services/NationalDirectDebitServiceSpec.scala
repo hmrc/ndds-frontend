@@ -630,7 +630,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
         .set(AmendPlanStartDatePage, start0).success.value
-        .set(PaymentPlansCountQuery,2).success.value
+        .set(PaymentPlansCountQuery, 2).success.value
 
       when(mockConnector.isDuplicatePaymentPlan(dummySingleRequest.directDebitReference, dummySingleRequest))
         .thenReturn(Future.successful(true))
@@ -736,7 +736,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
         .set(NewAmendPlanEndDatePage, end0).success.value
-        .set(PaymentPlansCountQuery,3).success.value
+        .set(PaymentPlansCountQuery, 3).success.value
 
       when(mockConnector.isDuplicatePaymentPlan(dummyBudgetRequest.directDebitReference, dummyBudgetRequest))
         .thenReturn(Future.successful(true))

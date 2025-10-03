@@ -466,7 +466,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
           )
       )
 
-      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef",duplicateCheckRequest).futureValue)
+      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue)
       ex.getMessage should include("failed")
     }
 
@@ -480,7 +480,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
           )
       )
 
-      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef",duplicateCheckRequest).futureValue)
+      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue)
       ex.getMessage should include("status: 500")
     }
 
@@ -492,7 +492,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
           )
       )
 
-      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef",duplicateCheckRequest).futureValue)
+      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue)
       ex.getMessage should include("The future returned an exception")
     }
 
