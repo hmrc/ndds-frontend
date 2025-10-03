@@ -370,6 +370,13 @@ paymentPlanDetails.details.planStartDate = Plan start date
 paymentPlanDetails.details.planEndDate = Plan end date
 paymentPlanDetails.details.suspendStartDate = Suspend start date
 paymentPlanDetails.details.suspendEndDate = Suspend end date
+paymentPlanDetails.paymentsFrequency.monthly = Monthly
+paymentPlanDetails.paymentsFrequency.weekly = Weekly
+paymentPlanDetails.paymentsFrequency.fortNightly = Fort Nightly
+paymentPlanDetails.paymentsFrequency.fourWeekly = Four Weekly
+paymentPlanDetails.paymentsFrequency.quarterly = Quarterly
+paymentPlanDetails.paymentsFrequency.sixMonthly = Six Monthly
+paymentPlanDetails.paymentsFrequency.annually = Annually
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 
