@@ -28,6 +28,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPlanEndDateView
 
@@ -40,6 +41,7 @@ class AmendPlanEndDateController @Inject()(
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
+                                        nddsService: NationalDirectDebitService,
                                         formProvider: AmendPlanEndDateFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
                                         view: AmendPlanEndDateView
@@ -66,27 +68,32 @@ class AmendPlanEndDateController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode,routes.AmendPaymentAmountController.onPageLoad(mode)))),
 
         value =>
-          (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
-            case (Some(planDetails), Some(amendedAmount)) =>
-              val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-              val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
+          if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+            (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
+              case (Some(planDetails), Some(amendedAmount)) =>
+                val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+                val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
 
-              val isNoChange = amendedAmount == dbAmount && value == dbEndDate
+                val isNoChange = amendedAmount == dbAmount && value == dbEndDate
 
-              if (isNoChange) {
-                val key = "amendment.noChange"
-                val errorForm = form.fill(value).withError("value", key)
-                Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
-              } else {
-                for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
-                  _              <- sessionRepository.set(updatedAnswers)
-                } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
-              }
+                if (isNoChange) {
+                  val key = "amendment.noChange"
+                  val errorForm = form.fill(value).withError("value", key)
+                  Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                } else {
+                  for {
+                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
+                    _ <- sessionRepository.set(updatedAnswers)
+                  } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                }
 
-            case _ =>
-              logger.error("Missing Amend payment amount and/or amend plan end date")
-              Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+              case _ =>
+                logger.error("Missing Amend payment amount and/or amend plan end date")
+                Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+            }
+          } else {
+            logger.error("Invalid payment plan type")
+            Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
           }
       )
   }

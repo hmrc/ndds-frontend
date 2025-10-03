@@ -28,6 +28,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPlanStartDateView
 
@@ -41,6 +42,7 @@ class AmendPlanStartDateController @Inject()(
                                                  identify: IdentifierAction,
                                                  getData: DataRetrievalAction,
                                                  requireData: DataRequiredAction,
+                                                 nddsService: NationalDirectDebitService,
                                                  formProvider: AmendPlanStartDateFormProvider,
                                                  val controllerComponents: MessagesControllerComponents,
                                                  view: AmendPlanStartDateView
@@ -66,27 +68,32 @@ class AmendPlanStartDateController @Inject()(
           Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
 
         value =>
-          (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
-            case (Some(planDetails), Some(amendedAmount)) =>
-              val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-              val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
+          if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+            (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
+              case (Some(planDetails), Some(amendedAmount)) =>
+                val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+                val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
 
-              val isNoChange = amendedAmount == dbAmount && value == dbStartDate
+                val isNoChange = amendedAmount == dbAmount && value == dbStartDate
 
-              if (isNoChange) {
-                val key = "amendment.noChange"
-                val errorForm = form.fill(value).withError("value", key)
-                Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
-              } else {
-                for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
-                  _              <- sessionRepository.set(updatedAnswers)
-                } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
-              }
+                if (isNoChange) {
+                  val key = "amendment.noChange"
+                  val errorForm = form.fill(value).withError("value", key)
+                  Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                } else {
+                  for {
+                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
+                    _ <- sessionRepository.set(updatedAnswers)
+                  } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
+                }
 
-            case _ =>
-              logger.error("Missing Amend payment amount and/or amend plan start date")
-              Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+              case _ =>
+                logger.error("Missing Amend payment amount and/or amend plan start date")
+                Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+            }
+          } else {
+            logger.error("Invalid payment plan type")
+            Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
           }
         )
       }
