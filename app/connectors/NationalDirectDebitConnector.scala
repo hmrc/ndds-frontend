@@ -18,8 +18,6 @@ package connectors
 
 import models.NddResponse
 import models.requests.{AmendChrisSubmissionRequest, ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanResponse}
 import play.api.Logging
 import play.api.http.Status.OK

@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.responses.PaymentPlanResponse
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -29,6 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
@@ -222,21 +223,129 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
     }
 
     "onSubmit" - {
-      "must redirect to JourneyRecoveryController" in {
+      "must redirect to AmendPaymentPlanUpdateController when CHRIS submission is successful" in {
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        import uk.gov.hmrc.http.HeaderCarrier
+        implicit val hc: HeaderCarrier = HeaderCarrier()
+
+        val mockNddService = mock[NationalDirectDebitService]
+
+        when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(true))
+
+        val directDebitReference = "DDI123456789"
+
+        val paymentPlanDetails = models.responses.PaymentPlanResponse(
+          directDebitDetails = models.responses.DirectDebitDetails(
+            bankSortCode = Some("123456"),
+            bankAccountNumber = Some("12345678"),
+            bankAccountName = Some("Bank Ltd"),
+            auDdisFlag = true,
+            submissionDateTime = java.time.LocalDateTime.now()
+          ),
+          paymentPlanDetails = models.responses.PaymentPlanDetails(
+            hodService = "CESA",
+            planType = "BudgetPaymentPlan",
+            paymentReference = "paymentReference",
+            submissionDateTime = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount = Some(1000),
+            scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
+            initialPaymentStartDate = Some(java.time.LocalDate.now()),
+            initialPaymentAmount = Some(150),
+            scheduledPaymentEndDate = Some(java.time.LocalDate.now().plusMonths(10)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate = Some(java.time.LocalDate.now()),
+            suspensionEndDate = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount = Some(600),
+            balancingPaymentDate = Some(java.time.LocalDate.now()),
+            totalLiability = Some(300),
+            paymentPlanEditable = false
+          )
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, directDebitReference).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now()).success.value
+          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
+          .set(PaymentPlanReferenceQuery, "paymentReference").success.value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          ).build()
 
         running(application) {
-
           val request = FakeRequest(POST, routes.AmendPaymentPlanConfirmationController.onSubmit(NormalMode).url)
-
           val result = route(application, request).value
 
           status(result) mustBe SEE_OTHER
-
           redirectLocation(result).value mustEqual routes.AmendPaymentPlanUpdateController.onPageLoad().url
         }
       }
+
+      "must redirect to JourneyRecoveryController when CHRIS submission fails" in {
+
+        import uk.gov.hmrc.http.HeaderCarrier
+        implicit val hc: HeaderCarrier = HeaderCarrier()
+
+        val mockNddService = mock[NationalDirectDebitService]
+
+        when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(false))
+
+        val directDebitReference = "DDI123456789"
+
+        val paymentPlanDetails = models.responses.PaymentPlanResponse(
+          directDebitDetails = models.responses.DirectDebitDetails(
+            bankSortCode = Some("123456"),
+            bankAccountNumber = Some("12345678"),
+            bankAccountName = Some("Bank Ltd"),
+            auDdisFlag = true,
+            submissionDateTime = java.time.LocalDateTime.now()
+          ),
+          paymentPlanDetails = models.responses.PaymentPlanDetails(
+            hodService = "CESA",
+            planType = "BudgetPaymentPlan",
+            paymentReference = "paymentReference",
+            submissionDateTime = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount = Some(1000),
+            scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
+            initialPaymentStartDate = Some(java.time.LocalDate.now()),
+            initialPaymentAmount = Some(150),
+            scheduledPaymentEndDate = Some(java.time.LocalDate.now().plusMonths(10)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate = Some(java.time.LocalDate.now()),
+            suspensionEndDate = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount = Some(600),
+            balancingPaymentDate = Some(java.time.LocalDate.now()),
+            totalLiability = Some(300),
+            paymentPlanEditable = false
+          )
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, directDebitReference).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now()).success.value
+          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
+          .set(PaymentPlanReferenceQuery, "paymentReference").success.value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          ).build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.AmendPaymentPlanConfirmationController.onSubmit(NormalMode).url)
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          flash(result).get("error").value mustBe "There was a problem submitting your direct debit. Please try again later."
+        }
+      }
     }
+
   }
 }
