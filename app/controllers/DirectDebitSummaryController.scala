@@ -44,19 +44,19 @@ class DirectDebitSummaryController @Inject()(
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     userAnswers.get(DirectDebitReferenceQuery) match {
-      case Some(paymentRefNumber) =>
+      case Some(reference) =>
         cleansePaymentReference(userAnswers).flatMap { _ =>
-          nddService.retrieveDirectDebitPaymentPlans(paymentRefNumber).flatMap { ddPaymentPlans =>
+          nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
             for {
               updatedAnswers <- Future.fromTry(userAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
-              updatedAnswers <- Future.fromTry(userAnswers.set(DirectDebitReferenceQuery,paymentRefNumber))
+              updatedAnswers <- Future.fromTry(userAnswers.set(DirectDebitReferenceQuery,reference))
               
               cachedAnswers  <- Future.fromTry(updatedAnswers.set(DirectDebitSummaryPage, ddPaymentPlans.paymentPlanCount))
               _              <- sessionRepository.set(cachedAnswers)
             } yield {
               Ok(
                 view(
-                  paymentRefNumber,
+                  reference,
                   ddPaymentPlans
                 )
               )

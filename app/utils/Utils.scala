@@ -17,7 +17,9 @@
 package utils
 
 import models.requests.PaymentPlanDuplicateCheckRequest
-import models.{PaymentPlanType, PaymentsFrequency, UserAnswers}
+import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
+import pages.PaymentReferencePage
+import queries.{DirectDebitReferenceQuery, PaymentReferenceQuery}
 
 object Utils {
   val emptyString = ""
@@ -27,18 +29,17 @@ object Utils {
                                     userAnswers: UserAnswers,
                                     directDebitRef: String
                                   ): PaymentPlanDuplicateCheckRequest = {
-    implicit val ua: UserAnswers = userAnswers
 
     PaymentPlanDuplicateCheckRequest(
       //TODO: Temp data with be replaced with actual data
-      directDebitReference = directDebitRef,
-      paymentPlanReference = "payment ref 123",
+      directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
+      paymentPlanReference = userAnswers.get(PaymentReferenceQuery).get,
       planType = PaymentPlanType.SinglePaymentPlan.toString,
-      paymentService = "CESA",
-      paymentReference = "payment ref",
-      paymentAmount =  120.00,
-      totalLiability = 780.00,
-      paymentFrequency = "WEEKLY"
+      paymentService = DirectDebitSource.SA.toString,
+      paymentReference = userAnswers.get(PaymentReferencePage).get,
+      paymentAmount =  BigDecimal(120.00),
+      totalLiability = BigDecimal(780.00),
+      paymentFrequency = PaymentsFrequency.Weekly.toString
     )
   }
 }

@@ -233,9 +233,9 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
           Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
 
         val flag = nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
-        println("flag is "+flag)
         flag
       } else {
+        println("There is only 1 payment plan so not checking duplicate as in no RDS Call")
         Future.successful(false)
       }
     } else {

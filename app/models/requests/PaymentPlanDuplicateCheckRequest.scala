@@ -24,8 +24,8 @@ case class PaymentPlanDuplicateCheckRequest(
                                              planType: String,
                                              paymentService: String,
                                              paymentReference: String,
-                                             paymentAmount: Double,
-                                             totalLiability: Double,
+                                             paymentAmount: BigDecimal,
+                                             totalLiability: BigDecimal,
                                              paymentFrequency: String
                              )
 
