@@ -23,7 +23,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.AmendPaymentPlanTypePage
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -49,8 +49,8 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
     val mockService = mock[NationalDirectDebitService]
 
     "must return OK and the correct view for a GET with SinglePaymentPlan" in {
-      val userAnswersWithSinglePaymentPlan =
-        emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+      val userAnswersWithSinglePaymentPlan = emptyUserAnswers
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
       val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePaymentPlan))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
@@ -86,6 +86,29 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
+      }
+    }
+
+    "must populate the view correctly on a GET when the question has previously been answered" in {
+      val userAnswersWithBudgetPaymentPlan = emptyUserAnswers
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+        .set(AmendPaymentAmountPage, validAnswer).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPaymentPlan))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val request = FakeRequest(GET, paymentPlanAmountRoute)
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[AmendPaymentAmountView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form.fill(validAnswer),
+          NormalMode, Call("GET", paymentPlanRoute))(request,
+          messages(application)).toString
       }
     }
 
