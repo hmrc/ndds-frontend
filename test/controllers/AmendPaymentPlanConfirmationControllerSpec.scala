@@ -44,7 +44,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
     val mockSessionRepository = mock[SessionRepository]
 
     def createSummaryListForBudgetPaymentPlan(userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
-       val paymentPlan = paymentPlanDetails.paymentPlanDetails
+      val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse(""))(messages(app)),

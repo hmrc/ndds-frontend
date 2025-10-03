@@ -25,9 +25,9 @@ import models.requests.{AmendChrisSubmissionRequest, ChrisSubmissionRequest, Gen
 import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import pages.*
 import models.responses.*
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
-import pages.{AmendPaymentPlanTypePage, DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
 import play.api.Logging
 import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
@@ -166,4 +166,5 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
                            (implicit hc: HeaderCarrier, request: Request[_]): Future[PaymentPlanResponse] = {
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
+
 }

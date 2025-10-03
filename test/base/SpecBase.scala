@@ -17,7 +17,7 @@
 package base
 
 import controllers.actions.*
-import models.{PaymentPlanType, UserAnswers}
+import models.UserAnswers
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
