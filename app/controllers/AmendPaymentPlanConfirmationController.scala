@@ -83,7 +83,6 @@ class AmendPaymentPlanConfirmationController @Inject()(
         (Seq(
           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
           AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
-          //DateSetupSummary.row(paymentPlan.submissionDateTime),
           TotalAmountDueSummary.row(paymentPlan.totalLiability),
           MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability),
           FinalPaymentAmountSummary.row(paymentPlan.balancingPaymentAmount, paymentPlan.totalLiability),

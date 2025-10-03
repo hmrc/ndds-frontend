@@ -514,6 +514,28 @@ class NationalDirectDebitServiceSpec extends SpecBase
       }
     }
 
+    "getPaymentPlanDetails" - {
+      "must successfully return the payment plan detail" in {
+
+        val planDetailsResponse = dummyPlanDetailResponse
+
+        when(mockConnector.getPaymentPlanDetails(any(), any())(any()))
+          .thenReturn(Future.successful(planDetailsResponse))
+
+        val result = service.getPaymentPlanDetails("test-ddRef", "test-pp-ref").futureValue
+
+        result mustBe planDetailsResponse
+      }
+
+      "fail when the connector call fails" in {
+        when(mockConnector.getPaymentPlanDetails(any(), any())(any()))
+          .thenReturn(Future.failed(new Exception("error")))
+
+        val result = intercept[Exception](service.getPaymentPlanDetails("test-ddRef", "test-pp-ref").futureValue)
+
+        result.getMessage must include("error")
+      }
+    }
   }
   
 }
