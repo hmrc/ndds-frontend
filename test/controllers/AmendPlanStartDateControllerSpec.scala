@@ -28,6 +28,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, NewAmendPaymentAmountPage, NewAmendPlanStartDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
@@ -57,6 +58,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   val singlePlan = "singlePaymentPlan"
 
   val mockService: NationalDirectDebitService = mock[NationalDirectDebitService]
+  val mockSessionRepository = mock[SessionRepository]
 
   def onwardRoute: Call = Call("GET", "/foo")
 
@@ -246,9 +248,23 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(AmendPlanStartDatePage, validAnswer).success.value
           .set(NewAmendPlanStartDatePage, validAnswer).success.value
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockService)
+          )
+          .build()
 
         running(application) {
+          when(mockSessionRepository.set(any()))
+            .thenReturn(Future.successful(true))
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+          when(mockService.amendmentMade(any()))
+            .thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(true))
+
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
 
@@ -265,9 +281,23 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(AmendPlanStartDatePage, validAnswer).success.value
           .set(NewAmendPlanStartDatePage, newValidAnswer).success.value
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockService)
+          )
+          .build()
 
         running(application) {
+          when(mockSessionRepository.set(any()))
+            .thenReturn(Future.successful(true))
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+          when(mockService.amendmentMade(any()))
+            .thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(true))
+
           val request = postRequestWithDate(newValidAnswer)
           val result = route(application, request).value
 
@@ -284,9 +314,23 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(AmendPlanStartDatePage, validAnswer).success.value
           .set(NewAmendPlanStartDatePage, newValidAnswer).success.value
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockService)
+          )
+          .build()
 
         running(application) {
+          when(mockSessionRepository.set(any()))
+            .thenReturn(Future.successful(true))
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+          when(mockService.amendmentMade(any()))
+            .thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(true))
+
           val request = postRequestWithDate(newValidAnswer)
           val result = route(application, request).value
 
@@ -303,7 +347,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
         when(mockService.amendmentMade(any[UserAnswers])).thenReturn(true)
-        when(mockService.isDuplicatePaymentPlan(any[UserAnswers])).thenReturn(true)
+        when(mockService.isDuplicatePaymentPlan(any[UserAnswers])(any(),any())).thenReturn(Future.successful(true))
         
         val validDate = LocalDate.now()
 

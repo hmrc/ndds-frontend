@@ -30,11 +30,11 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.{should, shouldBe}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{PaymentReferencePage as directDebitReference, *}
+import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery, PaymentReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery, PaymentPlansCountQuery, PaymentReferenceQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
@@ -611,108 +611,114 @@ class NationalDirectDebitServiceSpec extends SpecBase
     val end1 = today.plusMonths(2)
     val earliestStart = today.plusDays(3).toString
 
-    "return true when amount changed,start date changed for single payment plan and connector returns true" in {
-      val userAnswers = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, "default ref 1").success.value
-        .set(PaymentReferenceQuery, "PR001").success.value
-        .set(PaymentReferencePage, "plan-abc").success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+    val dummyRequest = PaymentPlanDuplicateCheckRequest(
+      directDebitReference = "default ref 1",
+      paymentPlanReference = "plan-abc",
+      planType = "Weekly",
+      paymentService = "CESA",
+      paymentReference = "ref-xyz",
+      paymentAmount = BigDecimal(123.45),
+      totalLiability = BigDecimal(1000.0),
+      paymentFrequency = "WEEKLY"
+    )
+
+    val userAnswers = emptyUserAnswers
+      .set(DirectDebitReferenceQuery, dummyRequest.directDebitReference).success.value
+      .set(PaymentReferenceQuery, dummyRequest.paymentReference).success.value
+      .set(PaymentReferencePage, dummyRequest.paymentPlanReference).success.value
+      .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+      .set(PaymentPlanTypeQuery, singlePlan).success.value
+      .set(TotalAmountDuePage, 780.00).success.value
+      .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
+
+
+    "return true when amount changed,start date changed for single payment plan and 2 payment plans so connector returns true" in {
+      userAnswers
         .set(PaymentPlanTypeQuery, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
         .set(AmendPlanStartDatePage, start1).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
+        .set(PaymentPlansCountQuery, 2).success.value
 
-      val dummyRequest = PaymentPlanDuplicateCheckRequest(
-        directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
-        paymentPlanReference = userAnswers.get(PaymentReferencePage).get,
-        planType = userAnswers.get(PaymentReferencePage).get,
-        paymentService = userAnswers.get(DirectDebitSourcePage.getClass(DirectDebitSource.SA)).get,
-        paymentReference = userAnswers.get(PaymentReferencePage).get,
-        paymentAmount = userAnswers.get(NewAmendPaymentAmountPage).get,
-        totalLiability = userAnswers.get(TotalAmountDuePage).get,
-        paymentFrequency = userAnswers.get(PaymentsFrequencyPage).get
-      )
-
-      val countOfPaymentPlans = userAnswers.get(DirectDebitSummaryPage).get
-      if (countOfPaymentPlans > 1) {
-        when(mockConnector.isDuplicatePaymentPlan(userAnswers.get(DirectDebitReferenceQuery).get, dummyRequest))
+      when(mockConnector.isDuplicatePaymentPlan(dummyRequest.directDebitReference, dummyRequest))
           .thenReturn(Future.successful(true))
-      }
 
       service.isDuplicatePaymentPlan(userAnswers).map { result =>
         true shouldBe true
       }
     }
 
-    "return true when amount changed,start date not changed for single payment plan and connector returns true" in {
-      val userAnswers = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, "default ref 1").success.value
-        .set(PaymentReferenceQuery, "PR001").success.value
-        .set(PaymentReferencePage, "plan-abc").success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+    "return true when amount changed,start date changed for single payment plan and only 1 payment plans so no call to connector returns true" in {
+      userAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(AmendPlanStartDatePage, start0).success.value
+        .set(AmendPlanStartDatePage, start1).success.value
+        .set(PaymentPlansCountQuery, 1).success.value
+
+      service.isDuplicatePaymentPlan(userAnswers).map { result =>
+        true shouldBe true
+      }
+    }
+
+    "return true when amount changed,start date not changed for single payment plan and  2 payment plans so connector returns true" in {
+      userAnswers
         .set(PaymentPlanTypeQuery, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
         .set(AmendPlanStartDatePage, start0).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
+        .set(PaymentPlansCountQuery,2).success.value
 
-      val dummyRequest = PaymentPlanDuplicateCheckRequest(
-        directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
-        paymentPlanReference = userAnswers.get(PaymentReferencePage).get,
-        planType = userAnswers.get(PaymentReferencePage).get,
-        paymentService = userAnswers.get(DirectDebitSourcePage.getClass(DirectDebitSource.SA)).get,
-        paymentReference = userAnswers.get(PaymentReferencePage).get,
-        paymentAmount = userAnswers.get(NewAmendPaymentAmountPage).get,
-        totalLiability = userAnswers.get(TotalAmountDuePage).get,
-        paymentFrequency = userAnswers.get(PaymentsFrequencyPage).get
-      )
-
-      val countOfPaymentPlans = userAnswers.get(DirectDebitSummaryPage).get
-      if (countOfPaymentPlans > 1) {
-        when(mockConnector.isDuplicatePaymentPlan(userAnswers.get(DirectDebitReferenceQuery).get, dummyRequest))
+        when(mockConnector.isDuplicatePaymentPlan(dummyRequest.directDebitReference, dummyRequest))
           .thenReturn(Future.successful(true))
-      }
 
       service.isDuplicatePaymentPlan(userAnswers).map { result =>
         true shouldBe true
       }
     }
 
-    "return true when amount not changed,start date changed for single payment plan and connector returns true" in {
-      val userAnswers = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, "default ref 1").success.value
-        .set(PaymentReferenceQuery, "PR001").success.value
-        .set(PaymentReferencePage, "plan-abc").success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+    "return true when amount changed,start date not changed for single payment plan and 1 payment plan so no call to connector returns true" in {
+      userAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(AmendPlanStartDatePage, start0).success.value
+        .set(AmendPlanStartDatePage, start0).success.value
+        .set(PaymentPlansCountQuery, 1).success.value
+
+      service.isDuplicatePaymentPlan(userAnswers).map { result =>
+        true shouldBe true
+      }
+    }
+
+    "return true when amount not changed,start date changed for single payment plan and more than 1 payment plan so connector returns true" in {
+      userAnswers
         .set(PaymentPlanTypeQuery, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
         .set(AmendPlanStartDatePage, start1).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
+        .set(PaymentPlansCountQuery, 3).success.value
 
-      val dummyRequest = PaymentPlanDuplicateCheckRequest(
-        directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
-        paymentPlanReference = userAnswers.get(PaymentReferencePage).get,
-        planType = userAnswers.get(PaymentReferencePage).get,
-        paymentService = userAnswers.get(DirectDebitSourcePage.getClass(DirectDebitSource.SA)).get,
-        paymentReference = userAnswers.get(PaymentReferencePage).get,
-        paymentAmount = userAnswers.get(NewAmendPaymentAmountPage).get,
-        totalLiability = userAnswers.get(TotalAmountDuePage).get,
-        paymentFrequency = userAnswers.get(PaymentsFrequencyPage).get.toString
-      )
-
-      val countOfPaymentPlans = userAnswers.get(DirectDebitSummaryPage).get
-      if (countOfPaymentPlans > 1) {
-        when(mockConnector.isDuplicatePaymentPlan(userAnswers.get(DirectDebitReferenceQuery).get, userAnswers))
+        when(mockConnector.isDuplicatePaymentPlan(dummyRequest.directDebitReference, dummyRequest))
           .thenReturn(Future.successful(true))
+
+      service.isDuplicatePaymentPlan(userAnswers).map { result =>
+        true shouldBe true
       }
+    }
+
+    "return true when amount not changed,start date changed for single payment plan and only 1 payment plan so no connector returns true" in {
+      userAnswers
+        .set(PaymentPlanTypeQuery, singlePlan).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(NewAmendPaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(AmendPlanStartDatePage, start0).success.value
+        .set(AmendPlanStartDatePage, start1).success.value
+        .set(PaymentPlansCountQuery, 1).success.value
 
       service.isDuplicatePaymentPlan(userAnswers).map { result =>
         true shouldBe true
@@ -720,90 +726,74 @@ class NationalDirectDebitServiceSpec extends SpecBase
     }
 
     "return false when amount not changed,start date not changed for single payment plan and do not call the connector" in {
-      val userAnswers = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, "default ref 1").success.value
-        .set(PaymentReferenceQuery, "PR001").success.value
-        .set(PaymentReferencePage, "plan-abc").success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+      userAnswers
         .set(PaymentPlanTypeQuery, singlePlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanStartDatePage, start0).success.value
         .set(AmendPlanStartDatePage, start0).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
 
       service.isDuplicatePaymentPlan(userAnswers).map { result =>
         false shouldBe false
       }
     }
 
-    "return true when amount changed,end date changed for budget payment plan and connector returns true" in {
-      val userAnswers = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, "default ref 1").success.value
-        .set(PaymentReferenceQuery, "PR001").success.value
-        .set(PaymentReferencePage, "plan-abc").success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+    "return true when amount changed,end date changed for budget payment plan and 4 payment plans so call the connector returns true" in {
+      userAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
         .set(NewAmendPlanEndDatePage, end1).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
+        .set(PaymentPlansCountQuery, 4).success.value
 
-      val dummyRequest = PaymentPlanDuplicateCheckRequest(
-        directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
-        paymentPlanReference = userAnswers.get(PaymentReferencePage).get,
-        planType = userAnswers.get(PaymentReferencePage).get,
-        paymentService = userAnswers.get(DirectDebitSourcePage.getClass(DirectDebitSource.SA)).get,
-        paymentReference = userAnswers.get(PaymentReferencePage).get,
-        paymentAmount = userAnswers.get(NewAmendPaymentAmountPage).get,
-        totalLiability = userAnswers.get(TotalAmountDuePage).get,
-        paymentFrequency = userAnswers.get(PaymentsFrequencyPage).get
-      )
-
-      val countOfPaymentPlans = userAnswers.get(DirectDebitSummaryPage).get
-      if (countOfPaymentPlans > 1) {
-        when(mockConnector.isDuplicatePaymentPlan(userAnswers.get(DirectDebitReferenceQuery).get, userAnswers))
-          .thenReturn(Future.successful(true))
-      }
+      when(mockConnector.isDuplicatePaymentPlan(dummyRequest.directDebitReference, dummyRequest))
+        .thenReturn(Future.successful(true))
 
       service.isDuplicatePaymentPlan(userAnswers).map { result =>
         true shouldBe true
       }
     }
 
-    "return true when amount changed,end date not changed for budget payment plan and connector returns true" in {
-      val userAnswers = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, "default ref 1").success.value
-        .set(PaymentReferenceQuery, "PR001").success.value
-        .set(PaymentReferencePage, "plan-abc").success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+    "return true when amount changed,end date changed for budget payment plan and 1 payment plan so no call to the connector returns true" in {
+      userAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(AmendPlanEndDatePage, end0).success.value
+        .set(NewAmendPlanEndDatePage, end1).success.value
+        .set(PaymentPlansCountQuery, 1).success.value
+
+      service.isDuplicatePaymentPlan(userAnswers).map { result =>
+        true shouldBe true
+      }
+    }
+
+    "return true when amount changed,end date not changed for budget payment plan and 3 payment plans so call to the connector returns true" in {
+      userAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
         .set(NewAmendPlanEndDatePage, end0).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
+        .set(PaymentPlansCountQuery,3).success.value
 
-      val dummyRequest = PaymentPlanDuplicateCheckRequest(
-        directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
-        paymentPlanReference = userAnswers.get(PaymentReferencePage).get,
-        planType = userAnswers.get(PaymentReferencePage).get,
-        paymentService = userAnswers.get(DirectDebitSourcePage.getClass(DirectDebitSource.SA)).get,
-        paymentReference = userAnswers.get(PaymentReferencePage).get,
-        paymentAmount = userAnswers.get(NewAmendPaymentAmountPage).get,
-        totalLiability = userAnswers.get(TotalAmountDuePage).get,
-        paymentFrequency = userAnswers.get(PaymentsFrequencyPage).get
-      )
-
-      val countOfPaymentPlans = userAnswers.get(DirectDebitSummaryPage).get
-      if (countOfPaymentPlans > 1) {
-        when(mockConnector.isDuplicatePaymentPlan(userAnswers.get(DirectDebitReferenceQuery).get, userAnswers))
+        when(mockConnector.isDuplicatePaymentPlan(dummyRequest.directDebitReference, dummyRequest))
           .thenReturn(Future.successful(true))
+
+      service.isDuplicatePaymentPlan(userAnswers).map { result =>
+        true shouldBe true
       }
+    }
+
+    "return true when amount changed,end date not changed for budget payment plan and 1 payment plans so no call to the connector returns true" in {
+      userAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
+        .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
+        .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
+        .set(AmendPlanEndDatePage, end0).success.value
+        .set(NewAmendPlanEndDatePage, end0).success.value
+        .set(PaymentPlansCountQuery, 1).success.value
 
       service.isDuplicatePaymentPlan(userAnswers).map { result =>
         true shouldBe true
@@ -811,18 +801,12 @@ class NationalDirectDebitServiceSpec extends SpecBase
     }
 
     "return false when amount not changed,end date changed for budget payment plan and do not call the connector" in {
-      val userAnswers = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, "default ref 1").success.value
-        .set(PaymentReferenceQuery, "PR001").success.value
-        .set(PaymentReferencePage, "plan-abc").success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
+      userAnswers
+        .set(PaymentPlanTypeQuery, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
         .set(NewAmendPlanEndDatePage, end1).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
 
       service.isDuplicatePaymentPlan(userAnswers).map { result =>
         false shouldBe false
@@ -830,18 +814,12 @@ class NationalDirectDebitServiceSpec extends SpecBase
     }
 
     "return false when amount not changed,end date not changed for budget payment plan and do not call the connector" in {
-      val userAnswers = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, "default ref 1").success.value
-        .set(PaymentReferenceQuery, "PR001").success.value
-        .set(PaymentReferencePage, "plan-abc").success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+      userAnswers
         .set(PaymentPlanTypeQuery, budgetPlan).success.value
         .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(NewAmendPaymentAmountPage, BigDecimal(100.00)).success.value
         .set(AmendPlanEndDatePage, end0).success.value
         .set(NewAmendPlanEndDatePage, end0).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
 
       service.isDuplicatePaymentPlan(userAnswers).map { result =>
         false shouldBe false

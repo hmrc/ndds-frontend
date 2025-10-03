@@ -27,7 +27,7 @@ import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequenc
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.Utils
@@ -226,7 +226,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       (amountChanged(ua) && (isSinglePaymentPlan(ua) || isBudgetPaymentPlan(ua))) ||
         (isSinglePaymentPlan(ua) && startDateChanged(ua))
     ) {
-      val countPaymentPlans = ua.get(DirectDebitSummaryPage).get
+      val countPaymentPlans = ua.get(PaymentPlansCountQuery).get
 
       if (countPaymentPlans > 1) {
         val request: PaymentPlanDuplicateCheckRequest =
