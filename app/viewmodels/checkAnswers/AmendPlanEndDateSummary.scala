@@ -42,8 +42,8 @@ object AmendPlanEndDateSummary {
         )
     }
 
-  def row(value: Option[LocalDate], showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
-    val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern("d MMM yyyy"))).getOrElse("")
+  def row(value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
+    val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
     SummaryListRowViewModel(
       key = "paymentPlanDetails.details.planEndDate",
       value = ValueViewModel(displayValue),

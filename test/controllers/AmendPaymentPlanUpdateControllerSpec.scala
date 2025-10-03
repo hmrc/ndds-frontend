@@ -30,6 +30,7 @@ import play.api.test.Helpers.*
 import queries.PaymentPlanReferenceQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.Constants
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, PaymentReferenceSummary}
 import views.html.AmendPaymentPlanUpdateView
 
@@ -59,18 +60,11 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         Seq(
           PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
           AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)(messages(app)),
-          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate)(messages(app)),
-          AmendPlanEndDateSummary.row(planEndDate)(messages(app)),
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app)),
+          AmendPlanEndDateSummary.row(planEndDate, Constants.longDateTimeFormatPattern)(messages(app)),
         )
       }
 
-//      PaymentReferenceSummary.row(paymentPlanReference)
-//      ,
-//      AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)
-//      ,
-//      AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate)
-//      ,
-//      AmendPlanEndDateSummary.row(planEndDate)
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanReferenceQuery, "123456789K").success.value
         .set(AmendPaymentAmountPage, regPaymentAmount).success.value
@@ -142,7 +136,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
 
 //    "must return error if no end date" in {
 //      val userAnswers = emptyUserAnswers
-//        .set(PaymentReferenceQuery, "123456789K").success.value
+//        .set(PaymentPlanReferenceQuery, "123456789K").success.value
 //        .set(RegularPaymentAmountPage, regPaymentAmount).success.value
 //        .set(AmendPlanStartDatePage, startDate).success.value
 //        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value

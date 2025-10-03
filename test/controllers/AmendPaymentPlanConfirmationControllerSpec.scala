@@ -30,7 +30,7 @@ import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.DirectDebitDetailsData
+import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
 
@@ -55,7 +55,8 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         PaymentsFrequencySummary.row(paymentPlan.scheduledPaymentFrequency)(messages(app)),
         AmendPlanStartDateSummary.row(
           PaymentPlanType.BudgetPaymentPlan.toString,
-          userAnswers.get(AmendPlanStartDatePage)
+          userAnswers.get(AmendPlanStartDatePage),
+          Constants.shortDateTimeFormatPattern
         )(messages(app)),
         AmendPaymentAmountSummary.row(
           PaymentPlanType.BudgetPaymentPlan.toString,
@@ -64,6 +65,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         )(messages(app)),
         AmendPlanEndDateSummary.row(
           userAnswers.get(AmendPlanEndDatePage),
+          Constants.shortDateTimeFormatPattern,
           true
         )(messages(app))
       )
@@ -84,6 +86,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         AmendPlanStartDateSummary.row(
           PaymentPlanType.SinglePaymentPlan.toString,
           userAnswers.get(AmendPlanStartDatePage),
+          Constants.shortDateTimeFormatPattern,
           true
         )(messages(app))
       )

@@ -30,6 +30,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
@@ -50,8 +51,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
         TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
         MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability)(messages(app)),
         FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability)(messages(app)),
-        AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
-        AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
+        AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(messages(app)),
+        AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)(messages(app)),
       )
     }
 
@@ -63,7 +64,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
           DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)(messages(app)),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(messages(app)),
         )
       }
 
@@ -121,8 +122,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
           MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability)(messages(app)),
           FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability)(messages(app)),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)(messages(app)),
-          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate)(messages(app)),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(messages(app)),
+          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)(messages(app)),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency)(messages(app)),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)(messages(app)),
           AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true)(messages(app)),
