@@ -60,7 +60,6 @@ class PaymentDateController @Inject()(
         }
 
         Ok(view(preparedForm, mode,
-          DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
           DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
           routes.PaymentAmountController.onPageLoad(mode)
         ))
@@ -80,7 +79,6 @@ class PaymentDateController @Inject()(
         formWithErrors =>
           nddService.calculateFutureWorkingDays(request.userAnswers).map { earliestPaymentDate =>
             BadRequest(view(formWithErrors, mode,
-              DateTimeFormats.formattedDateTimeShort(earliestPaymentDate.date),
               DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
               routes.PaymentAmountController.onPageLoad(mode)
             ))
