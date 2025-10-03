@@ -25,32 +25,32 @@ import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object FinalPaymentAmountDueSummary {
+object FinalPaymentAmountSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TotalAmountDuePage).map { totalAmount =>
       val monthlyPayment = (totalAmount / 12).setScale(2, BigDecimal.RoundingMode.DOWN)
       val finalPayment = totalAmount - (monthlyPayment * 11)
       SummaryListRowViewModel(
-        key     = "totalAmountDue.final.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(finalPayment)),
+        key = "totalAmountDue.final.checkYourAnswersLabel",
+        value = ValueViewModel(currencyFormat(finalPayment)),
         actions = Seq.empty
       )
     }
 
-  def row(amount: BigDecimal, totalDue: BigDecimal)(implicit messages: Messages): SummaryListRow =
-    if (totalDue.equals(BigDecimal(0))) {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.final.checkYourAnswersLabel",
-        value = ValueViewModel(""),
-        actions = Seq.empty
-      )
-    } else {
-      SummaryListRowViewModel(
-        key = "totalAmountDue.final.checkYourAnswersLabel",
-        value = ValueViewModel(formatAmount(amount.doubleValue)),
-        actions = Seq.empty
-      )
-    }
+  def row(amount: Option[BigDecimal], totalDue: Option[BigDecimal])(implicit messages: Messages): SummaryListRow = {
+    val displayValue =
+      if (totalDue.exists(_ > 0) && amount.isDefined) {
+        formatAmount(amount.get.doubleValue)
+      } else {
+        ""
+      }
+
+    SummaryListRowViewModel(
+      key = "totalAmountDue.final.checkYourAnswersLabel",
+      value = ValueViewModel(displayValue),
+      actions = Seq.empty
+    )
+  }
 
 }

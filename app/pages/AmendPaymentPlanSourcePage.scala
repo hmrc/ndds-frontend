@@ -22,5 +22,5 @@ case object AmendPaymentPlanSourcePage extends QuestionPage[String] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "paymentPlaneSource"
+  override def toString: String = "paymentPlanSource"
 }

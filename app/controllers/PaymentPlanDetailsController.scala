@@ -20,20 +20,19 @@ import controllers.actions.*
 import models.*
 import models.responses.PaymentPlanDetails
 import pages.*
-
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentReferenceQuery
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Utils.listHodServices
-import viewmodels.checkAnswers.{AmendPlanStartDateSummary, *}
+import utils.Constants
+import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
+import javax.inject.Inject
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -50,51 +49,46 @@ class PaymentPlanDetailsController @Inject()(
   extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    request.userAnswers.get(PaymentReferenceQuery) match {
-      case Some(paymentReference) =>
-        nddService.getPaymentPlanDetails(paymentReference).flatMap { response =>
+    (request.userAnswers.get(DirectDebitReferenceQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
+      case (Some(directDebitReference), Some(paymentPlanReference)) =>
+        nddService.getPaymentPlanDetails(directDebitReference, paymentPlanReference).flatMap { response =>
           val planDetail = response.paymentPlanDetails
-          val directDebit = response.directDebitDetails
-          val maybeSource: Option[DirectDebitSource] =
-            listHodServices.find { case (_, v) => v.equalsIgnoreCase(planDetail.hodService) }.map(_._1)
-          val frequency = PaymentsFrequency.fromString(planDetail.scheduledPaymentFrequency)
-
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanSourcePage, maybeSource.getOrElse("").toString))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, planDetail.scheduledPaymentAmount))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, planDetail.scheduledPaymentStartDate))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, planDetail.scheduledPaymentEndDate))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentReferenceQuery, planDetail.paymentReference))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(TotalAmountDuePage, planDetail.totalLiability))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(RegularPaymentAmountPage, planDetail.scheduledPaymentAmount))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentsFrequencyPage, frequency.get))
-            cachedAnswers <- Future.fromTry(updatedAnswers.set(YourBankDetailsPage,
-              YourBankDetailsWithAuddisStatus(
-                accountHolderName = directDebit.bankAccountName,
-                sortCode = directDebit.bankSortCode,
-                accountNumber = directDebit.bankAccountNumber,
-                auddisStatus = directDebit.auddisFlag,
-                accountVerified = false
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
+            updatedAnswers <- planDetail.scheduledPaymentAmount match {
+              case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
+              case None         => Future.failed(
+                new IllegalStateException("scheduledPaymentAmount is missing when updating AmendPaymentAmountPage")
               )
-            ))
-            _ <- sessionRepository.set(cachedAnswers)
+            }
+            updatedAnswers <- planDetail.scheduledPaymentStartDate match {
+              case Some(startDate) => Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, startDate))
+              case None         => Future.failed(
+                new IllegalStateException("scheduledPaymentStartDate is missing when updating AmendPlanStartDatePage")
+              )
+            }
+            updatedAnswers <- planDetail.scheduledPaymentEndDate match {
+              case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
+              case None         => Future.successful(updatedAnswers)
+            }
+            _ <- sessionRepository.set(updatedAnswers)
           } yield {
             val flag: Future[Boolean] = calculateShowAction(nddService, planDetail)
             val showActions = Await.result(flag, 5.seconds)
             val summaryRows: Seq[SummaryListRow] = buildSummaryRows(planDetail)
-            Ok(view(planDetail.planType, paymentReference, showActions, summaryRows))
+            Ok(view(planDetail.planType, paymentPlanReference, showActions, summaryRows))
           }
         }
-      case None =>
+      case _ =>
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
 
-  def onRedirect(paymentReference: String): Action[AnyContent] =
+  def onRedirect(paymentPlanReference: String): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
     for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferenceQuery, paymentReference))
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanReferenceQuery, paymentPlanReference))
       _ <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
   }
@@ -107,7 +101,7 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
         )
       case PaymentPlanType.BudgetPaymentPlan.toString =>
         Seq(
@@ -115,10 +109,10 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
           TotalAmountDueSummary.row(planDetail.totalLiability),
-          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
-          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
-          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern),
+          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
           AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true), //true for start
@@ -130,10 +124,10 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
           TotalAmountDueSummary.row(planDetail.totalLiability),
-          MonthlyPaymentAmountDueSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
-          FinalPaymentAmountDueSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
-          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern),
+          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern),
         )
     }
   }
@@ -142,12 +136,24 @@ class PaymentPlanDetailsController @Inject()(
                                  (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] = {
     planDetail.planType match {
       case PaymentPlanType.SinglePaymentPlan.toString =>
-        nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
+        nddService.isTwoDaysPriorPaymentDate(
+          planDetail.scheduledPaymentStartDate.getOrElse(
+            throw new IllegalStateException("scheduledPaymentStartDate is missing")
+          )
+        )
 
       case PaymentPlanType.BudgetPaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
         for {
-          isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(planDetail.scheduledPaymentStartDate)
-          isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(planDetail.scheduledPaymentEndDate)
+          isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(
+            planDetail.scheduledPaymentStartDate.getOrElse(
+              throw new IllegalStateException("scheduledPaymentStartDate is missing")
+            )
+          )
+          isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(
+            planDetail.scheduledPaymentEndDate.getOrElse(
+              throw new IllegalStateException("scheduledPaymentEndDate is missing")
+            )
+          )
         } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
 
       case _ => Future.successful(false) //For TaxCredit repayment plan

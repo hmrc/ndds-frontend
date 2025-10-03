@@ -26,15 +26,18 @@ import java.time.format.DateTimeFormatter
 
 object AmendSuspendDateSummary  {
 
-  def row(value: LocalDate, isStartDate: Boolean)(implicit messages: Messages): SummaryListRow =
+  def row(suspendDate: Option[LocalDate], isStartDate: Boolean)(implicit messages: Messages): SummaryListRow =
     val label = if(isStartDate) {
       "paymentPlanDetails.details.suspendStartDate"
     } else {
       "paymentPlanDetails.details.suspendEndDate"
     }
+    val formattedDate = suspendDate
+      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .getOrElse("")
     SummaryListRowViewModel(
       key = label,
-      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      value = ValueViewModel(formattedDate),
       actions = Seq.empty
     )
 

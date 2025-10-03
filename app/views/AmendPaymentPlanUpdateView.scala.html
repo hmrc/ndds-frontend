@@ -28,7 +28,7 @@
         govukInsetText: GovukInsetText
 )
 
-@(paymentRef: String, regularPaymentAmount: String, startDate: String, endDate: String)(implicit request: Request[_], messages: Messages)
+@(paymentPlanReference: String, regularPaymentAmount: String, startDate: String, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
@@ -36,13 +36,11 @@
         title = messages("amendPaymentPlanUpdate.panel.title"),
         body = Html(
                     s"${messages("amendPaymentPlanUpdate.panel.body1")}" +
-                    s"${messages("amendPaymentPlanUpdate.panel.strong",paymentRef)}" +
+                    s"${messages("amendPaymentPlanUpdate.panel.strong",paymentPlanReference)}" +
                     s"${messages("amendPaymentPlanUpdate.panel.body2")}"
                 ),
         classes = "govuk-!-margin-bottom-2"
     )
-
-    @paragraph(messages("amendPaymentPlanUpdate.confirm"))
 
     @header2("amendPaymentPlanUpdate.h1")
 
@@ -63,24 +61,7 @@
     @header2("amendPaymentPlanUpdate.h2")
 
     @govukSummaryList(SummaryList(
-        rows = Seq(
-            SummaryListRow(
-                key = Key(Text(messages("amendPaymentPlanUpdate.reference"))),
-                value = Value(Text(paymentRef))
-            ),
-            SummaryListRow(
-                key = Key(Text(messages("amendPaymentPlanUpdate.amount"))),
-                value = Value(Text(regularPaymentAmount))
-            ),
-            SummaryListRow(
-                key = Key(Text(messages("amendPaymentPlanUpdate.startDate"))),
-                value = Value(Text(startDate))
-            ),
-            SummaryListRow(
-                key = Key(Text(messages("amendPaymentPlanUpdate.endDate"))),
-                value = Value(Text(endDate))
-            )
-        )
+        rows = rows
     ))
 
     @govukDetails(
