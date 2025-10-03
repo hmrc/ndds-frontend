@@ -18,11 +18,10 @@ package controllers
 
 import base.SpecBase
 import models.{PaymentPlanType, UserAnswers}
-import models.responses.PaymentPlanResponse
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage, RegularPaymentAmountPage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage}
 import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -37,8 +36,6 @@ import views.html.AmendPaymentPlanUpdateView
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.text.NumberFormat
-import java.util.Locale
 
 class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
 
@@ -69,7 +66,6 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         .set(PaymentPlanReferenceQuery, "123456789K").success.value
         .set(AmendPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
-        .set(AmendPlanEndDatePage, endDate).success.value
         .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
@@ -94,7 +90,6 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
       def summaryList(userAnswers: UserAnswers, paymentPlanReference: String, app: Application): Seq[SummaryListRow] = {
         val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
         val planStartDate = userAnswers.get(AmendPlanStartDatePage)
-        val planEndDate = userAnswers.get(AmendPlanEndDatePage)
 
         Seq(
           PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),

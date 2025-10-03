@@ -27,9 +27,10 @@ import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, Your
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should.Matchers.{should, shouldBe}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{AmendPaymentPlanTypePage, DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
@@ -73,6 +74,9 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD
+  
+  val singlePlan = "singlePaymentPlan"
+  val budgetPlan = "budgetPaymentPlan"
 
   "NationalDirectDebitService" - {
     "retrieveDirectDebits" - {
@@ -533,5 +537,5 @@ class NationalDirectDebitServiceSpec extends SpecBase
       }
     }
   }
-
+  
 }
