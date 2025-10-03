@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.responses.PaymentPlanResponse
-import models.{NormalMode, PaymentPlanType, PaymentsFrequency, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
