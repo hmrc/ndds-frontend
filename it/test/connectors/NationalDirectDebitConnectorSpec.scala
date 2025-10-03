@@ -385,7 +385,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       )
 
       val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef",duplicateCheckRequest).futureValue)
-      ex.getMessage should include("Failed")
+      ex.getMessage should include("failed")
     }
 
     "must fail when request returns an UpstreamErrorResponse" in {

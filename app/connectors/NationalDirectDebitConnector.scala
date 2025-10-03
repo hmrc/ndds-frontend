@@ -108,27 +108,12 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
         case Right(response) if response.status == OK =>
-          val json = response.json
-          val isDuplicateOpt = response.json.validate[Boolean].asOpt
-              .orElse((json \ "isDuplicate").asOpt[String].flatMap {
-                case "true" => Some(true)
-                case "false" => Some(false)
-                case _ => None
-              })
-
-          isDuplicateOpt match {
-            case Some(value) => Future.successful(value)
-            case None =>
-              val msg = s"Missing or invalid 'isDuplicate' field in response: ${response.body}"
-              logger.error(msg)
-              Future.failed(new Exception(msg))
-          }
+          Future.successful(true)
         case Left(errorResponse) =>
-          logger.error(s"Request failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
-          Future.failed(new Exception(s"Request failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))
-
+          logger.error(s"Duplicate check failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
+          Future.failed(new Exception(s"Duplicate check failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))
         case Right(response) =>
-          logger.error(s"Unexpected response error status: ${response.status}")
+          logger.error(s"Unexpected Duplicate check response error status: ${response.status}")
           Future.failed(new Exception(s"Unexpected status: ${response.status}"))
       }
   }
