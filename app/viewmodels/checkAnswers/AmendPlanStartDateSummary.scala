@@ -17,29 +17,62 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, PaymentPlanType, UserAnswers}
 import pages.AmendPlanStartDatePage
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.DateTimeFormats.dateTimeFormat
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object AmendPlanStartDateSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPlanStartDatePage).map {
       answer =>
-
-        implicit val lang: Lang = messages.lang
-
         SummaryListRowViewModel(
-          key     = "amendPlanStartDate.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.format(dateTimeFormat())),
+          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
+          ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
           actions = Seq(
             ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("amendPlanStartDate.change.hidden"))
+              .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
           )
         )
     }
+
+  def row(planType: String, value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow =
+    val label = if(PaymentPlanType.SinglePaymentPlan.toString == planType) {
+      "paymentPlanDetails.details.date"
+    } else {
+      "paymentPlanDetails.details.startDate"
+    }
+
+    val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
+    SummaryListRowViewModel(
+      key = label,
+      value = ValueViewModel(displayValue),
+      actions = if (showChange) {
+        Seq(
+          ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
+        )
+      } else {
+        Seq.empty
+      }
+    )
+
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
+    val dateText = answers
+      .get(AmendPlanStartDatePage)
+      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .getOrElse("")
+
+    Some(SummaryListRowViewModel(
+      key = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
+      ValueViewModel(dateText),
+      actions = Seq.empty
+    ))
+  }
 }

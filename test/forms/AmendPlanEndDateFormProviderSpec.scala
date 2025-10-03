@@ -59,6 +59,5 @@ class AmendPlanEndDateFormProviderSpec extends DateBehaviours {
         )
       }
     }
-
   }
 }

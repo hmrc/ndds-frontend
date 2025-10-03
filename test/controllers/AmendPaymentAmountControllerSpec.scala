@@ -23,11 +23,11 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentPlanTypeQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import views.html.AmendPaymentAmountView
@@ -49,9 +49,29 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
     val mockService = mock[NationalDirectDebitService]
 
     "must return OK and the correct view for a GET with SinglePaymentPlan" in {
-      val userAnswersWithSinglePaymentPlan =
-        emptyUserAnswers.set(PaymentPlanTypeQuery, PaymentPlanType.SinglePaymentPlan.toString).success.value
+      val userAnswersWithSinglePaymentPlan = emptyUserAnswers
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
       val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePaymentPlan))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val request = FakeRequest(GET, paymentPlanAmountRoute)
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[AmendPaymentAmountView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
+      val userAnswersWithBudgetPaymentPlan = emptyUserAnswers
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPaymentPlan))
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockService)
         )
@@ -69,13 +89,13 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
-      val userAnswersWithBudgetPaymentPlan =
-        emptyUserAnswers.set(PaymentPlanTypeQuery, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+    "must populate the view correctly on a GET when the question has previously been answered" in {
+      val userAnswersWithBudgetPaymentPlan = emptyUserAnswers
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+        .set(AmendPaymentAmountPage, validAnswer).success.value
+
       val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPaymentPlan))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService)
-        )
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       running(application) {
@@ -86,7 +106,24 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[AmendPaymentAmountView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentPlanRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer),
+          NormalMode, Call("GET", paymentPlanRoute))(request,
+          messages(application)).toString
+      }
+    }
+
+    "must return NDDS error if amend payment plan guard returns false" in {
+      val userAnswers = emptyUserAnswers
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+        val request = FakeRequest(GET, routes.AmendPaymentAmountController.onPageLoad(NormalMode).url)
+        val result = intercept[Exception](route(application, request).value.futureValue)
+
+        result.getMessage must include("NDDS Payment Plan Guard: Cannot amend this plan type: taxCreditRepaymentPlan")
       }
     }
 
@@ -153,6 +190,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
+
   }
 }
 

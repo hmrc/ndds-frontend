@@ -14,12 +14,16 @@
  * limitations under the License.
  *@
 
+@import views.html.components.*
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    h1: Header1,
+    p: Paragraph
 )
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
@@ -32,15 +36,17 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
         }
 
+        @h1(messages("amendPlanEndDate.heading"))
+        @p(messages("amendPlanEndDate.p1"))
+
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("amendPlanEndDate.heading")).asPageHeading()
+                legend = LegendViewModel(content="")
             ).withHint(
                 HintViewModel(
                     HtmlContent(
                         Seq(
-                            s"<p class='govuk-!-margin-top-7 govuk-hint-black'>${messages("amendPlanEndDate.p1")}</p>",
                             s"<p class='govuk-!-margin-top-7'>${messages("amendPlanEndDate.hint")}</p>",
                         ).mkString
                     )

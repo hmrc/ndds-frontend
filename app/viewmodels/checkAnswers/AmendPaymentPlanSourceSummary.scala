@@ -16,25 +16,31 @@
 
 package viewmodels.checkAnswers
 
-import config.CurrencyFormatter.currencyFormat
 import models.UserAnswers
-import pages.TotalAmountDuePage
+import pages.AmendPaymentPlanSourcePage
 import play.api.i18n.Messages
+import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object FinalPaymentAmountDueSummary {
+object AmendPaymentPlanSourceSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(TotalAmountDuePage).map { totalAmount =>
-      val monthlyPayment = (totalAmount / 12).setScale(2, BigDecimal.RoundingMode.DOWN)
-      val finalPayment = totalAmount - (monthlyPayment * 11)
-      SummaryListRowViewModel(
-        key     = "totalAmountDue.final.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(finalPayment)),
-        actions = Seq.empty
-      )
+    answers.get(AmendPaymentPlanSourcePage).map {
+      answer =>
+        SummaryListRowViewModel(
+          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor",
+          value   = ValueViewModel(HtmlFormat.escape(answer.toUpperCase).toString),
+          actions = Seq.empty
+        )
     }
-}
 
+  def row(value: String)(implicit messages: Messages): SummaryListRow = {
+    SummaryListRowViewModel(
+      key = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor",
+      value = ValueViewModel(HtmlFormat.escape(value.toUpperCase).toString),
+      actions = Seq.empty
+    )
+  }
+}

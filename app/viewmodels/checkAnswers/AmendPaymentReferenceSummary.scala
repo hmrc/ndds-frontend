@@ -16,26 +16,23 @@
 
 package viewmodels.checkAnswers
 
-import config.CurrencyFormatter.currencyFormat
 import models.UserAnswers
-import pages.TotalAmountDuePage
+import pages.PaymentReferencePage
 import play.api.i18n.Messages
+import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-import scala.math.BigDecimal.RoundingMode
-
-object MonthlyPaymentAmountDueSummary  {
+object AmendPaymentReferenceSummary  {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(TotalAmountDuePage).map { totalAmount =>
-      val monthlyPayment = (totalAmount / 12).setScale(2, RoundingMode.DOWN)
-
-      SummaryListRowViewModel(
-        key     = "totalAmountDue.monthly.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(monthlyPayment)),
-        actions = Seq.empty
-      )
+    answers.get(PaymentReferencePage).map {
+      answer =>
+        SummaryListRowViewModel(
+          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference",
+          value   = ValueViewModel(HtmlFormat.escape(answer).toString),
+          actions = Seq.empty
+        )
     }
 }

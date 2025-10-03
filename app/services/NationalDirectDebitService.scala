@@ -21,6 +21,10 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import pages.*
+import models.responses.*
+import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
 import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
@@ -111,12 +115,12 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     config.paymentDelayFixed + dynamicDelay
   }
 
-  //PaymentPlanTypePage used for setup journey and PaymentPlanTypeQuery used for Amend journey
+  //PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers.get(AmendPaymentPlanTypePage).getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers.get(PaymentPlanTypeQuery).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers.get(AmendPaymentPlanTypePage).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
@@ -144,80 +148,16 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     val currentDate = LocalDate.now().toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map {
       futureWorkingDays => {
-        val isThreeDaysPrior = planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
+        val isThreeDaysPrior =  planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
         logger.info(s"planEndWithinThreeDays flag is set to: $isThreeDaysPrior")
         isThreeDaysPrior
       }
     }
   }
 
-  def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanResponse] = {
-    //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
-    val now = LocalDateTime.now()
-    val currentDate = LocalDate.now()
-
-    val samplePaymentPlanResponse: PaymentPlanResponse =
-      PaymentPlanResponse(
-        directDebitDetails = DirectDebitDetails(
-          bankSortCode = "123456",
-          bankAccountNumber = "12345678",
-          bankAccountName = "John Doe",
-          auddisFlag = true
-        ),
-        paymentPlanDetails = PaymentPlanDetails(
-          hodService = "CESA",
-          planType = PaymentPlanType.SinglePaymentPlan.toString,
-          paymentReference = paymentReference,
-          submissionDateTime = now.minusDays(5), //Some(now.minusDays(5)),
-          scheduledPaymentAmount = 120.00,
-          scheduledPaymentStartDate = currentDate.plusDays(3), //Some(LocalDate.now().minusMonths(8)),
-          initialPaymentStartDate = now.plusDays(5), //Some(LocalDateTime.now().plusDays(1)),
-          initialPaymentAmount = Some(BigDecimal(50.00)),
-          scheduledPaymentEndDate = currentDate.plusDays(4), //Some(LocalDate.now().plusMonths(12)),
-          scheduledPaymentFrequency = Some(PaymentsFrequency.Weekly.toString),
-          suspensionStartDate = None,
-          suspensionEndDate = None,
-          balancingPaymentAmount = Some(BigDecimal(25.00)),
-          balancingPaymentDate = Some(LocalDateTime.now().plusMonths(13)),
-          totalLiability = Some(780.00), //Some(BigDecimal(1825.50)),
-          paymentPlanEditable = true
-        )
-      )
-    Future.successful(samplePaymentPlanResponse)
-  }
-
-  def amendmentMade(ua: UserAnswers): Boolean = {
-    ua.get(PaymentPlanTypeQuery) match {
-      case Some("singlePaymentPlan") => amountChanged(ua) || startDateChanged(ua)
-      case Some("budgetPaymentPlan") => amountChanged(ua) || endDateChanged(ua)
-      case _ =>
-        logger.warn(s"Unexpected / missing plan type in amend journey; applying permissive check.")
-        amountChanged(ua) || startDateChanged(ua) || endDateChanged(ua)
-    }
-  }
-
-  private def amountChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPaymentAmountPage), ua.get(NewAmendPaymentAmountPage)) match {
-      case (Some(amend), Some(newAmend)) => amend.compare(newAmend) != 0
-      case (None, Some(_)) => true
-      case _ => false
-    }
-  }
-
-  private def startDateChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPlanStartDatePage), ua.get(NewAmendPlanStartDatePage)) match {
-      case (Some(amend), Some(newAmend)) => amend != newAmend
-      case (None, Some(_)) => true
-      case _ => false
-    }
-  }
-
-  private def endDateChanged(ua: UserAnswers): Boolean = {
-    (ua.get(AmendPlanEndDatePage), ua.get(NewAmendPlanEndDatePage)) match {
-      case (Some(amend), Some(newAmend)) => amend != newAmend
-      case (None, Some(_)) => true
-      case _ => false
-    }
+  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)
+                           (implicit hc: HeaderCarrier, request: Request[_]): Future[PaymentPlanResponse] = {
+    nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
   def isDuplicatePaymentPlan(ua: UserAnswers)
@@ -242,4 +182,5 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       Future.successful(false)
     }
   }
+
 }

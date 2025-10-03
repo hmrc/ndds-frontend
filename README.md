@@ -8,7 +8,7 @@ This is the new NDDS frontend repository
 
 Service Manager: `sm2 --start NDDS_ALL`
 
-To run all tests and coverage: `./run_all_tests.sh`
+To check libraries update, run all tests and coverage: `./run_all_tests.sh`
 
 To start the server locally: `sbt run`
 

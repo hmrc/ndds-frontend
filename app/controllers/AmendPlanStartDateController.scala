@@ -22,10 +22,11 @@ import forms.AmendPlanStartDateFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPlanStartDatePage, NewAmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -41,8 +42,8 @@ class AmendPlanStartDateController @Inject()(
                                                  identify: IdentifierAction,
                                                  getData: DataRetrievalAction,
                                                  requireData: DataRequiredAction,
+                                                 nddsService: NationalDirectDebitService,
                                                  formProvider: AmendPlanStartDateFormProvider,
-                                                 nddService: NationalDirectDebitService,
                                                  val controllerComponents: MessagesControllerComponents,
                                                  view: AmendPlanStartDateView
                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
@@ -50,7 +51,7 @@ class AmendPlanStartDateController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request => {
       val form = formProvider()
-      val preparedForm = request.userAnswers.get(NewAmendPlanStartDatePage)
+      val preparedForm = request.userAnswers.get(AmendPlanStartDatePage)
         .orElse(request.userAnswers.get(AmendPlanStartDatePage))
         .fold(form)(form.fill)
 
@@ -60,30 +61,43 @@ class AmendPlanStartDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
+      val form = formProvider()
+      val userAnswers = request.userAnswers
+      form.bindFromRequest().fold(
+        formWithErrors =>
+          Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
 
-          val form = formProvider()
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
+        value =>
+          if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+            (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
+              case (Some(planDetails), Some(amendedAmount)) =>
+                val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+                val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
 
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(NewAmendPlanStartDatePage, value))
-                _ <- sessionRepository.set(updatedAnswers)
-              } yield {
-                if (nddService.amendmentMade(updatedAnswers)) {
+                val isNoChange = amendedAmount == dbAmount && value == dbStartDate
+
+                if (isNoChange) {
+                  val key = "amendment.noChange"
+                  val errorForm = form.fill(value).withError("value", key)
+                  Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                } else {
                   //TODO: will be used to show a warning screen later for amending duplicate plan
                   val flag = nddService.isDuplicatePaymentPlan(updatedAnswers)
                   flag.map { value =>
                     println(s"Duplicate check response is $value")
-                  }
-                  Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
-                } else {
-                  val key = "amendment.noChange"
-                  val errorForm = form.fill(value).withError("value", key)
-                  BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+                  for {
+                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
+                    _ <- sessionRepository.set(updatedAnswers)
+                  } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
                 }
-              }
-          )
+
+              case _ =>
+                logger.error("Missing Amend payment amount and/or amend plan start date")
+                Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+            }
+          } else {
+            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(AmendPaymentPlanTypePage).get}")
+          }
+        )
       }
   }
