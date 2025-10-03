@@ -42,14 +42,14 @@ object AmendPlanStartDateSummary  {
         )
     }
 
-  def row(planType: String, value: Option[LocalDate], showChange: Boolean = false)(implicit messages: Messages): SummaryListRow =
+  def row(planType: String, value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow =
     val label = if(PaymentPlanType.SinglePaymentPlan.toString == planType) {
       "paymentPlanDetails.details.date"
     } else {
       "paymentPlanDetails.details.startDate"
     }
 
-    val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern("d MMM yyyy"))).getOrElse("")
+    val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
     SummaryListRowViewModel(
       key = label,
       value = ValueViewModel(displayValue),

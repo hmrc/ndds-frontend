@@ -26,6 +26,7 @@ import queries.PaymentPlanReferenceQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanUpdateView
 
@@ -78,14 +79,14 @@ class AmendPaymentPlanUpdateController @Inject()(
         Seq(
           PaymentReferenceSummary.row(paymentPlanReference),
           AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount),
-          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate)
+          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)
         )
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
         Seq(
           PaymentReferenceSummary.row(paymentPlanReference),
           AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
-          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate),
-          AmendPlanEndDateSummary.row(planEndDate)
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern),
+          AmendPlanEndDateSummary.row(planEndDate, Constants.longDateTimeFormatPattern)
         )
       case _ => throw new IllegalStateException("Plan type is missing or invalid")
     }

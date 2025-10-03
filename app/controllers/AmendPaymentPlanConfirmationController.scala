@@ -25,6 +25,7 @@ import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
 
@@ -89,7 +90,8 @@ class AmendPaymentPlanConfirmationController @Inject()(
           PaymentsFrequencySummary.row(paymentPlan.scheduledPaymentFrequency),
           AmendPlanStartDateSummary.row(
             PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPlanStartDatePage)
+            userAnswers.get(AmendPlanStartDatePage),
+            Constants.shortDateTimeFormatPattern
           ),
           AmendPaymentAmountSummary.row(
             PaymentPlanType.BudgetPaymentPlan.toString,
@@ -98,6 +100,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           ),
           AmendPlanEndDateSummary.row(
             userAnswers.get(AmendPlanEndDatePage),
+            Constants.shortDateTimeFormatPattern,
             true
           )
         ), routes.AmendPlanEndDateController.onPageLoad(mode))
@@ -115,6 +118,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           AmendPlanStartDateSummary.row(
             PaymentPlanType.SinglePaymentPlan.toString,
             userAnswers.get(AmendPlanStartDatePage),
+            Constants.shortDateTimeFormatPattern,
             true
           )
         ), routes.AmendPlanStartDateController.onPageLoad(mode))
