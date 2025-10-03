@@ -18,14 +18,13 @@ package controllers
 
 import controllers.actions.*
 import models.requests.ChrisSubmissionRequest
-import models.responses.PaymentPlanDetails
+import models.responses.{DirectDebitDetails, PaymentPlanDetails}
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
-import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -43,8 +42,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
                                                         requireData: DataRequiredAction,
                                                         val controllerComponents: MessagesControllerComponents,
                                                         view: AmendPaymentPlanConfirmationView,
-                                                        nddService: NationalDirectDebitService,
-                                                        sessionRepository: SessionRepository,
+                                                        nddService: NationalDirectDebitService
                                                       )(implicit ec: ExecutionContext)
   extends FrontendBaseController with I18nSupport with Logging {
 
@@ -87,8 +85,6 @@ class AmendPaymentPlanConfirmationController @Inject()(
       ua.get(DirectDebitReferenceQuery) match {
         case Some(ddiReference) =>
           val chrisRequest = buildChrisSubmissionRequest(ua, ddiReference)
-          println("****************************************" + chrisRequest)
-
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
               logger.info(s"CHRIS submission successful for DDI Ref [$ddiReference]")
@@ -113,6 +109,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
                                            userAnswers: UserAnswers,
                                            ddiReference: String
                                          ): ChrisSubmissionRequest = {
+
     implicit val ua: UserAnswers = userAnswers
     userAnswers.get(PaymentPlanDetailsQuery) match {
       case Some(response) =>
@@ -122,46 +119,34 @@ class AmendPaymentPlanConfirmationController @Inject()(
         val serviceType: DirectDebitSource =
           DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
 
-        val planStartDateDetails: Option[PlanStartDateDetails] =
-          planDetail.scheduledPaymentStartDate.map { date =>
-            PlanStartDateDetails(
-              enteredDate = date,
-              earliestPlanStartDate = date.toString
-            )
-          }
-        val bankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus =
-          YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(
-            yourBankDetails = YourBankDetails(
-              accountHolderName = directDebitDetails.bankAccountName.getOrElse(
-                throw new IllegalStateException("Missing bank account name")
-              ),
-              sortCode = directDebitDetails.bankSortCode.getOrElse(
-                throw new IllegalStateException("Missing bank sort code")
-              ),
-              accountNumber = directDebitDetails.bankAccountNumber.getOrElse(
-                throw new IllegalStateException("Missing bank account number")
-              )
-            ),
-            auddisStatus = directDebitDetails.auDdisFlag,
-            accountVerified = true
+        val planStartDateDetails: Option[PlanStartDateDetails] = ua.get(AmendPlanStartDatePage).map { date =>
+          PlanStartDateDetails(enteredDate = date, earliestPlanStartDate = date.toString // you can adjust this if you have a different logic
           )
+        }
+
+        val paymentPlanType: PaymentPlanType =
+          PaymentPlanType.values
+            .find(_.toString.equalsIgnoreCase(planDetail.planType))
+            .getOrElse(PaymentPlanType.BudgetPaymentPlan)
+
+        val bankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus = buildBankDetailsWithAuddisStatus(directDebitDetails)
 
 
         ChrisSubmissionRequest(
           serviceType = serviceType,
-          paymentPlanType = PaymentPlanType.BudgetPaymentPlan,
-          paymentFrequency = planDetail.scheduledPaymentFrequency,
-          paymentPlanReferenceNumber = ua.get(PaymentPlanReferenceNumberPage),
+          paymentPlanType = paymentPlanType,
+          paymentFrequency = if (planDetail.planType.equalsIgnoreCase("singlePaymentPlan")) None else planDetail.scheduledPaymentFrequency,
+          paymentPlanReferenceNumber = ua.get(PaymentPlanReferencePage),
           yourBankDetailsWithAuddisStatus = bankDetailsWithAuddisStatus,
           planStartDate = planStartDateDetails,
           planEndDate = ua.get(AmendPlanEndDatePage),
           paymentDate = None,
           yearEndAndMonth = None,
           ddiReferenceNo = ddiReference,
-          paymentReference = required(PaymentReferencePage),
-          totalAmountDue = ua.get(TotalAmountDuePage),
-          paymentAmount = ua.get(PaymentAmountPage),
-          regularPaymentAmount = ua.get(RegularPaymentAmountPage),
+          paymentReference = planDetail.paymentReference,
+          totalAmountDue = planDetail.totalLiability,
+          paymentAmount = planDetail.balancingPaymentAmount,
+          regularPaymentAmount = ua.get(AmendPaymentAmountPage),
           calculation = None,
           amendPlan = true
         )
@@ -171,10 +156,27 @@ class AmendPaymentPlanConfirmationController @Inject()(
     }
   }
 
+  private def buildBankDetailsWithAuddisStatus(
+                                                directDebitDetails: DirectDebitDetails
+                                              ): YourBankDetailsWithAuddisStatus = {
+    val bankDetails = YourBankDetails(
+      accountHolderName = directDebitDetails.bankAccountName.getOrElse(
+        throw new IllegalStateException("Missing bank account name")
+      ),
+      sortCode = directDebitDetails.bankSortCode.getOrElse(
+        throw new IllegalStateException("Missing bank sort code")
+      ),
+      accountNumber = directDebitDetails.bankAccountNumber.getOrElse(
+        throw new IllegalStateException("Missing bank account number")
+      )
+    )
 
-  private def required[A](page: QuestionPage[A])(implicit ua: UserAnswers, rds: play.api.libs.json.Reads[A]): A =
-    ua.get(page).getOrElse(throw new Exception(s"Missing details: ${page.toString}"))
-
+    YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(
+      yourBankDetails = bankDetails,
+      auddisStatus = directDebitDetails.auDdisFlag,
+      accountVerified = true
+    )
+  }
 
   private def buildRows(userAnswers: UserAnswers, paymentPlan: PaymentPlanDetails, mode: Mode)(implicit messages: Messages): (Seq[SummaryListRow], Call) =
     userAnswers.get(AmendPaymentPlanTypePage) match {

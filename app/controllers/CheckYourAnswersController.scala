@@ -148,7 +148,7 @@ class CheckYourAnswersController @Inject()(
       serviceType                  = required(DirectDebitSourcePage),
       paymentPlanType              = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan),
       paymentPlanReferenceNumber    = None,
-      paymentFrequency             = Some(ua.get(PaymentsFrequencyPage).toString),
+      paymentFrequency             = ua.get(PaymentsFrequencyPage).map(_.toString),
       yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
       planStartDate                = ua.get(PlanStartDatePage),
       planEndDate                  = ua.get(PlanEndDatePage),

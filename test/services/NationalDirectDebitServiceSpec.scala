@@ -463,7 +463,8 @@ class NationalDirectDebitServiceSpec extends SpecBase
       val chrisSubmission = models.requests.ChrisSubmissionRequest(
         serviceType = DirectDebitSource.TC,
         paymentPlanType = PaymentPlanType.TaxCreditRepaymentPlan,
-        paymentFrequency = Some(models.PaymentsFrequency.Monthly),
+        paymentPlanReferenceNumber    = None,
+        paymentFrequency = Some(models.PaymentsFrequency.Monthly.toString),
         yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
           accountHolderName = "Test",
           sortCode = "123456",
