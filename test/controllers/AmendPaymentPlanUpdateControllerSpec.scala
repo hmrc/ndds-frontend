@@ -50,7 +50,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
     val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
     val endDate: LocalDate = LocalDate.of(2025, 10, 25)
 
-    "must return OK and the correct view for a GET" in {
+    "must return OK and the correct view for a GET when plan type is Budget Payment Plan" in {
 
       def summaryList(userAnswers: UserAnswers, paymentPlanReference: String, app: Application): Seq[SummaryListRow] = {
         val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
@@ -71,6 +71,44 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         .set(AmendPlanStartDatePage, startDate).success.value
         .set(AmendPlanEndDatePage, endDate).success.value
         .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
+
+        val summaryListRows = summaryList(userAnswers, "123456789K", application)
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, summaryListRows)(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when plan type is Single Payment Plan" in {
+
+      def summaryList(userAnswers: UserAnswers, paymentPlanReference: String, app: Application): Seq[SummaryListRow] = {
+        val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
+        val planStartDate = userAnswers.get(AmendPlanStartDatePage)
+        val planEndDate = userAnswers.get(AmendPlanEndDatePage)
+
+        Seq(
+          PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
+          AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount)(messages(app)),
+          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app)),
+        )
+      }
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanReferenceQuery, "123456789K").success.value
+        .set(AmendPaymentAmountPage, regPaymentAmount).success.value
+        .set(AmendPlanStartDatePage, startDate).success.value
+        .set(AmendPlanEndDatePage, endDate).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
