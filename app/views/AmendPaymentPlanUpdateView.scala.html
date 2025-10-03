@@ -28,7 +28,7 @@
         govukInsetText: GovukInsetText
 )
 
-@(paymentPlanReference: String, regularPaymentAmount: String, startDate: String, endDate: String, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(paymentPlanReference: String, regularPaymentAmount: String, startDate: String, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
