@@ -27,12 +27,11 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
+import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanUpdateView
 
-import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
 import scala.concurrent.Future
 
@@ -51,19 +50,27 @@ class AmendPaymentPlanUpdateController @Inject()(
     implicit request =>
       val userAnswers = request.userAnswers
       if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-        val paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse("")
-        val paymentAmount = userAnswers.get(AmendPaymentAmountPage).getOrElse(BigDecimal(0))
-        val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(paymentAmount)
-        val startDate = userAnswers.get(AmendPlanStartDatePage).get
-        val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        val maybeResult = for {
+          paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
+          paymentAmount <- userAnswers.get(AmendPaymentAmountPage)
+          startDate <- userAnswers.get(AmendPlanStartDatePage)
+        } yield {
+          val formattedRegPaymentAmount = formatAmount(paymentAmount)
+          val formattedStartDate =
+            startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+          val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
 
-        val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
-
-        Future.successful(Ok(view(paymentPlanReference, formattedRegPaymentAmount, formattedStartDate, summaryRows)))
+          Ok(view(paymentPlanReference, formattedRegPaymentAmount, formattedStartDate, summaryRows))
+        }
+        maybeResult match {
+          case Some(result) => Future.successful(result)
+          case None =>
+            logger.error("Missing required values in user answers for amend payment plan")
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        }
       } else {
-        val paymentPlanType = userAnswers.get(AmendPaymentPlanTypePage).getOrElse("Missing plan type from user answers")
-        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $paymentPlanType")
-        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $paymentPlanType")
+        logger.error(s"NDDS Payment Plan Guard check failed")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
   }
 
