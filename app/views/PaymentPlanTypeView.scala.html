@@ -39,7 +39,7 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        @h1("paymentPlanType.heading", id = Some("govuk-margin-15"))
+        @h1("paymentPlanType.heading", classes = "govuk-heading-xl govuk-!-margin-bottom-3")
 
         @if(selectedAnswer.contains(MGD)) {
             @defining(HtmlFormat.fill(Seq(
