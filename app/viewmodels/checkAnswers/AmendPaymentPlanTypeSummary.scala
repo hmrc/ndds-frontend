@@ -31,7 +31,7 @@ object AmendPaymentPlanTypeSummary {
     answers.get(AmendPaymentPlanTypePage).map {
       answer =>
         SummaryListRowViewModel(
-          key = "amendPaymentPlanConfirmation.amendPaymentPlan.planType",
+          key = "paymentPlanDetails.details.planType.label",
           value = ValueViewModel(HtmlFormat.escape(answer).toString),
           actions = Seq.empty
         )

@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package pages
+package utils
 
-import play.api.libs.json.JsPath
-
-case object AmendPaymentPlanTypePage extends QuestionPage[String] {
-
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "amendPaymentPlanType"
+object Constants {
+  val shortDateTimeFormatPattern = "d MMM yyyy"
+  val longDateTimeFormatPattern = "d MMMM yyyy"
 }

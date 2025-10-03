@@ -62,14 +62,14 @@
         @govukSummaryList(SummaryList(
             card = Some(Card(
                 title = Some(CardTitle(
-                    content = messages("directDebitPaymentSummary.activePayment.summary.title", pp.paymentReference)
+                    content = messages("directDebitPaymentSummary.activePayment.summary.title", pp.planRefNumber)
                 )),
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.PaymentPlanDetailsController.onRedirect(pp.paymentReference).url,
+                            href = routes.PaymentPlanDetailsController.onRedirect(pp.planRefNumber).url,
                             content = messages("directDebitPaymentSummary.activePayment.summary.action"),
-                            visuallyHiddenText = Some(messages(pp.paymentReference))
+                            visuallyHiddenText = Some(messages(pp.planRefNumber))
                         )
                     )
                 ))
@@ -77,7 +77,7 @@
             rows = Seq(
                 SummaryListRow(
                     key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.planType")),
-                    value = Value(content = HtmlContent(pp.planType))
+                    value = Value(content = HtmlContent(messages(s"directDebitPaymentSummary.activePayment.summary.planType.${pp.planType}")))
                 ),
                 SummaryListRow(
                     key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")),

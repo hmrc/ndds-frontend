@@ -61,7 +61,6 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
 
   val date: LocalDateTime = LocalDateTime.now(fixedClock)
-  private val formattedDate = "06 Feb 2025"
   private val formattedDateNumeric = "06 02 2025"
 
   val expectedEarliestPaymentDate: EarliestPaymentDate = EarliestPaymentDate("2025-02-06")
@@ -120,7 +119,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val view = application.injector.instanceOf[PaymentDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -141,7 +140,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDateNumeric, Call("GET", paymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
@@ -236,7 +235,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric, Call("GET", paymentAmountRoute))(request, messages(application)).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDateNumeric, Call("GET", paymentAmountRoute))(request, messages(application)).toString
         }
       }
 

@@ -24,16 +24,31 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, BankDetailsCheckYourAnswerPage, PersonalOrBusinessAccountPage, YourBankDetailsPage}
+import pages._
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers.*
+import play.api.test.Helpers._
 import repositories.SessionRepository
+import utils.MacGenerator
 
 import scala.concurrent.Future
 
 class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSugar {
+
+  // Fake MacGenerator for testing
+  class FakeMacGenerator extends MacGenerator(null) {
+    override def generateMac(
+                              accountName: String,
+                              accountNumber: String,
+                              sortCode: String,
+                              lines: Seq[String],
+                              town: String,
+                              postcode: String,
+                              bankName: String,
+                              bacsNumber: String
+                            ): String = "TEST-MAC"
+  }
 
   def onwardRoute: Call = Call("GET", "/foo")
 
@@ -41,7 +56,6 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
   val form = formProvider()
 
   lazy val bankDetailsCheckYourAnswerRoute = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
-  lazy val ConfirmAuthorityRoute = routes.ConfirmAuthorityController.onPageLoad(NormalMode).url
 
   "BankDetailsCheckYourAnswer Controller" - {
 
@@ -52,14 +66,15 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
         .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[MacGenerator].toInstance(new FakeMacGenerator))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsCheckYourAnswerRoute)
         val result = route(application, request).value
 
         status(result) mustEqual OK
-
         val html = contentAsString(result)
         html must include("Check your answers")
         html must include("BARCLAYS BANK UK PLC")
@@ -71,7 +86,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       }
     }
 
-    "must populate the view correctly on a GET when the question has previously been answered" in {
+    "must populate the view correctly on a GET when previously answered" in {
       val userAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
@@ -79,14 +94,15 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
         .set(BankDetailsCheckYourAnswerPage, true).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[MacGenerator].toInstance(new FakeMacGenerator))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsCheckYourAnswerRoute)
         val result = route(application, request).value
 
         status(result) mustEqual OK
-
         val html = contentAsString(result)
         html must include("Check your answers")
         html must include("Your bank details")
@@ -97,35 +113,36 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       }
     }
 
-    "must redirect to the next page and send an audit event when Continue is clicked" in {
+    "must redirect to the next page and persist MAC when Continue is clicked" in {
       val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
       val userAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", true, false))
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
+        .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[MacGenerator].toInstance(new FakeMacGenerator)
         )
         .build()
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
       running(application) {
-        val request =
-          FakeRequest(POST, bankDetailsCheckYourAnswerRoute)
-            .withFormUrlEncodedBody("anything" -> "ignored")
+        val request = FakeRequest(POST, bankDetailsCheckYourAnswerRoute).withFormUrlEncodedBody("anything" -> "ignored")
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
       }
     }
-    
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-      val application = applicationBuilder(userAnswers = None).build()
+
+    "must redirect to Journey Recovery for a GET if no existing data" in {
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[MacGenerator].toInstance(new FakeMacGenerator))
+        .build()
 
       running(application) {
         val request = FakeRequest(GET, bankDetailsCheckYourAnswerRoute)
@@ -136,16 +153,13 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       }
     }
 
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
+    "must redirect to Journey Recovery for a POST if no existing data" in {
+      val application = applicationBuilder(userAnswers = None)
+        .overrides(bind[MacGenerator].toInstance(new FakeMacGenerator))
+        .build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, bankDetailsCheckYourAnswerRoute)
-            .withFormUrlEncodedBody(("anything" -> "ignored"))
-
+        val request = FakeRequest(POST, bankDetailsCheckYourAnswerRoute).withFormUrlEncodedBody("anything" -> "ignored")
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER

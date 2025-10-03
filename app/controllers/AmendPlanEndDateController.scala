@@ -22,10 +22,13 @@ import forms.AmendPlanEndDateFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.AmendPlanEndDatePage
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPlanEndDateView
 
@@ -38,10 +41,11 @@ class AmendPlanEndDateController @Inject()(
                                         identify: IdentifierAction,
                                         getData: DataRetrievalAction,
                                         requireData: DataRequiredAction,
+                                        nddsService: NationalDirectDebitService,
                                         formProvider: AmendPlanEndDateFormProvider,
                                         val controllerComponents: MessagesControllerComponents,
                                         view: AmendPlanEndDateView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
@@ -57,17 +61,39 @@ class AmendPlanEndDateController @Inject()(
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-
       val form = formProvider()
+      val userAnswers = request.userAnswers
       form.bindFromRequest().fold(
         formWithErrors =>
           Future.successful(BadRequest(view(formWithErrors, mode,routes.AmendPaymentAmountController.onPageLoad(mode)))),
 
         value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+          if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+            (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
+              case (Some(planDetails), Some(amendedAmount)) =>
+                val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+                val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
+
+                val isNoChange = amendedAmount == dbAmount && value == dbEndDate
+
+                if (isNoChange) {
+                  val key = "amendment.noChange"
+                  val errorForm = form.fill(value).withError("value", key)
+                  Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                } else {
+                  for {
+                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
+                    _ <- sessionRepository.set(updatedAnswers)
+                  } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                }
+
+              case _ =>
+                logger.error("Missing Amend payment amount and/or amend plan end date")
+                Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+            }
+          } else {
+            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(AmendPaymentPlanTypePage).get}")
+          }
       )
   }
 }
