@@ -26,7 +26,7 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow

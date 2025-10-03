@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.responses.PaymentPlanResponse
-import models.{NormalMode, PaymentPlanType, PaymentsFrequency, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -44,7 +44,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
     val mockSessionRepository = mock[SessionRepository]
 
     def createSummaryListForBudgetPaymentPlan(userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
-       val paymentPlan = paymentPlanDetails.paymentPlanDetails
+      val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
         AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse(""))(messages(app)),

@@ -18,7 +18,6 @@ package controllers
 
 import base.SpecBase
 import models.{PaymentPlanType, UserAnswers}
-import models.responses.PaymentPlanResponse
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
@@ -47,8 +46,6 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
     val formattedRegPaymentAmount: String = NumberFormat.getCurrencyInstance(Locale.UK).format(regPaymentAmount)
     val startDate: LocalDate = LocalDate.of(2025, 10, 2)
     val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-    val endDate: LocalDate = LocalDate.of(2025, 10, 25)
-    val formattedEndDate = endDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
     "must return OK and the correct view for a GET" in {
 
@@ -69,7 +66,6 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         .set(PaymentPlanReferenceQuery, "123456789K").success.value
         .set(AmendPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
-        .set(AmendPlanEndDatePage, endDate).success.value
         .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
@@ -156,7 +152,6 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         .set(PaymentPlanReferenceQuery, "123456789K").success.value
         .set(RegularPaymentAmountPage, regPaymentAmount).success.value
         .set(AmendPlanStartDatePage, startDate).success.value
-        .set(AmendPlanEndDatePage, endDate).success.value
         .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
