@@ -339,6 +339,7 @@ directDebitPaymentSummary.activePayment.summary.planType.budgetPaymentPlan  = Bu
 directDebitPaymentSummary.activePayment.summary.planType.singlePaymentPlan = Single payment
 directDebitPaymentSummary.activePayment.summary.planType.variablePaymentPlan = Variable Payment
 directDebitPaymentSummary.activePayment.summary.planType.taxCreditRepaymentPlan = Tax Credit Repayment
+directDebitPaymentSummary.activePayment.summary.planType.unknownPlanType = Unknown plan
 directDebitPaymentSummary.activePayment.summary.paymentFor = Payment for
 directDebitPaymentSummary.activePayment.summary.date = Date set up
 directDebitPaymentSummary.activePayment.summary.amount = Payment amount
