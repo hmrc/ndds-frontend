@@ -28,6 +28,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
 
@@ -184,14 +185,14 @@ class AmendPaymentPlanConfirmationController @Inject()(
         (Seq(
           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
           AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
-          //DateSetupSummary.row(paymentPlan.submissionDateTime),
           TotalAmountDueSummary.row(paymentPlan.totalLiability),
           MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability),
           FinalPaymentAmountSummary.row(paymentPlan.balancingPaymentAmount, paymentPlan.totalLiability),
           PaymentsFrequencySummary.row(paymentPlan.scheduledPaymentFrequency),
           AmendPlanStartDateSummary.row(
             PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPlanStartDatePage)
+            userAnswers.get(AmendPlanStartDatePage),
+            Constants.shortDateTimeFormatPattern
           ),
           AmendPaymentAmountSummary.row(
             PaymentPlanType.BudgetPaymentPlan.toString,
@@ -200,6 +201,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           ),
           AmendPlanEndDateSummary.row(
             userAnswers.get(AmendPlanEndDatePage),
+            Constants.shortDateTimeFormatPattern,
             true
           )
         ), routes.AmendPlanEndDateController.onPageLoad(mode))
@@ -217,6 +219,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           AmendPlanStartDateSummary.row(
             PaymentPlanType.SinglePaymentPlan.toString,
             userAnswers.get(AmendPlanStartDatePage),
+            Constants.shortDateTimeFormatPattern,
             true
           )
         ), routes.AmendPlanStartDateController.onPageLoad(mode))

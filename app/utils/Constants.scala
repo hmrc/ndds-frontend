@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package queries
+package utils
 
-import play.api.libs.json.JsPath
-
-import java.time.LocalDateTime
-
-case object DateSetupQuery extends Gettable[LocalDateTime] with Settable[LocalDateTime] {
-
-  override def path: JsPath = JsPath \ "dateSetup"
-  
+object Constants {
+  val shortDateTimeFormatPattern = "d MMM yyyy"
+  val longDateTimeFormatPattern = "d MMMM yyyy"
 }

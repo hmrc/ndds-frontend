@@ -28,6 +28,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
@@ -100,7 +101,7 @@ class PaymentPlanDetailsController @Inject()(
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
           DateSetupSummary.row(planDetail.submissionDateTime),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate)
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
         )
       case PaymentPlanType.BudgetPaymentPlan.toString =>
         Seq(
@@ -110,8 +111,8 @@ class PaymentPlanDetailsController @Inject()(
           TotalAmountDueSummary.row(planDetail.totalLiability),
           MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
           FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
-          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern),
+          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
           AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true), //true for start
@@ -125,8 +126,8 @@ class PaymentPlanDetailsController @Inject()(
           TotalAmountDueSummary.row(planDetail.totalLiability),
           MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
           FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate),
-          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern),
+          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern),
         )
     }
   }

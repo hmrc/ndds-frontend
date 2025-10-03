@@ -370,6 +370,13 @@ paymentPlanDetails.details.planStartDate = Plan start date
 paymentPlanDetails.details.planEndDate = Plan end date
 paymentPlanDetails.details.suspendStartDate = Suspend start date
 paymentPlanDetails.details.suspendEndDate = Suspend end date
+paymentPlanDetails.paymentsFrequency.monthly = Monthly
+paymentPlanDetails.paymentsFrequency.weekly = Weekly
+paymentPlanDetails.paymentsFrequency.fortNightly = Fort Nightly
+paymentPlanDetails.paymentsFrequency.fourWeekly = Four Weekly
+paymentPlanDetails.paymentsFrequency.quarterly = Quarterly
+paymentPlanDetails.paymentsFrequency.sixMonthly = Six Monthly
+paymentPlanDetails.paymentsFrequency.annually = Annually
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 
@@ -384,7 +391,7 @@ amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026
 
-amendPaymentPlanConfirmation.title = Confirm plan page - Amend a payment plan
+amendPaymentPlanConfirmation.title = Confirm new payment plan details - amend a payment plan
 amendPaymentPlanConfirmation.heading = Confirm new payment plan details
 amendPaymentPlanConfirmation.p1 = The amendment will remove any suspension you currently have in place. Please check that the details below are correct, then click ''Continue'' to proceed. For security reasons you may be asked to re-authenticate your details.
 amendPaymentPlanConfirmation.directDebit.h2 = Direct Debit details
@@ -403,13 +410,14 @@ amendPaymentPlanConfirmation.amendPaymentPlan.endDate = Plan end date
 amendPaymentPlanConfirmation.amendPaymentPlan.endDate.change = Change
 amendPaymentPlanConfirmation.amendPaymentPlan.continueButton = Continue
 amendPaymentPlanConfirmation.summary.link = Why can't I edit all information?
-amendPaymentPlanConfirmation.summary.content = For your plan type or payment you will need to contact us directly to change certain details like your Direct Debit reference, account number, or payment reference. These are set when your plan is first created and require verification for security reasons. You can change payment amounts and dates online, but other changes must be made by calling our customer service team on 0845 366 1208.
+amendPaymentPlanConfirmation.summary.content = You can change payment amounts and dates online, but you''ll need to contact us to change details that were set when your plan was created. This is for verification and security reasons. Call our customer service team on 0845 366 1208.
 
 amendPaymentPlanUpdate.title = Payment plan updated
 amendPaymentPlanUpdate.panel.title = Payment plan updated
 amendPaymentPlanUpdate.panel.body1 = Your payment reference
 amendPaymentPlanUpdate.panel.strong = <br><strong>{0}</strong>
 amendPaymentPlanUpdate.panel.body2 = <br>has been successfully updated
+amendPaymentPlanUpdate.confirm = We''ve sent a confirmation email to your registered email address.
 amendPaymentPlanUpdate.h1 = What happens next
 amendPaymentPlanUpdate.p1 = Your updated payment plan will take effect from your next scheduled payment date.
 amendPaymentPlanUpdate.l1 = Your new payment amount of {0} will be collected monthly starting {1}

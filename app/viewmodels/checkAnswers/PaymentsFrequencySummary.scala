@@ -64,11 +64,11 @@ object PaymentsFrequencySummary  {
     }
 
   def row(value: Option[String])(implicit messages: Messages): SummaryListRow = {
-    val displayValue = value.getOrElse("")
+    val displayValue = value.map(v => s"paymentPlanDetails.paymentsFrequency.$v").getOrElse("")
 
     SummaryListRowViewModel(
       key = "paymentsFrequency.checkYourAnswersLabel",
-      value = ValueViewModel(HtmlFormat.escape(displayValue).toString),
+      value = ValueViewModel(HtmlFormat.escape(messages(displayValue)).toString),
       actions = Seq.empty
     )
   }
