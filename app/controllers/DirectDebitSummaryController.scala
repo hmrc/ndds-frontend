@@ -49,10 +49,8 @@ class DirectDebitSummaryController @Inject()(
           nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
             for {
               updatedAnswers <- Future.fromTry(userAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
-              updatedAnswers <- Future.fromTry(userAnswers.set(DirectDebitReferenceQuery,reference))
-
-              cachedAnswers  <- Future.fromTry(updatedAnswers.set(DirectDebitSummaryPage, ddPaymentPlans.paymentPlanCount))
-              _              <- sessionRepository.set(cachedAnswers)
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery,reference))
+              _              <- sessionRepository.set(updatedAnswers)
             } yield {
               Ok(
                 view(

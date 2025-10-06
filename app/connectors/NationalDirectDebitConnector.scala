@@ -18,9 +18,7 @@ package connectors
 
 import models.NddResponse
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanResponse}
+import models.responses.*
 import play.api.Logging
 import play.api.http.Status.OK
 import play.api.libs.json.Json
@@ -110,19 +108,9 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
       .execute[PaymentPlanResponse]
   }
 
-  def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)(implicit hc: HeaderCarrier): Future[DuplicateCheckResponse] = {
     http.post(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/duplicate-plan-check")
       .withBody(Json.toJson(request))
-      .execute[Either[UpstreamErrorResponse, HttpResponse]]
-      .flatMap {
-        case Right(response) if response.status == OK =>
-          Future.successful(true)
-        case Left(errorResponse) =>
-          logger.error(s"Duplicate check failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
-          Future.failed(new Exception(s"Duplicate check failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))
-        case Right(response) =>
-          logger.error(s"Unexpected Duplicate check response error status: ${response.status}")
-          Future.failed(new Exception(s"Unexpected status: ${response.status}"))
-      }
+      .execute[DuplicateCheckResponse]
   }
 }

@@ -18,8 +18,6 @@ package controllers
 
 import controllers.actions.*
 import forms.AmendPlanStartDateFormProvider
-
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage}
@@ -33,6 +31,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPlanStartDateView
 
 import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AmendPlanStartDateController @Inject()(
@@ -81,13 +80,19 @@ class AmendPlanStartDateController @Inject()(
                   val errorForm = form.fill(value).withError("value", key)
                   Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                 } else {
-//                  nddsService.isDuplicatePaymentPlan(userAnswers) map { isDuplicate =>
-//                    println(s"Duplicate check response is $isDuplicate")
-//                  }
                   for {
+                    duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers)
                     updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
                     _ <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
+                  } yield {
+                    if(duplicateCheckResponse.isDuplicate){
+                      println("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+                      logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)}
+                    else {
+                      println("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+                      logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)}
+                    Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
+                  }
                 }
 
               case _ =>

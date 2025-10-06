@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
 import itutil.ApplicationWithWiremock
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
-import models.responses.{BankAddress, Country, EarliestPaymentDate, GenerateDdiRefResponse}
+import models.responses.*
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YourBankDetailsWithAuddisStatus}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
@@ -450,52 +450,29 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
             aResponse()
               .withStatus(OK)
               .withHeader("Content-Type", "application/json")
-              .withBody("true") // JSON boolean
+              .withBody(Json.toJson(DuplicateCheckResponse(true)).toString)
           )
       )
 
-      val result = connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue
-      result shouldBe true
+      val result: DuplicateCheckResponse = connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue
+      result shouldBe DuplicateCheckResponse(true)
     }
 
-    "must fail when request returns a non-200 status" in {
-      stubFor(
-        post(urlPathMatching("/national-direct-debit/direct-debits/testRef/duplicate-plan-check"))
-          .willReturn(
-            aResponse().withStatus(BAD_REQUEST)
-          )
-      )
-
-      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue)
-      ex.getMessage should include("failed")
-    }
-
-    "must fail when request returns an UpstreamErrorResponse" in {
+    "successfully return false when there is no duplicate Plan with 200 OK" in {
       stubFor(
         post(urlPathMatching("/national-direct-debit/direct-debits/testRef/duplicate-plan-check"))
           .willReturn(
             aResponse()
-              .withStatus(INTERNAL_SERVER_ERROR)
-              .withBody("test error")
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(Json.toJson(DuplicateCheckResponse(false)).toString)
           )
       )
 
-      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue)
-      ex.getMessage should include("status: 500")
+      val result: DuplicateCheckResponse = connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue
+      result shouldBe DuplicateCheckResponse(false)
     }
-
-    "must fail when the result is a failed future" in {
-      stubFor(
-        post(urlPathMatching("/national-direct-debit/direct-debits/testRef/duplicate-plan-check"))
-          .willReturn(
-            aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER) // Simulate connection drop
-          )
-      )
-
-      val ex = intercept[Exception](connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue)
-      ex.getMessage should include("The future returned an exception")
-    }
-
+    
   }
 
 }

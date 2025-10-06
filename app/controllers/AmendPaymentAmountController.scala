@@ -20,7 +20,6 @@ import controllers.actions.*
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, NewAmendPaymentAmountPage}
 import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form

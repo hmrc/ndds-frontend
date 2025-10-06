@@ -21,13 +21,9 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import pages.*
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
 import models.responses.*
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
-import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
@@ -36,7 +32,7 @@ import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.Utils
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -159,27 +155,25 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
-//  def isDuplicatePaymentPlan(ua: UserAnswers)
-//                            (implicit hc: HeaderCarrier, request: Request[_]): Future[Boolean] = {
-//    if (
-//      (amountChanged(ua) && (isSinglePaymentPlan(ua) || isBudgetPaymentPlan(ua))) ||
-//        (isSinglePaymentPlan(ua) && startDateChanged(ua))
-//    ) {
-//      val countPaymentPlans = ua.get(PaymentPlansCountQuery).get
-//
-//      if (countPaymentPlans > 1) {
-//        val request: PaymentPlanDuplicateCheckRequest =
-//          Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
-//
-//        val flag = nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
-//        flag
-//      } else {
-//        println("There is only 1 payment plan so not checking duplicate as in no RDS Call")
-//        Future.successful(false)
-//      }
-//    } else {
-//      Future.successful(false)
-//    }
-//  }
-
+  def isDuplicatePaymentPlan(ua: UserAnswers)
+                            (implicit hc: HeaderCarrier, request: Request[_]): Future[DuplicateCheckResponse] = {
+    ua.get(PaymentPlansCountQuery) match {
+      case Some(count) => {
+        if (count > 1) {
+          val request: PaymentPlanDuplicateCheckRequest =
+            Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
+          
+          nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
+        }
+        else {
+          logger.info("There is only 1 payment plan so not checking duplicate as in no RDS Call")
+          Future.successful(DuplicateCheckResponse(false))
+        }
+      }
+      case None => {
+        logger.error("Could not find the count of Payment Plans")
+        throw new IllegalStateException("Count of payment plans is missing or invalid")
+      }
+    }
+  }
 }

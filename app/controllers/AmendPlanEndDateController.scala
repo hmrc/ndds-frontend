@@ -18,11 +18,8 @@ package controllers
 
 import controllers.actions.*
 import forms.AmendPlanEndDateFormProvider
-
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPlanEndDatePage, NewAmendPlanEndDatePage}
 import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -33,6 +30,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPlanEndDateView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AmendPlanEndDateController @Inject()(
@@ -82,13 +80,27 @@ class AmendPlanEndDateController @Inject()(
                   val errorForm = form.fill(value).withError("value", key)
                   Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                 } else {
-//                  nddsService.isDuplicatePaymentPlan(userAnswers) map { isDuplicate =>
-//                    println(s"Duplicate check response is $isDuplicate")
-//                  }
-                  for {
-                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
-                    _ <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                  val hasAmountChanged = amendedAmount != dbAmount
+                  val hasEndDateChanged = value != dbEndDate
+
+                  if(!hasAmountChanged && hasEndDateChanged) {
+                    logger.info("Duplicate Check not performed as only EndDate has been amended")
+                    for {
+                      updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
+                      _ <- sessionRepository.set(updatedAnswers)
+                    } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                  }
+                  else {
+                    for {
+                      duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers)
+                      updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
+                      _ <- sessionRepository.set(updatedAnswers)
+                    } yield{
+                      val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
+                      if(duplicateCheckResponse.isDuplicate) logger.warn(logMsg) else logger.info(logMsg)
+                      Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                    }
+                  }
                 }
 
               case _ =>
