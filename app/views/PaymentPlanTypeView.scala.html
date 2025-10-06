@@ -25,6 +25,7 @@
     govukDetails: GovukDetails,
     govukRadios: GovukRadios,
     h1: Header1,
+    h3: Header3,
     govukButton: GovukButton,
     bulletList: BulletList
 )
@@ -43,12 +44,13 @@
 
         @if(selectedAnswer.contains(MGD)) {
             @defining(HtmlFormat.fill(Seq(
-                paragraph("paymentPlan.collapsable.mgd"),
                 paragraph("paymentPlan.collapsable.mgd.p1"),
-                paragraph("paymentPlan.collapsable.mgd.single"),
+                h3("paymentPlan.collapsable.mgd.single"),
                 paragraph("paymentPlan.collapsable.mgd.p2"),
-                paragraph("paymentPlan.collapsable.mgd.variable"),
                 paragraph("paymentPlan.collapsable.mgd.p3"),
+                h3("paymentPlan.collapsable.mgd.variable"),
+                paragraph("paymentPlan.collapsable.mgd.p4"),
+                paragraph("paymentPlan.collapsable.mgd.p5"),
                 bulletList(
                     items = Seq(
                         "paymentPlan.collapsable.mgd.b1",
@@ -56,12 +58,12 @@
                     )
                 ),
 
-            ))) { mgdContent =>
+            ))) { content =>
 
                 @govukDetails(
                     Details(
                         summary = messages("paymentPlan.collapsable"),
-                        content = HtmlContent(mgdContent)
+                        content = HtmlContent(content)
                     )
                 )
             }
@@ -69,11 +71,10 @@
 
         @if(selectedAnswer.contains(SA)) {
             @defining(HtmlFormat.fill(Seq(
-                paragraph("paymentPlan.collapsable.sa"),
                 paragraph("paymentPlan.collapsable.sa.p1"),
-                paragraph("paymentPlan.collapsable.sa.single"),
+                h3("paymentPlan.collapsable.sa.single"),
                 paragraph("paymentPlan.collapsable.sa.p2"),
-                paragraph("paymentPlan.collapsable.sa.budget"),
+                h3("paymentPlan.collapsable.sa.budget"),
                 paragraph("paymentPlan.collapsable.sa.p3"),
                 paragraph("paymentPlan.collapsable.sa.p4"),
                 bulletList(
@@ -87,12 +88,12 @@
                 paragraph("paymentPlan.collapsable.sa.p5"),
                 paragraph("paymentPlan.collapsable.sa.p6"),
 
-            ))) { mgdContent =>
+            ))) { content =>
 
                 @govukDetails(
                     Details(
                         summary = messages("paymentPlan.collapsable"),
-                        content = HtmlContent(mgdContent)
+                        content = HtmlContent(content)
                     )
                 )
             }
@@ -100,11 +101,10 @@
 
         @if(selectedAnswer.contains(TC)) {
             @defining(HtmlFormat.fill(Seq(
-                paragraph("paymentPlan.collapsable.tc"),
                 paragraph("paymentPlan.collapsable.tc.p1"),
-                paragraph("paymentPlan.collapsable.tc.single"),
+                h3("paymentPlan.collapsable.tc.single"),
                 paragraph("paymentPlan.collapsable.tc.p2"),
-                paragraph("paymentPlan.collapsable.credit"),
+                h3("paymentPlan.collapsable.credit"),
                 paragraph("paymentPlan.collapsable.tc.p3"),
                 paragraph("paymentPlan.collapsable.tc.p4"),
                 bulletList(
@@ -122,12 +122,12 @@
                 ),
                 paragraph("paymentPlan.collapsable.tc.p6"),
 
-            ))) { mgdContent =>
+            ))) { content =>
 
                 @govukDetails(
                     Details(
                         summary = messages("paymentPlan.collapsable"),
-                        content = HtmlContent(mgdContent)
+                        content = HtmlContent(content)
                     )
                 )
             }
