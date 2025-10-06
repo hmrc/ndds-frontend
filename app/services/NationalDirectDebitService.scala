@@ -66,17 +66,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       false
     }
   }
-
-  def submitAmendChrisData(submission: AmendChrisSubmissionRequest)
-                     (implicit hc: HeaderCarrier): Future[Boolean] = {
-    nddConnector.amendSubmitChrisData(submission).map { success =>
-      success
-    }.recover { case ex =>
-      logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
-      false
-    }
-  }
-
+  
   def calculateFutureWorkingDays(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)
       .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))

@@ -17,7 +17,7 @@
 package connectors
 
 import models.NddResponse
-import models.requests.{AmendChrisSubmissionRequest, ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanResponse}
 import play.api.Logging
 import play.api.http.Status.OK
@@ -62,23 +62,6 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   }
 
   def submitChrisData(submission: ChrisSubmissionRequest)
-                     (implicit hc: HeaderCarrier): Future[Boolean] = {
-    http.post(url"$nationalDirectDebitBaseUrl/chris")
-      .withBody(Json.toJson(submission))
-      .execute[Either[UpstreamErrorResponse, HttpResponse]]
-      .flatMap {
-        case Right(response) if response.status == OK =>
-          Future.successful(true)
-        case Left(errorResponse) =>
-          logger.error(s"CHRIS submission failed: ${errorResponse.message}, status: ${errorResponse.statusCode}")
-          Future.failed(new Exception(s"CHRIS submission failed: ${errorResponse.message}, status: ${errorResponse.statusCode}"))
-        case Right(response) =>
-          logger.error(s"Unexpected CHRIS response error status: ${response.status}")
-          Future.failed(new Exception(s"Unexpected status: ${response.status}"))
-      }
-  }
-
-  def amendSubmitChrisData(submission: AmendChrisSubmissionRequest)
                      (implicit hc: HeaderCarrier): Future[Boolean] = {
     http.post(url"$nationalDirectDebitBaseUrl/chris")
       .withBody(Json.toJson(submission))
