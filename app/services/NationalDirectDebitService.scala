@@ -21,13 +21,10 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
-import models.requests.{AmendChrisSubmissionRequest, ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import pages.*
 import models.responses.*
 import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
+import pages.*
 import play.api.Logging
 import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
@@ -66,7 +63,7 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
       false
     }
   }
-  
+
   def calculateFutureWorkingDays(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)
       .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))

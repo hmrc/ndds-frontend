@@ -137,7 +137,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
           serviceType = serviceType,
           paymentPlanType = paymentPlanType,
           paymentFrequency = if (planDetail.planType.equalsIgnoreCase("singlePaymentPlan")) None else planDetail.scheduledPaymentFrequency,
-          paymentPlanReferenceNumber = ua.get(PaymentPlanReferencePage),
+          paymentPlanReferenceNumber = ua.get(PaymentPlanReferenceQuery),
           yourBankDetailsWithAuddisStatus = bankDetailsWithAuddisStatus,
           planStartDate = planStartDateDetails,
           planEndDate = ua.get(AmendPlanEndDatePage),
