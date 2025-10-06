@@ -16,11 +16,8 @@
 
 package models.requests
 
-import models.responses.BankAddress
-import models.{
-  DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation,
-  PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus
-}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation,
+  PaymentPlanType, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate

@@ -28,7 +28,6 @@ object PaymentPlanType extends Enumerable.Implicits {
   case object VariablePaymentPlan extends WithName("variablePaymentPlan") with PaymentPlanType
   case object BudgetPaymentPlan extends WithName("budgetPaymentPlan") with PaymentPlanType
   case object TaxCreditRepaymentPlan extends WithName("taxCreditRepaymentPlan") with PaymentPlanType
-  case object AmendPaymentPlan extends WithName("amendPaymentPlan") with PaymentPlanType
 
   // All values used for Enumerable mapping
   val values: Seq[PaymentPlanType] = Seq(
