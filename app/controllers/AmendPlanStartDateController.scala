@@ -81,10 +81,9 @@ class AmendPlanStartDateController @Inject()(
                   val errorForm = form.fill(value).withError("value", key)
                   Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                 } else {
-                  //TODO: will be used to show a warning screen later for amending duplicate plan
-                  val flag = nddService.isDuplicatePaymentPlan(updatedAnswers)
-                  flag.map { value =>
-                    println(s"Duplicate check response is $value")
+//                  nddsService.isDuplicatePaymentPlan(userAnswers) map { isDuplicate =>
+//                    println(s"Duplicate check response is $isDuplicate")
+//                  }
                   for {
                     updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
                     _ <- sessionRepository.set(updatedAnswers)

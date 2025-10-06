@@ -22,7 +22,7 @@ import pages.DirectDebitSummaryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
-import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSummaryView

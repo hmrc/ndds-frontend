@@ -17,14 +17,12 @@
 package utils
 
 import models.DirectDebitSource
-
 import models.UserAnswers
 import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
-
 import models.requests.PaymentPlanDuplicateCheckRequest
 import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.PaymentReferencePage
-import queries.{DirectDebitReferenceQuery, PaymentReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery}
 
 object Utils {
   val emptyString = ""
@@ -78,7 +76,7 @@ object Utils {
     PaymentPlanDuplicateCheckRequest(
       //TODO: Temp data with be replaced with actual data
       directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
-      paymentPlanReference = userAnswers.get(PaymentReferenceQuery).get,
+      paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).get,
       planType = PaymentPlanType.SinglePaymentPlan.toString,
       paymentService = DirectDebitSource.SA.toString,
       paymentReference = userAnswers.get(PaymentReferencePage).get,

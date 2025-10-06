@@ -31,7 +31,7 @@ import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequenc
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.Utils
@@ -111,7 +111,6 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     } else {
       config.paymentDelayDynamicAuddisNotEnabled
     }
-
     config.paymentDelayFixed + dynamicDelay
   }
 
@@ -160,27 +159,27 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
-  def isDuplicatePaymentPlan(ua: UserAnswers)
-                            (implicit hc: HeaderCarrier, request: Request[_]): Future[Boolean] = {
-    if (
-      (amountChanged(ua) && (isSinglePaymentPlan(ua) || isBudgetPaymentPlan(ua))) ||
-        (isSinglePaymentPlan(ua) && startDateChanged(ua))
-    ) {
-      val countPaymentPlans = ua.get(PaymentPlansCountQuery).get
-
-      if (countPaymentPlans > 1) {
-        val request: PaymentPlanDuplicateCheckRequest =
-          Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
-
-        val flag = nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
-        flag
-      } else {
-        println("There is only 1 payment plan so not checking duplicate as in no RDS Call")
-        Future.successful(false)
-      }
-    } else {
-      Future.successful(false)
-    }
-  }
+//  def isDuplicatePaymentPlan(ua: UserAnswers)
+//                            (implicit hc: HeaderCarrier, request: Request[_]): Future[Boolean] = {
+//    if (
+//      (amountChanged(ua) && (isSinglePaymentPlan(ua) || isBudgetPaymentPlan(ua))) ||
+//        (isSinglePaymentPlan(ua) && startDateChanged(ua))
+//    ) {
+//      val countPaymentPlans = ua.get(PaymentPlansCountQuery).get
+//
+//      if (countPaymentPlans > 1) {
+//        val request: PaymentPlanDuplicateCheckRequest =
+//          Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
+//
+//        val flag = nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
+//        flag
+//      } else {
+//        println("There is only 1 payment plan so not checking duplicate as in no RDS Call")
+//        Future.successful(false)
+//      }
+//    } else {
+//      Future.successful(false)
+//    }
+//  }
 
 }

@@ -36,7 +36,7 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.{DirectDebitReferenceQuery, PaymentPlanTypeQuery, PaymentPlansCountQuery, PaymentReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
