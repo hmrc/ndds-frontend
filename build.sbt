@@ -1,3 +1,4 @@
+import org.scalafmt.sbt.ScalafmtPlugin.autoImport.scalafmtDetailedError
 import play.sbt.routes.RoutesKeys
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
@@ -11,7 +12,11 @@ lazy val microservice = (project in file("."))
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(inConfig(Test)(testSettings): _*)
   .settings(ThisBuild / useSuperShell := false)
-  .settings(scalafmtOnCompile := true)
+  .settings(scalafmtOnCompile := true,
+    scalafmtDetailedError := true,
+    scalafmtPrintDiff := true,
+    scalafmtFailOnErrors := true
+  )
   .settings(
     name := "ndds-frontend",
     PlayKeys.playDefaultPort := 6990,
