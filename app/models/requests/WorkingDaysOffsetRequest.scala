@@ -23,5 +23,3 @@ case class WorkingDaysOffsetRequest(baseDate: String, offsetWorkingDays: Int)
 object WorkingDaysOffsetRequest {
   implicit val format: OFormat[WorkingDaysOffsetRequest] = Json.format[WorkingDaysOffsetRequest]
 }
-
-

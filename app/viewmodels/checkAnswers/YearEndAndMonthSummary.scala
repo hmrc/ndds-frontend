@@ -21,22 +21,21 @@ import models.{CheckMode, UserAnswers}
 import pages.YearEndAndMonthPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object YearEndAndMonthSummary  {
+object YearEndAndMonthSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(YearEndAndMonthPage).map {
-      answer =>
+    answers.get(YearEndAndMonthPage).map { answer =>
 
-        SummaryListRowViewModel(
-          key     = "yearEndAndMonth.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.displayFormat),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.YearEndAndMonthController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("yearEndAndMonth.change.hidden"))
-          )
+      SummaryListRowViewModel(
+        key   = "yearEndAndMonth.checkYourAnswersLabel",
+        value = ValueViewModel(answer.displayFormat),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.YearEndAndMonthController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("yearEndAndMonth.change.hidden"))
         )
+      )
     }
 }

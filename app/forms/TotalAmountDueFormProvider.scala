@@ -21,7 +21,7 @@ import forms.mappings.Mappings
 import javax.inject.Inject
 import play.api.data.Form
 
-class TotalAmountDueFormProvider @Inject()(config: FrontendAppConfig) extends Mappings {
+class TotalAmountDueFormProvider @Inject() (config: FrontendAppConfig) extends Mappings {
 
   private val maximum = 99999999.99
   private val minimum = config.minimumLiabilityAmount
@@ -29,9 +29,9 @@ class TotalAmountDueFormProvider @Inject()(config: FrontendAppConfig) extends Ma
   def apply(): Form[BigDecimal] =
     Form(
       "value" -> currencyWithTwoDecimalsOrWholeNumber(
-        requiredKey = "totalAmountDue.error.required",
+        requiredKey       = "totalAmountDue.error.required",
         invalidNumericKey = "totalAmountDue.error.invalidNumeric",
-        nonNumericKey = "totalAmountDue.error.nonNumeric"
+        nonNumericKey     = "totalAmountDue.error.nonNumeric"
       ).verifying(
         maximumCurrency(maximum, "totalAmountDue.error.aboveMaximum"),
         minimumCurrency(minimum, "totalAmountDue.error.belowMinimum")
@@ -39,4 +39,3 @@ class TotalAmountDueFormProvider @Inject()(config: FrontendAppConfig) extends Ma
     )
 
 }
-

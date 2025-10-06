@@ -21,14 +21,14 @@ import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, TaxCreditRe
 import play.api.libs.json.Json
 
 class AuditEventSpec extends SpecBase {
-  
+
   "SubmitDirectDebitPaymentPlan" - {
     "paymentPlanTypeWrites method" - {
       "must write PaymentPlanType correctly" in {
         val testCases = Seq(
-          SinglePaymentPlan -> "SINGLE",
-          VariablePaymentPlan -> "VPP",
-          BudgetPaymentPlan -> "BUDGET",
+          SinglePaymentPlan      -> "SINGLE",
+          VariablePaymentPlan    -> "VPP",
+          BudgetPaymentPlan      -> "BUDGET",
           TaxCreditRepaymentPlan -> "TIME_TO_PAY"
         )
 

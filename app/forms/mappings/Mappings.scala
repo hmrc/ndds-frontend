@@ -32,72 +32,83 @@ trait Mappings extends Formatters with Constraints {
   protected def int(requiredKey: String = "error.required",
                     wholeNumberKey: String = "error.wholeNumber",
                     nonNumericKey: String = "error.nonNumeric",
-                    args: Seq[String] = Seq.empty): FieldMapping[Int] =
+                    args: Seq[String] = Seq.empty
+                   ): FieldMapping[Int] =
     of(intFormatter(requiredKey, wholeNumberKey, nonNumericKey, args))
 
   protected def boolean(requiredKey: String = "error.required",
                         invalidKey: String = "error.boolean",
-                        args: Seq[String] = Seq.empty): FieldMapping[Boolean] =
+                        args: Seq[String] = Seq.empty
+                       ): FieldMapping[Boolean] =
     of(booleanFormatter(requiredKey, invalidKey, args))
 
-
-  protected def enumerable[A](requiredKey: String = "error.required",
-                              invalidKey: String = "error.invalid",
-                              args: Seq[String] = Seq.empty)(implicit ev: Enumerable[A]): FieldMapping[A] =
+  protected def enumerable[A](requiredKey: String = "error.required", invalidKey: String = "error.invalid", args: Seq[String] = Seq.empty)(implicit
+    ev: Enumerable[A]
+  ): FieldMapping[A] =
     of(enumerableFormatter[A](requiredKey, invalidKey, args))
 
-  protected def localDate(
-                           invalidKey: String,
-                           allRequiredKey: String,
-                           twoRequiredKey: String,
-                           requiredKey: String,
-                           args: Seq[String] = Seq.empty)(implicit messages: Messages): FieldMapping[LocalDate] =
+  protected def localDate(invalidKey: String, allRequiredKey: String, twoRequiredKey: String, requiredKey: String, args: Seq[String] = Seq.empty)(
+    implicit messages: Messages
+  ): FieldMapping[LocalDate] =
     of(new LocalDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args))
 
   protected def currency(requiredKey: String = "error.required",
                          invalidNumeric: String = "error.invalidNumeric",
                          nonNumericKey: String = "error.nonNumeric",
-                         args: Seq[String] = Seq.empty): FieldMapping[BigDecimal] =
+                         args: Seq[String] = Seq.empty
+                        ): FieldMapping[BigDecimal] =
     of(currencyFormatter(requiredKey, invalidNumeric, nonNumericKey, args))
 
-  protected def customPaymentDate(
-                                   invalidKey: String,
-                                   allRequiredKey: String,
-                                   twoRequiredKey: String,
-                                   requiredKey: String,
-                                   args: Seq[String] = Seq.empty,
-                                   dateFormats: Seq[DateFormat])(implicit messages: Messages): FieldMapping[LocalDate] =
-    of(new CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
-
-  protected def planStartDate(
-                             invalidKey: String,
-                             allRequiredKey: String,
-                             twoRequiredKey: String,
-                             requiredKey: String,
-                             beforeEarliestDateKey: String,
-                             budgetAfterMaxDateKey: String,
-                             timeToPayAfterMaxDateKey: String,
-                             args: Seq[String] = Seq.empty,
-                             dateFormats: Seq[DateFormat],
-                             userAnswers: models.UserAnswers,
-                             earliestPlanStartDate: java.time.LocalDate)(implicit messages: Messages): FieldMapping[java.time.LocalDate] =
-    of(new PlanStartDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, beforeEarliestDateKey, budgetAfterMaxDateKey, timeToPayAfterMaxDateKey, args, dateFormats, userAnswers, earliestPlanStartDate))
-
-
-
-  protected def yearEndMonthDate(
-                                  invalidKey: String,
+  protected def customPaymentDate(invalidKey: String,
                                   allRequiredKey: String,
                                   twoRequiredKey: String,
                                   requiredKey: String,
                                   args: Seq[String] = Seq.empty,
-                                  dateFormats: Seq[DateFormat]): FieldMapping[YearEndAndMonth] =
+                                  dateFormats: Seq[DateFormat]
+                                 )(implicit messages: Messages): FieldMapping[LocalDate] =
+    of(new CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats))
+
+  protected def planStartDate(invalidKey: String,
+                              allRequiredKey: String,
+                              twoRequiredKey: String,
+                              requiredKey: String,
+                              beforeEarliestDateKey: String,
+                              budgetAfterMaxDateKey: String,
+                              timeToPayAfterMaxDateKey: String,
+                              args: Seq[String] = Seq.empty,
+                              dateFormats: Seq[DateFormat],
+                              userAnswers: models.UserAnswers,
+                              earliestPlanStartDate: java.time.LocalDate
+                             )(implicit messages: Messages): FieldMapping[java.time.LocalDate] =
+    of(
+      new PlanStartDateFormatter(
+        invalidKey,
+        allRequiredKey,
+        twoRequiredKey,
+        requiredKey,
+        beforeEarliestDateKey,
+        budgetAfterMaxDateKey,
+        timeToPayAfterMaxDateKey,
+        args,
+        dateFormats,
+        userAnswers,
+        earliestPlanStartDate
+      )
+    )
+
+  protected def yearEndMonthDate(invalidKey: String,
+                                 allRequiredKey: String,
+                                 twoRequiredKey: String,
+                                 requiredKey: String,
+                                 args: Seq[String] = Seq.empty,
+                                 dateFormats: Seq[DateFormat]
+                                ): FieldMapping[YearEndAndMonth] =
     of(new YearEndAndMonthDateFormatter(invalidKey, args, dateFormats))
 
   private def currencyConstraint(
-                                  nonNumericKey: String,
-                                  invalidNumericKey: String
-                                ): Constraint[String] = Constraint("currencyConstraint") { str =>
+    nonNumericKey: String,
+    invalidNumericKey: String
+  ): Constraint[String] = Constraint("currencyConstraint") { str =>
     if (!str.matches("""^-?\d+(\.\d{2})?$""")) {
       if (str.exists(ch => !ch.isDigit && ch != '.' && ch != '-')) Invalid(nonNumericKey)
       else Invalid(invalidNumericKey)
@@ -107,10 +118,10 @@ trait Mappings extends Formatters with Constraints {
   }
 
   def currencyWithTwoDecimalsOrWholeNumber(
-                                            requiredKey: String,
-                                            invalidNumericKey: String,
-                                            nonNumericKey: String
-                                          ): Mapping[BigDecimal] =
+    requiredKey: String,
+    invalidNumericKey: String,
+    nonNumericKey: String
+  ): Mapping[BigDecimal] =
     text(requiredKey)
       .verifying(currencyConstraint(nonNumericKey, invalidNumericKey))
       .transform[BigDecimal](
@@ -119,17 +130,17 @@ trait Mappings extends Formatters with Constraints {
       )
 
   def optionalLocalDate(
-                         invalidKey: String,
-                         allRequiredKey: String,
-                         twoRequiredKey: String,
-                         requiredKey: String
-                       )(implicit messages: Messages): Mapping[Option[LocalDate]] = {
+    invalidKey: String,
+    allRequiredKey: String,
+    twoRequiredKey: String,
+    requiredKey: String
+  )(implicit messages: Messages): Mapping[Option[LocalDate]] = {
     optional(
       localDate(
-        invalidKey = invalidKey,
+        invalidKey     = invalidKey,
         allRequiredKey = allRequiredKey,
         twoRequiredKey = twoRequiredKey,
-        requiredKey = requiredKey
+        requiredKey    = requiredKey
       )
     )
   }

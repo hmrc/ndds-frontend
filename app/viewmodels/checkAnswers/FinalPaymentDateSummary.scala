@@ -34,14 +34,13 @@ object FinalPaymentDateSummary {
 
       val finalPaymentDate = PaymentCalculations.calculateFinalPaymentDate(
         planStartDate = planStartDate.enteredDate,
-        monthsOffset = appConfig.tcMonthsUntilFinalPayment
+        monthsOffset  = appConfig.tcMonthsUntilFinalPayment
       )
 
       SummaryListRowViewModel(
-        key = "planEndDate.final.checkYourAnswersLabel",
-        value = ValueViewModel(finalPaymentDate.format(dateTimeFormat())),
+        key     = "planEndDate.final.checkYourAnswersLabel",
+        value   = ValueViewModel(finalPaymentDate.format(dateTimeFormat())),
         actions = Seq.empty
       )
     }
 }
-

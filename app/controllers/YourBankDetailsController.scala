@@ -41,19 +41,22 @@ import utils.Utils.LockExpirySessionKey
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class YourBankDetailsController @Inject()(
-                                           override val messagesApi: MessagesApi,
-                                           sessionRepository: SessionRepository,
-                                           navigator: Navigator,
-                                           identify: IdentifierAction,
-                                           requireData: DataRequiredAction,
-                                           getData: DataRetrievalAction,
-                                           barsService: BarsService,
-                                           lockService: LockService,
-                                           formProvider: YourBankDetailsFormProvider,
-                                           val controllerComponents: MessagesControllerComponents,
-                                           view: YourBankDetailsView
-                                         )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class YourBankDetailsController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  requireData: DataRequiredAction,
+  getData: DataRetrievalAction,
+  barsService: BarsService,
+  lockService: LockService,
+  formProvider: YourBankDetailsFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: YourBankDetailsView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[YourBankDetails] = formProvider()
 
@@ -78,30 +81,31 @@ class YourBankDetailsController @Inject()(
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
 
         case Some(accountType) =>
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              Future.successful(
-                BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
-              ),
-            bankDetails =>
-              startVerification(accountType, bankDetails, request.userAnswers, credId, mode)
-          )
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                Future.successful(
+                  BadRequest(view(formWithErrors, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+                ),
+              bankDetails => startVerification(accountType, bankDetails, request.userAnswers, credId, mode)
+            )
       }
     }
 
   private def startVerification(
-                                 accountType: PersonalOrBusinessAccount,
-                                 bankDetails: YourBankDetails,
-                                 userAnswers: UserAnswers,
-                                 credId: String,
-                                 mode: Mode
-                               )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+    accountType: PersonalOrBusinessAccount,
+    bankDetails: YourBankDetails,
+    userAnswers: UserAnswers,
+    credId: String,
+    mode: Mode
+  )(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Result] = {
 
     barsService.barsVerification(accountType.toString, bankDetails).flatMap {
       case Right((verificationResponse, bank)) =>
         onSuccessfulVerification(
           userAnswers,
-          auddisFlag   = if (bank.ddiVoucherFlag == "N") true else false,
+          auddisFlag  = if (bank.ddiVoucherFlag == "N") true else false,
           bankDetails = bankDetails,
           bankName    = bank.bankName,
           bankAddress = bank.address
@@ -120,17 +124,20 @@ class YourBankDetailsController @Inject()(
   }
 
   private def onSuccessfulVerification(
-                                        userAnswers: UserAnswers,
-                                        auddisFlag: Boolean,
-                                        bankDetails: YourBankDetails,
-                                        bankName: String,
-                                        bankAddress: BankAddress
-                                      ): Future[UserAnswers] = {
+    userAnswers: UserAnswers,
+    auddisFlag: Boolean,
+    bankDetails: YourBankDetails,
+    bankName: String,
+    bankAddress: BankAddress
+  ): Future[UserAnswers] = {
     val updatedAnswersTry = for {
       ua1 <- userAnswers.set(
-        YourBankDetailsPage,
-        YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, auddisFlag, true) //defaulting to true as account successful verified
-      )
+               YourBankDetailsPage,
+               YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails,
+                                                                       auddisFlag,
+                                                                       true
+                                                                      ) // defaulting to true as account successful verified
+             )
       ua2 <- ua1.set(BankDetailsBankNamePage, bankName)
       ua3 <- ua2.set(BankDetailsAddressPage, bankAddress)
     } yield ua3
@@ -145,11 +152,11 @@ class YourBankDetailsController @Inject()(
   }
 
   private def onFailedVerification(
-                                    credId: String,
-                                    bankDetails: YourBankDetails,
-                                    mode: Mode,
-                                    barsError: BarsErrors
-                                  )(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+    credId: String,
+    bankDetails: YourBankDetails,
+    mode: Mode,
+    barsError: BarsErrors
+  )(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Result] = {
 
     val accountUnverifiedFlag: Boolean = barsError match {
       case BarsErrors.BankAccountUnverified => true
@@ -161,18 +168,15 @@ class YourBankDetailsController @Inject()(
       updatedAnswers <- Future.fromTry(request.userAnswers.set(AccountUnverifiedPage, accountUnverifiedFlag))
       _              <- sessionRepository.set(updatedAnswers)
 
-      result         <- lockResponse.lockStatus match {
-        case NotLocked           => handleNotLocked(bankDetails, mode, barsError)
-        case LockedAndVerified   => handleLockedAndVerified(credId, accountUnverifiedFlag)
-        case LockedAndUnverified => handleLockedAndUnverified(credId)
-      }
+      result <- lockResponse.lockStatus match {
+                  case NotLocked           => handleNotLocked(bankDetails, mode, barsError)
+                  case LockedAndVerified   => handleLockedAndVerified(credId, accountUnverifiedFlag)
+                  case LockedAndUnverified => handleLockedAndUnverified(credId)
+                }
     } yield result
   }
 
-  private def handleNotLocked(
-                               bankDetails: YourBankDetails,
-                               mode: Mode, barsErrors:
-                               BarsErrors)(implicit request: DataRequest[_]): Future[Result] = {
+  private def handleNotLocked(bankDetails: YourBankDetails, mode: Mode, barsErrors: BarsErrors)(implicit request: DataRequest[?]): Future[Result] = {
     val formWithErrors = BarsErrorMapper
       .toFormError(barsErrors)
       .foldLeft(form.fill(bankDetails))(_ withError _)
@@ -182,27 +186,24 @@ class YourBankDetailsController @Inject()(
     )
   }
 
-  private def handleLockedAndVerified(
-      credId: String,
-      accountUnverifiedFlag: Boolean)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+  private def handleLockedAndVerified(credId: String, accountUnverifiedFlag: Boolean)(implicit
+    hc: HeaderCarrier,
+    request: DataRequest[?]
+  ): Future[Result] = {
 
     if (accountUnverifiedFlag) {
       lockService
         .markUserAsUnverifiable(credId)
         .recoverWith { case e: UpstreamErrorResponse if e.statusCode == 409 => lockService.isUserLocked(credId) }
-        .map(lockResp =>
-          withExpiry(Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad()), lockResp.lockoutExpiryDateTime))
+        .map(lockResp => withExpiry(Redirect(routes.AccountDetailsNotVerifiedController.onPageLoad()), lockResp.lockoutExpiryDateTime))
     } else {
       lockService
         .isUserLocked(credId)
-        .map(lockResp =>
-          withExpiry(Redirect(routes.ReachedLimitController.onPageLoad()), lockResp.lockoutExpiryDateTime))
+        .map(lockResp => withExpiry(Redirect(routes.ReachedLimitController.onPageLoad()), lockResp.lockoutExpiryDateTime))
     }
   }
 
-  private def handleLockedAndUnverified(
-
-       credId: String)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+  private def handleLockedAndUnverified(credId: String)(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Result] = {
     for {
       status <- lockService.isUserLocked(credId)
     } yield withExpiry(

@@ -81,9 +81,9 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
       val oneYearLater = fixedDate.plusYears(1) // 2026-08-06
       val result = form.bind(
         Map(
-          "value.day" -> oneYearLater.getDayOfMonth.toString,
+          "value.day"   -> oneYearLater.getDayOfMonth.toString,
           "value.month" -> oneYearLater.getMonthValue.toString,
-          "value.year" -> oneYearLater.getYear.toString
+          "value.year"  -> oneYearLater.getYear.toString
         )
       )
       result.errors mustBe empty
@@ -94,9 +94,9 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
       val futureDate = fixedDate.plusYears(1).plusDays(1) // 2026-08-07
       val result = form.bind(
         Map(
-          "value.day" -> futureDate.getDayOfMonth.toString,
+          "value.day"   -> futureDate.getDayOfMonth.toString,
           "value.month" -> futureDate.getMonthValue.toString,
-          "value.year" -> futureDate.getYear.toString
+          "value.year"  -> futureDate.getYear.toString
         )
       )
       result.errors must contain only FormError("value", "paymentDate.error.tooFarInFuture")
@@ -107,9 +107,9 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
       val futureDate = fixedDate.plusYears(5)
       val result = form.bind(
         Map(
-          "value.day" -> futureDate.getDayOfMonth.toString,
+          "value.day"   -> futureDate.getDayOfMonth.toString,
           "value.month" -> futureDate.getMonthValue.toString,
-          "value.year" -> futureDate.getYear.toString
+          "value.year"  -> futureDate.getYear.toString
         )
       )
       result.errors mustBe empty

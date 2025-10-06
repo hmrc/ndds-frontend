@@ -32,10 +32,10 @@ class YourBankDetailsAddressSummarySpec extends SpecBase {
     "row" - {
       "must return a SummaryListRow when UserAnswers has BankDetailsAddressPage set" in new Setup {
         val address = BankAddress(
-          lines = Seq("Line1", "Line2"),
-          town = "London",
+          lines    = Seq("Line1", "Line2"),
+          town     = "London",
           postCode = "SW1A 1AA",
-          country = Country("United Kingdom")
+          country  = Country("United Kingdom")
         )
         val userAnswers = UserAnswers("id").set(BankDetailsAddressPage, address).success.value
         val result = YourBankDetailsAddressSummary.row(userAnswers)(messages)

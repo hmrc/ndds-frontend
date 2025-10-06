@@ -24,15 +24,14 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object AmendPaymentReferenceSummary  {
+object AmendPaymentReferenceSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentReferencePage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference",
-          value   = ValueViewModel(HtmlFormat.escape(answer).toString),
-          actions = Seq.empty
-        )
+    answers.get(PaymentReferencePage).map { answer =>
+      SummaryListRowViewModel(
+        key     = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference",
+        value   = ValueViewModel(HtmlFormat.escape(answer).toString),
+        actions = Seq.empty
+      )
     }
 }

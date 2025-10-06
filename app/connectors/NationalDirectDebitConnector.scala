@@ -32,19 +32,19 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
-                                             http: HttpClientV2)
-                                            (implicit ec: ExecutionContext) extends HttpReadsInstances with Logging {
+class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: HttpClientV2)(implicit ec: ExecutionContext)
+    extends HttpReadsInstances
+    with Logging {
 
   private val nationalDirectDebitBaseUrl: String = config.baseUrl("national-direct-debit") + "/national-direct-debit"
 
   def retrieveDirectDebits()(implicit hc: HeaderCarrier): Future[NddResponse] = {
-    http.get(url"$nationalDirectDebitBaseUrl/direct-debits")(hc)
+    http
+      .get(url"$nationalDirectDebitBaseUrl/direct-debits")(hc)
       .execute[NddResponse]
   }
 
-  def getFutureWorkingDays(workingDaysOffsetRequest: WorkingDaysOffsetRequest)
-                          (implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
+  def getFutureWorkingDays(workingDaysOffsetRequest: WorkingDaysOffsetRequest)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     http
       .post(url"$nationalDirectDebitBaseUrl/direct-debits/future-working-days")
       .withBody(Json.toJson(workingDaysOffsetRequest))
@@ -52,7 +52,7 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
       .flatMap {
         case Right(response) if response.status == OK =>
           Try(response.json.as[EarliestPaymentDate]) match {
-            case Success(data) => Future.successful(data)
+            case Success(data)      => Future.successful(data)
             case Failure(exception) => Future.failed(new Exception(s"Invalid JSON format $exception"))
           }
         case Left(errorResponse) =>
@@ -61,9 +61,9 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
       }
   }
 
-  def submitChrisData(submission: ChrisSubmissionRequest)
-                     (implicit hc: HeaderCarrier): Future[Boolean] = {
-    http.post(url"$nationalDirectDebitBaseUrl/chris")
+  def submitChrisData(submission: ChrisSubmissionRequest)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    http
+      .post(url"$nationalDirectDebitBaseUrl/chris")
       .withBody(Json.toJson(submission))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
@@ -78,9 +78,7 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
       }
   }
 
-
-  def generateNewDdiReference(generateDdiRefRequest: GenerateDdiRefRequest)
-                             (implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
+  def generateNewDdiReference(generateDdiRefRequest: GenerateDdiRefRequest)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     http
       .post(url"$nationalDirectDebitBaseUrl/direct-debit-reference")
       .withBody(Json.toJson(generateDdiRefRequest))
@@ -88,7 +86,7 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
       .flatMap {
         case Right(response) if response.status == OK =>
           Try(response.json.as[GenerateDdiRefResponse]) match {
-            case Success(data) => Future.successful(data)
+            case Success(data)      => Future.successful(data)
             case Failure(exception) => Future.failed(new Exception(s"Invalid JSON format $exception"))
           }
         case Left(errorResponse) =>
@@ -98,13 +96,14 @@ class NationalDirectDebitConnector @Inject()(config: ServicesConfig,
   }
 
   def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier): Future[NddDDPaymentPlansResponse] = {
-    http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans")(hc)
+    http
+      .get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans")(hc)
       .execute[NddDDPaymentPlansResponse]
   }
 
-  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier):
-  Future[PaymentPlanResponse] = {
-    http.get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans/$paymentPlanReference")(hc)
+  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier): Future[PaymentPlanResponse] = {
+    http
+      .get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans/$paymentPlanReference")(hc)
       .execute[PaymentPlanResponse]
   }
 }

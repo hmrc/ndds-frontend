@@ -24,10 +24,10 @@ import viewmodels.implicits.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-object AmendSuspendDateSummary  {
+object AmendSuspendDateSummary {
 
   def row(suspendDate: Option[LocalDate], isStartDate: Boolean)(implicit messages: Messages): SummaryListRow =
-    val label = if(isStartDate) {
+    val label = if (isStartDate) {
       "paymentPlanDetails.details.suspendStartDate"
     } else {
       "paymentPlanDetails.details.suspendEndDate"
@@ -36,8 +36,8 @@ object AmendSuspendDateSummary  {
       .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
       .getOrElse("")
     SummaryListRowViewModel(
-      key = label,
-      value = ValueViewModel(formattedDate),
+      key     = label,
+      value   = ValueViewModel(formattedDate),
       actions = Seq.empty
     )
 

@@ -21,7 +21,7 @@ import models.{ConfirmAuthority, Mode, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{verify, when, doNothing}
+import org.mockito.Mockito.{doNothing, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.ConfirmAuthorityPage
 import play.api.data.Form
@@ -59,7 +59,8 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
             bind[ConfirmAuthorityView].toInstance(mockView),
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[AuditService].toInstance(mockAuditService)
-          ).build()
+          )
+          .build()
 
       running(application) {
         val request: FakeRequest[AnyContentAsEmpty.type] =
@@ -95,7 +96,8 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
             bind[ConfirmAuthorityView].toInstance(mockView),
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[AuditService].toInstance(mockAuditService)
-          ).build()
+          )
+          .build()
 
       running(application) {
         val request = FakeRequest(GET, routes.ConfirmAuthorityController.onPageLoad(mode).url)
@@ -123,7 +125,8 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
             bind[ConfirmAuthorityView].toInstance(mockView),
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[AuditService].toInstance(mockAuditService)
-          ).build()
+          )
+          .build()
 
       running(application) {
         val request =
@@ -146,7 +149,8 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
             bind[SessionRepository].toInstance(mockSessionRepo),
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[AuditService].toInstance(mockAuditService)
-          ).build()
+          )
+          .build()
 
       running(application) {
         val request =
@@ -174,7 +178,8 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
             bind[SessionRepository].toInstance(mockSessionRepo),
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[AuditService].toInstance(mockAuditService)
-          ).build()
+          )
+          .build()
 
       running(application) {
         val request =

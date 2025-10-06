@@ -78,7 +78,9 @@ class RegularPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentsFrequencyRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentsFrequencyRoute))(request,
+                                                                                                                        messages(application)
+                                                                                                                       ).toString
       }
     }
 

@@ -77,7 +77,8 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
     "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides().build()
+        .overrides()
+        .build()
 
       running(application) {
 
@@ -92,7 +93,8 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
     "must redirect to Journey Recover page when UserAnswers is None" in {
       val application = applicationBuilder(userAnswers = None)
-        .overrides().build()
+        .overrides()
+        .build()
 
       running(application) {
 
@@ -168,4 +170,3 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
     }
   }
 }
-

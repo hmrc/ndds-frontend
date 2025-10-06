@@ -18,7 +18,7 @@ package forms
 
 import forms.mappings.Mappings
 import play.api.data.Form
-import play.api.data.validation._
+import play.api.data.validation.*
 import play.api.i18n.Messages
 
 import java.time.LocalDate
@@ -44,4 +44,3 @@ class PlanEndDateFormProvider @Inject() extends Mappings {
         Valid
     }
 }
-

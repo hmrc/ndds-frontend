@@ -18,7 +18,7 @@ package models
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json._
+import play.api.libs.json.*
 import java.time.LocalDate
 
 class PaymentPlanCalculationSpec extends AnyWordSpec with Matchers {
@@ -27,20 +27,20 @@ class PaymentPlanCalculationSpec extends AnyWordSpec with Matchers {
 
     "serialize to JSON correctly" in {
       val model = PaymentPlanCalculation(
-        regularPaymentAmount = Some(BigDecimal(100.50)),
-        finalPaymentAmount = Some(BigDecimal(50.25)),
-        secondPaymentDate = Some(LocalDate.parse("2025-09-16")),
+        regularPaymentAmount   = Some(BigDecimal(100.50)),
+        finalPaymentAmount     = Some(BigDecimal(50.25)),
+        secondPaymentDate      = Some(LocalDate.parse("2025-09-16")),
         penultimatePaymentDate = Some(LocalDate.parse("2025-12-01")),
-        finalPaymentDate = Some(LocalDate.parse("2026-01-15"))
+        finalPaymentDate       = Some(LocalDate.parse("2026-01-15"))
       )
 
       val json = Json.toJson(model)
 
       (json \ "regularPaymentAmount").as[BigDecimal] shouldBe 100.50
-      (json \ "finalPaymentAmount").as[BigDecimal] shouldBe 50.25
-      (json \ "secondPaymentDate").as[String] shouldBe "2025-09-16"
-      (json \ "penultimatePaymentDate").as[String] shouldBe "2025-12-01"
-      (json \ "finalPaymentDate").as[String] shouldBe "2026-01-15"
+      (json \ "finalPaymentAmount").as[BigDecimal]   shouldBe 50.25
+      (json \ "secondPaymentDate").as[String]        shouldBe "2025-09-16"
+      (json \ "penultimatePaymentDate").as[String]   shouldBe "2025-12-01"
+      (json \ "finalPaymentDate").as[String]         shouldBe "2026-01-15"
     }
 
     "deserialize from JSON correctly" in {
@@ -58,11 +58,11 @@ class PaymentPlanCalculationSpec extends AnyWordSpec with Matchers {
 
       val result = json.as[PaymentPlanCalculation]
 
-      result.regularPaymentAmount shouldBe Some(BigDecimal(100.50))
-      result.finalPaymentAmount shouldBe Some(BigDecimal(50.25))
-      result.secondPaymentDate shouldBe Some(LocalDate.parse("2025-09-16"))
+      result.regularPaymentAmount   shouldBe Some(BigDecimal(100.50))
+      result.finalPaymentAmount     shouldBe Some(BigDecimal(50.25))
+      result.secondPaymentDate      shouldBe Some(LocalDate.parse("2025-09-16"))
       result.penultimatePaymentDate shouldBe Some(LocalDate.parse("2025-12-01"))
-      result.finalPaymentDate shouldBe Some(LocalDate.parse("2026-01-15"))
+      result.finalPaymentDate       shouldBe Some(LocalDate.parse("2026-01-15"))
     }
 
     "handle missing optional fields" in {

@@ -23,24 +23,22 @@ import play.api.i18n.Messages
 
 case class DateFormat(dateType: String, errorKey: String, regex: String)
 
-
 class CustomDateFormatter(invalidKey: String,
                           allRequiredKey: String,
                           twoRequiredKey: String,
                           requiredKey: String,
                           args: Seq[String] = Seq.empty,
                           dateFormats: Seq[DateFormat]
-                         )(implicit messages: Messages) extends LocalDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args) {
+                         )(implicit messages: Messages)
+    extends LocalDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args) {
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
-    val fields = fieldKeys.map {
-      field =>
-        field -> data.get(s"$key.$field").filter(_.nonEmpty)
+    val fields = fieldKeys.map { field =>
+      field -> data.get(s"$key.$field").filter(_.nonEmpty)
     }.toMap
-    
-    lazy val missingFieldErrors = fields.collect {
-      case (field, None) =>
-        FormError(s"$key.$field", s"date.error.$field")
+
+    lazy val missingFieldErrors = fields.collect { case (field, None) =>
+      FormError(s"$key.$field", s"date.error.$field")
     }.toList
 
     val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
@@ -64,6 +62,5 @@ class CustomDateFormatter(invalidKey: String,
         None
     }
   }
-
 
 }

@@ -29,16 +29,17 @@ import views.html.DirectDebitSummaryView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DirectDebitSummaryController @Inject()(
-                                                       override val messagesApi: MessagesApi,
-                                                       identify: IdentifierAction,
-                                                       getData: DataRetrievalAction,
-                                                       val controllerComponents: MessagesControllerComponents,
-                                                       view: DirectDebitSummaryView,
-                                                       nddService: NationalDirectDebitService,
-                                                       sessionRepository: SessionRepository,
-                                                     )(implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport {
+class DirectDebitSummaryController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: DirectDebitSummaryView,
+  nddService: NationalDirectDebitService,
+  sessionRepository: SessionRepository
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
@@ -63,13 +64,13 @@ class DirectDebitSummaryController @Inject()(
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     for {
       updatedAnswers <- Future.fromTry(userAnswers.set(DirectDebitReferenceQuery, directDebitReference))
-      _ <- sessionRepository.set(updatedAnswers)
+      _              <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.DirectDebitSummaryController.onPageLoad())
   }
 
   private def cleansePaymentReference(userAnswers: UserAnswers): Future[UserAnswers] =
     for {
       updatedUserAnswers <- Future.fromTry(userAnswers.remove(PaymentPlanReferenceQuery))
-      _ <- sessionRepository.set(updatedUserAnswers)
+      _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 }

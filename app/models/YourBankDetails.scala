@@ -16,12 +16,9 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
-case class YourBankDetails(accountHolderName: String, sortCode: String, accountNumber: String) {
-
-
-}
+case class YourBankDetails(accountHolderName: String, sortCode: String, accountNumber: String) {}
 
 object YourBankDetails {
 

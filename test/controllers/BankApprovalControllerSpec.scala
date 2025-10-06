@@ -38,7 +38,7 @@ class BankApprovalControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[BankApprovalView]
 
         implicit val msgs: Messages = messages(application)
-        implicit val req: Request[_] = request
+        implicit val req: Request[?] = request
 
         contentAsString(result) mustEqual view("http://www.hmrc.gov.uk/payinghmrc/").toString
       }

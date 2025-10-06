@@ -18,7 +18,7 @@ package models
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.twirl.api.Html
 
 class UKBankAddressSpec extends AnyWordSpec with Matchers {
@@ -32,7 +32,7 @@ class UKBankAddressSpec extends AnyWordSpec with Matchers {
         addressLine3 = Some("London"),
         addressLine4 = None,
         addressLine5 = None,
-        postCode = "SW1A 2AA"
+        postCode     = "SW1A 2AA"
       )
 
       val json = Json.toJson(model)
@@ -40,8 +40,8 @@ class UKBankAddressSpec extends AnyWordSpec with Matchers {
       (json \ "addressLine1").as[String] shouldBe "10 Downing Street"
       (json \ "addressLine2").as[String] shouldBe "Westminster"
       (json \ "addressLine3").as[String] shouldBe "London"
-      (json \ "postCode").as[String] shouldBe "SW1A 2AA"
-      (json \ "addressLine4").toOption shouldBe None
+      (json \ "postCode").as[String]     shouldBe "SW1A 2AA"
+      (json \ "addressLine4").toOption   shouldBe None
     }
 
     "deserialize from JSON correctly" in {
@@ -63,7 +63,7 @@ class UKBankAddressSpec extends AnyWordSpec with Matchers {
       result.addressLine3 shouldBe Some("London")
       result.addressLine4 shouldBe None
       result.addressLine5 shouldBe None
-      result.postCode shouldBe "SW1A 2AA"
+      result.postCode     shouldBe "SW1A 2AA"
     }
 
     "support round-trip JSON" in {
@@ -89,25 +89,28 @@ class UKBankAddressSpec extends AnyWordSpec with Matchers {
       val html: Html = address.getFullAddress
       val rendered = html.body
 
-      rendered should include ("10 Downing Street<br>")
-      rendered should include ("Westminster<br>")
-      rendered should include ("London<br>")
-      rendered should include ("Greater London<br>")
-      rendered should include ("England<br>")
-      rendered should include ("SW1A 2AA<br>")
+      rendered should include("10 Downing Street<br>")
+      rendered should include("Westminster<br>")
+      rendered should include("London<br>")
+      rendered should include("Greater London<br>")
+      rendered should include("England<br>")
+      rendered should include("SW1A 2AA<br>")
     }
 
     "skip missing optional lines" in {
       val address = UKBankAddress(
         "221B Baker Street",
-        None, None, None, None,
+        None,
+        None,
+        None,
+        None,
         "NW1 6XE"
       )
 
       val html = address.getFullAddress.body
 
-      html should include ("221B Baker Street<br>")
-      html should include ("NW1 6XE<br>")
+      html should include("221B Baker Street<br>")
+      html should include("NW1 6XE<br>")
       html should not include "None"
     }
 
@@ -115,15 +118,17 @@ class UKBankAddressSpec extends AnyWordSpec with Matchers {
       val address = UKBankAddress(
         "123 <Hack> Street",
         Some("Apartment & Co"),
-        None, None, None,
+        None,
+        None,
+        None,
         "AB1 <CD>"
       )
 
       val html = address.getFullAddress.body
 
-      html should include ("123 &lt;Hack&gt; Street<br>")
-      html should include ("Apartment &amp; Co<br>")
-      html should include ("AB1 &lt;CD&gt;<br>")
+      html should include("123 &lt;Hack&gt; Street<br>")
+      html should include("Apartment &amp; Co<br>")
+      html should include("AB1 &lt;CD&gt;<br>")
     }
   }
 }

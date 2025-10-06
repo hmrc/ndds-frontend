@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.*
 
-case class DirectDebitDetails (directDebitReference: String, setupDate: String, sortCode: String, accountNumber:String, paymentPlans: String)
+case class DirectDebitDetails(directDebitReference: String, setupDate: String, sortCode: String, accountNumber: String, paymentPlans: String)
 
 object DirectDebitDetails {
   implicit val format: OFormat[DirectDebitDetails] = Json.format

@@ -21,7 +21,7 @@ import forms.mappings.Mappings
 import javax.inject.Inject
 import play.api.data.Form
 
-class PaymentAmountFormProvider @Inject()() extends Mappings {
+class PaymentAmountFormProvider @Inject() () extends Mappings {
 
   val MIN_AMOUNT: BigDecimal = 1.0
   val MAX_AMOUNT: BigDecimal = 20000000.00
@@ -37,6 +37,4 @@ class PaymentAmountFormProvider @Inject()() extends Mappings {
         .verifying(maximumValue(MAX_AMOUNT, "paymentAmount.error.max.min.range"))
     )
 
-
 }
-

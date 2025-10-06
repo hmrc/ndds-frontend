@@ -63,11 +63,17 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   private val validPlanStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(validAnswer, earliestPlanStartDate)
   lazy val planStartDateRoute: String = routes.PlanStartDateController.onPageLoad(NormalMode).url
   lazy val paymentReferenceRoute: String = routes.PaymentReferenceController.onPageLoad(NormalMode).url
-  
+
   val expectedUserAnswers: UserAnswers = UserAnswers(userAnswersId)
-    .set(DirectDebitSourcePage, testDirectDebitSource).success.value
-    .set(PaymentPlanTypePage, testPaymentPlanType).success.value
-    .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true, false)).success.value
+    .set(DirectDebitSourcePage, testDirectDebitSource)
+    .success
+    .value
+    .set(PaymentPlanTypePage, testPaymentPlanType)
+    .success
+    .value
+    .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true, false))
+    .success
+    .value
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, planStartDateRoute)
@@ -75,9 +81,9 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, planStartDateRoute)
       .withFormUrlEncodedBody(
-        "value.day" -> validAnswer.getDayOfMonth.toString,
+        "value.day"   -> validAnswer.getDayOfMonth.toString,
         "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year" -> validAnswer.getYear.toString
+        "value.year"  -> validAnswer.getYear.toString
       )
 
   "planStartDate Controller" - {
@@ -95,7 +101,13 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanStartDateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form,
+                                               NormalMode,
+                                               formattedDate,
+                                               formattedDateNumeric,
+                                               testDirectDebitSource,
+                                               Call("GET", paymentReferenceRoute)
+                                              )(getRequest(), messages(application)).toString
       }
     }
 
@@ -116,7 +128,13 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer),
+                                               NormalMode,
+                                               formattedDate,
+                                               formattedDateNumeric,
+                                               testDirectDebitSource,
+                                               Call("GET", paymentReferenceRoute)
+                                              )(getRequest(), messages(application)).toString
       }
     }
 
@@ -135,8 +153,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to Journey Recovery for a GET if the earliest payment date cannot be obtained" in {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
@@ -197,7 +214,13 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDate, formattedDateNumeric, testDirectDebitSource, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm,
+                                               NormalMode,
+                                               formattedDate,
+                                               formattedDateNumeric,
+                                               testDirectDebitSource,
+                                               Call("GET", paymentReferenceRoute)
+                                              )(request, messages(application)).toString
       }
     }
 
@@ -227,8 +250,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
@@ -245,8 +267,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
