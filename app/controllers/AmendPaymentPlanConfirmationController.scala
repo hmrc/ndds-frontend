@@ -111,7 +111,6 @@ class AmendPaymentPlanConfirmationController @Inject()(
                                            ddiReference: String
                                          ): ChrisSubmissionRequest = {
 
-    implicit val ua: UserAnswers = userAnswers
     userAnswers.get(PaymentPlanDetailsQuery) match {
       case Some(response) =>
         val planDetail = response.paymentPlanDetails
@@ -120,7 +119,7 @@ class AmendPaymentPlanConfirmationController @Inject()(
         val serviceType: DirectDebitSource =
           DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
 
-        val planStartDateDetails: Option[PlanStartDateDetails] = ua.get(AmendPlanStartDatePage).map { date =>
+        val planStartDateDetails: Option[PlanStartDateDetails] = userAnswers.get(AmendPlanStartDatePage).map { date =>
           PlanStartDateDetails(enteredDate = date, earliestPlanStartDate = date.toString // you can adjust this if you have a different logic
           )
         }
@@ -137,17 +136,17 @@ class AmendPaymentPlanConfirmationController @Inject()(
           serviceType = serviceType,
           paymentPlanType = paymentPlanType,
           paymentFrequency = if (planDetail.planType.equalsIgnoreCase("singlePaymentPlan")) None else planDetail.scheduledPaymentFrequency,
-          paymentPlanReferenceNumber = ua.get(PaymentPlanReferenceQuery),
+          paymentPlanReferenceNumber = userAnswers.get(PaymentPlanReferenceQuery),
           yourBankDetailsWithAuddisStatus = bankDetailsWithAuddisStatus,
           planStartDate = planStartDateDetails,
-          planEndDate = ua.get(AmendPlanEndDatePage),
+          planEndDate = userAnswers.get(AmendPlanEndDatePage),
           paymentDate = None,
           yearEndAndMonth = None,
           ddiReferenceNo = ddiReference,
           paymentReference = planDetail.paymentReference,
           totalAmountDue = planDetail.totalLiability,
           paymentAmount = planDetail.balancingPaymentAmount,
-          regularPaymentAmount = ua.get(AmendPaymentAmountPage),
+          regularPaymentAmount = userAnswers.get(AmendPaymentAmountPage),
           calculation = None,
           amendPlan = true
         )
