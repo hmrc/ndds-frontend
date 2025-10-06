@@ -17,7 +17,8 @@
 package controllers
 
 import base.SpecBase
-import models.{NormalMode, PaymentsFrequency, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.responses.PaymentPlanResponse
+import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -26,10 +27,10 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.{DirectDebitReferenceQuery, PaymentReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.DirectDebitDetailsData
+import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
 
@@ -42,63 +43,81 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
     val mockSessionRepository = mock[SessionRepository]
 
-    def createSummaryListForBudgetPaymentPlan(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
+    def createSummaryListForBudgetPaymentPlan(userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+      val paymentPlan = paymentPlanDetails.paymentPlanDetails
+
       Seq(
-        AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
-        AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
-        PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
-        AmendPlanStartDateSummary.rowData(userAnswers)(messages(app)),
-        AmendPaymentAmountSummary.row("budgetPaymentPlan", userAnswers)(messages(app)),
-        AmendPlanEndDateSummary.row(userAnswers)(messages(app))
-      ).flatten
+        AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse(""))(messages(app)),
+        AmendPaymentPlanSourceSummary.row(paymentPlan.hodService)(messages(app)),
+        TotalAmountDueSummary.row(paymentPlan.totalLiability)(messages(app)),
+        MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability)(messages(app)),
+        FinalPaymentAmountSummary.row(paymentPlan.balancingPaymentAmount, paymentPlan.totalLiability)(messages(app)),
+        PaymentsFrequencySummary.row(paymentPlan.scheduledPaymentFrequency)(messages(app)),
+        AmendPlanStartDateSummary.row(
+          PaymentPlanType.BudgetPaymentPlan.toString,
+          userAnswers.get(AmendPlanStartDatePage),
+          Constants.shortDateTimeFormatPattern
+        )(messages(app)),
+        AmendPaymentAmountSummary.row(
+          PaymentPlanType.BudgetPaymentPlan.toString,
+          userAnswers.get(AmendPaymentAmountPage),
+          true
+        )(messages(app)),
+        AmendPlanEndDateSummary.row(
+          userAnswers.get(AmendPlanEndDatePage),
+          Constants.shortDateTimeFormatPattern,
+          true
+        )(messages(app))
+      )
     }
 
-    def createSummaryListForSinglePaymentPlans(userAnswers: UserAnswers, app: Application): Seq[SummaryListRow] = {
+    def createSummaryListForSinglePaymentPlans(userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+      val paymentPlan = paymentPlanDetails.paymentPlanDetails
+
       Seq(
-        AmendPaymentPlanTypeSummary.row(userAnswers)(messages(app)),
-        AmendPaymentPlanSourceSummary.row(userAnswers)(messages(app)),
-        PaymentsFrequencySummary.rowData(userAnswers)(messages(app)),
-        AmendPlanEndDateSummary.rowData(userAnswers)(messages(app)),
-        AmendPaymentAmountSummary.row("singlePaymentPlan", userAnswers)(messages(app)),
-        AmendPlanStartDateSummary.row(userAnswers)(messages(app))
-      ).flatten
+        AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse(""))(messages(app)),
+        AmendPaymentPlanSourceSummary.row(paymentPlan.hodService)(messages(app)),
+        DateSetupSummary.row(paymentPlan.submissionDateTime)(messages(app)),
+        AmendPaymentAmountSummary.row(
+          PaymentPlanType.SinglePaymentPlan.toString,
+          userAnswers.get(AmendPaymentAmountPage),
+          true
+        )(messages(app)),
+        AmendPlanStartDateSummary.row(
+          PaymentPlanType.SinglePaymentPlan.toString,
+          userAnswers.get(AmendPlanStartDatePage),
+          Constants.shortDateTimeFormatPattern,
+          true
+        )(messages(app))
+      )
     }
 
     "onPageLoad" - {
       "must return OK and the correct view for a GET with a Budget Payment Plan" in {
+
+        val mockBudgetPaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString))
+
         val directDebitReference = "122222"
-        val paymentReference = "paymentReference"
+        val paymentPlanReference = "paymentReference"
         val userAnswers =
           emptyUserAnswers
-            .set(
-              YourBankDetailsPage,
-              YourBankDetailsWithAuddisStatus(
-                accountHolderName = "account name",
-                sortCode = "sort code",
-                accountNumber = "account number",
-                auddisStatus = false,
-                accountVerified = false
-              )
-            ).success.value
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
             ).success.value
             .set(
-              PaymentReferenceQuery,
-              "payment reference"
+              PaymentPlanReferenceQuery,
+              paymentPlanReference
             ).success.value
             .set(
               AmendPaymentPlanTypePage,
-              "budgetPaymentPlan"
+              PaymentPlanType.BudgetPaymentPlan.toString
             ).success.value
             .set(
-              AmendPaymentPlanSourcePage,
-              "paymentPlaneSource"
-            ).success.value
-            .set(
-              PaymentReferencePage,
-              paymentReference
+              PaymentPlanDetailsQuery,
+              mockBudgetPaymentPlanDetailResponse
             ).success.value
             .set(
               AmendPaymentAmountPage,
@@ -106,16 +125,12 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             ).success.value
             .set(
               AmendPlanStartDatePage,
-              LocalDate.now().plusDays(4)
-            )
-            .success
-            .value
+              LocalDate.now()
+            ).success.value
             .set(
-              PaymentsFrequencyPage,
-              PaymentsFrequency.Weekly
-            )
-            .success
-            .value
+              AmendPlanEndDatePage,
+              LocalDate.now().plusMonths(2)
+            ).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -128,70 +143,56 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           when(mockSessionRepository.get(any()))
             .thenReturn(Future.successful(Some(userAnswers)))
 
-          val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, application)
+          val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, mockBudgetPaymentPlanDetailResponse, application)
           val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
-
           val result = route(application, request).value
-
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
-          contentAsString(result) mustEqual view(NormalMode, paymentReference, directDebitReference, "sort code",
-            "account number", summaryListRows, routes.AmendPlanEndDateController.onPageLoad(NormalMode))(request, messages(application)).toString
+          contentAsString(result) mustEqual view(NormalMode, paymentPlanReference, directDebitReference,
+            mockBudgetPaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
+            mockBudgetPaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,
+            summaryListRows, routes.AmendPlanEndDateController.onPageLoad(NormalMode))(request, messages(application)).toString
         }
       }
 
       "must return OK and the correct view for a GET with a Single Payment Plan" in {
+        val mockSinglePaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString))
+
         val directDebitReference = "122222"
-        val paymentReference = "paymentReference"
+        val paymentPlanReference = "paymentReference"
         val userAnswers =
           emptyUserAnswers
-            .set(
-              YourBankDetailsPage,
-              YourBankDetailsWithAuddisStatus(
-                accountHolderName = "account name",
-                sortCode = "sort code",
-                accountNumber = "account number",
-                auddisStatus = false,
-                accountVerified = false
-              )
-            ).success.value
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
             ).success.value
             .set(
-              PaymentReferenceQuery,
-              "payment reference"
+              PaymentPlanReferenceQuery,
+              paymentPlanReference
             ).success.value
             .set(
               AmendPaymentPlanTypePage,
-              "singlePaymentPlan"
+              PaymentPlanType.SinglePaymentPlan.toString
             ).success.value
             .set(
-              AmendPaymentPlanSourcePage,
-              "paymentPlanSource"
-            ).success.value
-            .set(
-              PaymentReferencePage,
-              paymentReference
+              PaymentPlanDetailsQuery,
+              mockSinglePaymentPlanDetailResponse
             ).success.value
             .set(
               AmendPaymentAmountPage,
               150.0
             ).success.value
             .set(
-              AmendPlanEndDatePage,
-              LocalDate.now().plusDays(4)
-            )
-            .success
-            .value
+              AmendPlanStartDatePage,
+              LocalDate.now()
+            ).success.value
             .set(
-              PaymentsFrequencyPage,
-              PaymentsFrequency.Weekly
-            )
-            .success
-            .value
+              AmendPlanEndDatePage,
+              LocalDate.now().plusMonths(2)
+            ).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -204,7 +205,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           when(mockSessionRepository.get(any()))
             .thenReturn(Future.successful(Some(userAnswers)))
 
-          val summaryListRows = createSummaryListForSinglePaymentPlans(userAnswers, application)
+          val summaryListRows = createSummaryListForSinglePaymentPlans(userAnswers, mockSinglePaymentPlanDetailResponse, application)
           val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
 
           val result = route(application, request).value
@@ -212,8 +213,10 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
-          contentAsString(result) mustEqual view(NormalMode, paymentReference, directDebitReference, "sort code",
-            "account number", summaryListRows, routes.AmendPlanStartDateController.onPageLoad(NormalMode))(request, messages(application)).toString
+          contentAsString(result) mustEqual view(NormalMode, paymentPlanReference, directDebitReference,
+            mockSinglePaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
+            mockSinglePaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,
+            summaryListRows, routes.AmendPlanStartDateController.onPageLoad(NormalMode))(request, messages(application)).toString
         }
       }
     }

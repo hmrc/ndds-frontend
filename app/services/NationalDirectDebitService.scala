@@ -22,15 +22,15 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{DirectDebitDetails, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, PaymentsFrequency, UserAnswers}
-import pages.{AmendPaymentPlanTypePage, DirectDebitSourcePage, PaymentPlanTypePage, YourBankDetailsPage}
+import pages.*
+import models.responses.*
+import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import play.api.Logging
 import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -149,39 +149,9 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     }
   }
 
-  def getPaymentPlanDetails(paymentReference: String): Future[PaymentPlanResponse] = {
-    //TODO *** TEMP DATA WILL BE REPLACED WITH ACTUAL DATA***
-    val now = LocalDateTime.now()
-    val currentDate = LocalDate.now()
-
-    val samplePaymentPlanResponse: PaymentPlanResponse =
-      PaymentPlanResponse(
-        directDebitDetails = DirectDebitDetails(
-          bankSortCode = "123456",
-          bankAccountNumber = "12345678",
-          bankAccountName = "John Doe",
-          auddisFlag = true
-        ),
-        paymentPlanDetails = PaymentPlanDetails(
-          hodService = "CESA",
-          planType = PaymentPlanType.BudgetPaymentPlan.toString,
-          paymentReference = paymentReference, //Payment reference
-          submissionDateTime = now.minusDays(5), //Date set up
-          scheduledPaymentAmount = 120.00, //Payment amount or Regular payment amount or Monthly payment amount
-          scheduledPaymentStartDate = currentDate.plusDays(4), //Payment date or Plan start date
-          scheduledPaymentEndDate = currentDate.plusDays(5), //Plan end date
-          scheduledPaymentFrequency = PaymentsFrequency.Weekly.toString, //Frequency of payments
-          suspensionStartDate = currentDate.plusDays(2), //Suspend start date
-          suspensionEndDate = currentDate.plusDays(4), //Suspend end date
-          balancingPaymentAmount = BigDecimal(25.00), //Final payment amount
-          totalLiability =  0.00, //Total amount due
-          balancingPaymentDate = currentDate.plusMonths(13),
-          initialPaymentStartDate = currentDate.plusDays(5),
-          initialPaymentAmount = BigDecimal(50.00),
-          paymentPlanEditable = true
-        )
-      )
-    Future.successful(samplePaymentPlanResponse)
+  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)
+                           (implicit hc: HeaderCarrier, request: Request[_]): Future[PaymentPlanResponse] = {
+    nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
 }

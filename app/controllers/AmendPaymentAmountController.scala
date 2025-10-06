@@ -50,6 +50,7 @@ class AmendPaymentAmountController @Inject()(
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
       val answers = request.userAnswers
+
       if (nddsService.amendPaymentPlanGuard(answers)) {
         val preparedForm = answers.get(AmendPaymentAmountPage) match {
           case None => form
@@ -58,9 +59,7 @@ class AmendPaymentAmountController @Inject()(
 
         Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
       } else {
-        val paymentPlanType = answers.get(AmendPaymentPlanTypePage).getOrElse("Missing plan type from user answers")
-        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
-        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${paymentPlanType}")
+        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${answers.get(AmendPaymentPlanTypePage).get}")
       }
   }
 
