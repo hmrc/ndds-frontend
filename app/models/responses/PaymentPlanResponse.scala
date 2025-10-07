@@ -59,14 +59,14 @@ object PaymentPlanDetails {
     "04" -> PaymentPlanType.VariablePaymentPlan.toString
   )
 
-  private val paymentFrequencyMapping: Map[String, String] = Map(
-    "1" -> PaymentsFrequency.FortNightly.toString,
-    "2" -> PaymentsFrequency.Weekly.toString,
-    "3" -> PaymentsFrequency.FourWeekly.toString,
-    "5" -> PaymentsFrequency.Monthly.toString,
-    "6" -> PaymentsFrequency.Quarterly.toString,
-    "7" -> PaymentsFrequency.SixMonthly.toString,
-    "9" -> PaymentsFrequency.Annually.toString
+  private val paymentFrequencyMapping: Map[Int, String] = Map(
+    1 -> PaymentsFrequency.FortNightly.toString,
+    2 -> PaymentsFrequency.Weekly.toString,
+    3 -> PaymentsFrequency.FourWeekly.toString,
+    5 -> PaymentsFrequency.Monthly.toString,
+    6 -> PaymentsFrequency.Quarterly.toString,
+    7 -> PaymentsFrequency.SixMonthly.toString,
+    9 -> PaymentsFrequency.Annually.toString
   )
 
   implicit val reads: Reads[PaymentPlanDetails] = (
@@ -81,8 +81,12 @@ object PaymentPlanDetails {
       (__ \ "initialPaymentStartDate").readNullable[LocalDate] and
       (__ \ "initialPaymentAmount").readNullable[BigDecimal] and
       (__ \ "scheduledPaymentEndDate").readNullable[LocalDate] and
-      (__ \ "scheduledPaymentFrequency").readNullable[String].map { code =>
-        code.flatMap(c => paymentFrequencyMapping.get(c).orElse(Some(c)))
+      (__ \ "scheduledPaymentFrequency").readNullable[JsValue].map {
+        _.flatMap{
+          case JsNumber(num) => paymentFrequencyMapping.get(num.toInt)
+          case JsString(code) => code.toIntOption.flatMap(paymentFrequencyMapping.get).orElse(Some(code))
+          case _ => Some("unknownFrequency")
+        }
       } and
       (__ \ "suspensionStartDate").readNullable[LocalDate] and
       (__ \ "suspensionEndDate").readNullable[LocalDate] and
