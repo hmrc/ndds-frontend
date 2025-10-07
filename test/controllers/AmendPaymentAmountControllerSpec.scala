@@ -50,7 +50,9 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET with SinglePaymentPlan" in {
       val userAnswersWithSinglePaymentPlan = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
       val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePaymentPlan))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
@@ -69,7 +71,9 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
       val userAnswersWithBudgetPaymentPlan = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPaymentPlan))
         .overrides(
@@ -91,8 +95,12 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
       val userAnswersWithBudgetPaymentPlan = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
-        .set(AmendPaymentAmountPage, validAnswer).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(AmendPaymentAmountPage, validAnswer)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPaymentPlan))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -106,15 +114,17 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[AmendPaymentAmountView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer),
-          NormalMode, Call("GET", paymentPlanRoute))(request,
-          messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentPlanRoute))(request,
+                                                                                                                  messages(application)
+                                                                                                                 ).toString
       }
     }
 
     "must return NDDS error if amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -147,7 +157,8 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository)
-        ).build()
+        )
+        .build()
 
       running(application) {
         val request = FakeRequest(POST, paymentPlanAmountRoute)
@@ -193,4 +204,3 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
   }
 }
-

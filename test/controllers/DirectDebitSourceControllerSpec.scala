@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.DirectDebitSourceFormProvider
-import models.{NormalMode, DirectDebitSource, UserAnswers}
+import models.{DirectDebitSource, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -27,7 +27,7 @@ import pages.DirectDebitSourcePage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.DirectDebitSourceView
 
@@ -76,7 +76,10 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(DirectDebitSource.values.head), NormalMode, Call("GET", ConfirmAuthorityRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(DirectDebitSource.values.head), NormalMode, Call("GET", ConfirmAuthorityRoute))(
+          request,
+          messages(application)
+        ).toString
       }
     }
 

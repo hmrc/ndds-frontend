@@ -24,29 +24,29 @@ sealed trait PaymentsFrequency
 
 object PaymentsFrequency extends Enumerable.Implicits {
 
-  case object Weekly extends WithName("weekly") with PaymentsFrequency
-  case object Monthly extends WithName("monthly") with PaymentsFrequency
+  case object Weekly      extends WithName("weekly") with PaymentsFrequency
+  case object Monthly     extends WithName("monthly") with PaymentsFrequency
   case object FortNightly extends WithName("fortNightly") with PaymentsFrequency
-  case object FourWeekly extends WithName("fourWeekly") with PaymentsFrequency
-  case object Quarterly extends WithName("quarterly") with PaymentsFrequency
-  case object SixMonthly extends WithName("sixMonthly") with PaymentsFrequency
-  case object Annually extends WithName("annually") with PaymentsFrequency
+  case object FourWeekly  extends WithName("fourWeekly") with PaymentsFrequency
+  case object Quarterly   extends WithName("quarterly") with PaymentsFrequency
+  case object SixMonthly  extends WithName("sixMonthly") with PaymentsFrequency
+  case object Annually    extends WithName("annually") with PaymentsFrequency
 
   val values: Seq[PaymentsFrequency] = Seq(
-    Weekly, Monthly
+    Weekly,
+    Monthly
   )
 
-  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {
-    case (value, index) =>
-      RadioItem(
-        content = Text(messages(s"paymentsFrequency.${value.toString}")),
-        value   = Some(value.toString),
-        id      = Some(s"value_$index")
-      )
+  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>
+    RadioItem(
+      content = Text(messages(s"paymentsFrequency.${value.toString}")),
+      value   = Some(value.toString),
+      id      = Some(s"value_$index")
+    )
   }
 
   implicit val enumerable: Enumerable[PaymentsFrequency] =
-    Enumerable(values.map(v => v.toString -> v): _*)
+    Enumerable(values.map(v => v.toString -> v)*)
 
   def fromString(str: String): Option[PaymentsFrequency] =
     values.find(_.toString.equalsIgnoreCase(str))

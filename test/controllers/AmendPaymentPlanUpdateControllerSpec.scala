@@ -37,7 +37,7 @@ import views.html.AmendPaymentPlanUpdateView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
+class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
 
   "PaymentPlanConfirmation Controller" - {
     val mockService = mock[NationalDirectDebitService]
@@ -57,16 +57,26 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         Seq(
           PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
           AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)(messages(app)),
-          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app)),
-          AmendPlanEndDateSummary.row(planEndDate, Constants.longDateTimeFormatPattern)(messages(app)),
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(
+            messages(app)
+          ),
+          AmendPlanEndDateSummary.row(planEndDate, Constants.longDateTimeFormatPattern)(messages(app))
         )
       }
 
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanReferenceQuery, "123456789K").success.value
-        .set(AmendPaymentAmountPage, regPaymentAmount).success.value
-        .set(AmendPlanStartDatePage, startDate).success.value
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+        .set(PaymentPlanReferenceQuery, "123456789K")
+        .success
+        .value
+        .set(AmendPaymentAmountPage, regPaymentAmount)
+        .success
+        .value
+        .set(AmendPlanStartDatePage, startDate)
+        .success
+        .value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -81,7 +91,9 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         val summaryListRows = summaryList(userAnswers, "123456789K", application)
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, summaryListRows)(request, messages(application)).toString
+        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, summaryListRows)(request,
+                                                                                                                             messages(application)
+                                                                                                                            ).toString
       }
     }
 
@@ -94,16 +106,26 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         Seq(
           PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
           AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount)(messages(app)),
-          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app)),
+          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app))
         )
       }
 
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanReferenceQuery, "123456789K").success.value
-        .set(AmendPaymentAmountPage, regPaymentAmount).success.value
-        .set(AmendPlanStartDatePage, startDate).success.value
-        .set(AmendPlanEndDatePage, endDate).success.value
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+        .set(PaymentPlanReferenceQuery, "123456789K")
+        .success
+        .value
+        .set(AmendPaymentAmountPage, regPaymentAmount)
+        .success
+        .value
+        .set(AmendPlanStartDatePage, startDate)
+        .success
+        .value
+        .set(AmendPlanEndDatePage, endDate)
+        .success
+        .value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -118,15 +140,23 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
         val summaryListRows = summaryList(userAnswers, "123456789K", application)
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, summaryListRows)(request, messages(application)).toString
+        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, summaryListRows)(request,
+                                                                                                                             messages(application)
+                                                                                                                            ).toString
       }
     }
 
     "must redirect to Journey Recover page when AmendPlanStartDatePage is None" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
-        .set(PaymentPlanReferenceQuery, "123456789K").success.value
-        .set(AmendPaymentAmountPage, regPaymentAmount).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, "123456789K")
+        .success
+        .value
+        .set(AmendPaymentAmountPage, regPaymentAmount)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -144,9 +174,15 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
 
     "must redirect to Journey Recover page when AmendPaymentAmountPage is None" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
-        .set(PaymentPlanReferenceQuery, "123456789K").success.value
-        .set(AmendPlanStartDatePage, startDate).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, "123456789K")
+        .success
+        .value
+        .set(AmendPlanStartDatePage, startDate)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -164,9 +200,15 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
 
     "must redirect to Journey Recover page when PaymentPlanReferenceQuery is None" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
-        .set(AmendPaymentAmountPage, regPaymentAmount).success.value
-        .set(AmendPlanStartDatePage, startDate).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+        .set(AmendPaymentAmountPage, regPaymentAmount)
+        .success
+        .value
+        .set(AmendPlanStartDatePage, startDate)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -184,7 +226,9 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase  with MockitoSugar {
 
     "must redirect to Journey Recover page when amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
+        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 

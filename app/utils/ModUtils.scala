@@ -23,9 +23,7 @@ object ModUtils {
 
   private val nddsMValue = 45
   val charRemainderMap: Array[Char] = Array(
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-    'X', 'J', 'K', 'L', 'M', 'N', 'Y', 'P',
-    'Q', 'R', 'S', 'T', 'Z', 'V', 'W'
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'X', 'J', 'K', 'L', 'M', 'N', 'Y', 'P', 'Q', 'R', 'S', 'T', 'Z', 'V', 'W'
   )
   private val E_INT_VAL = 37
   private val C_INT_VAL = 35
@@ -187,7 +185,7 @@ object ModUtils {
     (mod97Flag, mod9755Flag) match {
       case (true, false) => true
       case (false, true) => true
-      case _ => false
+      case _             => false
     }
   }
 
@@ -205,8 +203,8 @@ object ModUtils {
   }
 
   def modCheck(modDivisor: Int, weightings: Array[Int], remainderMap: Array[Char], numericValues: Array[Int]): Char = {
-    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) {
-      case (acc, (value, index)) => acc + (value * weightings(index))
+    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
+      acc + (value * weightings(index))
     }
     val modResult = sumOfWeightedValues % modDivisor
     remainderMap(modResult)
@@ -214,24 +212,24 @@ object ModUtils {
 
   def modCheck(modDivisor: Int, weightings: Array[Int], protectedChars: String) = {
     val numericValues = parseIntArray(protectedChars)
-    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) {
-      case (acc, (value, index)) => acc + (value * weightings(index))
+    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
+      acc + (value * weightings(index))
     }
     sumOfWeightedValues % modDivisor
   }
 
   private def modCheckTotal(weightings: Array[Int], protectedChar: String): Int = {
     val numericValues = parseIntArray(protectedChar)
-    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) {
-      case (acc, (value, index)) => acc + (value * weightings(index))
+    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
+      acc + (value * weightings(index))
     }
     sumOfWeightedValues
   }
 
   private def mgdModCheck(modeDivisor: Int, weightings: Array[Int], remainderMap: Array[Char], protectedChars: String): Char = {
     val numericValues = mgdParseIntArray(protectedChars)
-    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) {
-      case (acc, (value, index)) => acc + (value * weightings(index))
+    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
+      acc + (value * weightings(index))
     }
     val modResult = sumOfWeightedValues % modeDivisor
     val expectedChar = remainderMap(modResult)
@@ -267,8 +265,8 @@ object ModUtils {
 
   def safe14ModCheck(modDivisor: Int, weightings: Array[Int], remainderMap: Array[Char], protectedChars: String) = {
     val numericValues = safe14ParseIntArray(protectedChars)
-    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) {
-      case (acc, (value, index)) => acc + (value * weightings(index))
+    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
+      acc + (value * weightings(index))
     }
     val modResult = sumOfWeightedValues % modDivisor
     remainderMap(modResult)

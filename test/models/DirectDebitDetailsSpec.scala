@@ -27,10 +27,10 @@ class DirectDebitDetailsSpec extends AnyWordSpec with Matchers {
     "serialize to JSON correctly" in {
       val details = DirectDebitDetails(
         directDebitReference = "DD123456789",
-        setupDate = "2025-08-10",
-        sortCode = "12-34-56",
-        accountNumber = "12345678",
-        paymentPlans = "PlanA"
+        setupDate            = "2025-08-10",
+        sortCode             = "12-34-56",
+        accountNumber        = "12345678",
+        paymentPlans         = "PlanA"
       )
 
       val json = Json.toJson(details)

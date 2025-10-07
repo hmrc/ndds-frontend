@@ -41,13 +41,13 @@ class SetUpDirectDebitPaymentViewSpec extends SpecBase with Matchers {
       shouldShowBackLink(view)
     }
   }
-  
+
   private def shouldShowBackLink(view: Document) = {
     view.select("a.govuk-back-link").size() mustBe 1
   }
 
   private def titleShouldBeCorrect(view: Document)(implicit msgs: Messages) = {
-    view.title() must include (msgs("setupDirectDebitPayment.title"))
+    view.title() must include(msgs("setupDirectDebitPayment.title"))
   }
 
   private def shouldDisplayCorrectHeader(view: Document)(implicit msgs: Messages) = {
@@ -61,14 +61,14 @@ class SetUpDirectDebitPaymentViewSpec extends SpecBase with Matchers {
     text must include(msgs("setUpDirectDebitPayment.p2"))
     text must include(msgs("setUpDirectDebitPayment.p3"))
   }
-  
+
   private def shouldDisplayCorrectDropDownTitle(view: Document)(implicit msgs: Messages) = {
     view.select("#dd-more-info summary").text() mustBe msgs("directDebitMoreInfo.collapsable")
   }
-  
+
   private def shouldDisplayCorrectDropDownParapgraphs(view: Document)(implicit msgs: Messages) = {
     val text = view.select("#dd-more-info p").text()
-    
+
     text must include(msgs("directDebitMoreInfo.p1"))
     text must include(msgs("directDebitMoreInfo.p2"))
     text must include(msgs("directDebitMoreInfo.p3"))
@@ -82,7 +82,7 @@ class SetUpDirectDebitPaymentViewSpec extends SpecBase with Matchers {
     anchors must include(msgs("directDebitMoreInfo.bullet.l3"))
     anchors must include(msgs("directDebitMoreInfo.bullet.l4"))
   }
-  
+
   private def shouldDisplayStartButton(view: Document)(implicit msgs: Messages) = {
     val button = view.select("#start-button")
     button.size() mustBe 1
@@ -93,12 +93,12 @@ class SetUpDirectDebitPaymentViewSpec extends SpecBase with Matchers {
     val app: Application = applicationBuilder().build()
     implicit val request: Request[AnyContent] = FakeRequest()
     implicit val msgs: Messages = messages(app)
-    
+
     private val viewTemplate = app.injector.instanceOf[SetupDirectDebitPaymentView]
-    
+
     val directDebitCount = 1
     val backCall: Call = Call("GET", "/previous")
-    
+
     val html = viewTemplate(directDebitCount, backCall).body
     val view: Document = Jsoup.parse(html)
   }

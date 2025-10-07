@@ -22,30 +22,29 @@ import pages.PaymentReferencePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object PaymentReferenceSummary  {
+object PaymentReferenceSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentReferencePage).map {
-      answer =>
+    answers.get(PaymentReferencePage).map { answer =>
 
-        SummaryListRowViewModel(
-          key     = "paymentReference.checkYourAnswersLabel",
-          value   = ValueViewModel(HtmlFormat.escape(answer).toString),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.PaymentReferenceController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("paymentReference.change.hidden"))
-          )
+      SummaryListRowViewModel(
+        key   = "paymentReference.checkYourAnswersLabel",
+        value = ValueViewModel(HtmlFormat.escape(answer).toString),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.PaymentReferenceController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("paymentReference.change.hidden"))
         )
+      )
     }
 
-  def row(paymentPlanReference: String)(implicit messages: Messages): SummaryListRow ={
-        SummaryListRowViewModel(
-          key = "paymentReference.checkYourAnswersLabel",
-          value = ValueViewModel(HtmlFormat.escape(paymentPlanReference).toString),
-          actions = Seq.empty
-        )
-    }
+  def row(paymentPlanReference: String)(implicit messages: Messages): SummaryListRow = {
+    SummaryListRowViewModel(
+      key     = "paymentReference.checkYourAnswersLabel",
+      value   = ValueViewModel(HtmlFormat.escape(paymentPlanReference).toString),
+      actions = Seq.empty
+    )
+  }
 }

@@ -41,16 +41,16 @@ class PlanStartDateFormProvider @Inject() extends Mappings {
   def apply(userAnswers: UserAnswers, earliestPlanStartDate: LocalDate)(implicit messages: Messages): Form[LocalDate] =
     Form(
       "value" -> planStartDate(
-        invalidKey     = "planStartDate.error.invalid",
-        allRequiredKey = "planStartDate.error.required.all",
-        twoRequiredKey = "planStartDate.error.required.two",
-        requiredKey    = "planStartDate.error.required",
-        beforeEarliestDateKey = "planStartDate.error.beforeEarliestDate",
-        budgetAfterMaxDateKey = "planStartDate.error.budgetAfterMaxDate",
+        invalidKey               = "planStartDate.error.invalid",
+        allRequiredKey           = "planStartDate.error.required.all",
+        twoRequiredKey           = "planStartDate.error.required.two",
+        requiredKey              = "planStartDate.error.required",
+        beforeEarliestDateKey    = "planStartDate.error.beforeEarliestDate",
+        budgetAfterMaxDateKey    = "planStartDate.error.budgetAfterMaxDate",
         timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
-        dateFormats    = DateFormats.defaultDateFormats,
-        userAnswers    = userAnswers,
-        earliestPlanStartDate = earliestPlanStartDate
+        dateFormats              = DateFormats.defaultDateFormats,
+        userAnswers              = userAnswers,
+        earliestPlanStartDate    = earliestPlanStartDate
       )
     )
 }

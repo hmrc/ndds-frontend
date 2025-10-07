@@ -41,15 +41,19 @@ class ReachedLimitControllerSpec extends SpecBase with MockitoSugar {
       val testInstant = Instant.parse("2025-06-28T15:30:00Z")
 
       when(mockLockService.isUserLocked(any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(LockResponse(
-          _id = "",
-          verifyCalls = 0,
-          isLocked = true,
-          unverifiable = None,
-          createdAt = None,
-          lastUpdated = None,
-          lockoutExpiryDateTime = Some(testInstant)
-        )))
+        .thenReturn(
+          Future.successful(
+            LockResponse(
+              _id                   = "",
+              verifyCalls           = 0,
+              isLocked              = true,
+              unverifiable          = None,
+              createdAt             = None,
+              lastUpdated           = None,
+              lockoutExpiryDateTime = Some(testInstant)
+            )
+          )
+        )
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(bind[LockService].toInstance(mockLockService))

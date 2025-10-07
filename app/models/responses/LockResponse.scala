@@ -20,14 +20,14 @@ import play.api.libs.json.{Format, Json}
 
 import java.time.Instant
 
-
 case class LockResponse(_id: String,
                         verifyCalls: Int,
                         isLocked: Boolean,
                         unverifiable: Option[Boolean],
                         createdAt: Option[Instant],
                         lastUpdated: Option[Instant],
-                        lockoutExpiryDateTime: Option[Instant]) {
+                        lockoutExpiryDateTime: Option[Instant]
+                       ) {
   val lockStatus: LockStatus = (isLocked, unverifiable) match {
     case (false, _)         => NotLocked
     case (true, Some(true)) => LockedAndUnverified
@@ -41,6 +41,6 @@ object LockResponse {
 
 sealed trait LockStatus
 
-case object NotLocked extends LockStatus
-case object LockedAndVerified extends LockStatus
+case object NotLocked           extends LockStatus
+case object LockedAndVerified   extends LockStatus
 case object LockedAndUnverified extends LockStatus

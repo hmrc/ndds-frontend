@@ -18,10 +18,10 @@ package models.errors
 
 enum BarsErrors {
   case BankAccountUnverified,
-  AccountDetailInvalidFormat, 
-  SortCodeNotFound,  
-  SortCodeNotSupported, 
-  AccountNotFound, 
-  NameMismatch, 
-  DetailsVerificationFailed
+    AccountDetailInvalidFormat,
+    SortCodeNotFound,
+    SortCodeNotSupported,
+    AccountNotFound,
+    NameMismatch,
+    DetailsVerificationFailed
 }

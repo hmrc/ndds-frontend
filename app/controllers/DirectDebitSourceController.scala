@@ -33,43 +33,46 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class DirectDebitSourceController @Inject()(
-                                             override val messagesApi: MessagesApi,
-                                             sessionRepository: SessionRepository,
-                                             navigator: Navigator,
-                                             identify: IdentifierAction,
-                                             getData: DataRetrievalAction,
-                                             requireData: DataRequiredAction,
-                                             formProvider: DirectDebitSourceFormProvider,
-                                             val controllerComponents: MessagesControllerComponents,
-                                             view: DirectDebitSourceView
-                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class DirectDebitSourceController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: DirectDebitSourceFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: DirectDebitSourceView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[DirectDebitSource] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val answers = request.userAnswers
-      val preparedForm = answers.get(DirectDebitSourcePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-      Ok(view(preparedForm, mode, routes.ConfirmAuthorityController.onPageLoad(mode)))
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
+    val preparedForm = answers.get(DirectDebitSourcePage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
+    Ok(view(preparedForm, mode, routes.ConfirmAuthorityController.onPageLoad(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
 
-      form.bindFromRequest().fold(
+    form
+      .bindFromRequest()
+      .fold(
         formWithErrors => {
           logger.warn(s"Bad Request validation error: ${formWithErrors.errors}")
           Future.successful(BadRequest(view(formWithErrors, mode, routes.BankDetailsCheckYourAnswerController.onPageLoad(mode))))
         },
-
         value => {
           val originalAnswers = request.userAnswers
 
-          Future.fromTry(setDirectDebitSource(originalAnswers, value))
+          Future
+            .fromTry(setDirectDebitSource(originalAnswers, value))
             .flatMap { updatedAnswers =>
               sessionRepository.set(updatedAnswers).map { _ =>
                 Redirect(navigator.nextPage(DirectDebitSourcePage, mode, updatedAnswers))

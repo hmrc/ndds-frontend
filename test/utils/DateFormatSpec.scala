@@ -32,40 +32,40 @@ class DateFormatSpec extends AnyFreeSpec with Matchers {
 
     "must match valid day input with regex" in {
       val df = DateFormat("day", "error.key", "^([1-9]|0[1-9]|1[0-9]|2[0-9]|3[0-1])$")
-      "1" must fullyMatch regex df.regex
-      "09" must fullyMatch regex df.regex
-      "31" must fullyMatch regex df.regex
-      "00" must not (fullyMatch regex df.regex)
-      "32" must not (fullyMatch regex df.regex)
-      "abc" must not (fullyMatch regex df.regex)
+      "1"   must fullyMatch regex df.regex
+      "09"  must fullyMatch regex df.regex
+      "31"  must fullyMatch regex df.regex
+      "00"  must not(fullyMatch regex df.regex)
+      "32"  must not(fullyMatch regex df.regex)
+      "abc" must not(fullyMatch regex df.regex)
     }
 
     "must match valid month input with regex" in {
       val df = DateFormat("month", "error.key", "^(0?[1-9]|1[0-2])$")
-      "1" must fullyMatch regex df.regex
-      "09" must fullyMatch regex df.regex
-      "12" must fullyMatch regex df.regex
-      "00" must not (fullyMatch regex df.regex)
-      "13" must not (fullyMatch regex df.regex)
-      "abc" must not (fullyMatch regex df.regex)
+      "1"   must fullyMatch regex df.regex
+      "09"  must fullyMatch regex df.regex
+      "12"  must fullyMatch regex df.regex
+      "00"  must not(fullyMatch regex df.regex)
+      "13"  must not(fullyMatch regex df.regex)
+      "abc" must not(fullyMatch regex df.regex)
     }
 
     "must match valid year end month input with regex" in {
       val df = DateFormat("month", "error.key", "^(0[1-9]|1[0-3])$")
-      "01" must fullyMatch regex df.regex
-      "09" must fullyMatch regex df.regex
-      "12" must fullyMatch regex df.regex
-      "13" must fullyMatch regex df.regex
-      "00" must not (fullyMatch regex df.regex)
-      "14" must not (fullyMatch regex df.regex)
-      "abc" must not (fullyMatch regex df.regex)
+      "01"  must fullyMatch regex df.regex
+      "09"  must fullyMatch regex df.regex
+      "12"  must fullyMatch regex df.regex
+      "13"  must fullyMatch regex df.regex
+      "00"  must not(fullyMatch regex df.regex)
+      "14"  must not(fullyMatch regex df.regex)
+      "abc" must not(fullyMatch regex df.regex)
     }
 
     "must match valid year input with regex" in {
       val df = DateFormat("year", "error.key", "^[0-9]{4}$")
       "2024" must fullyMatch regex df.regex
-      "24" must not (fullyMatch regex df.regex)
-      "abcd" must not (fullyMatch regex df.regex)
+      "24"   must not(fullyMatch regex df.regex)
+      "abcd" must not(fullyMatch regex df.regex)
     }
   }
 }

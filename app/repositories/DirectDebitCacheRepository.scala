@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.{NddDAO, NddResponse, NddDetails}
+import models.{NddDAO, NddDetails, NddResponse}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes, ReplaceOptions, Updates}
 import play.api.libs.json.Format
@@ -32,39 +32,35 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DirectDebitCacheRepository @Inject()(mongoComponent: MongoComponent,
-                                           appConfig: FrontendAppConfig,
-                                           clock: Clock)
-                                          (implicit ec: ExecutionContext)
-  extends PlayMongoRepository[NddDAO](
-    collectionName = "direct-debit-cache",
-    mongoComponent = mongoComponent,
-    domainFormat   = NddDAO.format,
-    indexes        = Seq(
-      IndexModel(
-        Indexes.ascending("lastUpdated"),
-        IndexOptions()
-          .name("lastUpdatedIdx")
-          .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+class DirectDebitCacheRepository @Inject() (mongoComponent: MongoComponent, appConfig: FrontendAppConfig, clock: Clock)(implicit ec: ExecutionContext)
+    extends PlayMongoRepository[NddDAO](
+      collectionName = "direct-debit-cache",
+      mongoComponent = mongoComponent,
+      domainFormat   = NddDAO.format,
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("lastUpdated"),
+          IndexOptions()
+            .name("lastUpdatedIdx")
+            .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+        )
       )
-    )
-  ) {
+    ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
   private def byId(id: String): Bson = Filters.equal("_id", id)
 
   def retrieveCache(id: String): Future[Seq[NddDetails]] = Mdc.preservingMdc {
-    keepAlive(id).flatMap {
-      _ =>
-        collection
-          .find(byId(id))
-          .headOption()
-          .map {
-            case Some(cache) => cache.directDebits
-            case _ => Seq()
-          }
-          .recover( _ => Seq())
+    keepAlive(id).flatMap { _ =>
+      collection
+        .find(byId(id))
+        .headOption()
+        .map {
+          case Some(cache) => cache.directDebits
+          case _           => Seq()
+        }
+        .recover(_ => Seq())
     }
   }
 
@@ -80,7 +76,7 @@ class DirectDebitCacheRepository @Inject()(mongoComponent: MongoComponent,
             options     = ReplaceOptions().upsert(true)
           )
           .toFuture()
-          .map( _ => true)
+          .map(_ => true)
       case existingCache =>
         Future.successful(true)
     }
@@ -90,7 +86,7 @@ class DirectDebitCacheRepository @Inject()(mongoComponent: MongoComponent,
     collection
       .updateOne(
         filter = byId(id),
-        update = Updates.set("lastUpdated", Instant.now(clock)),
+        update = Updates.set("lastUpdated", Instant.now(clock))
       )
       .toFuture()
       .map(_ => true)

@@ -28,18 +28,17 @@ import viewmodels.implicits.*
 object PlanStartDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PlanStartDatePage).map {
-      answer =>
+    answers.get(PlanStartDatePage).map { answer =>
 
-        implicit val lang: Lang = messages.lang
+      implicit val lang: Lang = messages.lang
 
-        SummaryListRowViewModel(
-          key = "planStartDate.checkYourAnswersLabel",
-          value = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.PlanStartDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("planStartDate.change.hidden"))
-          )
+      SummaryListRowViewModel(
+        key   = "planStartDate.checkYourAnswersLabel",
+        value = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.PlanStartDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("planStartDate.change.hidden"))
         )
+      )
     }
 }

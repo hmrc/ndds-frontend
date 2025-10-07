@@ -28,24 +28,25 @@ import java.time.ZoneId
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class AccountDetailsNotVerifiedController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: AccountDetailsNotVerifiedView,
-                                       lockService: LockService
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class AccountDetailsNotVerifiedController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: AccountDetailsNotVerifiedView,
+  lockService: LockService
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData).async {
-    implicit request =>
-      lockService.isUserLocked(request.userId) map { response =>
-        val formattedDate = response.lockoutExpiryDateTime
-          .map(_.atZone(ZoneId.of("Europe/London")))
-          .map(DateTimeFormats.formattedDateTime)
-          .getOrElse(throw Exception("Locked user has no expiry time"))
+  def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    lockService.isUserLocked(request.userId) map { response =>
+      val formattedDate = response.lockoutExpiryDateTime
+        .map(_.atZone(ZoneId.of("Europe/London")))
+        .map(DateTimeFormats.formattedDateTime)
+        .getOrElse(throw Exception("Locked user has no expiry time"))
 
-        Ok(view(formattedDate))
-      }
+      Ok(view(formattedDate))
+    }
   }
 }
