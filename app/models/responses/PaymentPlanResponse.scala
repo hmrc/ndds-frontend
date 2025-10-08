@@ -83,10 +83,10 @@ object PaymentPlanDetails {
       (__ \ "initialPaymentAmount").readNullable[BigDecimal] and
       (__ \ "scheduledPaymentEndDate").readNullable[LocalDate] and
       (__ \ "scheduledPaymentFrequency").readNullable[JsValue].map {
-        _.flatMap{
-          case JsNumber(num) => paymentFrequencyMapping.get(num.toInt)
+        _.flatMap {
+          case JsNumber(num)  => paymentFrequencyMapping.get(num.toInt)
           case JsString(code) => code.toIntOption.flatMap(paymentFrequencyMapping.get).orElse(Some(code))
-          case _ => Some("unknownFrequency")
+          case _              => Some("unknownFrequency")
         }
       } and
       (__ \ "suspensionStartDate").readNullable[LocalDate] and
