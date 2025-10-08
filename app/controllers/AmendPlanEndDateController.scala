@@ -22,7 +22,7 @@ import forms.AmendPlanEndDateFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -64,6 +64,7 @@ class AmendPlanEndDateController @Inject() (
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val form = formProvider()
     val userAnswers = request.userAnswers
+
     form
       .bindFromRequest()
       .fold(
@@ -74,6 +75,8 @@ class AmendPlanEndDateController @Inject() (
               case (Some(planDetails), Some(amendedAmount)) =>
                 val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
                 val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
+                val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
+                val frequency = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
 
                 val isNoChange = amendedAmount == dbAmount && value == dbEndDate
 
@@ -82,10 +85,20 @@ class AmendPlanEndDateController @Inject() (
                   val errorForm = form.fill(value).withError("value", key)
                   Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                 } else {
-                  for {
-                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                  // Calculate next payment date and validate against plan end date
+                  nddsService.calculateNextPaymentDate(dbStartDate, value, frequency).flatMap { result =>
+                    if (!result.nextPaymentDateValid) {
+                      val errorKey = "amendment.invalidEndDate.afterNextPayment"
+                      val errorForm = form.fill(value).withError("value", errorKey)
+                      Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                    } else {
+                      for {
+                        updatedAnswers1 <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
+                        updatedAnswers2 <- Future.fromTry(updatedAnswers1.set(AmendPlanStartDatePage, result.potentialNextPaymentDate))
+                        _               <- sessionRepository.set(updatedAnswers2)
+                      } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers2))
+                    }
+                  }
                 }
 
               case _ =>
@@ -97,4 +110,5 @@ class AmendPlanEndDateController @Inject() (
           }
       )
   }
+
 }

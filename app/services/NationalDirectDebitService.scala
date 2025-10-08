@@ -164,6 +164,115 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
+  case class NextPaymentValidationResult(
+    potentialNextPaymentDate: LocalDate,
+    nextPaymentDateValid: Boolean
+  )
+
+  def calculateNextPaymentDate(
+    planStartDate: LocalDate,
+    planEndDate: LocalDate,
+    paymentFrequency: String
+  )(implicit hc: HeaderCarrier): Future[NextPaymentValidationResult] = {
+
+    val today = LocalDate.now()
+
+    for {
+      isBeyondThreeDays <- isThreeDaysPriorPlanEndDate(planStartDate)
+      potentialNextPaymentDate <-
+        if (planStartDate.isAfter(today) && isBeyondThreeDays) {
+          Future.successful(planStartDate)
+        } else {
+          Future.successful(calculateFrequencyBasedNextDate(planStartDate, today, paymentFrequency))
+        }
+    } yield {
+      // Step 2: Validate against plan end date
+      val nextPaymentDateValid = !potentialNextPaymentDate.isAfter(planEndDate)
+
+      NextPaymentValidationResult(
+        potentialNextPaymentDate = potentialNextPaymentDate,
+        nextPaymentDateValid     = nextPaymentDateValid
+      )
+    }
+  }
+
+  private def calculateFrequencyBasedNextDate(
+    startDate: LocalDate,
+    today: LocalDate,
+    frequency: String
+  ): LocalDate = {
+
+    val daysInWeek = 7
+    val annualMonths = 12
+
+    frequency.toLowerCase match {
+      case "weekly" | "fortnightly" | "four weekly" =>
+        val daysFrequency = frequency match {
+          case "weekly"      => 7
+          case "fortnightly" => 14
+          case "four weekly" => 28
+        }
+
+        val daysDiff = java.time.temporal.ChronoUnit.DAYS.between(startDate, today).toInt
+        val paymentsTakenToDate = daysDiff / daysFrequency
+        val weeksUntilNextPayment = daysFrequency / daysInWeek
+
+        var potentialNext = startDate.plusWeeks(paymentsTakenToDate * weeksUntilNextPayment)
+        if (!potentialNext.isAfter(today.plusDays(3))) {
+          potentialNext = potentialNext.plusWeeks(weeksUntilNextPayment)
+        }
+        potentialNext
+
+      case "monthly" | "quarterly" | "six monthly" | "annually" =>
+        val monthsFrequency = frequency match {
+          case "monthly"     => 1
+          case "quarterly"   => 3
+          case "six monthly" => 6
+          case "annually"    => 12
+        }
+
+        val yearsDiff = today.getYear - startDate.getYear
+        val monthsDiff =
+          if (yearsDiff == 0) {
+            today.getMonthValue - startDate.getMonthValue
+          } else if (yearsDiff == 1) {
+            (annualMonths - startDate.getMonthValue) + today.getMonthValue
+          } else {
+            (annualMonths - startDate.getMonthValue) + today.getMonthValue + ((yearsDiff - 1) * annualMonths)
+          }
+
+        var paymentsTaken = monthsDiff / monthsFrequency
+        if ((monthsDiff % monthsFrequency) != 0) {
+          paymentsTaken += 1
+        }
+
+        var potentialNext = startDate.plusMonths(paymentsTaken * monthsFrequency)
+        if (!potentialNext.isAfter(today)) {
+          potentialNext = potentialNext.plusMonths(monthsFrequency)
+        }
+
+        if (potentialNext.getMonthValue < startDate.getMonthValue) {
+          potentialNext = potentialNext
+            .plusMonths(1)
+            .`with`(java.time.temporal.TemporalAdjusters.firstDayOfMonth())
+        }
+
+        if (!potentialNext.isAfter(today.plusDays(3))) {
+          potentialNext = potentialNext.plusMonths(monthsFrequency)
+          if (potentialNext.getMonthValue < startDate.getMonthValue) {
+            potentialNext = potentialNext
+              .plusMonths(1)
+              .`with`(java.time.temporal.TemporalAdjusters.firstDayOfMonth())
+          }
+        }
+
+        potentialNext
+
+      case _ =>
+        throw new IllegalArgumentException(s"Unknown payment frequency: $frequency")
+    }
+  }
+
   def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit
     hc: HeaderCarrier,
     request: Request[?]
