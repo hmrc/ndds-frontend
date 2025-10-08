@@ -33,42 +33,44 @@ import views.html.AmendPaymentAmountView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AmendPaymentAmountController @Inject()(
-                                              override val messagesApi: MessagesApi,
-                                              sessionRepository: SessionRepository,
-                                              navigator: Navigator,
-                                              identify: IdentifierAction,
-                                              getData: DataRetrievalAction,
-                                              requireData: DataRequiredAction,
-                                              formProvider: AmendPaymentAmountFormProvider,
-                                              nddsService: NationalDirectDebitService,
-                                              val controllerComponents: MessagesControllerComponents,
-                                              view: AmendPaymentAmountView
-                                       )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class AmendPaymentAmountController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: AmendPaymentAmountFormProvider,
+  nddsService: NationalDirectDebitService,
+  val controllerComponents: MessagesControllerComponents,
+  view: AmendPaymentAmountView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
   val form: Form[BigDecimal] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val answers = request.userAnswers
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
 
-      if (nddsService.amendPaymentPlanGuard(answers)) {
-        val preparedForm = answers.get(AmendPaymentAmountPage) match {
-          case None => form
-          case Some(value) => form.fill(value)
-        }
-
-        Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
-      } else {
-        throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${answers.get(AmendPaymentPlanTypePage).get}")
+    if (nddsService.amendPaymentPlanGuard(answers)) {
+      val preparedForm = answers.get(AmendPaymentAmountPage) match {
+        case None        => form
+        case Some(value) => form.fill(value)
       }
+
+      Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
+    } else {
+      throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${answers.get(AmendPaymentPlanTypePage).get}")
+    }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentPlanDetailsController.onPageLoad()))),
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentPlanDetailsController.onPageLoad()))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))

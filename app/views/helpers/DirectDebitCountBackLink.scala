@@ -19,9 +19,9 @@ package views.helpers
 import play.api.mvc.Call
 
 object DirectDebitCountBackLink {
-    def link(DirectDebitCount: Int, call: Call): Option[String] =
-      if (DirectDebitCount != 0) Some(call.url) else None
-      
-    def show(DirectDebitCount: Int): Boolean =
-      DirectDebitCount != 0
+  def link(DirectDebitCount: Int, call: Call): Option[String] =
+    if (DirectDebitCount != 0) Some(call.url) else None
+
+  def show(DirectDebitCount: Int): Boolean =
+    DirectDebitCount != 0
 }

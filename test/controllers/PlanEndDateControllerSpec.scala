@@ -59,9 +59,9 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, planEndDateRoute)
       .withFormUrlEncodedBody(
-        "value.day" -> validAnswer.getDayOfMonth.toString,
+        "value.day"   -> validAnswer.getDayOfMonth.toString,
         "value.month" -> validAnswer.getMonthValue.toString,
-        "value.year" -> validAnswer.getYear.toString
+        "value.year"  -> validAnswer.getYear.toString
       )
 
   "PlanEndDate Controller" - {
@@ -93,15 +93,21 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = UserAnswers(userAnswersId)
-        .set(PlanStartDatePage, planStartDateDetails).success.value
-        .set(PlanEndDatePage, validAnswer).success.value
+        .set(PlanStartDatePage, planStartDateDetails)
+        .success
+        .value
+        .set(PlanEndDatePage, validAnswer)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       running(application) {
         val view = application.injector.instanceOf[PlanEndDateView]
         val result = route(application, getRequest).value
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(Some(validAnswer)), NormalMode, Call("GET", planStartDateRoute))(getRequest, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(Some(validAnswer)), NormalMode, Call("GET", planStartDateRoute))(getRequest,
+                                                                                                                          messages(application)
+                                                                                                                         ).toString
       }
     }
 

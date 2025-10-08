@@ -39,7 +39,7 @@ class TotalAmountDueControllerSpec extends SpecBase with MockitoSugar {
 
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   when(mockConfig.minimumLiabilityAmount).thenReturn(BigDecimal("12.00"))
-  
+
   val formProvider = new TotalAmountDueFormProvider(mockConfig)
   val form: Form[BigDecimal] = formProvider()
 
@@ -82,7 +82,9 @@ class TotalAmountDueControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(request,
+                                                                                                                       messages(application)
+                                                                                                                      ).toString
       }
     }
 

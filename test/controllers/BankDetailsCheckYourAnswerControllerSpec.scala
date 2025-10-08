@@ -24,11 +24,11 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages._
+import pages.*
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import utils.MacGenerator
 
@@ -39,15 +39,15 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
   // Fake MacGenerator for testing
   class FakeMacGenerator extends MacGenerator(null) {
     override def generateMac(
-                              accountName: String,
-                              accountNumber: String,
-                              sortCode: String,
-                              lines: Seq[String],
-                              town: String,
-                              postcode: String,
-                              bankName: String,
-                              bacsNumber: String
-                            ): String = "TEST-MAC"
+      accountName: String,
+      accountNumber: String,
+      sortCode: String,
+      lines: Seq[String],
+      town: String,
+      postcode: String,
+      bankName: String,
+      bacsNumber: String
+    ): String = "TEST-MAC"
   }
 
   def onwardRoute: Call = Call("GET", "/foo")
@@ -92,7 +92,9 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
         .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
-        .set(BankDetailsCheckYourAnswerPage, true).success.value
+        .set(BankDetailsCheckYourAnswerPage, true)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(bind[MacGenerator].toInstance(new FakeMacGenerator))

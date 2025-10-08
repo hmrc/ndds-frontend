@@ -37,12 +37,13 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConnector,
-                                           val directDebitCache: DirectDebitCacheRepository,
-                                           config: FrontendAppConfig,
-                                           auditService: AuditService)
-                                          (implicit ec: ExecutionContext) extends Logging {
-  def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[NddResponse] = {
+class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitConnector,
+                                            val directDebitCache: DirectDebitCacheRepository,
+                                            config: FrontendAppConfig,
+                                            auditService: AuditService
+                                           )(implicit ec: ExecutionContext)
+    extends Logging {
+  def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[?]): Future[NddResponse] = {
     directDebitCache.retrieveCache(id) flatMap {
       case Seq() =>
         for {
@@ -56,18 +57,22 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     }
   }
 
-  def submitChrisData(submission: ChrisSubmissionRequest)
-                     (implicit hc: HeaderCarrier): Future[Boolean] = {
-    nddConnector.submitChrisData(submission).map { success =>
-      success
-    }.recover { case ex =>
-      logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
-      false
-    }
+  def submitChrisData(submission: ChrisSubmissionRequest)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    nddConnector
+      .submitChrisData(submission)
+      .map { success =>
+        success
+      }
+      .recover { case ex =>
+        logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
+        false
+      }
   }
 
   def calculateFutureWorkingDays(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
-    val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)
+    val auddisStatus = userAnswers
+      .get(YourBankDetailsPage)
+      .map(_.auddisStatus)
       .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
     val offsetWorkingDays = calculateOffset(auddisStatus)
     val currentDate = LocalDate.now().toString
@@ -76,11 +81,15 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
   }
 
   def getEarliestPlanStartDate(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
-    val auddisStatus = userAnswers.get(YourBankDetailsPage).map(_.auddisStatus)
+    val auddisStatus = userAnswers
+      .get(YourBankDetailsPage)
+      .map(_.auddisStatus)
       .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
-    val paymentPlanType = userAnswers.get(PaymentPlanTypePage)
+    val paymentPlanType = userAnswers
+      .get(PaymentPlanTypePage)
       .getOrElse(throw new Exception("PaymentPlanTypePage details missing from user answers"))
-    val directDebitSource = userAnswers.get(DirectDebitSourcePage)
+    val directDebitSource = userAnswers
+      .get(DirectDebitSourcePage)
       .getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
 
     val offsetWorkingDays = calculateOffset(auddisStatus, paymentPlanType, directDebitSource)
@@ -110,18 +119,24 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
     config.paymentDelayFixed + dynamicDelay
   }
 
-  //PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
+  // PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers.get(AmendPaymentPlanTypePage).getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers
+      .get(AmendPaymentPlanTypePage)
+      .getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers.get(AmendPaymentPlanTypePage).getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
+    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers
+      .get(AmendPaymentPlanTypePage)
+      .getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
   }
 
-  def retrieveDirectDebitPaymentPlans(directDebitReference: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[NddDDPaymentPlansResponse] = {
+  def retrieveDirectDebitPaymentPlans(
+    directDebitReference: String
+  )(implicit hc: HeaderCarrier, request: Request[?]): Future[NddDDPaymentPlansResponse] = {
     nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
   }
 
@@ -130,8 +145,8 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
   def isTwoDaysPriorPaymentDate(planStarDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now().toString
-    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2)).map {
-      futureWorkingDays => {
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2)).map { futureWorkingDays =>
+      {
         val twoDaysPrior = planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
         logger.info(s"twoDaysPrior flag is set to: $twoDaysPrior")
         twoDaysPrior
@@ -141,17 +156,19 @@ class NationalDirectDebitService @Inject()(nddConnector: NationalDirectDebitConn
 
   def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now().toString
-    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map {
-      futureWorkingDays => {
-        val isThreeDaysPrior =  planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map { futureWorkingDays =>
+      {
+        val isThreeDaysPrior = planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
         logger.info(s"planEndWithinThreeDays flag is set to: $isThreeDaysPrior")
         isThreeDaysPrior
       }
     }
   }
 
-  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)
-                           (implicit hc: HeaderCarrier, request: Request[_]): Future[PaymentPlanResponse] = {
+  def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit
+    hc: HeaderCarrier,
+    request: Request[?]
+  ): Future[PaymentPlanResponse] = {
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 

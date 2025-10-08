@@ -31,7 +31,11 @@ class YourBankDetailsWithAuddisStatusSpec extends SpecBase {
         val testModel = YourBankDetails(accountHolderName = testAccountHolderName, sortCode = testSortCode, accountNumber = testAccountNumber)
 
         val expectedResult = YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName,
-          sortCode = testSortCode, accountNumber = testAccountNumber, auddisStatus = true, false)
+                                                             sortCode          = testSortCode,
+                                                             accountNumber     = testAccountNumber,
+                                                             auddisStatus      = true,
+                                                             false
+                                                            )
         val result = YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(testModel, testAuddisStatus, false)
 
         result mustEqual expectedResult
@@ -41,10 +45,13 @@ class YourBankDetailsWithAuddisStatusSpec extends SpecBase {
     "toModelWithAuddisStatus method" - {
       "must successfully convert from YourBankDetailsWithAuddisStatus to YourBankDetails" in {
         val testModel = YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName,
-          sortCode = testSortCode, accountNumber = testAccountNumber, auddisStatus = true, false)
+                                                        sortCode          = testSortCode,
+                                                        accountNumber     = testAccountNumber,
+                                                        auddisStatus      = true,
+                                                        false
+                                                       )
 
-        val expectedResult = YourBankDetails(accountHolderName = testAccountHolderName,
-          sortCode = testSortCode, accountNumber = testAccountNumber)
+        val expectedResult = YourBankDetails(accountHolderName = testAccountHolderName, sortCode = testSortCode, accountNumber = testAccountNumber)
         val result = YourBankDetailsWithAuddisStatus.toModelWithoutAuddisStatus(testModel)
 
         result mustEqual expectedResult

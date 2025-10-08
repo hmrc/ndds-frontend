@@ -62,9 +62,9 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   def postRequestWithDate(date: LocalDate): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, amendPlanStartDateRoutePost)
       .withFormUrlEncodedBody(
-        "value.day" -> date.getDayOfMonth.toString,
+        "value.day"   -> date.getDayOfMonth.toString,
         "value.month" -> date.getMonthValue.toString,
-        "value.year" -> date.getYear.toString
+        "value.year"  -> date.getYear.toString
       )
 
   "AmendPlanStartDate Controller" - {
@@ -91,9 +91,9 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer),
-            NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(),
-            messages(application)).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(),
+                                                                                                                           messages(application)
+                                                                                                                          ).toString
         }
       }
 
@@ -111,29 +111,29 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
     "onSubmit" - {
       val directDebitDetails = DirectDebitDetails(
-        bankSortCode = Some("123456"),
-        bankAccountNumber = Some("12345678"),
-        bankAccountName = Some("UK Bank"),
-        auDdisFlag = true,
+        bankSortCode       = Some("123456"),
+        bankAccountNumber  = Some("12345678"),
+        bankAccountName    = Some("UK Bank"),
+        auDdisFlag         = true,
         submissionDateTime = LocalDateTime.now()
       )
       val planDetails = PaymentPlanDetails(
-        hodService = "TC",
-        planType = "Budget payment",
-        paymentReference = "987654321K",
-        submissionDateTime = LocalDateTime.now(),
-        scheduledPaymentAmount = Some(BigDecimal(1500)),
+        hodService                = "TC",
+        planType                  = "Budget payment",
+        paymentReference          = "987654321K",
+        submissionDateTime        = LocalDateTime.now(),
+        scheduledPaymentAmount    = Some(BigDecimal(1500)),
         scheduledPaymentStartDate = Some(LocalDate.now()),
-        scheduledPaymentEndDate = Some(LocalDate.now()),
+        scheduledPaymentEndDate   = Some(LocalDate.now()),
         scheduledPaymentFrequency = Some("Monthly"),
-        initialPaymentStartDate = Some(LocalDate.now()),
-        initialPaymentAmount = Some(BigDecimal(1500)),
-        suspensionStartDate = Some(LocalDate.now()),
-        suspensionEndDate = Some(LocalDate.now()),
-        balancingPaymentAmount = Some(BigDecimal(1500)),
-        balancingPaymentDate = Some(LocalDate.now()),
-        totalLiability = Some(BigDecimal(1500)),
-        paymentPlanEditable = true
+        initialPaymentStartDate   = Some(LocalDate.now()),
+        initialPaymentAmount      = Some(BigDecimal(1500)),
+        suspensionStartDate       = Some(LocalDate.now()),
+        suspensionEndDate         = Some(LocalDate.now()),
+        balancingPaymentAmount    = Some(BigDecimal(1500)),
+        balancingPaymentDate      = Some(LocalDate.now()),
+        totalLiability            = Some(BigDecimal(1500)),
+        paymentPlanEditable       = true
       )
       val paymentPlanResponse = PaymentPlanResponse(directDebitDetails, planDetails)
 
@@ -159,10 +159,18 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must return a Bad Request when no amendment is made" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, "Budget payment").success.value
-          .set(AmendPaymentAmountPage, BigDecimal(1500)).success.value
-          .set(AmendPlanStartDatePage, validAnswer).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(AmendPaymentPlanTypePage, "Budget payment")
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1500))
+          .success
+          .value
+          .set(AmendPlanStartDatePage, validAnswer)
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -184,10 +192,18 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must return to next page when payment amount is updated" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, singlePlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(1900)).success.value
-          .set(AmendPlanStartDatePage, validAnswer).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(AmendPaymentPlanTypePage, singlePlan)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanStartDatePage, validAnswer)
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -207,10 +223,18 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must return to next page when payment plan start date is updated" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, singlePlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(1500)).success.value
-          .set(AmendPlanStartDatePage, validAnswer.plusDays(3)).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(AmendPaymentPlanTypePage, singlePlan)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1500))
+          .success
+          .value
+          .set(AmendPlanStartDatePage, validAnswer.plusDays(3))
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -230,10 +254,18 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must return to next page when payment amount and plan start date is updated" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, singlePlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(1900)).success.value
-          .set(AmendPlanStartDatePage, validAnswer.plusDays(3)).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(AmendPaymentPlanTypePage, singlePlan)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanStartDatePage, validAnswer.plusDays(3))
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -253,10 +285,18 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must redirect to Journey Recovery for a POST if invalid payment plan type selected" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, "Tax Credit payment").success.value
-          .set(AmendPaymentAmountPage, BigDecimal(1900)).success.value
-          .set(AmendPlanStartDatePage, validAnswer.plusDays(3)).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(AmendPaymentPlanTypePage, "Tax Credit payment")
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanStartDatePage, validAnswer.plusDays(3))
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -273,9 +313,15 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must redirect to Journey Recovery for a POST when no amend payment amount exist" in {
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, "Budget payment").success.value
-          .set(AmendPlanStartDatePage, validAnswer.plusDays(3)).success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(AmendPaymentPlanTypePage, singlePlan)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, validAnswer.plusDays(3))
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))

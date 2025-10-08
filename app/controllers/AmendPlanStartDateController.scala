@@ -34,23 +34,27 @@ import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class AmendPlanStartDateController @Inject()(
-                                                 override val messagesApi: MessagesApi,
-                                                 sessionRepository: SessionRepository,
-                                                 navigator: Navigator,
-                                                 identify: IdentifierAction,
-                                                 getData: DataRetrievalAction,
-                                                 requireData: DataRequiredAction,
-                                                 nddsService: NationalDirectDebitService,
-                                                 formProvider: AmendPlanStartDateFormProvider,
-                                                 val controllerComponents: MessagesControllerComponents,
-                                                 view: AmendPlanStartDateView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class AmendPlanStartDateController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
+  formProvider: AmendPlanStartDateFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: AmendPlanStartDateView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request => {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    {
       val form = formProvider()
-      val preparedForm = request.userAnswers.get(AmendPlanStartDatePage)
+      val preparedForm = request.userAnswers
+        .get(AmendPlanStartDatePage)
         .orElse(request.userAnswers.get(AmendPlanStartDatePage))
         .fold(form)(form.fill)
 
@@ -58,14 +62,13 @@ class AmendPlanStartDateController @Inject()(
     }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val form = formProvider()
-      val userAnswers = request.userAnswers
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
-
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val form = formProvider()
+    val userAnswers = request.userAnswers
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
         value =>
           if (nddsService.amendPaymentPlanGuard(userAnswers)) {
             (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
@@ -102,6 +105,6 @@ class AmendPlanStartDateController @Inject()(
           } else {
             throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(AmendPaymentPlanTypePage).get}")
           }
-        )
-      }
+      )
   }
+}

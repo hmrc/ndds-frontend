@@ -32,10 +32,9 @@ class PersonalOrBusinessAccountSpec extends AnyFreeSpec with Matchers with Scala
 
       val gen = Gen.oneOf(PersonalOrBusinessAccount.values)
 
-      forAll(gen) {
-        personalOrBusinessAccount =>
+      forAll(gen) { personalOrBusinessAccount =>
 
-          JsString(personalOrBusinessAccount.toString).validate[PersonalOrBusinessAccount].asOpt.value mustEqual personalOrBusinessAccount
+        JsString(personalOrBusinessAccount.toString).validate[PersonalOrBusinessAccount].asOpt.value mustEqual personalOrBusinessAccount
       }
     }
 
@@ -43,10 +42,9 @@ class PersonalOrBusinessAccountSpec extends AnyFreeSpec with Matchers with Scala
 
       val gen = arbitrary[String] suchThat (!PersonalOrBusinessAccount.values.map(_.toString).contains(_))
 
-      forAll(gen) {
-        invalidValue =>
+      forAll(gen) { invalidValue =>
 
-          JsString(invalidValue).validate[PersonalOrBusinessAccount] mustEqual JsError("error.invalid")
+        JsString(invalidValue).validate[PersonalOrBusinessAccount] mustEqual JsError("error.invalid")
       }
     }
 
@@ -54,10 +52,9 @@ class PersonalOrBusinessAccountSpec extends AnyFreeSpec with Matchers with Scala
 
       val gen = Gen.oneOf(PersonalOrBusinessAccount.values)
 
-      forAll(gen) {
-        personalOrBusinessAccount =>
+      forAll(gen) { personalOrBusinessAccount =>
 
-          Json.toJson(personalOrBusinessAccount) mustEqual JsString(personalOrBusinessAccount.toString)
+        Json.toJson(personalOrBusinessAccount) mustEqual JsString(personalOrBusinessAccount.toString)
       }
     }
   }

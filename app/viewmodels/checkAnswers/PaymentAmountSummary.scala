@@ -30,8 +30,8 @@ object PaymentAmountSummary {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PaymentAmountPage).map { amount =>
       SummaryListRowViewModel(
-        key     = "paymentAmount.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(amount)),
+        key   = "paymentAmount.checkYourAnswersLabel",
+        value = ValueViewModel(currencyFormat(amount)),
         actions = Seq(
           ActionItemViewModel("site.change", routes.PaymentAmountController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("paymentAmount.change.hidden"))

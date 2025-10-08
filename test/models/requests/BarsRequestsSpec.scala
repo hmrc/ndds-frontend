@@ -18,7 +18,7 @@ package models.requests
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json._
+import play.api.libs.json.*
 
 class BarsRequestsSpec extends AnyWordSpec with Matchers {
 
@@ -26,9 +26,9 @@ class BarsRequestsSpec extends AnyWordSpec with Matchers {
     "serialize and deserialize correctly" in {
       val account = BarsAccount("123456", "12345678")
       val json = Json.toJson(account)
-      (json \ "sortCode").as[String] shouldBe "123456"
+      (json \ "sortCode").as[String]      shouldBe "123456"
       (json \ "accountNumber").as[String] shouldBe "12345678"
-      json.as[BarsAccount] shouldBe account
+      json.as[BarsAccount]                shouldBe account
     }
   }
 
@@ -37,7 +37,7 @@ class BarsRequestsSpec extends AnyWordSpec with Matchers {
       val subject = BarsSubject("John Doe")
       val json = Json.toJson(subject)
       (json \ "name").as[String] shouldBe "John Doe"
-      json.as[BarsSubject] shouldBe subject
+      json.as[BarsSubject]       shouldBe subject
     }
   }
 
@@ -46,7 +46,7 @@ class BarsRequestsSpec extends AnyWordSpec with Matchers {
       val business = BarsBusiness("Test Company Ltd")
       val json = Json.toJson(business)
       (json \ "companyName").as[String] shouldBe "Test Company Ltd"
-      json.as[BarsBusiness] shouldBe business
+      json.as[BarsBusiness]             shouldBe business
     }
   }
 
@@ -58,9 +58,9 @@ class BarsRequestsSpec extends AnyWordSpec with Matchers {
       )
 
       val json = Json.toJson(request)
-      (json \ "account" \ "sortCode").as[String] shouldBe "123456"
+      (json \ "account" \ "sortCode").as[String]      shouldBe "123456"
       (json \ "account" \ "accountNumber").as[String] shouldBe "12345678"
-      (json \ "subject" \ "name").as[String] shouldBe "Jane Doe"
+      (json \ "subject" \ "name").as[String]          shouldBe "Jane Doe"
 
       json.as[BarsPersonalRequest] shouldBe request
     }
@@ -74,9 +74,9 @@ class BarsRequestsSpec extends AnyWordSpec with Matchers {
       )
 
       val json = Json.toJson(request)
-      (json \ "account" \ "sortCode").as[String] shouldBe "654321"
+      (json \ "account" \ "sortCode").as[String]      shouldBe "654321"
       (json \ "account" \ "accountNumber").as[String] shouldBe "87654321"
-      (json \ "business" \ "companyName").as[String] shouldBe "Widgets Inc"
+      (json \ "business" \ "companyName").as[String]  shouldBe "Widgets Inc"
 
       json.as[BarsBusinessRequest] shouldBe request
     }

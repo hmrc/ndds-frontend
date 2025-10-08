@@ -26,24 +26,24 @@ object Utils {
   val LockExpirySessionKey = "lockoutExpiryDateTime"
 
   val listHodServices: Map[DirectDebitSource, String] = Map(
-    DirectDebitSource.CT -> "COTA",
+    DirectDebitSource.CT   -> "COTA",
     DirectDebitSource.PAYE -> "PAYE",
-    DirectDebitSource.SA -> "CESA",
-    DirectDebitSource.TC -> "NTC",
-    DirectDebitSource.VAT -> "VAT",
-    DirectDebitSource.MGD -> "MGD",
-    DirectDebitSource.NIC -> "NIDN",
-    DirectDebitSource.OL -> "SAFE",
+    DirectDebitSource.SA   -> "CESA",
+    DirectDebitSource.TC   -> "NTC",
+    DirectDebitSource.VAT  -> "VAT",
+    DirectDebitSource.MGD  -> "MGD",
+    DirectDebitSource.NIC  -> "NIDN",
+    DirectDebitSource.OL   -> "SAFE",
     DirectDebitSource.SDLT -> "SDLT"
   )
 
   def generateMacFromAnswers(
-                              answers: UserAnswers,
-                              macGenerator: MacGenerator,
-                              bacsNumber: String
-                            ): Option[String] = {
+    answers: UserAnswers,
+    macGenerator: MacGenerator,
+    bacsNumber: String
+  ): Option[String] = {
     val maybeBankAddress = answers.get(BankDetailsAddressPage)
-    val maybeBankName    = answers.get(BankDetailsBankNamePage)
+    val maybeBankName = answers.get(BankDetailsBankNamePage)
     val maybeBankDetails = answers.get(YourBankDetailsPage)
 
     (maybeBankAddress, maybeBankName, maybeBankDetails) match {
@@ -83,4 +83,3 @@ object Utils {
     )
   }
 }
-

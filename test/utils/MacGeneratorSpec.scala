@@ -33,14 +33,14 @@ class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
       val macGenerator = new MacGenerator(mockAppConfig)
 
-      val accountName   = "John Doe"
+      val accountName = "John Doe"
       val accountNumber = "12345678"
-      val sortCode      = "112233"
-      val lines         = Seq("10 Downing Street", "Flat 2")
-      val town          = "London"
-      val postcode      = "SW1A 2AA"
-      val bankName      = "Bank of Scala"
-      val bacsNumber    = "111222"
+      val sortCode = "112233"
+      val lines = Seq("10 Downing Street", "Flat 2")
+      val town = "London"
+      val postcode = "SW1A 2AA"
+      val bankName = "Bank of Scala"
+      val bacsNumber = "111222"
 
       val mac = macGenerator.generateMac(
         accountName,
@@ -55,7 +55,7 @@ class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
       val expectedMac = "HLfhORXoYm54KiRTo4eN6sW6Is0="
       mac must not be empty
-       mac mustEqual expectedMac
+      mac mustEqual expectedMac
     }
 
     "produce different MACs if any input changes" in {
@@ -65,13 +65,25 @@ class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {
       val macGenerator = new MacGenerator(mockAppConfig)
 
       val baseMac = macGenerator.generateMac(
-        "John Doe", "12345678", "112233", Seq("10 Downing Street", "Flat 2"),
-        "London", "SW1A 2AA", "Bank of Scala", "111222"
+        "John Doe",
+        "12345678",
+        "112233",
+        Seq("10 Downing Street", "Flat 2"),
+        "London",
+        "SW1A 2AA",
+        "Bank of Scala",
+        "111222"
       )
 
       val changedMac = macGenerator.generateMac(
-        "Jane Doe", "12345678", "112233", Seq("10 Downing Street", "Flat 2"),
-        "London", "SW1A 2AA", "Bank of Scala", "111222"
+        "Jane Doe",
+        "12345678",
+        "112233",
+        Seq("10 Downing Street", "Flat 2"),
+        "London",
+        "SW1A 2AA",
+        "Bank of Scala",
+        "111222"
       )
 
       baseMac must not equal changedMac

@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{NddResponse, NddDetails}
+import models.{NddDetails, NddResponse}
 import models.responses.LockResponse
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -40,12 +40,12 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     val returnedDate = "2025-06-28T15:30:30Z"
 
     def response = LockResponse(
-      _id = "testId",
-      verifyCalls = 3,
-      isLocked = false,
-      unverifiable = None,
-      createdAt = None,
-      lastUpdated = None,
+      _id                   = "testId",
+      verifyCalls           = 3,
+      isLocked              = false,
+      unverifiable          = None,
+      createdAt             = None,
+      lastUpdated           = None,
       lockoutExpiryDateTime = Some(Instant.parse(returnedDate))
     )
 
@@ -57,15 +57,17 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     "must return OK and the correct view for a GET with no back link (DDI = 0) without Back link" in {
       val cacheResponse: NddResponse = NddResponse(0, sequence)
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).overrides(
-        bind[NationalDirectDebitService].toInstance(mockRDSDatacacheService),
-        bind[LockService].toInstance(mockService)
-      ).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockRDSDatacacheService),
+          bind[LockService].toInstance(mockService)
+        )
+        .build()
 
       running(application) {
 
         when(mockRDSDatacacheService.retrieveAllDirectDebits(any())(any(), any()))
-                .thenReturn(Future.successful(cacheResponse))
+          .thenReturn(Future.successful(cacheResponse))
 
         when(mockService.isUserLocked(any())(any()))
           .thenReturn(Future.successful(response))
@@ -84,10 +86,12 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     "must return OK and the correct view for a GET if there is back link (DDI > 1) with Back link" in {
       val cacheResponse: NddResponse = NddResponse(3, sequence)
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).overrides(
-        bind[NationalDirectDebitService].toInstance(mockRDSDatacacheService),
-        bind[LockService].toInstance(mockService)
-      ).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockRDSDatacacheService),
+          bind[LockService].toInstance(mockService)
+        )
+        .build()
 
       running(application) {
 
@@ -112,9 +116,11 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     }
 
     "must return See Other and redirect for a GET if the user is locked but not verified" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).overrides(
-        bind[LockService].toInstance(mockService)
-      ).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[LockService].toInstance(mockService)
+        )
+        .build()
 
       running(application) {
 
@@ -131,9 +137,11 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     }
 
     "must return See Other and redirect for a GET if the user is locked and verified" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).overrides(
-        bind[LockService].toInstance(mockService)
-      ).build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[LockService].toInstance(mockService)
+        )
+        .build()
 
       running(application) {
 
@@ -150,4 +158,3 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     }
   }
 }
-

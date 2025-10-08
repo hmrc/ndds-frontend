@@ -28,11 +28,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-case class BarsConnector @Inject()(
-                                    config: ServicesConfig,
-                                    http: HttpClientV2
-                                  )(implicit ec: ExecutionContext)
-  extends HttpReadsInstances with Logging {
+case class BarsConnector @Inject() (
+  config: ServicesConfig,
+  http: HttpClientV2
+)(implicit ec: ExecutionContext)
+    extends HttpReadsInstances
+    with Logging {
   private val barsBaseUrl: String = config.baseUrl("bars")
 
   def getMetadata(sortCode: String)(implicit hc: HeaderCarrier): Future[Bank] =
@@ -49,8 +50,7 @@ case class BarsConnector @Inject()(
           )
       }
 
-  def verify(endpoint: String, requestJson: JsValue)
-            (implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
+  def verify(endpoint: String, requestJson: JsValue)(implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
     val url = s"$barsBaseUrl/verify/$endpoint"
     logger.info(s"Account validation called with $url")
     logger.info(

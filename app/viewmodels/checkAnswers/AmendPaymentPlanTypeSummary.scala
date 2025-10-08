@@ -28,13 +28,12 @@ import viewmodels.implicits.*
 object AmendPaymentPlanTypeSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AmendPaymentPlanTypePage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key = "paymentPlanDetails.details.planType.label",
-          value = ValueViewModel(HtmlFormat.escape(answer).toString),
-          actions = Seq.empty
-        )
+    answers.get(AmendPaymentPlanTypePage).map { answer =>
+      SummaryListRowViewModel(
+        key     = "paymentPlanDetails.details.planType.label",
+        value   = ValueViewModel(HtmlFormat.escape(answer).toString),
+        actions = Seq.empty
+      )
     }
 
   def row(planType: String)(implicit messages: Messages): SummaryListRow = {
@@ -45,8 +44,8 @@ object AmendPaymentPlanTypeSummary {
     )
 
     SummaryListRowViewModel(
-      key = "paymentPlanDetails.details.planType.label",
-      value = value,
+      key     = "paymentPlanDetails.details.planType.label",
+      value   = value,
       actions = Seq.empty
     )
   }

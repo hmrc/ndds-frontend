@@ -44,7 +44,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
 
-
   "Check Your Answers Controller" - {
 
     val userAnswer = emptyUserAnswers
@@ -64,7 +63,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your answers")
         contentAsString(result) must include("Payment Plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include(
+          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+        )
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
@@ -90,7 +91,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your answers")
         contentAsString(result) must include("Payment Plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include(
+          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+        )
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
@@ -116,7 +119,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your answers")
         contentAsString(result) must include("Payment Plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include(
+          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+        )
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
@@ -145,7 +150,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your answers")
         contentAsString(result) must include("Payment Plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include(
+          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+        )
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Frequency of payments")
         contentAsString(result) must include("Monthly")
@@ -171,7 +178,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your answers")
         contentAsString(result) must include("Payment Plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include("This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.")
+        contentAsString(result) must include(
+          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+        )
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("1234567")
         contentAsString(result) must include("Total Amount Due")
@@ -202,12 +211,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
     "must redirect to Journey Recovery for a POST if PaymentReferencePage data is missing" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
-        .setOrException(YourBankDetailsPage,
-          YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false)
-        )
-        .setOrException(BankDetailsAddressPage,
-          BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
-        )
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(pages.MacValuePage, "valid-mac")
@@ -216,8 +221,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .thenReturn(Future.successful(GenerateDdiRefResponse("fakeRef")))
       when(
         mockMacGenerator.generateMac(
-          any[String], any[String], any[String], any[Seq[String]],
-          any[String], any[String], any[String], any[String]
+          any[String],
+          any[String],
+          any[String],
+          any[Seq[String]],
+          any[String],
+          any[String],
+          any[String],
+          any[String]
         )
       ).thenReturn("valid-mac")
 
@@ -237,23 +248,25 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
     "must redirect to Journey Recovery for a POST if DirectDebitSource data is missing" in {
       val incompleteAnswers = emptyUserAnswers
-        .setOrException(YourBankDetailsPage,
-          YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false)
-        )
-        .setOrException(BankDetailsAddressPage,
-          BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
-        )
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(PaymentReferencePage, "testRef")
         .setOrException(pages.MacValuePage, "valid-mac")
 
-        when(
-          mockMacGenerator.generateMac(
-            any[String], any[String], any[String], any[Seq[String]],
-            any[String], any[String], any[String], any[String]
-          )
-        ).thenReturn("valid-mac")
+      when(
+        mockMacGenerator.generateMac(
+          any[String],
+          any[String],
+          any[String],
+          any[Seq[String]],
+          any[String],
+          any[String],
+          any[String],
+          any[String]
+        )
+      ).thenReturn("valid-mac")
 
       val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
         .overrides(
@@ -284,8 +297,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
       when(
         mockMacGenerator.generateMac(
-          any[String], any[String], any[String], any[Seq[String]],
-          any[String], any[String], any[String], any[String]
+          any[String],
+          any[String],
+          any[String],
+          any[Seq[String]],
+          any[String],
+          any[String],
+          any[String],
+          any[String]
         )
       ).thenReturn("valid-mac")
 
@@ -333,11 +352,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
         when(
           mockMacGenerator.generateMac(
-            any[String], any[String], any[String], any[Seq[String]],
-            any[String], any[String], any[String], any[String]
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[String],
+            any[String],
+            any[String],
+            any[String]
           )
         ).thenReturn("valid-mac")
-
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
@@ -361,16 +385,13 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-          .setOrException(YourBankDetailsPage,
-            YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
           .setOrException(TotalAmountDuePage, 5000)
           .setOrException(PlanStartDatePage, planStartDateDetails)
           .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(BankDetailsAddressPage,
-            BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
-
 
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -411,7 +432,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
 
-
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
 
@@ -420,11 +440,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         when(
           mockMacGenerator.generateMac(
-            any[String], any[String], any[String], any[Seq[String]],
-            any[String], any[String], any[String], any[String]
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[String],
+            any[String],
+            any[String],
+            any[String]
           )
         ).thenReturn("valid-mac")
-
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
@@ -454,8 +479,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         when(
           mockMacGenerator.generateMac(
-            any[String], any[String], any[String], any[Seq[String]],
-            any[String], any[String], any[String], any[String]
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[String],
+            any[String],
+            any[String],
+            any[String]
           )
         ).thenReturn("generated-mac")
 
@@ -485,8 +516,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         when(
           mockMacGenerator.generateMac(
-            any[String], any[String], any[String], any[Seq[String]],
-            any[String], any[String], any[String], any[String]
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[String],
+            any[String],
+            any[String],
+            any[String]
           )
         ).thenReturn("generated-mac")
 
@@ -506,22 +543,18 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
-
       "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all required data is provided" in {
         val totalDueAmount = 200
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-          .setOrException(YourBankDetailsPage,
-            YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
           .setOrException(TotalAmountDuePage, totalDueAmount)
           .setOrException(PlanStartDatePage, planStartDateDetails)
           .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(BankDetailsAddressPage,
-            BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
-
 
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -529,11 +562,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .thenReturn(Future.successful(true))
         when(
           mockMacGenerator.generateMac(
-            any[String], any[String], any[String], any[Seq[String]],
-            any[String], any[String], any[String], any[String]
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[String],
+            any[String],
+            any[String],
+            any[String]
           )
         ).thenReturn("valid-mac")
-
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(

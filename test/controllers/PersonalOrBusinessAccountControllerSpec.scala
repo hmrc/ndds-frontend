@@ -42,7 +42,7 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
 
   val formProvider = new PersonalOrBusinessAccountFormProvider()
   val form: Form[PersonalOrBusinessAccount] = formProvider()
-  
+
   lazy val backLinkRoute: Call = routes.SetupDirectDebitPaymentController.onPageLoad()
 
   "PersonalOrBusinessAccount Controller" - {
@@ -76,7 +76,9 @@ class PersonalOrBusinessAccountControllerSpec extends SpecBase with MockitoSugar
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(PersonalOrBusinessAccount.values.head), NormalMode, backLinkRoute)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(PersonalOrBusinessAccount.values.head), NormalMode, backLinkRoute)(request,
+                                                                                                                            messages(application)
+                                                                                                                           ).toString
       }
     }
 

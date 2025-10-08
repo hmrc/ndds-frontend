@@ -33,8 +33,8 @@ object MonthlyPaymentAmountSummary {
       val monthlyPayment = (totalAmount / 12).setScale(2, RoundingMode.DOWN)
 
       SummaryListRowViewModel(
-        key = "totalAmountDue.monthly.checkYourAnswersLabel",
-        value = ValueViewModel(currencyFormat(monthlyPayment)),
+        key     = "totalAmountDue.monthly.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(monthlyPayment)),
         actions = Seq.empty
       )
     }
@@ -44,14 +44,14 @@ object MonthlyPaymentAmountSummary {
       case Some(_) =>
         val displayValue = amount.map(a => formatAmount(a)).getOrElse("")
         SummaryListRowViewModel(
-          key = "totalAmountDue.monthly.checkYourAnswersLabel",
-          value = ValueViewModel(displayValue),
+          key     = "totalAmountDue.monthly.checkYourAnswersLabel",
+          value   = ValueViewModel(displayValue),
           actions = Seq.empty
         )
       case None =>
         SummaryListRowViewModel(
-          key = "totalAmountDue.monthly.checkYourAnswersLabel",
-          value = ValueViewModel(""),
+          key     = "totalAmountDue.monthly.checkYourAnswersLabel",
+          value   = ValueViewModel(""),
           actions = Seq.empty
         )
     }

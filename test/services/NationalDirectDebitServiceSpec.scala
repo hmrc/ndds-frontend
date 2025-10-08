@@ -45,9 +45,7 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class NationalDirectDebitServiceSpec extends SpecBase
-  with MockitoSugar
-  with DirectDebitDetailsData {
+class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with DirectDebitDetailsData {
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -72,8 +70,12 @@ class NationalDirectDebitServiceSpec extends SpecBase
     FakeRequest(GET, routes.LandingController.onPageLoad().url)
 
   val testBankDetailsAuddisTrue: YourBankDetailsWithAuddisStatus =
-    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName, sortCode = testSortCode,
-      accountNumber = testAccountNumber, auddisStatus = true, false)
+    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName,
+                                    sortCode          = testSortCode,
+                                    accountNumber     = testAccountNumber,
+                                    auddisStatus      = true,
+                                    false
+                                   )
 
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD
@@ -167,9 +169,15 @@ class NationalDirectDebitServiceSpec extends SpecBase
     "getEarliestPlanStartDate" - {
       "must successfully return the Earliest Payment Date" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, testPaymentPlanType).success.value
-          .set(DirectDebitSourcePage, testDirectDebitSource).success.value
-          .set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+          .success
+          .value
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
@@ -183,8 +191,12 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       "fail when auddis status is not in user answers" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, testPaymentPlanType).success.value
-          .set(DirectDebitSourcePage, testDirectDebitSource).success.value
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
 
         val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
 
@@ -193,8 +205,12 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       "fail when payment plan type is not in user answers" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(DirectDebitSourcePage, testDirectDebitSource).success.value
-          .set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+          .success
+          .value
 
         val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
 
@@ -203,8 +219,12 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       "fail when direct debit source is not in user answers" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, testPaymentPlanType).success.value
-          .set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+          .success
+          .value
 
         val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
 
@@ -213,9 +233,15 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
       "fail when the connector call fails" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, testPaymentPlanType).success.value
-          .set(DirectDebitSourcePage, testDirectDebitSource).success.value
-          .set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+          .success
+          .value
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
@@ -332,13 +358,13 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "retrieveDirectDebitPaymentPlans" - {
       "must successfully return the direct debit payment plans" in {
-        val paymentPlanResponse = NddDDPaymentPlansResponse(
-          bankSortCode = "123456",
-          bankAccountNumber = "12345678",
-          bankAccountName = "MyBankAcc",
-          auDdisFlag = "01",
-          paymentPlanCount = 2,
-          paymentPlanList = Seq.empty)
+        val paymentPlanResponse = NddDDPaymentPlansResponse(bankSortCode      = "123456",
+                                                            bankAccountNumber = "12345678",
+                                                            bankAccountName   = "MyBankAcc",
+                                                            auDdisFlag        = "01",
+                                                            paymentPlanCount  = 2,
+                                                            paymentPlanList   = Seq.empty
+                                                           )
 
         when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
           .thenReturn(Future.successful(paymentPlanResponse))
@@ -361,56 +387,72 @@ class NationalDirectDebitServiceSpec extends SpecBase
     "amendPaymentPlanGuard" - {
       "must return true if single payment for set up journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
+          .success
+          .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe true
       }
 
       "must return true if single payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe true
       }
 
       "must return true if budget payment for set up journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .success
+          .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe true
       }
 
       "must return true if budget payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe true
       }
 
       "must return false if variable payment for set up journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan)
+          .success
+          .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe false
       }
 
       "must return false if variable payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString).success.value
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
+          .success
+          .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe false
       }
 
       "must return false if tax credit repayment payment for set up journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan).success.value
+          .set(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .success
+          .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe false
       }
 
       "must return false if payment plan is empty for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, "").success.value
+          .set(AmendPaymentPlanTypePage, "")
+          .success
+          .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
         result mustBe false
       }
@@ -458,43 +500,43 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "submitChrisData" - {
       val planStartDateDetails = models.PlanStartDateDetails(
-        enteredDate = java.time.LocalDate.of(2025, 9, 1),
+        enteredDate           = java.time.LocalDate.of(2025, 9, 1),
         earliestPlanStartDate = "2025-09-01"
       )
 
       val paymentDateDetails = models.PaymentDateDetails(
-        enteredDate = java.time.LocalDate.of(2025, 9, 15),
+        enteredDate         = java.time.LocalDate.of(2025, 9, 15),
         earliestPaymentDate = "2025-09-01"
       )
 
       val chrisSubmission = models.requests.ChrisSubmissionRequest(
-        serviceType = DirectDebitSource.TC,
-        paymentPlanType = PaymentPlanType.TaxCreditRepaymentPlan,
+        serviceType      = DirectDebitSource.TC,
+        paymentPlanType  = PaymentPlanType.TaxCreditRepaymentPlan,
         paymentFrequency = Some(models.PaymentsFrequency.Monthly),
         yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
           accountHolderName = "Test",
-          sortCode = "123456",
-          accountNumber = "12345678",
-          auddisStatus = false,
-          accountVerified = false
+          sortCode          = "123456",
+          accountNumber     = "12345678",
+          auddisStatus      = false,
+          accountVerified   = false
         ),
-        planStartDate = Some(planStartDateDetails),
-        planEndDate = None,
-        paymentDate = Some(paymentDateDetails),
+        planStartDate   = Some(planStartDateDetails),
+        planEndDate     = None,
+        paymentDate     = Some(paymentDateDetails),
         yearEndAndMonth = None,
         bankDetailsAddress = models.responses.BankAddress(
-          lines = Seq("line 1"),
-          town = "Town",
-          country = models.responses.Country("UK"),
+          lines    = Seq("line 1"),
+          town     = "Town",
+          country  = models.responses.Country("UK"),
           postCode = "NE5 2DH"
         ),
-        ddiReferenceNo = "DDI123456789",
-        paymentReference = "testReference",
-        bankName = "Barclays",
-        totalAmountDue = Some(BigDecimal(200)),
-        paymentAmount = Some(BigDecimal(100)),
+        ddiReferenceNo       = "DDI123456789",
+        paymentReference     = "testReference",
+        bankName             = "Barclays",
+        totalAmountDue       = Some(BigDecimal(200)),
+        paymentAmount        = Some(BigDecimal(100)),
         regularPaymentAmount = Some(BigDecimal(90)),
-        calculation = None
+        calculation          = None
       )
 
       "must return true when CHRIS submission succeeds" in {
@@ -539,6 +581,7 @@ class NationalDirectDebitServiceSpec extends SpecBase
         result.getMessage must include("error")
       }
     }
+  }
 
     "isDuplicatePaymentPlan" - {
 

@@ -35,7 +35,7 @@ trait BackLinkFluency {
 
   implicit class FluentBackLink(backLink: BackLink) {
 
-    def withCssClass(newClass:String): BackLink =
+    def withCssClass(newClass: String): BackLink =
       backLink.copy(classes = s"${backLink.classes} $newClass")
 
     def withAttribute(attribute: (String, String)): BackLink =

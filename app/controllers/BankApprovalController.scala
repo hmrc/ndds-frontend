@@ -25,18 +25,18 @@ import views.html.BankApprovalView
 
 import javax.inject.Inject
 
-class BankApprovalController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: BankApprovalView,
-                                       appConfig: FrontendAppConfig
-                                     ) extends FrontendBaseController with I18nSupport {
+class BankApprovalController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: BankApprovalView,
+  appConfig: FrontendAppConfig
+) extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      Ok(view(appConfig.payingHmrcUrl))
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    Ok(view(appConfig.payingHmrcUrl))
   }
 }

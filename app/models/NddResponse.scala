@@ -28,13 +28,14 @@ case class NddDetails(ddiRefNumber: String,
                       bankAccountNumber: String,
                       bankAccountName: String,
                       auDdisFlag: Boolean,
-                      numberOfPayPlans: Int) {
+                      numberOfPayPlans: Int
+                     ) {
   val toDirectDebitDetails: DirectDebitDetails = DirectDebitDetails(
     directDebitReference = ddiRefNumber,
-    setupDate = submissionDateTime.format(gdsFormatter),
-    sortCode = bankSortCode,
-    accountNumber = bankAccountNumber,
-    paymentPlans = numberOfPayPlans.toString
+    setupDate            = submissionDateTime.format(gdsFormatter),
+    sortCode             = bankSortCode,
+    accountNumber        = bankAccountNumber,
+    paymentPlans         = numberOfPayPlans.toString
   )
 }
 
@@ -43,18 +44,14 @@ object NddDetails {
   java.time.Month.values()
 }
 
-case class NddResponse(directDebitCount: Int,
-                       directDebitList: Seq[NddDetails])
+case class NddResponse(directDebitCount: Int, directDebitList: Seq[NddDetails])
 
 object NddResponse {
   import NddDetails.format
   implicit val format: OFormat[NddResponse] = Json.format[NddResponse]
 }
 
-
-case class NddDAO(id: String,
-                  lastUpdated: Instant,
-                  directDebits: Seq[NddDetails])
+case class NddDAO(id: String, lastUpdated: Instant, directDebits: Seq[NddDetails])
 
 object NddDAO {
   import NddDetails.format

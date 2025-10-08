@@ -22,7 +22,7 @@ import controllers.routes
 import models.requests.IdentifierRequest
 import play.api.mvc.Results.*
 import play.api.mvc.*
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession, AuthorisationException}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, AuthorisedFunctions, NoActiveSession}
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
@@ -32,12 +32,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]
 
-class AuthenticatedIdentifierAction @Inject()(
-                                               override val authConnector: AuthConnector,
-                                               config: FrontendAppConfig,
-                                               val parser: BodyParsers.Default
-                                             )
-                                             (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
+class AuthenticatedIdentifierAction @Inject() (
+  override val authConnector: AuthConnector,
+  config: FrontendAppConfig,
+  val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends IdentifierAction
+    with AuthorisedFunctions {
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
@@ -45,7 +46,7 @@ class AuthenticatedIdentifierAction @Inject()(
 
     authorised().retrieve(Retrievals.internalId and Retrievals.credentials) {
       case Some(internalId) ~ Some(credentials) => block(IdentifierRequest(request, credentials.providerId))
-      case _ => throw new UnauthorizedException("Unable to retrieve credential id")
+      case _                                    => throw new UnauthorizedException("Unable to retrieve credential id")
     } recover {
       case _: NoActiveSession =>
         Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
@@ -56,10 +57,10 @@ class AuthenticatedIdentifierAction @Inject()(
   }
 }
 
-class SessionIdentifierAction @Inject()(
-                                         val parser: BodyParsers.Default
-                                       )
-                                       (implicit val executionContext: ExecutionContext) extends IdentifierAction {
+class SessionIdentifierAction @Inject() (
+  val parser: BodyParsers.Default
+)(implicit val executionContext: ExecutionContext)
+    extends IdentifierAction {
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 

@@ -43,7 +43,7 @@ class AuditServiceSpec extends SpecBase {
     super.beforeEach()
     reset(mockConnector)
   }
-  
+
   val mockConnector: AuditConnector = mock[AuditConnector]
 
   val testService = new AuditService(mockConnector)
@@ -56,13 +56,13 @@ class AuditServiceSpec extends SpecBase {
   "Audit service" - {
     "sendEvent method" - {
       "must take an AuditEvent and send an the audit" in {
-        implicit val request: Request[_] = FakeRequest("GET", testUri, Headers(), "")
+        implicit val request: Request[?] = FakeRequest("GET", testUri, Headers(), "")
         val testAuditEvent = SubmitDirectDebitPaymentPlan(paymentReference = "testReference", planType = TaxCreditRepaymentPlan)
         val extendedDataEvent = ExtendedDataEvent(
           auditSource = "ndds-frontend",
-          auditType = testAuditEvent.auditType,
-          detail = Json.toJson(testAuditEvent),
-          tags = hc.toAuditTags(testAuditEvent.transactionName, testUri)
+          auditType   = testAuditEvent.auditType,
+          detail      = Json.toJson(testAuditEvent),
+          tags        = hc.toAuditTags(testAuditEvent.transactionName, testUri)
         )
 
         when(mockConnector.sendExtendedEvent(extendedDataEvent)).thenReturn(Future.successful(AuditResult.Success))
@@ -76,9 +76,15 @@ class AuditServiceSpec extends SpecBase {
       "must send an audit when needed data is gathered successfully and payment plan type is in the session" in {
         val request: Request[AnyContent] = FakeRequest("GET", testUri, Headers(), AnyContent("test"))
         val expectedUserAnswers: UserAnswers = emptyUserAnswers
-          .set(DirectDebitSourcePage, MGD).success.value
-          .set(PaymentPlanTypePage, VariablePaymentPlan).success.value
-          .set(PaymentReferencePage, "testPaymentReference").success.value
+          .set(DirectDebitSourcePage, MGD)
+          .success
+          .value
+          .set(PaymentPlanTypePage, VariablePaymentPlan)
+          .success
+          .value
+          .set(PaymentReferencePage, "testPaymentReference")
+          .success
+          .value
 
         implicit val dataRequest: DataRequest[AnyContent] = DataRequest(request, "testUserId", expectedUserAnswers)
 
@@ -90,8 +96,12 @@ class AuditServiceSpec extends SpecBase {
       "must send an audit when needed data is gathered successfully and payment plan type is NOT in the session" in {
         val request: Request[AnyContent] = FakeRequest("GET", testUri, Headers(), AnyContent("test"))
         val expectedUserAnswers: UserAnswers = emptyUserAnswers
-          .set(DirectDebitSourcePage, OL).success.value
-          .set(PaymentReferencePage, "testPaymentReference").success.value
+          .set(DirectDebitSourcePage, OL)
+          .success
+          .value
+          .set(PaymentReferencePage, "testPaymentReference")
+          .success
+          .value
 
         implicit val dataRequest: DataRequest[AnyContent] = DataRequest(request, "testUserId", expectedUserAnswers)
 
@@ -103,7 +113,9 @@ class AuditServiceSpec extends SpecBase {
       "must fail when payment reference is missing from the session" in {
         val request: Request[AnyContent] = FakeRequest("GET", testUri, Headers(), AnyContent("test"))
         val expectedUserAnswers: UserAnswers = emptyUserAnswers
-          .set(DirectDebitSourcePage, OL).success.value
+          .set(DirectDebitSourcePage, OL)
+          .success
+          .value
 
         implicit val dataRequest: DataRequest[AnyContent] = DataRequest(request, "testUserId", expectedUserAnswers)
 
@@ -114,7 +126,9 @@ class AuditServiceSpec extends SpecBase {
       "must fail when plan source is missing from the session" in {
         val request: Request[AnyContent] = FakeRequest("GET", testUri, Headers(), AnyContent("test"))
         val expectedUserAnswers: UserAnswers = emptyUserAnswers
-          .set(PaymentReferencePage, "testPaymentReference").success.value
+          .set(PaymentReferencePage, "testPaymentReference")
+          .success
+          .value
 
         implicit val dataRequest: DataRequest[AnyContent] = DataRequest(request, "testUserId", expectedUserAnswers)
 
@@ -125,8 +139,12 @@ class AuditServiceSpec extends SpecBase {
       "must fail if payment plan type is missing, but is supposed to exist" in {
         val request: Request[AnyContent] = FakeRequest("GET", testUri, Headers(), AnyContent("test"))
         val expectedUserAnswers: UserAnswers = emptyUserAnswers
-          .set(DirectDebitSourcePage, MGD).success.value
-          .set(PaymentReferencePage, "testPaymentReference").success.value
+          .set(DirectDebitSourcePage, MGD)
+          .success
+          .value
+          .set(PaymentReferencePage, "testPaymentReference")
+          .success
+          .value
 
         implicit val dataRequest: DataRequest[AnyContent] = DataRequest(request, "testUserId", expectedUserAnswers)
 

@@ -20,7 +20,7 @@ import models.ConfirmAuthority
 import play.api.libs.json.JsPath
 
 case object ConfirmAuthorityPage extends QuestionPage[ConfirmAuthority] {
-  
+
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "confirmYourAuthority"
