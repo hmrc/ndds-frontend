@@ -34,7 +34,7 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
@@ -542,62 +542,23 @@ class NationalDirectDebitServiceSpec extends SpecBase
 
     "isDuplicatePaymentPlan" - {
 
-      val today = LocalDate.now()
-      val startDate = today.plusDays(1)
-      val endDate = today.plusMonths(1)
-
-      val dummySingleRequest = PaymentPlanDuplicateCheckRequest(
-        directDebitReference = "default ref 1",
-        paymentPlanReference = "plan-abc",
-        planType = singlePlan,
-        paymentService = "CESA",
-        paymentReference = "ref-xyz",
-        paymentAmount = BigDecimal(123.45),
-        totalLiability = BigDecimal(1000.0),
-        paymentFrequency = "WEEKLY"
-      )
-
-      val dummyBudgetRequest = PaymentPlanDuplicateCheckRequest(
-        directDebitReference = "default ref 1",
-        paymentPlanReference = "plan-abc",
-        planType = budgetPlan,
-        paymentService = "CESA",
-        paymentReference = "ref-xyz",
-        paymentAmount = BigDecimal(123.45),
-        totalLiability = BigDecimal(1000.0),
-        paymentFrequency = "WEEKLY"
-      )
-
-      val userAnswersSingle = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, dummySingleRequest.directDebitReference).success.value
-        .set(PaymentReferenceQuery, dummySingleRequest.paymentReference).success.value
-        .set(PaymentReferencePage, dummySingleRequest.paymentPlanReference).success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
-        .set(PaymentPlanTypeQuery, singlePlan).success.value
-        .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
-        .set(AmendPlanStartDatePage, startDate).success.value
-
-      val userAnswersBudget = emptyUserAnswers
-        .set(DirectDebitReferenceQuery, dummyBudgetRequest.directDebitReference).success.value
-        .set(PaymentReferenceQuery, dummyBudgetRequest.paymentReference).success.value
-        .set(PaymentReferencePage, dummyBudgetRequest.paymentPlanReference).success.value
-        .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
-        .set(PaymentPlanTypeQuery, budgetPlan).success.value
-        .set(TotalAmountDuePage, 780.00).success.value
-        .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
-        .set(PaymentPlanTypeQuery, budgetPlan).success.value
-        .set(AmendPaymentAmountPage, BigDecimal(100.00)).success.value
-        .set(AmendPlanEndDatePage, endDate).success.value
-
       "return true when count is more than 1 payment plan and it is single payment plan so connector returns true" in {
-        userAnswersSingle
-          .set(PaymentPlansCountQuery, 2).success.value
+        val mockSinglePaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString))
 
-        when(mockConnector.isDuplicatePaymentPlan(dummySingleRequest.directDebitReference, dummySingleRequest))
-          .thenReturn(Future.successful(true))
+        val userAnswersSingle = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, "default ref 1").success.value
+          .set(PaymentPlanReferenceQuery, "payment ref 1").success.value
+          .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse).success.value
+          .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+          .set(AmendPaymentPlanTypePage, singlePlan).success.value
+          .set(TotalAmountDuePage, 780.00).success.value
+          .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
+          .set(PaymentPlansCountQuery, 4).success.value
+
+        when(mockConnector.isDuplicatePaymentPlan((any()), (any()))(any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(true)))
 
         val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswersSingle).futureValue
 
@@ -605,19 +566,31 @@ class NationalDirectDebitServiceSpec extends SpecBase
       }
 
       "return false count is 1 payment plan and single payment plan so no call to connector returns false" in {
-        userAnswersSingle
+        val userAnswers = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, "default ref 1").success.value
           .set(PaymentPlansCountQuery, 1).success.value
 
-        val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswersSingle).futureValue
+        val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswers).futureValue
 
         result shouldBe DuplicateCheckResponse(false)
       }
 
       "return true when count is more than 1 payment plan and it is budget payment plan so connector returns true" in {
-        userAnswersBudget
+        val mockBudgetPaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString))
+
+        val userAnswersBudget = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, "default ref 1").success.value
+          .set(PaymentPlanReferenceQuery, "payment ref 1").success.value
+          .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse).success.value
+          .set(DirectDebitSourcePage, DirectDebitSource.SA).success.value
+          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
+          .set(TotalAmountDuePage, 780.00).success.value
+          .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly).success.value
           .set(PaymentPlansCountQuery, 4).success.value
 
-        when(mockConnector.isDuplicatePaymentPlan(dummyBudgetRequest.directDebitReference, dummyBudgetRequest))
+        when(mockConnector.isDuplicatePaymentPlan((any()),(any()))(any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(true)))
 
         val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswersBudget).futureValue
@@ -626,7 +599,8 @@ class NationalDirectDebitServiceSpec extends SpecBase
       }
 
       "return false when count is 1 payment plan so no call to the connector returns false" in {
-        userAnswersBudget
+        val userAnswersBudget = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, "default ref 1").success.value
           .set(PaymentPlansCountQuery, 1).success.value
 
         val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswersBudget).futureValue

@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions.*
 import models.UserAnswers
-import pages.DirectDebitSummaryPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService

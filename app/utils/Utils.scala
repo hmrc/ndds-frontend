@@ -18,7 +18,7 @@ package utils
 
 import models.requests.PaymentPlanDuplicateCheckRequest
 import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
-import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, PaymentReferencePage, YourBankDetailsPage}
+import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 
 object Utils {

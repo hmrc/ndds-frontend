@@ -18,33 +18,32 @@ package controllers
 
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
-import models.NormalMode
+import models.requests.PaymentPlanDuplicateCheckRequest
+import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
+import models.{DirectDebitSource, NormalMode, PaymentsFrequency}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
-import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, NewAmendPaymentAmountPage, NewAmendPlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, DirectDebitSourcePage, PaymentReferencePage, PaymentsFrequencyPage, TotalAmountDuePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentPlanDetailsQuery
-import services.NationalDirectDebitService
-import queries.{PaymentPlanTypeQuery, PaymentPlansCountQuery}
-import repositories.SessionRepository
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery}
 import services.NationalDirectDebitService
 import views.html.AmendPlanEndDateView
 
 import java.time.{LocalDate, LocalDateTime}
+import scala.concurrent.Future
 
 class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
   private val formProvider = new AmendPlanEndDateFormProvider()
   private def form = formProvider()
   val validAnswer: LocalDate = LocalDate.now()
+
+  val budgetPlan = "Budget Payment"
 
   lazy val amendPlanEndDateRoute: String = routes.AmendPlanEndDateController.onPageLoad(NormalMode).url
   lazy val amendPlanEndDateRoutePost: String = routes.AmendPlanEndDateController.onSubmit(NormalMode).url
@@ -72,7 +71,6 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
   "AmendPlanEndDate Controller" - {
     val mockService = mock[NationalDirectDebitService]
-    val mockSessionRepository = mock[SessionRepository]
     "onPageLoad" - {
       "must return OK and the correct view for a GET" in {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
@@ -123,7 +121,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       )
       val planDetails = PaymentPlanDetails(
         hodService = "SA",
-        planType = "Single payment",
+        planType = budgetPlan,
         paymentReference = "987654321K",
         submissionDateTime = LocalDateTime.now(),
         scheduledPaymentAmount = Some(BigDecimal(1500)),
@@ -164,7 +162,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       "must return a Bad Request when no amendment is made" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(1500)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
 
@@ -189,7 +187,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       "must return to next page when payment amount is updated" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(1900)).success.value
           .set(AmendPlanEndDatePage, validAnswer).success.value
 
@@ -199,6 +197,8 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(true)))
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
 
@@ -210,7 +210,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       "must return to next page when payment plan end date is updated" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(1500)).success.value
           .set(AmendPlanEndDatePage, validAnswer.plusDays(3)).success.value
 
@@ -231,7 +231,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       "must return to next page when payment amount and plan end date is updated" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPaymentAmountPage, BigDecimal(1900)).success.value
           .set(AmendPlanEndDatePage, validAnswer.plusDays(3)).success.value
 
@@ -241,6 +241,8 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(true)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = route(application, request).value
 
@@ -269,135 +271,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return a Bad Request with amendment.noChange when no amendment is made" in {
-        val userAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, budgetPlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(NewAmendPlanEndDatePage, validAnswer).success.value
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-        running(application) {
-          val view = application.injector.instanceOf[AmendPlanEndDateView]
-
-          val request = postRequestWithDate(validAnswer)
-          val result = route(application, request).value
-
-          val errorForm = form.fill(validAnswer).withError("value", "amendment.noChange")
-
-          status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual
-            view(errorForm, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
-        }
-      }
-
-      "must redirect when amendment in amount is detected" in {
-        val userAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, budgetPlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
-          .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(NewAmendPlanEndDatePage, validAnswer).success.value
-          .set(PaymentPlansCountQuery, 2).success.value
-
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[NationalDirectDebitService].toInstance(mockService)
-          )
-          .build()
-
-        running(application) {
-          when(mockSessionRepository.set(any()))
-            .thenReturn(Future.successful(true))
-          when(mockSessionRepository.get(any()))
-            .thenReturn(Future.successful(Some(userAnswers)))
-          when(mockService.amendmentMade(any()))
-            .thenReturn(true)
-          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
-            .thenReturn(Future.successful(true))
-
-          val request = postRequestWithDate(validAnswer)
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual tempProblemPage
-        }
-      }
-
-      "must redirect when amendment in date is detected" in {
-        val userAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, budgetPlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(NewAmendPlanEndDatePage, newValidAnswer).success.value
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[NationalDirectDebitService].toInstance(mockService)
-          )
-          .build()
-
-        running(application) {
-          when(mockSessionRepository.set(any()))
-            .thenReturn(Future.successful(true))
-          when(mockSessionRepository.get(any()))
-            .thenReturn(Future.successful(Some(userAnswers)))
-          when(mockService.amendmentMade(any()))
-            .thenReturn(true)
-          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
-            .thenReturn(Future.successful(true))
-
-          val request = postRequestWithDate(newValidAnswer)
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual tempProblemPage
-        }
-      }
-
-      "must redirect when amendment in amount and date detected" in {
-        val userAnswers = emptyUserAnswers
-          .set(PaymentPlanTypeQuery, budgetPlan).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(120.00)).success.value
-          .set(NewAmendPaymentAmountPage, BigDecimal(200.00)).success.value
-          .set(AmendPlanEndDatePage, validAnswer).success.value
-          .set(NewAmendPlanEndDatePage, newValidAnswer).success.value
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[NationalDirectDebitService].toInstance(mockService)
-          )
-          .build()
-
-        running(application) {
-          when(mockSessionRepository.set(any()))
-            .thenReturn(Future.successful(true))
-          when(mockSessionRepository.get(any()))
-            .thenReturn(Future.successful(Some(userAnswers)))
-          when(mockService.amendmentMade(any()))
-            .thenReturn(true)
-          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
-            .thenReturn(Future.successful(true))
-
-          val request = postRequestWithDate(newValidAnswer)
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual tempProblemPage
-        }
-      }
-
       "must redirect to Journey Recovery for a POST when no amend payment plan exists" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
-          .set(AmendPaymentPlanTypePage, "Single payment").success.value
+          .set(AmendPaymentPlanTypePage, budgetPlan).success.value
           .set(AmendPlanEndDatePage, validAnswer.plusDays(3)).success.value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
