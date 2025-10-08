@@ -135,10 +135,10 @@ class AmendPaymentPlanConfirmationController @Inject() (
         val bankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus = buildBankDetailsWithAuddisStatus(directDebitDetails)
 
         ChrisSubmissionRequest(
-          serviceType                = serviceType,
-          paymentPlanType            = paymentPlanType,
-          paymentFrequency           = if (planDetail.planType.equalsIgnoreCase("singlePaymentPlan")) None else planDetail.scheduledPaymentFrequency,
-          paymentPlanReferenceNumber = userAnswers.get(PaymentPlanReferenceQuery),
+          serviceType                     = serviceType,
+          paymentPlanType                 = paymentPlanType,
+          paymentFrequency                = planDetail.scheduledPaymentFrequency,
+          paymentPlanReferenceNumber      = userAnswers.get(PaymentPlanReferenceQuery),
           yourBankDetailsWithAuddisStatus = bankDetailsWithAuddisStatus,
           planStartDate                   = planStartDateDetails,
           planEndDate                     = userAnswers.get(AmendPlanEndDatePage),
@@ -148,7 +148,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
           paymentReference                = planDetail.paymentReference,
           totalAmountDue                  = planDetail.totalLiability,
           paymentAmount                   = planDetail.balancingPaymentAmount,
-          regularPaymentAmount            = userAnswers.get(AmendPaymentAmountPage),
+          regularPaymentAmount            = None,
+          amendPaymentAmount              = userAnswers.get(AmendPaymentAmountPage),
           calculation                     = None,
           amendPlan                       = true
         )

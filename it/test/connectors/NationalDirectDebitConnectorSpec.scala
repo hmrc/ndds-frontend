@@ -310,6 +310,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       totalAmountDue = Some(BigDecimal(200)),
       paymentAmount = Some(BigDecimal(100.00)),
       regularPaymentAmount = Some(BigDecimal(90.00)),
+      amendPaymentAmount = None,
       calculation = None
     )
 

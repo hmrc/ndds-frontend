@@ -36,6 +36,7 @@ case class ChrisSubmissionRequest(
   totalAmountDue: Option[BigDecimal],
   paymentAmount: Option[BigDecimal],
   regularPaymentAmount: Option[BigDecimal],
+  amendPaymentAmount: Option[BigDecimal],
   calculation: Option[PaymentPlanCalculation],
   amendPlan: Boolean = false
 )

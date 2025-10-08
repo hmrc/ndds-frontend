@@ -159,6 +159,7 @@ class CheckYourAnswersController @Inject() (
       totalAmountDue                  = ua.get(TotalAmountDuePage),
       paymentAmount                   = ua.get(PaymentAmountPage),
       regularPaymentAmount            = ua.get(RegularPaymentAmountPage),
+      amendPaymentAmount              = None,
       calculation                     = calculationOpt
     )
   }
