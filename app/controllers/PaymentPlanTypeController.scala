@@ -33,44 +33,47 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class PaymentPlanTypeController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       formProvider: PaymentPlanTypeFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: PaymentPlanTypeView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class PaymentPlanTypeController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: PaymentPlanTypeFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: PaymentPlanTypeView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[PaymentPlanType] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val answers = request.userAnswers
-      val selectedAnswers = answers.get(DirectDebitSourcePage)
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
+    val selectedAnswers = answers.get(DirectDebitSourcePage)
 
-      val preparedForm = answers.get(PaymentPlanTypePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-      Ok(view(preparedForm, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode)))
+    val preparedForm = answers.get(PaymentPlanTypePage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
+    Ok(view(preparedForm, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val selectedSource = request.userAnswers.get(DirectDebitSourcePage)
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val selectedSource = request.userAnswers.get(DirectDebitSourcePage)
 
-      form.bindFromRequest().fold(
+    form
+      .bindFromRequest()
+      .fold(
         formWithErrors => {
           logger.warn(s"Payment plan validation error: ${formWithErrors.errors}")
           Future.successful(BadRequest(view(formWithErrors, mode, selectedSource, routes.DirectDebitSourceController.onPageLoad(mode))))
         },
-
         newValue =>
-          Future.fromTry(setPaymentPlanType(request.userAnswers, newValue))
+          Future
+            .fromTry(setPaymentPlanType(request.userAnswers, newValue))
             .flatMap { updatedAnswers =>
               sessionRepository.set(updatedAnswers).map { _ =>
                 Redirect(navigator.nextPage(PaymentPlanTypePage, mode, updatedAnswers))

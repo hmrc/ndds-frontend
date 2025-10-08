@@ -20,35 +20,33 @@ import play.api.Logging
 import play.api.libs.json.*
 
 case class YourBankDetailsWithAuddisStatus(
-                                            accountHolderName: String,
-                                            sortCode: String,
-                                            accountNumber: String,
-                                            auddisStatus: Boolean,
-                                            accountVerified: Boolean
-                                          )
+  accountHolderName: String,
+  sortCode: String,
+  accountNumber: String,
+  auddisStatus: Boolean,
+  accountVerified: Boolean
+)
 
 object YourBankDetailsWithAuddisStatus extends Logging {
 
   implicit val format: OFormat[YourBankDetailsWithAuddisStatus] = Json.format
 
-  def toModelWithAuddisStatus(yourBankDetails: YourBankDetails,
-                              auddisStatus: Boolean,
-                              accountVerified: Boolean): YourBankDetailsWithAuddisStatus = {
+  def toModelWithAuddisStatus(yourBankDetails: YourBankDetails, auddisStatus: Boolean, accountVerified: Boolean): YourBankDetailsWithAuddisStatus = {
     logger.info(s"***** Auddis Flag: $auddisStatus")
     YourBankDetailsWithAuddisStatus(
       accountHolderName = yourBankDetails.accountHolderName,
-      sortCode = yourBankDetails.sortCode,
-      accountNumber = yourBankDetails.accountNumber,
-      auddisStatus = auddisStatus,
-      accountVerified = accountVerified
+      sortCode          = yourBankDetails.sortCode,
+      accountNumber     = yourBankDetails.accountNumber,
+      auddisStatus      = auddisStatus,
+      accountVerified   = accountVerified
     )
   }
 
   def toModelWithoutAuddisStatus(yourBankDetailsWithoutAuddisStatus: YourBankDetailsWithAuddisStatus): YourBankDetails = {
     YourBankDetails(
       accountHolderName = yourBankDetailsWithoutAuddisStatus.accountHolderName,
-      sortCode = yourBankDetailsWithoutAuddisStatus.sortCode,
-      accountNumber = yourBankDetailsWithoutAuddisStatus.accountNumber
+      sortCode          = yourBankDetailsWithoutAuddisStatus.sortCode,
+      accountNumber     = yourBankDetailsWithoutAuddisStatus.accountNumber
     )
   }
 }

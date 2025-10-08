@@ -27,23 +27,24 @@ import viewmodels.implicits.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-object AmendPlanStartDateSummary  {
+object AmendPlanStartDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AmendPlanStartDatePage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
-          ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
-          )
+    answers.get(AmendPlanStartDatePage).map { answer =>
+      SummaryListRowViewModel(
+        key = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
+        ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
         )
+      )
     }
 
-  def row(planType: String, value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow =
-    val label = if(PaymentPlanType.SinglePaymentPlan.toString == planType) {
+  def row(planType: String, value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit
+    messages: Messages
+  ): SummaryListRow =
+    val label = if (PaymentPlanType.SinglePaymentPlan.toString == planType) {
       "paymentPlanDetails.details.date"
     } else {
       "paymentPlanDetails.details.startDate"
@@ -51,7 +52,7 @@ object AmendPlanStartDateSummary  {
 
     val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
     SummaryListRowViewModel(
-      key = label,
+      key   = label,
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
@@ -69,10 +70,12 @@ object AmendPlanStartDateSummary  {
       .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
       .getOrElse("")
 
-    Some(SummaryListRowViewModel(
-      key = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
-      ValueViewModel(dateText),
-      actions = Seq.empty
-    ))
+    Some(
+      SummaryListRowViewModel(
+        key = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
+        ValueViewModel(dateText),
+        actions = Seq.empty
+      )
+    )
   }
 }

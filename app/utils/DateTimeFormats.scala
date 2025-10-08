@@ -40,7 +40,7 @@ object DateTimeFormats {
     LocalDate.now().format(formatter)
   }
 
-  def formattedDateTime(dateTime: ZonedDateTime): String = { //example: 24 July 2020, 16:29pm in local zone BST time (ZonedDateTime)
+  def formattedDateTime(dateTime: ZonedDateTime): String = { // example: 24 July 2020, 16:29pm in local zone BST time (ZonedDateTime)
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mma")
     val extractDateSuffix = """(.*)(am|pm|AM|PM)""".r
 
@@ -49,14 +49,14 @@ object DateTimeFormats {
     }
   }
 
-  def formattedDateTimeShort(dateTime: String): String = { //example: 14 Aug 2025
+  def formattedDateTimeShort(dateTime: String): String = { // example: 14 Aug 2025
     val date = LocalDate.parse(dateTime)
     val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.UK)
 
     date.format(formatter)
   }
 
-  def formattedDateTimeNumeric(dateTime: String): String = { //example: 17 11 2017
+  def formattedDateTimeNumeric(dateTime: String): String = { // example: 17 11 2017
     val date = LocalDate.parse(dateTime)
     val formatter = DateTimeFormatter.ofPattern("dd MM yyyy", Locale.UK)
 

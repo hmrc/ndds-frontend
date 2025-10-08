@@ -31,35 +31,37 @@ import views.html.TotalAmountDueView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TotalAmountDueController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        sessionRepository: SessionRepository,
-                                        navigator: Navigator,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        formProvider: TotalAmountDueFormProvider,
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: TotalAmountDueView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class TotalAmountDueController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: TotalAmountDueFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: TotalAmountDueView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   val form: Form[BigDecimal] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
-      val preparedForm = request.userAnswers.get(TotalAmountDuePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
+    val preparedForm = request.userAnswers.get(TotalAmountDuePage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
 
-      Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
+    Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
 
-      form.bindFromRequest().fold(
+    form
+      .bindFromRequest()
+      .fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentReferenceController.onPageLoad(mode)))),
         value =>
           for {

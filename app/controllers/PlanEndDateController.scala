@@ -31,30 +31,31 @@ import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PlanEndDateController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       formProvider: PlanEndDateFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: PlanEndDateView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class PlanEndDateController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: PlanEndDateFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: PlanEndDateView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      request.userAnswers.get(PlanStartDatePage) match {
-        case Some(startDate) =>
-          val form = formProvider(startDate.enteredDate)
-          val preparedForm = request.userAnswers.get(PlanEndDatePage).map(Some(_)).fold(form)(form.fill)
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    request.userAnswers.get(PlanStartDatePage) match {
+      case Some(startDate) =>
+        val form = formProvider(startDate.enteredDate)
+        val preparedForm = request.userAnswers.get(PlanEndDatePage).map(Some(_)).fold(form)(form.fill)
 
-          Ok(view(preparedForm, mode, routes.PlanStartDateController.onPageLoad(mode)))
+        Ok(view(preparedForm, mode, routes.PlanStartDateController.onPageLoad(mode)))
 
-        case None =>
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
-      }
+      case None =>
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
@@ -63,26 +64,27 @@ class PlanEndDateController @Inject()(
         case Some(startDate) =>
           val form = formProvider(startDate.enteredDate)
 
-          form.bindFromRequest().fold(
-            formWithErrors =>
-              Future.successful(
-                BadRequest(view(formWithErrors, mode, routes.PlanStartDateController.onPageLoad(mode)))
-              ),
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                Future.successful(
+                  BadRequest(view(formWithErrors, mode, routes.PlanStartDateController.onPageLoad(mode)))
+                ),
+              {
+                case Some(endDate) =>
+                  val updatedAnswers = request.userAnswers.set(PlanEndDatePage, endDate).get
+                  sessionRepository.set(updatedAnswers).map { _ =>
+                    Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
+                  }
 
-            {
-              case Some(endDate) =>
-                val updatedAnswers = request.userAnswers.set(PlanEndDatePage, endDate).get
-                sessionRepository.set(updatedAnswers).map { _ =>
-                  Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
-                }
-
-              case None =>
-                val updatedAnswers = request.userAnswers.remove(PlanEndDatePage).get
-                sessionRepository.set(updatedAnswers).map { _ =>
-                  Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
-                }
-            }
-          )
+                case None =>
+                  val updatedAnswers = request.userAnswers.remove(PlanEndDatePage).get
+                  sessionRepository.set(updatedAnswers).map { _ =>
+                    Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
+                  }
+              }
+            )
 
         case None =>
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))

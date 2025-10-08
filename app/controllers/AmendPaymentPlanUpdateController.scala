@@ -35,43 +35,43 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.Future
 
-class AmendPaymentPlanUpdateController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       nddsService: NationalDirectDebitService,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: AmendPaymentPlanUpdateView
-                                     )
-  extends FrontendBaseController with I18nSupport with Logging {
+class AmendPaymentPlanUpdateController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
+  val controllerComponents: MessagesControllerComponents,
+  view: AmendPaymentPlanUpdateView
+) extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val userAnswers = request.userAnswers
-      if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-        val maybeResult = for {
-          paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
-          paymentAmount <- userAnswers.get(AmendPaymentAmountPage)
-          startDate <- userAnswers.get(AmendPlanStartDatePage)
-        } yield {
-          val formattedRegPaymentAmount = formatAmount(paymentAmount)
-          val formattedStartDate =
-            startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-          val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val userAnswers = request.userAnswers
+    if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+      val maybeResult = for {
+        paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
+        paymentAmount        <- userAnswers.get(AmendPaymentAmountPage)
+        startDate            <- userAnswers.get(AmendPlanStartDatePage)
+      } yield {
+        val formattedRegPaymentAmount = formatAmount(paymentAmount)
+        val formattedStartDate =
+          startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+        val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
 
-          Ok(view(paymentPlanReference, formattedRegPaymentAmount, formattedStartDate, summaryRows))
-        }
-        maybeResult match {
-          case Some(result) => Future.successful(result)
-          case None =>
-            logger.error("Missing required values in user answers for amend payment plan")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-        }
-      } else {
-        logger.error(s"NDDS Payment Plan Guard check failed")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Ok(view(paymentPlanReference, formattedRegPaymentAmount, formattedStartDate, summaryRows))
       }
+      maybeResult match {
+        case Some(result) => Future.successful(result)
+        case None =>
+          logger.error("Missing required values in user answers for amend payment plan")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    } else {
+      logger.error(s"NDDS Payment Plan Guard check failed")
+      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
   }
 
   private def buildSummaryRows(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {

@@ -27,9 +27,9 @@ class RegularPaymentAmountFormProvider @Inject() extends Mappings {
   def apply(): Form[BigDecimal] =
     Form(
       "value" -> currencyWithTwoDecimalsOrWholeNumber(
-        requiredKey = "regularPaymentAmount.error.required",
+        requiredKey       = "regularPaymentAmount.error.required",
         invalidNumericKey = "regularPaymentAmount.error.invalidNumeric",
-        nonNumericKey = "regularPaymentAmount.error.nonNumeric"
+        nonNumericKey     = "regularPaymentAmount.error.nonNumeric"
       )
         .verifying(maximumCurrency(MAX_AMOUNT, "regularPaymentAmount.error.aboveMaximum"))
         .verifying(minimumCurrency(MIN_AMOUNT, "regularPaymentAmount.error.belowMinimum"))

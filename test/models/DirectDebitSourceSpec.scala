@@ -32,10 +32,9 @@ class DirectDebitSourceSpec extends AnyFreeSpec with Matchers with ScalaCheckPro
 
       val gen = Gen.oneOf(DirectDebitSource.values.toSeq)
 
-      forAll(gen) {
-        directDebitSource =>
+      forAll(gen) { directDebitSource =>
 
-          JsString(directDebitSource.toString).validate[DirectDebitSource].asOpt.value mustEqual directDebitSource
+        JsString(directDebitSource.toString).validate[DirectDebitSource].asOpt.value mustEqual directDebitSource
       }
     }
 
@@ -43,10 +42,9 @@ class DirectDebitSourceSpec extends AnyFreeSpec with Matchers with ScalaCheckPro
 
       val gen = arbitrary[String] suchThat (!DirectDebitSource.values.map(_.toString).contains(_))
 
-      forAll(gen) {
-        invalidValue =>
+      forAll(gen) { invalidValue =>
 
-          JsString(invalidValue).validate[DirectDebitSource] mustEqual JsError("error.invalid")
+        JsString(invalidValue).validate[DirectDebitSource] mustEqual JsError("error.invalid")
       }
     }
 
@@ -54,10 +52,9 @@ class DirectDebitSourceSpec extends AnyFreeSpec with Matchers with ScalaCheckPro
 
       val gen = Gen.oneOf(DirectDebitSource.values.toSeq)
 
-      forAll(gen) {
-        directDebitSource =>
+      forAll(gen) { directDebitSource =>
 
-          Json.toJson(directDebitSource) mustEqual JsString(directDebitSource.toString)
+        Json.toJson(directDebitSource) mustEqual JsString(directDebitSource.toString)
       }
     }
   }

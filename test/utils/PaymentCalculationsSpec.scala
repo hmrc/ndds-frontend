@@ -22,27 +22,27 @@ import java.time.LocalDate
 
 class PaymentCalculationsSpec extends PlaySpec {
 
-  private val TotalAmountEven     = BigDecimal(1200)
-  private val PaymentsEven        = 12
+  private val TotalAmountEven = BigDecimal(1200)
+  private val PaymentsEven = 12
   private val ExpectedEvenPayment = 100.00
 
-  private val TotalAmountUneven     = BigDecimal(1000)
-  private val PaymentsUneven        = 3
+  private val TotalAmountUneven = BigDecimal(1000)
+  private val PaymentsUneven = 3
   private val ExpectedUnevenPayment = 333.33
 
-  private val FinalPaymentBaseAmount     = BigDecimal(1000)
-  private val FinalRegularPayment        = BigDecimal(333.33)
-  private val FinalRegularPaymentCount   = 2
+  private val FinalPaymentBaseAmount = BigDecimal(1000)
+  private val FinalRegularPayment = BigDecimal(333.33)
+  private val FinalRegularPaymentCount = 2
   private val ExpectedFinalPaymentAmount = BigDecimal(333.34)
 
-  private val StartDate     = LocalDate.of(2025, 1, 15)
-  private val OffsetOne     = 1
-  private val OffsetTen     = 10
-  private val OffsetEleven  = 11
+  private val StartDate = LocalDate.of(2025, 1, 15)
+  private val OffsetOne = 1
+  private val OffsetTen = 10
+  private val OffsetEleven = 11
 
-  private val ExpectedSecondPaymentDate      = LocalDate.of(2025, 2, 15)
+  private val ExpectedSecondPaymentDate = LocalDate.of(2025, 2, 15)
   private val ExpectedPenultimatePaymentDate = LocalDate.of(2025, 11, 15)
-  private val ExpectedFinalPaymentDate       = LocalDate.of(2025, 12, 15)
+  private val ExpectedFinalPaymentDate = LocalDate.of(2025, 12, 15)
 
   "PaymentCalculations" should {
 

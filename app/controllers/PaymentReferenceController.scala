@@ -32,70 +32,70 @@ import views.html.PaymentReferenceView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaymentReferenceController @Inject()(
-                                            override val messagesApi: MessagesApi,
-                                            sessionRepository: SessionRepository,
-                                            navigator: Navigator,
-                                            identify: IdentifierAction,
-                                            getData: DataRetrievalAction,
-                                            requireData: DataRequiredAction,
-                                            formProvider: PaymentReferenceFormProvider,
-                                            val controllerComponents: MessagesControllerComponents,
-                                            view: PaymentReferenceView
-                                          )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class PaymentReferenceController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: PaymentReferenceFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: PaymentReferenceView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
+    val selectedAnswers = answers.get(DirectDebitSourcePage)
+    val dds = selectedAnswers.flatMap(dds => DirectDebitSource.objectMap.get(dds.toString))
+    val result = dds.flatMap(v => ReferenceTypeValidatorMap.validatorType(v))
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val answers = request.userAnswers
-      val selectedAnswers = answers.get(DirectDebitSourcePage)
-      val dds = selectedAnswers.flatMap(dds => DirectDebitSource.objectMap.get(dds.toString))
-      val result = dds.flatMap(v => ReferenceTypeValidatorMap.validatorType(v))
+    result match {
+      case None =>
+        Redirect(navigator.nextPage(PaymentReferencePage, mode, answers))
+      case Some(_) =>
+        val form = formProvider(None)
+        val preparedForm = answers.get(PaymentReferencePage) match {
+          case None        => form
+          case Some(value) => form.fill(value)
+        }
 
-      result match {
-        case None =>
-          Redirect(navigator.nextPage(PaymentReferencePage, mode, answers))
-        case Some(_) =>
-          val form = formProvider(None)
-          val preparedForm = answers.get(PaymentReferencePage) match {
-            case None => form
-            case Some(value) => form.fill(value)
-          }
-
-          if (selectedAnswers.contains(MGD) || selectedAnswers.contains(SA) || selectedAnswers.contains(TC)) {
-            Ok(view(preparedForm, mode, selectedAnswers, routes.PaymentPlanTypeController.onPageLoad(mode)))
-          } else {
-            Ok(view(preparedForm, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode)))
-          }
-      }
+        if (selectedAnswers.contains(MGD) || selectedAnswers.contains(SA) || selectedAnswers.contains(TC)) {
+          Ok(view(preparedForm, mode, selectedAnswers, routes.PaymentPlanTypeController.onPageLoad(mode)))
+        } else {
+          Ok(view(preparedForm, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode)))
+        }
+    }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val answers = request.userAnswers
-      val selectedAnswers = answers.get(DirectDebitSourcePage)
-      val dds = selectedAnswers.flatMap(dds => DirectDebitSource.objectMap.get(dds.toString))
-      val result = dds.flatMap(v => ReferenceTypeValidatorMap.validatorType(v))
-      
-      result match {
-        case None =>
-          Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
-        case Some(serviceType) =>
-          val form = formProvider(Some(serviceType))
-          form.bindFromRequest().fold(
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val answers = request.userAnswers
+    val selectedAnswers = answers.get(DirectDebitSourcePage)
+    val dds = selectedAnswers.flatMap(dds => DirectDebitSource.objectMap.get(dds.toString))
+    val result = dds.flatMap(v => ReferenceTypeValidatorMap.validatorType(v))
+
+    result match {
+      case None =>
+        Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
+      case Some(serviceType) =>
+        val form = formProvider(Some(serviceType))
+        form
+          .bindFromRequest()
+          .fold(
             formWithErrors =>
               if (selectedAnswers.contains(MGD) || selectedAnswers.contains(SA) || selectedAnswers.contains(TC)) {
                 Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, routes.PaymentPlanTypeController.onPageLoad(mode))))
               } else {
                 Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode))))
               },
-
             value =>
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, value))
-                _ <- sessionRepository.set(updatedAnswers)
+                _              <- sessionRepository.set(updatedAnswers)
               } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
           )
-      }
+    }
   }
 }

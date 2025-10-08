@@ -57,7 +57,7 @@ class MainButtonSpec extends SpecBase with Matchers {
   trait Setup {
     val app = applicationBuilder().build()
     val mainButton = app.injector.instanceOf[MainButton]
-    implicit val request: play.api.mvc.Request[_] = FakeRequest()
+    implicit val request: play.api.mvc.Request[?] = FakeRequest()
     implicit val messages: Messages = play.api.i18n.MessagesImpl(
       play.api.i18n.Lang.defaultLang,
       app.injector.instanceOf[play.api.i18n.MessagesApi]

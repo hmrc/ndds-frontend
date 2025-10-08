@@ -24,10 +24,9 @@ import utils.DateFormats
 import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 
-class PaymentDateFormProvider @Inject()(clock: Clock) extends Mappings {
+class PaymentDateFormProvider @Inject() (clock: Clock) extends Mappings {
 
-  def apply(earliestDate: LocalDate, isSinglePlan: Boolean)
-           (implicit messages: Messages): Form[LocalDate] = {
+  def apply(earliestDate: LocalDate, isSinglePlan: Boolean)(implicit messages: Messages): Form[LocalDate] = {
 
     val today = LocalDate.now(clock)
     val maxDateForSinglePlan = today.plusYears(1)

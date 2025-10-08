@@ -27,14 +27,12 @@ import viewmodels.implicits.*
 
 object YourBankDetailsNameSummary extends DirectDebitDetailsData {
 
-
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(BankDetailsBankNamePage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key = "bankDetailsCheckYourAnswer.account.bank.name",
-          value = ValueViewModel(HtmlFormat.escape(answer).toString),
-          actions = Seq.empty
-        )
+    answers.get(BankDetailsBankNamePage).map { answer =>
+      SummaryListRowViewModel(
+        key     = "bankDetailsCheckYourAnswer.account.bank.name",
+        value   = ValueViewModel(HtmlFormat.escape(answer).toString),
+        actions = Seq.empty
+      )
     }
 }

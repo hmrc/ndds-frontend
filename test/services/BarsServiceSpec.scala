@@ -20,7 +20,7 @@ import models.YourBankDetails
 import models.errors.BarsErrors.*
 import models.responses.{Bank, BankAddress, BarsResponse, BarsVerificationResponse, Country}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
@@ -41,30 +41,30 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
   val service = new BarsService(mockConnector, mockConfig)
 
   val bank: Bank = Bank(
-    bankName = "Test Bank",
+    bankName       = "Test Bank",
     ddiVoucherFlag = "N",
     address = BankAddress(
-      lines = Seq("123 Bank Street", "Suite 100"),
-      town = "London",
-      country = Country("United Kingdom"),
+      lines    = Seq("123 Bank Street", "Suite 100"),
+      town     = "London",
+      country  = Country("United Kingdom"),
       postCode = "AB12 3CD"
     )
   )
 
   val bank1: Bank = Bank(
-    bankName = "Test Bank",
+    bankName       = "Test Bank",
     ddiVoucherFlag = "Y",
     address = BankAddress(
-      lines = Seq("123 Bank Street", "Suite 100"),
-      town = "London",
-      country = Country("United Kingdom"),
+      lines    = Seq("123 Bank Street", "Suite 100"),
+      town     = "London",
+      country  = Country("United Kingdom"),
       postCode = "AB12 3CD"
     )
   )
 
   val validBankDetails: YourBankDetails = YourBankDetails(
-    sortCode = "123456",
-    accountNumber = "12345678",
+    sortCode          = "123456",
+    accountNumber     = "12345678",
     accountHolderName = "John Doe"
   )
 
@@ -72,16 +72,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
     "for personal account" should {
       "return Right(BarsVerificationResponse, Bank) when all checks pass" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank1.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank1.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -96,16 +96,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(BankAccountUnverified) when account is indeterminate" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Indeterminate,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Indeterminate,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -118,16 +118,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(BankAccountUnverified) when name is indeterminate" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Indeterminate,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Indeterminate,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -140,16 +140,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(AccountDetailInvalidFormat) when account number is badly formatted" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.No,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.No,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -162,16 +162,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(SortCodeNotFound) when sort code not present on EISCD" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.No,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.No,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -184,16 +184,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(SortCodeNotSupported) when sort code does not support direct debit" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.No,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.No,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -206,16 +206,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(AccountNotFound) when account does not exist" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.No,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.No,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -228,16 +228,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(NameMismatch) when name does not match" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank1.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.No,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank1.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.No,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -252,16 +252,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
     "for business account" should {
       "return Right(BarsVerificationResponse, Bank) when all checks pass" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -276,16 +276,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(BankAccountUnverified) when account or name is indeterminate" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Indeterminate,
-          nameMatches = BarsResponse.Indeterminate,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Indeterminate,
+          nameMatches                              = BarsResponse.Indeterminate,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -298,16 +298,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(AccountDetailInvalidFormat) when account number is badly formatted" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.No,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank1.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.No,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank1.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -320,16 +320,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(SortCodeNotFound) when sort code not present on EISCD" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.No,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.No,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -342,16 +342,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(SortCodeNotSupported) when sort code does not support direct debit" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.No,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.No,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -364,16 +364,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(AccountNotFound) when account does not exist" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank1.bankName),
-          accountExists = BarsResponse.No,
-          nameMatches = BarsResponse.Yes,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank1.bankName),
+          accountExists                            = BarsResponse.No,
+          nameMatches                              = BarsResponse.Yes,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -386,16 +386,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(NameMismatch) when name does not match" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.No,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.No,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))
@@ -408,16 +408,16 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
       "return Left(NameMismatch) when name is not applicable" in {
         val response = BarsVerificationResponse(
-          accountNumberIsWellFormatted = BarsResponse.Yes,
-          sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-          sortCodeBankName = Some(bank.bankName),
-          accountExists = BarsResponse.Yes,
-          nameMatches = BarsResponse.Inapplicable,
-          sortCodeSupportsDirectDebit = BarsResponse.Yes,
-          sortCodeSupportsDirectCredit = BarsResponse.Yes,
+          accountNumberIsWellFormatted             = BarsResponse.Yes,
+          sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+          sortCodeBankName                         = Some(bank.bankName),
+          accountExists                            = BarsResponse.Yes,
+          nameMatches                              = BarsResponse.Inapplicable,
+          sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+          sortCodeSupportsDirectCredit             = BarsResponse.Yes,
           nonStandardAccountDetailsRequiredForBacs = None,
-          iban = Some("GB33BUKB20201555555555"),
-          accountName = Some("John Doe")
+          iban                                     = Some("GB33BUKB20201555555555"),
+          accountName                              = Some("John Doe")
         )
 
         when(mockConnector.verify(any(), any())(any()))

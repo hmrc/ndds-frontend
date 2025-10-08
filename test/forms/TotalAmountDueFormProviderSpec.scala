@@ -41,7 +41,8 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with Mockit
   private val form = formWithMin(min)
 
   private val validDataGenerator: Gen[String] =
-    Gen.choose[BigDecimal](min, max)
+    Gen
+      .choose[BigDecimal](min, max)
       .map(_.setScale(2, RoundingMode.HALF_UP))
       .map(_.toString)
 
@@ -52,7 +53,7 @@ class TotalAmountDueFormProviderSpec extends CurrencyFieldBehaviours with Mockit
     behave like currencyField(
       form,
       fieldName,
-      nonNumericError = FormError(fieldName, "totalAmountDue.error.nonNumeric"),
+      nonNumericError     = FormError(fieldName, "totalAmountDue.error.nonNumeric"),
       invalidNumericError = FormError(fieldName, "totalAmountDue.error.invalidNumeric")
     )
 

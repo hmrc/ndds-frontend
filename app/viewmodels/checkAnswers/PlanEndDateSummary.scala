@@ -22,24 +22,23 @@ import pages.PlanEndDatePage
 import play.api.i18n.{Lang, Messages}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DateTimeFormats.dateTimeFormat
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object PlanEndDateSummary  {
+object PlanEndDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PlanEndDatePage).map {
-      answer =>
+    answers.get(PlanEndDatePage).map { answer =>
 
-        implicit val lang: Lang = messages.lang
+      implicit val lang: Lang = messages.lang
 
-        SummaryListRowViewModel(
-          key     = "planEndDate.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.format(dateTimeFormat())),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.PlanEndDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("planEndDate.change.hidden"))
-          )
+      SummaryListRowViewModel(
+        key   = "planEndDate.checkYourAnswersLabel",
+        value = ValueViewModel(answer.format(dateTimeFormat())),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.PlanEndDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("planEndDate.change.hidden"))
         )
+      )
     }
 }

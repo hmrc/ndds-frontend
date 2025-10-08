@@ -44,24 +44,30 @@ object DirectDebitSource extends Enumerable.Implicits {
   case object VAT extends WithName("vat") with DirectDebitSource
 
   val values: Seq[DirectDebitSource] = Seq(
-    CT, MGD, NIC, OL, PAYE, SA, SDLT, TC, VAT
+    CT,
+    MGD,
+    NIC,
+    OL,
+    PAYE,
+    SA,
+    SDLT,
+    TC,
+    VAT
   )
 
-  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {
-    case (value, index) =>
-      val hintKey = s"directDebitSource.${value.toString}.hint"
-      val hintText = messages(hintKey)
-      RadioItem(
-        content = Text(messages(s"directDebitSource.${value.toString}")),
-        value = Some(value.toString),
-        id = Some(s"value_$index"),
-        hint = if (hintText != hintKey) Some(Hint(content = Text(hintText))) else None
-      )
+  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>
+    val hintKey = s"directDebitSource.${value.toString}.hint"
+    val hintText = messages(hintKey)
+    RadioItem(
+      content = Text(messages(s"directDebitSource.${value.toString}")),
+      value   = Some(value.toString),
+      id      = Some(s"value_$index"),
+      hint    = if (hintText != hintKey) Some(Hint(content = Text(hintText))) else None
+    )
   }
 
-
   implicit val enumerable: Enumerable[DirectDebitSource] =
-    Enumerable(values.map(v => v.toString -> v): _*)
+    Enumerable(values.map(v => v.toString -> v)*)
 
-   val objectMap: Map[String, DirectDebitSource] = values.map(v => v.toString -> v).toMap
+  val objectMap: Map[String, DirectDebitSource] = values.map(v => v.toString -> v).toMap
 }

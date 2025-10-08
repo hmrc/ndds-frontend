@@ -32,10 +32,10 @@ trait RadiosFluency {
   object RadiosViewModel extends ErrorMessageAwareness with FieldsetFluency {
 
     def apply(
-               field: Field,
-               items: Seq[RadioItem],
-               legend: Legend
-             )(implicit messages: Messages): Radios =
+      field: Field,
+      items: Seq[RadioItem],
+      legend: Legend
+    )(implicit messages: Messages): Radios =
       apply(
         field    = field,
         items    = items,
@@ -43,10 +43,10 @@ trait RadiosFluency {
       )
 
     def apply(
-               field: Field,
-               items: Seq[RadioItem],
-               fieldset: Fieldset
-             )(implicit messages: Messages): Radios =
+      field: Field,
+      items: Seq[RadioItem],
+      fieldset: Fieldset
+    )(implicit messages: Messages): Radios =
       Radios(
         fieldset     = Some(fieldset),
         name         = field.name,
@@ -55,18 +55,18 @@ trait RadiosFluency {
       )
 
     def yesNo(
-               field: Field,
-               legend: Legend
-             )(implicit messages: Messages): Radios =
+      field: Field,
+      legend: Legend
+    )(implicit messages: Messages): Radios =
       yesNo(
         field    = field,
         fieldset = FieldsetViewModel(legend)
       )
 
     def yesNo(
-               field: Field,
-               fieldset: Fieldset
-             )(implicit messages: Messages): Radios = {
+      field: Field,
+      fieldset: Fieldset
+    )(implicit messages: Messages): Radios = {
 
       val items = Seq(
         RadioItem(

@@ -22,21 +22,21 @@ import org.scalatest.matchers.should.Matchers.shouldBe
 import play.api.mvc.Call
 
 class DirectDebitCountBackLinkSpec extends SpecBase with Matchers {
-  
+
   "DirectDebitCountBackLink" - {
 
     val dummyCall = Call("GET", "/test-url")
-    
+
     "should return Some(call.url) and show=true when count is not zero" in {
       val count = 1
       DirectDebitCountBackLink.link(count, dummyCall) shouldBe Some("/test-url")
-      DirectDebitCountBackLink.show(count) shouldBe true
+      DirectDebitCountBackLink.show(count)            shouldBe true
     }
 
     "should return None and show=false when count is zero" in {
       val count = 0
       DirectDebitCountBackLink.link(count, dummyCall) shouldBe None
-      DirectDebitCountBackLink.show(count) shouldBe false
+      DirectDebitCountBackLink.show(count)            shouldBe false
     }
   }
 }

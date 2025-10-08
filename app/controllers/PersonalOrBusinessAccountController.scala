@@ -32,54 +32,56 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
-class PersonalOrBusinessAccountController @Inject()(
-                                                     override val messagesApi: MessagesApi,
-                                                     sessionRepository: SessionRepository,
-                                                     navigator: Navigator,
-                                                     identify: IdentifierAction,
-                                                     getData: DataRetrievalAction,
-                                                     formProvider: PersonalOrBusinessAccountFormProvider,
-                                                     val controllerComponents: MessagesControllerComponents,
-                                                     view: PersonalOrBusinessAccountView
-                                                   )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class PersonalOrBusinessAccountController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  formProvider: PersonalOrBusinessAccountFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: PersonalOrBusinessAccountView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   private val form: Form[PersonalOrBusinessAccount] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) {
-    implicit request =>
-      val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-      val preparedForm = answers.get(PersonalOrBusinessAccountPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) { implicit request =>
+    val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+    val preparedForm = answers.get(PersonalOrBusinessAccountPage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
 
-      Ok(view(preparedForm, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))
+    Ok(view(preparedForm, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    form.bindFromRequest().fold(
-      formWithErrors =>
-        Future.successful(
-          BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))
-        ),
-      value => {
-        val originalAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors =>
+          Future.successful(
+            BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))
+          ),
+        value => {
+          val originalAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
 
-        val updatedAnswersTry = updateAnswers(originalAnswers, value)
+          val updatedAnswersTry = updateAnswers(originalAnswers, value)
 
-        for {
-          updatedAnswers <- Future.fromTry(updatedAnswersTry)
-          _ <- sessionRepository.set(updatedAnswers)
-        } yield Redirect(navigator.nextPage(PersonalOrBusinessAccountPage, mode, updatedAnswers))
-      }
-    )
+          for {
+            updatedAnswers <- Future.fromTry(updatedAnswersTry)
+            _              <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(PersonalOrBusinessAccountPage, mode, updatedAnswers))
+        }
+      )
   }
 
-
   private def updateAnswers(
-                             userAnswers: UserAnswers,
-                             newValue: PersonalOrBusinessAccount
-                           ): Try[UserAnswers] = {
+    userAnswers: UserAnswers,
+    newValue: PersonalOrBusinessAccount
+  ): Try[UserAnswers] = {
     val oldValue = userAnswers.get(PersonalOrBusinessAccountPage)
 
     if (oldValue.contains(newValue)) {
