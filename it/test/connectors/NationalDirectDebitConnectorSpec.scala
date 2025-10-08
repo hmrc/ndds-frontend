@@ -29,10 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 
-class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
-  with Matchers
-  with ScalaFutures
-  with IntegrationPatience {
+class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matchers with ScalaFutures with IntegrationPatience {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -224,12 +221,12 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
       val result = connector.retrieveDirectDebitPaymentPlans("testRef").futureValue
 
-      result.bankSortCode shouldBe "123456"
-      result.paymentPlanCount shouldBe 4
+      result.bankSortCode                  shouldBe "123456"
+      result.paymentPlanCount              shouldBe 4
       result.paymentPlanList.head.planType shouldBe PaymentPlanType.SinglePaymentPlan.toString
-      result.paymentPlanList(1).planType shouldBe PaymentPlanType.BudgetPaymentPlan.toString
-      result.paymentPlanList(2).planType shouldBe PaymentPlanType.TaxCreditRepaymentPlan.toString
-      result.paymentPlanList(3).planType shouldBe PaymentPlanType.VariablePaymentPlan.toString
+      result.paymentPlanList(1).planType   shouldBe PaymentPlanType.BudgetPaymentPlan.toString
+      result.paymentPlanList(2).planType   shouldBe PaymentPlanType.TaxCreditRepaymentPlan.toString
+      result.paymentPlanList(3).planType   shouldBe PaymentPlanType.VariablePaymentPlan.toString
     }
   }
 
@@ -280,45 +277,44 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
   "submitChrisData" should {
 
     val planStartDateDetails = PlanStartDateDetails(
-      enteredDate = LocalDate.of(2025, 9, 1),
+      enteredDate           = LocalDate.of(2025, 9, 1),
       earliestPlanStartDate = "2025-09-01"
     )
 
     val paymentDateDetails = PaymentDateDetails(
-      enteredDate = LocalDate.of(2025, 9, 15),
+      enteredDate         = LocalDate.of(2025, 9, 15),
       earliestPaymentDate = "2025-09-01"
     )
 
     val submission = ChrisSubmissionRequest(
-      serviceType = DirectDebitSource.TC,
-      paymentPlanType = PaymentPlanType.TaxCreditRepaymentPlan,
+      serviceType      = DirectDebitSource.TC,
+      paymentPlanType  = PaymentPlanType.TaxCreditRepaymentPlan,
       paymentFrequency = Some(PaymentsFrequency.Monthly),
       yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
         accountHolderName = "Test",
-        sortCode = "123456",
-        accountNumber = "12345678",
-        auddisStatus = false,
-        accountVerified = false
+        sortCode          = "123456",
+        accountNumber     = "12345678",
+        auddisStatus      = false,
+        accountVerified   = false
       ),
-      planStartDate = Some(planStartDateDetails),
-      planEndDate = None,
-      paymentDate = Some(paymentDateDetails),
+      planStartDate   = Some(planStartDateDetails),
+      planEndDate     = None,
+      paymentDate     = Some(paymentDateDetails),
       yearEndAndMonth = None,
       bankDetailsAddress = BankAddress(
-        lines = Seq("line 1"),
-        town = "Town",
-        country = Country("UK"),
+        lines    = Seq("line 1"),
+        town     = "Town",
+        country  = Country("UK"),
         postCode = "NE5 2DH"
       ),
-      ddiReferenceNo = "DDI123456789",
-      paymentReference = "testReference",
-      bankName = "Barclays",
-      totalAmountDue = Some(BigDecimal(200)),
-      paymentAmount = Some(BigDecimal(100.00)),
+      ddiReferenceNo       = "DDI123456789",
+      paymentReference     = "testReference",
+      bankName             = "Barclays",
+      totalAmountDue       = Some(BigDecimal(200)),
+      paymentAmount        = Some(BigDecimal(100.00)),
       regularPaymentAmount = Some(BigDecimal(90.00)),
-      calculation = None
+      calculation          = None
     )
-
 
     "successfully return true when CHRIS submission succeeds with 200 OK" in {
       stubFor(
@@ -419,14 +415,14 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
       val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
 
-      result.directDebitDetails.bankSortCode shouldBe Some("123456")
+      result.directDebitDetails.bankSortCode    shouldBe Some("123456")
       result.directDebitDetails.bankAccountName shouldBe None
-      result.directDebitDetails.auDdisFlag shouldBe true
+      result.directDebitDetails.auDdisFlag      shouldBe true
 
-      result.paymentPlanDetails.hodService shouldBe "CESA"
-      result.paymentPlanDetails.planType shouldBe PaymentPlanType.SinglePaymentPlan.toString
+      result.paymentPlanDetails.hodService        shouldBe DirectDebitSource.SA.toString
+      result.paymentPlanDetails.planType          shouldBe PaymentPlanType.SinglePaymentPlan.toString
       result.paymentPlanDetails.suspensionEndDate shouldBe None
-      result.paymentPlanDetails.totalLiability shouldBe None
+      result.paymentPlanDetails.totalLiability    shouldBe None
     }
 
     "successfully retrieve payment plan details when scheduledPaymentFrequency is null" in {
@@ -442,7 +438,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
           |    "submissionDateTime": "2025-09-30T11:00:00"
           |  },
           |  "paymentPlanDetails": {
-          |    "hodService": "CESA",
+          |    "hodService": "NIDN",
           |    "planType": "01",
           |    "paymentReference": "test-pp-ref",
           |    "submissionDateTime": "2025-09-30T11:00:00",
@@ -473,6 +469,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
       val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
 
+      result.paymentPlanDetails.hodService                shouldBe DirectDebitSource.NIC.toString
       result.paymentPlanDetails.scheduledPaymentFrequency shouldBe None
     }
 
@@ -489,7 +486,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
           |    "submissionDateTime": "2025-09-30T11:00:00"
           |  },
           |  "paymentPlanDetails": {
-          |    "hodService": "CESA",
+          |    "hodService": "unknownHodService",
           |    "planType": "01",
           |    "paymentReference": "test-pp-ref",
           |    "submissionDateTime": "2025-09-30T11:00:00",
@@ -520,6 +517,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
       val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
 
+      result.paymentPlanDetails.hodService                shouldBe "unknownHodService"
       result.paymentPlanDetails.scheduledPaymentFrequency shouldBe Some("weekly")
     }
   }

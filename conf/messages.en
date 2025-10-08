@@ -378,6 +378,15 @@ paymentPlanDetails.paymentsFrequency.fourWeekly = Four Weekly
 paymentPlanDetails.paymentsFrequency.quarterly = Quarterly
 paymentPlanDetails.paymentsFrequency.sixMonthly = Six Monthly
 paymentPlanDetails.paymentsFrequency.annually = Annually
+paymentPlanDetails.details.hodService.ct = CT
+paymentPlanDetails.details.hodService.mgd = MGD
+paymentPlanDetails.details.hodService.nic = NIC
+paymentPlanDetails.details.hodService.otherLiability = OTHER_LIABILITY
+paymentPlanDetails.details.hodService.paye = PAYE
+paymentPlanDetails.details.hodService.sa = SA
+paymentPlanDetails.details.hodService.sdlt = SDLT
+paymentPlanDetails.details.hodService.tc = NTC
+paymentPlanDetails.details.hodService.vat = VAT
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 

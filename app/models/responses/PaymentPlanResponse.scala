@@ -16,7 +16,7 @@
 
 package models.responses
 
-import models.{PaymentPlanType, PaymentsFrequency}
+import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency}
 
 import java.time.{LocalDate, LocalDateTime}
 import play.api.libs.functional.syntax.*
@@ -70,8 +70,22 @@ object PaymentPlanDetails {
     9 -> PaymentsFrequency.Annually.toString
   )
 
+  private val hodServiceMapping: Map[String, String] = Map(
+    "COTA" -> DirectDebitSource.CT.toString,
+    "NIDN" -> DirectDebitSource.NIC.toString,
+    "SAFE" -> DirectDebitSource.OL.toString,
+    "PAYE" -> DirectDebitSource.PAYE.toString,
+    "CESA" -> DirectDebitSource.SA.toString,
+    "SDLT" -> DirectDebitSource.SDLT.toString,
+    "NTC"  -> DirectDebitSource.TC.toString,
+    "VAT"  -> DirectDebitSource.VAT.toString,
+    "MGD"  -> DirectDebitSource.MGD.toString
+  )
+
   implicit val reads: Reads[PaymentPlanDetails] = (
-    (__ \ "hodService").read[String] and
+    (__ \ "hodService").read[String].map { code =>
+      hodServiceMapping.getOrElse(code, code)
+    } and
       (__ \ "planType").read[String].map { code =>
         planTypeMapping.getOrElse(code, code)
       } and

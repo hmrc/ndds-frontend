@@ -20,6 +20,7 @@ import models.UserAnswers
 import pages.AmendPaymentPlanSourcePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
@@ -36,9 +37,16 @@ object AmendPaymentPlanSourceSummary {
     }
 
   def row(value: String)(implicit messages: Messages): SummaryListRow = {
+
+    val displayValue = ValueViewModel(
+      HtmlContent(
+        HtmlFormat.escape(messages(s"paymentPlanDetails.details.hodService.$value"))
+      )
+    )
+
     SummaryListRowViewModel(
       key     = "amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor",
-      value   = ValueViewModel(HtmlFormat.escape(value.toUpperCase).toString),
+      value   = displayValue,
       actions = Seq.empty
     )
   }
