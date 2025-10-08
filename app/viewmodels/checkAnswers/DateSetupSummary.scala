@@ -28,8 +28,8 @@ object DateSetupSummary {
 
   def row(value: LocalDateTime)(implicit messages: Messages): SummaryListRow =
     SummaryListRowViewModel(
-      key = "paymentPlanDetails.details.dateSetUp",
-      value = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      key     = "paymentPlanDetails.details.dateSetUp",
+      value   = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
       actions = Seq.empty
     )
 }

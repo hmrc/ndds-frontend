@@ -22,24 +22,23 @@ import pages.PaymentDatePage
 import play.api.i18n.{Lang, Messages}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DateTimeFormats.dateTimeFormat
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object PaymentDateSummary  {
+object PaymentDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentDatePage).map {
-      answer =>
+    answers.get(PaymentDatePage).map { answer =>
 
-        implicit val lang: Lang = messages.lang
+      implicit val lang: Lang = messages.lang
 
-        SummaryListRowViewModel(
-          key     = "paymentDate.checkYourAnswersLabel",
-          value   = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.PaymentDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("paymentDate.change.hidden"))
-          )
+      SummaryListRowViewModel(
+        key   = "paymentDate.checkYourAnswersLabel",
+        value = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.PaymentDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("paymentDate.change.hidden"))
         )
+      )
     }
 }

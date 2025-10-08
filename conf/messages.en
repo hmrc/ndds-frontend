@@ -339,6 +339,7 @@ directDebitPaymentSummary.activePayment.summary.planType.budgetPaymentPlan  = Bu
 directDebitPaymentSummary.activePayment.summary.planType.singlePaymentPlan = Single payment
 directDebitPaymentSummary.activePayment.summary.planType.variablePaymentPlan = Variable Payment
 directDebitPaymentSummary.activePayment.summary.planType.taxCreditRepaymentPlan = Tax Credit Repayment
+directDebitPaymentSummary.activePayment.summary.planType.unknownPlanType = Unknown plan
 directDebitPaymentSummary.activePayment.summary.paymentFor = Payment for
 directDebitPaymentSummary.activePayment.summary.date = Date set up
 directDebitPaymentSummary.activePayment.summary.amount = Payment amount
@@ -395,7 +396,7 @@ amendPlanEndDate.hint = e.g. 16 6 2026
 
 amendPaymentPlanConfirmation.title = Confirm new payment plan details - amend a payment plan
 amendPaymentPlanConfirmation.heading = Confirm new payment plan details
-amendPaymentPlanConfirmation.p1 = The amendment will remove any suspension you currently have in place. Please check that the details below are correct, then click ''Continue'' to proceed. For security reasons you may be asked to re-authenticate your details.
+amendPaymentPlanConfirmation.p1 = This amendment will remove any suspension that you have in place. Check that the details below are correct, then click ''Continue'' to proceed. For security reasons, you may be asked to re-authenticate your details.
 amendPaymentPlanConfirmation.directDebit.h2 = Direct Debit details
 amendPaymentPlanConfirmation.directDebit.reference = Direct Debit reference
 amendPaymentPlanConfirmation.directDebit.accountNumber = Account number

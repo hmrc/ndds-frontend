@@ -34,20 +34,20 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
   )
 
   val formatter = new CustomDateFormatter(
-    invalidKey = "error.invalid",
+    invalidKey     = "error.invalid",
     allRequiredKey = "error.allRequired",
     twoRequiredKey = "error.twoRequired",
-    requiredKey = "error.required",
-    dateFormats = dateFormats
+    requiredKey    = "error.required",
+    dateFormats    = dateFormats
   )
 
   "CustomDateFormatter" should {
 
     "bind successfully with valid date input" in {
       val data = Map(
-        "date.day" -> "15",
+        "date.day"   -> "15",
         "date.month" -> "8",
-        "date.year" -> "2025"
+        "date.year"  -> "2025"
       )
 
       val result = formatter.bind("date", data)
@@ -58,29 +58,29 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
     "return error for missing day" in {
       val data = Map(
         "date.month" -> "8",
-        "date.year" -> "2025"
+        "date.year"  -> "2025"
       )
 
       val result = formatter.bind("date", data)
 
       result match {
         case Left(errors) => errors must contain(FormError("date.day", "date.error.day"))
-        case Right(_) => fail("Expected Left with errors but got Right")
+        case Right(_)     => fail("Expected Left with errors but got Right")
       }
     }
 
     "return error for invalid month format" in {
       val data = Map(
-        "date.day" -> "15",
+        "date.day"   -> "15",
         "date.month" -> "abc",
-        "date.year" -> "2025"
+        "date.year"  -> "2025"
       )
 
       val result = formatter.bind("date", data)
 
       result match {
         case Left(errors) => errors must contain(FormError("date.month", "error.month"))
-        case Right(_) => fail("Expected Left with errors but got Right")
+        case Right(_)     => fail("Expected Left with errors but got Right")
       }
     }
 

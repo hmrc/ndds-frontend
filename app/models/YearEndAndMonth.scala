@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import java.time.LocalDate
 
@@ -25,7 +25,7 @@ case class YearEndAndMonth(year: Int, month: Int) {
     val actualMonth = if (month == YearEndAndMonth.SpecialMonthValue) YearEndAndMonth.December else month
     LocalDate.of(year, actualMonth, YearEndAndMonth.FirstDayOfMonth)
   }
-  
+
   def displayFormat: String = {
     f"$year%04d $month%02d"
   }
@@ -35,9 +35,9 @@ object YearEndAndMonth {
   private val SpecialMonthValue = 13
   private val December = 12
   private val FirstDayOfMonth = 1
-  
+
   implicit val format: OFormat[YearEndAndMonth] = Json.format[YearEndAndMonth]
-  
+
   def fromLocalDate(localDate: LocalDate): YearEndAndMonth = {
     YearEndAndMonth(localDate.getYear, localDate.getMonthValue)
   }

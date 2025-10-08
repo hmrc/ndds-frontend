@@ -44,7 +44,10 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
     val mockSessionRepository = mock[SessionRepository]
 
-    def createSummaryListForBudgetPaymentPlan(userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+    def createSummaryListForBudgetPaymentPlan(userAnswers: UserAnswers,
+                                              paymentPlanDetails: PaymentPlanResponse,
+                                              app: Application
+                                             ): Seq[SummaryListRow] = {
       val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
@@ -72,7 +75,10 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       )
     }
 
-    def createSummaryListForSinglePaymentPlans(userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+    def createSummaryListForSinglePaymentPlans(userAnswers: UserAnswers,
+                                               paymentPlanDetails: PaymentPlanResponse,
+                                               app: Application
+                                              ): Seq[SummaryListRow] = {
       val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
@@ -98,7 +104,8 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
         val mockBudgetPaymentPlanDetailResponse =
           dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString))
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+          )
 
         val directDebitReference = "122222"
         val paymentPlanReference = "paymentReference"
@@ -107,31 +114,45 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
-            ).success.value
+            )
+            .success
+            .value
             .set(
               PaymentPlanReferenceQuery,
               paymentPlanReference
-            ).success.value
+            )
+            .success
+            .value
             .set(
               AmendPaymentPlanTypePage,
               PaymentPlanType.BudgetPaymentPlan.toString
-            ).success.value
+            )
+            .success
+            .value
             .set(
               PaymentPlanDetailsQuery,
               mockBudgetPaymentPlanDetailResponse
-            ).success.value
+            )
+            .success
+            .value
             .set(
               AmendPaymentAmountPage,
               150.0
-            ).success.value
+            )
+            .success
+            .value
             .set(
               AmendPlanStartDatePage,
               LocalDate.now()
-            ).success.value
+            )
+            .success
+            .value
             .set(
               AmendPlanEndDatePage,
               LocalDate.now().plusMonths(2)
-            ).success.value
+            )
+            .success
+            .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -150,17 +171,23 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
-          contentAsString(result) mustEqual view(NormalMode, paymentPlanReference, directDebitReference,
+          contentAsString(result) mustEqual view(
+            NormalMode,
+            paymentPlanReference,
+            directDebitReference,
             mockBudgetPaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
             mockBudgetPaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,
-            summaryListRows, routes.AmendPlanEndDateController.onPageLoad(NormalMode))(request, messages(application)).toString
+            summaryListRows,
+            routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
         }
       }
 
       "must return OK and the correct view for a GET with a Single Payment Plan" in {
         val mockSinglePaymentPlanDetailResponse =
           dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString))
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
+          )
 
         val directDebitReference = "122222"
         val paymentPlanReference = "paymentReference"
@@ -169,31 +196,45 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
-            ).success.value
+            )
+            .success
+            .value
             .set(
               PaymentPlanReferenceQuery,
               paymentPlanReference
-            ).success.value
+            )
+            .success
+            .value
             .set(
               AmendPaymentPlanTypePage,
               PaymentPlanType.SinglePaymentPlan.toString
-            ).success.value
+            )
+            .success
+            .value
             .set(
               PaymentPlanDetailsQuery,
               mockSinglePaymentPlanDetailResponse
-            ).success.value
+            )
+            .success
+            .value
             .set(
               AmendPaymentAmountPage,
               150.0
-            ).success.value
+            )
+            .success
+            .value
             .set(
               AmendPlanStartDatePage,
               LocalDate.now()
-            ).success.value
+            )
+            .success
+            .value
             .set(
               AmendPlanEndDatePage,
               LocalDate.now().plusMonths(2)
-            ).success.value
+            )
+            .success
+            .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -214,10 +255,15 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
-          contentAsString(result) mustEqual view(NormalMode, paymentPlanReference, directDebitReference,
+          contentAsString(result) mustEqual view(
+            NormalMode,
+            paymentPlanReference,
+            directDebitReference,
             mockSinglePaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
             mockSinglePaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,
-            summaryListRows, routes.AmendPlanStartDateController.onPageLoad(NormalMode))(request, messages(application)).toString
+            summaryListRows,
+            routes.AmendPlanStartDateController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
         }
       }
     }
@@ -237,43 +283,54 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
         val paymentPlanDetails = models.responses.PaymentPlanResponse(
           directDebitDetails = models.responses.DirectDebitDetails(
-            bankSortCode = Some("123456"),
-            bankAccountNumber = Some("12345678"),
-            bankAccountName = Some("Bank Ltd"),
-            auDdisFlag = true,
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
             submissionDateTime = java.time.LocalDateTime.now()
           ),
           paymentPlanDetails = models.responses.PaymentPlanDetails(
-            hodService = "CESA",
-            planType = "BudgetPaymentPlan",
-            paymentReference = "paymentReference",
-            submissionDateTime = java.time.LocalDateTime.now(),
-            scheduledPaymentAmount = Some(1000),
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
             scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
-            initialPaymentStartDate = Some(java.time.LocalDate.now()),
-            initialPaymentAmount = Some(150),
-            scheduledPaymentEndDate = Some(java.time.LocalDate.now().plusMonths(10)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
             scheduledPaymentFrequency = Some("Monthly"),
-            suspensionStartDate = Some(java.time.LocalDate.now()),
-            suspensionEndDate = Some(java.time.LocalDate.now()),
-            balancingPaymentAmount = Some(600),
-            balancingPaymentDate = Some(java.time.LocalDate.now()),
-            totalLiability = Some(300),
-            paymentPlanEditable = false
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = Some(600),
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
           )
         )
 
         val userAnswers = emptyUserAnswers
-          .set(DirectDebitReferenceQuery, directDebitReference).success.value
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPlanStartDatePage, java.time.LocalDate.now()).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
-          .set(PaymentPlanReferenceQuery, "paymentReference").success.value
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService)
-          ).build()
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, routes.AmendPaymentPlanConfirmationController.onSubmit(NormalMode).url)
@@ -298,43 +355,54 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
         val paymentPlanDetails = models.responses.PaymentPlanResponse(
           directDebitDetails = models.responses.DirectDebitDetails(
-            bankSortCode = Some("123456"),
-            bankAccountNumber = Some("12345678"),
-            bankAccountName = Some("Bank Ltd"),
-            auDdisFlag = true,
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
             submissionDateTime = java.time.LocalDateTime.now()
           ),
           paymentPlanDetails = models.responses.PaymentPlanDetails(
-            hodService = "CESA",
-            planType = "BudgetPaymentPlan",
-            paymentReference = "paymentReference",
-            submissionDateTime = java.time.LocalDateTime.now(),
-            scheduledPaymentAmount = Some(1000),
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
             scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
-            initialPaymentStartDate = Some(java.time.LocalDate.now()),
-            initialPaymentAmount = Some(150),
-            scheduledPaymentEndDate = Some(java.time.LocalDate.now().plusMonths(10)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
             scheduledPaymentFrequency = Some("Monthly"),
-            suspensionStartDate = Some(java.time.LocalDate.now()),
-            suspensionEndDate = Some(java.time.LocalDate.now()),
-            balancingPaymentAmount = Some(600),
-            balancingPaymentDate = Some(java.time.LocalDate.now()),
-            totalLiability = Some(300),
-            paymentPlanEditable = false
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = Some(600),
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
           )
         )
 
         val userAnswers = emptyUserAnswers
-          .set(DirectDebitReferenceQuery, directDebitReference).success.value
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPlanStartDatePage, java.time.LocalDate.now()).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
-          .set(PaymentPlanReferenceQuery, "paymentReference").success.value
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService)
-          ).build()
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, routes.AmendPaymentPlanConfirmationController.onSubmit(NormalMode).url)

@@ -38,48 +38,49 @@ import views.html.BankDetailsCheckYourAnswerView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class BankDetailsCheckYourAnswerController @Inject()(
-                                                      override val messagesApi: MessagesApi,
-                                                      identify: IdentifierAction,
-                                                      getData: DataRetrievalAction,
-                                                      requireData: DataRequiredAction,
-                                                      sessionRepository: SessionRepository,
-                                                      navigator: Navigator,
-                                                      formProvider: BankDetailsCheckYourAnswerFormProvider,
-                                                      val controllerComponents: MessagesControllerComponents,
-                                                      view: BankDetailsCheckYourAnswerView,
-                                                      macGenerator:MacGenerator,
-                                                      appConfig: FrontendAppConfig
-                                                    ) (implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class BankDetailsCheckYourAnswerController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  formProvider: BankDetailsCheckYourAnswerFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: BankDetailsCheckYourAnswerView,
+  macGenerator: MacGenerator,
+  appConfig: FrontendAppConfig
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
   val form: Form[Boolean] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      logger.info("Display bank details confirmation page")
-      val preparedForm = request.userAnswers.get(BankDetailsCheckYourAnswerPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-      val summaryList = buildSummaryList(request.userAnswers)
-      Ok(view(preparedForm, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode)))
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    logger.info("Display bank details confirmation page")
+    val preparedForm = request.userAnswers.get(BankDetailsCheckYourAnswerPage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
+    val summaryList = buildSummaryList(request.userAnswers)
+    Ok(view(preparedForm, mode, summaryList, routes.YourBankDetailsController.onPageLoad(mode)))
   }
-
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
       val confirmed = true
 
-      generateMacFromAnswers(request.userAnswers, macGenerator, appConfig.bacsNumber ) match {
+      generateMacFromAnswers(request.userAnswers, macGenerator, appConfig.bacsNumber) match {
         case Some(mac) =>
           logger.info(s"Generated MAC successfully")
 
           for {
             updatedAnswers <- Future.fromTry(
-              request.userAnswers
-                .set(BankDetailsCheckYourAnswerPage, confirmed)
-                .flatMap(_.set(pages.MacValuePage, mac))
-            )
+                                request.userAnswers
+                                  .set(BankDetailsCheckYourAnswerPage, confirmed)
+                                  .flatMap(_.set(pages.MacValuePage, mac))
+                              )
             _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
 

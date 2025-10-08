@@ -32,19 +32,18 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class AuditService @Inject(
-                            auditConnector: AuditConnector
-                          )(implicit ec: ExecutionContext) {
+class AuditService @Inject (
+  auditConnector: AuditConnector
+)(implicit ec: ExecutionContext) {
 
   private val auditSource: String = "ndds-frontend"
 
-  def sendEvent[A <: AuditEvent](auditEvent: A)
-                                (implicit hc: HeaderCarrier, writes: Writes[A], request: Request[_]): Unit = {
+  def sendEvent[A <: AuditEvent](auditEvent: A)(implicit hc: HeaderCarrier, writes: Writes[A], request: Request[?]): Unit = {
     val extendedDataEvent = ExtendedDataEvent(
       auditSource = auditSource,
-      auditType = auditEvent.auditType,
-      detail = Json.toJson(auditEvent),
-      tags = hc.toAuditTags(auditEvent.transactionName, request.uri)
+      auditType   = auditEvent.auditType,
+      detail      = Json.toJson(auditEvent),
+      tags        = hc.toAuditTags(auditEvent.transactionName, request.uri)
     )
 
     auditConnector.sendExtendedEvent(extendedDataEvent)

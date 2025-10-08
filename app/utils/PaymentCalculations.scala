@@ -23,9 +23,9 @@ object PaymentCalculations {
   private val ScaleTwo = 2
   private val ScaleFour = 4
   def calculateRegularPaymentAmount(
-                                     totalAmountDueInput: BigDecimal,
-                                     totalNumberOfPayments: Int
-                                   ): Double = {
+    totalAmountDueInput: BigDecimal,
+    totalNumberOfPayments: Int
+  ): Double = {
     val totalAmountDueRounded = totalAmountDueInput.setScale(ScaleTwo, RoundingMode.HALF_DOWN)
 
     val regularPaymentFullPrecision =
@@ -39,31 +39,31 @@ object PaymentCalculations {
   }
 
   def calculateFinalPayment(
-                             totalAmountDue: BigDecimal,
-                             regularPaymentAmount: BigDecimal,
-                             numberOfEqualPayments: Int
-                           ): BigDecimal = {
+    totalAmountDue: BigDecimal,
+    regularPaymentAmount: BigDecimal,
+    numberOfEqualPayments: Int
+  ): BigDecimal = {
     val totalRegularPayments = regularPaymentAmount * BigDecimal(numberOfEqualPayments)
     totalAmountDue - totalRegularPayments
   }
 
   def calculateSecondPaymentDate(
-                                  planStartDate: LocalDate,
-                                  monthsOffset: Int
-                                ): LocalDate = {
+    planStartDate: LocalDate,
+    monthsOffset: Int
+  ): LocalDate = {
     planStartDate.plusMonths(monthsOffset.toLong)
   }
 
   def calculatePenultimatePaymentDate(
-                                       planStartDate: LocalDate,
-                                       penultimateInstallmentOffset: Int
-                                     ): LocalDate = {
+    planStartDate: LocalDate,
+    penultimateInstallmentOffset: Int
+  ): LocalDate = {
     planStartDate.plusMonths(penultimateInstallmentOffset.toLong)
   }
   def calculateFinalPaymentDate(
-                                 planStartDate: LocalDate,
-                                 monthsOffset: Int
-                               ): LocalDate = {
+    planStartDate: LocalDate,
+    monthsOffset: Int
+  ): LocalDate = {
     planStartDate.plusMonths(monthsOffset.toLong)
   }
 }

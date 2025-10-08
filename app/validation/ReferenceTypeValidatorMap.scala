@@ -25,14 +25,14 @@ object ReferenceTypeValidatorMap {
 
     val res = dds match {
       case PAYE => summon[Validator[PAYE.type]].validate _
-      case MGD => summon[Validator[MGD.type]].validate _
-      case SA => summon[Validator[SA.type]].validate _
+      case MGD  => summon[Validator[MGD.type]].validate _
+      case SA   => summon[Validator[SA.type]].validate _
       case SDLT => summon[Validator[SDLT.type]].validate _
-      case VAT => summon[Validator[VAT.type]].validate _
-      case NIC => summon[Validator[NIC.type]].validate _
-      case OL => summon[Validator[OL.type]].validate _
-      case CT => summon[Validator[CT.type]].validate _
-      case TC => summon[Validator[TC.type]].validate _
+      case VAT  => summon[Validator[VAT.type]].validate _
+      case NIC  => summon[Validator[NIC.type]].validate _
+      case OL   => summon[Validator[OL.type]].validate _
+      case CT   => summon[Validator[CT.type]].validate _
+      case TC   => summon[Validator[TC.type]].validate _
     }
 
     Some(res)

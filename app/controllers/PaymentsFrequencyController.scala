@@ -31,39 +31,39 @@ import views.html.PaymentsFrequencyView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaymentsFrequencyController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       navigator: Navigator,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       formProvider: PaymentsFrequencyFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: PaymentsFrequencyView
-                                     )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class PaymentsFrequencyController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: PaymentsFrequencyFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: PaymentsFrequencyView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   val form: Form[PaymentsFrequency] = formProvider()
   val backLink: Mode => Call = mode => routes.PaymentReferenceController.onPageLoad(mode)
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val answers = request.userAnswers
-      val preparedForm = answers.get(PaymentsFrequencyPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
+    val preparedForm = answers.get(PaymentsFrequencyPage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
 
-      Ok(view(preparedForm, mode, backLink(mode)))
+    Ok(view(preparedForm, mode, backLink(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, backLink(mode)))),
-
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, backLink(mode)))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentsFrequencyPage, value))

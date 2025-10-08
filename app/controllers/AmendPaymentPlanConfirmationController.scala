@@ -36,34 +36,36 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class AmendPaymentPlanConfirmationController @Inject()(
-                                                        override val messagesApi: MessagesApi,
-                                                        identify: IdentifierAction,
-                                                        getData: DataRetrievalAction,
-                                                        requireData: DataRequiredAction,
-                                                        val controllerComponents: MessagesControllerComponents,
-                                                        view: AmendPaymentPlanConfirmationView,
-                                                        nddService: NationalDirectDebitService
-                                                      )(implicit ec: ExecutionContext)
-  extends FrontendBaseController with I18nSupport with Logging {
+class AmendPaymentPlanConfirmationController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: AmendPaymentPlanConfirmationView,
+  nddService: NationalDirectDebitService
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val userAnswers = request.userAnswers
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val userAnswers = request.userAnswers
 
-      userAnswers.get(PaymentPlanDetailsQuery) match {
-        case Some(response) =>
-          val planDetail = response.paymentPlanDetails
-          val directDebitDetails = response.directDebitDetails
+    userAnswers.get(PaymentPlanDetailsQuery) match {
+      case Some(response) =>
+        val planDetail = response.paymentPlanDetails
+        val directDebitDetails = response.directDebitDetails
 
-          val (rows, backLink) = buildRows(userAnswers, planDetail, mode)
+        val (rows, backLink) = buildRows(userAnswers, planDetail, mode)
 
-          for {
-            directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
-            paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
-            planType <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
-          } yield {
-            Ok(view(
+        for {
+          directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
+          paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
+          planType             <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
+        } yield {
+          Ok(
+            view(
               mode,
               paymentPlanReference,
               directDebitReference,
@@ -71,12 +73,13 @@ class AmendPaymentPlanConfirmationController @Inject()(
               directDebitDetails.bankAccountNumber.getOrElse(""),
               rows,
               backLink
-            ))
-          }
+            )
+          )
+        }
 
-        case None =>
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-      }
+      case None =>
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
@@ -105,11 +108,10 @@ class AmendPaymentPlanConfirmationController @Inject()(
       }
     }
 
-
   private def buildChrisSubmissionRequest(
-                                           userAnswers: UserAnswers,
-                                           ddiReference: String
-                                         ): ChrisSubmissionRequest = {
+    userAnswers: UserAnswers,
+    ddiReference: String
+  ): ChrisSubmissionRequest = {
 
     userAnswers.get(PaymentPlanDetailsQuery) match {
       case Some(response) =>
@@ -120,8 +122,9 @@ class AmendPaymentPlanConfirmationController @Inject()(
           DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
 
         val planStartDateDetails: Option[PlanStartDateDetails] = userAnswers.get(AmendPlanStartDatePage).map { date =>
-          PlanStartDateDetails(enteredDate = date, earliestPlanStartDate = date.toString // you can adjust this if you have a different logic
-          )
+          PlanStartDateDetails(enteredDate           = date,
+                               earliestPlanStartDate = date.toString // you can adjust this if you have a different logic
+                              )
         }
 
         val paymentPlanType: PaymentPlanType =
@@ -131,24 +134,23 @@ class AmendPaymentPlanConfirmationController @Inject()(
 
         val bankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus = buildBankDetailsWithAuddisStatus(directDebitDetails)
 
-
         ChrisSubmissionRequest(
-          serviceType = serviceType,
-          paymentPlanType = paymentPlanType,
-          paymentFrequency = if (planDetail.planType.equalsIgnoreCase("singlePaymentPlan")) None else planDetail.scheduledPaymentFrequency,
+          serviceType                = serviceType,
+          paymentPlanType            = paymentPlanType,
+          paymentFrequency           = if (planDetail.planType.equalsIgnoreCase("singlePaymentPlan")) None else planDetail.scheduledPaymentFrequency,
           paymentPlanReferenceNumber = userAnswers.get(PaymentPlanReferenceQuery),
           yourBankDetailsWithAuddisStatus = bankDetailsWithAuddisStatus,
-          planStartDate = planStartDateDetails,
-          planEndDate = userAnswers.get(AmendPlanEndDatePage),
-          paymentDate = None,
-          yearEndAndMonth = None,
-          ddiReferenceNo = ddiReference,
-          paymentReference = planDetail.paymentReference,
-          totalAmountDue = planDetail.totalLiability,
-          paymentAmount = planDetail.balancingPaymentAmount,
-          regularPaymentAmount = userAnswers.get(AmendPaymentAmountPage),
-          calculation = None,
-          amendPlan = true
+          planStartDate                   = planStartDateDetails,
+          planEndDate                     = userAnswers.get(AmendPlanEndDatePage),
+          paymentDate                     = None,
+          yearEndAndMonth                 = None,
+          ddiReferenceNo                  = ddiReference,
+          paymentReference                = planDetail.paymentReference,
+          totalAmountDue                  = planDetail.totalLiability,
+          paymentAmount                   = planDetail.balancingPaymentAmount,
+          regularPaymentAmount            = userAnswers.get(AmendPaymentAmountPage),
+          calculation                     = None,
+          amendPlan                       = true
         )
 
       case None =>
@@ -157,8 +159,8 @@ class AmendPaymentPlanConfirmationController @Inject()(
   }
 
   private def buildBankDetailsWithAuddisStatus(
-                                                directDebitDetails: DirectDebitDetails
-                                              ): YourBankDetailsWithAuddisStatus = {
+    directDebitDetails: DirectDebitDetails
+  ): YourBankDetailsWithAuddisStatus = {
     val bankDetails = YourBankDetails(
       accountHolderName = directDebitDetails.bankAccountName.getOrElse(
         throw new IllegalStateException("Missing bank account name")
@@ -173,55 +175,61 @@ class AmendPaymentPlanConfirmationController @Inject()(
 
     YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(
       yourBankDetails = bankDetails,
-      auddisStatus = directDebitDetails.auDdisFlag,
+      auddisStatus    = directDebitDetails.auDdisFlag,
       accountVerified = true
     )
   }
 
-  private def buildRows(userAnswers: UserAnswers, paymentPlan: PaymentPlanDetails, mode: Mode)(implicit messages: Messages): (Seq[SummaryListRow], Call) =
+  private def buildRows(userAnswers: UserAnswers, paymentPlan: PaymentPlanDetails, mode: Mode)(implicit
+    messages: Messages
+  ): (Seq[SummaryListRow], Call) =
     userAnswers.get(AmendPaymentPlanTypePage) match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
         (Seq(
-          AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
-          AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
-          TotalAmountDueSummary.row(paymentPlan.totalLiability),
-          MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability),
-          FinalPaymentAmountSummary.row(paymentPlan.balancingPaymentAmount, paymentPlan.totalLiability),
-          PaymentsFrequencySummary.row(paymentPlan.scheduledPaymentFrequency),
-          AmendPlanStartDateSummary.row(
-            PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPlanStartDatePage),
-            Constants.shortDateTimeFormatPattern
-          ),
-          AmendPaymentAmountSummary.row(
-            PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPaymentAmountPage),
-            true
-          ),
-          AmendPlanEndDateSummary.row(
-            userAnswers.get(AmendPlanEndDatePage),
-            Constants.shortDateTimeFormatPattern,
-            true
-          )
-        ), routes.AmendPlanEndDateController.onPageLoad(mode))
+           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+           AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
+           TotalAmountDueSummary.row(paymentPlan.totalLiability),
+           MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability),
+           FinalPaymentAmountSummary.row(paymentPlan.balancingPaymentAmount, paymentPlan.totalLiability),
+           PaymentsFrequencySummary.row(paymentPlan.scheduledPaymentFrequency),
+           AmendPlanStartDateSummary.row(
+             PaymentPlanType.BudgetPaymentPlan.toString,
+             userAnswers.get(AmendPlanStartDatePage),
+             Constants.shortDateTimeFormatPattern
+           ),
+           AmendPaymentAmountSummary.row(
+             PaymentPlanType.BudgetPaymentPlan.toString,
+             userAnswers.get(AmendPaymentAmountPage),
+             true
+           ),
+           AmendPlanEndDateSummary.row(
+             userAnswers.get(AmendPlanEndDatePage),
+             Constants.shortDateTimeFormatPattern,
+             true
+           )
+         ),
+         routes.AmendPlanEndDateController.onPageLoad(mode)
+        )
 
       case _ =>
         (Seq(
-          AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
-          AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
-          DateSetupSummary.row(paymentPlan.submissionDateTime),
-          AmendPaymentAmountSummary.row(
-            PaymentPlanType.SinglePaymentPlan.toString,
-            userAnswers.get(AmendPaymentAmountPage),
-            true
-          ),
-          AmendPlanStartDateSummary.row(
-            PaymentPlanType.SinglePaymentPlan.toString,
-            userAnswers.get(AmendPlanStartDatePage),
-            Constants.shortDateTimeFormatPattern,
-            true
-          )
-        ), routes.AmendPlanStartDateController.onPageLoad(mode))
+           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+           AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
+           DateSetupSummary.row(paymentPlan.submissionDateTime),
+           AmendPaymentAmountSummary.row(
+             PaymentPlanType.SinglePaymentPlan.toString,
+             userAnswers.get(AmendPaymentAmountPage),
+             true
+           ),
+           AmendPlanStartDateSummary.row(
+             PaymentPlanType.SinglePaymentPlan.toString,
+             userAnswers.get(AmendPlanStartDatePage),
+             Constants.shortDateTimeFormatPattern,
+             true
+           )
+         ),
+         routes.AmendPlanStartDateController.onPageLoad(mode)
+        )
     }
 
 }

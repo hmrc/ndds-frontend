@@ -20,12 +20,12 @@ import play.api.libs.json.{Json, OFormat}
 import java.time.LocalDate
 
 case class PaymentPlanCalculation(
-                                   regularPaymentAmount: Option[BigDecimal],   // optional if single payment
-                                   finalPaymentAmount: Option[BigDecimal],     // optional if no split
-                                   secondPaymentDate: Option[LocalDate],       // optional depending on plan type
-                                   penultimatePaymentDate: Option[LocalDate],  // optional depending on plan type
-                                   finalPaymentDate: Option[LocalDate]         // optional for single payment
-                                 )
+  regularPaymentAmount: Option[BigDecimal], // optional if single payment
+  finalPaymentAmount: Option[BigDecimal], // optional if no split
+  secondPaymentDate: Option[LocalDate], // optional depending on plan type
+  penultimatePaymentDate: Option[LocalDate], // optional depending on plan type
+  finalPaymentDate: Option[LocalDate] // optional for single payment
+)
 
 object PaymentPlanCalculation {
   implicit val format: OFormat[PaymentPlanCalculation] = Json.format[PaymentPlanCalculation]

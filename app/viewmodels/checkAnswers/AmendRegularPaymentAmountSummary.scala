@@ -25,18 +25,17 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object AmendRegularPaymentAmountSummary  {
+object AmendRegularPaymentAmountSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(RegularPaymentAmountPage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key     = "amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount",
-          value   = ValueViewModel(currencyFormat(answer)),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount"))
-          )
+    answers.get(RegularPaymentAmountPage).map { answer =>
+      SummaryListRowViewModel(
+        key   = "amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount",
+        value = ValueViewModel(currencyFormat(answer)),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount"))
         )
+      )
     }
 }

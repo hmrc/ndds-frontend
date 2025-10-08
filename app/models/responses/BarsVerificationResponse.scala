@@ -16,7 +16,7 @@
 
 package models.responses
 
-import models.responses.BarsVerificationResponse._
+import models.responses.BarsVerificationResponse.*
 import play.api.libs.json.{Json, OFormat}
 
 case class BarsVerificationResponse(accountNumberIsWellFormatted: BarsResponse,
@@ -29,9 +29,7 @@ case class BarsVerificationResponse(accountNumberIsWellFormatted: BarsResponse,
                                     nonStandardAccountDetailsRequiredForBacs: Option[BarsResponse],
                                     iban: Option[String],
                                     accountName: Option[String]
-                                   ) {
-
-}
-object BarsVerificationResponse{
+                                   ) {}
+object BarsVerificationResponse {
   implicit val format: OFormat[BarsVerificationResponse] = Json.format[BarsVerificationResponse]
 }

@@ -26,21 +26,20 @@ import viewmodels.implicits.*
 import controllers.routes
 import models.{CheckMode, UserAnswers}
 
-object YourBankDetailsAccountNumberSummary  {
+object YourBankDetailsAccountNumberSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(YourBankDetailsPage).map {
-      answer =>
+    answers.get(YourBankDetailsPage).map { answer =>
 
       val value = HtmlFormat.escape(answer.accountNumber).toString
 
-        SummaryListRowViewModel(
-          key     = "bankDetailsCheckYourAnswer.account.account.number",
-          value   = ValueViewModel(HtmlContent(value)),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
-          )
+      SummaryListRowViewModel(
+        key   = "bankDetailsCheckYourAnswer.account.account.number",
+        value = ValueViewModel(HtmlContent(value)),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
         )
+      )
     }
 }

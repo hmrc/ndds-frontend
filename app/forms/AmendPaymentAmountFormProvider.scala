@@ -21,7 +21,7 @@ import play.api.data.Form
 
 import javax.inject.Inject
 
-class AmendPaymentAmountFormProvider @Inject()() extends Mappings {
+class AmendPaymentAmountFormProvider @Inject() () extends Mappings {
 
   val MIN_AMOUNT: BigDecimal = 1.0
   val MAX_AMOUNT: BigDecimal = 20000000.00

@@ -32,9 +32,8 @@ class PaymentPlanTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
 
       val gen = Gen.oneOf(PaymentPlanType.values1.toSeq)
 
-      forAll(gen) {
-        paymentPlanType =>
-          JsString(paymentPlanType.toString).validate[PaymentPlanType].asOpt.value mustEqual paymentPlanType
+      forAll(gen) { paymentPlanType =>
+        JsString(paymentPlanType.toString).validate[PaymentPlanType].asOpt.value mustEqual paymentPlanType
       }
     }
 
@@ -42,10 +41,9 @@ class PaymentPlanTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
 
       val gen = arbitrary[String] suchThat (!PaymentPlanType.values1.map(_.toString).contains(_))
 
-      forAll(gen) {
-        invalidValue =>
+      forAll(gen) { invalidValue =>
 
-          JsString(invalidValue).validate[PaymentPlanType] mustEqual JsError("error.invalid")
+        JsString(invalidValue).validate[PaymentPlanType] mustEqual JsError("error.invalid")
       }
     }
 
@@ -53,10 +51,9 @@ class PaymentPlanTypeSpec extends AnyFreeSpec with Matchers with ScalaCheckPrope
 
       val gen = Gen.oneOf(PaymentPlanType.values1.toSeq)
 
-      forAll(gen) {
-        paymentPlanType =>
+      forAll(gen) { paymentPlanType =>
 
-          Json.toJson(paymentPlanType) mustEqual JsString(paymentPlanType.toString)
+        Json.toJson(paymentPlanType) mustEqual JsString(paymentPlanType.toString)
       }
     }
   }

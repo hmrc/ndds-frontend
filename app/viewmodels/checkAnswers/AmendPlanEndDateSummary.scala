@@ -30,22 +30,21 @@ import java.time.format.DateTimeFormatter
 object AmendPlanEndDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AmendPlanEndDatePage).map {
-      answer =>
-        SummaryListRowViewModel(
-          key = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
-          value = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
-          )
+    answers.get(AmendPlanEndDatePage).map { answer =>
+      SummaryListRowViewModel(
+        key   = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
+        value = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
         )
+      )
     }
 
   def row(value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
     val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
     SummaryListRowViewModel(
-      key = "paymentPlanDetails.details.planEndDate",
+      key   = "paymentPlanDetails.details.planEndDate",
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
@@ -64,10 +63,12 @@ object AmendPlanEndDateSummary {
       .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
       .getOrElse("")
 
-    Some(SummaryListRowViewModel(
-      key = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
-      ValueViewModel(dateText),
-      actions = Seq.empty
-    ))
+    Some(
+      SummaryListRowViewModel(
+        key = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
+        ValueViewModel(dateText),
+        actions = Seq.empty
+      )
+    )
   }
 }

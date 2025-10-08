@@ -16,30 +16,29 @@
 
 package models.requests
 
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation,
-  PaymentPlanType, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
 case class ChrisSubmissionRequest(
-                                   serviceType: DirectDebitSource,
-                                   paymentPlanType: PaymentPlanType,
-                                   paymentPlanReferenceNumber:Option[String],
-                                   paymentFrequency: Option[String],
-                                   yourBankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus,
-                                   planStartDate: Option[PlanStartDateDetails],
-                                   planEndDate: Option[LocalDate],
-                                   paymentDate: Option[PaymentDateDetails],
-                                   yearEndAndMonth: Option[YearEndAndMonth],
-                                   ddiReferenceNo: String,
-                                   paymentReference: String,
-                                   totalAmountDue: Option[BigDecimal],
-                                   paymentAmount: Option[BigDecimal],
-                                   regularPaymentAmount: Option[BigDecimal],
-                                   calculation: Option[PaymentPlanCalculation],
-                                   amendPlan: Boolean = false
-                                 )
+  serviceType: DirectDebitSource,
+  paymentPlanType: PaymentPlanType,
+  paymentPlanReferenceNumber: Option[String],
+  paymentFrequency: Option[String],
+  yourBankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus,
+  planStartDate: Option[PlanStartDateDetails],
+  planEndDate: Option[LocalDate],
+  paymentDate: Option[PaymentDateDetails],
+  yearEndAndMonth: Option[YearEndAndMonth],
+  ddiReferenceNo: String,
+  paymentReference: String,
+  totalAmountDue: Option[BigDecimal],
+  paymentAmount: Option[BigDecimal],
+  regularPaymentAmount: Option[BigDecimal],
+  calculation: Option[PaymentPlanCalculation],
+  amendPlan: Boolean = false
+)
 
 object ChrisSubmissionRequest {
   implicit val format: OFormat[ChrisSubmissionRequest] = Json.format[ChrisSubmissionRequest]

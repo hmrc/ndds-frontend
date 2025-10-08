@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import forms.mappings.Mappings
 import play.api.data.Form
-import play.api.data.Forms._
+import play.api.data.Forms.*
 import models.YourBankDetails
 
 class YourBankDetailsFormProvider @Inject() extends Mappings {
@@ -34,19 +34,21 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
       "accountHolderName" -> text("yourBankDetails.error.accountHolderName.required")
         .verifying(maxLength(MAX_ACCOUNT_HOLDER_NAME_LENGTH, "yourBankDetails.error.accountHolderName.length")),
       "sortCode" -> text("yourBankDetails.error.sortCode.required")
-        .verifying(firstError(
-          minLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
-          maxLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
-          regexp(NumericRegex, "yourBankDetails.error.sortCode.numericOnly")
-        )),
+        .verifying(
+          firstError(
+            minLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
+            maxLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
+            regexp(NumericRegex, "yourBankDetails.error.sortCode.numericOnly")
+          )
+        ),
       "accountNumber" -> text("yourBankDetails.error.accountNumber.required")
-        .verifying(firstError(
-          minLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.tooShort"),
-          maxLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.length"),
-          regexp(NumericRegex, "yourBankDetails.error.accountNumber.numericOnly")
-        ))
-    )(YourBankDetails(_,_,_))(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))
+        .verifying(
+          firstError(
+            minLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.tooShort"),
+            maxLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.length"),
+            regexp(NumericRegex, "yourBankDetails.error.accountNumber.numericOnly")
+          )
+        )
+    )(YourBankDetails(_, _, _))(x => Some((x.accountHolderName, x.sortCode, x.accountNumber)))
   )
 }
-
-
