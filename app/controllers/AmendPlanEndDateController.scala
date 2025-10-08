@@ -84,21 +84,20 @@ class AmendPlanEndDateController @Inject() (
                   val hasAmountChanged = amendedAmount != dbAmount
                   val hasEndDateChanged = value != dbEndDate
 
-                  if(!hasAmountChanged && hasEndDateChanged) {
+                  if (!hasAmountChanged && hasEndDateChanged) {
                     logger.info("Duplicate Check not performed as only EndDate has been amended")
                     for {
                       updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
                       _              <- sessionRepository.set(updatedAnswers)
                     } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
-                  }
-                  else {
+                  } else {
                     for {
                       duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers)
-                      updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
-                      _              <- sessionRepository.set(updatedAnswers)
-                    } yield{
+                      updatedAnswers         <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
+                      _                      <- sessionRepository.set(updatedAnswers)
+                    } yield {
                       val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
-                      if(duplicateCheckResponse.isDuplicate) logger.warn(logMsg) else logger.info(logMsg)
+                      if (duplicateCheckResponse.isDuplicate) logger.warn(logMsg) else logger.info(logMsg)
                       Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
                     }
                   }

@@ -66,20 +66,20 @@ object Utils {
   }
 
   def buildPaymentPlanCheckRequest(
-                                    userAnswers: UserAnswers,
-                                    directDebitRef: String
-                                  ): PaymentPlanDuplicateCheckRequest = {
+    userAnswers: UserAnswers,
+    directDebitRef: String
+  ): PaymentPlanDuplicateCheckRequest = {
 
     PaymentPlanDuplicateCheckRequest(
-      //TODO: Temp data with be replaced with actual data
+      // TODO: Temp data with be replaced with actual data
       directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
       paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).get,
-      planType = PaymentPlanType.SinglePaymentPlan.toString,
-      paymentService = DirectDebitSource.SA.toString,
-      paymentReference = userAnswers.get(PaymentPlanDetailsQuery).get.paymentPlanDetails.paymentReference,
-      paymentAmount = BigDecimal(120.00),
-      totalLiability = BigDecimal(780.00),
-      paymentFrequency = PaymentsFrequency.Weekly.toString
+      planType             = PaymentPlanType.SinglePaymentPlan.toString,
+      paymentService       = DirectDebitSource.SA.toString,
+      paymentReference     = userAnswers.get(PaymentPlanDetailsQuery).get.paymentPlanDetails.paymentReference,
+      paymentAmount        = BigDecimal(120.00),
+      totalLiability       = BigDecimal(780.00),
+      paymentFrequency     = PaymentsFrequency.Weekly.toString
     )
   }
 }

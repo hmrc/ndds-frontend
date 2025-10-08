@@ -107,8 +107,11 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
       .execute[PaymentPlanResponse]
   }
 
-  def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)(implicit hc: HeaderCarrier): Future[DuplicateCheckResponse] = {
-    http.post(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/duplicate-plan-check")
+  def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)(implicit
+    hc: HeaderCarrier
+  ): Future[DuplicateCheckResponse] = {
+    http
+      .post(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/duplicate-plan-check")
       .withBody(Json.toJson(request))
       .execute[DuplicateCheckResponse]
   }

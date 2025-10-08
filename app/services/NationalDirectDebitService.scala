@@ -172,23 +172,21 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
-  def isDuplicatePaymentPlan(ua: UserAnswers)
-                            (implicit hc: HeaderCarrier, request: Request[_]): Future[DuplicateCheckResponse] = {
+  def isDuplicatePaymentPlan(ua: UserAnswers)(implicit hc: HeaderCarrier, request: Request[?]): Future[DuplicateCheckResponse] = {
     ua.get(PaymentPlansCountQuery) match {
       case Some(count) => {
         if (count > 1) {
           val request: PaymentPlanDuplicateCheckRequest =
             Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
-            
+
           nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
-        }
-        else {
+        } else {
           logger.info("There is only 1 payment plan so not checking duplicate as in no RDS Call")
           Future.successful(DuplicateCheckResponse(false))
         }
       }
       case None => {
-        logger.error("Could not find the count of Payment Plans"+ ua.get(PaymentPlansCountQuery).get)
+        logger.error("Could not find the count of Payment Plans" + ua.get(PaymentPlansCountQuery).get)
         throw new IllegalStateException("Count of payment plans is missing or invalid")
       }
     }

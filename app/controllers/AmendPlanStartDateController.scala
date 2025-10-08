@@ -85,15 +85,16 @@ class AmendPlanStartDateController @Inject() (
                 } else {
                   for {
                     duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers)
-                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
-                    _ <- sessionRepository.set(updatedAnswers)
+                    updatedAnswers         <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
+                    _                      <- sessionRepository.set(updatedAnswers)
                   } yield {
-                    if(duplicateCheckResponse.isDuplicate){
+                    if (duplicateCheckResponse.isDuplicate) {
                       println("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
-                      logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)}
-                    else {
+                      logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+                    } else {
                       println("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
-                      logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)}
+                      logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+                    }
                     Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
                   }
                 }
