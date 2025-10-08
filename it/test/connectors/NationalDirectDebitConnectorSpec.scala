@@ -428,5 +428,99 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
       result.paymentPlanDetails.suspensionEndDate shouldBe None
       result.paymentPlanDetails.totalLiability shouldBe None
     }
+
+    "successfully retrieve payment plan details when scheduledPaymentFrequency is null" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "CESA",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": null,
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+            """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.scheduledPaymentFrequency shouldBe None
+    }
+
+    "successfully retrieve payment plan details when scheduledPaymentFrequency is weekly" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "CESA",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.scheduledPaymentFrequency shouldBe Some("weekly")
+    }
   }
 }
