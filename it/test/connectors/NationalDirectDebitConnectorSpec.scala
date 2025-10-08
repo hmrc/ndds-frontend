@@ -581,7 +581,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
           |    "submissionDateTime": "2025-09-30T11:00:00"
           |  },
           |  "paymentPlanDetails": {
-          |    "hodService": "COTA",
+          |    "hodService": "NIDN",
           |    "planType": "01",
           |    "paymentReference": "test-pp-ref",
           |    "submissionDateTime": "2025-09-30T11:00:00",
@@ -863,7 +863,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
           |    "submissionDateTime": "2025-09-30T11:00:00"
           |  },
           |  "paymentPlanDetails": {
-          |    "hodService": "NTC",
+          |    "hodService": "VAT",
           |    "planType": "01",
           |    "paymentReference": "test-pp-ref",
           |    "submissionDateTime": "2025-09-30T11:00:00",
