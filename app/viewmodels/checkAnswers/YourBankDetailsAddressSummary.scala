@@ -26,16 +26,18 @@ import utils.DirectDebitDetailsData
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object YourBankDetailsAddressSummary extends DirectDebitDetailsData{
+object YourBankDetailsAddressSummary extends DirectDebitDetailsData {
 
-  def row1(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] ={
+  def row1(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
     val formattedAddress = ukBankAddress.getFullAddress
-       Some( SummaryListRowViewModel(
-          key     = "bankDetailsCheckYourAnswer.account.bank.address",
-          value   = ValueViewModel(HtmlContent(formattedAddress)),
-          actions = Seq.empty
-        ))
-    }
+    Some(
+      SummaryListRowViewModel(
+        key     = "bankDetailsCheckYourAnswer.account.bank.address",
+        value   = ValueViewModel(HtmlContent(formattedAddress)),
+        actions = Seq.empty
+      )
+    )
+  }
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers
@@ -50,8 +52,8 @@ object YourBankDetailsAddressSummary extends DirectDebitDetailsData{
         val fullAddress = Html(s"$field1<br/>$field2<br/>$field3<br/>$field4")
 
         SummaryListRowViewModel(
-          key = "bankDetailsCheckYourAnswer.account.bank.address",
-          value = ValueViewModel(HtmlContent(fullAddress )),
+          key     = "bankDetailsCheckYourAnswer.account.bank.address",
+          value   = ValueViewModel(HtmlContent(fullAddress)),
           actions = Seq.empty
         )
       }

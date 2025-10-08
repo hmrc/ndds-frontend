@@ -26,8 +26,6 @@ class PaymentReferenceFormProvider @Inject() extends Mappings {
     Form(
       "value" -> text("paymentReference.error.invalid")
         .verifying("paymentReference.error.invalid", reference => validator.forall(_(reference)))
-
     )
-
 
 }

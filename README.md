@@ -12,6 +12,8 @@ To check libraries update, run all tests and coverage: `./run_all_tests.sh`
 
 To start the server locally: `sbt run`
 
+To execute the scala formatter: `./run_all_checks.sh`
+
 
 ### License
 

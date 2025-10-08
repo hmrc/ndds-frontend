@@ -30,37 +30,37 @@ import views.html.YearEndAndMonthView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class YearEndAndMonthController @Inject()(
-                                           override val messagesApi: MessagesApi,
-                                           sessionRepository: SessionRepository,
-                                           navigator: Navigator,
-                                           identify: IdentifierAction,
-                                           getData: DataRetrievalAction,
-                                           requireData: DataRequiredAction,
-                                           formProvider: YearEndAndMonthFormProvider,
-                                           val controllerComponents: MessagesControllerComponents,
-                                           view: YearEndAndMonthView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class YearEndAndMonthController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: YearEndAndMonthFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: YearEndAndMonthView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val answers = request.userAnswers
-      val preparedForm = answers.get(YearEndAndMonthPage) match {
-        case None => formProvider()
-        case Some(value) => formProvider().fill(value)
-      }
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
+    val preparedForm = answers.get(YearEndAndMonthPage) match {
+      case None        => formProvider()
+      case Some(value) => formProvider().fill(value)
+    }
 
-      Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
+    Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val form = formProvider()
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val form = formProvider()
 
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentReferenceController.onPageLoad(mode)))),
-
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentReferenceController.onPageLoad(mode)))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(YearEndAndMonthPage, value))

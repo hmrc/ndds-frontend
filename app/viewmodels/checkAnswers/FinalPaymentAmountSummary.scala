@@ -32,8 +32,8 @@ object FinalPaymentAmountSummary {
       val monthlyPayment = (totalAmount / 12).setScale(2, BigDecimal.RoundingMode.DOWN)
       val finalPayment = totalAmount - (monthlyPayment * 11)
       SummaryListRowViewModel(
-        key = "totalAmountDue.final.checkYourAnswersLabel",
-        value = ValueViewModel(currencyFormat(finalPayment)),
+        key     = "totalAmountDue.final.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(finalPayment)),
         actions = Seq.empty
       )
     }
@@ -47,8 +47,8 @@ object FinalPaymentAmountSummary {
       }
 
     SummaryListRowViewModel(
-      key = "totalAmountDue.final.checkYourAnswersLabel",
-      value = ValueViewModel(displayValue),
+      key     = "totalAmountDue.final.checkYourAnswersLabel",
+      value   = ValueViewModel(displayValue),
       actions = Seq.empty
     )
   }

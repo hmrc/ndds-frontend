@@ -56,10 +56,10 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
     Json.obj(
       YourBankDetailsPage.toString -> Json.obj(
         "accountHolderName" -> "value 1",
-        "sortCode" -> "123212",
-        "accountNumber" -> "34211234",
-        "auddisStatus" -> true,
-        "accountVerified" -> false
+        "sortCode"          -> "123212",
+        "accountNumber"     -> "34211234",
+        "auddisStatus"      -> true,
+        "accountVerified"   -> false
       )
     )
   )
@@ -78,8 +78,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(
-          form, NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", personalOrBusinessAccountRoute))(request, messages(application)).toString
       }
     }
 
@@ -92,9 +91,10 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(
-          YourBankDetails("value 1", "123212", "34211234")), NormalMode, Call("GET", personalOrBusinessAccountRoute))
-          (request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(YourBankDetails("value 1", "123212", "34211234")),
+                                               NormalMode,
+                                               Call("GET", personalOrBusinessAccountRoute)
+                                              )(request, messages(application)).toString
       }
     }
 
@@ -108,15 +108,17 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val request = FakeRequest(POST, yourBankDetailsRoute)
           .withFormUrlEncodedBody(
             "accountHolderName" -> "",
-            "sortCode" -> "12",
-            "accountNumber" -> "abcd"
+            "sortCode"          -> "12",
+            "accountNumber"     -> "abcd"
           )
 
-        val boundForm = form.bind(Map(
-          "accountHolderName" -> "",
-          "sortCode" -> "12",
-          "accountNumber" -> "abcd"
-        ))
+        val boundForm = form.bind(
+          Map(
+            "accountHolderName" -> "",
+            "sortCode"          -> "12",
+            "accountNumber"     -> "abcd"
+          )
+        )
 
         val view = application.injector.instanceOf[YourBankDetailsView]
         val result = route(application, request).value
@@ -150,9 +152,9 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val request = FakeRequest(POST, yourBankDetailsRoute)
           .withFormUrlEncodedBody(
             "accountHolderName" -> "value 1",
-            "sortCode" -> "123454",
-            "accountNumber" -> "34211234",
-            "auddisStatus" -> "true"
+            "sortCode"          -> "123454",
+            "accountNumber"     -> "34211234",
+            "auddisStatus"      -> "true"
           )
 
         val result = route(application, request).value
@@ -172,25 +174,25 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val barResponse = BarsVerificationResponse(
-        accountNumberIsWellFormatted = BarsResponse.Yes,
-        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-        sortCodeBankName = Some("Test Bank"),
-        accountExists = BarsResponse.Yes,
-        nameMatches = BarsResponse.Yes,
-        sortCodeSupportsDirectDebit = BarsResponse.Yes,
-        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        accountNumberIsWellFormatted             = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+        sortCodeBankName                         = Some("Test Bank"),
+        accountExists                            = BarsResponse.Yes,
+        nameMatches                              = BarsResponse.Yes,
+        sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit             = BarsResponse.Yes,
         nonStandardAccountDetailsRequiredForBacs = Some(BarsResponse.No),
-        iban = Some("GB29NWBK60161331926819"),
-        accountName = Some("John Doe")
+        iban                                     = Some("GB29NWBK60161331926819"),
+        accountName                              = Some("John Doe")
       )
 
       val bank = Bank(
-        bankName = "Test Bank",
+        bankName       = "Test Bank",
         ddiVoucherFlag = "N",
         address = BankAddress(
-          lines = Seq("1 Bank Street"),
-          town = "London",
-          country = Country("UK"),
+          lines    = Seq("1 Bank Street"),
+          town     = "London",
+          country  = Country("UK"),
           postCode = "EC1A 1AA"
         )
       )
@@ -210,9 +212,9 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val request = FakeRequest(POST, yourBankDetailsRoute)
           .withFormUrlEncodedBody(
             "accountHolderName" -> "value 1",
-            "sortCode" -> "123212",
-            "accountNumber" -> "34211234",
-            "auddisStatus" -> "true"
+            "sortCode"          -> "123212",
+            "accountNumber"     -> "34211234",
+            "auddisStatus"      -> "true"
           )
 
         val result = route(application, request).value
@@ -232,25 +234,25 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val barResponse = BarsVerificationResponse(
-        accountNumberIsWellFormatted = BarsResponse.Yes,
-        sortCodeIsPresentOnEISCD = BarsResponse.Yes,
-        sortCodeBankName = Some("Test Bank"),
-        accountExists = BarsResponse.Yes,
-        nameMatches = BarsResponse.Yes,
-        sortCodeSupportsDirectDebit = BarsResponse.Yes,
-        sortCodeSupportsDirectCredit = BarsResponse.Yes,
+        accountNumberIsWellFormatted             = BarsResponse.Yes,
+        sortCodeIsPresentOnEISCD                 = BarsResponse.Yes,
+        sortCodeBankName                         = Some("Test Bank"),
+        accountExists                            = BarsResponse.Yes,
+        nameMatches                              = BarsResponse.Yes,
+        sortCodeSupportsDirectDebit              = BarsResponse.Yes,
+        sortCodeSupportsDirectCredit             = BarsResponse.Yes,
         nonStandardAccountDetailsRequiredForBacs = Some(BarsResponse.No),
-        iban = Some("GB29NWBK60161331926819"),
-        accountName = Some("John Doe")
+        iban                                     = Some("GB29NWBK60161331926819"),
+        accountName                              = Some("John Doe")
       )
 
       val bank = Bank(
-        bankName = "Test Bank",
+        bankName       = "Test Bank",
         ddiVoucherFlag = "Y",
         address = BankAddress(
-          lines = Seq("1 Bank Street"),
-          town = "London",
-          country = Country("UK"),
+          lines    = Seq("1 Bank Street"),
+          town     = "London",
+          country  = Country("UK"),
           postCode = "EC1A 1AA"
         )
       )
@@ -270,9 +272,9 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val request = FakeRequest(POST, yourBankDetailsRoute)
           .withFormUrlEncodedBody(
             "accountHolderName" -> "value 1",
-            "sortCode" -> "123212",
-            "accountNumber" -> "34211234",
-            "auddisStatus" -> "false"
+            "sortCode"          -> "123212",
+            "accountNumber"     -> "34211234",
+            "auddisStatus"      -> "false"
           )
 
         val result = route(application, request).value
@@ -304,9 +306,9 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val request = FakeRequest(POST, yourBankDetailsRoute)
           .withFormUrlEncodedBody(
             "accountHolderName" -> "value 1",
-            "sortCode" -> "123212",
-            "accountNumber" -> "34211234",
-            "auddisStatus" -> "true"
+            "sortCode"          -> "123212",
+            "accountNumber"     -> "34211234",
+            "auddisStatus"      -> "true"
           )
 
         val result = route(application, request).value
@@ -341,9 +343,9 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
         val request = FakeRequest(POST, yourBankDetailsRoute)
           .withFormUrlEncodedBody(
             "accountHolderName" -> "value 1",
-            "sortCode" -> "123212",
-            "accountNumber" -> "34211234",
-            "auddisStatus" -> "true"
+            "sortCode"          -> "123212",
+            "accountNumber"     -> "34211234",
+            "auddisStatus"      -> "true"
           )
 
         val result = route(application, request).value
@@ -365,15 +367,16 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[BarsService].toInstance(mockBarService),
             bind[LockService].toInstance(mockLockService)
-          ).build()
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, yourBankDetailsRoute)
             .withFormUrlEncodedBody(
               "accountHolderName" -> "value 1",
-              "sortCode" -> "123212",
-              "accountNumber" -> "34211234",
-              "auddisStatus" -> "true"
+              "sortCode"          -> "123212",
+              "accountNumber"     -> "34211234",
+              "auddisStatus"      -> "true"
             )
 
           val result = route(application, request).value
@@ -394,22 +397,23 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val application: Application = applicationBuilder(userAnswers = Some(ua))
           .configure(
-            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN",
+            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN"
           )
           .overrides(
             bind[HttpFilters].to[NoHttpFilters],
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[BarsService].toInstance(mockBarService),
             bind[LockService].toInstance(mockLockService)
-          ).build()
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, yourBankDetailsRoute)
             .withFormUrlEncodedBody(
               "accountHolderName" -> "value 1",
-              "sortCode" -> "123212",
-              "accountNumber" -> "34211234",
-              "auddisStatus" -> "true"
+              "sortCode"          -> "123212",
+              "accountNumber"     -> "34211234",
+              "auddisStatus"      -> "true"
             )
 
           val result = route(application, request).value
@@ -429,22 +433,23 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val application: Application = applicationBuilder(userAnswers = Some(ua))
           .configure(
-            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN",
+            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN"
           )
           .overrides(
             bind[HttpFilters].to[NoHttpFilters],
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[BarsService].toInstance(mockBarService),
             bind[LockService].toInstance(mockLockService)
-          ).build()
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, yourBankDetailsRoute)
             .withFormUrlEncodedBody(
               "accountHolderName" -> "value 1",
-              "sortCode" -> "123212",
-              "accountNumber" -> "34211234",
-              "auddisStatus" -> "true"
+              "sortCode"          -> "123212",
+              "accountNumber"     -> "34211234",
+              "auddisStatus"      -> "true"
             )
 
           val result = route(application, request).value
@@ -465,7 +470,7 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val application: Application = applicationBuilder(userAnswers = Some(ua))
           .configure(
-            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN",
+            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN"
           )
           .overrides(
             bind[HttpFilters].to[NoHttpFilters],
@@ -479,9 +484,9 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
           val request = FakeRequest(POST, yourBankDetailsRoute)
             .withFormUrlEncodedBody(
               "accountHolderName" -> "value 1",
-              "sortCode" -> "123212",
-              "accountNumber" -> "34211234",
-              "auddisStatus" -> "true"
+              "sortCode"          -> "123212",
+              "accountNumber"     -> "34211234",
+              "auddisStatus"      -> "true"
             )
 
           val result = route(application, request).value
@@ -506,22 +511,23 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
         val application: Application = applicationBuilder(userAnswers = Some(ua))
           .configure(
-            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN",
+            "play.http.secret.key" -> "aT3m3h0a2bS2S0Gv4bQ1aZ0cA4dF6gJ7mP8qR9tU2wX3yZ4C5dE6fG7hI8jK9LmN"
           )
           .overrides(
             bind[HttpFilters].to[NoHttpFilters],
             bind[SessionRepository].toInstance(mockSessionRepository),
             bind[BarsService].toInstance(mockBarService),
             bind[LockService].toInstance(mockLockService)
-          ).build()
+          )
+          .build()
 
         running(application) {
           val request = FakeRequest(POST, yourBankDetailsRoute)
             .withFormUrlEncodedBody(
               "accountHolderName" -> "value 1",
-              "sortCode" -> "123212",
-              "accountNumber" -> "34211234",
-              "auddisStatus" -> "true"
+              "sortCode"          -> "123212",
+              "accountNumber"     -> "34211234",
+              "auddisStatus"      -> "true"
             )
 
           val result = route(application, request).value
@@ -546,33 +552,26 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
     val mockLockService: LockService = mock[LockService]
 
     val notLocked: LockResponse =
-      LockResponse(
-        "_",
-        0,
-        isLocked = false,
-        unverifiable = None,
-        createdAt = None,
-        lastUpdated = None,
-        lockoutExpiryDateTime = None)
+      LockResponse("_", 0, isLocked = false, unverifiable = None, createdAt = None, lastUpdated = None, lockoutExpiryDateTime = None)
 
     val lockedAndVerified: LockResponse =
-      LockResponse(
-        "_",
-        0,
-        isLocked = true,
-        unverifiable = Some(false),
-        createdAt = None,
-        lastUpdated = None,
-        lockoutExpiryDateTime = Some(expiryDateTime))
+      LockResponse("_",
+                   0,
+                   isLocked              = true,
+                   unverifiable          = Some(false),
+                   createdAt             = None,
+                   lastUpdated           = None,
+                   lockoutExpiryDateTime = Some(expiryDateTime)
+                  )
 
     val lockedAndUnverified: LockResponse =
-      LockResponse(
-        "_",
-        0,
-        isLocked = true,
-        unverifiable = Some(true),
-        createdAt = None,
-        lastUpdated = None,
-        lockoutExpiryDateTime = Some(expiryDateTime))
+      LockResponse("_",
+                   0,
+                   isLocked              = true,
+                   unverifiable          = Some(true),
+                   createdAt             = None,
+                   lastUpdated           = None,
+                   lockoutExpiryDateTime = Some(expiryDateTime)
+                  )
   }
 }

@@ -35,31 +35,31 @@ trait DateFluency {
   object DateViewModel extends ErrorMessageAwareness {
 
     def apply(
-               field: Field,
-               legend: Legend
-             )(implicit messages: Messages): DateInput =
+      field: Field,
+      legend: Legend
+    )(implicit messages: Messages): DateInput =
       apply(
         field    = field,
         fieldset = Fieldset(legend = Some(legend))
       )
 
     def apply(
-               field: Field,
-               fieldset: Fieldset
-             )(implicit messages: Messages): DateInput = {
+      field: Field,
+      fieldset: Fieldset
+    )(implicit messages: Messages): DateInput = {
 
       val errorClass = "govuk-input--error"
 
       // Updated error detection logic: highlight if any error on subfield
-      val dayError   = field("day").error.isDefined
+      val dayError = field("day").error.isDefined
       val monthError = field("month").error.isDefined
-      val yearError  = field("year").error.isDefined
+      val yearError = field("year").error.isDefined
       val anySpecificError = dayError || monthError || yearError
-      val allFieldsError   = field.error.isDefined && !anySpecificError
+      val allFieldsError = field.error.isDefined && !anySpecificError
 
-      val dayErrorClass   = if (dayError || allFieldsError) errorClass else emptyString
+      val dayErrorClass = if (dayError || allFieldsError) errorClass else emptyString
       val monthErrorClass = if (monthError || allFieldsError) errorClass else emptyString
-      val yearErrorClass  = if (yearError || allFieldsError) errorClass else emptyString
+      val yearErrorClass = if (yearError || allFieldsError) errorClass else emptyString
 
       val items = Seq(
         InputItem(
@@ -110,11 +110,11 @@ trait DateFluency {
     )(implicit messages: Messages): DateInput = {
       val errorClass = "govuk-input--error"
       val monthError = field("month").error.isDefined
-      val yearError  = field("year").error.isDefined
+      val yearError = field("year").error.isDefined
       val anySpecificError = monthError || yearError
-      val allFieldsError   = field.error.isDefined && !anySpecificError
+      val allFieldsError = field.error.isDefined && !anySpecificError
       val monthErrorClass = if (monthError || allFieldsError) errorClass else emptyString
-      val yearErrorClass  = if (yearError || allFieldsError) errorClass else emptyString
+      val yearErrorClass = if (yearError || allFieldsError) errorClass else emptyString
       val items = Seq(
         InputItem(
           id      = s"${field.id}.year",
@@ -158,12 +158,10 @@ trait DateFluency {
       date.copy(attributes = date.attributes + attribute)
 
     def asDateOfBirth(): DateInput =
-      date.copy(
-        items = date.items map {
-          item =>
-            val name = item.id.split('.').last
-            item.copy(autocomplete = Some(s"bday-$name"))
-        })
+      date.copy(items = date.items map { item =>
+        val name = item.id.split('.').last
+        item.copy(autocomplete = Some(s"bday-$name"))
+      })
   }
 
   // New helper to provide specific error messages for date fields
@@ -171,20 +169,20 @@ trait DateFluency {
     val dayErrorKey = DateFormats.defaultDateFormats.find(_.dateType == "day").map(_.errorKey).getOrElse("date.error.day")
     val monthErrorKey = DateFormats.defaultDateFormats.find(_.dateType == "month").map(_.errorKey).getOrElse("date.error.month")
     val yearErrorKey = DateFormats.defaultDateFormats.find(_.dateType == "year").map(_.errorKey).getOrElse("date.error.year")
-    
-    val dayError   = field("day").error.exists(_.message == dayErrorKey)
+
+    val dayError = field("day").error.exists(_.message == dayErrorKey)
     val monthError = field("month").error.exists(_.message == monthErrorKey)
-    val yearError  = field("year").error.exists(_.message == yearErrorKey)
+    val yearError = field("year").error.exists(_.message == yearErrorKey)
 
     val errorMsg: Option[String] =
       if (dayError) Some(messages(dayErrorKey))
       else if (monthError) Some(messages(monthErrorKey))
       else if (yearError) Some(messages(yearErrorKey))
-      else field.error.map(e => messages(e.message, e.args: _*))
+      else field.error.map(e => messages(e.message, e.args*))
 
     errorMsg.map { msg =>
       ErrorMessage(
-        content = uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text(msg),
+        content            = uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text(msg),
         visuallyHiddenText = Some(messages("error.prefix"))
       )
     }

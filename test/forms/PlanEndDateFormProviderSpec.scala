@@ -33,9 +33,9 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
       val validDate = endDate
       val result = form.bind(
         Map(
-          "value.day" -> validDate.getDayOfMonth.toString,
+          "value.day"   -> validDate.getDayOfMonth.toString,
           "value.month" -> validDate.getMonthValue.toString,
-          "value.year" -> validDate.getYear.toString
+          "value.year"  -> validDate.getYear.toString
         )
       )
       result.errors mustBe empty
@@ -45,9 +45,9 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
       val invalidDate = endDate.minusDays(1)
       val result = form.bind(
         Map(
-          "value.day" -> invalidDate.getDayOfMonth.toString,
+          "value.day"   -> invalidDate.getDayOfMonth.toString,
           "value.month" -> invalidDate.getMonthValue.toString,
-          "value.year" -> invalidDate.getYear.toString
+          "value.year"  -> invalidDate.getYear.toString
         )
       )
       result.errors must contain(FormError("value", "planEndDate.error.beforeOrEqualStartDate"))
@@ -62,9 +62,9 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
     "must fail with required error if partially completed" in {
       val result = form.bind(
         Map(
-          "value.day" -> "",
+          "value.day"   -> "",
           "value.month" -> "4",
-          "value.year" -> ""
+          "value.year"  -> ""
         )
       )
       result.errors must contain(FormError("value", "planEndDate.error.incomplete", Seq("date.error.day", "date.error.year")))

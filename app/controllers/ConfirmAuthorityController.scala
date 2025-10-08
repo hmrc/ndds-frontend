@@ -34,16 +34,18 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmAuthorityController @Inject() (
-                                             val controllerComponents: MessagesControllerComponents,
-                                             identify: IdentifierAction,
-                                             getData: DataRetrievalAction,
-                                             formProvider: ConfirmAuthorityFormProvider,
-                                             requireData: DataRequiredAction,
-                                             sessionRepository: SessionRepository,
-                                             auditService: AuditService,
-                                             navigator: Navigator,
-                                             view: ConfirmAuthorityView,
-                                           )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+  val controllerComponents: MessagesControllerComponents,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  formProvider: ConfirmAuthorityFormProvider,
+  requireData: DataRequiredAction,
+  sessionRepository: SessionRepository,
+  auditService: AuditService,
+  navigator: Navigator,
+  view: ConfirmAuthorityView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   private val form: Form[ConfirmAuthority] = formProvider()
 
@@ -51,7 +53,7 @@ class ConfirmAuthorityController @Inject() (
     (identify andThen getData) { implicit request =>
       val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
       val preparedForm = answers.get(ConfirmAuthorityPage) match {
-        case None => form
+        case None        => form
         case Some(value) => form.fill(value)
       }
       auditService.sendEvent(ConfirmBankDetails())
@@ -59,20 +61,20 @@ class ConfirmAuthorityController @Inject() (
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    form.bindFromRequest().fold(
-      formWithErrors =>
-        Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))),
-      value => {
-        val updatedTry = request.userAnswers.set(ConfirmAuthorityPage, value)
-        for {
-          updated <- Future.fromTry(updatedTry)
-          _       <- sessionRepository.set(updated)
-        } yield {
-          auditService.sendEvent(ConfirmBankDetails())
-          Redirect(navigator.nextPage(ConfirmAuthorityPage, mode, updated))
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.SetupDirectDebitPaymentController.onPageLoad()))),
+        value => {
+          val updatedTry = request.userAnswers.set(ConfirmAuthorityPage, value)
+          for {
+            updated <- Future.fromTry(updatedTry)
+            _       <- sessionRepository.set(updated)
+          } yield {
+            auditService.sendEvent(ConfirmBankDetails())
+            Redirect(navigator.nextPage(ConfirmAuthorityPage, mode, updated))
+          }
         }
-      }
-    )
+      )
   }
 }
-

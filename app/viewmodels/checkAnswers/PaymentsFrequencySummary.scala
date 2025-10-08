@@ -23,52 +23,50 @@ import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object PaymentsFrequencySummary  {
+object PaymentsFrequencySummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentsFrequencyPage).map {
-      answer =>
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"paymentsFrequency.$answer"))
-          )
+    answers.get(PaymentsFrequencyPage).map { answer =>
+      val value = ValueViewModel(
+        HtmlContent(
+          HtmlFormat.escape(messages(s"paymentsFrequency.$answer"))
         )
+      )
 
-        SummaryListRowViewModel(
-          key     = "paymentsFrequency.checkYourAnswersLabel",
-          value   = value,
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.PaymentsFrequencyController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("paymentsFrequency.change.hidden"))
-          )
+      SummaryListRowViewModel(
+        key   = "paymentsFrequency.checkYourAnswersLabel",
+        value = value,
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.PaymentsFrequencyController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("paymentsFrequency.change.hidden"))
         )
+      )
     }
 
   def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentsFrequencyPage).map {
-      answer =>
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"paymentsFrequency.$answer"))
-          )
+    answers.get(PaymentsFrequencyPage).map { answer =>
+      val value = ValueViewModel(
+        HtmlContent(
+          HtmlFormat.escape(messages(s"paymentsFrequency.$answer"))
         )
+      )
 
-        SummaryListRowViewModel(
-          key     = "paymentsFrequency.checkYourAnswersLabel",
-          value   = value,
-          actions = Seq.empty
-        )
+      SummaryListRowViewModel(
+        key     = "paymentsFrequency.checkYourAnswersLabel",
+        value   = value,
+        actions = Seq.empty
+      )
     }
 
   def row(value: Option[String])(implicit messages: Messages): SummaryListRow = {
     val displayValue = value.map(v => s"paymentPlanDetails.paymentsFrequency.$v").getOrElse("")
 
     SummaryListRowViewModel(
-      key = "paymentsFrequency.checkYourAnswersLabel",
-      value = ValueViewModel(HtmlFormat.escape(messages(displayValue)).toString),
+      key     = "paymentsFrequency.checkYourAnswersLabel",
+      value   = ValueViewModel(HtmlFormat.escape(messages(displayValue)).toString),
       actions = Seq.empty
     )
   }

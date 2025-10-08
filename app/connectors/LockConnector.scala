@@ -28,9 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class LockConnector @Inject()(config: ServicesConfig,
-                              http: HttpClientV2)
-                              (implicit ec: ExecutionContext) extends HttpReadsInstances with Logging {
+class LockConnector @Inject() (config: ServicesConfig, http: HttpClientV2)(implicit ec: ExecutionContext) extends HttpReadsInstances with Logging {
 
   private val lockBaseUrl: String = config.baseUrl("lock") + "/locks/bars"
 
@@ -44,9 +42,9 @@ class LockConnector @Inject()(config: ServicesConfig,
     buildRequest(s"$lockBaseUrl/markUnverifiable", credId)
 
   private def buildRequest[A](uri: String, credId: String)(implicit hc: HeaderCarrier): Future[LockResponse] =
-    http.post(url"$uri")(hc)
-      .withBody(Json.parse(
-        s"""
+    http
+      .post(url"$uri")(hc)
+      .withBody(Json.parse(s"""
            |{
            |  "identifier": "$credId"
            |}
@@ -54,8 +52,7 @@ class LockConnector @Inject()(config: ServicesConfig,
       .execute[Either[UpstreamErrorResponse, LockResponse]]
       .flatMap {
         case Right(resp) =>
-          logger.info(
-            s"""LockService Results:
+          logger.info(s"""LockService Results:
                |{
                |  "identifier": "$credId"
                |}
@@ -69,9 +66,9 @@ class LockConnector @Inject()(config: ServicesConfig,
                |  . lastUpdated            = ${resp.lastUpdated}
                |  • lockoutExpiryDateTime  = ${resp.lockoutExpiryDateTime.map(_.toString).getOrElse("n/a")}
                |""".stripMargin
-        )
-        logger.debug(s"Lock status: ${Json.stringify(Json.toJson(resp))}")
-        Future.successful(resp)
+          )
+          logger.debug(s"Lock status: ${Json.stringify(Json.toJson(resp))}")
+          Future.successful(resp)
         case Left(errorResponse) =>
           logger.warn(s"[LOCK] ${errorResponse.statusCode} ${errorResponse.message}")
           Future.failed(errorResponse)

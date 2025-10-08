@@ -60,7 +60,9 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentReferenceView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Some(MGD), Call("GET", paymentPlanTypeRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Some(MGD), Call("GET", paymentPlanTypeRoute))(request,
+                                                                                                               messages(application)
+                                                                                                              ).toString
         contentAsString(result) must include("XAM00001234567")
       }
     }
@@ -78,15 +80,20 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Some(DirectDebitSource.OL), routes.DirectDebitSourceController.onPageLoad(NormalMode))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form,
+                                               NormalMode,
+                                               Some(DirectDebitSource.OL),
+                                               routes.DirectDebitSourceController.onPageLoad(NormalMode)
+                                              )(request, messages(application)).toString
       }
     }
-
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = UserAnswers(userAnswersId)
-        .set(PaymentReferencePage, "answer").success.value
+        .set(PaymentReferencePage, "answer")
+        .success
+        .value
         .setOrException(DirectDebitSourcePage, TC)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
@@ -99,7 +106,9 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), NormalMode, Some(TC), Call("GET", paymentPlanTypeRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill("answer"), NormalMode, Some(TC), Call("GET", paymentPlanTypeRoute))(request,
+                                                                                                                             messages(application)
+                                                                                                                            ).toString
         contentAsString(result) must include("Your Tax Credit (TC) payment reference is 16 digits long")
       }
     }
@@ -147,14 +156,20 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, Some(VAT), Call("GET", directDebitSourceRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Some(VAT), Call("GET", directDebitSourceRoute))(request,
+                                                                                                                      messages(application)
+                                                                                                                     ).toString
       }
     }
 
     "must redirect to the next page when valid data is submitted even if no existing data is found" in {
       val userAnswers = UserAnswers("id")
-        .set(DirectDebitSourcePage, DirectDebitSource.TC).success.value
-        .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan).success.value
+        .set(DirectDebitSourcePage, DirectDebitSource.TC)
+        .success
+        .value
+        .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 

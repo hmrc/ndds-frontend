@@ -25,19 +25,19 @@ import views.html.DirectDebitConfirmationView
 
 import javax.inject.Inject
 
-class DirectDebitConfirmationController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: DirectDebitConfirmationView
-                                     ) extends FrontendBaseController with I18nSupport {
+class DirectDebitConfirmationController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: DirectDebitConfirmationView
+) extends FrontendBaseController
+    with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val referenceNumber = request.userAnswers.get(CheckYourAnswerPage).getOrElse(throw new Exception("Missing generated DDI reference number"))
-      val serviceNumber = "X00011111A"
-      Ok(view(referenceNumber.ddiRefNumber, serviceNumber))
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val referenceNumber = request.userAnswers.get(CheckYourAnswerPage).getOrElse(throw new Exception("Missing generated DDI reference number"))
+    val serviceNumber = "X00011111A"
+    Ok(view(referenceNumber.ddiRefNumber, serviceNumber))
   }
 }

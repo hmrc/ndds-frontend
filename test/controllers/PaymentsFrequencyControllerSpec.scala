@@ -27,7 +27,7 @@ import pages.PaymentsFrequencyPage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.PaymentsFrequencyView
 
@@ -75,7 +75,9 @@ class PaymentsFrequencyControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(PaymentsFrequency.values.head), NormalMode, backLinkRoute)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(PaymentsFrequency.values.head), NormalMode, backLinkRoute)(request,
+                                                                                                                    messages(application)
+                                                                                                                   ).toString
       }
     }
 

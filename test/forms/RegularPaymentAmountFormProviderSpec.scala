@@ -38,7 +38,8 @@ class RegularPaymentAmountFormProviderSpec extends CurrencyFieldBehaviours {
   private val belowMinimumError = "regularPaymentAmount.error.belowMinimum"
 
   private val validDataGenerator: Gen[String] =
-    Gen.choose[BigDecimal](minimum, maximum)
+    Gen
+      .choose[BigDecimal](minimum, maximum)
       .map(_.setScale(2, RoundingMode.HALF_UP))
       .map(_.toString)
 

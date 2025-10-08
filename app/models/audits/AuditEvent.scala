@@ -50,9 +50,9 @@ case class SubmitDirectDebitPaymentPlan(paymentReference: String, planType: Paym
 
 object SubmitDirectDebitPaymentPlan {
   private implicit val paymentPlanTypeWrites: Writes[PaymentPlanType] = Writes {
-    case SinglePaymentPlan => JsString("SINGLE")
-    case VariablePaymentPlan => JsString("VPP")
-    case BudgetPaymentPlan => JsString("BUDGET")
+    case SinglePaymentPlan      => JsString("SINGLE")
+    case VariablePaymentPlan    => JsString("VPP")
+    case BudgetPaymentPlan      => JsString("BUDGET")
     case TaxCreditRepaymentPlan => JsString("TIME_TO_PAY")
   }
 
