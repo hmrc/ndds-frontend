@@ -96,6 +96,7 @@ class AmendPlanEndDateController @Inject() (
                       updatedAnswers         <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
                       _                      <- sessionRepository.set(updatedAnswers)
                     } yield {
+                      println(s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}")
                       val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
                       if (duplicateCheckResponse.isDuplicate) logger.warn(logMsg) else logger.info(logMsg)
                       Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
