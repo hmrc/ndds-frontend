@@ -387,6 +387,7 @@ paymentPlanDetails.details.hodService.sa = SA
 paymentPlanDetails.details.hodService.sdlt = SDLT
 paymentPlanDetails.details.hodService.tc = NTC
 paymentPlanDetails.details.hodService.vat = VAT
+paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
 
 amendPaymentAmount.hint = 	e.g. £1000.00
 
