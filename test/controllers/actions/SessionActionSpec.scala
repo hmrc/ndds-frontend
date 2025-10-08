@@ -19,7 +19,7 @@ package controllers.actions
 import base.SpecBase
 import play.api.mvc.{Action, AnyContent, BodyParsers, Results}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.SessionKeys
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SessionActionSpec extends SpecBase {
 
   class Harness(action: IdentifierAction) {
-    def onPageLoad(): Action[AnyContent] = action { _ => Results.Ok }
+    def onPageLoad(): Action[AnyContent] = action(_ => Results.Ok)
   }
 
   "Session Action" - {
@@ -38,7 +38,7 @@ class SessionActionSpec extends SpecBase {
 
         val application = applicationBuilder(userAnswers = None).build()
 
-        running(application){
+        running(application) {
           val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
 
           val sessionAction = new SessionIdentifierAction(bodyParsers)

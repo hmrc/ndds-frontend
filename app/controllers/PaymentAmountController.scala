@@ -32,40 +32,42 @@ import views.html.PaymentAmountView
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaymentAmountController @Inject()(
-                                         override val messagesApi: MessagesApi,
-                                         sessionRepository: SessionRepository,
-                                         navigator: Navigator,
-                                         identify: IdentifierAction,
-                                         getData: DataRetrievalAction,
-                                         requireData: DataRequiredAction,
-                                         formProvider: PaymentAmountFormProvider,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: PaymentAmountView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+class PaymentAmountController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: PaymentAmountFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: PaymentAmountView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   val form: Form[BigDecimal] = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      val answers = request.userAnswers
-      val preparedForm = answers.get(PaymentAmountPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-      val selectedAnswers = answers.get(DirectDebitSourcePage)
-      if (selectedAnswers.contains(PAYE)) {
-        Ok(view(preparedForm, mode, routes.YearEndAndMonthController.onPageLoad(mode)))
-      } else {
-        Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
-      }
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
+    val preparedForm = answers.get(PaymentAmountPage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
+    val selectedAnswers = answers.get(DirectDebitSourcePage)
+    if (selectedAnswers.contains(PAYE)) {
+      Ok(view(preparedForm, mode, routes.YearEndAndMonthController.onPageLoad(mode)))
+    } else {
+      Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
+    }
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val selectedSource = request.userAnswers.get(DirectDebitSourcePage)
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val selectedSource = request.userAnswers.get(DirectDebitSourcePage)
 
-      form.bindFromRequest().fold(
+    form
+      .bindFromRequest()
+      .fold(
         formWithErrors =>
           if (selectedSource.contains(PAYE)) {
             Future.successful(BadRequest(view(formWithErrors, mode, routes.YearEndAndMonthController.onPageLoad(mode))))

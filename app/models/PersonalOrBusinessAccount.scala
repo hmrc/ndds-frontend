@@ -28,18 +28,18 @@ object PersonalOrBusinessAccount extends Enumerable.Implicits {
   case object Business extends WithName("business") with PersonalOrBusinessAccount
 
   val values: Seq[PersonalOrBusinessAccount] = Seq(
-    Personal, Business
+    Personal,
+    Business
   )
 
-  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map {
-    case (value, index) =>
-      RadioItem(
-        content = Text(messages(s"personalOrBusinessAccount.${value.toString}")),
-        value   = Some(value.toString),
-        id      = Some(s"value_$index")
-      )
+  def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>
+    RadioItem(
+      content = Text(messages(s"personalOrBusinessAccount.${value.toString}")),
+      value   = Some(value.toString),
+      id      = Some(s"value_$index")
+    )
   }
 
   implicit val enumerable: Enumerable[PersonalOrBusinessAccount] =
-    Enumerable(values.map(v => v.toString -> v): _*)
+    Enumerable(values.map(v => v.toString -> v)*)
 }

@@ -42,9 +42,8 @@ object BarsAccount {
   implicit val format: OFormat[BarsAccount] = Json.format[BarsAccount]
 }
 
-
 case class BarsSubject(name: String)
 
-object BarsSubject{
+object BarsSubject {
   implicit val format: OFormat[BarsSubject] = Json.format[BarsSubject]
 }

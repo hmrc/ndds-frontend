@@ -34,43 +34,41 @@ object ReferenceTypeValidator {
     def validate(reference: String): Boolean = {
       val tempReference = (ref: String) => if (reference.length >= 13) Right(ref) else Left(s"Error: reference $ref length less than 13")
       val updatedTempRef = (tempRef: String) => {
-        (if (Set('N', 'P').contains(tempRef(0))) Right(tempRef.drop(1)) else Right(tempRef)).flatMap {
-          ref =>
-            if (ref.length <= 13) {
-              Right(ref)
-            } else {
-              Left(s"Error: Updated reference $ref is greater than 13")
-            }
+        (if (Set('N', 'P').contains(tempRef(0))) Right(tempRef.drop(1)) else Right(tempRef)).flatMap { ref =>
+          if (ref.length <= 13) {
+            Right(ref)
+          } else {
+            Left(s"Error: Updated reference $ref is greater than 13")
+          }
         }
       }
       val isUpdatedRefFormatValid = (ref: String) => {
-        (if (ref.take(12).matches("\\d{3}P[A-Z]\\d{7}")) Right(ref) else Left(s"Error: $ref is in an invalid format")).flatMap {
-          validRef =>
-            if (validRef.length == 13) {
-              validRef.take(3) match {
-                case "961" if validRef(12).isDigit || validRef(12) == 'X' =>
+        (if (ref.take(12).matches("\\d{3}P[A-Z]\\d{7}")) Right(ref) else Left(s"Error: $ref is in an invalid format")).flatMap { validRef =>
+          if (validRef.length == 13) {
+            validRef.take(3) match {
+              case "961" if validRef(12).isDigit || validRef(12) == 'X' =>
+                Right(validRef)
+              case "961" if validRef(12) == 'X' && validRef(5) == '0' =>
+                Right(validRef)
+              case "961" if validRef(12) != 'X' && validRef.substring(5, 11).matches("\\d{7}") => Right(validRef)
+              case _ =>
+                if (!validRef.substring(0, 2).matches("961") && validRef(12).isDigit) {
                   Right(validRef)
-                case "961" if validRef(12) == 'X' && validRef(5) == '0' =>
-                  Right(validRef)
-                case "961" if validRef(12) != 'X'&& validRef.substring(5, 11).matches("\\d{7}") => Right(validRef)
-                case _ =>
-                  if (!validRef.substring(0, 2).matches("961") && validRef(12).isDigit) {
-                    Right(validRef)
-                  } else {
-                    Left(s"Error: $validRef is not a decimal")
-                  }
-              }
-            } else {
-              Right(validRef)
+                } else {
+                  Left(s"Error: $validRef is not a decimal")
+                }
             }
+          } else {
+            Right(validRef)
+          }
         }
       }
 
       val result = for {
-        tempRef <- tempReference(reference)
+        tempRef    <- tempReference(reference)
         updatedRef <- updatedTempRef(tempRef)
-        _ <- isUpdatedRefFormatValid(updatedRef)
-      } yield (updatedRef)
+        _          <- isUpdatedRefFormatValid(updatedRef)
+      } yield updatedRef
       result.fold(_ => false, payeModCheckResult)
     }
   }
@@ -82,7 +80,7 @@ object ReferenceTypeValidator {
       val result = for {
         _ <- refLengthCheck(reference)
         _ <- isValidFormat(reference)
-      } yield (reference)
+      } yield reference
       result.fold(_ => false, ref => ModUtils.mod23(ref))
     }
   }
@@ -96,7 +94,7 @@ object ReferenceTypeValidator {
 
   given Validator[CT.type] with {
     def validate(reference: String): Boolean = {
-      val isValidFormat = (ref: String) => if (ref.matches( "\\d{10}A001\\d{2}A")) Right(ref) else Left(s"Error: $ref Invalid format")
+      val isValidFormat = (ref: String) => if (ref.matches("\\d{10}A001\\d{2}A")) Right(ref) else Left(s"Error: $ref Invalid format")
       isValidFormat(reference).fold(_ => false, ModUtils.modulusU11)
     }
   }
@@ -112,10 +110,10 @@ object ReferenceTypeValidator {
     def validate(reference: String): Boolean = {
       val refLengthCheck = (ref: String) => if (ref.length >= 9) Right(ref) else Left(s"Error: too many characters")
       val isValidFormat = (ref: String) => if (ref.matches("\\d{9}")) Right(ref) else Left(s"Error: $ref Invalid format")
-      val result = for{
+      val result = for {
         _ <- refLengthCheck(reference)
         _ <- isValidFormat(reference)
-      }yield reference
+      } yield reference
       result.fold(_ => false, ModUtils.mod97)
     }
   }
@@ -124,7 +122,7 @@ object ReferenceTypeValidator {
     def validate(reference: String): Boolean = {
       val checkFirstTwoChars = (ref: String) => if (ref.take(2) == "60") Right(ref) else Left(s"Error: too many characters")
       val isValidFormat = (ref: String) => if (ref.matches("\\d{17}[\\d{1}|X]")) Right(ref) else Left(s"Error: $ref Invalid format")
-      val result = for{
+      val result = for {
         _ <- checkFirstTwoChars(reference)
         _ <- isValidFormat(reference)
       } yield reference
@@ -222,31 +220,30 @@ object ReferenceTypeValidator {
         else
           Right(ref)
       }
-      val checkCharacterPairs = (ref:String) => {
+      val checkCharacterPairs = (ref: String) => {
         if (invalidCharacterPairs.contains(ref.take(2)))
           Left("Error: Contains invalid pairs")
         else
           Right(ref)
       }
 
-      val checkDateFormat = (ref:String) => {
+      val checkDateFormat = (ref: String) => {
         val formatter = DateTimeFormatter.ofPattern("ddMMyy")
 
-        val extractDate = reference.substring(8,14)
-        Try(LocalDate.parse(extractDate, formatter)) match{
+        val extractDate = reference.substring(8, 14)
+        Try(LocalDate.parse(extractDate, formatter)) match {
           case Success(_) => Right(ref)
           case Failure(_) => Left("Error: Invalid date format")
         }
       }
 
-      val result = for{
+      val result = for {
         _ <- invalidFormat(reference)
         _ <- checkFirstTwoChars(reference)
         _ <- checkCharacterPairs(reference)
-        _ <-  checkDateFormat(reference)
-      }yield()
+        _ <- checkDateFormat(reference)
+      } yield ()
       result.fold(_ => false, _ => ModUtils.modTCRef(reference))
-
 
     }
   }

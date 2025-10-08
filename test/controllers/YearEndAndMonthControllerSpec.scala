@@ -28,7 +28,7 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.YearEndAndMonthView
 
@@ -88,7 +88,9 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(getRequest(),
+                                                                                                                       messages(application)
+                                                                                                                      ).toString
       }
     }
 

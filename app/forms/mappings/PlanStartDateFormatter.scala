@@ -24,24 +24,25 @@ import play.api.i18n.Messages
 import java.time.LocalDate
 
 class PlanStartDateFormatter(
-                              invalidKey: String,
-                              allRequiredKey: String,
-                              twoRequiredKey: String,
-                              requiredKey: String,
-                              beforeEarliestDateKey: String,
-                              budgetAfterMaxDateKey: String,
-                              timeToPayAfterMaxDateKey: String,
-                              args: Seq[String] = Seq.empty,
-                              dateFormats: Seq[DateFormat],
-                              userAnswers: UserAnswers,
-                              earliestPlanStartDate: LocalDate
-                            )(implicit messages: Messages) extends CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats) {
+  invalidKey: String,
+  allRequiredKey: String,
+  twoRequiredKey: String,
+  requiredKey: String,
+  beforeEarliestDateKey: String,
+  budgetAfterMaxDateKey: String,
+  timeToPayAfterMaxDateKey: String,
+  args: Seq[String] = Seq.empty,
+  dateFormats: Seq[DateFormat],
+  userAnswers: UserAnswers,
+  earliestPlanStartDate: LocalDate
+)(implicit messages: Messages)
+    extends CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats) {
 
   private val BudgetPaymentPlanMaxYears = 1
   private val TimeToPayMaxDays = 30
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
-   
+
     super.bind(key, data).flatMap { date =>
       validateBusinessRules(key, date)
     }

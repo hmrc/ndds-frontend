@@ -16,18 +16,17 @@
 
 package generators
 
-import models._
+import models.*
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
-  
-  implicit lazy val arbitraryYourBankDetails: Arbitrary[YourBankDetails] =
 
+  implicit lazy val arbitraryYourBankDetails: Arbitrary[YourBankDetails] =
     Arbitrary {
       for {
         accountHolderName <- Gen.alphaStr.suchThat(_.nonEmpty)
-        sortCode <- Gen.listOfN(6, Gen.numChar).map(_.mkString)
-        accountNumber <- Gen.listOfN(8, Gen.numChar).map(_.mkString)
+        sortCode          <- Gen.listOfN(6, Gen.numChar).map(_.mkString)
+        accountNumber     <- Gen.listOfN(8, Gen.numChar).map(_.mkString)
       } yield YourBankDetails(accountHolderName, sortCode, accountNumber)
     }
 

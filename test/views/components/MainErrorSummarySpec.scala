@@ -17,7 +17,7 @@
 import base.SpecBase
 import org.scalatest.matchers.must.Matchers
 import play.api.data.{Form, Forms}
-import play.api.data.Forms._
+import play.api.data.Forms.*
 import play.api.test.FakeRequest
 import play.api.i18n.Messages
 import org.jsoup.Jsoup
@@ -44,9 +44,9 @@ class MainErrorSummarySpec extends SpecBase with Matchers {
 
     "must render the error summary with error message arguments" in new Setup {
       val formWithError = form.withError(
-        key = "fieldName",
+        key     = "fieldName",
         message = "error.with.args",
-        args = Seq("arg1", "arg2")
+        args    = Seq("arg1", "arg2")
       )
       val html = mainErrorSummary(formWithError)
       val doc = Jsoup.parse(html.body)
@@ -57,7 +57,7 @@ class MainErrorSummarySpec extends SpecBase with Matchers {
 
     "must render the error summary with no href when error key is empty" in new Setup {
       val formWithError = form.withError(
-        key = "",
+        key     = "",
         message = "error.without.key"
       )
       val html = mainErrorSummary(formWithError)
@@ -76,7 +76,7 @@ class MainErrorSummarySpec extends SpecBase with Matchers {
     val form: Form[String] = Form(
       "value" -> nonEmptyText
     )
-    implicit val request: play.api.mvc.Request[_] = FakeRequest()
+    implicit val request: play.api.mvc.Request[?] = FakeRequest()
     implicit val messages: Messages = play.api.i18n.MessagesImpl(
       play.api.i18n.Lang.defaultLang,
       app.injector.instanceOf[play.api.i18n.MessagesApi]

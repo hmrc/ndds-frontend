@@ -23,33 +23,34 @@ import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
 
 case class DirectDebitDetails(bankSortCode: Option[String],
-                             bankAccountNumber: Option[String],
-                             bankAccountName: Option[String],
-                             auDdisFlag: Boolean,
-                             submissionDateTime: LocalDateTime)
+                              bankAccountNumber: Option[String],
+                              bankAccountName: Option[String],
+                              auDdisFlag: Boolean,
+                              submissionDateTime: LocalDateTime
+                             )
 
 object DirectDebitDetails {
   implicit val format: OFormat[DirectDebitDetails] = Json.format
 }
 
 case class PaymentPlanDetails(
-                               hodService: String,
-                               planType: String,
-                               paymentReference: String,
-                               submissionDateTime: LocalDateTime,
-                               scheduledPaymentAmount: Option[BigDecimal],
-                               scheduledPaymentStartDate: Option[LocalDate],
-                               initialPaymentStartDate: Option[LocalDate],
-                               initialPaymentAmount: Option[BigDecimal],
-                               scheduledPaymentEndDate: Option[LocalDate],
-                               scheduledPaymentFrequency: Option[String],
-                               suspensionStartDate: Option[LocalDate],
-                               suspensionEndDate: Option[LocalDate],
-                               balancingPaymentAmount: Option[BigDecimal],
-                               balancingPaymentDate: Option[LocalDate],
-                               totalLiability: Option[BigDecimal],
-                               paymentPlanEditable: Boolean
-                             )
+  hodService: String,
+  planType: String,
+  paymentReference: String,
+  submissionDateTime: LocalDateTime,
+  scheduledPaymentAmount: Option[BigDecimal],
+  scheduledPaymentStartDate: Option[LocalDate],
+  initialPaymentStartDate: Option[LocalDate],
+  initialPaymentAmount: Option[BigDecimal],
+  scheduledPaymentEndDate: Option[LocalDate],
+  scheduledPaymentFrequency: Option[String],
+  suspensionStartDate: Option[LocalDate],
+  suspensionEndDate: Option[LocalDate],
+  balancingPaymentAmount: Option[BigDecimal],
+  balancingPaymentDate: Option[LocalDate],
+  totalLiability: Option[BigDecimal],
+  paymentPlanEditable: Boolean
+)
 
 object PaymentPlanDetails {
   private val planTypeMapping: Map[String, String] = Map(
@@ -94,7 +95,7 @@ object PaymentPlanDetails {
       (__ \ "balancingPaymentDate").readNullable[LocalDate] and
       (__ \ "totalLiability").readNullable[BigDecimal] and
       (__ \ "paymentPlanEditable").read[Boolean]
-    )(PaymentPlanDetails.apply _)
+  )(PaymentPlanDetails.apply _)
 
   implicit val writes: OWrites[PaymentPlanDetails] = Json.writes[PaymentPlanDetails]
 
@@ -102,9 +103,9 @@ object PaymentPlanDetails {
 }
 
 case class PaymentPlanResponse(
-                                directDebitDetails: DirectDebitDetails,
-                                paymentPlanDetails: PaymentPlanDetails
-                              )
+  directDebitDetails: DirectDebitDetails,
+  paymentPlanDetails: PaymentPlanDetails
+)
 
 object PaymentPlanResponse {
   implicit val format: OFormat[PaymentPlanResponse] = Json.format

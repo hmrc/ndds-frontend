@@ -33,7 +33,7 @@ class ConfirmationPanelSpec extends SpecBase with Matchers {
       val panel = doc.select(".govuk-panel")
       panel.size mustBe 1
       panel.select(".govuk-panel__title").text mustBe title
-      panel.select(".govuk-panel__body").html must include ("<span>Test confirmation body.</span>")
+      panel.select(".govuk-panel__body").html must include("<span>Test confirmation body.</span>")
     }
 
     "must apply custom CSS classes if provided" in new Setup {
@@ -50,7 +50,7 @@ class ConfirmationPanelSpec extends SpecBase with Matchers {
   trait Setup {
     val app = applicationBuilder().build()
     val confirmationPanel = app.injector.instanceOf[ConfirmationPanel]
-    implicit val request: play.api.mvc.Request[_] = FakeRequest()
+    implicit val request: play.api.mvc.Request[?] = FakeRequest()
     implicit val messages: Messages = play.api.i18n.MessagesImpl(
       play.api.i18n.Lang.defaultLang,
       app.injector.instanceOf[play.api.i18n.MessagesApi]

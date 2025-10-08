@@ -26,12 +26,11 @@ class YourBankDetailsSpec extends AnyWordSpec with Matchers {
 
     val sample = YourBankDetails(
       accountHolderName = "John Doe",
-      sortCode = "12-34-56",
-      accountNumber = "12345678"
+      sortCode          = "12-34-56",
+      accountNumber     = "12345678"
     )
 
-    val json = Json.parse(
-      """
+    val json = Json.parse("""
         |{
         |  "accountHolderName": "John Doe",
         |  "sortCode": "12-34-56",

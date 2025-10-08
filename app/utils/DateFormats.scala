@@ -25,18 +25,18 @@ object DateFormats {
   private val YearRegex = "^\\d{4}$"
 
   val defaultDateFormats: Seq[DateFormat] = Seq(
-    DateFormat(dateType = "day", errorKey = "date.error.day", regex = DayRegex),
+    DateFormat(dateType = "day", errorKey   = "date.error.day", regex   = DayRegex),
     DateFormat(dateType = "month", errorKey = "date.error.month", regex = MonthRegex),
-    DateFormat(dateType = "year", errorKey = "date.error.year", regex = YearRegex)
+    DateFormat(dateType = "year", errorKey  = "date.error.year", regex  = YearRegex)
   )
 
   val monthYearFormats: Seq[DateFormat] = Seq(
     DateFormat(dateType = "month", errorKey = "date.error.month", regex = MonthRegex),
-    DateFormat(dateType = "year", errorKey = "date.error.year", regex = YearRegex)
+    DateFormat(dateType = "year", errorKey  = "date.error.year", regex  = YearRegex)
   )
 
   val yearEndMonthFormats: Seq[DateFormat] = Seq(
-    DateFormat(dateType = "year", errorKey = "date.error.year", regex = YearRegex),
+    DateFormat(dateType = "year", errorKey  = "date.error.year", regex  = YearRegex),
     DateFormat(dateType = "month", errorKey = "date.error.month", regex = YearEndMonthRegex)
   )
 }

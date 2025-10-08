@@ -34,39 +34,40 @@ import views.html.AmendPlanEndDateView
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AmendPlanEndDateController @Inject()(
-                                        override val messagesApi: MessagesApi,
-                                        sessionRepository: SessionRepository,
-                                        navigator: Navigator,
-                                        identify: IdentifierAction,
-                                        getData: DataRetrievalAction,
-                                        requireData: DataRequiredAction,
-                                        nddsService: NationalDirectDebitService,
-                                        formProvider: AmendPlanEndDateFormProvider,
-                                        val controllerComponents: MessagesControllerComponents,
-                                        view: AmendPlanEndDateView
-                                      )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with Logging {
+class AmendPlanEndDateController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
+  formProvider: AmendPlanEndDateFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: AmendPlanEndDateView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
-      val form = formProvider()
-      val preparedForm = request.userAnswers.get(AmendPlanEndDatePage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
+    val form = formProvider()
+    val preparedForm = request.userAnswers.get(AmendPlanEndDatePage) match {
+      case None        => form
+      case Some(value) => form.fill(value)
+    }
 
-      Ok(view(preparedForm, mode,routes.AmendPaymentAmountController.onPageLoad(mode)))
+    Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val form = formProvider()
-      val userAnswers = request.userAnswers
-      form.bindFromRequest().fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode,routes.AmendPaymentAmountController.onPageLoad(mode)))),
-
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val form = formProvider()
+    val userAnswers = request.userAnswers
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
         value =>
           if (nddsService.amendPaymentPlanGuard(userAnswers)) {
             (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
@@ -83,7 +84,7 @@ class AmendPlanEndDateController @Inject()(
                 } else {
                   for {
                     updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
-                    _ <- sessionRepository.set(updatedAnswers)
+                    _              <- sessionRepository.set(updatedAnswers)
                   } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
                 }
 

@@ -27,7 +27,8 @@ case class NddPaymentPlan(scheduledPaymentAmount: BigDecimal,
                           planType: String,
                           paymentReference: String,
                           hodService: String,
-                          submissionDateTime: LocalDateTime)
+                          submissionDateTime: LocalDateTime
+                         )
 
 object NddPaymentPlan {
   private val planTypeMapping: Map[String, String] = Map(
@@ -44,18 +45,18 @@ object NddPaymentPlan {
       (__ \ "paymentReference").read[String] and
       (__ \ "hodService").read[String] and
       (__ \ "submissionDateTime").read[LocalDateTime]
-    )(NddPaymentPlan.apply _)
+  )(NddPaymentPlan.apply _)
 
   implicit val writes: OWrites[NddPaymentPlan] = Json.writes[NddPaymentPlan]
 }
-
 
 case class NddDDPaymentPlansResponse(bankSortCode: String,
                                      bankAccountNumber: String,
                                      bankAccountName: String,
                                      auDdisFlag: String,
                                      paymentPlanCount: Int,
-                                     paymentPlanList: Seq[NddPaymentPlan])
+                                     paymentPlanList: Seq[NddPaymentPlan]
+                                    )
 
 object NddDDPaymentPlansResponse {
   implicit val format: OFormat[NddDDPaymentPlansResponse] = Json.format[NddDDPaymentPlansResponse]

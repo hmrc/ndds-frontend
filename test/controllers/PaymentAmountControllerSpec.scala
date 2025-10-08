@@ -27,7 +27,7 @@ import pages.PaymentAmountPage
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.PaymentAmountView
 import models.DirectDebitSource.PAYE
@@ -74,10 +74,11 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentAmountView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(request,
+                                                                                                                       messages(application)
+                                                                                                                      ).toString
       }
     }
-
 
     "must return OK and the correct view for a GET when DirectDebitSourcePage is PAYE" in {
       val userAnswers = emptyUserAnswers.set(DirectDebitSourcePage, PAYE).success.value
@@ -91,7 +92,9 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentAmountView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, routes.YearEndAndMonthController.onPageLoad(NormalMode))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, routes.YearEndAndMonthController.onPageLoad(NormalMode))(request,
+                                                                                                                          messages(application)
+                                                                                                                         ).toString
       }
     }
 
@@ -110,7 +113,9 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, routes.YearEndAndMonthController.onPageLoad(NormalMode))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, routes.YearEndAndMonthController.onPageLoad(NormalMode))(request,
+                                                                                                                               messages(application)
+                                                                                                                              ).toString
       }
     }
 
@@ -124,7 +129,8 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository)
-        ).build()
+        )
+        .build()
 
       running(application) {
         val request = FakeRequest(POST, paymentAmountRoute)
@@ -137,7 +143,6 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-
     "must redirect to the next page when valid data is submitted" in {
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
@@ -146,7 +151,8 @@ class PaymentAmountControllerSpec extends SpecBase with MockitoSugar {
         .overrides(
           bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
           bind[SessionRepository].toInstance(mockSessionRepository)
-        ).build()
+        )
+        .build()
 
       running(application) {
         val request = FakeRequest(POST, paymentAmountRoute)

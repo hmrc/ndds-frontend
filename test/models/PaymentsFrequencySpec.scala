@@ -32,10 +32,9 @@ class PaymentsFrequencySpec extends AnyFreeSpec with Matchers with ScalaCheckPro
 
       val gen = Gen.oneOf(PaymentsFrequency.values.toSeq)
 
-      forAll(gen) {
-        paymentsFrequency =>
+      forAll(gen) { paymentsFrequency =>
 
-          JsString(paymentsFrequency.toString).validate[PaymentsFrequency].asOpt.value mustEqual paymentsFrequency
+        JsString(paymentsFrequency.toString).validate[PaymentsFrequency].asOpt.value mustEqual paymentsFrequency
       }
     }
 
@@ -43,10 +42,9 @@ class PaymentsFrequencySpec extends AnyFreeSpec with Matchers with ScalaCheckPro
 
       val gen = arbitrary[String] suchThat (!PaymentsFrequency.values.map(_.toString).contains(_))
 
-      forAll(gen) {
-        invalidValue =>
+      forAll(gen) { invalidValue =>
 
-          JsString(invalidValue).validate[PaymentsFrequency] mustEqual JsError("error.invalid")
+        JsString(invalidValue).validate[PaymentsFrequency] mustEqual JsError("error.invalid")
       }
     }
 
@@ -54,10 +52,9 @@ class PaymentsFrequencySpec extends AnyFreeSpec with Matchers with ScalaCheckPro
 
       val gen = Gen.oneOf(PaymentsFrequency.values.toSeq)
 
-      forAll(gen) {
-        paymentsFrequency =>
+      forAll(gen) { paymentsFrequency =>
 
-          Json.toJson(paymentsFrequency) mustEqual JsString(paymentsFrequency.toString)
+        Json.toJson(paymentsFrequency) mustEqual JsString(paymentsFrequency.toString)
       }
     }
   }

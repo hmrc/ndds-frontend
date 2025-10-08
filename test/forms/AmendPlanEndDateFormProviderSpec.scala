@@ -34,9 +34,9 @@ class AmendPlanEndDateFormProviderSpec extends DateBehaviours {
       val validDate = endDate
       val result = form.bind(
         Map(
-          "value.day" -> validDate.getDayOfMonth.toString,
+          "value.day"   -> validDate.getDayOfMonth.toString,
           "value.month" -> validDate.getMonthValue.toString,
-          "value.year" -> validDate.getYear.toString
+          "value.year"  -> validDate.getYear.toString
         )
       )
       result.errors mustBe empty

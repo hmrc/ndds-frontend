@@ -41,7 +41,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
   lazy val paymentPlanTypeRoute: String = routes.PaymentPlanTypeController.onPageLoad(NormalMode).url
   lazy val directDebitSourceRoute: String = routes.DirectDebitSourceController.onPageLoad(NormalMode).url
-  
+
   val formProvider = new PaymentPlanTypeFormProvider()
   val form: Form[PaymentPlanType] = formProvider()
 
@@ -59,7 +59,9 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentPlanTypeView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Some(TC), Call("GET", directDebitSourceRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Some(TC), Call("GET", directDebitSourceRoute))(request,
+                                                                                                                messages(application)
+                                                                                                               ).toString
       }
     }
 
@@ -137,7 +139,9 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, None, Call("GET", directDebitSourceRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, None, Call("GET", directDebitSourceRoute))(request,
+                                                                                                                 messages(application)
+                                                                                                                ).toString
       }
     }
 

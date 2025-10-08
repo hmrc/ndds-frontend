@@ -25,4 +25,3 @@ case class PaymentDateDetails(enteredDate: LocalDate, earliestPaymentDate: Strin
 object PaymentDateDetails {
   implicit val format: OFormat[PaymentDateDetails] = Json.format
 }
-

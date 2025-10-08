@@ -28,15 +28,15 @@ given Format[BarsResponse] with {
   def reads(json: JsValue): JsResult[BarsResponse] = json match {
     case JsString(str) =>
       str.toLowerCase match {
-        case "yes" => JsSuccess(Yes)
-        case "no" => JsSuccess(No)
-        case "partial" => JsSuccess(Partial)
+        case "yes"           => JsSuccess(Yes)
+        case "no"            => JsSuccess(No)
+        case "partial"       => JsSuccess(Partial)
         case "indeterminate" => JsSuccess(Indeterminate)
-        case "inapplicable" => JsSuccess(Inapplicable)
-        case "error" => JsSuccess(Error)
-        case _ =>  JsError(s"Unknown value: $str")
+        case "inapplicable"  => JsSuccess(Inapplicable)
+        case "error"         => JsSuccess(Error)
+        case _               => JsError(s"Unknown value: $str")
       }
-  
+
     case _ => JsError("Expected String")
 
   }

@@ -63,7 +63,9 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebi
         contentAsString(result) must include("Account Number")
         contentAsString(result) must include("Number of payment plans")
         contentAsString(result) must include("View or add to")
-        contentAsString(result) must include("<b>Note:</b> If you want to cancel a Direct Debit you must contact the HMRC Payment Helpline on 0845 366 1208.")
+        contentAsString(result) must include(
+          "<b>Note:</b> If you want to cancel a Direct Debit you must contact the HMRC Payment Helpline on 0845 366 1208."
+        )
       }
     }
 
@@ -95,9 +97,10 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebi
         contentAsString(result) must include("Account Number")
         contentAsString(result) must include("Number of payment plans")
         contentAsString(result) must include("View or add to")
-        contentAsString(result) must include("<b>Note:</b> If you want to cancel a Direct Debit you must contact the HMRC Payment Helpline on 0845 366 1208.")
+        contentAsString(result) must include(
+          "<b>Note:</b> If you want to cancel a Direct Debit you must contact the HMRC Payment Helpline on 0845 366 1208."
+        )
       }
     }
   }
 }
-
