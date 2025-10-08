@@ -385,7 +385,7 @@ paymentPlanDetails.details.hodService.otherLiability = OTHER_LIABILITY
 paymentPlanDetails.details.hodService.paye = PAYE
 paymentPlanDetails.details.hodService.sa = SA
 paymentPlanDetails.details.hodService.sdlt = SDLT
-paymentPlanDetails.details.hodService.tc = NTC
+paymentPlanDetails.details.hodService.tc = TC
 paymentPlanDetails.details.hodService.vat = VAT
 paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
 
