@@ -51,7 +51,7 @@ trait SpecBase extends AnyFreeSpec with Matchers with TryValues with OptionValue
         submissionDateTime = now.minusDays(5)
       ),
       paymentPlanDetails = PaymentPlanDetails(
-        hodService                = "NDD",
+        hodService                = "sa",
         planType                  = "dummyPlan",
         paymentReference          = "paymentReference",
         submissionDateTime        = now.minusDays(5),

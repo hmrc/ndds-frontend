@@ -19,6 +19,7 @@
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
+    govukDetails: GovukDetails,
     govukButton: GovukButton
 )
 
@@ -40,10 +41,14 @@
                     HintViewModel(
                         HtmlContent(
                         Seq(
-                            s"<p >${messages("planEndDate.p1")}</p>",
-                            s"<p >${messages("planEndDate.p2")}</p>",
-                            s"<p>${messages("planEndDate.p3")}</p>",
-                            s"<p class='govuk-!-margin-top-7'>${messages("planEndDate.hint")}</p>",
+                            s"<p class='govuk-body'>${messages("planEndDate.p1")}</p>",
+                            govukDetails(
+                                Details(
+                                    summary = messages("planEndDate.detailSummary"),
+                                    content = messages("planEndDate.detailContent")
+                                )
+                            ),
+                            messages("planEndDate.hint"),
                             ).mkString
                         )
                     )

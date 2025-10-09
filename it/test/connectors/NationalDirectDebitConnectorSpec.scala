@@ -29,10 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 
-class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
-  with Matchers
-  with ScalaFutures
-  with IntegrationPatience {
+class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matchers with ScalaFutures with IntegrationPatience {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -224,12 +221,12 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
       val result = connector.retrieveDirectDebitPaymentPlans("testRef").futureValue
 
-      result.bankSortCode shouldBe "123456"
-      result.paymentPlanCount shouldBe 4
+      result.bankSortCode                  shouldBe "123456"
+      result.paymentPlanCount              shouldBe 4
       result.paymentPlanList.head.planType shouldBe PaymentPlanType.SinglePaymentPlan.toString
-      result.paymentPlanList(1).planType shouldBe PaymentPlanType.BudgetPaymentPlan.toString
-      result.paymentPlanList(2).planType shouldBe PaymentPlanType.TaxCreditRepaymentPlan.toString
-      result.paymentPlanList(3).planType shouldBe PaymentPlanType.VariablePaymentPlan.toString
+      result.paymentPlanList(1).planType   shouldBe PaymentPlanType.BudgetPaymentPlan.toString
+      result.paymentPlanList(2).planType   shouldBe PaymentPlanType.TaxCreditRepaymentPlan.toString
+      result.paymentPlanList(3).planType   shouldBe PaymentPlanType.VariablePaymentPlan.toString
     }
   }
 
@@ -280,45 +277,44 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
   "submitChrisData" should {
 
     val planStartDateDetails = PlanStartDateDetails(
-      enteredDate = LocalDate.of(2025, 9, 1),
+      enteredDate           = LocalDate.of(2025, 9, 1),
       earliestPlanStartDate = "2025-09-01"
     )
 
     val paymentDateDetails = PaymentDateDetails(
-      enteredDate = LocalDate.of(2025, 9, 15),
+      enteredDate         = LocalDate.of(2025, 9, 15),
       earliestPaymentDate = "2025-09-01"
     )
 
     val submission = ChrisSubmissionRequest(
-      serviceType = DirectDebitSource.TC,
-      paymentPlanType = PaymentPlanType.TaxCreditRepaymentPlan,
+      serviceType      = DirectDebitSource.TC,
+      paymentPlanType  = PaymentPlanType.TaxCreditRepaymentPlan,
       paymentFrequency = Some(PaymentsFrequency.Monthly),
       yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
         accountHolderName = "Test",
-        sortCode = "123456",
-        accountNumber = "12345678",
-        auddisStatus = false,
-        accountVerified = false
+        sortCode          = "123456",
+        accountNumber     = "12345678",
+        auddisStatus      = false,
+        accountVerified   = false
       ),
-      planStartDate = Some(planStartDateDetails),
-      planEndDate = None,
-      paymentDate = Some(paymentDateDetails),
+      planStartDate   = Some(planStartDateDetails),
+      planEndDate     = None,
+      paymentDate     = Some(paymentDateDetails),
       yearEndAndMonth = None,
       bankDetailsAddress = BankAddress(
-        lines = Seq("line 1"),
-        town = "Town",
-        country = Country("UK"),
+        lines    = Seq("line 1"),
+        town     = "Town",
+        country  = Country("UK"),
         postCode = "NE5 2DH"
       ),
-      ddiReferenceNo = "DDI123456789",
-      paymentReference = "testReference",
-      bankName = "Barclays",
-      totalAmountDue = Some(BigDecimal(200)),
-      paymentAmount = Some(BigDecimal(100.00)),
+      ddiReferenceNo       = "DDI123456789",
+      paymentReference     = "testReference",
+      bankName             = "Barclays",
+      totalAmountDue       = Some(BigDecimal(200)),
+      paymentAmount        = Some(BigDecimal(100.00)),
       regularPaymentAmount = Some(BigDecimal(90.00)),
-      calculation = None
+      calculation          = None
     )
-
 
     "successfully return true when CHRIS submission succeeds with 200 OK" in {
       stubFor(
@@ -419,14 +415,533 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock
 
       val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
 
-      result.directDebitDetails.bankSortCode shouldBe Some("123456")
+      result.directDebitDetails.bankSortCode    shouldBe Some("123456")
       result.directDebitDetails.bankAccountName shouldBe None
-      result.directDebitDetails.auDdisFlag shouldBe true
+      result.directDebitDetails.auDdisFlag      shouldBe true
 
-      result.paymentPlanDetails.hodService shouldBe "CESA"
-      result.paymentPlanDetails.planType shouldBe PaymentPlanType.SinglePaymentPlan.toString
+      result.paymentPlanDetails.hodService        shouldBe DirectDebitSource.SA.toString
+      result.paymentPlanDetails.planType          shouldBe PaymentPlanType.SinglePaymentPlan.toString
       result.paymentPlanDetails.suspensionEndDate shouldBe None
-      result.paymentPlanDetails.totalLiability shouldBe None
+      result.paymentPlanDetails.totalLiability    shouldBe None
+    }
+
+    "successfully retrieve payment plan details when scheduledPaymentFrequency is null" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "NIDN",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": null,
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+            """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService                shouldBe DirectDebitSource.NIC.toString
+      result.paymentPlanDetails.scheduledPaymentFrequency shouldBe None
+    }
+
+    "successfully retrieve payment plan details when scheduledPaymentFrequency is weekly" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "unknownHodService",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService                shouldBe "unknownHodService"
+      result.paymentPlanDetails.scheduledPaymentFrequency shouldBe Some("weekly")
+    }
+
+    "successfully retrieve payment plan details when hodService is COTA" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "COTA",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                    """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.CT.toString
+    }
+
+    "successfully retrieve payment plan details when hodService is NIDN" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "NIDN",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                        """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.NIC.toString
+    }
+
+    "successfully retrieve payment plan details when hodService is SAFE" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "SAFE",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                            """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.OL.toString
+    }
+
+    "successfully retrieve payment plan details when hodService is PAYE" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "PAYE",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                                """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.PAYE.toString
+    }
+
+    "successfully retrieve payment plan details when hodService is CESA" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "CESA",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                                    """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.SA.toString
+    }
+
+    "successfully retrieve payment plan details when hodService is SDLT" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "SDLT",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                                        """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.SDLT.toString
+    }
+
+    "successfully retrieve payment plan details when hodService is NTC" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "NTC",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                                            """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.TC.toString
+    }
+
+    "successfully retrieve payment plan details when hodService is VAT" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "VAT",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                                                """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.VAT.toString
+    }
+
+    "successfully retrieve payment plan details when hodService is MGD" in {
+
+      val responseJson =
+        """
+          |{
+          |  "directDebitDetails": {
+          |    "bankSortCode": "123456",
+          |    "bankAccountNumber": "12345678",
+          |    "bankAccountName": null,
+          |    "auDdisFlag": true,
+          |    "submissionDateTime": "2025-09-30T11:00:00"
+          |  },
+          |  "paymentPlanDetails": {
+          |    "hodService": "MGD",
+          |    "planType": "01",
+          |    "paymentReference": "test-pp-ref",
+          |    "submissionDateTime": "2025-09-30T11:00:00",
+          |    "scheduledPaymentAmount": 1000,
+          |    "scheduledPaymentStartDate": "2025-10-01",
+          |    "initialPaymentStartDate": "2025-10-01",
+          |    "initialPaymentAmount": 150,
+          |    "scheduledPaymentEndDate": "2025-10-01",
+          |    "scheduledPaymentFrequency": "weekly",
+          |    "suspensionStartDate": "2025-11-01",
+          |    "suspensionEndDate": null,
+          |    "balancingPaymentAmount": 600,
+          |    "balancingPaymentDate": "2025-12-01",
+          |    "totalLiability": null,
+          |    "paymentPlanEditable": false
+          |  }
+          |}
+                                                    """.stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
+
+      result.paymentPlanDetails.hodService shouldBe DirectDebitSource.MGD.toString
     }
   }
 }
