@@ -15,13 +15,19 @@
  *@
 
 @import models.DirectDebitSource.*
+@import views.html.components.*
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
+    paragraph: Paragraph,
     govukErrorSummary: GovukErrorSummary,
+    govukDetails: GovukDetails,
     govukRadios: GovukRadios,
-    govukButton: GovukButton
+    h1: Header1,
+    h3: Header3,
+    govukButton: GovukButton,
+    bulletList: BulletList
 )
 
 @(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], call: Call)(implicit request: Request[_], messages: Messages)
@@ -31,14 +37,113 @@
     @formHelper(action = routes.PaymentPlanTypeController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form,  errorLinkOverrides = Map("value" -> "value_0")))
+            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
+        }
+
+        @h1("paymentPlanType.heading", classes = "govuk-heading-xl govuk-!-margin-bottom-3")
+
+        @if(selectedAnswer.contains(MGD)) {
+            @defining(HtmlFormat.fill(Seq(
+                paragraph("paymentPlan.collapsable.mgd.p1"),
+                h3("paymentPlan.collapsable.mgd.single"),
+                paragraph("paymentPlan.collapsable.mgd.p2"),
+                paragraph("paymentPlan.collapsable.mgd.p3"),
+                h3("paymentPlan.collapsable.mgd.variable"),
+                paragraph("paymentPlan.collapsable.mgd.p4"),
+                paragraph("paymentPlan.collapsable.mgd.p5"),
+                bulletList(
+                    items = Seq(
+                        "paymentPlan.collapsable.mgd.b1",
+                        "paymentPlan.collapsable.mgd.b2"
+                    )
+                ),
+
+            ))) { content =>
+
+                @govukDetails(
+                    Details(
+                        summary = messages("paymentPlan.collapsable"),
+                        content = HtmlContent(content)
+                    )
+                )
+            }
+        }
+
+        @if(selectedAnswer.contains(SA)) {
+            @defining(HtmlFormat.fill(Seq(
+                paragraph("paymentPlan.collapsable.sa.p1"),
+                h3("paymentPlan.collapsable.sa.single"),
+                paragraph("paymentPlan.collapsable.sa.p2"),
+                h3("paymentPlan.collapsable.sa.budget"),
+                paragraph("paymentPlan.collapsable.sa.p3"),
+                paragraph("paymentPlan.collapsable.sa.p4"),
+                bulletList(
+                    items = Seq(
+                        "paymentPlan.collapsable.sa.b1",
+                        "paymentPlan.collapsable.sa.b2",
+                        "paymentPlan.collapsable.sa.b3",
+                        "paymentPlan.collapsable.sa.b4"
+                    )
+                ),
+                paragraph("paymentPlan.collapsable.sa.p5"),
+                paragraph("paymentPlan.collapsable.sa.p6"),
+
+            ))) { content =>
+
+                @govukDetails(
+                    Details(
+                        summary = messages("paymentPlan.collapsable"),
+                        content = HtmlContent(content)
+                    )
+                )
+            }
+        }
+
+        @if(selectedAnswer.contains(TC)) {
+            @defining(HtmlFormat.fill(Seq(
+                paragraph("paymentPlan.collapsable.tc.p1"),
+                h3("paymentPlan.collapsable.tc.single"),
+                paragraph("paymentPlan.collapsable.tc.p2"),
+                h3("paymentPlan.collapsable.credit"),
+                paragraph("paymentPlan.collapsable.tc.p3"),
+                paragraph("paymentPlan.collapsable.tc.p4"),
+                bulletList(
+                    items = Seq(
+                        "paymentPlan.collapsable.tc.b1",
+                        "paymentPlan.collapsable.tc.b2",
+                    )
+                ),
+                paragraph("paymentPlan.collapsable.tc.p5"),
+                bulletList(
+                    items = Seq(
+                        "paymentPlan.collapsable.tc.b3",
+                        "paymentPlan.collapsable.tc.b4"
+                    )
+                ),
+                paragraph("paymentPlan.collapsable.tc.p6"),
+
+            ))) { content =>
+
+                @govukDetails(
+                    Details(
+                        summary = messages("paymentPlan.collapsable"),
+                        content = HtmlContent(content)
+                    )
+                )
+            }
         }
 
         @govukRadios(
             RadiosViewModel(
-                field  = form("value"),
-                legend = LegendViewModel(messages("paymentPlanType.heading")).asPageHeading(),
-                items  = if (selectedAnswer == Some(MGD)) { PaymentPlanType.options1 } else if (selectedAnswer == Some(SA)) { PaymentPlanType.options2 } else { PaymentPlanType.options3 }
+                field = form("value"),
+                legend = LegendViewModel(messages("")).asPageHeading(),
+                items = if(selectedAnswer.contains(MGD)) {
+                    PaymentPlanType.options1
+                } else if(selectedAnswer.contains(SA)) {
+                    PaymentPlanType.options2
+                } else {
+                    PaymentPlanType.options3
+                }
             )
         )
 
@@ -47,3 +152,4 @@
         )
     }
 }
+
