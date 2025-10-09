@@ -98,8 +98,14 @@ class AmendPlanEndDateController @Inject() (
                     } yield {
                       println(s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}")
                       val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
-                      if (duplicateCheckResponse.isDuplicate) logger.warn(logMsg) else logger.info(logMsg)
-                      Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                      if (duplicateCheckResponse.isDuplicate) {
+                        logger.warn(logMsg)
+                        // TODO: Replace with new Warning page DTR-542 DW1
+                        Redirect(routes.JourneyRecoveryController.onPageLoad())
+                      } else {
+                        logger.info(logMsg)
+                        Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                      }
                     }
                   }
                 }

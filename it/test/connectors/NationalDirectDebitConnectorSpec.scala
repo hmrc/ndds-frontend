@@ -951,12 +951,12 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
     val duplicateCheckRequest: PaymentPlanDuplicateCheckRequest = PaymentPlanDuplicateCheckRequest(
       directDebitReference = "testRef",
       paymentPlanReference = "payment ref 123",
-      planType = "type 1",
-      paymentService = "CESA",
-      paymentReference = "payment ref",
-      paymentAmount = 120.00,
-      totalLiability = 780.00,
-      paymentFrequency = "WEEKLY"
+      planType             = "type 1",
+      paymentService       = "CESA",
+      paymentReference     = "payment ref",
+      paymentAmount        = 120.00,
+      totalLiability       = 780.00,
+      paymentFrequency     = 1
     )
 
     "successfully return true when there is a duplicate Plan with 200 OK" in {
@@ -988,7 +988,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val result: DuplicateCheckResponse = connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue
       result shouldBe DuplicateCheckResponse(false)
     }
-    
+
   }
 
 }

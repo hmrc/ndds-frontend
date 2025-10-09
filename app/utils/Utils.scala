@@ -17,7 +17,7 @@
 package utils
 
 import models.requests.PaymentPlanDuplicateCheckRequest
-import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
+import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
 import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 
@@ -79,7 +79,7 @@ object Utils {
       paymentReference     = userAnswers.get(PaymentPlanDetailsQuery).get.paymentPlanDetails.paymentReference,
       paymentAmount        = BigDecimal(120.00),
       totalLiability       = BigDecimal(780.00),
-      paymentFrequency     = PaymentsFrequency.Weekly.toString
+      paymentFrequency     = 1
     )
   }
 }

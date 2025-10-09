@@ -91,11 +91,13 @@ class AmendPlanStartDateController @Inject() (
                     if (duplicateCheckResponse.isDuplicate) {
                       println("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
                       logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+                      // TODO: Replace with new Warning page DTR-542 DW1
+                      Redirect(routes.JourneyRecoveryController.onPageLoad())
                     } else {
                       println("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
                       logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+                      Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
                     }
-                    Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
                   }
                 }
 
