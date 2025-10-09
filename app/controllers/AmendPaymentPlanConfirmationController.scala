@@ -147,7 +147,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
           ddiReferenceNo                  = ddiReference,
           paymentReference                = planDetail.paymentReference,
           totalAmountDue                  = planDetail.totalLiability,
-          paymentAmount                   = planDetail.balancingPaymentAmount,
+          paymentAmount                   = None,
           regularPaymentAmount            = None,
           amendPaymentAmount              = userAnswers.get(AmendPaymentAmountPage),
           calculation                     = None,

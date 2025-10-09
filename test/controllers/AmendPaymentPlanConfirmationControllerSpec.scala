@@ -302,7 +302,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             scheduledPaymentFrequency = Some("Monthly"),
             suspensionStartDate       = Some(java.time.LocalDate.now()),
             suspensionEndDate         = Some(java.time.LocalDate.now()),
-            balancingPaymentAmount    = Some(600),
+            balancingPaymentAmount    = None,
             balancingPaymentDate      = Some(java.time.LocalDate.now()),
             totalLiability            = Some(300),
             paymentPlanEditable       = false
