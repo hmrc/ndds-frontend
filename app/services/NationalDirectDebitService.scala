@@ -24,7 +24,7 @@ import models.audits.GetDDIs
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
 import pages.*
 import models.responses.*
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
+import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers}
 import play.api.Logging
 import play.api.mvc.Request
 import repositories.DirectDebitCacheRepository
@@ -164,11 +164,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
-  case class NextPaymentValidationResult(
-    potentialNextPaymentDate: LocalDate,
-    nextPaymentDateValid: Boolean
-  )
-
   def calculateNextPaymentDate(
     planStartDate: LocalDate,
     planEndDate: LocalDate,
@@ -178,16 +173,22 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     val today = LocalDate.now()
 
     for {
+      // Step 1.1 – check if start date is beyond 3 working days
       isBeyondThreeDays <- isThreeDaysPriorPlanEndDate(planStartDate)
+
+      // Step 1.2 – calculate next payment date
       potentialNextPaymentDate <-
         if (planStartDate.isAfter(today) && isBeyondThreeDays) {
           Future.successful(planStartDate)
         } else {
           Future.successful(calculateFrequencyBasedNextDate(planStartDate, today, paymentFrequency))
         }
+
     } yield {
-      // Step 2: Validate against plan end date
-      val nextPaymentDateValid = !potentialNextPaymentDate.isAfter(planEndDate)
+      // Step 2 – validate against plan end date
+      val nextPaymentDateValid =
+        if (planEndDate != null) { !potentialNextPaymentDate.isAfter(planEndDate) }
+        else { true }
 
       NextPaymentValidationResult(
         potentialNextPaymentDate = potentialNextPaymentDate,
@@ -201,76 +202,117 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     today: LocalDate,
     frequency: String
   ): LocalDate = {
-
-    val daysInWeek = 7
-    val annualMonths = 12
-
     frequency.toLowerCase match {
       case "weekly" | "fortnightly" | "four weekly" =>
-        val daysFrequency = frequency match {
-          case "weekly"      => 7
-          case "fortnightly" => 14
-          case "four weekly" => 28
-        }
-
-        val daysDiff = java.time.temporal.ChronoUnit.DAYS.between(startDate, today).toInt
-        val paymentsTakenToDate = daysDiff / daysFrequency
-        val weeksUntilNextPayment = daysFrequency / daysInWeek
-
-        var potentialNext = startDate.plusWeeks(paymentsTakenToDate * weeksUntilNextPayment)
-        if (!potentialNext.isAfter(today.plusDays(3))) {
-          potentialNext = potentialNext.plusWeeks(weeksUntilNextPayment)
-        }
-        potentialNext
+        calculateWeeklyBasedNextDate(startDate, today, frequency)
 
       case "monthly" | "quarterly" | "six monthly" | "annually" =>
-        val monthsFrequency = frequency match {
-          case "monthly"     => 1
-          case "quarterly"   => 3
-          case "six monthly" => 6
-          case "annually"    => 12
-        }
-
-        val yearsDiff = today.getYear - startDate.getYear
-        val monthsDiff =
-          if (yearsDiff == 0) {
-            today.getMonthValue - startDate.getMonthValue
-          } else if (yearsDiff == 1) {
-            (annualMonths - startDate.getMonthValue) + today.getMonthValue
-          } else {
-            (annualMonths - startDate.getMonthValue) + today.getMonthValue + ((yearsDiff - 1) * annualMonths)
-          }
-
-        var paymentsTaken = monthsDiff / monthsFrequency
-        if ((monthsDiff % monthsFrequency) != 0) {
-          paymentsTaken += 1
-        }
-
-        var potentialNext = startDate.plusMonths(paymentsTaken * monthsFrequency)
-        if (!potentialNext.isAfter(today)) {
-          potentialNext = potentialNext.plusMonths(monthsFrequency)
-        }
-
-        if (potentialNext.getMonthValue < startDate.getMonthValue) {
-          potentialNext = potentialNext
-            .plusMonths(1)
-            .`with`(java.time.temporal.TemporalAdjusters.firstDayOfMonth())
-        }
-
-        if (!potentialNext.isAfter(today.plusDays(3))) {
-          potentialNext = potentialNext.plusMonths(monthsFrequency)
-          if (potentialNext.getMonthValue < startDate.getMonthValue) {
-            potentialNext = potentialNext
-              .plusMonths(1)
-              .`with`(java.time.temporal.TemporalAdjusters.firstDayOfMonth())
-          }
-        }
-
-        potentialNext
+        calculateMonthlyBasedNextDate(startDate, today, frequency)
 
       case _ =>
         throw new IllegalArgumentException(s"Unknown payment frequency: $frequency")
     }
+  }
+
+  private def calculateWeeklyBasedNextDate(
+    startDate: LocalDate,
+    today: LocalDate,
+    frequency: String
+  ): LocalDate = {
+
+    val daysInWeek = 7
+    val daysFrequency = frequency.toLowerCase match {
+      case "weekly"      => 7
+      case "fortnightly" => 14
+      case "four weekly" => 28
+    }
+
+    // Step 1 – find days difference
+    val daysDiff = java.time.temporal.ChronoUnit.DAYS.between(startDate, today).toInt
+
+    // Step 2 – number of payments taken to-date
+    val paymentsTakenToDate = Math.max(0, daysDiff / daysFrequency)
+
+    // Step 3 – number of weeks until next payment
+    val weeksUntilNextPayment = daysFrequency / daysInWeek
+
+    // Step 4 – potential next payment date
+    var potentialNext = startDate.plusWeeks(paymentsTakenToDate * weeksUntilNextPayment)
+
+    // Step 5 – if within 3 working days → add one cycle
+    if (!potentialNext.isAfter(today.plusDays(3))) {
+      potentialNext = potentialNext.plusWeeks(weeksUntilNextPayment)
+    }
+
+    potentialNext
+  }
+
+  private def calculateMonthlyBasedNextDate(
+    startDate: LocalDate,
+    today: LocalDate,
+    frequency: String
+  ): LocalDate = {
+
+    val annualMonths = 12
+    val monthsFrequency = frequency.toLowerCase match {
+      case "monthly"     => 1
+      case "quarterly"   => 3
+      case "six monthly" => 6
+      case "annually"    => 12
+    }
+
+    // Step 1: If start date > today and within next 3 working days
+    val withinNext3Days = !startDate.isAfter(today.plusDays(3))
+    if (startDate.isAfter(today) && withinNext3Days) {
+      return startDate.plusMonths(monthsFrequency)
+    }
+
+    // Step 2: Calculate months difference based on year difference
+    val yearsDiff = today.getYear - startDate.getYear
+    val monthsDiff =
+      if (yearsDiff == 0) {
+        today.getMonthValue - startDate.getMonthValue
+      } else if (yearsDiff == 1) {
+        (annualMonths - startDate.getMonthValue) + today.getMonthValue
+      } else {
+        (annualMonths - startDate.getMonthValue) + today.getMonthValue + ((yearsDiff - 1) * annualMonths)
+      }
+
+    // Step 3: Payments taken to-date
+    var paymentsTaken = monthsDiff / monthsFrequency
+    if ((monthsDiff % monthsFrequency) != 0) {
+      paymentsTaken += 1
+    }
+
+    // Step 4: Number of months to add
+    var monthsToAdd = paymentsTaken * monthsFrequency
+    var potentialNext = startDate.plusMonths(monthsToAdd)
+
+    // Step 5: If potential next ≤ today → move one more frequency ahead
+    if (!potentialNext.isAfter(today)) {
+      monthsToAdd += monthsFrequency
+      potentialNext = startDate.plusMonths(monthsToAdd)
+    }
+
+    // Step 6: If month rolled back (before start month) → move to 1st of next month
+    if (potentialNext.getMonthValue < startDate.getMonthValue) {
+      potentialNext = potentialNext
+        .plusMonths(1)
+        .`with`(java.time.temporal.TemporalAdjusters.firstDayOfMonth())
+    }
+
+    // Step 7: If within next 3 working days → move one more frequency ahead
+    if (!potentialNext.isAfter(today.plusDays(3))) {
+      monthsToAdd += monthsFrequency
+      potentialNext = startDate.plusMonths(monthsToAdd)
+      if (potentialNext.getMonthValue < startDate.getMonthValue) {
+        potentialNext = potentialNext
+          .plusMonths(1)
+          .`with`(java.time.temporal.TemporalAdjusters.firstDayOfMonth())
+      }
+    }
+
+    potentialNext
   }
 
   def getPaymentPlanDetails(directDebitReference: String, paymentPlanReference: String)(implicit
