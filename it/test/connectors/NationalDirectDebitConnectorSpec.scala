@@ -287,9 +287,10 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
     )
 
     val submission = ChrisSubmissionRequest(
-      serviceType      = DirectDebitSource.TC,
-      paymentPlanType  = PaymentPlanType.TaxCreditRepaymentPlan,
-      paymentFrequency = Some(PaymentsFrequency.Monthly),
+      serviceType = DirectDebitSource.TC,
+      paymentPlanType = PaymentPlanType.TaxCreditRepaymentPlan,
+      paymentPlanReferenceNumber = None,
+      paymentFrequency = Some(PaymentsFrequency.Monthly.toString),
       yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
         accountHolderName = "Test",
         sortCode          = "123456",
@@ -301,19 +302,13 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       planEndDate     = None,
       paymentDate     = Some(paymentDateDetails),
       yearEndAndMonth = None,
-      bankDetailsAddress = BankAddress(
-        lines    = Seq("line 1"),
-        town     = "Town",
-        country  = Country("UK"),
-        postCode = "NE5 2DH"
-      ),
-      ddiReferenceNo       = "DDI123456789",
-      paymentReference     = "testReference",
-      bankName             = "Barclays",
-      totalAmountDue       = Some(BigDecimal(200)),
-      paymentAmount        = Some(BigDecimal(100.00)),
+      ddiReferenceNo = "DDI123456789",
+      paymentReference = "testReference",
+      totalAmountDue = Some(BigDecimal(200)),
+      paymentAmount = Some(BigDecimal(100.00)),
       regularPaymentAmount = Some(BigDecimal(90.00)),
-      calculation          = None
+      amendPaymentAmount = None,
+      calculation = None
     )
 
     "successfully return true when CHRIS submission succeeds with 200 OK" in {

@@ -38,7 +38,7 @@ import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -507,9 +507,10 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       )
 
       val chrisSubmission = models.requests.ChrisSubmissionRequest(
-        serviceType      = DirectDebitSource.TC,
-        paymentPlanType  = PaymentPlanType.TaxCreditRepaymentPlan,
-        paymentFrequency = Some(models.PaymentsFrequency.Monthly),
+        serviceType                = DirectDebitSource.TC,
+        paymentPlanType            = PaymentPlanType.TaxCreditRepaymentPlan,
+        paymentPlanReferenceNumber = None,
+        paymentFrequency           = Some(models.PaymentsFrequency.Monthly.toString),
         yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
           accountHolderName = "Test",
           sortCode          = "123456",
@@ -517,22 +518,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           auddisStatus      = false,
           accountVerified   = false
         ),
-        planStartDate   = Some(planStartDateDetails),
-        planEndDate     = None,
-        paymentDate     = Some(paymentDateDetails),
-        yearEndAndMonth = None,
-        bankDetailsAddress = models.responses.BankAddress(
-          lines    = Seq("line 1"),
-          town     = "Town",
-          country  = models.responses.Country("UK"),
-          postCode = "NE5 2DH"
-        ),
+        planStartDate        = Some(planStartDateDetails),
+        planEndDate          = None,
+        paymentDate          = Some(paymentDateDetails),
+        yearEndAndMonth      = None,
         ddiReferenceNo       = "DDI123456789",
         paymentReference     = "testReference",
-        bankName             = "Barclays",
         totalAmountDue       = Some(BigDecimal(200)),
         paymentAmount        = Some(BigDecimal(100)),
         regularPaymentAmount = Some(BigDecimal(90)),
+        amendPaymentAmount   = None,
         calculation          = None
       )
 
@@ -545,7 +540,42 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
         verify(mockConnector, atLeastOnce()).submitChrisData(any[models.requests.ChrisSubmissionRequest]())(any[HeaderCarrier])
       }
+      val currentTime = LocalDateTime.now().withNano(0)
+      val chrisAmendSubmission = models.requests.ChrisSubmissionRequest(
+        serviceType                = DirectDebitSource.TC,
+        paymentPlanType            = PaymentPlanType.TaxCreditRepaymentPlan,
+        paymentPlanReferenceNumber = None,
+        paymentFrequency           = Some(models.PaymentsFrequency.Monthly.toString),
+        yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
+          accountHolderName = "Test",
+          sortCode          = "123456",
+          accountNumber     = "12345678",
+          auddisStatus      = true,
+          accountVerified   = true
+        ),
+        planStartDate        = Some(planStartDateDetails),
+        planEndDate          = Some(currentTime.toLocalDate.plusYears(1)),
+        paymentDate          = Some(paymentDateDetails),
+        yearEndAndMonth      = None,
+        ddiReferenceNo       = "DDI123456789",
+        paymentReference     = "testReference",
+        totalAmountDue       = Some(BigDecimal(200)),
+        paymentAmount        = Some(BigDecimal(100)),
+        regularPaymentAmount = Some(BigDecimal(90)),
+        amendPaymentAmount   = None,
+        calculation          = None,
+        amendPlan            = true
+      )
 
+      "must return true when CHRIS submission succeeds for amend" in {
+        when(mockConnector.submitChrisData(any[models.requests.ChrisSubmissionRequest]())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(true))
+
+        val result = service.submitChrisData(chrisAmendSubmission).futureValue
+        result mustBe true
+
+        verify(mockConnector, atLeastOnce()).submitChrisData(any[models.requests.ChrisSubmissionRequest]())(any[HeaderCarrier])
+      }
       "must return false when CHRIS submission fails with exception" in {
         when(mockConnector.submitChrisData(any[models.requests.ChrisSubmissionRequest]())(any[HeaderCarrier]))
           .thenReturn(Future.failed(new Exception("submission failed")))
