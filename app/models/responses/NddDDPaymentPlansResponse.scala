@@ -16,7 +16,7 @@
 
 package models.responses
 
-import models.PaymentPlanType
+import models.{DirectDebitSource, PaymentPlanType}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
 
@@ -43,7 +43,9 @@ object NddPaymentPlan {
       (__ \ "planRefNumber").read[String] and
       (__ \ "planType").read[String].map(code => planTypeMapping.getOrElse(code, "unknownPlanType")) and
       (__ \ "paymentReference").read[String] and
-      (__ \ "hodService").read[String] and
+      (__ \ "hodService").read[String].map { code =>
+        DirectDebitSource.hodServiceMapping.getOrElse(code, code)
+      } and
       (__ \ "submissionDateTime").read[LocalDateTime]
   )(NddPaymentPlan.apply _)
 

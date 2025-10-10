@@ -59,17 +59,11 @@ class PaymentPlanDetailsController @Inject() (
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
             updatedAnswers <- planDetail.scheduledPaymentAmount match {
                                 case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
-                                case None =>
-                                  Future.failed(
-                                    new IllegalStateException("scheduledPaymentAmount is missing when updating AmendPaymentAmountPage")
-                                  )
+                                case None         => Future.successful(updatedAnswers)
                               }
             updatedAnswers <- planDetail.scheduledPaymentStartDate match {
                                 case Some(startDate) => Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, startDate))
-                                case None =>
-                                  Future.failed(
-                                    new IllegalStateException("scheduledPaymentStartDate is missing when updating AmendPlanStartDatePage")
-                                  )
+                                case None            => Future.successful(updatedAnswers)
                               }
             updatedAnswers <- planDetail.scheduledPaymentEndDate match {
                                 case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
@@ -141,24 +135,21 @@ class PaymentPlanDetailsController @Inject() (
   ): Future[Boolean] = {
     planDetail.planType match {
       case PaymentPlanType.SinglePaymentPlan.toString =>
-        nddService.isTwoDaysPriorPaymentDate(
-          planDetail.scheduledPaymentStartDate.getOrElse(
-            throw new IllegalStateException("scheduledPaymentStartDate is missing")
-          )
-        )
+        planDetail.scheduledPaymentStartDate match {
+          case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
+          case None            => Future.successful(true)
+        }
 
       case PaymentPlanType.BudgetPaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
         for {
-          isTwoDaysBeforeStart <- nddService.isTwoDaysPriorPaymentDate(
-                                    planDetail.scheduledPaymentStartDate.getOrElse(
-                                      throw new IllegalStateException("scheduledPaymentStartDate is missing")
-                                    )
-                                  )
-          isThreeDaysBeforeEnd <- nddService.isThreeDaysPriorPlanEndDate(
-                                    planDetail.scheduledPaymentEndDate.getOrElse(
-                                      throw new IllegalStateException("scheduledPaymentEndDate is missing")
-                                    )
-                                  )
+          isTwoDaysBeforeStart <- planDetail.scheduledPaymentStartDate match {
+                                    case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
+                                    case None            => Future.successful(true)
+                                  }
+          isThreeDaysBeforeEnd <- planDetail.scheduledPaymentEndDate match {
+                                    case Some(endDate) => nddService.isThreeDaysPriorPlanEndDate(endDate)
+                                    case None          => Future.successful(true)
+                                  }
         } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
 
       case _ => Future.successful(false) // For TaxCredit repayment plan
