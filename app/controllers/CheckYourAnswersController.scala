@@ -147,19 +147,19 @@ class CheckYourAnswersController @Inject() (
     ChrisSubmissionRequest(
       serviceType                     = required(DirectDebitSourcePage),
       paymentPlanType                 = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan),
-      paymentFrequency                = ua.get(PaymentsFrequencyPage),
+      paymentPlanReferenceNumber      = None,
+      paymentFrequency                = ua.get(PaymentsFrequencyPage).map(_.toString),
       yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
       planStartDate                   = ua.get(PlanStartDatePage),
       planEndDate                     = ua.get(PlanEndDatePage),
       paymentDate                     = ua.get(PaymentDatePage),
       yearEndAndMonth                 = ua.get(YearEndAndMonthPage),
-      bankDetailsAddress              = required(BankDetailsAddressPage),
-      bankName                        = required(BankDetailsBankNamePage),
       ddiReferenceNo                  = ddiReference,
       paymentReference                = required(PaymentReferencePage),
       totalAmountDue                  = ua.get(TotalAmountDuePage),
       paymentAmount                   = ua.get(PaymentAmountPage),
       regularPaymentAmount            = ua.get(RegularPaymentAmountPage),
+      amendPaymentAmount              = None,
       calculation                     = calculationOpt
     )
   }

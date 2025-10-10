@@ -326,7 +326,8 @@ totalAmountDue.error.belowMinimum = The amount entered must be greater than or e
 totalAmountDue.change.hidden = Total amount due
 totalAmountDue.monthly.checkYourAnswersLabel = Monthly Payment Amount
 totalAmountDue.final.checkYourAnswersLabel = Final Payment Amount
-totalAmountDue.hint = This is the total amount due for repayment to HM Revenue & Customs (HMRC) and must match the amount notified to you in your ’Notice to Pay’.<br><br><strong> Must be pounds and pence value. For example, 1000.00</strong>
+totalAmountDue.p1 = This is the total amount due for repayment to HMRC and must match the amount notified to you in your ''Notice to Pay''.
+totalAmountDue.hint = Value must be in pounds and pence, like 967.82
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
