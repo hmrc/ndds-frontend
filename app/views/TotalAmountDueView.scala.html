@@ -41,7 +41,12 @@
             )
             .withPrefix(PrefixOrSuffix(content = "£"))
             .withWidth(Fixed10)
-            .withHint(HintViewModel(HtmlContent(messages("totalAmountDue.hint"))))
+            .withHint(HintViewModel(HtmlContent(Seq
+                (
+                    s"<p class='govuk-body'>${messages("totalAmountDue.p1")}</p>",
+                    messages("totalAmountDue.hint")
+                ).mkString
+            )))
         )
 
         @govukButton(
