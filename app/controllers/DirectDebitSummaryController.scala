@@ -21,7 +21,7 @@ import models.UserAnswers
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
-import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSummaryView
@@ -46,13 +46,19 @@ class DirectDebitSummaryController @Inject() (
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
         cleansePaymentReference(userAnswers).flatMap { _ =>
-          nddService.retrieveDirectDebitPaymentPlans(reference) map { ddPaymentPlans =>
-            Ok(
-              view(
-                reference,
-                ddPaymentPlans
+          nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
+            for {
+              updatedAnswers <- Future.fromTry(userAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield {
+              Ok(
+                view(
+                  reference,
+                  ddPaymentPlans
+                )
               )
-            )
+            }
           }
         }
       case None =>

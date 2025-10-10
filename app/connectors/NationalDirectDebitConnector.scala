@@ -17,8 +17,8 @@
 package connectors
 
 import models.NddResponse
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse, PaymentPlanResponse}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
+import models.responses.*
 import play.api.Logging
 import play.api.http.Status.OK
 import play.api.libs.json.Json
@@ -105,5 +105,14 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
     http
       .get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans/$paymentPlanReference")(hc)
       .execute[PaymentPlanResponse]
+  }
+
+  def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)(implicit
+    hc: HeaderCarrier
+  ): Future[DuplicateCheckResponse] = {
+    http
+      .post(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/duplicate-plan-check")
+      .withBody(Json.toJson(request))
+      .execute[DuplicateCheckResponse]
   }
 }

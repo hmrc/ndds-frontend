@@ -22,8 +22,8 @@ import connectors.NationalDirectDebitConnector
 import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
-import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
+import models.responses.*
+import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatest.freespec.AnyFreeSpec
@@ -34,6 +34,7 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
@@ -606,6 +607,122 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         val result = intercept[Exception](service.getPaymentPlanDetails("test-ddRef", "test-pp-ref").futureValue)
 
         result.getMessage must include("error")
+      }
+    }
+
+    "isDuplicatePaymentPlan" - {
+
+      "return true when count is more than 1 payment plan and it is single payment plan so connector returns true" in {
+        val mockSinglePaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
+          )
+
+        val currentDate = LocalDate.now()
+
+        val userAnswersSingle = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, "default ref 1")
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "payment ref 1")
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
+          .success
+          .value
+          .set(DirectDebitSourcePage, DirectDebitSource.SA)
+          .success
+          .value
+          .set(AmendPaymentPlanTypePage, singlePlan)
+          .success
+          .value
+          .set(TotalAmountDuePage, 780.00)
+          .success
+          .value
+          .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly)
+          .success
+          .value
+          .set(PaymentPlansCountQuery, 4)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, currentDate)
+          .success
+          .value
+
+        when(mockConnector.isDuplicatePaymentPlan(any(), any())(any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+
+        val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswersSingle).futureValue
+
+        result shouldBe DuplicateCheckResponse(true)
+      }
+
+      "return false count is 1 payment plan and single payment plan so no call to connector returns false" in {
+        val userAnswers = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, "default ref 1")
+          .success
+          .value
+          .set(PaymentPlansCountQuery, 1)
+          .success
+          .value
+
+        val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswers).futureValue
+
+        result shouldBe DuplicateCheckResponse(false)
+      }
+
+      "return true when count is more than 1 payment plan and it is budget payment plan so connector returns true" in {
+        val mockBudgetPaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+          )
+
+        val userAnswersBudget = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, "default ref 1")
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "payment ref 1")
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+          .success
+          .value
+          .set(DirectDebitSourcePage, DirectDebitSource.SA)
+          .success
+          .value
+          .set(AmendPaymentPlanTypePage, budgetPlan)
+          .success
+          .value
+          .set(TotalAmountDuePage, 780.00)
+          .success
+          .value
+          .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly)
+          .success
+          .value
+          .set(PaymentPlansCountQuery, 4)
+          .success
+          .value
+
+        when(mockConnector.isDuplicatePaymentPlan(any(), any())(any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+
+        val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswersBudget).futureValue
+
+        result shouldBe DuplicateCheckResponse(true)
+      }
+
+      "return false when count is 1 payment plan so no call to the connector returns false" in {
+        val userAnswersBudget = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, "default ref 1")
+          .success
+          .value
+          .set(PaymentPlansCountQuery, 1)
+          .success
+          .value
+
+        val result: DuplicateCheckResponse = service.isDuplicatePaymentPlan(userAnswersBudget).futureValue
+
+        result shouldBe DuplicateCheckResponse(false)
       }
     }
   }
