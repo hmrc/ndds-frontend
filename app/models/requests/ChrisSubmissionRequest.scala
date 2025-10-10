@@ -16,8 +16,7 @@
 
 package models.requests
 
-import models.responses.BankAddress
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
@@ -25,20 +24,21 @@ import java.time.LocalDate
 case class ChrisSubmissionRequest(
   serviceType: DirectDebitSource,
   paymentPlanType: PaymentPlanType,
-  paymentFrequency: Option[PaymentsFrequency],
+  paymentPlanReferenceNumber: Option[String],
+  paymentFrequency: Option[String],
   yourBankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus,
   planStartDate: Option[PlanStartDateDetails],
   planEndDate: Option[LocalDate],
   paymentDate: Option[PaymentDateDetails],
   yearEndAndMonth: Option[YearEndAndMonth],
-  bankDetailsAddress: BankAddress,
   ddiReferenceNo: String,
   paymentReference: String,
-  bankName: String,
   totalAmountDue: Option[BigDecimal],
   paymentAmount: Option[BigDecimal],
   regularPaymentAmount: Option[BigDecimal],
-  calculation: Option[PaymentPlanCalculation]
+  amendPaymentAmount: Option[BigDecimal],
+  calculation: Option[PaymentPlanCalculation],
+  amendPlan: Boolean = false
 )
 
 object ChrisSubmissionRequest {
