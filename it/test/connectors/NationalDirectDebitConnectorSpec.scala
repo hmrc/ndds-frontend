@@ -948,6 +948,8 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
 
   "isDuplicatePaymentPlan" should {
 
+    val currentDate = LocalDate.now()
+
     val duplicateCheckRequest: PaymentPlanDuplicateCheckRequest = PaymentPlanDuplicateCheckRequest(
       directDebitReference = "testRef",
       paymentPlanReference = "payment ref 123",
@@ -956,7 +958,8 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       paymentReference     = "payment ref",
       paymentAmount        = 120.00,
       totalLiability       = 780.00,
-      paymentFrequency     = 1
+      paymentFrequency     = 1,
+      paymentStartDate     = currentDate
     )
 
     "successfully return true when there is a duplicate Plan with 200 OK" in {

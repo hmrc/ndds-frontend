@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.AmendPlanStartDateFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage, NewAmendPlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -84,18 +84,24 @@ class AmendPlanStartDateController @Inject() (
                   Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                 } else {
                   for {
-                    duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers)
-                    updatedAnswers         <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
+                    updatedAnswers <- if (value != dbStartDate) {
+                                        Future.fromTry(userAnswers.set(NewAmendPlanStartDatePage, value))
+                                      } else {
+                                        Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
+                                      }
+                    duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(updatedAnswers)
+                    updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, value))
                     _                      <- sessionRepository.set(updatedAnswers)
                   } yield {
-                    if (duplicateCheckResponse.isDuplicate) {
-                      println("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
-                      logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+                    val isDuplicate = duplicateCheckResponse.isDuplicate
+                    if (isDuplicate) {
+                      println("Duplicate check response is " + isDuplicate)
+                      logger.warn("Duplicate check response is " + isDuplicate)
                       // TODO: Replace with new Warning page DTR-542 DW1
                       Redirect(routes.JourneyRecoveryController.onPageLoad())
                     } else {
-                      println("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
-                      logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+                      println("Duplicate check response is " + isDuplicate)
+                      logger.info("Duplicate check response is " + isDuplicate)
                       Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
                     }
                   }

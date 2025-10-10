@@ -18,8 +18,10 @@ package utils
 
 import models.requests.PaymentPlanDuplicateCheckRequest
 import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
-import pages.{BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
+import pages.{AmendPlanStartDatePage, BankDetailsAddressPage, BankDetailsBankNamePage, NewAmendPlanStartDatePage, YourBankDetailsPage}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+
+import java.time.LocalDate
 
 object Utils {
   val emptyString = ""
@@ -70,16 +72,41 @@ object Utils {
     directDebitRef: String
   ): PaymentPlanDuplicateCheckRequest = {
 
+    val planType =
+      userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails.planType).getOrElse(throw new RuntimeException("Missing PaymentPlanType"))
+
+    val startDate: LocalDate = planType match {
+      case PaymentPlanType.SinglePaymentPlan.toString =>
+        userAnswers
+          .get(NewAmendPlanStartDatePage)
+          .orElse(userAnswers.get(AmendPlanStartDatePage))
+          .getOrElse(throw new RuntimeException("Missing start date from both NewAmendPlanStartDatePage and AmendPlanStartDatePage"))
+
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        userAnswers
+          .get(PaymentPlanDetailsQuery)
+          .flatMap(_.paymentPlanDetails.scheduledPaymentStartDate)
+          .getOrElse(throw new RuntimeException("Missing scheduledPaymentStartDate in PaymentPlanDetailsQuery"))
+
+      case _ =>
+        throw new RuntimeException(s"Unsupported plan type: $planType")
+    }
+
     PaymentPlanDuplicateCheckRequest(
       // TODO: Temp data with be replaced with actual data
-      directDebitReference = userAnswers.get(DirectDebitReferenceQuery).get,
-      paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).get,
-      planType             = PaymentPlanType.SinglePaymentPlan.toString,
-      paymentService       = DirectDebitSource.SA.toString,
-      paymentReference     = userAnswers.get(PaymentPlanDetailsQuery).get.paymentPlanDetails.paymentReference,
-      paymentAmount        = BigDecimal(120.00),
-      totalLiability       = BigDecimal(780.00),
-      paymentFrequency     = 1
+      directDebitReference = userAnswers.get(DirectDebitReferenceQuery).getOrElse(throw new RuntimeException("Missing DirectDebitReferenceQuery")),
+      paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse(throw new RuntimeException("Missing PaymentPlanReferenceQuery")),
+      planType =
+        userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails.planType).getOrElse(throw new RuntimeException("Missing PaymentPlanType")),
+      paymentService = DirectDebitSource.SA.toString,
+      paymentReference = userAnswers
+        .get(PaymentPlanDetailsQuery)
+        .map(_.paymentPlanDetails.paymentReference)
+        .getOrElse(throw new RuntimeException("Missing PaymentPlanDetailsQuery or paymentReference")),
+      paymentAmount    = BigDecimal(120.00),
+      totalLiability   = BigDecimal(780.00),
+      paymentFrequency = 1,
+      paymentStartDate = startDate
     )
   }
 }

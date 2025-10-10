@@ -588,6 +588,8 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
             dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
           )
 
+        val currentDate = LocalDate.now()
+
         val userAnswersSingle = emptyUserAnswers
           .set(DirectDebitReferenceQuery, "default ref 1")
           .success
@@ -611,6 +613,9 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
           .set(PaymentPlansCountQuery, 4)
+          .success
+          .value
+          .set(NewAmendPlanStartDatePage, currentDate)
           .success
           .value
 

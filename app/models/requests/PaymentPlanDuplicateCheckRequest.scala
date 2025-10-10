@@ -18,6 +18,8 @@ package models.requests
 
 import play.api.libs.json.{Json, OFormat}
 
+import java.time.LocalDate
+
 case class PaymentPlanDuplicateCheckRequest(
   directDebitReference: String,
   paymentPlanReference: String,
@@ -26,7 +28,8 @@ case class PaymentPlanDuplicateCheckRequest(
   paymentReference: String,
   paymentAmount: BigDecimal,
   totalLiability: BigDecimal,
-  paymentFrequency: Int
+  paymentFrequency: Int,
+  paymentStartDate: LocalDate
 )
 
 object PaymentPlanDuplicateCheckRequest {
