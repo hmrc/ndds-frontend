@@ -92,7 +92,7 @@ class AmendPlanEndDateController @Inject() (
                         .fill(value)
                         .withError(
                           key     = "value", // form field name in AmendPlanEndDateFormProvider
-                          message = "planEndDate.error.nextPaymentDateValid" // exact key from messages file
+                          message = "amendPlanEndDate.error.nextPaymentDateValid" // exact key from messages file
                         )
                       Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                     } else {

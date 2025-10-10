@@ -440,6 +440,7 @@ amendPlanEndDate.title = Plan end date
 amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026
+amendPlanEndDate.error.nextPaymentDateValid = Next Payment date is not valid, may be plan ended already
 
 amendPaymentPlanConfirmation.title = Confirm new payment plan details - amend a payment plan
 amendPaymentPlanConfirmation.heading = Confirm new payment plan details
@@ -482,3 +483,4 @@ amendPaymentPlanUpdate.endDate = Plan end date
 amendPaymentPlanUpdate.print = Print this confirmation
 amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
 amendPaymentPlanUpdate.close = Close
+
