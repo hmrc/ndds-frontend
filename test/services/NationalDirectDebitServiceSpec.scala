@@ -615,7 +615,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .set(PaymentPlansCountQuery, 4)
           .success
           .value
-          .set(NewAmendPlanStartDatePage, currentDate)
+          .set(AmendPlanStartDatePage, currentDate)
           .success
           .value
 
