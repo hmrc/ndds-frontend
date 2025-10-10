@@ -55,6 +55,18 @@ object DirectDebitSource extends Enumerable.Implicits {
     VAT
   )
 
+  val hodServiceMapping: Map[String, String] = Map(
+    "COTA" -> CT.toString,
+    "NIDN" -> NIC.toString,
+    "SAFE" -> OL.toString,
+    "PAYE" -> PAYE.toString,
+    "CESA" -> SA.toString,
+    "SDLT" -> SDLT.toString,
+    "NTC"  -> TC.toString,
+    "VAT"  -> VAT.toString,
+    "MGD"  -> MGD.toString
+  )
+
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>
     val hintKey = s"directDebitSource.${value.toString}.hint"
     val hintText = messages(hintKey)
