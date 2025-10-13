@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.responses.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -278,6 +278,8 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
         when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(true))
+        when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
 
         val directDebitReference = "DDI123456789"
 
