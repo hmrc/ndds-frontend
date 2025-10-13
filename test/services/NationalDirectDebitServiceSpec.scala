@@ -615,17 +615,11 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "return true when count is more than 1 payment plan and it is single payment plan so connector returns true" in {
         val mockSinglePaymentPlanDetailResponse =
           dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
-          )
-
-        val mockServiceType =
-          dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(hodService = DirectDebitSource.SA.toString)
-          )
-
-        val mockPaymentFrequency =
-          dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString))
+            dummyPlanDetailResponse.paymentPlanDetails.copy(
+              planType                  = PaymentPlanType.SinglePaymentPlan.toString,
+              hodService                = DirectDebitSource.SA.toString,
+              scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString)
+            )
           )
 
         val currentDate = LocalDate.now()
@@ -640,16 +634,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
           .success
           .value
-          .set(PaymentPlanDetailsQuery, mockServiceType)
-          .success
-          .value
-          .set(AmendPaymentPlanTypePage, singlePlan)
-          .success
-          .value
           .set(TotalAmountDuePage, 780.00)
-          .success
-          .value
-          .set(PaymentPlanDetailsQuery, mockPaymentFrequency)
           .success
           .value
           .set(PaymentPlansCountQuery, 4)
@@ -684,17 +669,11 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "return true when count is more than 1 payment plan and it is budget payment plan so connector returns true" in {
         val mockBudgetPaymentPlanDetailResponse =
           dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
-          )
-
-        val mockServiceType =
-          dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(hodService = DirectDebitSource.SA.toString)
-          )
-
-        val mockPaymentFrequency =
-          dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString))
+            dummyPlanDetailResponse.paymentPlanDetails.copy(
+              planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
+              hodService                = DirectDebitSource.SA.toString,
+              scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString)
+            )
           )
 
         val userAnswersBudget = emptyUserAnswers
@@ -707,16 +686,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
           .success
           .value
-          .set(PaymentPlanDetailsQuery, mockServiceType)
-          .success
-          .value
-          .set(AmendPaymentPlanTypePage, budgetPlan)
-          .success
-          .value
           .set(TotalAmountDuePage, 780.00)
-          .success
-          .value
-          .set(PaymentPlanDetailsQuery, mockPaymentFrequency)
           .success
           .value
           .set(PaymentPlansCountQuery, 4)

@@ -52,7 +52,7 @@ trait SpecBase extends AnyFreeSpec with Matchers with TryValues with OptionValue
       ),
       paymentPlanDetails = PaymentPlanDetails(
         hodService                = "sa",
-        planType                  = "singlePaymentPlan",
+        planType                  = "dummyPlan",
         paymentReference          = "paymentReference",
         submissionDateTime        = now.minusDays(5),
         scheduledPaymentAmount    = Some(120.00),
