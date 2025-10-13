@@ -19,7 +19,6 @@ package controllers
 import controllers.actions.*
 import forms.AmendPlanEndDateFormProvider
 import models.{Mode, UserAnswers}
-import models.requests.DataRequest
 import navigation.Navigator
 import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
 import play.api.Logging

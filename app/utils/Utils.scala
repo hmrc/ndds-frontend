@@ -17,8 +17,8 @@
 package utils
 
 import models.requests.PaymentPlanDuplicateCheckRequest
-import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
-import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, BankDetailsAddressPage, BankDetailsBankNamePage, TotalAmountDuePage, YourBankDetailsPage}
+import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
+import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 
 import java.time.LocalDate
@@ -101,15 +101,47 @@ object Utils {
         throw new RuntimeException(s"Unsupported plan type: $planType")
     }
 
+    val planTypeMapping: Map[String, String] = Map(
+      PaymentPlanType.SinglePaymentPlan.toString      -> "01",
+      PaymentPlanType.BudgetPaymentPlan.toString      -> "02",
+      PaymentPlanType.TaxCreditRepaymentPlan.toString -> "03",
+      PaymentPlanType.VariablePaymentPlan.toString    -> "04"
+    )
+
+    val paymentFrequencyMapping: Map[String, Int] = Map(
+      PaymentsFrequency.FortNightly.toString -> 1,
+      PaymentsFrequency.Weekly.toString      -> 2,
+      PaymentsFrequency.FourWeekly.toString  -> 3,
+      PaymentsFrequency.Monthly.toString     -> 5,
+      PaymentsFrequency.Quarterly.toString   -> 6,
+      PaymentsFrequency.SixMonthly.toString  -> 7,
+      PaymentsFrequency.Annually.toString    -> 9
+    )
+
+    val hodServiceMapping: Map[String, String] = Map(
+      DirectDebitSource.CT.toString   -> "COTA",
+      DirectDebitSource.NIC.toString  -> "NIDN",
+      DirectDebitSource.OL.toString   -> "SAFE",
+      DirectDebitSource.PAYE.toString -> "PAYE",
+      DirectDebitSource.SA.toString   -> "CESA",
+      DirectDebitSource.SDLT.toString -> "SDLT",
+      DirectDebitSource.TC.toString   -> "NTC",
+      DirectDebitSource.VAT.toString  -> "VAT",
+      DirectDebitSource.MGD.toString  -> "MGD"
+    )
+
     PaymentPlanDuplicateCheckRequest(
-      // TODO: Temp data with be replaced with actual data
       directDebitReference = userAnswers.get(DirectDebitReferenceQuery).getOrElse(throw new RuntimeException("Missing DirectDebitReferenceQuery")),
       paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse(throw new RuntimeException("Missing PaymentPlanReferenceQuery")),
-      planType =
-        userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails.planType).getOrElse(throw new RuntimeException("Missing PaymentPlanType")),
+      planType = userAnswers
+        .get(PaymentPlanDetailsQuery)
+        .map(_.paymentPlanDetails.planType)
+        .flatMap(planTypeMapping.get)
+        .getOrElse(throw new RuntimeException("Missing PaymentPlanType")),
       paymentService = userAnswers
         .get(PaymentPlanDetailsQuery)
         .map(_.paymentPlanDetails.hodService)
+        .flatMap(hodServiceMapping.get)
         .getOrElse(throw new RuntimeException("Missing paymentService")),
       paymentReference = userAnswers
         .get(PaymentPlanDetailsQuery)
@@ -120,7 +152,11 @@ object Utils {
         .get(PaymentPlanDetailsQuery)
         .flatMap(_.paymentPlanDetails.balancingPaymentAmount)
         .getOrElse(throw new RuntimeException("Missing TotalLiability")),
-      paymentFrequency = 1,
+      paymentFrequency = userAnswers
+        .get(PaymentPlanDetailsQuery)
+        .flatMap(_.paymentPlanDetails.scheduledPaymentFrequency)
+        .flatMap(paymentFrequencyMapping.get)
+        .getOrElse(throw new RuntimeException("Missing Payment Frequency")),
       paymentStartDate = startDate
     )
   }

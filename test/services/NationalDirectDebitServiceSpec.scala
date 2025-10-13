@@ -618,6 +618,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
             dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
           )
 
+        val mockServiceType =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(hodService = DirectDebitSource.SA.toString)
+          )
+
+        val mockPaymentFrequency =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString))
+          )
+
         val currentDate = LocalDate.now()
 
         val userAnswersSingle = emptyUserAnswers
@@ -630,7 +640,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
           .success
           .value
-          .set(DirectDebitSourcePage, DirectDebitSource.SA)
+          .set(PaymentPlanDetailsQuery, mockServiceType)
           .success
           .value
           .set(AmendPaymentPlanTypePage, singlePlan)
@@ -639,7 +649,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .set(TotalAmountDuePage, 780.00)
           .success
           .value
-          .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly)
+          .set(PaymentPlanDetailsQuery, mockPaymentFrequency)
           .success
           .value
           .set(PaymentPlansCountQuery, 4)
@@ -677,6 +687,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
             dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
           )
 
+        val mockServiceType =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(hodService = DirectDebitSource.SA.toString)
+          )
+
+        val mockPaymentFrequency =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString))
+          )
+
         val userAnswersBudget = emptyUserAnswers
           .set(DirectDebitReferenceQuery, "default ref 1")
           .success
@@ -687,7 +707,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
           .success
           .value
-          .set(DirectDebitSourcePage, DirectDebitSource.SA)
+          .set(PaymentPlanDetailsQuery, mockServiceType)
           .success
           .value
           .set(AmendPaymentPlanTypePage, budgetPlan)
@@ -696,7 +716,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .set(TotalAmountDuePage, 780.00)
           .success
           .value
-          .set(PaymentsFrequencyPage, PaymentsFrequency.Weekly)
+          .set(PaymentPlanDetailsQuery, mockPaymentFrequency)
           .success
           .value
           .set(PaymentPlansCountQuery, 4)
