@@ -22,7 +22,7 @@ import connectors.NationalDirectDebitConnector
 import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
-import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
+import models.responses.{AmendLockResponse, EarliestPaymentDate, GenerateDdiRefResponse, NddDDPaymentPlansResponse}
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
@@ -606,6 +606,26 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         val result = intercept[Exception](service.getPaymentPlanDetails("test-ddRef", "test-pp-ref").futureValue)
 
         result.getMessage must include("error")
+      }
+    }
+
+    "lockPaymentPlan" - {
+      "must successfully return Ok" in {
+        when(mockConnector.lockPaymentPlan(any(), any())(any()))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+        val result = service.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue
+
+        result mustBe AmendLockResponse(lockSuccessful = true)
+      }
+
+      "fail when the connector call fails" in {
+        when(mockConnector.lockPaymentPlan(any(), any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue)
+
+        result.getMessage must include("bang")
       }
     }
   }
