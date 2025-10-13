@@ -74,7 +74,6 @@ class AmendPlanEndDateController @Inject() (
             (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
               case (Some(planDetails), Some(amendedAmount)) =>
                 val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-                val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
                 val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
                 val frequency = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
 
@@ -102,8 +101,10 @@ class AmendPlanEndDateController @Inject() (
                     } else {
                       for {
                         updatedAnswers1 <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                        updatedAnswers2 <- Future.fromTry(updatedAnswers1.set(AmendPlanStartDatePage, result.potentialNextPaymentDate)) //this needed for budgting amend end date for chris submission
-                        _               <- sessionRepository.set(updatedAnswers2)
+                        updatedAnswers2 <- Future.fromTry(
+                                             updatedAnswers1.set(AmendPlanStartDatePage, result.potentialNextPaymentDate)
+                                           ) // this needed for budgting amend end date for chris submission
+                        _ <- sessionRepository.set(updatedAnswers2)
                       } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers2))
                     }
                   }

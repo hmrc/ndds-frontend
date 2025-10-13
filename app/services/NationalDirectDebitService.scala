@@ -235,7 +235,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       case "fortnightly" => 14
       case "four weekly" => 28
     }
-
     // Step 1 – find days difference
     val daysDiff = java.time.temporal.ChronoUnit.DAYS.between(startDate, today).toInt
 
@@ -252,7 +251,14 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     if (!potentialNext.isAfter(today.plusDays(3))) {
       potentialNext = potentialNext.plusWeeks(weeksUntilNextPayment)
     }
-    logger.info(s"potentialNext date for weekly....: $potentialNext")
+    logger.info(
+      s"""| ............Weekly..................
+          | End date update result Results:
+          |  • potentialNext = $potentialNext
+          |  • Start date before f20 = $startDate
+
+          |""".stripMargin
+    )
     potentialNext
   }
 
@@ -322,7 +328,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     // Step 7: If potential next payment date is within next 3 working days
     // then move one more frequency ahead, and adjust for month rollover
 
-    if (!potentialNext.isAfter(today.plusDays(3))) {
+    if (!potentialNext.isAfter(today.plusDays(3))) { // 4-c
       monthsToAdd += monthsFrequency
       potentialNext = startDate.plusMonths(monthsToAdd)
       if (potentialNext.getMonthValue < startDate.getMonthValue) {
@@ -331,6 +337,15 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           .`with`(java.time.temporal.TemporalAdjusters.firstDayOfMonth())
       }
     }
+
+    logger.info(
+      s"""| ............Monthly..................
+          | End date update result Results:
+          |  • potentialNext = $potentialNext
+          |  • Start date before f20 = $startDate
+
+          |""".stripMargin
+    )
     potentialNext
   }
 
