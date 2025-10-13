@@ -20,6 +20,7 @@ import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NextPaymentValidationResult, NormalMode}
+import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -118,12 +119,12 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       )
       val planDetails = PaymentPlanDetails(
         hodService                = "SA",
-        planType                  = "Single payment",
+        planType                  = PaymentPlanType.SinglePaymentPlan.toString,
         paymentReference          = "987654321K",
         submissionDateTime        = LocalDateTime.now(),
         scheduledPaymentAmount    = Some(BigDecimal(1500)),
         scheduledPaymentStartDate = Some(LocalDate.now()),
-        scheduledPaymentEndDate   = Some(LocalDate.now()),
+        scheduledPaymentEndDate   = Some(LocalDate.now().plusDays(10)),
         scheduledPaymentFrequency = Some("Monthly"),
         initialPaymentStartDate   = Some(LocalDate.now()),
         initialPaymentAmount      = Some(BigDecimal(1500)),
@@ -161,13 +162,13 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Single payment")
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
           .success
           .value
-          .set(AmendPlanEndDatePage, validAnswer)
+          .set(AmendPlanEndDatePage, paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
           .success
           .value
 
@@ -181,10 +182,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
             .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
           val view = application.injector.instanceOf[AmendPlanEndDateView]
-          val request = postRequestWithDate(validAnswer)
+          val request = postRequestWithDate(validAnswer.plusDays(10))
           val result = route(application, request).value
 
-          val errorForm = form.fill(validAnswer).withError("value", "amendment.noChange")
+          val errorForm = form.fill(validAnswer.plusDays(10)).withError("value", "amendment.noChange")
 
           status(result) mustEqual BAD_REQUEST
           contentAsString(result) mustEqual
@@ -230,13 +231,13 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Single payment")
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
           .success
           .value
-          .set(AmendPlanEndDatePage, validAnswer.plusDays(3))
+          .set(AmendPlanEndDatePage, paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
           .success
           .value
 
@@ -250,7 +251,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
             .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
 
-          val request = postRequestWithDate(validAnswer.plusDays(3))
+          val request = postRequestWithDate(validAnswer.plusDays(7))
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER

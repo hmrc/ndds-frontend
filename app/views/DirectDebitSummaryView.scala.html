@@ -81,7 +81,7 @@
                 ),
                 SummaryListRow(
                     key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")),
-                    value = Value(content = HtmlContent(pp.hodService))
+                    value = Value(content = HtmlContent(messages(s"paymentPlanDetails.details.hodService.${pp.hodService}")))
                 ),
                 SummaryListRow(
                     key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.date")),

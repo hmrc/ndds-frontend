@@ -163,9 +163,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
     directDebitDetails: DirectDebitDetails
   ): YourBankDetailsWithAuddisStatus = {
     val bankDetails = YourBankDetails(
-      accountHolderName = directDebitDetails.bankAccountName.getOrElse(
-        throw new IllegalStateException("Missing bank account name")
-      ),
+      accountHolderName = directDebitDetails.bankAccountName.getOrElse(""),
       sortCode = directDebitDetails.bankSortCode.getOrElse(
         throw new IllegalStateException("Missing bank sort code")
       ),
