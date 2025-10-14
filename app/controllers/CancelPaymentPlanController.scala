@@ -18,12 +18,15 @@ package controllers
 
 import controllers.actions.*
 import forms.CancelPaymentPlanFormProvider
+
 import javax.inject.Inject
 import models.Mode
+import models.responses.{DirectDebitDetails, PaymentPlanDetails}
 import navigation.Navigator
 import pages.CancelPaymentPlanPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelPaymentPlanView
@@ -44,24 +47,48 @@ class CancelPaymentPlanController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  val form = formProvider()
+  private val form = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
-    val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
-      case None        => form
-      case Some(value) => form.fill(value)
-    }
+    (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
+      case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
+        val paymentPlan = paymentPlanDetail.paymentPlanDetails
+        val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
+          case None        => form
+          case Some(value) => form.fill(value)
+        }
+        Ok(view(preparedForm, mode, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
 
-    Ok(view(preparedForm, mode, "budgetPaymentPlan"))
+      case _ =>
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, "singlePaymentPlan"))),
+        formWithErrors => {
+          (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
+            case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
+              val paymentPlan = paymentPlanDetail.paymentPlanDetails
+              Future.successful(
+                BadRequest(
+                  view(
+                    formWithErrors,
+                    mode,
+                    paymentPlan.planType,
+                    paymentPlanReference,
+                    paymentPlan.scheduledPaymentAmount.get
+                  )
+                )
+              )
+
+            case _ =>
+              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          }
+        },
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(CancelPaymentPlanPage, value))
