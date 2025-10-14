@@ -74,7 +74,9 @@ object PaymentPlanDetails {
     (__ \ "hodService").read[String].map { code =>
       DirectDebitSource.hodServiceMapping.getOrElse(code, code)
     } and
-      (__ \ "planType").read[String].map(code => planTypeMapping.getOrElse(code, "unknownPlanType")) and
+      (__ \ "planType").read[String].map { code =>
+        planTypeMapping.getOrElse(code, code)
+      } and
       (__ \ "paymentReference").read[String] and
       (__ \ "submissionDateTime").read[LocalDateTime] and
       (__ \ "scheduledPaymentAmount").readNullable[BigDecimal] and
