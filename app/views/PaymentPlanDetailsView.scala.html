@@ -52,7 +52,7 @@
                             visuallyHiddenText = Some(messages("Amend"))
                         ) else null,
                         if (showActions && planType != PaymentPlanType.TaxCreditRepaymentPlan.toString) ActionItem(
-                            href = routes.CancelPaymentPlanController.onPageLoad(NormalMode).url,
+                            href = routes.CancelPaymentPlanController.onPageLoad().url,
                             content = messages("paymentPlanDetails.details.cancel"),
                             visuallyHiddenText = Some(messages("Cancel"))
                         ) else null,

@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.CancelPaymentPlanFormProvider
-import models.{NormalMode, PaymentPlanType}
+import models.PaymentPlanType
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -42,7 +42,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
   val formProvider = new CancelPaymentPlanFormProvider()
   private val form = formProvider()
 
-  private lazy val cancelPaymentPlanRoute = routes.CancelPaymentPlanController.onPageLoad(NormalMode).url
+  private lazy val cancelPaymentPlanRoute = routes.CancelPaymentPlanController.onPageLoad().url
 
   "CancelPaymentPlan Controller" - {
 
@@ -83,7 +83,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, NormalMode, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
             request,
             messages(application)
           ).toString
@@ -130,7 +130,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, NormalMode, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
             request,
             messages(application)
           ).toString
@@ -180,7 +180,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form.fill(true), NormalMode, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form.fill(true), paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
             request,
             messages(application)
           ).toString
@@ -253,12 +253,11 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm,
-                                               NormalMode,
-                                               paymentPlan.planType,
-                                               paymentPlanReference,
-                                               paymentPlan.scheduledPaymentAmount.get
-                                              )(request, messages(application)).toString
+        contentAsString(result) mustEqual
+          view(boundForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
+            request,
+            messages(application)
+          ).toString
       }
     }
 
