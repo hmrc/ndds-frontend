@@ -74,12 +74,9 @@ class AmendPlanEndDateController @Inject() (
             (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
               case (Some(planDetails), Some(amendedAmount)) =>
                 val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+                val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
 
-                val hasDateChanged = planDetails.paymentPlanDetails.scheduledPaymentEndDate match {
-                  case Some(dbEndDate) => value != dbEndDate
-                  case _               => true
-                }
-                val isNoChange = amendedAmount == dbAmount && !hasDateChanged
+                val isNoChange = amendedAmount == dbAmount && value == dbEndDate
 
                 if (isNoChange) {
                   val key = "amendment.noChange"
