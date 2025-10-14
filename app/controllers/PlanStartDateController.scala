@@ -69,7 +69,6 @@ class PlanStartDateController @Inject() (
           view(
             preparedForm,
             mode,
-            DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
             DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
             answers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers")),
             backLinkRedirect(mode, answers)
@@ -110,7 +109,6 @@ class PlanStartDateController @Inject() (
                           view(
                             formWithErrors,
                             mode,
-                            DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
                             DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
                             request.userAnswers
                               .get(DirectDebitSourcePage)

@@ -55,7 +55,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   val mockService: NationalDirectDebitService = mock[NationalDirectDebitService]
 
   private val expectedEarliestPlanStartDate: EarliestPaymentDate = EarliestPaymentDate("2025-02-06")
-  private val formattedDate = "06 Feb 2025"
   private val formattedDateNumeric = "06 02 2025"
   private val earliestPlanStartDate = "06-02-2025"
   private val testDirectDebitSource: DirectDebitSource = MGD
@@ -101,13 +100,10 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanStartDateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form,
-                                               NormalMode,
-                                               formattedDate,
-                                               formattedDateNumeric,
-                                               testDirectDebitSource,
-                                               Call("GET", paymentReferenceRoute)
-                                              )(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, formattedDateNumeric, testDirectDebitSource, Call("GET", paymentReferenceRoute))(
+          getRequest(),
+          messages(application)
+        ).toString
       }
     }
 
@@ -130,7 +126,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form.fill(validAnswer),
                                                NormalMode,
-                                               formattedDate,
                                                formattedDateNumeric,
                                                testDirectDebitSource,
                                                Call("GET", paymentReferenceRoute)
@@ -216,7 +211,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm,
                                                NormalMode,
-                                               formattedDate,
                                                formattedDateNumeric,
                                                testDirectDebitSource,
                                                Call("GET", paymentReferenceRoute)
