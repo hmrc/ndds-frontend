@@ -136,3 +136,8 @@ GET        /payment-plan/change-confirm-plan-details    controllers.AmendPayment
 POST       /payment-plan/change-confirm-plan-details    controllers.AmendPaymentPlanConfirmationController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-plan/payment-plan-confirmation      controllers.AmendPaymentPlanUpdateController.onPageLoad()
+
+GET        /already-have-payment-plan                   controllers.DuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
+POST       /already-have-payment-plan                   controllers.DuplicateWarningController.onSubmit(mode: Mode = NormalMode)
+GET        /change-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)

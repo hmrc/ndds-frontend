@@ -109,7 +109,7 @@ class AmendPlanStartDateController @Inject() (
     } yield {
       if (duplicateCheckResponse.isDuplicate) {
         logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Redirect(routes.DuplicateWarningController.onPageLoad(mode))
       } else {
         logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
         Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))

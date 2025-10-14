@@ -482,3 +482,12 @@ amendPaymentPlanUpdate.endDate = Plan end date
 amendPaymentPlanUpdate.print = Print this confirmation
 amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
 amendPaymentPlanUpdate.close = Close
+
+duplicateWarning.title = You already have a payment plan with these details
+duplicateWarning.h1 = You already have a payment plan with these details
+duplicateWarning.p1 = <br>You already have a payment plan set up with the same amount and dates.
+duplicateWarning.h2 = Do you want to continue with this amendment?
+duplicateWarning.error.required = Select yes if duplicateWarning
+duplicateWarning.change.hidden = DuplicateWarning
+duplicateWarning.yes= Yes
+duplicateWarning.no= No
