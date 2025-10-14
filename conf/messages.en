@@ -344,7 +344,7 @@ checkYourAnswers.p8 = <strong>Instruction to your Bank or Building Society to pa
 checkYourAnswers.p9 = HM Revenue & Customs (HMRC)<br/> HMRC Accounts Office <br/> Direct Debit Section <br/> Cumbernauld <br/> Glasgow G67 1YZ
 checkYourAnswers.acceptAndContinue = Accept and Continue
 
-directDebitConfirmation.title = Direct Debit payment set up
+directDebitConfirmation.title = Your direct debit payment was successful
 directDebitConfirmation.panel.title = Direct Debit payment set up
 directDebitConfirmation.panel.body = Your Direct Debit reference is<br /><strong>{0}</strong>
 directDebitConfirmation.inset.text = Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
