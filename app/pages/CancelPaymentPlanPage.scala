@@ -22,5 +22,5 @@ case object CancelPaymentPlanPage extends QuestionPage[Boolean] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "cancelPaymentPlan"
+  override def toString: String = "hasCancelledPaymentPlan"
 }

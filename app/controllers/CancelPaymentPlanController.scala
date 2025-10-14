@@ -53,7 +53,7 @@ class CancelPaymentPlanController @Inject() (
       case Some(value) => form.fill(value)
     }
 
-    Ok(view(preparedForm, mode))
+    Ok(view(preparedForm, mode, "budgetPaymentPlan"))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
@@ -61,7 +61,7 @@ class CancelPaymentPlanController @Inject() (
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, "singlePaymentPlan"))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(CancelPaymentPlanPage, value))

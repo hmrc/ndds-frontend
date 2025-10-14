@@ -483,8 +483,14 @@ amendPaymentPlanUpdate.print = Print this confirmation
 amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
 amendPaymentPlanUpdate.close = Close
 
-cancelPaymentPlan.title = cancelPaymentPlan
-cancelPaymentPlan.heading = cancelPaymentPlan
+cancelPaymentPlan.title = Cancel this payment plan - Manage a payment plan
+cancelPaymentPlan.heading = Cancel this payment plan
+cancelPaymentPlan.paymentReference = Payment reference: {0}
+cancelPaymentPlan.paymentAmount.single = Payment amount: {0}
+cancelPaymentPlan.paymentAmount.budget = Regular payment amount: {0}
+cancelPaymentPlan.p1 = Payments due within the next 3 working days cannot be cancelled.
+cancelPaymentPlan.p2 = For security reasons, you may be asked to re-authenticate your details.
+cancelPaymentPlan.h2 = Are you sure you want to cancel this payment plan?
 cancelPaymentPlan.checkYourAnswersLabel = cancelPaymentPlan
-cancelPaymentPlan.error.required = Select yes if cancelPaymentPlan
+cancelPaymentPlan.error.required = Select one option.
 cancelPaymentPlan.change.hidden = CancelPaymentPlan

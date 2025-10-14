@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import viewmodels.LegendSize._
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
@@ -22,7 +24,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, planType: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("cancelPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
@@ -32,10 +34,24 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
+        <h1 class="govuk-heading-xl">@messages("cancelPaymentPlan.heading")</h1>
+
+        <p class="govuk-body">
+            @messages("cancelPaymentPlan.paymentReference") <br/>
+            @if(planType == PaymentPlanType.SinglePaymentPlan.toString) {
+                @messages("cancelPaymentPlan.paymentAmount.single")<br/>
+            } else {
+                @messages("cancelPaymentPlan.paymentAmount.budget")<br/>
+            }
+        </p>
+
+        <p class="govuk-body">@messages("cancelPaymentPlan.p1")</p>
+        <p class="govuk-body">@messages("cancelPaymentPlan.p2")</p>
+
         @govukRadios(
             RadiosViewModel.yesNo(
                 field = form("value"),
-                legend = LegendViewModel(messages("cancelPaymentPlan.heading")).asPageHeading()
+                legend = Legend(messages("cancelPaymentPlan.h2")).asSecondaryHeading(Medium)
             )
         )
 
