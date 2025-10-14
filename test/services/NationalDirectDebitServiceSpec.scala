@@ -37,6 +37,7 @@ import play.api.test.Helpers.GET
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
+import utils.Frequency.{Monthly, Weekly}
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.global
@@ -620,7 +621,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       when(mockConnector.getFutureWorkingDays(any())(any()))
         .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, "monthly").futureValue
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
 
       result.potentialNextPaymentDate mustBe startDate
       result.nextPaymentDateValid mustBe true
@@ -634,7 +635,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       when(mockConnector.getFutureWorkingDays(any())(any()))
         .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, "monthly").futureValue
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
 
       (result.potentialNextPaymentDate.isAfter(startDate) ||
         result.potentialNextPaymentDate.isEqual(startDate)) mustBe true
@@ -649,7 +650,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       when(mockConnector.getFutureWorkingDays(any())(any()))
         .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, "weekly").futureValue
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
 
       result.potentialNextPaymentDate.isAfter(startDate) mustBe true
       result.nextPaymentDateValid mustBe true
@@ -663,7 +664,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       when(mockConnector.getFutureWorkingDays(any())(any()))
         .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, "monthly").futureValue
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
 
       result.potentialNextPaymentDate.isAfter(startDate) mustBe true
       result.nextPaymentDateValid mustBe true
@@ -677,7 +678,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       when(mockConnector.getFutureWorkingDays(any())(any()))
         .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, "weekly").futureValue
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
 
       result.nextPaymentDateValid mustBe false
     }
@@ -690,23 +691,23 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       when(mockConnector.getFutureWorkingDays(any())(any()))
         .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, "weekly").futureValue
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
 
       result.nextPaymentDateValid mustBe true
     }
 
-    "must throw exception when invalid frequency is provided" in {
-      val today = LocalDate.now()
-      val startDate = today.minusWeeks(2)
-
-      when(mockConnector.getFutureWorkingDays(any())(any()))
-        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
-
-      whenReady(service.calculateNextPaymentDate(startDate, null, "invalid").failed) { ex =>
-        ex mustBe a[IllegalArgumentException]
-        ex.getMessage must include("Unknown payment frequency")
-      }
-    }
+//    "must throw exception when invalid frequency is provided" in {
+//      val today = LocalDate.now()
+//      val startDate = today.minusWeeks(2)
+//
+//      when(mockConnector.getFutureWorkingDays(any())(any()))
+//        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+//
+//      whenReady(service.calculateNextPaymentDate(startDate, null, Fre).failed) { ex =>
+//        ex mustBe a[IllegalArgumentException]
+//        ex.getMessage must include("Unknown payment frequency")
+//      }
+//    }
 
   }
 

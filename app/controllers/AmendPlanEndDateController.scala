@@ -30,6 +30,7 @@ import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Frequency
 import views.html.AmendPlanEndDateView
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -75,7 +76,8 @@ class AmendPlanEndDateController @Inject() (
               case (Some(planDetails), Some(amendedAmount)) =>
                 val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
                 val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
-                val frequency = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
+                val frequencyStr = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
+                val frequency = Frequency.fromString(frequencyStr)
 
                 val hasDateChanged = planDetails.paymentPlanDetails.scheduledPaymentEndDate match {
                   case Some(dbEndDate) => value != dbEndDate
