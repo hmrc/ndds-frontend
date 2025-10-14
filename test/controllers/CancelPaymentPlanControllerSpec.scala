@@ -31,6 +31,7 @@ import play.api.test.Helpers.*
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import views.html.CancelPaymentPlanView
+import utils.MaskAndFormatUtils.*
 
 import scala.concurrent.Future
 
@@ -86,6 +87,9 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
             request,
             messages(application)
           ).toString
+
+        contentAsString(result) must include(s"Payment reference: <strong>$paymentPlanReference</strong>")
+        contentAsString(result) must include(s"Regular payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
       }
     }
 
@@ -130,6 +134,9 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
             request,
             messages(application)
           ).toString
+
+        contentAsString(result) must include(s"Payment reference: <strong>$paymentPlanReference</strong>")
+        contentAsString(result) must include(s"Payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
       }
     }
 
