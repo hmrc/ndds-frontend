@@ -47,16 +47,9 @@
                     govukDetails(
                         Details(
                             summary = messages("planStartDate.collapsable"),
-                            content = source match {
-                                case MGD => messages("planStartDate.collapsable.mgd.p1")
-                                case SA => messages("planStartDate.collapsable.sa.p1")
-                                case TC => messages("planStartDate.collapsable.tc.p1")
-                                case _ => throw new Exception("DirectDebitSource is not MGD, SA or TC from user answers")
-                            }
-
+                            content = messages(s"planStartDate.collapsable.${source}.p1")
                         )
                     ),
-
                     messages("planStartDate.fixedHint", dateTimeNumeric),
                 ).mkString
             )))
