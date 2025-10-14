@@ -23,6 +23,7 @@
     paragraph: Paragraph,
     layout: templates.Layout,
     govukSummaryList: GovukSummaryList,
+    govukDetails: GovukDetails,
     govukButton: GovukButton,
     formHelper: FormWithCSRF,
 )
@@ -33,25 +34,27 @@
 
     @formHelper(action = routes.CheckYourAnswersController.onSubmit(), Symbol("autoComplete") -> "off") {
         @h1("checkYourAnswers.heading")
-        @h2("checkYourAnswers.h2")
+        @h2("checkYourAnswers.ppDetails.h2")
         @govukSummaryList(list)
-        @paragraph("checkYourAnswers.p1")
-        @h3("checkYourAnswers.h3")
-        @paragraph("checkYourAnswers.p2")
-        @paragraph("checkYourAnswers.p3")
-        @paragraph("checkYourAnswers.p4")
-        @paragraph("checkYourAnswers.p5")
-        @paragraph("checkYourAnswers.p6")
-        @paragraph(messages("checkYourAnswers.p7", currentDate),  extraClasses="govuk-!-margin-top-7")
-        @paragraph("checkYourAnswers.p8")
-        <div class="govuk-body extra-line-spacing direct-debit-container">
-            <div class="direct-debit-text">
-                @Html(messages("checkYourAnswers.p9"))
-            </div>
-            <div class="direct-debit-logo">
-                <img src="@routes.Assets.versioned("images/logo.png")" alt="Direct Debit logo" />
-            </div>
-        </div>
+        @h2("checkYourAnswers.ddDeclaration.h2")
+
+        <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
+        @paragraph("checkYourAnswers.ddDeclaration.p1")
+        @paragraph("checkYourAnswers.ddDeclaration.p2")
+
+        @defining(HtmlFormat.fill(Seq(
+        paragraph("checkYourAnswers.collapsable.p1"),
+        paragraph("checkYourAnswers.collapsable.p2"),
+        paragraph("checkYourAnswers.collapsable.p3"),
+        paragraph("checkYourAnswers.collapsable.p4"),
+        paragraph("checkYourAnswers.collapsable.p5")
+        ))) { content =>
+                @govukDetails(
+                    Details(
+                        summary = messages("checkYourAnswers.collapsable"),
+                        content = HtmlContent(content)
+                ))
+        }
 
         @govukButton(
             ButtonViewModel(messages("checkYourAnswers.acceptAndContinue"))
