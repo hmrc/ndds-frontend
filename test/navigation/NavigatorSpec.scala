@@ -291,6 +291,33 @@ class NavigatorSpec extends SpecBase {
           navigator.nextPage(AmendPlanEndDatePage, NormalMode, userAnswers) mustBe
             routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
         }
+
+        "must go from a CancelPaymentPlanPage to PaymentPlanDetailsController" in {
+          val ua = userAnswers
+            .set(CancelPaymentPlanPage, false)
+            .success
+            .value
+
+          navigator.nextPage(CancelPaymentPlanPage, NormalMode, ua) mustBe
+            routes.PaymentPlanDetailsController.onPageLoad()
+        }
+
+        "must go from a CancelPaymentPlanPage to PaymentCancellationSuccessController" in { // TODO
+          val ua = userAnswers
+            .set(CancelPaymentPlanPage, true)
+            .success
+            .value
+
+          navigator.nextPage(CancelPaymentPlanPage, NormalMode, ua) mustBe
+            routes.JourneyRecoveryController.onPageLoad()
+        }
+
+        "must go from a CancelPaymentPlanPage to Journey Recovery Page" in {
+          val ua = userAnswers
+
+          navigator.nextPage(CancelPaymentPlanPage, NormalMode, ua) mustBe
+            routes.JourneyRecoveryController.onPageLoad()
+        }
       }
     }
 

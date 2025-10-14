@@ -21,7 +21,6 @@ import forms.CancelPaymentPlanFormProvider
 
 import javax.inject.Inject
 import models.Mode
-import models.responses.{DirectDebitDetails, PaymentPlanDetails}
 import navigation.Navigator
 import pages.CancelPaymentPlanPage
 import play.api.i18n.{I18nSupport, MessagesApi}
