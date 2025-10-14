@@ -302,12 +302,13 @@ class NavigatorSpec extends SpecBase {
             routes.PaymentPlanDetailsController.onPageLoad()
         }
 
-        "must go from a CancelPaymentPlanPage to PaymentCancellationSuccessController" in { // TODO
+        "must go from a CancelPaymentPlanPage to PaymentCancellationSuccessController" in {
           val ua = userAnswers
             .set(CancelPaymentPlanPage, true)
             .success
             .value
 
+          // TODO must redirect to CP2
           navigator.nextPage(CancelPaymentPlanPage, NormalMode, ua) mustBe
             routes.JourneyRecoveryController.onPageLoad()
         }
