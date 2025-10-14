@@ -92,6 +92,12 @@ class AmendPlanEndDateController @Inject() (
                 } else {
                   // Calculate next payment date and validate against plan end date
                   nddsService.calculateNextPaymentDate(dbStartDate, value, frequency).flatMap { result =>
+                    logger.info(
+                      s"""|[AmendPlanEndDateController]
+                          |  nextPaymentDateValid: $result.nextPaymentDateValid
+                          |  StartDate: $result.dbStartDate
+                          |""".stripMargin
+                    )
                     if (!result.nextPaymentDateValid) {
                       val errorForm = form
                         .fill(value)

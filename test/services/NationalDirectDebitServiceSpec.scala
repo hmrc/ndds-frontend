@@ -696,19 +696,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       result.nextPaymentDateValid mustBe true
     }
 
-//    "must throw exception when invalid frequency is provided" in {
-//      val today = LocalDate.now()
-//      val startDate = today.minusWeeks(2)
-//
-//      when(mockConnector.getFutureWorkingDays(any())(any()))
-//        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
-//
-//      whenReady(service.calculateNextPaymentDate(startDate, null, Fre).failed) { ex =>
-//        ex mustBe a[IllegalArgumentException]
-//        ex.getMessage must include("Unknown payment frequency")
-//      }
-//    }
-
   }
 
 }
