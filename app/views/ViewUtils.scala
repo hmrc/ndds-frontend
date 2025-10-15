@@ -34,12 +34,12 @@ object ViewUtils {
     if (form.hasErrors || form.hasGlobalErrors) messages("error.title.prefix") else ""
   }
 
-  def titleForJourney(form: Form[?], title: String, section: Option[String] = None)(implicit messages: Messages): String =
-    titleForJourneyNoForm(
+  def titleForManageJourney(form: Form[?], title: String, section: Option[String] = None)(implicit messages: Messages): String =
+    titleForManageJourneyNoForm(
       title   = s"${errorPrefix(form)} ${messages(title)}",
       section = section
     )
 
-  def titleForJourneyNoForm(title: String, section: Option[String] = None)(implicit messages: Messages): String =
-    s"${messages(title)} - ${section.fold("")(messages(_) + " - ")}${messages("journey.amend")} - ${messages("site.govuk")}"
+  def titleForManageJourneyNoForm(title: String, section: Option[String] = None)(implicit messages: Messages): String =
+    s"${messages(title)} - ${section.fold("")(messages(_) + " - ")}${messages("service.manage")} - ${messages("site.govuk")}"
 }

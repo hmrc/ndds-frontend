@@ -27,7 +27,7 @@
 
 @(form: Form[_], planType: String, paymentPlanReference: String, paymentAmount: BigDecimal)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForJourney(form, messages("cancelPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
+@layout(pageTitle = titleForManageJourney(form, messages("cancelPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
     @formHelper(action = routes.CancelPaymentPlanController.onSubmit(), Symbol("autoComplete") -> "off") {
 

@@ -1,6 +1,6 @@
 service.name = Set up a direct debit
 
-journey.amend = Manage a payment plan
+service.manage = Manage a payment plan
 
 site.back = Back
 site.remove = Remove
