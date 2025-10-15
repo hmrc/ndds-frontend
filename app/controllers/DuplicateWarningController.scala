@@ -68,7 +68,6 @@ class DuplicateWarningController @Inject() (
             updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningPage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield {
-            println("Value is " + updatedAnswers.get(DuplicateWarningPage).get)
             Redirect(navigator.nextPage(DuplicateWarningPage, mode, updatedAnswers))
           }
       )

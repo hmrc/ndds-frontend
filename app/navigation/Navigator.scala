@@ -46,6 +46,7 @@ class Navigator @Inject() () {
     case AmendPaymentAmountPage         => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
     case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+    case DuplicateWarningPage           => nextAfterDuplicatePlanCheck(NormalMode)
     case _                              => _ => routes.LandingController.onPageLoad()
   }
 
@@ -136,10 +137,9 @@ class Navigator @Inject() () {
   }
 
   private def nextAfterDuplicatePlanCheck(mode: Mode): UserAnswers => Call = ua =>
-    println("🔍 DuplicateWarningPage value: " + ua.get(DuplicateWarningPage))
     ua.get(DuplicateWarningPage) match {
       case Some(DuplicateWarning.Yes) => routes.AmendPaymentPlanConfirmationController.onPageLoad(mode)
-      case Some(DuplicateWarning.No)  => routes.DirectDebitSummaryController.onPageLoad()
+      case Some(DuplicateWarning.No)  => routes.PaymentPlanDetailsController.onPageLoad()
       case None                       => routes.JourneyRecoveryController.onPageLoad()
     }
 
