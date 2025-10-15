@@ -1,4 +1,5 @@
 service.name = Set up a direct debit
+service.manage = Manage a payment plan
 
 site.back = Back
 site.remove = Remove
@@ -481,3 +482,15 @@ amendPaymentPlanUpdate.endDate = Plan end date
 amendPaymentPlanUpdate.print = Print this confirmation
 amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
 amendPaymentPlanUpdate.close = Close
+
+suspendPaymentPlan.title = Suspend this payment plan
+suspendPaymentPlan.heading = Suspend this payment plan
+suspendPaymentPlan.p1 = You can suspend your payment plan if you need to pause payments.
+suspendPaymentPlan.p2 = When you suspend a payment plan:
+suspendPaymentPlan.p3 = Payments due within the next 3 working days cannot be suspended.
+suspendPaymentPlan.l1 = no payments will be taken during the suspension period
+suspendPaymentPlan.l2 = you can cancel the suspension at any time
+suspendPaymentPlan.l3 = interest may continue to accrue on your outstanding balance
+suspendPaymentPlan.l4 = your payment plan will resume automatically after the suspension ends
+suspendPaymentPlan.continue = Continue
+suspendPaymentPlan.cancel.link = Cancel and return to payment plan details
