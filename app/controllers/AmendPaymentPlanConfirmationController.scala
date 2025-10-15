@@ -99,8 +99,10 @@ class AmendPaymentPlanConfirmationController @Inject() (
               } yield {
                 if (lockResponse.lockSuccessful) {
                   logger.info(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                  println(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
                 } else {
                   logger.error(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                  println(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
                 }
                 Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
               }
