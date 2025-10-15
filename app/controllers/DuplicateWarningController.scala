@@ -20,8 +20,7 @@ import controllers.actions.*
 import forms.DuplicateWarningFormProvider
 
 import javax.inject.Inject
-import models.{Mode, UserAnswers}
-import navigation.Navigator
+import models.Mode
 import pages.DuplicateWarningPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
@@ -34,7 +33,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class DuplicateWarningController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
-  navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
