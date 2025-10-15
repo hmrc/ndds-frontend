@@ -146,3 +146,5 @@ GET        /cancel-payment-plan                         controllers.CancelPaymen
 POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
 
 GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()
+
+GET        /suspend-payment-plan                        controllers.SuspendPaymentPlanController.onPageLoad()

@@ -537,3 +537,15 @@ duplicateWarning.error.required = Select one option
 duplicateWarning.change.hidden = DuplicateWarning
 duplicateWarning.yes= Yes
 duplicateWarning.no= No
+
+suspendPaymentPlan.title = Suspend this payment plan
+suspendPaymentPlan.heading = Suspend this payment plan
+suspendPaymentPlan.p1 = You can suspend your payment plan if you need to pause payments.
+suspendPaymentPlan.p2 = When you suspend a payment plan:
+suspendPaymentPlan.p3 = Payments due within the next 3 working days cannot be suspended.
+suspendPaymentPlan.l1 = no payments will be taken during the suspension period
+suspendPaymentPlan.l2 = you can cancel the suspension at any time
+suspendPaymentPlan.l3 = interest may continue to accrue on your outstanding balance
+suspendPaymentPlan.l4 = your payment plan will resume automatically after the suspension ends
+suspendPaymentPlan.continue = Continue
+suspendPaymentPlan.cancel.link = Cancel and return to payment plan details
