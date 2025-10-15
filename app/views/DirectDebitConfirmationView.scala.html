@@ -19,46 +19,43 @@
 
 @this(
         layout: templates.Layout,
+        govukPanel: GovukPanel,
+        govukInsetText: GovukInsetText,
         govukButton: GovukButton,
         paragraph: Paragraph,
         header2: Header2,
-        confirmationPanel: ConfirmationPanel,
         mainButton: MainButton
 )
 
-@(referenceNumber: String, serviceNumber: String)(implicit request: Request[_], messages: Messages)
+@(referenceNumber: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title")), showBackLink = false) {
 
-    
-    @paragraph(messages("directDebitConfirmation.successMessage"))
+    @govukPanel(Panel(
+        title = messages("directDebitConfirmation.panel.title"),
+        content = HtmlContent(messages("directDebitConfirmation.panel.body", referenceNumber)),
+    ))
 
-    @confirmationPanel(
-      title = messages("directDebitConfirmation.panel.title"),
-      body = Html(messages("directDebitConfirmation.panel.body", referenceNumber)),
-      classes = "govuk-!-margin-bottom-9"
+    @govukInsetText(
+        InsetText(
+            content = Text(messages("directDebitConfirmation.inset.text"))
+        )
     )
-
-    @paragraph(messages("directDebitConfirmation.pleaseNote"))
 
     @header2("directDebitConfirmation.h2")
 
-    @paragraph(messages("directDebitConfirmation.p1", referenceNumber, serviceNumber))
-    @paragraph(messages("directDebitConfirmation.p2"))
+    @paragraph(messages("directDebitConfirmation.p1", referenceNumber))
+
+    <p class="govuk-body">
+        <a href="#" class="govuk-link" download="direct-debit-confirmation.pdf">@messages("directDebitConfirmation.download")</a>
+    </p>
+
     @header2("directDebitConfirmation.printingHelp.h2")
     @paragraph(messages("directDebitConfirmation.printSafari"))
     @paragraph(messages("directDebitConfirmation.printChromeFirefoxEdge"))
     @paragraph(messages("directDebitConfirmation.printNoPrinter"))
-    
-    <div class="govuk-button-group">
-      @mainButton(
-        msg = "directDebitConfirmation.downloadButton",
-        href = Some("#"),
-      )
-      @mainButton(
-        msg = "site.continue",
-        href = Some("#"),
-        classes = "govuk-button--secondary"
-      )
-    </div> 
+
+    @govukButton(
+        ButtonViewModel(messages("site.continue")).asSecondaryButton()
+    )
 }
