@@ -23,6 +23,7 @@ import javax.inject.Inject
 import models.NormalMode
 import navigation.Navigator
 import pages.CancelPaymentPlanPage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
@@ -44,7 +45,8 @@ class CancelPaymentPlanController @Inject() (
   view: CancelPaymentPlanView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   private val form = formProvider()
 
@@ -60,6 +62,7 @@ class CancelPaymentPlanController @Inject() (
         Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
 
       case _ =>
+        logger.error(s"Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
@@ -84,6 +87,7 @@ class CancelPaymentPlanController @Inject() (
               )
 
             case _ =>
+              logger.error(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
               Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
           }
         },
