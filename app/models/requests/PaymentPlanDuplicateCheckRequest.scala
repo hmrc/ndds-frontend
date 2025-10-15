@@ -28,7 +28,7 @@ case class PaymentPlanDuplicateCheckRequest(
   paymentReference: String,
   paymentAmount: BigDecimal,
   totalLiability: BigDecimal,
-  paymentFrequency: Int,
+  paymentFrequency: Option[Int],
   paymentStartDate: LocalDate
 )
 

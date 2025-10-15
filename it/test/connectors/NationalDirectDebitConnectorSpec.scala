@@ -953,7 +953,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       paymentReference     = "payment ref",
       paymentAmount        = 120.00,
       totalLiability       = 780.00,
-      paymentFrequency     = 1,
+      paymentFrequency     = Some(1),
       paymentStartDate     = currentDate
     )
 

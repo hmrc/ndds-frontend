@@ -37,7 +37,6 @@ class DirectDebitConfirmationController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val referenceNumber = request.userAnswers.get(CheckYourAnswerPage).getOrElse(throw new Exception("Missing generated DDI reference number"))
-    val serviceNumber = "X00011111A"
-    Ok(view(referenceNumber.ddiRefNumber, serviceNumber))
+    Ok(view(referenceNumber.ddiRefNumber))
   }
 }
