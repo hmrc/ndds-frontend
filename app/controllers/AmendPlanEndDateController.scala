@@ -123,7 +123,7 @@ class AmendPlanEndDateController @Inject() (
         val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
         if (duplicateCheckResponse.isDuplicate) {
           logger.warn(logMsg)
-          Redirect(routes.DuplicateWarningController.onPageLoad(mode))
+          Redirect(routes.DuplicateWarningController.onPageLoad(mode).url + "?from=amendEndDate")
         } else {
           logger.info(logMsg)
           Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))

@@ -2,139 +2,139 @@ package controllers
 
 import base.SpecBase
 import forms.DuplicateWarningFormProvider
-import models.{NormalMode, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
+import models.NormalMode
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar
-import pages.DuplicateWarningPage
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
-import play.api.mvc.Call
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.DuplicateWarningView
 
 import scala.concurrent.Future
 
-class DuplicateWarningControllerSpec extends SpecBase with MockitoSugar {
+class DuplicateWarningControllerSpec extends SpecBase {
 
-  def onwardRoute = Call("GET", "/foo")
+  private val formProvider = new DuplicateWarningFormProvider()
+  private val form = formProvider()
+  private val mode = NormalMode
 
-  val formProvider = new DuplicateWarningFormProvider()
-  val form = formProvider()
+  "DuplicateWarningController" - {
 
-  lazy val duplicateWarningRoute = routes.DuplicateWarningController.onPageLoad(NormalMode).url
-
-  "DuplicateWarning Controller" - {
-
-    "must return OK and the correct view for a GET" in {
-
+    "must return OK and view with AmendPlanStartDateController back link when from=amendStartDate" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, duplicateWarningRoute)
+        val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoad(mode).url + "?from=amendStartDate")
 
         val result = route(application, request).value
-
         val view = application.injector.instanceOf[DuplicateWarningView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          form,
+          mode,
+          routes.AmendPlanStartDateController.onPageLoad(mode)
+        )(request, messages(application)).toString
       }
     }
 
-    "must populate the view correctly on a GET when the question has previously been answered" in {
-
-      val userAnswers = UserAnswers(userAnswersId).set(DuplicateWarningPage, true).success.value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+    "must return OK and view with AmendPlanEndDateController back link when from=amendEndDate" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, duplicateWarningRoute)
-
-        val view = application.injector.instanceOf[DuplicateWarningView]
+        val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoad(mode).url + "?from=amendEndDate")
 
         val result = route(application, request).value
+        val view = application.injector.instanceOf[DuplicateWarningView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          form,
+          mode,
+          routes.AmendPlanEndDateController.onPageLoad(mode)
+        )(request, messages(application)).toString
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
-
+    "must redirect to AmendPaymentPlanConfirmationController when user selects Yes (true)" in {
       val mockSessionRepository = mock[SessionRepository]
-
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+        .build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, duplicateWarningRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+        val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmit(mode).url)
+          .withFormUrlEncodedBody("value" -> "true")
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustEqual routes.AmendPaymentPlanConfirmationController.onPageLoad(mode).url
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
+    "must redirect to PaymentPlanDetailsController when user selects No (false)" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmit(mode).url)
+          .withFormUrlEncodedBody("value" -> "false")
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.PaymentPlanDetailsController.onPageLoad().url
+      }
+    }
+
+    "must return Bad Request and show errors with AmendPlanStartDateController back link when no option selected (from=amendStartDate)" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, duplicateWarningRoute)
-            .withFormUrlEncodedBody(("value", ""))
+        val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmit(mode).url + "?from=amendStartDate")
+          .withFormUrlEncodedBody()
 
-        val boundForm = form.bind(Map("value" -> ""))
-
+        val boundForm = form.bind(Map.empty[String, String])
         val view = application.injector.instanceOf[DuplicateWarningView]
 
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(
+          boundForm,
+          mode,
+          routes.AmendPlanStartDateController.onPageLoad(mode)
+        )(request, messages(application)).toString
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
+    "must return Bad Request and show errors with AmendPlanEndDateController back link when no option selected (from=amendEndDate)" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, duplicateWarningRoute)
+        val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmit(mode).url + "?from=amendEndDate")
+          .withFormUrlEncodedBody()
+
+        val boundForm = form.bind(Map.empty[String, String])
+        val view = application.injector.instanceOf[DuplicateWarningView]
 
         val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
-      val application = applicationBuilder(userAnswers = None).build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, duplicateWarningRoute)
-            .withFormUrlEncodedBody(("value", "true"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) mustEqual view(
+          boundForm,
+          mode,
+          routes.AmendPlanEndDateController.onPageLoad(mode)
+        )(request, messages(application)).toString
       }
     }
   }

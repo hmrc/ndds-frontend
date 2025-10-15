@@ -39,19 +39,23 @@ govukButton: GovukButton
 
         @h1("duplicateWarning.h1")
 
+        @paragraph("duplicateWarning.p1")
+
+        @h2("duplicateWarning.h2")
+
         @govukRadios(
             RadiosViewModel(
-            field  = form("value"),
-            legend = LegendViewModel(HtmlContent(messages("duplicateWarning.p1"))),
-            items  = DuplicateWarning.options)
-                        .withHint(Hint(
-                        content = messages("duplicateWarning.h2"),
-                        classes = "govuk-hint-black")
-            )
+                field = form("value"),
+                items = Seq(
+                        RadioItem(content = Text(messages("site.yes")), value = Some("true"), id = Some("value_0")),
+                        RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"))
+                ),
+                fieldset = Fieldset(legend = None)
+            ).withCssClass("govuk-radios--inline")
         )
 
         @govukButton(
-        ButtonViewModel(messages("site.continue"))
+            ButtonViewModel(messages("site.continue"))
         )
     }
 }

@@ -18,13 +18,12 @@ package forms
 
 import javax.inject.Inject
 import forms.mappings.Mappings
-import models.DuplicateWarning
 import play.api.data.Form
 
 class DuplicateWarningFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[DuplicateWarning] =
+  def apply(): Form[Boolean] =
     Form(
-      "value" -> enumerable[DuplicateWarning]("duplicateWarning.error.required")
+      "value" -> boolean("duplicateWarning.error.required")
     )
 }

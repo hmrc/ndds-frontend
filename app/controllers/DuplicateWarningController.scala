@@ -24,7 +24,7 @@ import models.{Mode, UserAnswers}
 import navigation.Navigator
 import pages.DuplicateWarningPage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DuplicateWarningView
@@ -47,29 +47,47 @@ class DuplicateWarningController @Inject() (
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData) { implicit request =>
-    val answers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-    val preparedForm = answers.get(DuplicateWarningPage) match {
-      case None        => form
-      case Some(value) => form.fill(value)
+  private def backLink(from: Option[String], mode: Mode): Call = {
+    from match {
+      case Some("amendStartDate") => routes.AmendPlanStartDateController.onPageLoad(mode)
+      case Some("amendEndDate")   => routes.AmendPlanEndDateController.onPageLoad(mode)
+      case _                      => routes.PaymentPlanDetailsController.onPageLoad() // default fallback
+    }
+  }
+
+  def onPageLoad(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData) { implicit request =>
+
+      val from: Option[String] = request.getQueryString("from")
+
+      val preparedForm = request.userAnswers.get(DuplicateWarningPage) match {
+        case None        => form
+        case Some(value) => form.fill(value)
+      }
+
+      Ok(view(preparedForm, mode, backLink(from, mode)))
     }
 
-    Ok(view(preparedForm, mode, routes.DuplicateWarningController.onPageLoad(mode)))
-  }
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+      val from: Option[String] = request.getQueryString("from")
 
-    form
-      .bindFromRequest()
-      .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentPlanDetailsController.onPageLoad()))),
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield {
-            Redirect(navigator.nextPage(DuplicateWarningPage, mode, updatedAnswers))
-          }
-      )
-  }
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, backLink(from, mode)))),
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningPage, value))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield {
+              if (value) {
+                Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad(mode))
+              } else {
+                Redirect(routes.PaymentPlanDetailsController.onPageLoad())
+              }
+            }
+        )
+    }
 }

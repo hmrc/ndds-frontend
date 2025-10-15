@@ -1,23 +1,23 @@
 package forms
 
-import forms.behaviours.{BooleanFieldBehaviours, OptionFieldBehaviours}
-import models.DuplicateWarning
+import forms.behaviours.BooleanFieldBehaviours
 import play.api.data.FormError
 
-class DuplicateWarningFormProviderSpec extends OptionFieldBehaviours {
+class DuplicateWarningFormProviderSpec extends BooleanFieldBehaviours {
+
+  private val requiredKey = "duplicateWarning.error.required"
+  private val invalidKey = "error.boolean"
 
   val form = new DuplicateWarningFormProvider()()
 
   ".value" - {
 
     val fieldName = "value"
-    val requiredKey = "duplicateWarning.error.required"
 
-    behave like optionsField[DuplicateWarning](
+    behave like booleanField(
       form,
       fieldName,
-      validValues  = DuplicateWarning.values,
-      invalidError = FormError(fieldName, "error.invalid")
+      invalidError = FormError(fieldName, invalidKey)
     )
 
     behave like mandatoryField(
