@@ -69,8 +69,7 @@ class PaymentPlanDetailsController @Inject() (
                                 case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
                                 case None          => Future.successful(updatedAnswers)
                               }
-            updatedAnswers <- cleanseCancelPaymentPlanPage(updatedAnswers)
-            _              <- sessionRepository.set(updatedAnswers)
+            _ <- sessionRepository.set(updatedAnswers)
           } yield {
             val flag: Future[Boolean] = calculateShowAction(nddService, planDetail)
             val showActions = Await.result(flag, 5.seconds)
@@ -140,8 +139,12 @@ class PaymentPlanDetailsController @Inject() (
           case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
           case None            => Future.successful(true)
         }
-
-      case PaymentPlanType.BudgetPaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        planDetail.scheduledPaymentEndDate match {
+          case Some(startDate) => nddService.isThreeDaysPriorPlanEndDate(startDate)
+          case None            => Future.successful(true)
+        }
+      case PaymentPlanType.VariablePaymentPlan.toString =>
         for {
           isTwoDaysBeforeStart <- planDetail.scheduledPaymentStartDate match {
                                     case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
@@ -156,11 +159,4 @@ class PaymentPlanDetailsController @Inject() (
       case _ => Future.successful(false) // For TaxCredit repayment plan
     }
   }
-
-  private def cleanseCancelPaymentPlanPage(userAnswers: UserAnswers): Future[UserAnswers] =
-    for {
-      updatedUserAnswers <- Future.fromTry(userAnswers.remove(CancelPaymentPlanPage))
-      _                  <- sessionRepository.set(updatedUserAnswers)
-    } yield updatedUserAnswers
-
 }
