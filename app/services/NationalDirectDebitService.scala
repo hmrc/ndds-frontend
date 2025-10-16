@@ -24,9 +24,7 @@ import models.audits.GetDDIs
 import models.requests.*
 import pages.*
 import models.responses.*
-import models.{DirectDebitSource, NddResponse, PaymentPlanType, UserAnswers}
 import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers}
-import pages.*
 import play.api.Logging
 import play.api.mvc.Request
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}

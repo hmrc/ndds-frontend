@@ -79,6 +79,7 @@ class AmendPlanEndDateController @Inject() (
                 val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
                 val frequencyStr = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
                 val frequency = Frequency.fromString(frequencyStr)
+                val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
 
                 val hasDateChanged = planDetails.paymentPlanDetails.scheduledPaymentEndDate match {
                   case Some(dbEndDate) => value != dbEndDate

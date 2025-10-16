@@ -19,7 +19,6 @@ package controllers
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NextPaymentValidationResult, NormalMode}
 import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
@@ -333,7 +332,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, budgetPlan)
+          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
