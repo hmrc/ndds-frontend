@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.CancelPaymentPlanFormProvider
-import models.requests.ChrisSubmissionRequest
+import models.requests.{ChrisSubmissionRequest, DataRequest}
 import models.responses.DirectDebitDetails
 
 import javax.inject.Inject
@@ -26,8 +26,9 @@ import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDeta
 import navigation.Navigator
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, CancelPaymentPlanPage}
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
@@ -74,53 +75,58 @@ class CancelPaymentPlanController @Inject() (
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => {
-          (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
-            case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
-              val paymentPlan = paymentPlanDetail.paymentPlanDetails
-              Future.successful(
-                BadRequest(
-                  view(
-                    formWithErrors,
-                    paymentPlan.planType,
-                    paymentPlanReference,
-                    paymentPlan.scheduledPaymentAmount.get
-                  )
-                )
-              )
-            case _ =>
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-          }
-        },
-        value => {
-          val ua = request.userAnswers
-
-          ua.get(DirectDebitReferenceQuery) match {
-            case Some(ddiReference) =>
-              val chrisRequest = buildCancelChrisRequest(ua, ddiReference)
-              nddService.submitChrisData(chrisRequest).flatMap { success =>
-                if (success) {
-                  logger.info(s"CHRIS Cancel submission successful for DDI Ref [$ddiReference]")
-
-                  for {
-                    updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(routes.CancelPaymentPlanController.onPageLoad()) // cancel confirmation
-
-                } else {
-                  logger.error(s"CHRIS submission failed for DDI Ref [$ddiReference]")
-                  Future.successful(
-                    Redirect(routes.JourneyRecoveryController.onPageLoad())
-                      .flashing("error" -> "There was a problem submitting cancel your direct debit plan. Please try again later.")
-                  )
-                }
-              }
-            case None =>
-              logger.error("Missing DirectDebitReference in UserAnswers")
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-          }
-        }
+        formWithErrors => handleFormErrors(formWithErrors),
+        value => handleValidSubmission(value)
       )
+  }
+
+  private def handleFormErrors(formWithErrors: Form[?])(implicit request: DataRequest[AnyContent]): Future[Result] = {
+    (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
+      case (Some(planDetail), Some(planReference)) =>
+        val paymentPlan = planDetail.paymentPlanDetails
+        Future.successful(
+          BadRequest(
+            view(
+              formWithErrors,
+              paymentPlan.planType,
+              planReference,
+              paymentPlan.scheduledPaymentAmount.get
+            )
+          )
+        )
+      case _ =>
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
+  }
+
+  private def handleValidSubmission(value: Boolean)(implicit request: DataRequest[AnyContent]): Future[Result] = {
+    val ua = request.userAnswers
+
+    ua.get(DirectDebitReferenceQuery) match {
+      case Some(ddiReference) =>
+        val chrisRequest = buildCancelChrisRequest(ua, ddiReference)
+
+        nddService.submitChrisData(chrisRequest).flatMap {
+          case true =>
+            logger.info(s"CHRIS Cancel payment plan payload submission successful for DDI Ref [$ddiReference]")
+
+            for {
+              updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield Redirect(routes.CancelPaymentPlanController.onPageLoad())
+
+          case false =>
+            logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
+            Future.successful(
+              Redirect(routes.JourneyRecoveryController.onPageLoad())
+                .flashing("error" -> "There was a problem cancelling your direct debit plan. Please try again later.")
+            )
+        }
+
+      case None =>
+        logger.error("Missing DirectDebitReference in UserAnswers")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
   }
 
   private def buildCancelChrisRequest(
