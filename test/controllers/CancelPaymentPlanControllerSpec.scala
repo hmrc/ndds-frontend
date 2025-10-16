@@ -17,12 +17,10 @@
 package controllers
 
 import base.SpecBase
-import com.sun.tools.doclint.Entity.times
 import forms.CancelPaymentPlanFormProvider
 import models.PaymentPlanType
-import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.CancelPaymentPlanPage
 import play.api.inject.bind
@@ -33,8 +31,8 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.http.HeaderCarrier
-import views.html.CancelPaymentPlanView
 import utils.MaskAndFormatUtils.*
+import views.html.CancelPaymentPlanView
 
 import scala.concurrent.Future
 

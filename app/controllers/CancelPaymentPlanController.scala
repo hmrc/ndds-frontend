@@ -142,9 +142,7 @@ class CancelPaymentPlanController @Inject() (
           DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
 
         val planStartDateDetails: Option[PlanStartDateDetails] = planDetail.scheduledPaymentStartDate.map { date =>
-          PlanStartDateDetails(enteredDate           = date,
-                               earliestPlanStartDate = date.toString
-                              )
+          PlanStartDateDetails(enteredDate = date, earliestPlanStartDate = date.toString)
         }
 
         val paymentPlanType: PaymentPlanType =
