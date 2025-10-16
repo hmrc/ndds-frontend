@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.CancelPaymentPlanFormProvider
 import models.requests.{ChrisSubmissionRequest, DataRequest}
 import models.responses.DirectDebitDetails
-import models.{DirectDebitSource, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.CancelPaymentPlanPage
 import play.api.Logging
@@ -66,6 +66,7 @@ class CancelPaymentPlanController @Inject() (
         Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
 
       case _ =>
+        logger.error(s"Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
@@ -81,19 +82,20 @@ class CancelPaymentPlanController @Inject() (
 
   private def handleFormErrors(formWithErrors: Form[?])(implicit request: DataRequest[AnyContent]): Future[Result] = {
     (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
-      case (Some(planDetail), Some(planReference)) =>
+      case (Some(planDetail), Some(paymentPlanReference)) =>
         val paymentPlan = planDetail.paymentPlanDetails
         Future.successful(
           BadRequest(
             view(
               formWithErrors,
               paymentPlan.planType,
-              planReference,
+              paymentPlanReference,
               paymentPlan.scheduledPaymentAmount.get
             )
           )
         )
       case _ =>
+        logger.error(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
@@ -112,8 +114,7 @@ class CancelPaymentPlanController @Inject() (
             for {
               updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
               _              <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(routes.CancelPaymentPlanController.onPageLoad()) // change it using navigator to confirmation page
-
+            } yield Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
           case false =>
             logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
             Future.successful(

@@ -19,6 +19,7 @@ package controllers
 import base.SpecBase
 import forms.CancelPaymentPlanFormProvider
 import models.PaymentPlanType
+import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -190,9 +191,13 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
     "must submit to CHRIS, save user answers and redirect when valid data is submitted" in {
 
+      import uk.gov.hmrc.http.HeaderCarrier
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
       val mockSessionRepository = mock[SessionRepository]
       val mockNddService = mock[NationalDirectDebitService]
 
+      // Mock successful save + CHRIS submission
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
       when(mockNddService.submitChrisData(any())(any[HeaderCarrier])) thenReturn Future.successful(true)
 
@@ -205,10 +210,13 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
 
+      val onwardRoute = Call("GET", "/foo")
+
       val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockNddService),
-          bind[SessionRepository].toInstance(mockSessionRepository)
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
         )
         .build()
 
@@ -219,9 +227,10 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CancelPaymentPlanController.onPageLoad().url
+        redirectLocation(result).value mustEqual onwardRoute.url
       }
     }
+
     "must return BadRequest when form submission is invalid" in {
 
       val mockNddService = mock[NationalDirectDebitService]
