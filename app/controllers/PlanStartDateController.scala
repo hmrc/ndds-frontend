@@ -65,15 +65,25 @@ class PlanStartDateController @Inject() (
           case Some(value) => form.fill(value.enteredDate)
         }
 
-        Ok(
-          view(
-            preparedForm,
-            mode,
-            DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-            answers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers")),
-            backLinkRedirect(mode, answers)
-          )
-        )
+        answers.get(DirectDebitSourcePage) match {
+          case Some(source) if Set("mgd", "sa", "tc").contains(source.toString) =>
+            Ok(
+              view(
+                preparedForm,
+                mode,
+                DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+                source,
+                backLinkRedirect(mode, answers)
+              )
+            )
+          case None =>
+            logger.warn(s"DirectDebitSourcePage details missing from user answers")
+            Redirect(routes.JourneyRecoveryController.onPageLoad())
+          case _ =>
+            logger.warn(s"DirectDebitSource is not mgd or sa or tc")
+            Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
