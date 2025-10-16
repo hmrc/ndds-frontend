@@ -171,4 +171,15 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
+  def isPaymentPlanCancellable(userAnswers: UserAnswers): Boolean = {
+    userAnswers
+      .get(AmendPaymentPlanTypePage)
+      .exists(planType =>
+        Set(
+          PaymentPlanType.SinglePaymentPlan.toString,
+          PaymentPlanType.BudgetPaymentPlan.toString,
+          PaymentPlanType.VariablePaymentPlan.toString
+        ).contains(planType)
+      )
+  }
 }

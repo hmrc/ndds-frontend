@@ -23,6 +23,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.CancelPaymentPlanPage
 import play.api.inject.bind
 import play.api.mvc.Call
@@ -30,6 +31,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import views.html.CancelPaymentPlanView
 import utils.MaskAndFormatUtils.*
 
@@ -45,6 +47,8 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
   private lazy val cancelPaymentPlanRoute = routes.CancelPaymentPlanController.onPageLoad().url
 
   "CancelPaymentPlan Controller" - {
+
+    val mockNddsService = mock[NationalDirectDebitService]
 
     "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
 
@@ -72,9 +76,16 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
 
       running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(true)
+
         val request = FakeRequest(GET, cancelPaymentPlanRoute)
 
         val result = route(application, request).value
@@ -119,9 +130,16 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
 
       running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(true)
+
         val request = FakeRequest(GET, cancelPaymentPlanRoute)
 
         val result = route(application, request).value
@@ -169,9 +187,16 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
 
       running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(true)
+
         val request = FakeRequest(GET, cancelPaymentPlanRoute)
 
         val view = application.injector.instanceOf[CancelPaymentPlanView]
@@ -313,6 +338,27 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
         val request =
           FakeRequest(POST, cancelPaymentPlanRoute)
             .withFormUrlEncodedBody(("value", ""))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if Payment plan is not cancellable" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(false)
+
+        val request = FakeRequest(GET, cancelPaymentPlanRoute)
 
         val result = route(application, request).value
 
