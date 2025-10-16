@@ -618,7 +618,8 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
             dummyPlanDetailResponse.paymentPlanDetails.copy(
               planType                  = PaymentPlanType.SinglePaymentPlan.toString,
               hodService                = DirectDebitSource.SA.toString,
-              scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString)
+              scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString),
+              totalLiability            = Some(780.0)
             )
           )
 
@@ -632,9 +633,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
           .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
-          .success
-          .value
-          .set(TotalAmountDuePage, 780.00)
           .success
           .value
           .set(PaymentPlansCountQuery, 4)
