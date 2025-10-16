@@ -346,19 +346,18 @@ checkYourAnswers.collapsable.p5 = You can cancel a Direct Debit at any time by s
 checkYourAnswers.acceptAndContinue = Accept and Continue
 
 directDebitConfirmation.title = Your direct debit payment was successful
-directDebitConfirmation.heading = Your direct debit payment was successful
-directDebitConfirmation.panel.title = Direct Debit set up
-directDebitConfirmation.successMessage = Your direct debit payment was successful
-directDebitConfirmation.panel.body = <strong>{0}</strong>
-directDebitConfirmation.p1 = Make a note of your direct debit reference <strong>{0}</strong> and service user number <strong>{1}</strong>.
-directDebitConfirmation.p2 = Download, save or print your confirmation.
+directDebitConfirmation.panel.title = Direct Debit payment set up
+directDebitConfirmation.panel.body = Your Direct Debit reference is<br /><strong>{0}</strong>
+directDebitConfirmation.inset.text = Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
 directDebitConfirmation.h2 = What you need to do
-directDebitConfirmation.printingHelp.h2 = Download your confirmation
-directDebitConfirmation.printSafari = If you are using Safari, confirm the download when asked through the popup window. Tap the arrow icon next to your Safari address bar to access your download files. You can then print your form.
-directDebitConfirmation.printChromeFirefoxEdge = If you are using Google Chrome or Firefox, choose the destination drop-down on the PDF and then select your required option from the list. If you are using Microsoft Edge, you will need to choose the printer drop-down menu on the PDF and then choose your required option.
+directDebitConfirmation.p1 = Make a note of your Direct Debit reference <strong>{0}</strong>.
+directDebitConfirmation.download = Download your confirmation (PDF, 23KB)
+directDebitConfirmation.printingHelp.h2 = Help with downloading
+directDebitConfirmation.printSafari = If you''re using Safari, confirm the download when asked through the popup window. Tap the arrow icon next to your Safari address bar to access your download files. You can then print your form.
+directDebitConfirmation.printChromeFirefoxEdge = If you''re using Google Chrome or Firefox, choose the destination dropdown on the PDF and then select your required option from the list. If you are using Microsoft Edge, you will need to choose the printer dropdown menu on the PDF and then choose your required option.
 directDebitConfirmation.printNoPrinter = If you do not own a printer, your local library may offer printing services for a small fee, or search online for a printing store.
 directDebitConfirmation.downloadButton = Download confirmation
-directDebitConfirmation.pleaseNote = <strong>Please note:</strong> Once you have set up your Direct Debit payment you will not be able to see it online for up to 36 hours.
+
 
 under_construction.heading = Under Construction
 
@@ -442,6 +441,7 @@ amendPlanEndDate.title = Plan end date
 amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026
+amendPlanEndDate.error.nextPaymentDateValid =There is insufficient time prior to the plan end date for your requested change  to be processed. Extend or remove the plan end date if you wish to continue.
 
 amendPaymentPlanConfirmation.title = Confirm new payment plan details - amend a payment plan
 amendPaymentPlanConfirmation.heading = Confirm new payment plan details
@@ -484,3 +484,4 @@ amendPaymentPlanUpdate.endDate = Plan end date
 amendPaymentPlanUpdate.print = Print this confirmation
 amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
 amendPaymentPlanUpdate.close = Close
+
