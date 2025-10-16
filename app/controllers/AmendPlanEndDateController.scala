@@ -22,7 +22,7 @@ import forms.AmendPlanEndDateFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,6 +30,7 @@ import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Frequency
 import views.html.AmendPlanEndDateView
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -64,6 +65,7 @@ class AmendPlanEndDateController @Inject() (
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val form = formProvider()
     val userAnswers = request.userAnswers
+
     form
       .bindFromRequest()
       .fold(
@@ -73,6 +75,9 @@ class AmendPlanEndDateController @Inject() (
             (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
               case (Some(planDetails), Some(amendedAmount)) =>
                 val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+                val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
+                val frequencyStr = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
+                val frequency = Frequency.fromString(frequencyStr)
 
                 val hasDateChanged = planDetails.paymentPlanDetails.scheduledPaymentEndDate match {
                   case Some(dbEndDate) => value != dbEndDate
@@ -85,10 +90,32 @@ class AmendPlanEndDateController @Inject() (
                   val errorForm = form.fill(value).withError("value", key)
                   Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                 } else {
-                  for {
-                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanEndDatePage, value))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
+                  // Calculate next payment date and validate against plan end date
+                  nddsService.calculateNextPaymentDate(dbStartDate, value, frequency).flatMap { result =>
+                    logger.info(
+                      s"""|[AmendPlanEndDateController]
+                          |  nextPaymentDateValid: $result.nextPaymentDateValid
+                          |  StartDate: $result.dbStartDate
+                          |""".stripMargin
+                    )
+                    if (!result.nextPaymentDateValid) {
+                      val errorForm = form
+                        .fill(value)
+                        .withError(
+                          key     = "value", // form field name in AmendPlanEndDateFormProvider
+                          message = "amendPlanEndDate.error.nextPaymentDateValid" // exact key from messages file
+                        )
+                      Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                    } else {
+                      for {
+                        updatedAnswers1 <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
+                        updatedAnswers2 <- Future.fromTry(
+                                             updatedAnswers1.set(AmendPlanStartDatePage, result.potentialNextPaymentDate)
+                                           ) // this needed for budgting amend end date for chris submission
+                        _ <- sessionRepository.set(updatedAnswers2)
+                      } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers2))
+                    }
+                  }
                 }
 
               case _ =>
@@ -100,4 +127,5 @@ class AmendPlanEndDateController @Inject() (
           }
       )
   }
+
 }

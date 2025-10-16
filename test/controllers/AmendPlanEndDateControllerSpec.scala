@@ -19,6 +19,7 @@ package controllers
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.{NextPaymentValidationResult, NormalMode}
 import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -34,6 +35,7 @@ import services.NationalDirectDebitService
 import views.html.AmendPlanEndDateView
 
 import java.time.{LocalDate, LocalDateTime}
+import scala.concurrent.Future
 
 class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
@@ -176,6 +178,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
           val view = application.injector.instanceOf[AmendPlanEndDateView]
           val request = postRequestWithDate(validAnswer.plusDays(10))
           val result = route(application, request).value
@@ -209,6 +214,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
+
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
 
@@ -238,6 +247,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
+
           val request = postRequestWithDate(validAnswer.plusDays(7))
           val result = route(application, request).value
 
@@ -267,6 +280,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
+
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = route(application, request).value
 
@@ -296,6 +313,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = intercept[Exception](route(application, request).value.futureValue)
 
