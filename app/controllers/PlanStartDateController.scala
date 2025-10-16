@@ -57,16 +57,16 @@ class PlanStartDateController @Inject() (
     {
       val answers = request.userAnswers
 
-      nddService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
-        val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
-        val form = formProvider(answers, earliestDate)
-        val preparedForm = answers.get(PlanStartDatePage) match {
-          case None        => form
-          case Some(value) => form.fill(value.enteredDate)
-        }
-
-        answers.get(DirectDebitSourcePage) match {
-          case Some(source) if Set("mgd", "sa", "tc").contains(source.toString) =>
+      answers.get(DirectDebitSourcePage) match {
+        case Some(source)
+            if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(source.toString) => {
+          nddService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
+            val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+            val form = formProvider(answers, earliestDate)
+            val preparedForm = answers.get(PlanStartDatePage) match {
+              case None        => form
+              case Some(value) => form.fill(value.enteredDate)
+            }
             Ok(
               view(
                 preparedForm,
@@ -76,17 +76,17 @@ class PlanStartDateController @Inject() (
                 backLinkRedirect(mode, answers)
               )
             )
-          case None =>
-            logger.warn(s"DirectDebitSourcePage details missing from user answers")
+          } recover { case e =>
+            logger.warn(s"Unexpected error: $e")
             Redirect(routes.JourneyRecoveryController.onPageLoad())
-          case _ =>
-            logger.warn(s"DirectDebitSource is not mgd or sa or tc")
-            Redirect(routes.JourneyRecoveryController.onPageLoad())
+          }
         }
-
-      } recover { case e =>
-        logger.warn(s"Unexpected error: $e")
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        case None =>
+          logger.warn(s"DirectDebitSourcePage details missing from user answers")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        case _ =>
+          logger.warn(s"DirectDebitSource is not mgd or sa or tc")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
   }
