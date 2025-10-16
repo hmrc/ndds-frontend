@@ -20,11 +20,9 @@ import controllers.actions.*
 import forms.CancelPaymentPlanFormProvider
 import models.requests.{ChrisSubmissionRequest, DataRequest}
 import models.responses.DirectDebitDetails
-
-import javax.inject.Inject
-import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, CancelPaymentPlanPage}
+import pages.CancelPaymentPlanPage
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -35,6 +33,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelPaymentPlanView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CancelPaymentPlanController @Inject() (
@@ -113,7 +112,7 @@ class CancelPaymentPlanController @Inject() (
             for {
               updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
               _              <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(routes.CancelPaymentPlanController.onPageLoad())
+            } yield Redirect(routes.CancelPaymentPlanController.onPageLoad()) // change it using navigator to confirmation page
 
           case false =>
             logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
@@ -144,7 +143,7 @@ class CancelPaymentPlanController @Inject() (
 
         val planStartDateDetails: Option[PlanStartDateDetails] = planDetail.scheduledPaymentStartDate.map { date =>
           PlanStartDateDetails(enteredDate           = date,
-                               earliestPlanStartDate = date.toString // you can adjust this if you have a different logic
+                               earliestPlanStartDate = date.toString
                               )
         }
 
