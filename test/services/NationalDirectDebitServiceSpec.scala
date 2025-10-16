@@ -608,6 +608,36 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         result.getMessage must include("error")
       }
     }
+
+    "isPaymentPlanCancellable" - {
+      "must return true when plan type is SinglePaymentPlan" in {
+        val userAnswers =
+          emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+
+        service.isPaymentPlanCancellable(userAnswers) mustBe true
+      }
+
+      "must return true when plan type is BudgetPaymentPlan" in {
+        val userAnswers =
+          emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+
+        service.isPaymentPlanCancellable(userAnswers) mustBe true
+      }
+
+      "must return true when plan type is VariablePaymentPlan" in {
+        val userAnswers =
+          emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString).success.value
+
+        service.isPaymentPlanCancellable(userAnswers) mustBe true
+      }
+
+      "must return true when plan type is TaxCreditRepaymentPlan" in {
+        val userAnswers =
+          emptyUserAnswers.set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
+
+        service.isPaymentPlanCancellable(userAnswers) mustBe false
+      }
+    }
   }
 
 }
