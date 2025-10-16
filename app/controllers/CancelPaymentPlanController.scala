@@ -65,11 +65,13 @@ class CancelPaymentPlanController @Inject() (
           Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
 
         case _ =>
-          logger.error(s"Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+          logger.error("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
     } else {
-      logger.error(s"NDDS Payment Plan Guard: PaymentPlantType is not SinglePaymentPlan or BudgetPaymentPlan or VariablePaymentPlan")
+      logger.error("NDDS Payment Plan Guard: PaymentPlanType is not SinglePaymentPlan, BudgetPaymentPlan, or VariablePaymentPlan")
+      // TODO removed after testing
+      println("NDDS Payment Plan Guard: PaymentPlanType is not SinglePaymentPlan, BudgetPaymentPlan, or VariablePaymentPlan")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
