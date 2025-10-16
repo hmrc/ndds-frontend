@@ -181,8 +181,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
         when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
           .thenReturn(Future.successful(true))
-        when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
-          .thenReturn(Future.successful(true))
 
         val summaryListRows = summaryList(mockBudgetPaymentPlanDetailResponse, application)
         val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)

@@ -20,6 +20,7 @@ import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.{NextPaymentValidationResult, NormalMode}
 import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -42,8 +43,6 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private val formProvider = new AmendPlanEndDateFormProvider()
   private def form = formProvider()
   val validAnswer: LocalDate = LocalDate.now()
-
-  val budgetPlan = "Budget payment"
 
   lazy val amendPlanEndDateRoute: String = routes.AmendPlanEndDateController.onPageLoad(NormalMode).url
   lazy val amendPlanEndDateRoutePost: String = routes.AmendPlanEndDateController.onSubmit(NormalMode).url
@@ -180,6 +179,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
           val view = application.injector.instanceOf[AmendPlanEndDateView]
           val request = postRequestWithDate(validAnswer.plusDays(10))
           val result = route(application, request).value
@@ -246,6 +248,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
           when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
+
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
 
@@ -275,6 +281,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
+
           val request = postRequestWithDate(validAnswer.plusDays(7))
           val result = route(application, request).value
 
@@ -304,6 +314,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
+
           when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(true)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
@@ -366,6 +380,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+          // Mock calculateNextPaymentDate
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = intercept[Exception](route(application, request).value.futureValue)
 
