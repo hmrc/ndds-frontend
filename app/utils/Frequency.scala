@@ -29,10 +29,10 @@ object Frequency {
   def fromString(value: String): Frequency = value.trim.toLowerCase match {
     case "weekly"      => Weekly
     case "fortnightly" => Fortnightly
-    case "four weekly" => FourWeekly
+    case "fourweekly"  => FourWeekly
     case "monthly"     => Monthly
     case "quarterly"   => Quarterly
-    case "six monthly" => SixMonthly
+    case "sixmonthly"  => SixMonthly
     case "annually"    => Annually
     case other =>
       throw new IllegalArgumentException(s"Unknown payment frequency: $other")
