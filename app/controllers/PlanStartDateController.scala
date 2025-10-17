@@ -58,8 +58,8 @@ class PlanStartDateController @Inject() (
       val answers = request.userAnswers
 
       answers.get(DirectDebitSourcePage) match {
-        case Some(source)
-            if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(source.toString) => {
+        case Some(value)
+            if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) => {
           nddService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
             val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
             val form = formProvider(answers, earliestDate)
@@ -72,7 +72,7 @@ class PlanStartDateController @Inject() (
                 preparedForm,
                 mode,
                 DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-                source,
+                value,
                 backLinkRedirect(mode, answers)
               )
             )
