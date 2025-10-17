@@ -31,7 +31,7 @@
 
 @(planType: String, paymentReference: String, showActions: Boolean, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
+@layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
     @header1("paymentPlanDetails.heading")
     @paragraph("paymentPlanDetails.p1")
     @paragraph("paymentPlanDetails.p2")

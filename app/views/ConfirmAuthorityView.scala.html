@@ -26,7 +26,7 @@
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("confirmYourAuthority.title")), backLink = Some(call.url)) {
+@layout(pageTitle = titleForSetupJourney(form, messages("confirmYourAuthority.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.ConfirmAuthorityController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
