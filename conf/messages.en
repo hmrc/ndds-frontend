@@ -447,7 +447,7 @@ amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) wi
 amendPlanEndDate.hint = e.g. 16 6 2026
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change  to be processed. Extend or remove the plan end date if you wish to continue.
 
-amendPaymentPlanConfirmation.title = Confirm new payment plan details - amend a payment plan
+amendPaymentPlanConfirmation.title = Confirm new payment plan details
 amendPaymentPlanConfirmation.heading = Confirm new payment plan details
 amendPaymentPlanConfirmation.p1 = This amendment will remove any suspension that you have in place. Check that the details below are correct, then click ''Continue'' to proceed. For security reasons, you may be asked to re-authenticate your details.
 amendPaymentPlanConfirmation.directDebit.h2 = Direct Debit details
