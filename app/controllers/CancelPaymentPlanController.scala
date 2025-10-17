@@ -22,7 +22,7 @@ import forms.CancelPaymentPlanFormProvider
 import javax.inject.Inject
 import models.NormalMode
 import navigation.Navigator
-import pages.CancelPaymentPlanPage
+import pages.{AmendPaymentPlanTypePage, CancelPaymentPlanPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -69,9 +69,10 @@ class CancelPaymentPlanController @Inject() (
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
     } else {
-      logger.error("NDDS Payment Plan Guard: PaymentPlanType is not SinglePaymentPlan, BudgetPaymentPlan, or VariablePaymentPlan")
+      val planType = request.userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
       // TODO removed after testing
-      println("NDDS Payment Plan Guard: PaymentPlanType is not SinglePaymentPlan, BudgetPaymentPlan, or VariablePaymentPlan")
+      println(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
