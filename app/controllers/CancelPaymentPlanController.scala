@@ -22,12 +22,13 @@ import forms.CancelPaymentPlanFormProvider
 import javax.inject.Inject
 import models.NormalMode
 import navigation.Navigator
-import pages.CancelPaymentPlanPage
+import pages.{CancelPaymentPlanPage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelPaymentPlanView
 
@@ -40,6 +41,7 @@ class CancelPaymentPlanController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  nddService: NationalDirectDebitService,
   formProvider: CancelPaymentPlanFormProvider,
   val controllerComponents: MessagesControllerComponents,
   view: CancelPaymentPlanView
@@ -52,18 +54,24 @@ class CancelPaymentPlanController @Inject() (
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
-    (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
-      case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
-        val paymentPlan = paymentPlanDetail.paymentPlanDetails
-        val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
-          case None        => form
-          case Some(value) => form.fill(value)
-        }
-        Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
+    if (nddService.isPaymentPlanCancellable(request.userAnswers)) {
+      (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
+        case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
+          val paymentPlan = paymentPlanDetail.paymentPlanDetails
+          val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
+            case None        => form
+            case Some(value) => form.fill(value)
+          }
+          Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
 
-      case _ =>
-        logger.error(s"Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        case _ =>
+          logger.error("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+          Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
 

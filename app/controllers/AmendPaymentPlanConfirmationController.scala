@@ -62,7 +62,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
         for {
           directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
           paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
-          planType             <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
+          planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
         } yield {
           Ok(
             view(
@@ -99,10 +99,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
               } yield {
                 if (lockResponse.lockSuccessful) {
                   logger.info(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
-                  println(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
                 } else {
                   logger.error(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
-                  println(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
                 }
                 Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
               }
@@ -194,10 +192,10 @@ class AmendPaymentPlanConfirmationController @Inject() (
   private def buildRows(userAnswers: UserAnswers, paymentPlan: PaymentPlanDetails, mode: Mode)(implicit
     messages: Messages
   ): (Seq[SummaryListRow], Call) =
-    userAnswers.get(AmendPaymentPlanTypePage) match {
+    userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
         (Seq(
-           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+           AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")),
            AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
            TotalAmountDueSummary.row(paymentPlan.totalLiability),
            MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability),
@@ -224,7 +222,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
 
       case _ =>
         (Seq(
-           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+           AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")),
            AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
            DateSetupSummary.row(paymentPlan.submissionDateTime),
            AmendPaymentAmountSummary.row(

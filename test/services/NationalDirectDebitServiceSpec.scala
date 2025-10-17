@@ -395,7 +395,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       "must return true if single payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
           .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
@@ -413,7 +413,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       "must return true if budget payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
@@ -431,7 +431,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       "must return false if variable payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
           .success
           .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
@@ -449,7 +449,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       "must return false if payment plan is empty for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, "")
+          .set(ManagePaymentPlanTypePage, "")
           .success
           .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
@@ -820,4 +820,33 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
   }
 
+  "isPaymentPlanCancellable" - {
+    "must return true when plan type is SinglePaymentPlan" in {
+      val userAnswers =
+        emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+
+      service.isPaymentPlanCancellable(userAnswers) mustBe true
+    }
+
+    "must return true when plan type is BudgetPaymentPlan" in {
+      val userAnswers =
+        emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+
+      service.isPaymentPlanCancellable(userAnswers) mustBe true
+    }
+
+    "must return true when plan type is VariablePaymentPlan" in {
+      val userAnswers =
+        emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString).success.value
+
+      service.isPaymentPlanCancellable(userAnswers) mustBe true
+    }
+
+    "must return true when plan type is TaxCreditRepaymentPlan" in {
+      val userAnswers =
+        emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
+
+      service.isPaymentPlanCancellable(userAnswers) mustBe false
+    }
+  }
 }
