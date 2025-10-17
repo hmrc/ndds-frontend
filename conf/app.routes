@@ -137,4 +137,8 @@ POST       /payment-plan/change-confirm-plan-details    controllers.AmendPayment
 
 GET        /payment-plan/payment-plan-confirmation      controllers.AmendPaymentPlanUpdateController.onPageLoad()
 
+GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
+POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
+
 GET        /suspend-payment-plan                        controllers.SuspendPaymentPlanController.onPageLoad()
+

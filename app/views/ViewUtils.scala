@@ -36,4 +36,13 @@ object ViewUtils {
   def errorPrefix(form: Form[?])(implicit messages: Messages): String = {
     if (form.hasErrors || form.hasGlobalErrors) messages("error.title.prefix") else ""
   }
+
+  def titleForManageJourney(form: Form[?], title: String, section: Option[String] = None)(implicit messages: Messages): String =
+    titleForManageJourneyNoForm(
+      title   = s"${errorPrefix(form)} ${messages(title)}",
+      section = section
+    )
+
+  def titleForManageJourneyNoForm(title: String, section: Option[String] = None)(implicit messages: Messages): String =
+    s"${messages(title)} - ${section.fold("")(messages(_) + " - ")}${messages("service.manage")} - ${messages("site.govuk")}"
 }
