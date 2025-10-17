@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.responses.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -272,12 +272,12 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       "must redirect to AmendPaymentPlanUpdateController when CHRIS submission is successful" in {
 
         import uk.gov.hmrc.http.HeaderCarrier
-        implicit val hc: HeaderCarrier = HeaderCarrier()
-
         val mockNddService = mock[NationalDirectDebitService]
 
         when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(true))
+        when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
 
         val directDebitReference = "DDI123456789"
 
@@ -344,7 +344,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       "must redirect to JourneyRecoveryController when CHRIS submission fails" in {
 
         import uk.gov.hmrc.http.HeaderCarrier
-        implicit val hc: HeaderCarrier = HeaderCarrier()
 
         val mockNddService = mock[NationalDirectDebitService]
 

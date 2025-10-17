@@ -92,7 +92,18 @@ class AmendPaymentPlanConfirmationController @Inject() (
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
               logger.info(s"CHRIS submission successful for DDI Ref [$ddiReference]")
-              Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
+              for {
+                directDebitReference <- Future.fromTry(Try(ua.get(DirectDebitReferenceQuery).get))
+                paymentPlanReference <- Future.fromTry(Try(ua.get(PaymentPlanReferenceQuery).get))
+                lockResponse         <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
+              } yield {
+                if (lockResponse.lockSuccessful) {
+                  logger.info(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                } else {
+                  logger.error(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                }
+                Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
+              }
             } else {
               logger.error(s"CHRIS submission failed for DDI Ref [$ddiReference]")
               Future.successful(
