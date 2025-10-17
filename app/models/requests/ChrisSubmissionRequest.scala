@@ -38,7 +38,8 @@ case class ChrisSubmissionRequest(
   regularPaymentAmount: Option[BigDecimal],
   amendPaymentAmount: Option[BigDecimal],
   calculation: Option[PaymentPlanCalculation],
-  amendPlan: Boolean = false
+  amendPlan: Boolean = false,
+  cancelPlan: Boolean = false
 )
 
 object ChrisSubmissionRequest {
