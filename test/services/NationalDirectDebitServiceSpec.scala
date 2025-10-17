@@ -831,5 +831,3 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
   }
 }
-
-}
