@@ -57,7 +57,7 @@
                             visuallyHiddenText = Some(messages("Cancel"))
                         ) else null,
                         if (showActions && planType == PaymentPlanType.BudgetPaymentPlan.toString) ActionItem(
-                            href = "#",
+                            href = routes.SuspendPaymentPlanController.onPageLoad().url,
                             content = messages("paymentPlanDetails.details.suspend"),
                             visuallyHiddenText = Some(messages("Suspend"))
                         ) else null
