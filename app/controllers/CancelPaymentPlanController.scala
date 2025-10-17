@@ -22,7 +22,7 @@ import forms.CancelPaymentPlanFormProvider
 import javax.inject.Inject
 import models.NormalMode
 import navigation.Navigator
-import pages.{AmendPaymentPlanTypePage, CancelPaymentPlanPage}
+import pages.{CancelPaymentPlanPage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -69,7 +69,7 @@ class CancelPaymentPlanController @Inject() (
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
     } else {
-      val planType = request.userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
       // TODO removed after testing
       println(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")

@@ -21,7 +21,7 @@ import models.{PaymentPlanType, UserAnswers}
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -74,7 +74,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
         .set(AmendPlanStartDatePage, startDate)
         .success
         .value
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
 
@@ -123,7 +123,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
         .set(AmendPlanEndDatePage, endDate)
         .success
         .value
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
 
@@ -148,7 +148,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to Journey Recover page when AmendPlanStartDatePage is None" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
         .set(PaymentPlanReferenceQuery, "123456789K")
@@ -174,7 +174,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to Journey Recover page when AmendPaymentAmountPage is None" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
         .set(PaymentPlanReferenceQuery, "123456789K")
@@ -200,7 +200,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to Journey Recover page when PaymentPlanReferenceQuery is None" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
         .set(AmendPaymentAmountPage, regPaymentAmount)
@@ -226,7 +226,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to Journey Recover page when amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
         .success
         .value
 

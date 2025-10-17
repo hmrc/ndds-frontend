@@ -124,12 +124,12 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   // PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers
-      .get(AmendPaymentPlanTypePage)
+      .get(ManagePaymentPlanTypePage)
       .getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers
-      .get(AmendPaymentPlanTypePage)
+      .get(ManagePaymentPlanTypePage)
       .getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
@@ -384,7 +384,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
   def isPaymentPlanCancellable(userAnswers: UserAnswers): Boolean = {
     userAnswers
-      .get(AmendPaymentPlanTypePage)
+      .get(ManagePaymentPlanTypePage)
       .exists(planType =>
         Set(
           PaymentPlanType.SinglePaymentPlan.toString,

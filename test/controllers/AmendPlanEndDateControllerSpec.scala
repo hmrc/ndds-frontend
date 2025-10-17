@@ -24,7 +24,7 @@ import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, ManagePaymentPlanTypePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -162,7 +162,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
@@ -198,7 +198,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -229,7 +229,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -264,7 +264,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
@@ -297,7 +297,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -332,7 +332,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -363,7 +363,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -394,7 +394,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -425,7 +425,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -456,7 +456,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Variable payment")
+          .set(ManagePaymentPlanTypePage, "Variable payment")
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -487,7 +487,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Single payment")
+          .set(ManagePaymentPlanTypePage, "Single payment")
           .success
           .value
           .set(AmendPlanEndDatePage, validAnswer.plusDays(3))
@@ -513,7 +513,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
@@ -549,7 +549,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
