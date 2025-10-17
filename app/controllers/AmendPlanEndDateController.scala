@@ -18,16 +18,15 @@ package controllers
 
 import controllers.actions.*
 import forms.AmendPlanEndDateFormProvider
-import models.{Mode, UserAnswers}
+import models.Mode
 import navigation.Navigator
 import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Frequency
 import views.html.AmendPlanEndDateView
@@ -79,21 +78,22 @@ class AmendPlanEndDateController @Inject() (
                 val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
                 val frequencyStr = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
                 val frequency = Frequency.fromString(frequencyStr)
-                val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
 
                 val hasDateChanged = planDetails.paymentPlanDetails.scheduledPaymentEndDate match {
                   case Some(dbEndDate) => value != dbEndDate
                   case _               => true
                 }
-                val isNoChange = amendedAmount == dbAmount && !hasDateChanged
 
-                if (isNoChange) {
+                val hasAmountChanged = amendedAmount != dbAmount
+
+                val isNoChange = !hasAmountChanged && !hasDateChanged
+
+                if (isNoChange) { // F27 - check
                   val key = "amendment.noChange"
                   val errorForm = form.fill(value).withError("value", key)
                   Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
-                } else {
-                  checkForDuplicate(mode, userAnswers, value, amendedAmount, dbAmount, dbEndDate)
-                  // Calculate next payment date and validate against plan end date
+                } else if (hasDateChanged && !hasAmountChanged) {
+                  // F20 check
                   nddsService.calculateNextPaymentDate(dbStartDate, value, frequency).flatMap { result =>
                     logger.info(
                       s"""|[AmendPlanEndDateController]
@@ -114,9 +114,61 @@ class AmendPlanEndDateController @Inject() (
                         updatedAnswers1 <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
                         updatedAnswers2 <- Future.fromTry(
                                              updatedAnswers1.set(AmendPlanStartDatePage, result.potentialNextPaymentDate)
-                                           ) // this needed for budgting amend end date for chris submission
+                                           ) // this needed for budgeting amend end date for chris submission
                         _ <- sessionRepository.set(updatedAnswers2)
                       } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers2))
+                    }
+                  }
+                } else if (!hasDateChanged && hasAmountChanged) {
+                  for {
+                    duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers) // F26 check
+                  } yield {
+                    val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
+                    if (duplicateCheckResponse.isDuplicate) {
+                      logger.warn(logMsg)
+                      // TODO DTR-542 Goes to Warning page DW1
+                      Redirect(routes.JourneyRecoveryController.onPageLoad())
+                    } else {
+                      logger.info(logMsg)
+                      Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
+                    }
+                  }
+                } else { // hasDateChanged && hasAmountChanged
+                  // F20 check
+                  nddsService.calculateNextPaymentDate(dbStartDate, value, frequency).flatMap { result =>
+                    logger.info(
+                      s"""|[AmendPlanEndDateController]
+                          |  nextPaymentDateValid: $result.nextPaymentDateValid
+                          |  StartDate: $result.dbStartDate
+                          |""".stripMargin
+                    )
+                    if (!result.nextPaymentDateValid) {
+                      val errorForm = form
+                        .fill(value)
+                        .withError(
+                          key     = "value", // form field name in AmendPlanEndDateFormProvider
+                          message = "amendPlanEndDate.error.nextPaymentDateValid" // exact key from messages file
+                        )
+                      Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                    } else {
+                      for {
+                        duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers) // F26 check
+                        updatedAnswers1        <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
+                        updatedAnswers2 <- Future.fromTry(
+                                             updatedAnswers1.set(AmendPlanStartDatePage, result.potentialNextPaymentDate)
+                                           ) // this needed for budgeting amend end date for chris submission
+                        _ <- sessionRepository.set(updatedAnswers2)
+                      } yield {
+                        val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
+                        if (duplicateCheckResponse.isDuplicate) {
+                          logger.warn(logMsg)
+                          // TODO DTR-542 Goes to Warning page DW1
+                          Redirect(routes.JourneyRecoveryController.onPageLoad())
+                        } else {
+                          logger.info(logMsg)
+                          Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
+                        }
+                      }
                     }
                   }
                 }
@@ -129,42 +181,6 @@ class AmendPlanEndDateController @Inject() (
             throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(AmendPaymentPlanTypePage).get}")
           }
       )
-  }
-
-  private def checkForDuplicate(mode: Mode,
-                                userAnswers: UserAnswers,
-                                value: LocalDate,
-                                amendedAmount: BigDecimal,
-                                dbAmount: BigDecimal,
-                                dbEndDate: LocalDate
-                               )(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext,
-    request: Request[?]
-  ): Future[Result] = {
-
-    if (amendedAmount == dbAmount && value != dbEndDate) {
-      logger.info("Duplicate Check not performed as only EndDate has been amended")
-      for {
-        updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-        _              <- sessionRepository.set(updatedAnswers)
-      } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
-    } else {
-      for {
-        duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers)
-        updatedAnswers         <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-        _                      <- sessionRepository.set(updatedAnswers)
-      } yield {
-        val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
-        if (duplicateCheckResponse.isDuplicate) {
-          logger.warn(logMsg)
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
-        } else {
-          logger.info(logMsg)
-          Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
-        }
-      }
-    }
   }
 
 }
