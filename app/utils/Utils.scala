@@ -101,27 +101,6 @@ object Utils {
         throw new RuntimeException(s"Unsupported plan type: $planType")
     }
 
-    val totalLiability: BigDecimal = planType match {
-      case PaymentPlanType.SinglePaymentPlan.toString =>
-        userAnswers
-          .get(AmendPaymentAmountPage)
-          .orElse(
-            userAnswers
-              .get(PaymentPlanDetailsQuery)
-              .flatMap(_.paymentPlanDetails.scheduledPaymentAmount)
-          )
-          .getOrElse(throw new RuntimeException("Missing Total Liability Amount"))
-
-      case PaymentPlanType.BudgetPaymentPlan.toString =>
-        userAnswers
-          .get(PaymentPlanDetailsQuery)
-          .flatMap(_.paymentPlanDetails.totalLiability)
-          .getOrElse(throw new RuntimeException("Missing TotalLiability Amount"))
-
-      case _ =>
-        throw new RuntimeException(s"Unsupported plan type: $planType")
-    }
-
     val planTypeMapping: Map[String, String] = Map(
       PaymentPlanType.SinglePaymentPlan.toString      -> "01",
       PaymentPlanType.BudgetPaymentPlan.toString      -> "02",
@@ -168,8 +147,11 @@ object Utils {
         .get(PaymentPlanDetailsQuery)
         .map(_.paymentPlanDetails.paymentReference)
         .getOrElse(throw new RuntimeException("Missing PaymentPlanDetailsQuery or paymentReference")),
-      paymentAmount  = paymentAmount,
-      totalLiability = totalLiability,
+      paymentAmount = paymentAmount,
+      totalLiability = userAnswers
+        .get(PaymentPlanDetailsQuery)
+        .flatMap(_.paymentPlanDetails.totalLiability)
+        .getOrElse(throw new RuntimeException("Missing TotalLiability Amount")),
       paymentFrequency = userAnswers
         .get(PaymentPlanDetailsQuery)
         .flatMap(_.paymentPlanDetails.scheduledPaymentFrequency)

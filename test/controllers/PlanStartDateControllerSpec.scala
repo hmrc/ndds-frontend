@@ -19,8 +19,8 @@ package controllers
 import java.time.{LocalDate, ZoneOffset}
 import base.SpecBase
 import forms.PlanStartDateFormProvider
-import models.DirectDebitSource.MGD
-import models.PaymentPlanType.VariablePaymentPlan
+import models.DirectDebitSource.{MGD, PAYE, SA, TC}
+import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.EarliestPaymentDate
 import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetailsWithAuddisStatus}
 import navigation.{FakeNavigator, Navigator}
@@ -55,7 +55,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   val mockService: NationalDirectDebitService = mock[NationalDirectDebitService]
 
   private val expectedEarliestPlanStartDate: EarliestPaymentDate = EarliestPaymentDate("2025-02-06")
-  private val formattedDate = "06 Feb 2025"
   private val formattedDateNumeric = "06 02 2025"
   private val earliestPlanStartDate = "06-02-2025"
   private val testDirectDebitSource: DirectDebitSource = MGD
@@ -87,7 +86,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       )
 
   "planStartDate Controller" - {
-    "must return OK and the correct view for a GET" in {
+    "must return OK and the correct view for a GET when the directDebitSource is MGD" in {
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
@@ -101,13 +100,76 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanStartDateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form,
-                                               NormalMode,
-                                               formattedDate,
-                                               formattedDateNumeric,
-                                               testDirectDebitSource,
-                                               Call("GET", paymentReferenceRoute)
-                                              )(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, formattedDateNumeric, testDirectDebitSource, Call("GET", paymentReferenceRoute))(
+          getRequest(),
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when the directDebitSource is SA" in {
+      lazy val regularPaymentAmountRoute: String = routes.RegularPaymentAmountController.onPageLoad(NormalMode).url
+      val userAnswers: UserAnswers = UserAnswers(userAnswersId)
+        .set(DirectDebitSourcePage, SA)
+        .success
+        .value
+        .set(PaymentPlanTypePage, BudgetPaymentPlan)
+        .success
+        .value
+        .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true, false))
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+
+      running(application) {
+        val result = route(application, getRequest()).value
+
+        val view = application.injector.instanceOf[PlanStartDateView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, formattedDateNumeric, SA, Call("GET", regularPaymentAmountRoute))(
+          getRequest(),
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when the directDebitSource is TC" in {
+      lazy val totalAmountDueRoute: String = routes.TotalAmountDueController.onPageLoad(NormalMode).url
+      val userAnswers: UserAnswers = UserAnswers(userAnswersId)
+        .set(DirectDebitSourcePage, TC)
+        .success
+        .value
+        .set(PaymentPlanTypePage, TaxCreditRepaymentPlan)
+        .success
+        .value
+        .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true, false))
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+
+      running(application) {
+        val result = route(application, getRequest()).value
+
+        val view = application.injector.instanceOf[PlanStartDateView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, formattedDateNumeric, TC, Call("GET", totalAmountDueRoute))(
+          getRequest(),
+          messages(application)
+        ).toString
       }
     }
 
@@ -130,7 +192,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(form.fill(validAnswer),
                                                NormalMode,
-                                               formattedDate,
                                                formattedDateNumeric,
                                                testDirectDebitSource,
                                                Call("GET", paymentReferenceRoute)
@@ -158,6 +219,51 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
         .thenReturn(Future.failed(new Exception("bang")))
+
+      running(application) {
+        val result = route(application, getRequest()).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if the directDebitSource is not MGD, SA or TC" in {
+      val userAnswers: UserAnswers = UserAnswers(userAnswersId)
+        .set(DirectDebitSourcePage, PAYE)
+        .success
+        .value
+        .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true, false))
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+
+      running(application) {
+        val result = route(application, getRequest()).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if the directDebitSource is empty" in {
+      val userAnswers: UserAnswers = UserAnswers(userAnswersId)
+        .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true, false))
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -216,7 +322,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm,
                                                NormalMode,
-                                               formattedDate,
                                                formattedDateNumeric,
                                                testDirectDebitSource,
                                                Call("GET", paymentReferenceRoute)

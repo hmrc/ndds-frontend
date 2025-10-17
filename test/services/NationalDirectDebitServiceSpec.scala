@@ -38,6 +38,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
+import utils.Frequency.{Monthly, Weekly}
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.ExecutionContext.global
@@ -618,7 +619,8 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
             dummyPlanDetailResponse.paymentPlanDetails.copy(
               planType                  = PaymentPlanType.SinglePaymentPlan.toString,
               hodService                = DirectDebitSource.SA.toString,
-              scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString)
+              scheduledPaymentFrequency = Some(PaymentsFrequency.FortNightly.toString),
+              totalLiability            = Some(780.0)
             )
           )
 
@@ -632,9 +634,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
           .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
-          .success
-          .value
-          .set(TotalAmountDuePage, 780.00)
           .success
           .value
           .set(PaymentPlansCountQuery, 4)
@@ -713,6 +712,93 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         result shouldBe DuplicateCheckResponse(false)
       }
     }
+  }
+
+  "calculateNextPaymentDate" - {
+
+    "must return start date when start date is after today and beyond 3 working days (Step 1.1)" in {
+      val today = LocalDate.now()
+      val startDate = today.plusDays(10)
+      val planEndDate = today.plusMonths(3)
+
+      when(mockConnector.getFutureWorkingDays(any())(any()))
+        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
+
+      result.potentialNextPaymentDate mustBe startDate
+      result.nextPaymentDateValid mustBe true
+    }
+
+    "must calculate next payment date when start date is within next 3 working days (Step 1.2 triggered)" in {
+      val today = LocalDate.now()
+      val startDate = today.plusDays(1)
+      val planEndDate = today.plusMonths(3)
+
+      when(mockConnector.getFutureWorkingDays(any())(any()))
+        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
+
+      (result.potentialNextPaymentDate.isAfter(startDate) ||
+        result.potentialNextPaymentDate.isEqual(startDate)) mustBe true
+      result.nextPaymentDateValid mustBe true
+    }
+
+    "must calculate weekly next payment date correctly when plan already started" in {
+      val today = LocalDate.now()
+      val startDate = today.minusWeeks(2)
+      val planEndDate = today.plusWeeks(6)
+
+      when(mockConnector.getFutureWorkingDays(any())(any()))
+        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
+
+      result.potentialNextPaymentDate.isAfter(startDate) mustBe true
+      result.nextPaymentDateValid mustBe true
+    }
+
+    "must calculate monthly next payment date correctly when plan already started" in {
+      val today = LocalDate.now()
+      val startDate = today.minusMonths(4)
+      val planEndDate = today.plusMonths(12)
+
+      when(mockConnector.getFutureWorkingDays(any())(any()))
+        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
+
+      result.potentialNextPaymentDate.isAfter(startDate) mustBe true
+      result.nextPaymentDateValid mustBe true
+    }
+
+    "must set nextPaymentDateValid = false when potential next payment date is after plan end date (Step 2 validation)" in {
+      val today = LocalDate.now()
+      val startDate = today.minusWeeks(2)
+      val planEndDate = today.minusDays(1) // plan ended yesterday
+
+      when(mockConnector.getFutureWorkingDays(any())(any()))
+        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
+
+      result.nextPaymentDateValid mustBe false
+    }
+
+    "must set nextPaymentDateValid = true when plan end date is null" in {
+      val today = LocalDate.now()
+      val startDate = today.minusWeeks(2)
+      val planEndDate: LocalDate = null
+
+      when(mockConnector.getFutureWorkingDays(any())(any()))
+        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
+
+      result.nextPaymentDateValid mustBe true
+    }
+
   }
 
 }

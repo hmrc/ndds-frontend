@@ -117,7 +117,6 @@ class AmendPaymentPlanConfirmationController @Inject() (
       case Some(response) =>
         val planDetail = response.paymentPlanDetails
         val directDebitDetails = response.directDebitDetails
-
         val serviceType: DirectDebitSource =
           DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
 

@@ -141,3 +141,6 @@ GET        /already-have-payment-plan                   controllers.DuplicateWar
 POST       /already-have-payment-plan                   controllers.DuplicateWarningController.onSubmit(mode: Mode = NormalMode)
 GET        /change-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)
+
+GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
+POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()

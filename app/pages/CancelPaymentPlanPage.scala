@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import utils.Utils.emptyString
-@import play.api.mvc.Call
+package pages
 
-@this()
+import play.api.libs.json.JsPath
 
-@(
-        items: Seq[(String, Option[Call])],
-        classes: String = "govuk-list govuk-list--bullet",
-        id: Option[String] = None
-)(implicit messages: Messages)
+case object CancelPaymentPlanPage extends QuestionPage[Boolean] {
 
-<ul @{id.fold(emptyString)(id => id)} class="@classes">
-@for((item, callOpt) <- items) {
-    <li>
-    @callOpt.map { call =>
-        <a class="govuk-link" href="@call.url" target="_blank" rel="noopener noreferrer">@messages(item)<span class="govuk-visually-hidden">(opens in new tab)</span></a>
-    }.getOrElse {
-        @messages(item)</li>
-    }
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "hasCancelledPaymentPlan"
 }
-</ul>

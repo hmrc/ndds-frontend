@@ -46,6 +46,7 @@ class Navigator @Inject() () {
     case AmendPaymentAmountPage         => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
     case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+    case CancelPaymentPlanPage          => navigateFromCancelPaymentPlanPage
     case _                              => _ => routes.LandingController.onPageLoad()
   }
 
@@ -133,4 +134,13 @@ class Navigator @Inject() () {
       case _                                                => routes.JourneyRecoveryController.onPageLoad()
     }
   }
+
+  private def navigateFromCancelPaymentPlanPage(answers: UserAnswers): Call =
+    answers
+      .get(CancelPaymentPlanPage)
+      .map {
+        case true  => routes.JourneyRecoveryController.onPageLoad()
+        case false => routes.PaymentPlanDetailsController.onPageLoad()
+      }
+      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
 }
