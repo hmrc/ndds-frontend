@@ -49,10 +49,10 @@
             paragraph("directDebitMoreInfo.p3"),
         bulletList(
           items = Seq(
-            "directDebitMoreInfo.bullet.l1" -> Some(routes.SetupDirectDebitPaymentController.onPageLoad()),
-            "directDebitMoreInfo.bullet.l2" -> Some(routes.SetupDirectDebitPaymentController.onPageLoad()),
-            "directDebitMoreInfo.bullet.l3" -> Some(routes.SetupDirectDebitPaymentController.onPageLoad()),
-            "directDebitMoreInfo.bullet.l4" -> Some(routes.SetupDirectDebitPaymentController.onPageLoad())
+            "directDebitMoreInfo.bullet.l1" -> Some(Call("GET", "https://www.gov.uk/pay-tax-direct-debit")),
+            "directDebitMoreInfo.bullet.l2" -> Some(Call("GET", "https://www.gov.uk/pay-self-assessment-tax-bill/direct-debit")),
+            "directDebitMoreInfo.bullet.l3" -> Some(Call("GET", "https://www.gov.uk/pay-self-assessment-tax-bill/approve-payment-through-online-bank-account")),
+            "directDebitMoreInfo.bullet.l4" -> Some(Call("GET", "https://www.directdebit.co.uk/direct-debit-guarantee/"))
           )
         )
         ))) { ddMoreInfoContent =>

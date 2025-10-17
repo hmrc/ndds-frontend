@@ -29,7 +29,7 @@
 @for((item, callOpt) <- items) {
     <li>
     @callOpt.map { call =>
-        <a class="govuk-link" href="@call.url">@messages(item)</a>
+        <a class="govuk-link" href="@call.url" target="_blank" rel="noopener noreferrer">@messages(item)<span class="govuk-visually-hidden">(opens in new tab)</span></a>
     }.getOrElse {
         @messages(item)</li>
     }

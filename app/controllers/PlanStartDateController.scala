@@ -57,27 +57,36 @@ class PlanStartDateController @Inject() (
     {
       val answers = request.userAnswers
 
-      nddService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
-        val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
-        val form = formProvider(answers, earliestDate)
-        val preparedForm = answers.get(PlanStartDatePage) match {
-          case None        => form
-          case Some(value) => form.fill(value.enteredDate)
+      answers.get(DirectDebitSourcePage) match {
+        case Some(value)
+            if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) => {
+          nddService.getEarliestPlanStartDate(request.userAnswers) map { earliestPlanStartDate =>
+            val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+            val form = formProvider(answers, earliestDate)
+            val preparedForm = answers.get(PlanStartDatePage) match {
+              case None        => form
+              case Some(value) => form.fill(value.enteredDate)
+            }
+            Ok(
+              view(
+                preparedForm,
+                mode,
+                DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+                value,
+                backLinkRedirect(mode, answers)
+              )
+            )
+          } recover { case e =>
+            logger.warn(s"Unexpected error: $e")
+            Redirect(routes.JourneyRecoveryController.onPageLoad())
+          }
         }
-
-        Ok(
-          view(
-            preparedForm,
-            mode,
-            DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
-            DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-            answers.get(DirectDebitSourcePage).getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers")),
-            backLinkRedirect(mode, answers)
-          )
-        )
-      } recover { case e =>
-        logger.warn(s"Unexpected error: $e")
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        case None =>
+          logger.warn(s"DirectDebitSourcePage details missing from user answers")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        case _ =>
+          logger.warn(s"DirectDebitSource is not mgd or sa or tc")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
   }
@@ -110,7 +119,6 @@ class PlanStartDateController @Inject() (
                           view(
                             formWithErrors,
                             mode,
-                            DateTimeFormats.formattedDateTimeShort(earliestPlanStartDate.date),
                             DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
                             request.userAnswers
                               .get(DirectDebitSourcePage)
