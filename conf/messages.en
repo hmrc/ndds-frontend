@@ -2,6 +2,8 @@ service.name = National Direct Debit System
 
 service.manage = Manage a payment plan
 
+service.manage = Manage a payment plan
+
 site.back = Back
 site.remove = Remove
 site.change = Change
@@ -441,7 +443,7 @@ amendPlanEndDate.title = Plan end date
 amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026
-amendPlanEndDate.error.nextPaymentDateValid =There is insufficient time prior to the plan end date for your requested change  to be processed. Extend or remove the plan end date if you wish to continue.
+amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change  to be processed. Extend or remove the plan end date if you wish to continue.
 
 amendPaymentPlanConfirmation.title = Confirm new payment plan details - amend a payment plan
 amendPaymentPlanConfirmation.heading = Confirm new payment plan details
@@ -485,3 +487,14 @@ amendPaymentPlanUpdate.print = Print this confirmation
 amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
 amendPaymentPlanUpdate.close = Close
 
+cancelPaymentPlan.title = Cancel this payment plan
+cancelPaymentPlan.heading = Cancel this payment plan
+cancelPaymentPlan.paymentReference = Payment reference:
+cancelPaymentPlan.paymentAmount.single = Payment amount:
+cancelPaymentPlan.paymentAmount.budget = Regular payment amount:
+cancelPaymentPlan.p1 = Payments due within the next 3 working days cannot be cancelled.
+cancelPaymentPlan.p2 = For security reasons, you may be asked to re-authenticate your details.
+cancelPaymentPlan.h2 = Are you sure you want to cancel this payment plan?
+cancelPaymentPlan.checkYourAnswersLabel = cancelPaymentPlan
+cancelPaymentPlan.error.required = Select one option.
+cancelPaymentPlan.change.hidden = CancelPaymentPlan
