@@ -14,15 +14,20 @@
  * limitations under the License.
  *@
 
+@import views.html.components.*
+@import models.DirectDebitSource.*
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     mainErrorSummary: components.MainErrorSummary,
     govukDateInput: GovukDateInput,
-    govukButton: GovukButton
+    govukButton: GovukButton,
+    govukDetails: GovukDetails,
+    paragraph: Paragraph,
 )
 
-@(form: Form[_], mode: Mode, dateTimeShort: String, dateTimeNumeric: String, source: DirectDebitSource, call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, dateTimeNumeric: String, source: DirectDebitSource, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("planStartDate.title")), backLink = Some(call.url)) {
 
@@ -35,7 +40,19 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("planStartDate.heading")).asPageHeading()
             )
-            .withHint(HintViewModel(HtmlContent(messages(s"planStartDate.${source.toString}.hint", dateTimeShort) + messages("planStartDate.fixedHint", dateTimeNumeric))))
+            .withHint(HintViewModel(HtmlContent(
+                Seq(
+                    paragraph("planStartDate.p1"),
+
+                    govukDetails(
+                        Details(
+                            summary = messages("planStartDate.collapsable"),
+                            content = messages(s"planStartDate.collapsable.${source}.p1")
+                        )
+                    ),
+                    messages("planStartDate.fixedHint", dateTimeNumeric),
+                ).mkString
+            )))
         )
 
         @govukButton(
