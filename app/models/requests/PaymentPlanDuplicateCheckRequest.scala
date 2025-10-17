@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import utils.Utils.emptyString
-@import play.api.mvc.Call
+package models.requests
 
-@this()
+import play.api.libs.json.{Json, OFormat}
 
-@(
-        items: Seq[(String, Option[Call])],
-        classes: String = "govuk-list govuk-list--bullet",
-        id: Option[String] = None
-)(implicit messages: Messages)
+import java.time.LocalDate
 
-<ul @{id.fold(emptyString)(id => id)} class="@classes">
-@for((item, callOpt) <- items) {
-    <li>
-    @callOpt.map { call =>
-        <a class="govuk-link" href="@call.url" target="_blank" rel="noopener noreferrer">@messages(item)<span class="govuk-visually-hidden">(opens in new tab)</span></a>
-    }.getOrElse {
-        @messages(item)</li>
-    }
+case class PaymentPlanDuplicateCheckRequest(
+  directDebitReference: String,
+  paymentPlanReference: String,
+  planType: String,
+  paymentService: String,
+  paymentReference: String,
+  paymentAmount: BigDecimal,
+  totalLiability: BigDecimal,
+  paymentFrequency: Option[Int],
+  paymentStartDate: LocalDate
+)
+
+object PaymentPlanDuplicateCheckRequest {
+  implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format[PaymentPlanDuplicateCheckRequest]
 }
-</ul>

@@ -64,9 +64,9 @@ class BulletListLinksSpec extends SpecBase with Matchers {
       val doc = Jsoup.parse(html.body)
       val bullets = doc.select("ul li")
       bullets.size mustBe 3
-      bullets.get(0).text mustBe "First bullet"
-      bullets.get(1).text mustBe "Second bullet"
-      bullets.get(2).text mustBe "Third bullet"
+      bullets.get(0).text mustBe "First bullet(opens in new tab)"
+      bullets.get(1).text mustBe "Second bullet(opens in new tab)"
+      bullets.get(2).text mustBe "Third bullet(opens in new tab)"
     }
 
     "must render all bullet points in the output HTML when some links are true, others are None" in new Setup {
@@ -79,9 +79,9 @@ class BulletListLinksSpec extends SpecBase with Matchers {
       val doc = Jsoup.parse(html.body)
       val bullets = doc.select("ul li")
       bullets.size mustBe 3
-      bullets.get(0).text mustBe "First bullet"
+      bullets.get(0).text mustBe "First bullet(opens in new tab)"
       bullets.get(1).text mustBe "Second bullet"
-      bullets.get(2).text mustBe "Third bullet"
+      bullets.get(2).text mustBe "Third bullet(opens in new tab)"
     }
   }
 
