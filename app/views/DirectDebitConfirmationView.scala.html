@@ -29,7 +29,7 @@
 
 @(referenceNumber: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title")), showBackLink = false) {
+@layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitConfirmation.title")), showBackLink = false) {
 
     @govukPanel(Panel(
         title = messages("directDebitConfirmation.panel.title"),

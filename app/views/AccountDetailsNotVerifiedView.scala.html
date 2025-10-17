@@ -26,7 +26,7 @@
 
 @(retryDate: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("accountDetailsNotVerified.title")), showBackLink = false) {
+@layout(pageTitle = titleForSetupJourneyNoForm(messages("accountDetailsNotVerified.title")), showBackLink = false) {
    @header1("accountDetailsNotVerified.heading")
    @paragraphWithParam("accountDetailsNotVerified.p1", retryDate)
    @paragraphWithLink(

@@ -25,7 +25,7 @@
 
 @(retryDate: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("reachedLimit.title")), showBackLink = false) {
+@layout(pageTitle = titleForSetupJourneyNoForm(messages("reachedLimit.title")), showBackLink = false) {
     @header1("reachedLimit.heading")
     @paragraphWithParam("reachedLimit.p1", retryDate)
 }

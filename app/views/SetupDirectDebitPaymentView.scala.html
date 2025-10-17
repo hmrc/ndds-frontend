@@ -30,7 +30,7 @@
 @(directDebitCount: Int, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(
-    pageTitle = titleNoForm(messages("setupDirectDebitPayment.title")),
+    pageTitle = titleForSetupJourneyNoForm(messages("setupDirectDebitPayment.title")),
     backLink = DirectDebitCountBackLink.link(directDebitCount, call),
     showBackLink = DirectDebitCountBackLink.show(directDebitCount)
 ) {

@@ -1,6 +1,6 @@
 service.name = National Direct Debit System
 
-service.manage = Manage a payment plan
+service.setup = Set up a direct debit
 
 service.manage = Manage a payment plan
 
