@@ -139,3 +139,8 @@ GET        /payment-plan/payment-plan-confirmation      controllers.AmendPayment
 
 GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
 POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
+
+GET        /payment-plan/how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /payment-plan/how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = NormalMode)
+GET        /payment-plan/change-how-long-suspension-period-last                       controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /payment-plan/change-how-long-suspension-period-last                        controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
