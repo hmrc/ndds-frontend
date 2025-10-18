@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions._
+import controllers.actions.*
 import forms.SuspensionPeriodRangeDateFormProvider
 import javax.inject.Inject
 import models.{Mode, SuspensionPeriodRange}
@@ -30,18 +30,18 @@ import views.html.SuspensionPeriodRangeDateView
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SuspensionPeriodRangeDateController @Inject()(
-                                                     override val messagesApi: MessagesApi,
-                                                     sessionRepository: SessionRepository,
-                                                     navigator: Navigator,
-                                                     identify: IdentifierAction,
-                                                     getData: DataRetrievalAction,
-                                                     requireData: DataRequiredAction,
-                                                     formProvider: SuspensionPeriodRangeDateFormProvider,
-                                                     val controllerComponents: MessagesControllerComponents,
-                                                     view: SuspensionPeriodRangeDateView
-                                                   )(implicit ec: ExecutionContext)
-  extends FrontendBaseController
+class SuspensionPeriodRangeDateController @Inject() (
+  override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
+  navigator: Navigator,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  formProvider: SuspensionPeriodRangeDateFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  view: SuspensionPeriodRangeDateView
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
@@ -63,13 +63,15 @@ class SuspensionPeriodRangeDateController @Inject()(
       implicit val messages: Messages = messagesApi.preferred(request)
       val form = formProvider()
 
-      form.bindFromRequest().fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(SuspensionPeriodRangeDatePage, mode, updatedAnswers))
-      )
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield Redirect(navigator.nextPage(SuspensionPeriodRangeDatePage, mode, updatedAnswers))
+        )
     }
 }

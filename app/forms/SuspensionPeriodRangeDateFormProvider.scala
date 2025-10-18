@@ -43,9 +43,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
         )
       )(
         SuspensionPeriodRange.apply
-      )(
-        range => Some((range.startDate, range.endDate))
-      )
+      )(range => Some((range.startDate, range.endDate)))
         .verifying(
           "suspensionPeriodRangeDate.error.endBeforeStart",
           range => !range.endDate.isBefore(range.startDate)

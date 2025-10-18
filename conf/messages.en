@@ -1,4 +1,6 @@
-service.name = Set up a direct debit
+service.name = National Direct Debit System
+
+service.setup = Set up a direct debit
 
 service.manage = Manage a payment plan
 
@@ -445,7 +447,7 @@ amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) wi
 amendPlanEndDate.hint = e.g. 16 6 2026
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change  to be processed. Extend or remove the plan end date if you wish to continue.
 
-amendPaymentPlanConfirmation.title = Confirm new payment plan details - amend a payment plan
+amendPaymentPlanConfirmation.title = Confirm new payment plan details
 amendPaymentPlanConfirmation.heading = Confirm new payment plan details
 amendPaymentPlanConfirmation.p1 = This amendment will remove any suspension that you have in place. Check that the details below are correct, then click ''Continue'' to proceed. For security reasons, you may be asked to re-authenticate your details.
 amendPaymentPlanConfirmation.directDebit.h2 = Direct Debit details
@@ -498,6 +500,19 @@ cancelPaymentPlan.h2 = Are you sure you want to cancel this payment plan?
 cancelPaymentPlan.checkYourAnswersLabel = cancelPaymentPlan
 cancelPaymentPlan.error.required = Select one option.
 cancelPaymentPlan.change.hidden = CancelPaymentPlan
+
+suspendPaymentPlan.title = Suspend this payment plan
+suspendPaymentPlan.heading = Suspend this payment plan
+suspendPaymentPlan.p1 = You can suspend your payment plan if you need to pause payments.
+suspendPaymentPlan.p2 = When you suspend a payment plan:
+suspendPaymentPlan.l1 = no payments will be taken during the suspension period
+suspendPaymentPlan.l2 = you can remove the suspension at any time
+suspendPaymentPlan.l3 = interest may continue to accrue on your outstanding balance
+suspendPaymentPlan.l4 = your payment plan will resume automatically after the suspension ends
+suspendPaymentPlan.p3 = Payments due within the next 3 working days cannot be suspended.
+suspendPaymentPlan.continue = Continue
+suspendPaymentPlan.cancel.link = Cancel and return to payment plan
+
 
 suspensionPeriodRangeDate.title = SuspensionPeriodRangeDate
 suspensionPeriodRangeDate.heading = SuspensionPeriodRangeDate

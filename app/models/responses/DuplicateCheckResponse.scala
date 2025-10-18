@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-    layout: templates.Layout,
-    govukButton: GovukButton
-)
+package models.responses
 
-@()(implicit request: Request[_], messages: Messages)
+import play.api.libs.json.{Json, OFormat}
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("journeyRecovery.startAgain.title"))) {
+case class DuplicateCheckResponse(isDuplicate: Boolean)
 
-    <h1 class="govuk-heading-xl">@messages("journeyRecovery.startAgain.heading")</h1>
-
-    <p class="govuk-body">@messages("journeyRecovery.startAgain.guidance")</p>
-
-    <p class="govuk-body">
-        @govukButton(
-            ButtonViewModel(messages("site.startAgain"))
-                .asLink(routes.LandingController.onPageLoad().url)
-        )
-    </p>
+object DuplicateCheckResponse {
+  implicit val format: OFormat[DuplicateCheckResponse] = Json.format
 }

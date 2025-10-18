@@ -29,7 +29,7 @@
 
 @(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
+@layout(pageTitle = titleForSetupJourneyNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
     @if(maxLimitReached) {
         @govukErrorSummary(

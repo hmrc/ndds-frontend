@@ -18,21 +18,21 @@ package controllers
 
 import controllers.actions.*
 import forms.AmendPlanStartDateFormProvider
-
-import javax.inject.Inject
-import models.Mode
+import models.{Mode, UserAnswers}
 import navigation.Navigator
 import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPlanStartDateView
 
 import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AmendPlanStartDateController @Inject() (
@@ -84,10 +84,7 @@ class AmendPlanStartDateController @Inject() (
                   val errorForm = form.fill(value).withError("value", key)
                   Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                 } else {
-                  for {
-                    updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPlanStartDatePage, value))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
+                  checkForDuplicate(mode, userAnswers, value)
                 }
 
               case _ =>
@@ -98,5 +95,25 @@ class AmendPlanStartDateController @Inject() (
             throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(AmendPaymentPlanTypePage).get}")
           }
       )
+  }
+
+  private def checkForDuplicate(mode: Mode, userAnswers: UserAnswers, value: LocalDate)(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext,
+    request: Request[?]
+  ): Future[Result] = {
+    for {
+      updatedAnswers         <- Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
+      _                      <- sessionRepository.set(updatedAnswers)
+      duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(updatedAnswers)
+    } yield {
+      if (duplicateCheckResponse.isDuplicate) {
+        logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      } else {
+        logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+        Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
+      }
+    }
   }
 }
