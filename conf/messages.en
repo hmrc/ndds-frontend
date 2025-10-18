@@ -534,3 +534,4 @@ suspensionPeriodRangeStartDate.error.required = Enter a valid date.
 suspensionPeriodRangeEndDate.error.required = Enter a valid date.
 suspensionPeriodRangeStartDate.error.required.two = Enter a valid date.
 suspensionPeriodRangeEndDate.error.required.two = Enter a valid date.
+suspensionPeriodRangeDate.error.endBeforeStart =

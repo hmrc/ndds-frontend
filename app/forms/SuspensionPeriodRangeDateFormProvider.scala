@@ -21,6 +21,7 @@ import models.SuspensionPeriodRange
 import play.api.data.Form
 import play.api.data.Forms.mapping
 import play.api.i18n.Messages
+import utils.DateFormats
 
 import javax.inject.Inject
 
@@ -29,21 +30,21 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
   def apply()(implicit messages: Messages): Form[SuspensionPeriodRange] =
     Form(
       mapping(
-        "suspensionPeriodRangeStartDate" -> localDate(
+        "suspensionPeriodRangeStartDate" -> customPaymentDate(
           invalidKey     = "suspensionPeriodRangeStartDate.error.invalid",
-          allRequiredKey = "suspensionPeriodRangeStartDate.error.required",
+          allRequiredKey = "suspensionPeriodRangeStartDate.error.required.all",
           twoRequiredKey = "suspensionPeriodRangeStartDate.error.required.two",
-          requiredKey    = "suspensionPeriodRangeStartDate.error.required"
+          requiredKey    = "suspensionPeriodRangeStartDate.error.required",
+          dateFormats    = DateFormats.defaultDateFormats
         ),
-        "suspensionPeriodRangeEndDate" -> localDate(
+        "suspensionPeriodRangeEndDate" -> customPaymentDate(
           invalidKey     = "suspensionPeriodRangeEndDate.error.invalid",
-          allRequiredKey = "suspensionPeriodRangeEndDate.error.required",
+          allRequiredKey = "suspensionPeriodRangeEndDate.error.required.all",
           twoRequiredKey = "suspensionPeriodRangeEndDate.error.required.two",
-          requiredKey    = "suspensionPeriodRangeEndDate.error.required"
+          requiredKey    = "suspensionPeriodRangeEndDate.error.required",
+          dateFormats    = DateFormats.defaultDateFormats
         )
-      )(
-        SuspensionPeriodRange.apply
-      )(range => Some((range.startDate, range.endDate)))
+      )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
         .verifying(
           "suspensionPeriodRangeDate.error.endBeforeStart",
           range => !range.endDate.isBefore(range.startDate)

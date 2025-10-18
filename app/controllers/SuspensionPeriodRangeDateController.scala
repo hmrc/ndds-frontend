@@ -24,10 +24,11 @@ import navigation.Navigator
 import pages.SuspensionPeriodRangeDatePage
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SuspensionPeriodRangeDateView
-
+import utils.MaskAndFormatUtils.formatAmount
 import scala.concurrent.{ExecutionContext, Future}
 
 class SuspensionPeriodRangeDateController @Inject() (
@@ -49,13 +50,16 @@ class SuspensionPeriodRangeDateController @Inject() (
       implicit val messages: Messages = messagesApi.preferred(request)
 
       val form = formProvider()
-
       val preparedForm = request.userAnswers.get(SuspensionPeriodRangeDatePage) match {
         case Some(value: SuspensionPeriodRange) => form.fill(value)
         case _                                  => form
       }
 
-      Ok(view(preparedForm, mode))
+      val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
+      val planReference = planDetailsOpt.map(_.paymentPlanDetails.paymentReference).getOrElse("")
+      val paymentAmount = formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))
+
+      Ok(view(preparedForm, mode, planReference, paymentAmount))
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
@@ -63,10 +67,14 @@ class SuspensionPeriodRangeDateController @Inject() (
       implicit val messages: Messages = messagesApi.preferred(request)
       val form = formProvider()
 
+      val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
+      val planReference = planDetailsOpt.map(_.paymentPlanDetails.paymentReference).getOrElse("")
+      val paymentAmount = formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))
+
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, planReference, paymentAmount))),
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))
