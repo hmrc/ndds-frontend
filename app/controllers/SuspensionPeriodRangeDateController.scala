@@ -18,17 +18,20 @@ package controllers
 
 import controllers.actions.*
 import forms.SuspensionPeriodRangeDateFormProvider
+import models.requests.DataRequest
+
 import javax.inject.Inject
 import models.{Mode, SuspensionPeriodRange}
 import navigation.Navigator
 import pages.SuspensionPeriodRangeDatePage
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.*
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.SuspensionPeriodRangeDateView
 import utils.MaskAndFormatUtils.formatAmount
+import views.html.SuspensionPeriodRangeDateView
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class SuspensionPeriodRangeDateController @Inject() (
@@ -47,30 +50,20 @@ class SuspensionPeriodRangeDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData) { implicit request =>
-      implicit val messages: Messages = messagesApi.preferred(request)
-
       val form = formProvider()
       val preparedForm = request.userAnswers.get(SuspensionPeriodRangeDatePage) match {
-        case Some(value: SuspensionPeriodRange) => form.fill(value)
-        case _                                  => form
+        case Some(value) => form.fill(value)
+        case None        => form
       }
 
-      val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
-      val planReference = planDetailsOpt.map(_.paymentPlanDetails.paymentReference).getOrElse("")
-      val paymentAmount = formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))
-
+      val (planReference, paymentAmount) = extractPlanData
       Ok(view(preparedForm, mode, planReference, paymentAmount))
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      implicit val messages: Messages = messagesApi.preferred(request)
+      val (planReference, paymentAmount) = extractPlanData
       val form = formProvider()
-
-      val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
-      val planReference = planDetailsOpt.map(_.paymentPlanDetails.paymentReference).getOrElse("")
-      val paymentAmount = formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))
-
       form
         .bindFromRequest()
         .fold(
@@ -82,4 +75,11 @@ class SuspensionPeriodRangeDateController @Inject() (
             } yield Redirect(navigator.nextPage(SuspensionPeriodRangeDatePage, mode, updatedAnswers))
         )
     }
+}
+
+private def extractPlanData(implicit request: DataRequest[?]): (String, String) = {
+  val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
+  val planReference = planDetailsOpt.map(_.paymentPlanDetails.paymentReference).getOrElse("")
+  val paymentAmount = formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))
+  (planReference, paymentAmount)
 }
