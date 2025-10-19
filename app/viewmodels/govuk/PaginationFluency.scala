@@ -18,6 +18,7 @@ package viewmodels.govuk
 
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.pagination.{Pagination, PaginationItem, PaginationLink}
+import utils.Utils.emptyString
 
 object PaginationFluency {
 
@@ -28,8 +29,8 @@ object PaginationFluency {
         items         = Nil,
         previous      = None,
         next          = None,
-        landmarkLabel = "Pagination",
-        classes       = "",
+        landmarkLabel = "site.pagination.landmark",
+        classes       = emptyString,
         attributes    = Map.empty
       )
 
@@ -38,8 +39,8 @@ object PaginationFluency {
         items         = items,
         previous      = None,
         next          = None,
-        landmarkLabel = "Pagination",
-        classes       = "",
+        landmarkLabel = "site.pagination.landmark",
+        classes       = emptyString,
         attributes    = Map.empty
       )
   }
@@ -48,8 +49,8 @@ object PaginationFluency {
     items: Seq[PaginationItemViewModel] = Nil,
     previous: Option[PaginationLinkViewModel] = None,
     next: Option[PaginationLinkViewModel] = None,
-    landmarkLabel: String = "Pagination",
-    classes: String = "",
+    landmarkLabel: String = "site.pagination.landmark",
+    classes: String = emptyString,
     attributes: Map[String, String] = Map.empty
   ) {
 
@@ -97,8 +98,8 @@ object PaginationFluency {
 
     def ellipsis(): PaginationItemViewModel =
       PaginationItemViewModel(
-        number             = "",
-        href               = "",
+        number             = emptyString,
+        href               = emptyString,
         visuallyHiddenText = None,
         current            = false,
         ellipsis           = true,
@@ -127,7 +128,7 @@ object PaginationFluency {
     def asPaginationItem(implicit messages: Messages): PaginationItem = {
       PaginationItem(
         number             = if (ellipsis) None else Some(number),
-        href               = if (ellipsis) "" else href,
+        href               = if (ellipsis) emptyString else href,
         visuallyHiddenText = visuallyHiddenText.map(messages(_)),
         current            = if (current) Some(true) else None,
         ellipsis           = if (ellipsis) Some(true) else None,
