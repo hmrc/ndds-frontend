@@ -19,9 +19,8 @@ package controllers
 import controllers.actions.*
 import forms.SuspensionPeriodRangeDateFormProvider
 import models.requests.DataRequest
-
 import javax.inject.Inject
-import models.{Mode, SuspensionPeriodRange}
+import models.{Mode, PaymentPlanType}
 import navigation.Navigator
 import pages.SuspensionPeriodRangeDatePage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -50,36 +49,61 @@ class SuspensionPeriodRangeDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData) { implicit request =>
-      val form = formProvider()
-      val preparedForm = request.userAnswers.get(SuspensionPeriodRangeDatePage) match {
-        case Some(value) => form.fill(value)
-        case None        => form
-      }
+      request.userAnswers.get(PaymentPlanDetailsQuery) match {
+        case Some(response) =>
+          val planDetail = response.paymentPlanDetails
 
-      val (planReference, paymentAmount) = extractPlanData
-      Ok(view(preparedForm, mode, planReference, paymentAmount))
+          // ✅ Only allow suspension for BudgetPaymentPlan
+          if (planDetail.planType != PaymentPlanType.BudgetPaymentPlan.toString) {
+            Redirect(routes.JourneyRecoveryController.onPageLoad())
+          } else {
+            val form = formProvider()
+            val preparedForm = request.userAnswers.get(SuspensionPeriodRangeDatePage) match {
+              case Some(value) => form.fill(value)
+              case None        => form
+            }
+
+            val (planReference, paymentAmount) = extractPlanData
+            Ok(view(preparedForm, mode, planReference, paymentAmount))
+          }
+
+        case None =>
+          Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      val (planReference, paymentAmount) = extractPlanData
-      val form = formProvider()
-      form
-        .bindFromRequest()
-        .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, planReference, paymentAmount))),
-          value =>
-            for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))
-              _              <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(navigator.nextPage(SuspensionPeriodRangeDatePage, mode, updatedAnswers))
-        )
-    }
-}
+      request.userAnswers.get(PaymentPlanDetailsQuery) match {
+        case Some(response) =>
+          val planDetail = response.paymentPlanDetails
+          if (planDetail.planType != PaymentPlanType.BudgetPaymentPlan.toString) {
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          } else {
+            val (planReference, paymentAmount) = extractPlanData
+            val form = formProvider()
+            form
+              .bindFromRequest()
+              .fold(
+                formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, planReference, paymentAmount))),
+                value =>
+                  for {
+                    updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))
+                    _              <- sessionRepository.set(updatedAnswers)
+                  } yield Redirect(navigator.nextPage(SuspensionPeriodRangeDatePage, mode, updatedAnswers))
+              )
+          }
 
-private def extractPlanData(implicit request: DataRequest[?]): (String, String) = {
-  val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
-  val planReference = planDetailsOpt.map(_.paymentPlanDetails.paymentReference).getOrElse("")
-  val paymentAmount = formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))
-  (planReference, paymentAmount)
+        case None =>
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    }
+
+  private def extractPlanData(implicit request: DataRequest[?]): (String, String) = {
+    val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
+    val planReference = planDetailsOpt.map(_.paymentPlanDetails.paymentReference).getOrElse("")
+    val paymentAmount =
+      formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))
+    (planReference, paymentAmount)
+  }
 }

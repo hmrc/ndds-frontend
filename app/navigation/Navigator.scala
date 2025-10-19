@@ -68,7 +68,7 @@ class Navigator @Inject() () {
     case AmendPaymentAmountPage         => userAnswers => checkPaymentPlanLogic(userAnswers, CheckMode)
     case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
-    case SuspensionPeriodRangeDatePage  => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
+    case SuspensionPeriodRangeDatePage  => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
     case _                              => _ => routes.LandingController.onPageLoad()
   }
 
@@ -130,7 +130,7 @@ class Navigator @Inject() () {
   }
 
   private def checkPaymentPlanLogic(userAnswers: UserAnswers, mode: Mode): Call = {
-    val paymentPlanType = userAnswers.get(AmendPaymentPlanTypePage)
+    val paymentPlanType = userAnswers.get(ManagePaymentPlanTypePage)
     paymentPlanType match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(mode)
       case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(mode)

@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import forms.SuspensionPeriodRangeDateFormProvider
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
-import models.{NormalMode, SuspensionPeriodRange}
+import models.{NormalMode, PaymentPlanType, SuspensionPeriodRange}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -53,7 +53,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
   private lazy val suspensionPeriodRangeDateRoute =
     routes.SuspensionPeriodRangeDateController.onPageLoad(NormalMode).url
 
-  private val paymentPlanResponse = PaymentPlanResponse(
+  private val budgetPaymentPlanResponse = PaymentPlanResponse(
     directDebitDetails = DirectDebitDetails(
       bankSortCode       = Some("12-34-56"),
       bankAccountNumber  = Some("12345678"),
@@ -63,7 +63,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
     ),
     paymentPlanDetails = PaymentPlanDetails(
       hodService                = "SA",
-      planType                  = "BudgetPaymentPlan",
+      planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
       paymentReference          = "PP123456",
       submissionDateTime        = LocalDateTime.now,
       scheduledPaymentAmount    = Some(BigDecimal(100)),
@@ -81,8 +81,15 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
     )
   )
 
-  private val userAnswersWithPlanDetails =
-    emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+  private val singlePaymentPlanResponse = budgetPaymentPlanResponse.copy(
+    paymentPlanDetails = budgetPaymentPlanResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
+  )
+
+  private val userAnswersWithBudgetPlan =
+    emptyUserAnswers.set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse).success.value
+
+  private val userAnswersWithSinglePlan =
+    emptyUserAnswers.set(PaymentPlanDetailsQuery, singlePaymentPlanResponse).success.value
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, suspensionPeriodRangeDateRoute)
@@ -100,8 +107,8 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
 
   "SuspensionPeriodRangeDateController" - {
 
-    "must return OK and the correct view for a GET" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithPlanDetails)).build()
+    "must return OK and the correct view for GET with BudgetPaymentPlan" in {
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan)).build()
 
       running(application) {
         val request = getRequest()
@@ -117,8 +124,18 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must populate the view correctly on a GET when previously answered" in {
-      val userAnswers = userAnswersWithPlanDetails
+    "must redirect to Journey Recovery for GET with non-Budget plan" in {
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePlan)).build()
+
+      running(application) {
+        val result = route(application, getRequest()).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must populate the view correctly on GET when previously answered" in {
+      val userAnswers = userAnswersWithBudgetPlan
         .set(SuspensionPeriodRangeDatePage, validAnswer)
         .success
         .value
@@ -139,12 +156,12 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must redirect to next page when valid POST with BudgetPaymentPlan" in {
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(userAnswersWithPlanDetails))
+        applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -158,8 +175,27 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must return a Bad Request and errors when invalid data is submitted" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithPlanDetails)).build()
+    "must redirect to Journey Recovery for POST with non-Budget plan" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswersWithSinglePlan))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val result = route(application, postRequest()).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must return BadRequest and errors when invalid POST data submitted" in {
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan)).build()
 
       val request =
         FakeRequest(POST, suspensionPeriodRangeDateRoute)
@@ -178,7 +214,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+    "must redirect to Journey Recovery for GET if no data exists" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
@@ -188,7 +224,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+    "must redirect to Journey Recovery for POST if no data exists" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
