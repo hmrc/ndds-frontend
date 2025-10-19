@@ -23,6 +23,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.CancelPaymentPlanPage
 import play.api.inject.bind
 import play.api.mvc.Call
@@ -37,6 +38,8 @@ import views.html.CancelPaymentPlanView
 
 import scala.concurrent.Future
 
+implicit val hc: HeaderCarrier = HeaderCarrier()
+
 class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
@@ -47,6 +50,8 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
   private lazy val cancelPaymentPlanRoute = routes.CancelPaymentPlanController.onPageLoad().url
 
   "CancelPaymentPlan Controller" - {
+
+    val mockNddsService = mock[NationalDirectDebitService]
 
     "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
 
@@ -74,9 +79,16 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
 
       running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(true)
+
         val request = FakeRequest(GET, cancelPaymentPlanRoute)
 
         val result = route(application, request).value
@@ -121,9 +133,16 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
 
       running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(true)
+
         val request = FakeRequest(GET, cancelPaymentPlanRoute)
 
         val result = route(application, request).value
@@ -171,9 +190,16 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
 
       running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(true)
+
         val request = FakeRequest(GET, cancelPaymentPlanRoute)
 
         val view = application.injector.instanceOf[CancelPaymentPlanView]
@@ -191,24 +217,29 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
     "must submit to CHRIS, save user answers and redirect when valid data is submitted" in {
 
-      import uk.gov.hmrc.http.HeaderCarrier
-      implicit val hc: HeaderCarrier = HeaderCarrier()
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
 
+      val paymentPlanReference = "ppReference"
       val mockSessionRepository = mock[SessionRepository]
       val mockNddService = mock[NationalDirectDebitService]
 
-      // Mock successful save + CHRIS submission
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-      when(mockNddService.submitChrisData(any())(any[HeaderCarrier])) thenReturn Future.successful(true)
-
       val userAnswersWithData =
         emptyUserAnswers
-          .set(DirectDebitReferenceQuery, "DDI123")
+          .set(PaymentPlanReferenceQuery, paymentPlanReference)
           .success
           .value
-          .set(PaymentPlanDetailsQuery, dummyPlanDetailResponse)
+          .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
           .success
           .value
+          .set(DirectDebitReferenceQuery, "DDI123456")
+          .success
+          .value
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.submitChrisData(any())(any[HeaderCarrier])) thenReturn Future.successful(true)
 
       val onwardRoute = Call("GET", "/foo")
 
@@ -315,6 +346,27 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
         val request =
           FakeRequest(POST, cancelPaymentPlanRoute)
             .withFormUrlEncodedBody(("value", ""))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if Payment plan is not cancellable" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(false)
+
+        val request = FakeRequest(GET, cancelPaymentPlanRoute)
 
         val result = route(application, request).value
 

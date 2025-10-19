@@ -21,14 +21,16 @@ import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
+import models.requests.*
+import pages.*
 import models.responses.*
 import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers}
-import pages.*
 import play.api.Logging
 import play.api.mvc.Request
+import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
+import utils.Utils
 import utils.Frequency
 
 import java.time.temporal.TemporalAdjusters
@@ -116,19 +118,18 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     } else {
       config.paymentDelayDynamicAuddisNotEnabled
     }
-
     config.paymentDelayFixed + dynamicDelay
   }
 
   // PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers
-      .get(AmendPaymentPlanTypePage)
+      .get(ManagePaymentPlanTypePage)
       .getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers
-      .get(AmendPaymentPlanTypePage)
+      .get(ManagePaymentPlanTypePage)
       .getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
@@ -361,4 +362,35 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
+  def isDuplicatePaymentPlan(ua: UserAnswers)(implicit hc: HeaderCarrier, request: Request[?]): Future[DuplicateCheckResponse] = {
+    ua.get(PaymentPlansCountQuery) match {
+      case Some(count) => {
+        if (count > 1) {
+          val request: PaymentPlanDuplicateCheckRequest =
+            Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
+
+          nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
+        } else {
+          logger.info("There is only 1 payment plan so not checking duplicate as in no RDS Call")
+          Future.successful(DuplicateCheckResponse(false))
+        }
+      }
+      case None => {
+        logger.error("Could not find the count of Payment Plans" + ua.get(PaymentPlansCountQuery).get)
+        throw new IllegalStateException("Count of payment plans is missing or invalid")
+      }
+    }
+  }
+
+  def isPaymentPlanCancellable(userAnswers: UserAnswers): Boolean = {
+    userAnswers
+      .get(ManagePaymentPlanTypePage)
+      .exists(planType =>
+        Set(
+          PaymentPlanType.SinglePaymentPlan.toString,
+          PaymentPlanType.BudgetPaymentPlan.toString,
+          PaymentPlanType.VariablePaymentPlan.toString
+        ).contains(planType)
+      )
+  }
 }

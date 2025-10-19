@@ -52,7 +52,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
-        AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse(""))(messages(app)),
+        AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse(""))(messages(app)),
         AmendPaymentPlanSourceSummary.row(paymentPlan.hodService)(messages(app)),
         TotalAmountDueSummary.row(paymentPlan.totalLiability)(messages(app)),
         MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability)(messages(app)),
@@ -83,7 +83,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
-        AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse(""))(messages(app)),
+        AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse(""))(messages(app)),
         AmendPaymentPlanSourceSummary.row(paymentPlan.hodService)(messages(app)),
         DateSetupSummary.row(paymentPlan.submissionDateTime)(messages(app)),
         AmendPaymentAmountSummary.row(
@@ -125,7 +125,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .success
             .value
             .set(
-              AmendPaymentPlanTypePage,
+              ManagePaymentPlanTypePage,
               PaymentPlanType.BudgetPaymentPlan.toString
             )
             .success
@@ -207,7 +207,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .success
             .value
             .set(
-              AmendPaymentPlanTypePage,
+              ManagePaymentPlanTypePage,
               PaymentPlanType.SinglePaymentPlan.toString
             )
             .success
