@@ -17,7 +17,7 @@
 package services
 
 import base.SpecBase
-import models.{DirectDebitDetails, NddDetails}
+import models.NddDetails
 import org.scalatest.matchers.must.Matchers
 import viewmodels.govuk.PaginationFluency.*
 
@@ -92,7 +92,7 @@ class PaginationServiceSpec extends SpecBase with Matchers {
           NddDetails("DD002", now.minusDays(1), "123456", "12345678", "Test Account", false, 1),
           NddDetails("DD003", now, "123456", "12345678", "Test Account", false, 1)
         )
-        
+
         val result = paginationService.paginateDirectDebits(testData, baseUrl = "/test")
 
         result.paginatedData.head.directDebitReference mustBe "DD003"
@@ -102,10 +102,10 @@ class PaginationServiceSpec extends SpecBase with Matchers {
 
       "must handle invalid page numbers gracefully" in {
         val testData = createTestNddDetails(5)
-        
+
         val resultNegative = paginationService.paginateDirectDebits(testData, currentPage = -1, baseUrl = "/test")
         resultNegative.currentPage mustBe 1
-        
+
         val resultTooHigh = paginationService.paginateDirectDebits(testData, currentPage = 999, baseUrl = "/test")
         resultTooHigh.currentPage mustBe 2
       }
@@ -131,18 +131,17 @@ class PaginationServiceSpec extends SpecBase with Matchers {
     }
   }
 
-
   private def createTestNddDetails(count: Int): Seq[NddDetails] = {
     val now = LocalDateTime.now()
     (1 to count).map { i =>
       NddDetails(
-        ddiRefNumber = s"DD$i",
+        ddiRefNumber       = s"DD$i",
         submissionDateTime = now.minusDays(i),
-        bankSortCode = "123456",
-        bankAccountNumber = "12345678",
-        bankAccountName = s"Test Account $i",
-        auDdisFlag = false,
-        numberOfPayPlans = 1
+        bankSortCode       = "123456",
+        bankAccountNumber  = "12345678",
+        bankAccountName    = s"Test Account $i",
+        auDdisFlag         = false,
+        numberOfPayPlans   = 1
       )
     }
   }
