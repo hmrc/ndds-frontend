@@ -139,3 +139,5 @@ GET        /payment-plan/payment-plan-confirmation      controllers.AmendPayment
 
 GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
 POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
+
+GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()

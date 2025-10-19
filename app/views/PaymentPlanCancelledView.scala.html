@@ -1,0 +1,67 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.html.components.*
+
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        confirmationPanel: ConfirmationPanel,
+        govukInsetText: GovukInsetText,
+        header2: Header2,
+        paragraph: Paragraph,
+        govukSummaryList: GovukSummaryList,
+        link: Link
+)
+
+@(paymentPlanReference: String, call: Call, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleNoForm(messages("paymentPlanCancelled.title")), showBackLink = false) {
+
+    @confirmationPanel(
+        title = messages("paymentPlanCancelled.panel.title"),
+        body = Html(
+                    s"${messages("paymentPlanCancelled.panel.body1")}" +
+                    s"${messages("paymentPlanCancelled.panel.strong", paymentPlanReference)}" +
+                    s"${messages("paymentPlanCancelled.panel.body2")}"
+                    ),
+        classes = "govuk-!-margin-bottom-2"
+    )
+
+    @govukInsetText(
+        InsetText(
+            content = Text(messages("paymentPlanCancelled.pleaseNote"))
+        )
+    )
+
+    @header2("paymentPlanCancelled.h1")
+
+    @paragraph(messages("paymentPlanCancelled.p1"))
+
+    @header2("paymentPlanCancelled.h2")
+
+    @govukSummaryList(SummaryList(
+        card = Some(Card(
+            title = Some(CardTitle(
+                content = messages("paymentPlanCancelled.paymentReference", paymentPlanReference)
+            ))
+        )),
+        rows = rows
+    ))
+
+    @link("paymentPlanCancelled.link", call.url)
+
+}
