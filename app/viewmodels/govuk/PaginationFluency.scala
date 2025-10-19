@@ -25,22 +25,22 @@ object PaginationFluency {
 
     def apply(): PaginationViewModel =
       PaginationViewModel(
-        items = Nil,
-        previous = None,
-        next = None,
+        items         = Nil,
+        previous      = None,
+        next          = None,
         landmarkLabel = "Pagination",
-        classes = "",
-        attributes = Map.empty
+        classes       = "",
+        attributes    = Map.empty
       )
 
     def apply(items: Seq[PaginationItemViewModel]): PaginationViewModel =
       PaginationViewModel(
-        items = items,
-        previous = None,
-        next = None,
+        items         = items,
+        previous      = None,
+        next          = None,
         landmarkLabel = "Pagination",
-        classes = "",
-        attributes = Map.empty
+        classes       = "",
+        attributes    = Map.empty
       )
   }
 
@@ -73,12 +73,12 @@ object PaginationFluency {
 
     def asPagination(implicit messages: Messages): Pagination = {
       Pagination(
-        items = Some(items.map(_.asPaginationItem)),
-        previous = previous.map(_.asPaginationLink),
-        next = next.map(_.asPaginationLink),
+        items         = Some(items.map(_.asPaginationItem)),
+        previous      = previous.map(_.asPaginationLink),
+        next          = next.map(_.asPaginationLink),
         landmarkLabel = Some(landmarkLabel),
-        classes = classes,
-        attributes = attributes
+        classes       = classes,
+        attributes    = attributes
       )
     }
   }
@@ -87,22 +87,22 @@ object PaginationFluency {
 
     def apply(number: String, href: String): PaginationItemViewModel =
       PaginationItemViewModel(
-        number = number,
-        href = href,
+        number             = number,
+        href               = href,
         visuallyHiddenText = None,
-        current = false,
-        ellipsis = false,
-        attributes = Map.empty
+        current            = false,
+        ellipsis           = false,
+        attributes         = Map.empty
       )
 
     def ellipsis(): PaginationItemViewModel =
       PaginationItemViewModel(
-        number = "",
-        href = "",
+        number             = "",
+        href               = "",
         visuallyHiddenText = None,
-        current = false,
-        ellipsis = true,
-        attributes = Map.empty
+        current            = false,
+        ellipsis           = true,
+        attributes         = Map.empty
       )
   }
 
@@ -126,12 +126,12 @@ object PaginationFluency {
 
     def asPaginationItem(implicit messages: Messages): PaginationItem = {
       PaginationItem(
-        number = if (ellipsis) None else Some(number),
-        href = if (ellipsis) "" else href,
+        number             = if (ellipsis) None else Some(number),
+        href               = if (ellipsis) "" else href,
         visuallyHiddenText = visuallyHiddenText.map(messages(_)),
-        current = if (current) Some(true) else None,
-        ellipsis = if (ellipsis) Some(true) else None,
-        attributes = attributes
+        current            = if (current) Some(true) else None,
+        ellipsis           = if (ellipsis) Some(true) else None,
+        attributes         = attributes
       )
     }
   }
@@ -140,10 +140,10 @@ object PaginationFluency {
 
     def apply(href: String): PaginationLinkViewModel =
       PaginationLinkViewModel(
-        href = href,
-        text = None,
-        html = None,
-        labelText = None,
+        href       = href,
+        text       = None,
+        html       = None,
+        labelText  = None,
         attributes = Map.empty
       )
   }
@@ -170,9 +170,9 @@ object PaginationFluency {
 
     def asPaginationLink(implicit messages: Messages): PaginationLink = {
       PaginationLink(
-        href = href,
-        text = text.map(messages(_)),
-        labelText = labelText.map(messages(_)),
+        href       = href,
+        text       = text.map(messages(_)),
+        labelText  = labelText.map(messages(_)),
         attributes = attributes
       )
     }

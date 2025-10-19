@@ -16,7 +16,7 @@
 
 import base.SpecBase
 import org.scalatest.matchers.must.Matchers
-import viewmodels.govuk.PaginationFluency._
+import viewmodels.govuk.PaginationFluency.*
 import play.api.test.FakeRequest
 import play.api.i18n.Messages
 
@@ -68,11 +68,11 @@ class PaginationViewModelSpec extends SpecBase with Matchers {
           PaginationItemViewModel("1", "/page/1"),
           PaginationItemViewModel("2", "/page/2").withCurrent(true)
         ),
-        previous = Some(PaginationLinkViewModel("/prev").withText("Previous")),
-        next = Some(PaginationLinkViewModel("/next").withText("Next")),
+        previous      = Some(PaginationLinkViewModel("/prev").withText("Previous")),
+        next          = Some(PaginationLinkViewModel("/next").withText("Next")),
         landmarkLabel = "Test Pagination",
-        classes = "test-class",
-        attributes = Map("data-test" -> "value")
+        classes       = "test-class",
+        attributes    = Map("data-test" -> "value")
       )
 
       val govukPagination = pagination.asPagination

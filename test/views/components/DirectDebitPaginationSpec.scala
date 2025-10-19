@@ -16,15 +16,15 @@
 
 import base.SpecBase
 import org.scalatest.matchers.must.Matchers
-import views.html.components.Pagination
+import views.html.components.DirectDebitPagination
 import play.api.test.FakeRequest
 import play.api.i18n.Messages
 import org.jsoup.Jsoup
 import viewmodels.govuk.PaginationFluency._
 
-class PaginationSpec extends SpecBase with Matchers {
+class DirectDebitPaginationSpec extends SpecBase with Matchers {
 
-  "Pagination component" - {
+  "DirectDebitPagination component" - {
 
     "must render basic pagination with page numbers" in new Setup {
       val pagination = PaginationViewModel(
@@ -186,7 +186,7 @@ class PaginationSpec extends SpecBase with Matchers {
 
   trait Setup {
     val app = applicationBuilder().build()
-    val paginationComponent = app.injector.instanceOf[Pagination]
+    val paginationComponent = app.injector.instanceOf[DirectDebitPagination]
     implicit val request: play.api.mvc.Request[?] = FakeRequest()
     implicit val messages: Messages = play.api.i18n.MessagesImpl(
       play.api.i18n.Lang.defaultLang,
