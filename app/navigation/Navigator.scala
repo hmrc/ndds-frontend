@@ -46,6 +46,7 @@ class Navigator @Inject() () {
     case AmendPaymentAmountPage         => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
     case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+    case SuspensionPeriodRangeDatePage  => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
     case CancelPaymentPlanPage          => navigateFromCancelPaymentPlanPage
     case _                              => _ => routes.LandingController.onPageLoad()
   }
@@ -67,10 +68,12 @@ class Navigator @Inject() () {
     case AmendPaymentAmountPage         => userAnswers => checkPaymentPlanLogic(userAnswers, CheckMode)
     case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+    case SuspensionPeriodRangeDatePage  => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
     case _                              => _ => routes.LandingController.onPageLoad()
   }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
+
     case NormalMode =>
       normalRoutes(page)(userAnswers)
     case CheckMode =>

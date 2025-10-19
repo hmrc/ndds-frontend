@@ -514,15 +514,8 @@ suspendPaymentPlan.continue = Continue
 suspendPaymentPlan.cancel.link = Cancel and return to payment plan
 
 
-suspensionPeriodRangeDate.title = SuspensionPeriodRangeDate
-suspensionPeriodRangeDate.heading = SuspensionPeriodRangeDate
-suspensionPeriodRangeDate.checkYourAnswersLabel = SuspensionPeriodRangeDate
-suspensionPeriodRangeDate.error.required.all = Enter the suspensionPeriodRangeDate
-suspensionPeriodRangeDate.error.required.two = The suspensionPeriodRangeDate must include {0} and {1}
-suspensionPeriodRangeDate.error.required = The suspensionPeriodRangeDate must include {0}
-suspensionPeriodRangeDate.error.invalid = Enter a real SuspensionPeriodRangeDate
-suspensionPeriodRangeDate.change.hidden = SuspensionPeriodRangeDate
 
+suspensionPeriodRangeDate.checkYourAnswersLabel = Suspension period
 suspensionPeriodRangeDate.title = How long will the suspension period last?
 suspensionPeriodRangeDate.heading = How long will the suspension period last?
 suspensionPeriodRangeDate.startDate = Start date
@@ -536,3 +529,7 @@ suspensionPeriodRangeEndDate.error.required = Enter a valid date.
 suspensionPeriodRangeStartDate.error.required.two = Enter a valid date.
 suspensionPeriodRangeEndDate.error.required.two = Enter a valid date.
 suspensionPeriodRangeDate.error.endBeforeStart = The end date you have entered is not valid. It cannot be before start date.
+
+checkYourSuspensionDetails.title = Check your suspension details
+checkYourSuspensionDetails.heading = Check your suspension details
+
