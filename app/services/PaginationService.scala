@@ -124,13 +124,30 @@ class PaginationService @Inject() {
     baseUrl: String
   ): Seq[PaginationItemViewModel] = {
     val pageRange = calculatePageRange(currentPage, totalPages)
+    val items = scala.collection.mutable.ListBuffer[PaginationItemViewModel]()
 
-    pageRange.map { page =>
-      PaginationItemViewModel(
+    if (pageRange.head > 1) {
+      items += PaginationItemViewModel("1", s"$baseUrl?page=1").withCurrent(1 == currentPage)
+      if (pageRange.head > 2) {
+        items += PaginationItemViewModel.ellipsis()
+      }
+    }
+
+    pageRange.foreach { page =>
+      items += PaginationItemViewModel(
         number = page.toString,
         href   = s"$baseUrl?page=$page"
       ).withCurrent(page == currentPage)
     }
+
+    if (pageRange.last < totalPages) {
+      if (pageRange.last < totalPages - 1) {
+        items += PaginationItemViewModel.ellipsis()
+      }
+      items += PaginationItemViewModel(totalPages.toString, s"$baseUrl?page=$totalPages").withCurrent(totalPages == currentPage)
+    }
+
+    items.toSeq
   }
 
   private def calculatePageRange(currentPage: Int, totalPages: Int): Range = {

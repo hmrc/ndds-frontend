@@ -18,8 +18,8 @@ site.accept.continue = Accept and continue
 site.next = Next
 site.previous = Previous
 site.pagination.landmark = Pagination
-site.pagination.previous = Previous page
-site.pagination.next = Next page
+site.pagination.previous = Previous
+site.pagination.next = Next
 
 date.day = Day
 date.month = Month
