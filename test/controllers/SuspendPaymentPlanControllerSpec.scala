@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import models.NormalMode
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import views.html.SuspendPaymentPlanView
@@ -37,7 +38,7 @@ class SuspendPaymentPlanControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[SuspendPaymentPlanView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual view(NormalMode)(request, messages(application)).toString
       }
     }
   }

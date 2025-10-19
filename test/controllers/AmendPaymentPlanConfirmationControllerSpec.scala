@@ -34,6 +34,8 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
+import uk.gov.hmrc.http.HeaderCarrier
+implicit val hc: HeaderCarrier = HeaderCarrier()
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -271,9 +273,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
     "onSubmit" - {
       "must redirect to AmendPaymentPlanUpdateController when CHRIS submission is successful" in {
 
-        import uk.gov.hmrc.http.HeaderCarrier
-        implicit val hc: HeaderCarrier = HeaderCarrier()
-
         val mockNddService = mock[NationalDirectDebitService]
 
         when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
@@ -342,9 +341,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       }
 
       "must redirect to JourneyRecoveryController when CHRIS submission fails" in {
-
-        import uk.gov.hmrc.http.HeaderCarrier
-        implicit val hc: HeaderCarrier = HeaderCarrier()
 
         val mockNddService = mock[NationalDirectDebitService]
 

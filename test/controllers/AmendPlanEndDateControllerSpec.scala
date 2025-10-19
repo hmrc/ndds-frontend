@@ -19,8 +19,7 @@ package controllers
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.{NextPaymentValidationResult, NormalMode}
-import models.{NormalMode, PaymentPlanType}
+import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
