@@ -259,7 +259,7 @@ class NavigatorSpec extends SpecBase {
 
         "must go from a AmendPaymentAmountPage to AmendPlanStartDatePage" in {
           val ua = userAnswers
-            .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+            .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
             .success
             .value
 
@@ -269,7 +269,7 @@ class NavigatorSpec extends SpecBase {
 
         "must go from a AmendPaymentAmountPage to AmendPlanEndDatePage" in {
           val ua = userAnswers
-            .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+            .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
             .success
             .value
 
@@ -401,7 +401,7 @@ class NavigatorSpec extends SpecBase {
 
         "must go from a AmendPaymentAmountPage to AmendPlanStartDatePage" in {
           val ua = userAnswers
-            .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+            .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
             .success
             .value
 
@@ -411,7 +411,7 @@ class NavigatorSpec extends SpecBase {
 
         "must go from a AmendPaymentAmountPage to AmendPlanEndDatePage" in {
           val ua = userAnswers
-            .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+            .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
             .success
             .value
 
