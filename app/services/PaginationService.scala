@@ -18,6 +18,7 @@ package services
 
 import models.{DirectDebitDetails, NddDetails}
 import viewmodels.govuk.PaginationFluency.*
+import utils.Utils.emptyString
 
 import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
@@ -84,11 +85,11 @@ class PaginationService @Inject() {
     
     val items = generatePageItems(currentPage, totalPages, baseUrl)
     val previous = if (currentPage > 1) {
-      Some(PaginationLinkViewModel(s"$baseUrl?page=${currentPage - 1}").withText("Previous page"))
+      Some(PaginationLinkViewModel(s"$baseUrl?page=${currentPage - 1}").withText("site.pagination.previous"))
     } else None
     
     val next = if (currentPage < totalPages) {
-      Some(PaginationLinkViewModel(s"$baseUrl?page=${currentPage + 1}").withText("Next page"))
+      Some(PaginationLinkViewModel(s"$baseUrl?page=${currentPage + 1}").withText("site.pagination.next"))
     } else None
     
     PaginationViewModel(
