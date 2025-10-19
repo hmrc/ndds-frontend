@@ -18,10 +18,15 @@ package services
 
 import models.{DirectDebitDetails, NddDetails}
 import viewmodels.govuk.PaginationFluency.*
-import utils.Utils.emptyString
 
 import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
+
+case class PaginationConfig(
+  recordsPerPage: Int = 3,
+  maxRecords: Int = 99,
+  maxVisiblePages: Int = 5
+)
 
 case class PaginationResult(
   paginatedData: Seq[DirectDebitDetails],
@@ -34,43 +39,53 @@ case class PaginationResult(
 @Singleton
 class PaginationService @Inject() {
 
-  val recordsPerPage = 3
-  val maxRecords = 99
+  private val config = PaginationConfig()
 
   def paginateDirectDebits(
     allDirectDebits: Seq[NddDetails],
     currentPage: Int = 1,
     baseUrl: String
   ): PaginationResult = {
-    
+
     val sortedDirectDebits = allDirectDebits
       .sortBy(_.submissionDateTime)(Ordering[LocalDateTime].reverse)
-      .take(maxRecords)
-    
+      .take(config.maxRecords)
+
     val totalRecords = sortedDirectDebits.length
-    val totalPages = Math.ceil(totalRecords.toDouble / recordsPerPage).toInt
-    val validCurrentPage = Math.max(1, Math.min(currentPage, totalPages))
-    
-    val startIndex = (validCurrentPage - 1) * recordsPerPage
-    val endIndex = Math.min(startIndex + recordsPerPage, totalRecords)
-    
+    val totalPages = calculateTotalPages(totalRecords)
+    val validCurrentPage = validateCurrentPage(currentPage, totalPages)
+
+    val (startIndex, endIndex) = calculatePageIndices(validCurrentPage, totalRecords)
+
     val paginatedData = sortedDirectDebits
       .slice(startIndex, endIndex)
       .map(_.toDirectDebitDetails)
-    
+
     val paginationViewModel = createPaginationViewModel(
       currentPage = validCurrentPage,
-      totalPages = totalPages,
-      baseUrl = baseUrl
+      totalPages  = totalPages,
+      baseUrl     = baseUrl
     )
-    
+
     PaginationResult(
-      paginatedData = paginatedData,
+      paginatedData       = paginatedData,
       paginationViewModel = paginationViewModel,
-      totalRecords = totalRecords,
-      currentPage = validCurrentPage,
-      totalPages = totalPages
+      totalRecords        = totalRecords,
+      currentPage         = validCurrentPage,
+      totalPages          = totalPages
     )
+  }
+
+  private def calculateTotalPages(totalRecords: Int): Int =
+    Math.ceil(totalRecords.toDouble / config.recordsPerPage).toInt
+
+  private def validateCurrentPage(currentPage: Int, totalPages: Int): Int =
+    Math.max(1, Math.min(currentPage, totalPages))
+
+  private def calculatePageIndices(currentPage: Int, totalRecords: Int): (Int, Int) = {
+    val startIndex = (currentPage - 1) * config.recordsPerPage
+    val endIndex = Math.min(startIndex + config.recordsPerPage, totalRecords)
+    (startIndex, endIndex)
   }
 
   private def createPaginationViewModel(
@@ -78,52 +93,55 @@ class PaginationService @Inject() {
     totalPages: Int,
     baseUrl: String
   ): PaginationViewModel = {
-    
     if (totalPages <= 1) {
-      return PaginationViewModel()
+      PaginationViewModel()
+    } else {
+      val items = generatePageItems(currentPage, totalPages, baseUrl)
+      val previous = createPreviousLink(currentPage, baseUrl)
+      val next = createNextLink(currentPage, totalPages, baseUrl)
+
+      PaginationViewModel(
+        items    = items,
+        previous = previous,
+        next     = next
+      )
     }
-    
-    val items = generatePageItems(currentPage, totalPages, baseUrl)
-    val previous = if (currentPage > 1) {
+  }
+
+  private def createPreviousLink(currentPage: Int, baseUrl: String): Option[PaginationLinkViewModel] =
+    if (currentPage > 1) {
       Some(PaginationLinkViewModel(s"$baseUrl?page=${currentPage - 1}").withText("site.pagination.previous"))
     } else None
-    
-    val next = if (currentPage < totalPages) {
+
+  private def createNextLink(currentPage: Int, totalPages: Int, baseUrl: String): Option[PaginationLinkViewModel] =
+    if (currentPage < totalPages) {
       Some(PaginationLinkViewModel(s"$baseUrl?page=${currentPage + 1}").withText("site.pagination.next"))
     } else None
-    
-    PaginationViewModel(
-      items = items,
-      previous = previous,
-      next = next
-    )
-  }
 
   private def generatePageItems(
     currentPage: Int,
     totalPages: Int,
     baseUrl: String
   ): Seq[PaginationItemViewModel] = {
-    
-    val maxVisiblePages = 5
-    val halfVisible = maxVisiblePages / 2
-    
-    val startPage = Math.max(1, currentPage - halfVisible)
-    val endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
-    
-    val adjustedStartPage = if (endPage - startPage < maxVisiblePages - 1) {
-      Math.max(1, endPage - maxVisiblePages + 1)
-    } else startPage
-    
-    val pages = (adjustedStartPage to endPage).toList
-    
-    val items = pages.map { page =>
+    val pageRange = calculatePageRange(currentPage, totalPages)
+
+    pageRange.map { page =>
       PaginationItemViewModel(
         number = page.toString,
-        href = s"$baseUrl?page=$page"
+        href   = s"$baseUrl?page=$page"
       ).withCurrent(page == currentPage)
     }
-    
-    items
+  }
+
+  private def calculatePageRange(currentPage: Int, totalPages: Int): Range = {
+    val halfVisible = config.maxVisiblePages / 2
+    val startPage = Math.max(1, currentPage - halfVisible)
+    val endPage = Math.min(totalPages, startPage + config.maxVisiblePages - 1)
+
+    val adjustedStartPage = if (endPage - startPage < config.maxVisiblePages - 1) {
+      Math.max(1, endPage - config.maxVisiblePages + 1)
+    } else startPage
+
+    adjustedStartPage to endPage
   }
 }
