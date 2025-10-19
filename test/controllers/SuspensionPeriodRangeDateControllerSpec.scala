@@ -53,7 +53,6 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
   private lazy val suspensionPeriodRangeDateRoute =
     routes.SuspensionPeriodRangeDateController.onPageLoad(NormalMode).url
 
-  // ✅ BudgetPaymentPlan response
   private val budgetPaymentPlanResponse = PaymentPlanResponse(
     directDebitDetails = DirectDebitDetails(
       bankSortCode       = Some("12-34-56"),
@@ -82,7 +81,6 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
     )
   )
 
-  // ❌ Non-BudgetPaymentPlan response
   private val singlePaymentPlanResponse = budgetPaymentPlanResponse.copy(
     paymentPlanDetails = budgetPaymentPlanResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
   )
