@@ -77,7 +77,7 @@ object PaginationFluency {
         items         = Some(items.map(_.asPaginationItem)),
         previous      = previous.map(_.asPaginationLink),
         next          = next.map(_.asPaginationLink),
-        landmarkLabel = Some(landmarkLabel),
+        landmarkLabel = Some(messages(landmarkLabel)),
         classes       = classes,
         attributes    = attributes
       )
