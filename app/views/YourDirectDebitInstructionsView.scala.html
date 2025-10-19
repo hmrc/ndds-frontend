@@ -16,6 +16,7 @@
 
 @import views.html.components.*
 @import utils.MaskAndFormatUtils.*
+@import viewmodels.govuk.PaginationFluency.*
 
 @this(
     layout: templates.Layout,
@@ -24,10 +25,11 @@
     paragraphMessageWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
-    govukSummaryList: GovukSummaryList
+    govukSummaryList: GovukSummaryList,
+    directDebitPagination: DirectDebitPagination
 )
 
-@(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false)(implicit request: Request[_], messages: Messages)
+@(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false, paginationViewModel: PaginationViewModel = PaginationViewModel())(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForSetupJourneyNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
@@ -96,4 +98,6 @@
             )
         ))
     }
+
+    @directDebitPagination(paginationViewModel)
 }

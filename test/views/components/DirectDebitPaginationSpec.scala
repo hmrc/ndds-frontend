@@ -20,7 +20,7 @@ import views.html.components.DirectDebitPagination
 import play.api.test.FakeRequest
 import play.api.i18n.Messages
 import org.jsoup.Jsoup
-import viewmodels.govuk.PaginationFluency._
+import viewmodels.govuk.PaginationFluency.*
 
 class DirectDebitPaginationSpec extends SpecBase with Matchers {
 
@@ -145,7 +145,7 @@ class DirectDebitPaginationSpec extends SpecBase with Matchers {
           PaginationItemViewModel("2", "/page/2").withCurrent(true)
         ),
         previous = Some(PaginationLinkViewModel("/page/1").withText("Go back")),
-        next = Some(PaginationLinkViewModel("/page/3").withText("Continue"))
+        next     = Some(PaginationLinkViewModel("/page/3").withText("Continue"))
       )
 
       val html = paginationComponent(pagination)
@@ -161,7 +161,7 @@ class DirectDebitPaginationSpec extends SpecBase with Matchers {
           PaginationItemViewModel("2", "/page/2").withCurrent(true)
         ),
         previous = Some(PaginationLinkViewModel("/page/1").withText("Previous").withLabelText("Search results")),
-        next = Some(PaginationLinkViewModel("/page/3").withText("Next").withLabelText("More results"))
+        next     = Some(PaginationLinkViewModel("/page/3").withText("Next").withLabelText("More results"))
       )
 
       val html = paginationComponent(pagination)
