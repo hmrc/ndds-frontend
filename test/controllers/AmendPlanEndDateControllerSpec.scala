@@ -18,6 +18,8 @@ package controllers
 
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
