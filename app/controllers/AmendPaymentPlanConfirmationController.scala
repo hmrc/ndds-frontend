@@ -181,8 +181,15 @@ class AmendPaymentPlanConfirmationController @Inject() (
   private def buildRows(userAnswers: UserAnswers, paymentPlan: PaymentPlanDetails, mode: Mode)(implicit
     messages: Messages
   ): (Seq[SummaryListRow], Call) =
+    val showDuplicateWarning = userAnswers.get(DuplicateWarningPage).getOrElse(false)
+
     userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
+        val backLink = if (showDuplicateWarning) {
+          routes.DuplicateWarningController.onPageLoad(mode)
+        } else {
+          routes.AmendPlanEndDateController.onPageLoad(mode)
+        }
         (Seq(
            AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")),
            AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
@@ -206,10 +213,15 @@ class AmendPaymentPlanConfirmationController @Inject() (
              true
            )
          ),
-         routes.AmendPlanEndDateController.onPageLoad(mode)
+         backLink
         )
 
       case _ =>
+        val backLink = if (showDuplicateWarning) {
+          routes.DuplicateWarningController.onPageLoad(mode)
+        } else {
+          routes.AmendPlanStartDateController.onPageLoad(mode)
+        }
         (Seq(
            AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")),
            AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
@@ -226,7 +238,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
              true
            )
          ),
-         routes.AmendPlanStartDateController.onPageLoad(mode)
+         backLink
         )
     }
 

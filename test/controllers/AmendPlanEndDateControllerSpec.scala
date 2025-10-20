@@ -195,7 +195,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return to Journey Recovery page when payment amount is updated and duplicate payment plan is true" in {
+      "must return to Duplicate Warning page when payment amount is updated and duplicate payment plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
@@ -222,7 +222,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -294,7 +294,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return to Journey Recovery page when payment amount and plan end date is updated, duplicate plan is true" in {
+      "must return to Duplicate Warning page when payment amount and plan end date is updated, duplicate plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
@@ -325,11 +325,11 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
-      "must return to Journey Recovery page when payment amount but plan end date is same, duplicate plan is true" in {
+      "must return to Duplicate Warning page when payment amount but plan end date is same, duplicate plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
@@ -356,7 +356,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -391,7 +391,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return to Journey Recovery page when payment amount is changed but plan end date is same, duplicate plan is true" in {
+      "must return to Duplicate Warning page when payment amount is changed but plan end date is same, duplicate plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
@@ -418,7 +418,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
