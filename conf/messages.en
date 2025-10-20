@@ -501,7 +501,7 @@ cancelPaymentPlan.checkYourAnswersLabel = cancelPaymentPlan
 cancelPaymentPlan.error.required = Select one option.
 cancelPaymentPlan.change.hidden = CancelPaymentPlan
 
-paymentPlanCancelled.title = Payment plan cancelled - Manage a payment plan
+paymentPlanCancelled.title = Payment plan cancelled
 paymentPlanCancelled.panel.title = Payment plan cancelled
 paymentPlanCancelled.panel.body1 = Your payment plan reference
 paymentPlanCancelled.panel.strong = <br><strong>{0}</strong>
