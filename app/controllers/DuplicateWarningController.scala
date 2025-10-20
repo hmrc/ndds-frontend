@@ -20,8 +20,8 @@ import controllers.actions.*
 import forms.DuplicateWarningFormProvider
 
 import javax.inject.Inject
-import models.Mode
-import pages.DuplicateWarningPage
+import models.{Mode, PaymentPlanType}
+import pages.{DuplicateWarningPage, ManagePaymentPlanTypePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -45,25 +45,25 @@ class DuplicateWarningController @Inject() (
 
   val form = formProvider()
 
-  private def backLink(from: Option[String], mode: Mode): Call = {
-    from match {
-      case Some("amendStartDate") => routes.AmendPlanStartDateController.onPageLoad(mode)
-      case Some("amendEndDate")   => routes.AmendPlanEndDateController.onPageLoad(mode)
-      case _                      => routes.PaymentPlanDetailsController.onPageLoad() // default fallback
+  private def backLink(planType: Option[String], mode: Mode): Call = {
+    planType match {
+      case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(mode)
+      case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(mode)
+      case None                                             => routes.PaymentPlanDetailsController.onPageLoad()
     }
   }
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData) { implicit request =>
 
-      val from: Option[String] = request.getQueryString("from")
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage)
 
       val preparedForm = request.userAnswers.get(DuplicateWarningPage) match {
         case None        => form
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode, backLink(from, mode)))
+      Ok(view(preparedForm, mode, backLink(planType, mode)))
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] =

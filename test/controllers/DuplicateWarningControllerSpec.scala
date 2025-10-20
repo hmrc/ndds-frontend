@@ -18,10 +18,11 @@ package controllers
 
 import base.SpecBase
 import forms.DuplicateWarningFormProvider
-import models.NormalMode
+import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.ManagePaymentPlanTypePage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -38,11 +39,12 @@ class DuplicateWarningControllerSpec extends SpecBase {
 
   "DuplicateWarningController" - {
 
-    "must return OK and view with AmendPlanStartDateController back link when from=amendStartDate" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+    "must return OK and view with AmendPlanStartDateController back link when planType is SinglePaymentPlan" in {
+      val userAnswers = emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoad(mode).url + "?from=amendStartDate")
+        val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoad(mode).url)
 
         val result = route(application, request).value
         val view = application.injector.instanceOf[DuplicateWarningView]
@@ -56,11 +58,12 @@ class DuplicateWarningControllerSpec extends SpecBase {
       }
     }
 
-    "must return OK and view with AmendPlanEndDateController back link when from=amendEndDate" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+    "must return OK and view with AmendPlanEndDateController back link when planType is BudgetPaymentPlan" in {
+      val userAnswers = emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoad(mode).url + "?from=amendEndDate")
+        val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoad(mode).url)
 
         val result = route(application, request).value
         val view = application.injector.instanceOf[DuplicateWarningView]
@@ -109,48 +112,6 @@ class DuplicateWarningControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.PaymentPlanDetailsController.onPageLoad().url
-      }
-    }
-
-    "must return Bad Request and show errors with AmendPlanStartDateController back link when no option selected (from=amendStartDate)" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmit(mode).url + "?from=amendStartDate")
-          .withFormUrlEncodedBody()
-
-        val boundForm = form.bind(Map.empty[String, String])
-        val view = application.injector.instanceOf[DuplicateWarningView]
-
-        val result = route(application, request).value
-
-        status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(
-          boundForm,
-          mode,
-          routes.AmendPlanStartDateController.onPageLoad(mode)
-        )(request, messages(application)).toString
-      }
-    }
-
-    "must return Bad Request and show errors with AmendPlanEndDateController back link when no option selected (from=amendEndDate)" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmit(mode).url + "?from=amendEndDate")
-          .withFormUrlEncodedBody()
-
-        val boundForm = form.bind(Map.empty[String, String])
-        val view = application.injector.instanceOf[DuplicateWarningView]
-
-        val result = route(application, request).value
-
-        status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(
-          boundForm,
-          mode,
-          routes.AmendPlanEndDateController.onPageLoad(mode)
-        )(request, messages(application)).toString
       }
     }
   }

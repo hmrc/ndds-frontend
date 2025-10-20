@@ -220,7 +220,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url + "?from=amendEndDate"
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -323,7 +323,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url + "?from=amendEndDate"
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -354,7 +354,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url + "?from=amendEndDate"
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -416,7 +416,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url + "?from=amendEndDate"
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
