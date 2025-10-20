@@ -144,3 +144,5 @@ POST       /change-already-have-payment-plan            controllers.DuplicateWar
 
 GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
 POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
+
+GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()

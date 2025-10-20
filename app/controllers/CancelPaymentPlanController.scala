@@ -18,20 +18,22 @@ package controllers
 
 import controllers.actions.*
 import forms.CancelPaymentPlanFormProvider
-
-import javax.inject.Inject
-import models.NormalMode
+import models.requests.{ChrisSubmissionRequest, DataRequest}
+import models.responses.DirectDebitDetails
+import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.{CancelPaymentPlanPage, ManagePaymentPlanTypePage}
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelPaymentPlanView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CancelPaymentPlanController @Inject() (
@@ -71,8 +73,6 @@ class CancelPaymentPlanController @Inject() (
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
-      // TODO removed after testing
-      println(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
@@ -81,31 +81,126 @@ class CancelPaymentPlanController @Inject() (
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => {
-          (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
-            case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
-              val paymentPlan = paymentPlanDetail.paymentPlanDetails
-              Future.successful(
-                BadRequest(
-                  view(
-                    formWithErrors,
-                    paymentPlan.planType,
-                    paymentPlanReference,
-                    paymentPlan.scheduledPaymentAmount.get
-                  )
-                )
-              )
-
-            case _ =>
-              logger.error(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-          }
-        },
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(CancelPaymentPlanPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
+        formWithErrors => handleFormErrors(formWithErrors),
+        value => handleValidSubmission(value)
       )
+  }
+
+  private def handleFormErrors(formWithErrors: Form[?])(implicit request: DataRequest[AnyContent]): Future[Result] = {
+    (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
+      case (Some(planDetail), Some(paymentPlanReference)) =>
+        val paymentPlan = planDetail.paymentPlanDetails
+        Future.successful(
+          BadRequest(
+            view(
+              formWithErrors,
+              paymentPlan.planType,
+              paymentPlanReference,
+              paymentPlan.scheduledPaymentAmount.get
+            )
+          )
+        )
+      case _ =>
+        logger.error(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
+  }
+
+  private def handleValidSubmission(value: Boolean)(implicit request: DataRequest[AnyContent]): Future[Result] = {
+    val ua = request.userAnswers
+
+    ua.get(DirectDebitReferenceQuery) match {
+      case Some(ddiReference) =>
+        val chrisRequest = buildCancelChrisRequest(ua, ddiReference)
+
+        nddService.submitChrisData(chrisRequest).flatMap {
+          case true =>
+            logger.info(s"CHRIS Cancel payment plan payload submission successful for DDI Ref [$ddiReference]")
+
+            for {
+              updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
+          case false =>
+            logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
+            Future.successful(
+              Redirect(routes.JourneyRecoveryController.onPageLoad())
+                .flashing("error" -> "There was a problem cancelling your direct debit plan. Please try again later.")
+            )
+        }
+
+      case None =>
+        logger.error("Missing DirectDebitReference in UserAnswers")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
+  }
+
+  private def buildCancelChrisRequest(
+    userAnswers: UserAnswers,
+    ddiReference: String
+  ): ChrisSubmissionRequest = {
+
+    userAnswers.get(PaymentPlanDetailsQuery) match {
+      case Some(response) =>
+        val planDetail = response.paymentPlanDetails
+        val directDebitDetails = response.directDebitDetails
+
+        val serviceType: DirectDebitSource =
+          DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
+
+        val planStartDateDetails: Option[PlanStartDateDetails] = planDetail.scheduledPaymentStartDate.map { date =>
+          PlanStartDateDetails(enteredDate = date, earliestPlanStartDate = date.toString)
+        }
+
+        val paymentPlanType: PaymentPlanType =
+          PaymentPlanType.values
+            .find(_.toString.equalsIgnoreCase(planDetail.planType))
+            .getOrElse(PaymentPlanType.BudgetPaymentPlan)
+
+        val bankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus = buildBankDetailsWithAuddisStatus(directDebitDetails)
+
+        ChrisSubmissionRequest(
+          serviceType                     = serviceType,
+          paymentPlanType                 = paymentPlanType,
+          paymentFrequency                = planDetail.scheduledPaymentFrequency,
+          paymentPlanReferenceNumber      = userAnswers.get(PaymentPlanReferenceQuery),
+          yourBankDetailsWithAuddisStatus = bankDetailsWithAuddisStatus,
+          planStartDate                   = planStartDateDetails,
+          planEndDate                     = planDetail.scheduledPaymentEndDate,
+          paymentDate                     = None,
+          yearEndAndMonth                 = None,
+          ddiReferenceNo                  = ddiReference,
+          paymentReference                = planDetail.paymentReference,
+          totalAmountDue                  = None,
+          paymentAmount                   = planDetail.scheduledPaymentAmount,
+          regularPaymentAmount            = None,
+          amendPaymentAmount              = None,
+          calculation                     = None,
+          cancelPlan                      = true
+        )
+
+      case None =>
+        throw new IllegalStateException("Missing PaymentPlanDetails in userAnswers")
+    }
+  }
+
+  private def buildBankDetailsWithAuddisStatus(
+    directDebitDetails: DirectDebitDetails
+  ): YourBankDetailsWithAuddisStatus = {
+    val bankDetails = YourBankDetails(
+      accountHolderName = directDebitDetails.bankAccountName.getOrElse(""),
+      sortCode = directDebitDetails.bankSortCode.getOrElse(
+        throw new IllegalStateException("Missing bank sort code")
+      ),
+      accountNumber = directDebitDetails.bankAccountNumber.getOrElse(
+        throw new IllegalStateException("Missing bank account number")
+      )
+    )
+
+    YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(
+      yourBankDetails = bankDetails,
+      auddisStatus    = directDebitDetails.auDdisFlag,
+      accountVerified = true
+    )
   }
 }
