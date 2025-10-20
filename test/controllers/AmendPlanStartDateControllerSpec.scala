@@ -23,7 +23,7 @@ import models.NormalMode
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -162,7 +162,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Budget payment")
+          .set(ManagePaymentPlanTypePage, "Budget payment")
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
@@ -195,7 +195,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, singlePlan)
+          .set(ManagePaymentPlanTypePage, singlePlan)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -226,7 +226,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, singlePlan)
+          .set(ManagePaymentPlanTypePage, singlePlan)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -257,7 +257,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, singlePlan)
+          .set(ManagePaymentPlanTypePage, singlePlan)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
@@ -288,7 +288,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, singlePlan)
+          .set(ManagePaymentPlanTypePage, singlePlan)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
@@ -319,7 +319,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, singlePlan)
+          .set(ManagePaymentPlanTypePage, singlePlan)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -350,7 +350,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, singlePlan)
+          .set(ManagePaymentPlanTypePage, singlePlan)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -381,7 +381,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Tax Credit payment")
+          .set(ManagePaymentPlanTypePage, "Tax Credit payment")
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -409,7 +409,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, singlePlan)
+          .set(ManagePaymentPlanTypePage, singlePlan)
           .success
           .value
           .set(AmendPlanStartDatePage, validAnswer.plusDays(3))

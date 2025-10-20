@@ -56,7 +56,7 @@ class PaymentPlanDetailsController @Inject() (
           val planDetail = response.paymentPlanDetails
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentPlanTypePage, planDetail.planType))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(ManagePaymentPlanTypePage, planDetail.planType))
             updatedAnswers <- planDetail.scheduledPaymentAmount match {
                                 case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
                                 case None         => Future.successful(updatedAnswers)

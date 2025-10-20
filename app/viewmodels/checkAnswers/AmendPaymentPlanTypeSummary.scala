@@ -17,7 +17,7 @@
 package viewmodels.checkAnswers
 
 import models.UserAnswers
-import pages.AmendPaymentPlanTypePage
+import pages.ManagePaymentPlanTypePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
@@ -28,7 +28,7 @@ import viewmodels.implicits.*
 object AmendPaymentPlanTypeSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AmendPaymentPlanTypePage).map { answer =>
+    answers.get(ManagePaymentPlanTypePage).map { answer =>
       SummaryListRowViewModel(
         key     = "paymentPlanDetails.details.planType.label",
         value   = ValueViewModel(HtmlFormat.escape(answer).toString),

@@ -62,7 +62,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
         for {
           directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
           paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
-          planType             <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
+          planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
         } yield {
           Ok(
             view(
@@ -183,7 +183,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
   ): (Seq[SummaryListRow], Call) =
     val showDuplicateWarning = userAnswers.get(DuplicateWarningPage).getOrElse(false)
 
-    userAnswers.get(AmendPaymentPlanTypePage) match {
+    userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
         val backLink = if (showDuplicateWarning) {
           routes.DuplicateWarningController.onPageLoad(mode)
@@ -191,7 +191,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
           routes.AmendPlanEndDateController.onPageLoad(mode)
         }
         (Seq(
-           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+           AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")),
            AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
            TotalAmountDueSummary.row(paymentPlan.totalLiability),
            MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability),
@@ -223,7 +223,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
           routes.AmendPlanStartDateController.onPageLoad(mode)
         }
         (Seq(
-           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+           AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")),
            AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
            DateSetupSummary.row(paymentPlan.submissionDateTime),
            AmendPaymentAmountSummary.row(
