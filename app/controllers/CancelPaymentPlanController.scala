@@ -35,6 +35,7 @@ import views.html.CancelPaymentPlanView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class CancelPaymentPlanController @Inject() (
   override val messagesApi: MessagesApi,
@@ -118,9 +119,19 @@ class CancelPaymentPlanController @Inject() (
             logger.info(s"CHRIS Cancel payment plan payload submission successful for DDI Ref [$ddiReference]")
 
             for {
-              updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
-              _              <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
+              updatedAnswers       <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
+              directDebitReference <- Future.fromTry(Try(ua.get(DirectDebitReferenceQuery).get))
+              paymentPlanReference <- Future.fromTry(Try(ua.get(PaymentPlanReferenceQuery).get))
+              lockResponse         <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
+              _                    <- sessionRepository.set(updatedAnswers)
+            } yield {
+              if (lockResponse.lockSuccessful) {
+                logger.info(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+              } else {
+                logger.error(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+              }
+              Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
+            }
           case false =>
             logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
             Future.successful(
