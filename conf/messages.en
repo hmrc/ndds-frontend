@@ -529,7 +529,9 @@ suspensionPeriodRangeEndDate.error.required = Enter a valid date.
 suspensionPeriodRangeStartDate.error.required.two = Enter a valid date.
 suspensionPeriodRangeEndDate.error.required.two = Enter a valid date.
 suspensionPeriodRangeDate.error.endBeforeStart = The end date you have entered is not valid. It cannot be before start date.
+suspensionPeriodRangeDate.to = to
 
 checkYourSuspensionDetails.title = Check your suspension details
 checkYourSuspensionDetails.heading = Check your suspension details
+
 

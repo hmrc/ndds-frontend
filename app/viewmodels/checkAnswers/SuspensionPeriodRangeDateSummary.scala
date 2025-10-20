@@ -47,7 +47,8 @@ object SuspensionPeriodRangeDateSummary {
 
       implicit val lang: Lang = messages.lang
 
-      val formattedValue = s"${formattedDateTimeShort(answer.startDate.toString)} to ${formattedDateTimeShort(answer.endDate.toString)}"
+      val formattedValue =
+        s"${formattedDateTimeShort(answer.startDate.toString)} ${messages("suspensionPeriodRangeDate.to")} ${formattedDateTimeShort(answer.endDate.toString)}"
       SummaryListRowViewModel(
         key   = "suspensionPeriodRangeDate.checkYourAnswersLabel",
         value = ValueViewModel(formattedValue),
