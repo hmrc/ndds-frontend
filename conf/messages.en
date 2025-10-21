@@ -431,7 +431,7 @@ paymentPlanDetails.details.hodService.tc = Tax Credits (TC)
 paymentPlanDetails.details.hodService.vat = Value Added Tax (VAT)
 paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
 
-amendPaymentAmount.title = What amount do you want to pay?
+amendPaymentAmount.title = What amount do you need to pay?
 amendPaymentAmount.heading = What amount do you want to pay?
 amendPaymentAmount.hint = 	e.g. £1000.00
 
