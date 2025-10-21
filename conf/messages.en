@@ -471,7 +471,7 @@ amendPaymentPlanConfirmation.summary.link = Why can't I edit all information?
 amendPaymentPlanConfirmation.summary.content = You can change payment amounts and dates online, but you''ll need to contact us to change details that were set when your plan was created. This is for verification and security reasons. Call our customer service team on 0845 366 1208.
 
 amendPaymentPlanUpdate.title = Payment plan amended
-amendPaymentPlanUpdate.panel.title = Payment plan updated
+amendPaymentPlanUpdate.panel.title = Payment plan amended
 amendPaymentPlanUpdate.panel.body1 = Your payment reference
 amendPaymentPlanUpdate.panel.strong = <br><strong>{0}</strong>
 amendPaymentPlanUpdate.panel.body2 = <br>has been successfully updated
