@@ -233,8 +233,8 @@ paymentReference.sdlt.hint = Your Stamp Duty Land Tax (SDLT) payment reference i
 paymentReference.tc.hint = Your Tax Credit (TC) payment reference is 16 digits long, starting and ending with two alpha characters, with an ’N’ as the 15th digit, for example, AB123456311204NC.
 paymentReference.vat.hint = Your Value Added Tax (VAT) payment reference is the same as your VAT Registration Number, which is nine digits long, for example 123456789.
 
-paymentAmount.title = What amount do you want to pay?
-paymentAmount.heading = What amount do you want to pay?
+paymentAmount.title = What amount do you need to pay?
+paymentAmount.heading = What amount do you need to pay?
 paymentAmount.checkYourAnswersLabel = Payment amount
 paymentAmount.error.nonNumeric = Enter a valid amount
 paymentAmount.error.required = Enter an amount
@@ -389,7 +389,7 @@ directDebitPaymentSummary.setupPayment.p1 = Once you have set up your Direct Deb
 directDebitPaymentSummary.addPaymentButton = Add payment plan
 
 paymentPlanDetails.title = Your payment plan details
-paymentPlanDetails.heading = Payment plan details
+paymentPlanDetails.heading = Your payment plan details
 paymentPlanDetails.p1 = You can amend the details of your payment plan, or cancel it if it is no longer required, by following either the ''Amend payment plan'' or ''Cancel payment plan'' links below.
 paymentPlanDetails.p2 = If you wish to suspend your payment plan please follow the ''Suspend payment plan'' link below.
 paymentPlanDetails.inset.text = Payments due within the next 3 working days will not be affected by any changes made.
