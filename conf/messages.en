@@ -285,11 +285,11 @@ yearEndAndMonth.deductionYearEnd.hint = If tax year is 2024/25, enter 2025.
 yearEndAndMonth.monthOrQuarter = Month or quarter
 yearEndAndMonth.monthOrQuarter.hint = Month must be between 01 and 12. Enter 13 for previous year.
 yearEndAndMonth.collapsable = Help with payment periods
-yearEndAndMonth.collapsable.examples.p1 = <strong>Examples:</strong>
+yearEndAndMonth.collapsable.examples.p1 = Examples:
 yearEndAndMonth.collapsable.examples.b1 = July 2024/25: Year 2025, Month 04
 yearEndAndMonth.collapsable.examples.b2 = Previous year: Year 2025, Month 13
 yearEndAndMonth.collapsable.examples.b3 = Q1 (Apr-Jun): Year 2025, Month 01
-yearEndAndMonth.collapsable.monthCodes.p1 = <strong>Month codes:</strong>
+yearEndAndMonth.collapsable.monthCodes.p1 = Month codes:
 yearEndAndMonth.collapsable.monthCodes.p2 = 01=Apr, 02=May, 03=Jun, 04=Jul, 05=Aug, 06=Sep, 07=Oct, 08=Nov, 09=Dec, 10=Jan, 11=Feb, 12=Mar
 yearEndAndMonth.collapsable.quarterCodes.p1 = <strong>Quarter codes:</strong> 01, 04, 07, 10
 yearEndAndMonth.checkYourAnswersLabel = Year end and month
