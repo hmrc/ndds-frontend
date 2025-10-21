@@ -305,6 +305,7 @@ paymentsFrequency.weekly = Weekly
 paymentsFrequency.monthly = Monthly
 paymentsFrequency.error.required = Select one option
 paymentsFrequency.change.hidden = Frequency of payments
+paymentsFrequency.checkYourAnswersLabel = Frequency of payments
 
 regularPaymentAmount.title = What is the regular payment amount?
 regularPaymentAmount.heading = What is the regular payment amount?
