@@ -29,7 +29,7 @@
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("amendPlanStartDate.title")), backLink = Some(call.url)) {
+@layout(pageTitle = titleForManageJourney(form, messages("amendPlanStartDate.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.AmendPlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 

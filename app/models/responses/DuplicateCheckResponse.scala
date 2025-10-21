@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package pages
+package models.responses
 
-import play.api.libs.json.JsPath
+import play.api.libs.json.{Json, OFormat}
 
-case object AmendPaymentPlanTypePage extends QuestionPage[String] {
+case class DuplicateCheckResponse(isDuplicate: Boolean)
 
-  override def path: JsPath = JsPath \ toString
-
-  override def toString: String = "amendPaymentPlanType"
+object DuplicateCheckResponse {
+  implicit val format: OFormat[DuplicateCheckResponse] = Json.format
 }

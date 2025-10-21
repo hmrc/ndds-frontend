@@ -31,7 +31,7 @@
 
 @(mode: Mode, paymentPlanReference: String, directDebitReference: String, sortCode: String, accountNumber: String, rows:Seq[SummaryListRow], call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("amendPaymentPlanConfirmation.title")), backLink = Some(call.url)) {
+@layout(pageTitle = titleForManageJourneyNoForm(messages("amendPaymentPlanConfirmation.title")), backLink = Some(call.url)) {
     @formHelper(action = routes.AmendPaymentPlanConfirmationController.onSubmit(mode), Symbol("autoComplete") -> "off") {
         @header1("amendPaymentPlanConfirmation.heading")
         @paragraph("amendPaymentPlanConfirmation.p1")

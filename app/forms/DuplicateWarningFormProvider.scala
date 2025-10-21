@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-    layout: templates.Layout,
-    govukButton: GovukButton
-)
+package forms
 
-@()(implicit request: Request[_], messages: Messages)
+import javax.inject.Inject
+import forms.mappings.Mappings
+import play.api.data.Form
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("journeyRecovery.startAgain.title"))) {
+class DuplicateWarningFormProvider @Inject() extends Mappings {
 
-    <h1 class="govuk-heading-xl">@messages("journeyRecovery.startAgain.heading")</h1>
-
-    <p class="govuk-body">@messages("journeyRecovery.startAgain.guidance")</p>
-
-    <p class="govuk-body">
-        @govukButton(
-            ButtonViewModel(messages("site.startAgain"))
-                .asLink(routes.LandingController.onPageLoad().url)
-        )
-    </p>
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("duplicateWarning.error.required")
+    )
 }

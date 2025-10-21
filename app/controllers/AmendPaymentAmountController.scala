@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage}
+import pages.{AmendPaymentAmountPage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -61,7 +61,7 @@ class AmendPaymentAmountController @Inject() (
 
       Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
     } else {
-      throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${answers.get(AmendPaymentPlanTypePage).get}")
+      throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${answers.get(ManagePaymentPlanTypePage).get}")
     }
   }
 

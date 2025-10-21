@@ -19,12 +19,14 @@ package controllers
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
+import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NextPaymentValidationResult, NormalMode}
 import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, ManagePaymentPlanTypePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -119,7 +121,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       )
       val planDetails = PaymentPlanDetails(
         hodService                = "SA",
-        planType                  = PaymentPlanType.SinglePaymentPlan.toString,
+        planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
         paymentReference          = "987654321K",
         submissionDateTime        = LocalDateTime.now(),
         scheduledPaymentAmount    = Some(BigDecimal(1500)),
@@ -162,7 +164,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
@@ -193,12 +195,12 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return to next page when payment amount is updated" in {
+      "must return to Duplicate Warning page when payment amount is updated and duplicate payment plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Single payment")
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -214,6 +216,39 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+          val request = postRequestWithDate(validAnswer)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+        }
+      }
+
+      "must return to next page when payment amount is updated and duplicate plan is false" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanEndDatePage, validAnswer)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           // Mock calculateNextPaymentDate
           when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
             .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
@@ -231,7 +266,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1500))
@@ -259,12 +294,12 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return to next page when payment amount and plan end date is updated" in {
+      "must return to Duplicate Warning page when payment amount and plan end date is updated, duplicate plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Single payment")
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -284,7 +319,133 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
             .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
 
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(true)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+        }
+      }
+
+      "must return to Duplicate Warning page when payment amount but plan end date is same, duplicate plan is true" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanEndDatePage, validAnswer)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+          val request = postRequestWithDate(validAnswer)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+        }
+      }
+
+      "must return to Journey Recovery page when payment plan end date is same but amount changed, duplicate plan is false" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanEndDatePage, paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          val request = postRequestWithDate(paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual planConfirmationPage
+        }
+      }
+
+      "must return to Duplicate Warning page when payment amount is changed but plan end date is same, duplicate plan is true" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanEndDatePage, paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+          val request = postRequestWithDate(paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+        }
+      }
+
+      "must return to next page when payment amount and plan end date is updated, duplicate plan is false" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanEndDatePage, paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          val request = postRequestWithDate(paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
@@ -297,7 +458,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Variable payment")
+          .set(ManagePaymentPlanTypePage, "Variable payment")
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1900))
@@ -328,7 +489,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
           .value
-          .set(AmendPaymentPlanTypePage, "Single payment")
+          .set(ManagePaymentPlanTypePage, "Single payment")
           .success
           .value
           .set(AmendPlanEndDatePage, validAnswer.plusDays(3))
@@ -349,6 +510,77 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
+      "must return a Bad Request when no amendment is made when calculateNextPaymentDate returns false but amount is same and date is changed" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1500))
+          .success
+          .value
+          .set(AmendPlanEndDatePage, paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = false)))
+
+          val view = application.injector.instanceOf[AmendPlanEndDateView]
+          val request = postRequestWithDate(validAnswer)
+          val result = route(application, request).value
+
+          val errorFor = form.fill(validAnswer).withError("value", "amendPlanEndDate.error.nextPaymentDateValid")
+
+          status(result) mustEqual BAD_REQUEST
+          contentAsString(result) mustEqual
+            view(errorFor, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
+        }
+      }
+
+      "must return a Bad Request when no amendment is made when calculateNextPaymentDate returns false but amount and date is changed" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1900))
+          .success
+          .value
+          .set(AmendPlanEndDatePage, paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
+            .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = false)))
+
+          val view = application.injector.instanceOf[AmendPlanEndDateView]
+          val request = postRequestWithDate(validAnswer)
+          val result = route(application, request).value
+
+          val errorFor = form.fill(validAnswer).withError("value", "amendPlanEndDate.error.nextPaymentDateValid")
+
+          status(result) mustEqual BAD_REQUEST
+          contentAsString(result) mustEqual
+            view(errorFor, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
+        }
+      }
     }
   }
 }

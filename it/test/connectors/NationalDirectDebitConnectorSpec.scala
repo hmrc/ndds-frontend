@@ -19,12 +19,13 @@ package connectors
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
 import itutil.ApplicationWithWiremock
-import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, WorkingDaysOffsetRequest}
-import models.responses.{BankAddress, Country, EarliestPaymentDate, GenerateDdiRefResponse}
+import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
+import models.responses.*
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YourBankDetailsWithAuddisStatus}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import play.api.http.Status.{BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, OK}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -939,4 +940,53 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       result.paymentPlanDetails.hodService shouldBe DirectDebitSource.MGD.toString
     }
   }
+
+  "isDuplicatePaymentPlan" should {
+
+    val currentDate = LocalDate.now()
+
+    val duplicateCheckRequest: PaymentPlanDuplicateCheckRequest = PaymentPlanDuplicateCheckRequest(
+      directDebitReference = "testRef",
+      paymentPlanReference = "payment ref 123",
+      planType             = "type 1",
+      paymentService       = "CESA",
+      paymentReference     = "payment ref",
+      paymentAmount        = Some(120.00),
+      totalLiability       = Some(120.00),
+      paymentFrequency     = Some(1),
+      paymentStartDate     = currentDate
+    )
+
+    "successfully return true when there is a duplicate Plan with 200 OK" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/direct-debits/testRef/duplicate-plan-check"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(Json.toJson(DuplicateCheckResponse(true)).toString)
+          )
+      )
+
+      val result: DuplicateCheckResponse = connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue
+      result shouldBe DuplicateCheckResponse(true)
+    }
+
+    "successfully return false when there is no duplicate Plan with 200 OK" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/direct-debits/testRef/duplicate-plan-check"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(Json.toJson(DuplicateCheckResponse(false)).toString)
+          )
+      )
+
+      val result: DuplicateCheckResponse = connector.isDuplicatePaymentPlan("testRef", duplicateCheckRequest).futureValue
+      result shouldBe DuplicateCheckResponse(false)
+    }
+
+  }
+
 }

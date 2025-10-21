@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this(
-    layout: templates.Layout,
-    govukButton: GovukButton
+package models.requests
+
+import play.api.libs.json.{Json, OFormat}
+
+import java.time.LocalDate
+
+case class PaymentPlanDuplicateCheckRequest(
+  directDebitReference: String,
+  paymentPlanReference: String,
+  planType: String,
+  paymentService: String,
+  paymentReference: String,
+  paymentAmount: Option[BigDecimal],
+  totalLiability: Option[BigDecimal],
+  paymentFrequency: Option[Int],
+  paymentStartDate: LocalDate
 )
 
-@()(implicit request: Request[_], messages: Messages)
-
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("journeyRecovery.startAgain.title"))) {
-
-    <h1 class="govuk-heading-xl">@messages("journeyRecovery.startAgain.heading")</h1>
-
-    <p class="govuk-body">@messages("journeyRecovery.startAgain.guidance")</p>
-
-    <p class="govuk-body">
-        @govukButton(
-            ButtonViewModel(messages("site.startAgain"))
-                .asLink(routes.LandingController.onPageLoad().url)
-        )
-    </p>
+object PaymentPlanDuplicateCheckRequest {
+  implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format[PaymentPlanDuplicateCheckRequest]
 }

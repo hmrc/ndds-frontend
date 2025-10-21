@@ -23,7 +23,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage}
+import pages.{AmendPaymentAmountPage, ManagePaymentPlanTypePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -50,7 +50,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET with SinglePaymentPlan" in {
       val userAnswersWithSinglePaymentPlan = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
       val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePaymentPlan))
@@ -71,7 +71,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
       val userAnswersWithBudgetPaymentPlan = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
 
@@ -95,7 +95,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
       val userAnswersWithBudgetPaymentPlan = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
         .set(AmendPaymentAmountPage, validAnswer)
@@ -122,7 +122,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
     "must return NDDS error if amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
-        .set(AmendPaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
         .success
         .value
 
