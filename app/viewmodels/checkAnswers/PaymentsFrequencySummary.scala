@@ -55,7 +55,7 @@ object PaymentsFrequencySummary {
       )
 
       SummaryListRowViewModel(
-        key     = "paymentsFrequency.checkYourAnswersLabel",
+        key     = "paymentPlanDetails.details.paymentsFrequency",
         value   = value,
         actions = Seq.empty
       )
@@ -65,7 +65,7 @@ object PaymentsFrequencySummary {
     val displayValue = value.map(v => s"paymentPlanDetails.paymentsFrequency.$v").getOrElse("")
 
     SummaryListRowViewModel(
-      key     = "paymentsFrequency.checkYourAnswersLabel",
+      key     = "paymentPlanDetails.details.paymentsFrequency",
       value   = ValueViewModel(HtmlFormat.escape(messages(displayValue)).toString),
       actions = Seq.empty
     )

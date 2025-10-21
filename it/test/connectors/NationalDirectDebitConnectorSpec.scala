@@ -976,8 +976,8 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       planType             = "type 1",
       paymentService       = "CESA",
       paymentReference     = "payment ref",
-      paymentAmount        = 120.00,
-      totalLiability       = 780.00,
+      paymentAmount        = Some(120.00),
+      totalLiability       = Some(120.00),
       paymentFrequency     = Some(1),
       paymentStartDate     = currentDate
     )
