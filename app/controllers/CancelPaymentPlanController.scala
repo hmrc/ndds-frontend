@@ -73,8 +73,6 @@ class CancelPaymentPlanController @Inject() (
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
-      // TODO removed after testing
-      println(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }

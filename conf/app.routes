@@ -137,18 +137,24 @@ POST       /payment-plan/change-confirm-plan-details    controllers.AmendPayment
 
 GET        /payment-plan/payment-plan-confirmation      controllers.AmendPaymentPlanUpdateController.onPageLoad()
 
+GET        /already-have-payment-plan                   controllers.DuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
+POST       /already-have-payment-plan                   controllers.DuplicateWarningController.onSubmit(mode: Mode = NormalMode)
+GET        /change-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)
+
 GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
 POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
 
 GET        /suspend-payment-plan                        controllers.SuspendPaymentPlanController.onPageLoad(mode: Mode = NormalMode)
 
-GET        /how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = NormalMode)
-POST       /how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = NormalMode)
-GET        /change-how-long-suspension-period-last                       controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-how-long-suspension-period-last                        controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
+GET        /how-long-suspension-period-last             controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /how-long-suspension-period-last             controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = NormalMode)
+GET        /change-how-long-suspension-period-last      controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-how-long-suspension-period-last      controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
 
-GET        /check-suspension-details                        controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = NormalMode)
-POST       /check-suspension-details                        controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = NormalMode)
-GET        /change-check-suspension-details                 controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-check-suspension-details                 controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = CheckMode)
+GET        /check-suspension-details                    controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = NormalMode)
+POST       /check-suspension-details                    controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = NormalMode)
+GET        /change-check-suspension-details             controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-check-suspension-details             controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = CheckMode)
 
+GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()

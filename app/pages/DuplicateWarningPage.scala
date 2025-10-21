@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package models.requests
+package pages
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsPath
 
-import java.time.LocalDate
+case object DuplicateWarningPage extends QuestionPage[Boolean] {
 
-case class PaymentPlanDuplicateCheckRequest(
-  directDebitReference: String,
-  paymentPlanReference: String,
-  planType: String,
-  paymentService: String,
-  paymentReference: String,
-  paymentAmount: Option[BigDecimal],
-  totalLiability: Option[BigDecimal],
-  paymentFrequency: Option[Int],
-  paymentStartDate: LocalDate
-)
+  override def path: JsPath = JsPath \ toString
 
-object PaymentPlanDuplicateCheckRequest {
-  implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format[PaymentPlanDuplicateCheckRequest]
+  override def toString: String = "duplicateWarning"
 }
