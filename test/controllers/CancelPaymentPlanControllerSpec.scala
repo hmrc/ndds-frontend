@@ -19,6 +19,7 @@ package controllers
 import base.SpecBase
 import forms.CancelPaymentPlanFormProvider
 import models.PaymentPlanType
+import models.responses.*
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -240,6 +241,8 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
       when(mockNddService.submitChrisData(any())(any[HeaderCarrier])) thenReturn Future.successful(true)
+      when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
 
       val onwardRoute = Call("GET", "/foo")
 
