@@ -52,8 +52,8 @@ case class BarsConnector @Inject() (
 
   def verify(endpoint: String, requestJson: JsValue)(implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
     val url = s"$barsBaseUrl/verify/$endpoint"
-    logger.info(s"Account validation called with $url")
-    logger.info(
+    logger.debug(s"Account validation called with $url")
+    logger.debug(
       s"""|
            |Account Validation Request:
           |${Json.prettyPrint(requestJson)}
@@ -65,7 +65,7 @@ case class BarsConnector @Inject() (
       .execute[Either[UpstreamErrorResponse, BarsVerificationResponse]]
       .flatMap {
         case Right(verificationData) =>
-          logger.info(
+          logger.debug(
             s"""|
         |Account Validation Results:
                 |  • accountNumberIsWellFormatted = ${verificationData.accountNumberIsWellFormatted}

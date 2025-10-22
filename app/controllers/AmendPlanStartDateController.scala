@@ -88,11 +88,11 @@ class AmendPlanStartDateController @Inject() (
                 }
 
               case _ =>
-                logger.error("Missing Amend payment amount and/or amend plan start date")
+                logger.warn("Missing Amend payment amount and/or amend plan start date")
                 Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
             }
           } else {
-            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage).get}")
+            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}")
           }
       )
   }
@@ -108,10 +108,10 @@ class AmendPlanStartDateController @Inject() (
       duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(updatedAnswers)
     } yield {
       if (duplicateCheckResponse.isDuplicate) {
-        logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+        logger.warn(s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}")
         Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
       } else {
-        logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
+        logger.debug("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
         Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
       }
     }

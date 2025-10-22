@@ -68,12 +68,12 @@ class CancelPaymentPlanController @Inject() (
           Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
 
         case _ =>
-          logger.error("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+          logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
+      logger.warn(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
@@ -102,7 +102,7 @@ class CancelPaymentPlanController @Inject() (
           )
         )
       case _ =>
-        logger.error(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+        logger.warn(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
@@ -137,6 +137,7 @@ class CancelPaymentPlanController @Inject() (
             Future.successful(
               Redirect(routes.JourneyRecoveryController.onPageLoad())
                 .flashing("error" -> "There was a problem cancelling your direct debit plan. Please try again later.")
+                // TODO Must not use content from outside of messages, cannot translate (also shouldn't use flashing)
             )
         }
 

@@ -95,7 +95,7 @@ class AmendPlanEndDateController @Inject() (
                 } else if (hasDateChanged && !hasAmountChanged) {
                   // F20 check
                   nddsService.calculateNextPaymentDate(dbStartDate, value, frequency).flatMap { result =>
-                    logger.info(
+                    logger.debug(
                       s"""|[AmendPlanEndDateController]
                           |  nextPaymentDateValid: $result.nextPaymentDateValid
                           |  StartDate: $result.dbStartDate
@@ -125,10 +125,10 @@ class AmendPlanEndDateController @Inject() (
                   } yield {
                     val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
                     if (duplicateCheckResponse.isDuplicate) {
-                      logger.warn(logMsg)
+                      logger.info(logMsg)
                       Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
                     } else {
-                      logger.info(logMsg)
+                      logger.debug(logMsg)
                       Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
                     }
                   }
@@ -160,10 +160,10 @@ class AmendPlanEndDateController @Inject() (
                       } yield {
                         val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
                         if (duplicateCheckResponse.isDuplicate) {
-                          logger.warn(logMsg)
+                          logger.info(logMsg)
                           Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
                         } else {
-                          logger.info(logMsg)
+                          logger.debug(logMsg)
                           Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
                         }
                       }
@@ -172,11 +172,11 @@ class AmendPlanEndDateController @Inject() (
                 }
 
               case _ =>
-                logger.error("Missing Amend payment amount and/or amend plan end date")
+                logger.warn("Missing Amend payment amount and/or amend plan end date")
                 Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
             }
           } else {
-            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage).get}")
+            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}")
           }
       )
   }

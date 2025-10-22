@@ -52,12 +52,12 @@ class LockConnector @Inject() (config: ServicesConfig, http: HttpClientV2)(impli
       .execute[Either[UpstreamErrorResponse, LockResponse]]
       .flatMap {
         case Right(resp) =>
-          logger.info(s"""LockService Results:
+          logger.debug(s"""LockService Results:
                |{
                |  "identifier": "$credId"
                |}
                |""".stripMargin)
-          logger.info(
+          logger.debug(
             s"""LockService Results:
                |  • isLocked               = ${resp.isLocked}
                |  • unverifiable           = ${resp.unverifiable.getOrElse(false)}
@@ -70,7 +70,7 @@ class LockConnector @Inject() (config: ServicesConfig, http: HttpClientV2)(impli
           logger.debug(s"Lock status: ${Json.stringify(Json.toJson(resp))}")
           Future.successful(resp)
         case Left(errorResponse) =>
-          logger.warn(s"[LOCK] ${errorResponse.statusCode} ${errorResponse.message}")
+          logger.error(s"[LOCK] ${errorResponse.statusCode} ${errorResponse.message}")
           Future.failed(errorResponse)
       }
 }
