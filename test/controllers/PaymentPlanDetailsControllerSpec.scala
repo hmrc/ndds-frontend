@@ -115,9 +115,9 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("singlePaymentPlan", paymentPlanReference, true, summaryListRows)(request,
-                                                                                                                 messages(application)
-                                                                                                                ).toString
+        contentAsString(result) mustEqual view("singlePaymentPlan", paymentPlanReference, true, true, false, summaryListRows)(request,
+                                                                                                                              messages(application)
+                                                                                                                             ).toString
       }
     }
 
@@ -187,9 +187,9 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, summaryListRows)(request,
-                                                                                                                 messages(application)
-                                                                                                                ).toString
+        contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, summaryListRows)(request,
+                                                                                                                             messages(application)
+                                                                                                                            ).toString
       }
     }
 
@@ -241,9 +241,9 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("variablePaymentPlan", paymentPlanReference, true, summaryListRows)(request,
-                                                                                                                   messages(application)
-                                                                                                                  ).toString
+        contentAsString(result) mustEqual view("variablePaymentPlan", paymentPlanReference, false, true, false, summaryListRows)(request,
+                                                                                                                                 messages(application)
+                                                                                                                                ).toString
       }
     }
 
@@ -291,9 +291,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
         val result = route(application, request).value
         val view = application.injector.instanceOf[PaymentPlanDetailsView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("taxCreditRepaymentPlan", paymentPlanReference, false, summaryListRows)(request,
-                                                                                                                       messages(application)
-                                                                                                                      ).toString
+        contentAsString(result) mustEqual view("taxCreditRepaymentPlan", paymentPlanReference, false, false, false, summaryListRows)(
+          request,
+          messages(application)
+        ).toString
       }
     }
 

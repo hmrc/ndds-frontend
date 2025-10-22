@@ -29,7 +29,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(planType: String, paymentReference: String, showActions: Boolean, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
     @header1("paymentPlanDetails.heading")
@@ -46,17 +46,17 @@
         actions =
                 Some(Actions(
                     items = Seq(
-                        if (showActions && (planType == PaymentPlanType.SinglePaymentPlan.toString || planType == PaymentPlanType.BudgetPaymentPlan.toString)) ActionItem(
+                        if (showAmendLink) ActionItem(
                             href = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url,
                             content = messages("paymentPlanDetails.details.amend"),
                             visuallyHiddenText = Some(messages("Amend"))
                         ) else null,
-                        if (showActions && planType != PaymentPlanType.TaxCreditRepaymentPlan.toString) ActionItem(
+                        if (showCancelLink) ActionItem(
                             href = routes.CancelPaymentPlanController.onPageLoad().url,
                             content = messages("paymentPlanDetails.details.cancel"),
                             visuallyHiddenText = Some(messages("Cancel"))
                         ) else null,
-                        if (showActions && planType == PaymentPlanType.BudgetPaymentPlan.toString) ActionItem(
+                        if (showSuspendLink) ActionItem(
                             href = "#",
                             content = messages("paymentPlanDetails.details.suspend"),
                             visuallyHiddenText = Some(messages("Suspend"))

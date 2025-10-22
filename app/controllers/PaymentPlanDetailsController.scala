@@ -74,8 +74,11 @@ class PaymentPlanDetailsController @Inject() (
           } yield {
             val flag: Future[Boolean] = calculateShowAction(nddService, planDetail)
             val showActions = Await.result(flag, 5.seconds)
+            val showAmendLink = isAmendLinkVisible(showActions, planDetail)
+            val showCancelLink = isCancelLinkVisible(showActions, planDetail)
+            val showSuspendLink = isSuspendLinkVisible(showActions, planDetail)
             val summaryRows: Seq[SummaryListRow] = buildSummaryRows(planDetail)
-            Ok(view(planDetail.planType, paymentPlanReference, showActions, summaryRows))
+            Ok(view(planDetail.planType, paymentPlanReference, showAmendLink, showCancelLink, showSuspendLink, summaryRows))
           }
         }
       case _ =>
@@ -167,4 +170,23 @@ class PaymentPlanDetailsController @Inject() (
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 
+  private def isAmendLinkVisible(showAllActions: Boolean, planDetail: PaymentPlanDetails): Boolean = {
+    showAllActions && (planDetail.planType == PaymentPlanType.SinglePaymentPlan.toString || planDetail.planType == PaymentPlanType.BudgetPaymentPlan.toString)
+  }
+
+  private def isCancelLinkVisible(showAllActions: Boolean, planDetail: PaymentPlanDetails): Boolean = {
+    showAllActions && planDetail.planType != PaymentPlanType.TaxCreditRepaymentPlan.toString
+  }
+
+  private def isSuspendLinkVisible(showAllActions: Boolean, planDetail: PaymentPlanDetails): Boolean = {
+    planDetail.planType match {
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        if (showAllActions) {
+          planDetail.suspensionStartDate.isEmpty && planDetail.suspensionEndDate.isEmpty
+        } else {
+          showAllActions
+        }
+      case _ => false
+    }
+  }
 }
