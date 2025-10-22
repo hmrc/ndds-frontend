@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.AmendPlanEndDateFormProvider
 import models.Mode
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanEndDatePage, AmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -126,8 +126,7 @@ class AmendPlanEndDateController @Inject() (
                     val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
                     if (duplicateCheckResponse.isDuplicate) {
                       logger.warn(logMsg)
-                      // TODO DTR-542 Goes to Warning page DW1
-                      Redirect(routes.JourneyRecoveryController.onPageLoad())
+                      Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
                     } else {
                       logger.info(logMsg)
                       Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
@@ -162,8 +161,7 @@ class AmendPlanEndDateController @Inject() (
                         val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
                         if (duplicateCheckResponse.isDuplicate) {
                           logger.warn(logMsg)
-                          // TODO DTR-542 Goes to Warning page DW1
-                          Redirect(routes.JourneyRecoveryController.onPageLoad())
+                          Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
                         } else {
                           logger.info(logMsg)
                           Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
@@ -178,7 +176,7 @@ class AmendPlanEndDateController @Inject() (
                 Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
             }
           } else {
-            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(AmendPaymentPlanTypePage).get}")
+            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage).get}")
           }
       )
   }

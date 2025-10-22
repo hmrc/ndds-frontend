@@ -76,7 +76,7 @@ class AmendPaymentPlanUpdateController @Inject() (
 
   private def buildSummaryRows(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
 
-    val planTypeOpt = userAnswers.get(AmendPaymentPlanTypePage)
+    val planTypeOpt = userAnswers.get(ManagePaymentPlanTypePage)
     val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
     val planStartDate = userAnswers.get(AmendPlanStartDatePage)
     val planEndDate = userAnswers.get(AmendPlanEndDatePage)

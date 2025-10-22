@@ -62,7 +62,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
         for {
           directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
           paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
-          planType             <- Future.fromTry(Try(userAnswers.get(AmendPaymentPlanTypePage).get))
+          planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
         } yield {
           Ok(
             view(
@@ -92,7 +92,18 @@ class AmendPaymentPlanConfirmationController @Inject() (
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
               logger.info(s"CHRIS submission successful for DDI Ref [$ddiReference]")
-              Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
+              for {
+                directDebitReference <- Future.fromTry(Try(ua.get(DirectDebitReferenceQuery).get))
+                paymentPlanReference <- Future.fromTry(Try(ua.get(PaymentPlanReferenceQuery).get))
+                lockResponse         <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
+              } yield {
+                if (lockResponse.lockSuccessful) {
+                  logger.info(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                } else {
+                  logger.error(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                }
+                Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
+              }
             } else {
               logger.error(s"CHRIS submission failed for DDI Ref [$ddiReference]")
               Future.successful(
@@ -181,10 +192,17 @@ class AmendPaymentPlanConfirmationController @Inject() (
   private def buildRows(userAnswers: UserAnswers, paymentPlan: PaymentPlanDetails, mode: Mode)(implicit
     messages: Messages
   ): (Seq[SummaryListRow], Call) =
-    userAnswers.get(AmendPaymentPlanTypePage) match {
+    val showDuplicateWarning = userAnswers.get(DuplicateWarningPage).getOrElse(false)
+
+    userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
+        val backLink = if (showDuplicateWarning) {
+          routes.DuplicateWarningController.onPageLoad(mode)
+        } else {
+          routes.AmendPlanEndDateController.onPageLoad(mode)
+        }
         (Seq(
-           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+           AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")),
            AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
            TotalAmountDueSummary.row(paymentPlan.totalLiability),
            MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability),
@@ -206,12 +224,17 @@ class AmendPaymentPlanConfirmationController @Inject() (
              true
            )
          ),
-         routes.AmendPlanEndDateController.onPageLoad(mode)
+         backLink
         )
 
       case _ =>
+        val backLink = if (showDuplicateWarning) {
+          routes.DuplicateWarningController.onPageLoad(mode)
+        } else {
+          routes.AmendPlanStartDateController.onPageLoad(mode)
+        }
         (Seq(
-           AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse("")),
+           AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")),
            AmendPaymentPlanSourceSummary.row(paymentPlan.hodService),
            DateSetupSummary.row(paymentPlan.submissionDateTime),
            AmendPaymentAmountSummary.row(
@@ -226,7 +249,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
              true
            )
          ),
-         routes.AmendPlanStartDateController.onPageLoad(mode)
+         backLink
         )
     }
 

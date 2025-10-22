@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.responses.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -31,6 +31,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
@@ -51,7 +52,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
-        AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse(""))(messages(app)),
+        AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse(""))(messages(app)),
         AmendPaymentPlanSourceSummary.row(paymentPlan.hodService)(messages(app)),
         TotalAmountDueSummary.row(paymentPlan.totalLiability)(messages(app)),
         MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability)(messages(app)),
@@ -82,7 +83,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
-        AmendPaymentPlanTypeSummary.row(userAnswers.get(AmendPaymentPlanTypePage).getOrElse(""))(messages(app)),
+        AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse(""))(messages(app)),
         AmendPaymentPlanSourceSummary.row(paymentPlan.hodService)(messages(app)),
         DateSetupSummary.row(paymentPlan.submissionDateTime)(messages(app)),
         AmendPaymentAmountSummary.row(
@@ -124,7 +125,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .success
             .value
             .set(
-              AmendPaymentPlanTypePage,
+              ManagePaymentPlanTypePage,
               PaymentPlanType.BudgetPaymentPlan.toString
             )
             .success
@@ -206,7 +207,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .success
             .value
             .set(
-              AmendPaymentPlanTypePage,
+              ManagePaymentPlanTypePage,
               PaymentPlanType.SinglePaymentPlan.toString
             )
             .success
@@ -272,12 +273,13 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       "must redirect to AmendPaymentPlanUpdateController when CHRIS submission is successful" in {
 
         import uk.gov.hmrc.http.HeaderCarrier
-        implicit val hc: HeaderCarrier = HeaderCarrier()
 
         val mockNddService = mock[NationalDirectDebitService]
 
         when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(true))
+        when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
 
         val directDebitReference = "DDI123456789"
 
@@ -342,9 +344,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       }
 
       "must redirect to JourneyRecoveryController when CHRIS submission fails" in {
-
-        import uk.gov.hmrc.http.HeaderCarrier
-        implicit val hc: HeaderCarrier = HeaderCarrier()
 
         val mockNddService = mock[NationalDirectDebitService]
 

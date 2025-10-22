@@ -124,12 +124,12 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   // PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers
-      .get(AmendPaymentPlanTypePage)
+      .get(ManagePaymentPlanTypePage)
       .getOrElse("") == PaymentPlanType.SinglePaymentPlan.toString
 
   def isBudgetPaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers
-      .get(AmendPaymentPlanTypePage)
+      .get(ManagePaymentPlanTypePage)
       .getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
@@ -362,6 +362,10 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
+  def lockPaymentPlan(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier): Future[AmendLockResponse] = {
+    nddConnector.lockPaymentPlan(directDebitReference, paymentPlanReference)
+  }
+
   def isDuplicatePaymentPlan(ua: UserAnswers)(implicit hc: HeaderCarrier, request: Request[?]): Future[DuplicateCheckResponse] = {
     ua.get(PaymentPlansCountQuery) match {
       case Some(count) => {
@@ -381,4 +385,17 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       }
     }
   }
+
+  def isPaymentPlanCancellable(userAnswers: UserAnswers): Boolean = {
+    userAnswers
+      .get(ManagePaymentPlanTypePage)
+      .exists(planType =>
+        Set(
+          PaymentPlanType.SinglePaymentPlan.toString,
+          PaymentPlanType.BudgetPaymentPlan.toString,
+          PaymentPlanType.VariablePaymentPlan.toString
+        ).contains(planType)
+      )
+  }
+
 }

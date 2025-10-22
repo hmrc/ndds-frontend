@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.AmendPlanStartDateFormProvider
 import models.{Mode, UserAnswers}
 import navigation.Navigator
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanTypePage, AmendPlanStartDatePage}
+import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
@@ -92,7 +92,7 @@ class AmendPlanStartDateController @Inject() (
                 Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
             }
           } else {
-            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(AmendPaymentPlanTypePage).get}")
+            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage).get}")
           }
       )
   }
@@ -109,7 +109,7 @@ class AmendPlanStartDateController @Inject() (
     } yield {
       if (duplicateCheckResponse.isDuplicate) {
         logger.warn("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
       } else {
         logger.info("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
         Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))

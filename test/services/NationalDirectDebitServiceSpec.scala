@@ -395,7 +395,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       "must return true if single payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
           .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
@@ -413,7 +413,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       "must return true if budget payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
@@ -431,7 +431,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       "must return false if variable payment for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
           .success
           .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
@@ -449,7 +449,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       "must return false if payment plan is empty for amend journey" in {
         val expectedUserAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanTypePage, "")
+          .set(ManagePaymentPlanTypePage, "")
           .success
           .value
         val result = service.amendPaymentPlanGuard(expectedUserAnswers)
@@ -608,6 +608,26 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         val result = intercept[Exception](service.getPaymentPlanDetails("test-ddRef", "test-pp-ref").futureValue)
 
         result.getMessage must include("error")
+      }
+    }
+
+    "lockPaymentPlan" - {
+      "must successfully return Ok" in {
+        when(mockConnector.lockPaymentPlan(any(), any())(any()))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+        val result = service.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue
+
+        result mustBe AmendLockResponse(lockSuccessful = true)
+      }
+
+      "fail when the connector call fails" in {
+        when(mockConnector.lockPaymentPlan(any(), any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue)
+
+        result.getMessage must include("bang")
       }
     }
 
@@ -798,7 +818,35 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       result.nextPaymentDateValid mustBe true
     }
-
   }
 
+  "isPaymentPlanCancellable" - {
+    "must return true when plan type is SinglePaymentPlan" in {
+      val userAnswers =
+        emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
+
+      service.isPaymentPlanCancellable(userAnswers) mustBe true
+    }
+
+    "must return true when plan type is BudgetPaymentPlan" in {
+      val userAnswers =
+        emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+
+      service.isPaymentPlanCancellable(userAnswers) mustBe true
+    }
+
+    "must return true when plan type is VariablePaymentPlan" in {
+      val userAnswers =
+        emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString).success.value
+
+      service.isPaymentPlanCancellable(userAnswers) mustBe true
+    }
+
+    "must return true when plan type is TaxCreditRepaymentPlan" in {
+      val userAnswers =
+        emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
+
+      service.isPaymentPlanCancellable(userAnswers) mustBe false
+    }
+  }
 }
