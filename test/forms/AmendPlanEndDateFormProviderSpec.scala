@@ -28,7 +28,7 @@ class AmendPlanEndDateFormProviderSpec extends DateBehaviours {
   private val endDate = LocalDate.of(2024, 4, 6)
   private val form = new AmendPlanEndDateFormProvider()()
 
-  "PlanEndDateFormProvider" - {
+  "AmendPlanEndDateFormProvider" - {
 
     "must bind valid dates after or equal to the plan start date" in {
       val validDate = endDate
@@ -48,15 +48,24 @@ class AmendPlanEndDateFormProviderSpec extends DateBehaviours {
         max = LocalDate.now(ZoneOffset.UTC)
       )
 
-      behave like dateField(form, "value", validData)
+      "bind valid data" in {
+        forAll(validData -> "valid date") { (date: LocalDate) =>
+          val data = Map(
+            "value.day"   -> date.getDayOfMonth.toString,
+            "value.month" -> date.getMonthValue.toString,
+            "value.year"  -> date.getYear.toString
+          )
+
+          val result = form.bind(data)
+          result.value.flatten mustBe Some(date)
+          result.errors mustBe empty
+        }
+      }
 
       "fail to bind an empty date" in {
         val result = form.bind(Map.empty[String, String])
-        result.errors must contain theSameElementsAs Seq(
-          FormError("value.day", "date.error.day"),
-          FormError("value.month", "date.error.month"),
-          FormError("value.year", "date.error.year")
-        )
+        result.errors mustBe empty
+        result.value mustBe Some(None)
       }
     }
   }

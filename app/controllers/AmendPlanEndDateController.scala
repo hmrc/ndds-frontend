@@ -56,7 +56,7 @@ class AmendPlanEndDateController @Inject() (
     val form = formProvider()
     val preparedForm = request.userAnswers.get(AmendPlanEndDatePage) match {
       case None        => form
-      case Some(value) => form.fill(value)
+      case Some(value) => form.fill(Some(value))
     }
 
     Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
@@ -70,113 +70,97 @@ class AmendPlanEndDateController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
-        value =>
-          if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-            (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
-              case (Some(planDetails), Some(amendedAmount)) =>
-                val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-                val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
-                val frequencyStr = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
-                val frequency = Frequency.fromString(frequencyStr)
+        maybeEndDate =>
+          maybeEndDate match {
+            // ✅ CASE 1: User left end date blank
+            case None =>
+              for {
+                updatedAnswers <- Future.fromTry(userAnswers.remove(AmendPlanEndDatePage))
+                _              <- sessionRepository.set(updatedAnswers)
+              } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
 
-                val hasDateChanged = planDetails.paymentPlanDetails.scheduledPaymentEndDate match {
-                  case Some(dbEndDate) => value != dbEndDate
-                  case _               => true
-                }
+            // ✅ CASE 2: User entered a date (previous logic)
+            case Some(value) =>
+              if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+                (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
+                  case (Some(planDetails), Some(amendedAmount)) =>
+                    val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+                    val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
+                    val frequencyStr = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
+                    val frequency = Frequency.fromString(frequencyStr)
 
-                val hasAmountChanged = amendedAmount != dbAmount
-
-                val isNoChange = !hasAmountChanged && !hasDateChanged
-
-                if (isNoChange) { // F27 - check
-                  val key = "amendment.noChange"
-                  val errorForm = form.fill(value).withError("value", key)
-                  Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
-                } else if (hasDateChanged && !hasAmountChanged) {
-                  // F20 check
-                  nddsService.calculateNextPaymentDate(dbStartDate, value, frequency).flatMap { result =>
-                    logger.info(
-                      s"""|[AmendPlanEndDateController]
-                          |  nextPaymentDateValid: $result.nextPaymentDateValid
-                          |  StartDate: $result.dbStartDate
-                          |""".stripMargin
-                    )
-                    if (!result.nextPaymentDateValid) {
-                      val errorForm = form
-                        .fill(value)
-                        .withError(
-                          key     = "value", // form field name in AmendPlanEndDateFormProvider
-                          message = "amendPlanEndDate.error.nextPaymentDateValid" // exact key from messages file
-                        )
-                      Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
-                    } else {
-                      for {
-                        updatedAnswers1 <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                        updatedAnswers2 <- Future.fromTry(
-                                             updatedAnswers1.set(AmendPlanStartDatePage, result.potentialNextPaymentDate)
-                                           ) // this needed for budgeting amend end date for chris submission
-                        _ <- sessionRepository.set(updatedAnswers2)
-                      } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers2))
+                    val hasDateChanged = planDetails.paymentPlanDetails.scheduledPaymentEndDate match {
+                      case Some(dbEndDate) => value != dbEndDate
+                      case _               => true
                     }
-                  }
-                } else if (!hasDateChanged && hasAmountChanged) {
-                  for {
-                    duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers) // F26 check
-                  } yield {
-                    val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
-                    if (duplicateCheckResponse.isDuplicate) {
-                      logger.warn(logMsg)
-                      Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
-                    } else {
-                      logger.info(logMsg)
-                      Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
-                    }
-                  }
-                } else { // hasDateChanged && hasAmountChanged
-                  // F20 check
-                  nddsService.calculateNextPaymentDate(dbStartDate, value, frequency).flatMap { result =>
-                    logger.info(
-                      s"""|[AmendPlanEndDateController]
-                          |  nextPaymentDateValid: $result.nextPaymentDateValid
-                          |  StartDate: $result.dbStartDate
-                          |""".stripMargin
-                    )
-                    if (!result.nextPaymentDateValid) {
-                      val errorForm = form
-                        .fill(value)
-                        .withError(
-                          key     = "value", // form field name in AmendPlanEndDateFormProvider
-                          message = "amendPlanEndDate.error.nextPaymentDateValid" // exact key from messages file
-                        )
+
+                    val hasAmountChanged = amendedAmount != dbAmount
+                    val isNoChange = !hasAmountChanged && !hasDateChanged
+
+                    if (isNoChange) {
+                      val key = "amendment.noChange"
+                      val errorForm = form.fill(Some(value)).withError("value", key)
                       Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
-                    } else {
-                      for {
-                        duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers) // F26 check
-                        updatedAnswers1        <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                        updatedAnswers2 <- Future.fromTry(
-                                             updatedAnswers1.set(AmendPlanStartDatePage, result.potentialNextPaymentDate)
-                                           ) // this needed for budgeting amend end date for chris submission
-                        _ <- sessionRepository.set(updatedAnswers2)
-                      } yield {
-                        val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
-                        if (duplicateCheckResponse.isDuplicate) {
-                          logger.warn(logMsg)
-                          Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
+                    } else if (hasDateChanged && !hasAmountChanged) {
+                      nddsService.calculateNextPaymentDate(dbStartDate, Some(value), frequency).flatMap { result =>
+                        if (!result.nextPaymentDateValid) {
+                          val errorForm = form.fill(Some(value)).withError("value", "amendPlanEndDate.error.nextPaymentDateValid")
+                          Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                         } else {
-                          logger.info(logMsg)
+                          for {
+                            updatedAnswers1 <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
+                            updatedAnswers2 <- result.potentialNextPaymentDate.fold(Future.successful(updatedAnswers1)) { nextDate =>
+                                                 Future.fromTry(updatedAnswers1.set(AmendPlanStartDatePage, nextDate))
+                                               }
+                            _ <- sessionRepository.set(updatedAnswers2)
+                          } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers2))
+
+                        }
+                      }
+                    } else if (!hasDateChanged && hasAmountChanged) {
+                      for {
+                        duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers)
+                      } yield {
+                        if (duplicateCheckResponse.isDuplicate)
+                          Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
+                        else
                           Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
+                      }
+                    } else {
+                      nddsService.calculateNextPaymentDate(dbStartDate, Some(value), frequency).flatMap { result =>
+                        if (!result.nextPaymentDateValid) {
+                          val errorForm = form.fill(Some(value)).withError("value", "amendPlanEndDate.error.nextPaymentDateValid")
+                          Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                        } else {
+                          for {
+                            duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers)
+                            updatedAnswers1        <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
+                            updatedAnswers2 <- result.potentialNextPaymentDate.fold(Future.successful(updatedAnswers1)) { nextDate =>
+                                                 Future.fromTry(updatedAnswers1.set(AmendPlanStartDatePage, nextDate))
+                                               }
+                            _ <- sessionRepository.set(updatedAnswers2)
+                          } yield {
+                            val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
+                            if (duplicateCheckResponse.isDuplicate) {
+                              logger.warn(logMsg)
+                              Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
+                            } else {
+                              logger.info(logMsg)
+                              Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers2))
+                            }
+                          }
+
                         }
                       }
                     }
-                  }
-                }
 
-              case _ =>
-                logger.error("Missing Amend payment amount and/or amend plan end date")
-                Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
-            }
-          } else {
-            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage).get}")
+                  case _ =>
+                    logger.error("Missing Amend payment amount and/or amend plan end date")
+                    Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+                }
+              } else {
+                throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage).get}")
+              }
           }
       )
   }
