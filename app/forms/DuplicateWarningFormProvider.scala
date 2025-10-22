@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-package models.requests
+package forms
 
-import play.api.libs.json.{Json, OFormat}
+import javax.inject.Inject
+import forms.mappings.Mappings
+import play.api.data.Form
 
-import java.time.LocalDate
+class DuplicateWarningFormProvider @Inject() extends Mappings {
 
-case class PaymentPlanDuplicateCheckRequest(
-  directDebitReference: String,
-  paymentPlanReference: String,
-  planType: String,
-  paymentService: String,
-  paymentReference: String,
-  paymentAmount: Option[BigDecimal],
-  totalLiability: Option[BigDecimal],
-  paymentFrequency: Option[Int],
-  paymentStartDate: LocalDate
-)
-
-object PaymentPlanDuplicateCheckRequest {
-  implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format[PaymentPlanDuplicateCheckRequest]
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("duplicateWarning.error.required")
+    )
 }

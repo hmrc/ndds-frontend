@@ -362,6 +362,10 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
+  def lockPaymentPlan(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier): Future[AmendLockResponse] = {
+    nddConnector.lockPaymentPlan(directDebitReference, paymentPlanReference)
+  }
+
   def isDuplicatePaymentPlan(ua: UserAnswers)(implicit hc: HeaderCarrier, request: Request[?]): Future[DuplicateCheckResponse] = {
     ua.get(PaymentPlansCountQuery) match {
       case Some(count) => {
@@ -393,4 +397,5 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
         ).contains(planType)
       )
   }
+
 }

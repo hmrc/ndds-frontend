@@ -611,6 +611,26 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       }
     }
 
+    "lockPaymentPlan" - {
+      "must successfully return Ok" in {
+        when(mockConnector.lockPaymentPlan(any(), any())(any()))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+        val result = service.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue
+
+        result mustBe AmendLockResponse(lockSuccessful = true)
+      }
+
+      "fail when the connector call fails" in {
+        when(mockConnector.lockPaymentPlan(any(), any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue)
+
+        result.getMessage must include("bang")
+      }
+    }
+
     "isDuplicatePaymentPlan" - {
 
       "return true when count is more than 1 payment plan and it is single payment plan so connector returns true" in {
@@ -798,7 +818,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       result.nextPaymentDateValid mustBe true
     }
-
   }
 
   "isPaymentPlanCancellable" - {

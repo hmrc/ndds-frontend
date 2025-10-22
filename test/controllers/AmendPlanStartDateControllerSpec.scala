@@ -190,7 +190,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return to Journey Recovery page when payment amount is updated and duplicate payment plan is true" in {
+      "must redirect to Duplicate Warning page when payment amount is updated and duplicate payment plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
@@ -217,7 +217,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -252,7 +252,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return to Journey Recovery page when payment plan start date is updated and duplicate payment plan is true" in {
+      "must redirect to Duplicate Warning page when payment plan start date is updated and duplicate payment plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
@@ -279,7 +279,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -314,7 +314,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must return to Journey Recovery page when payment amount and plan start date is updated and duplicate payment plan is true" in {
+      "must redirect to Duplicate Warning page when payment amount and plan start date is updated and duplicate payment plan is true" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)
           .success
@@ -341,7 +341,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
