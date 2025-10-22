@@ -107,6 +107,12 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
       .execute[PaymentPlanResponse]
   }
 
+  def lockPaymentPlan(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier): Future[AmendLockResponse] = {
+    http
+      .put(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans/$paymentPlanReference/lock")(hc)
+      .execute[AmendLockResponse]
+  }
+
   def isDuplicatePaymentPlan(directDebitReference: String, request: PaymentPlanDuplicateCheckRequest)(implicit
     hc: HeaderCarrier
   ): Future[DuplicateCheckResponse] = {

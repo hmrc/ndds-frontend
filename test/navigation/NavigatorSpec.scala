@@ -308,9 +308,8 @@ class NavigatorSpec extends SpecBase {
             .success
             .value
 
-          // TODO must redirect to CP2
           navigator.nextPage(CancelPaymentPlanPage, NormalMode, ua) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.PaymentPlanCancelledController.onPageLoad()
         }
 
         "must go from a CancelPaymentPlanPage to Journey Recovery Page" in {

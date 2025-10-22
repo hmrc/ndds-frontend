@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package models.requests
+package models.responses
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.*
 
-import java.time.LocalDate
+case class AmendLockResponse(lockSuccessful: Boolean)
 
-case class PaymentPlanDuplicateCheckRequest(
-  directDebitReference: String,
-  paymentPlanReference: String,
-  planType: String,
-  paymentService: String,
-  paymentReference: String,
-  paymentAmount: Option[BigDecimal],
-  totalLiability: Option[BigDecimal],
-  paymentFrequency: Option[Int],
-  paymentStartDate: LocalDate
-)
-
-object PaymentPlanDuplicateCheckRequest {
-  implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format[PaymentPlanDuplicateCheckRequest]
+object AmendLockResponse {
+  implicit val format: OFormat[AmendLockResponse] = Json.format
 }

@@ -142,7 +142,7 @@ class Navigator @Inject() () {
     answers
       .get(CancelPaymentPlanPage)
       .map {
-        case true  => routes.JourneyRecoveryController.onPageLoad()
+        case true  => routes.PaymentPlanCancelledController.onPageLoad()
         case false => routes.PaymentPlanDetailsController.onPageLoad()
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
