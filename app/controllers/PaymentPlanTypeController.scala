@@ -68,7 +68,6 @@ class PaymentPlanTypeController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => {
-          logger.warn(s"Payment plan validation error: ${formWithErrors.errors}")
           Future.successful(BadRequest(view(formWithErrors, mode, selectedSource, routes.DirectDebitSourceController.onPageLoad(mode))))
         },
         newValue =>

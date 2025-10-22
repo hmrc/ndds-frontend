@@ -58,7 +58,7 @@ class BankDetailsCheckYourAnswerController @Inject() (
   val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    logger.info("Display bank details confirmation page")
+    logger.debug("Display bank details confirmation page")
     val preparedForm = request.userAnswers.get(BankDetailsCheckYourAnswerPage) match {
       case None        => form
       case Some(value) => form.fill(value)
@@ -73,7 +73,7 @@ class BankDetailsCheckYourAnswerController @Inject() (
 
       generateMacFromAnswers(request.userAnswers, macGenerator, appConfig.bacsNumber) match {
         case Some(mac) =>
-          logger.info(s"Generated MAC successfully")
+          logger.debug(s"Generated MAC successfully")
 
           for {
             updatedAnswers <- Future.fromTry(
@@ -85,7 +85,7 @@ class BankDetailsCheckYourAnswerController @Inject() (
           } yield Redirect(navigator.nextPage(BankDetailsCheckYourAnswerPage, mode, updatedAnswers))
 
         case None =>
-          logger.error("Could not generate MAC – missing bank details")
+          logger.warn("Could not generate MAC – missing bank details")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
