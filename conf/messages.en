@@ -570,5 +570,6 @@ suspensionPeriodRangeDate.to = to
 
 checkYourSuspensionDetails.title = Check your suspension details
 checkYourSuspensionDetails.heading = Check your suspension details
+checkYourSuspensionDetails.confirm = Confirm and continue
 
 
