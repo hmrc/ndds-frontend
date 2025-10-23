@@ -18,10 +18,11 @@ package controllers
 
 import controllers.actions.*
 import models.UserAnswers
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
-import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSummaryView
@@ -45,10 +46,10 @@ class DirectDebitSummaryController @Inject() (
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
-        cleansePaymentReference(userAnswers).flatMap { _ =>
+        cleansePaymentReference(userAnswers).flatMap { cleansedUserAnswers =>
           nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
             for {
-              updatedAnswers <- Future.fromTry(userAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
+              updatedAnswers <- Future.fromTry(cleansedUserAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
               updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
               _              <- sessionRepository.set(updatedAnswers)
             } yield {
@@ -77,6 +78,11 @@ class DirectDebitSummaryController @Inject() (
   private def cleansePaymentReference(userAnswers: UserAnswers): Future[UserAnswers] =
     for {
       updatedUserAnswers <- Future.fromTry(userAnswers.remove(PaymentPlanReferenceQuery))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(PaymentPlanDetailsQuery))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(ManagePaymentPlanTypePage))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPaymentAmountPage))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanStartDatePage))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanEndDatePage))
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 }
