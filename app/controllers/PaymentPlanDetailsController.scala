@@ -29,7 +29,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
-import viewmodels.checkAnswers.*
+import viewmodels.checkAnswers.{SuspensionPeriodRangeDateSummary, *}
 import views.html.PaymentPlanDetailsView
 
 import java.time.LocalDate
@@ -121,10 +121,14 @@ class PaymentPlanDetailsController @Inject() (
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
-          AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
-          AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true), // true for start
-          AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false) // false for end
-        )
+          AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)
+        ) ++
+          (if (isSuspendPeriodActive(planDetail)) {
+             Seq(SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate))
+           } else {
+             Seq.empty
+           })
+
       case _ => // For Variable and Tax repayment plan
         Seq(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),

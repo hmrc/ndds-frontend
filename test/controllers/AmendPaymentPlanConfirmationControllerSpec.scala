@@ -35,7 +35,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
-import uk.gov.hmrc.http.HeaderCarrier
 implicit val hc: HeaderCarrier = HeaderCarrier()
 
 import java.time.LocalDate

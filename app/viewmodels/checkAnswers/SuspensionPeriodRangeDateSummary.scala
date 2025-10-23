@@ -41,6 +41,9 @@ import utils.DateTimeFormats.formattedDateTimeShort
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 object SuspensionPeriodRangeDateSummary {
   def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(SuspensionPeriodRangeDatePage).map { answer =>
@@ -62,4 +65,29 @@ object SuspensionPeriodRangeDateSummary {
         }
       )
     }
+
+  def row(suspendStartDate: Option[LocalDate], suspendEndDate: Option[LocalDate])(implicit messages: Messages): SummaryListRow = {
+    val formattedStartDate = suspendStartDate
+      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .getOrElse("")
+
+    val formattedEndDate = suspendEndDate
+      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .getOrElse("")
+
+    val formattedValue =
+      s"$formattedStartDate ${messages("suspensionPeriodRangeDate.to")} $formattedEndDate"
+
+    SummaryListRowViewModel(
+      key   = "suspensionPeriodRangeDate.checkYourAnswersLabel",
+      value = ValueViewModel(formattedValue),
+      actions = Seq(
+        ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
+          .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden")),
+        ActionItemViewModel("site.remove", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
+          .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
+      )
+    )
+  }
+
 }
