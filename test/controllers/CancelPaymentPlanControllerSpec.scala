@@ -39,8 +39,6 @@ import views.html.CancelPaymentPlanView
 
 import scala.concurrent.Future
 
-implicit val hc: HeaderCarrier = HeaderCarrier()
-
 class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
