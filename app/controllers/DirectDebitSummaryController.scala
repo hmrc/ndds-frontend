@@ -46,7 +46,7 @@ class DirectDebitSummaryController @Inject() (
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
-        cleansePaymentReference(userAnswers).flatMap { cleansedUserAnswers =>
+        cleanseUserData(userAnswers).flatMap { cleansedUserAnswers =>
           nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
             for {
               updatedAnswers <- Future.fromTry(cleansedUserAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
@@ -75,7 +75,7 @@ class DirectDebitSummaryController @Inject() (
     } yield Redirect(routes.DirectDebitSummaryController.onPageLoad())
   }
 
-  private def cleansePaymentReference(userAnswers: UserAnswers): Future[UserAnswers] =
+  private def cleanseUserData(userAnswers: UserAnswers): Future[UserAnswers] =
     for {
       updatedUserAnswers <- Future.fromTry(userAnswers.remove(PaymentPlanReferenceQuery))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(PaymentPlanDetailsQuery))
