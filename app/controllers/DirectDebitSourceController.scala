@@ -65,7 +65,6 @@ class DirectDebitSourceController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => {
-          logger.warn(s"Bad Request validation error: ${formWithErrors.errors}")
           Future.successful(BadRequest(view(formWithErrors, mode, routes.BankDetailsCheckYourAnswerController.onPageLoad(mode))))
         },
         value => {

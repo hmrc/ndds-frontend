@@ -109,12 +109,13 @@ class AmendPaymentPlanConfirmationController @Inject() (
               Future.successful(
                 Redirect(routes.JourneyRecoveryController.onPageLoad())
                   .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+                  // TODO Must not use content from outside of messages, cannot translate (also shouldn't use flashing)
               )
             }
           }
 
         case None =>
-          logger.error("Missing DirectDebitReference in UserAnswers")
+          logger.warn("Missing DirectDebitReference in UserAnswers when trying to amend payment plan")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
