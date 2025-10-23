@@ -538,9 +538,9 @@ duplicateWarning.change.hidden = DuplicateWarning
 duplicateWarning.yes= Yes
 duplicateWarning.no= No
 
-suspendPaymentPlan.title = Suspend this payment plan
-suspendPaymentPlan.heading = Suspend this payment plan
-suspendPaymentPlan.p1 = You can suspend your payment plan if you need to pause payments.
+suspendPaymentPlan.title = Suspending this payment plan
+suspendPaymentPlan.heading = Suspending this payment plan
+suspendPaymentPlan.p1 = You can suspend this payment plan if you need to pause payments.
 suspendPaymentPlan.p2 = When you suspend a payment plan:
 suspendPaymentPlan.l1 = no payments will be taken during the suspension period
 suspendPaymentPlan.l2 = you can remove the suspension at any time

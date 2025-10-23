@@ -147,4 +147,4 @@ POST       /cancel-payment-plan                         controllers.CancelPaymen
 
 GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()
 
-GET        /suspend-payment-plan                        controllers.SuspendPaymentPlanController.onPageLoad()
+GET        /suspending-this-payment-plan                controllers.SuspendPaymentPlanController.onPageLoad()
