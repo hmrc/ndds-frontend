@@ -551,21 +551,12 @@ suspendPaymentPlan.continue = Continue
 suspendPaymentPlan.cancel.link = Cancel and return to payment plan
 
 
-suspensionPeriodRangeDate.title = SuspensionPeriodRangeDate
-suspensionPeriodRangeDate.heading = SuspensionPeriodRangeDate
-suspensionPeriodRangeDate.checkYourAnswersLabel = SuspensionPeriodRangeDate
-suspensionPeriodRangeDate.error.required.all = Enter the suspensionPeriodRangeDate
-suspensionPeriodRangeDate.error.required.two = The suspensionPeriodRangeDate must include {0} and {1}
-suspensionPeriodRangeDate.error.required = The suspensionPeriodRangeDate must include {0}
-suspensionPeriodRangeDate.error.invalid = Enter a real SuspensionPeriodRangeDate
-suspensionPeriodRangeDate.change.hidden = SuspensionPeriodRangeDate
-
-suspensionPeriodRangeDate.title = How long will the suspension period last?
+suspensionPeriodRangeDate.title = Enter suspension dates
 suspensionPeriodRangeDate.heading = How long will the suspension period last?
 suspensionPeriodRangeDate.startDate = Start date
 suspensionPeriodRangeDate.endDate = End date
-suspensionPeriodRangeDate.hint = For example, 16 6 2026
-suspensionPeriodRangeEndDate.hint = For example, 18 7 2026
+suspensionPeriodRangeDate.hint = For example, 27 3 2020
+suspensionPeriodRangeEndDate.hint = For example, 28 4 2020
 suspensionPeriodRangeDate.p1.line1 = Payment reference: <strong>{0}</strong>
 suspensionPeriodRangeDate.p1.line2 = Regular payment amount: <strong>{0}</strong>
 suspensionPeriodRangeStartDate.error.required = Enter a valid date.
