@@ -21,6 +21,7 @@ import forms.AmendPlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
+import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
 import models.{NextPaymentValidationResult, NormalMode}
 import models.PaymentPlanType
 import org.mockito.ArgumentMatchers.any
