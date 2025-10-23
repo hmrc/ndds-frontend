@@ -32,6 +32,7 @@ import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -144,10 +145,19 @@ class PaymentPlanDetailsController @Inject() (
           case None            => Future.successful(true)
         }
       case PaymentPlanType.BudgetPaymentPlan.toString =>
-        planDetail.scheduledPaymentEndDate match {
-          case Some(startDate) => nddService.isThreeDaysPriorPlanEndDate(startDate)
-          case None            => Future.successful(true)
-        }
+        for {
+          isTwoDaysBeforeStart <- planDetail.scheduledPaymentStartDate match {
+                                    case Some(startDate) =>
+                                      nddService.isTwoDaysPriorPaymentDate(startDate).map { isTwoDaysPrior =>
+                                        isTwoDaysPrior || LocalDate.now().isAfter(startDate)
+                                      }
+                                    case None => Future.successful(true)
+                                  }
+          isThreeDaysBeforeEnd <- planDetail.scheduledPaymentEndDate match {
+                                    case Some(endDate) => nddService.isThreeDaysPriorPlanEndDate(endDate)
+                                    case None          => Future.successful(true)
+                                  }
+        } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
       case PaymentPlanType.VariablePaymentPlan.toString =>
         for {
           isTwoDaysBeforeStart <- planDetail.scheduledPaymentStartDate match {
@@ -180,13 +190,16 @@ class PaymentPlanDetailsController @Inject() (
 
   private def isSuspendLinkVisible(showAllActions: Boolean, planDetail: PaymentPlanDetails): Boolean = {
     planDetail.planType match {
-      case PaymentPlanType.BudgetPaymentPlan.toString =>
-        if (showAllActions) {
-          planDetail.suspensionStartDate.isEmpty && planDetail.suspensionEndDate.isEmpty
-        } else {
-          showAllActions
-        }
+      case planType if planType == PaymentPlanType.BudgetPaymentPlan.toString =>
+        showAllActions && !isSuspendPeriodActive(planDetail)
       case _ => false
     }
+  }
+
+  private def isSuspendPeriodActive(planDetail: PaymentPlanDetails): Boolean = {
+    (for {
+      suspensionStartDate <- planDetail.suspensionStartDate
+      suspensionEndDate   <- planDetail.suspensionEndDate
+    } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
   }
 }
