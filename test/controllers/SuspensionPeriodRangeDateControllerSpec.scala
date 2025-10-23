@@ -30,7 +30,7 @@ import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentPlanDetailsQuery
+import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
@@ -86,10 +86,22 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
   )
 
   private val userAnswersWithBudgetPlan =
-    emptyUserAnswers.set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse).success.value
+    emptyUserAnswers
+      .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+      .success
+      .value
+      .set(PaymentPlanReferenceQuery, "PP123456")
+      .success
+      .value
 
   private val userAnswersWithSinglePlan =
-    emptyUserAnswers.set(PaymentPlanDetailsQuery, singlePaymentPlanResponse).success.value
+    emptyUserAnswers
+      .set(PaymentPlanDetailsQuery, singlePaymentPlanResponse)
+      .success
+      .value
+      .set(PaymentPlanReferenceQuery, "SPP654321")
+      .success
+      .value
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, suspensionPeriodRangeDateRoute)

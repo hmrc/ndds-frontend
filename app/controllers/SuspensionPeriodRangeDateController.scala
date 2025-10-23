@@ -19,13 +19,14 @@ package controllers
 import controllers.actions.*
 import forms.SuspensionPeriodRangeDateFormProvider
 import models.requests.DataRequest
+
 import javax.inject.Inject
 import models.{Mode, PaymentPlanType}
 import navigation.Navigator
 import pages.SuspensionPeriodRangeDatePage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
-import queries.PaymentPlanDetailsQuery
+import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MaskAndFormatUtils.formatAmount
@@ -100,10 +101,12 @@ class SuspensionPeriodRangeDateController @Inject() (
     }
 
   private def extractPlanData(implicit request: DataRequest[?]): (String, String) = {
+    val planReference = request.userAnswers.get(PaymentPlanReferenceQuery).getOrElse("")
     val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
-    val planReference = planDetailsOpt.map(_.paymentPlanDetails.paymentReference).getOrElse("")
     val paymentAmount =
       formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))
+
     (planReference, paymentAmount)
   }
+
 }
