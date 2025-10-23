@@ -42,7 +42,7 @@ import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
 object SuspensionPeriodRangeDateSummary {
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(SuspensionPeriodRangeDatePage).map { answer =>
 
       implicit val lang: Lang = messages.lang
@@ -52,10 +52,14 @@ object SuspensionPeriodRangeDateSummary {
       SummaryListRowViewModel(
         key   = "suspensionPeriodRangeDate.checkYourAnswersLabel",
         value = ValueViewModel(formattedValue),
-        actions = Seq(
-          ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
-        )
+        actions = if (showChange) {
+          Seq(
+            ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
+          )
+        } else {
+          Seq.empty
+        }
       )
     }
 }

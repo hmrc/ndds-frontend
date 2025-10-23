@@ -70,7 +70,7 @@ class CheckYourSuspensionDetailsController @Inject() (
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =
     SummaryListViewModel(
       rows = Seq(
-        SuspensionPeriodRangeDateSummary.row(answers)
+        SuspensionPeriodRangeDateSummary.row(answers, true)
       ).flatten
     )
 

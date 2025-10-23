@@ -146,7 +146,7 @@ class YourBankDetailsController @Inject() (
       updatedAnswers <- Future.fromTry(updatedAnswersTry)
       _              <- sessionRepository.set(updatedAnswers)
     } yield {
-      logger.info(s"[YourBankDetailsController][onSuccessfulVerification] Session repository updated successfully")
+      logger.debug(s"[YourBankDetailsController][onSuccessfulVerification] Session repository updated successfully")
       updatedAnswers
     }
   }

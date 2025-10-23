@@ -90,7 +90,7 @@ class CheckYourAnswersController @Inject() (
 
       (ua.get(pages.MacValuePage), maybeMac2) match {
         case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-          logger.info(s"MAC validation successful")
+          logger.debug(s"MAC validation successful")
           nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
             val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
 
@@ -105,7 +105,7 @@ class CheckYourAnswersController @Inject() (
                     _              <- sessionRepository.set(updatedAnswers)
                   } yield {
                     auditService.sendSubmitDirectDebitPaymentPlan
-                    logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
+                    logger.debug(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
                     Redirect(routes.DirectDebitConfirmationController.onPageLoad())
                   }
                 } else {
@@ -113,6 +113,7 @@ class CheckYourAnswersController @Inject() (
                   Future.successful(
                     Redirect(routes.JourneyRecoveryController.onPageLoad())
                       .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+                      // TODO Must not use content from outside of messages, cannot translate (also shouldn't use flashing)
                   )
                 }
               }
@@ -120,11 +121,12 @@ class CheckYourAnswersController @Inject() (
                 logger.error("CHRIS submission or session update failed", ex)
                 Redirect(routes.JourneyRecoveryController.onPageLoad())
                   .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
+              // TODO Must not use content from outside of messages, cannot translate (also shouldn't use flashing)
               }
           }
 
         case (Some(mac1), Some(mac2)) =>
-          logger.error(s"MAC validation failed")
+          logger.error(s"MAC validation failed for user ${request.userId}")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
 
         case _ =>
