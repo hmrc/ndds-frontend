@@ -1,0 +1,84 @@
+/*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package controllers
+
+import controllers.actions.*
+import models.{PaymentPlanType, UserAnswers}
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
+
+import javax.inject.Inject
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentPlanReferenceQuery
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
+import utils.MaskAndFormatUtils.formatAmount
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, PaymentReferenceSummary}
+import views.html.RemoveSuspensionConfirmationView
+
+import java.time.format.DateTimeFormatter
+
+class RemoveSuspensionConfirmationController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: RemoveSuspensionConfirmationView
+) extends FrontendBaseController
+    with I18nSupport {
+
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val userAnswers = request.userAnswers
+
+    (for {
+      paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
+      paymentAmount        <- userAnswers.get(AmendPaymentAmountPage)
+      startDate            <- userAnswers.get(AmendPlanStartDatePage)
+    } yield {
+      val formattedRegPaymentAmount = formatAmount(paymentAmount)
+      val formattedStartDate =
+        startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+      val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
+
+      Ok(view(formattedRegPaymentAmount, formattedStartDate, summaryRows, routes.PaymentPlanDetailsController.onPageLoad()))
+    }).getOrElse {
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
+  }
+
+  private def buildSummaryRows(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
+    
+    val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
+    val planStartDate = userAnswers.get(AmendPlanStartDatePage)
+    val planEndDate = userAnswers.get(AmendPlanEndDatePage)
+
+    val baseRows = Seq(
+          PaymentReferenceSummary.row(paymentPlanReference),
+          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)
+        )
+
+        planEndDate match {
+          case Some(endDate) =>
+            baseRows :+ AmendPlanEndDateSummary.row(Some(endDate), Constants.longDateTimeFormatPattern)
+          case None =>
+            baseRows
+        }
+    }
+}
