@@ -75,7 +75,7 @@ class PaymentPlanDetailsController @Inject() (
                                 case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
                                 case None          => Future.successful(updatedAnswers)
                               }
-            updatedAnswers <- cleanseCancelPaymentPlanPage(updatedAnswers)
+            updatedAnswers <- cleanseSessionPages(updatedAnswers)
             _              <- sessionRepository.set(updatedAnswers)
           } yield {
             val flag: Future[Boolean] = calculateShowAction(nddService, planDetail)
@@ -183,9 +183,10 @@ class PaymentPlanDetailsController @Inject() (
     }
   }
 
-  private def cleanseCancelPaymentPlanPage(userAnswers: UserAnswers): Future[UserAnswers] =
+  private def cleanseSessionPages(userAnswers: UserAnswers): Future[UserAnswers] =
     for {
       updatedUserAnswers <- Future.fromTry(userAnswers.remove(CancelPaymentPlanPage))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(DuplicateWarningPage))
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 
