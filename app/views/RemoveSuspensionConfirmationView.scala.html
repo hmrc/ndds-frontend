@@ -1,0 +1,57 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.html.components.*
+
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        paragraph: Paragraph,
+        header2: Header2,
+        confirmationPanel: ConfirmationPanel,
+        govukSummaryList: GovukSummaryList,
+        govukInsetText: GovukInsetText,
+        link: Link
+)
+
+@(regularPaymentAmount: String, startDate: String, rows: Seq[SummaryListRow],call: Call)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleForManageJourneyNoForm(messages("removeSuspensionConfirmation.title")), showBackLink = false) {
+
+
+    @confirmationPanel(
+        title = messages("removeSuspensionConfirmation.panel.title"),
+        classes = "govuk-!-margin-bottom-2"
+    )
+
+    @header2("removeSuspensionConfirmation.h1")
+
+    @paragraph(messages("removeSuspensionConfirmation.p1", regularPaymentAmount, startDate))
+
+    @header2("removeSuspensionConfirmation.h2")
+
+    @govukSummaryList(SummaryList(
+        rows = rows
+    ))
+
+    @govukInsetText(
+        InsetText(
+            content = Text(messages("removeSuspensionConfirmation.print"))
+        )
+    )
+
+    @link("removeSuspensionConfirmation.link", call.url)
+}
