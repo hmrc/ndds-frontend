@@ -32,6 +32,8 @@ import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -74,13 +76,38 @@ class PaymentPlanDetailsController @Inject() (
                                 case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
                                 case None          => Future.successful(updatedAnswers)
                               }
-            updatedAnswers <- cleanseCancelPaymentPlanPage(updatedAnswers)
+            updatedAnswers <- cleanseSessionPages(updatedAnswers)
             _              <- sessionRepository.set(updatedAnswers)
           } yield {
             val flag: Future[Boolean] = calculateShowAction(nddService, planDetail)
             val showActions = Await.result(flag, 5.seconds)
+            val showAmendLink = isAmendLinkVisible(showActions, planDetail)
+            val showCancelLink = isCancelLinkVisible(showActions, planDetail)
+            val showSuspendLink = isSuspendLinkVisible(showActions, planDetail)
             val summaryRows: Seq[SummaryListRow] = buildSummaryRows(planDetail)
-            Ok(view(planDetail.planType, paymentPlanReference, showActions, summaryRows))
+            val isSuspensionActive = isSuspendPeriodActive(planDetail)
+
+            val formattedSuspensionStartDate = planDetail.suspensionStartDate
+              .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+              .getOrElse("")
+
+            val formattedSuspensionEndDate = planDetail.suspensionEndDate
+              .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+              .getOrElse("")
+
+            Ok(
+              view(
+                planDetail.planType,
+                paymentPlanReference,
+                showAmendLink,
+                showCancelLink,
+                showSuspendLink,
+                isSuspensionActive,
+                formattedSuspensionStartDate,
+                formattedSuspensionEndDate,
+                summaryRows
+              )
+            )
           }
         }
       case _ =>
@@ -117,10 +144,14 @@ class PaymentPlanDetailsController @Inject() (
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern),
           AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
-          AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
-          AmendSuspendDateSummary.row(planDetail.suspensionStartDate, true), // true for start
-          AmendSuspendDateSummary.row(planDetail.suspensionEndDate, false) // false for end
-        )
+          AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)
+        ) ++
+          (if (isSuspendPeriodActive(planDetail)) {
+             Seq(SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate))
+           } else {
+             Seq.empty
+           })
+
       case _ => // For Variable and Tax repayment plan
         Seq(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),
@@ -146,10 +177,19 @@ class PaymentPlanDetailsController @Inject() (
           case None            => Future.successful(true)
         }
       case PaymentPlanType.BudgetPaymentPlan.toString =>
-        planDetail.scheduledPaymentEndDate match {
-          case Some(startDate) => nddService.isThreeDaysPriorPlanEndDate(startDate)
-          case None            => Future.successful(true)
-        }
+        for {
+          isTwoDaysBeforeStart <- planDetail.scheduledPaymentStartDate match {
+                                    case Some(startDate) =>
+                                      nddService.isTwoDaysPriorPaymentDate(startDate).map { isTwoDaysPrior =>
+                                        isTwoDaysPrior || LocalDate.now().isAfter(startDate)
+                                      }
+                                    case None => Future.successful(true)
+                                  }
+          isThreeDaysBeforeEnd <- planDetail.scheduledPaymentEndDate match {
+                                    case Some(endDate) => nddService.isThreeDaysPriorPlanEndDate(endDate)
+                                    case None          => Future.successful(true)
+                                  }
+        } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
       case PaymentPlanType.VariablePaymentPlan.toString =>
         for {
           isTwoDaysBeforeStart <- planDetail.scheduledPaymentStartDate match {
@@ -166,10 +206,33 @@ class PaymentPlanDetailsController @Inject() (
     }
   }
 
-  private def cleanseCancelPaymentPlanPage(userAnswers: UserAnswers): Future[UserAnswers] =
+  private def cleanseSessionPages(userAnswers: UserAnswers): Future[UserAnswers] =
     for {
       updatedUserAnswers <- Future.fromTry(userAnswers.remove(CancelPaymentPlanPage))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(DuplicateWarningPage))
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 
+  private def isAmendLinkVisible(showAllActions: Boolean, planDetail: PaymentPlanDetails): Boolean = {
+    showAllActions && (planDetail.planType == PaymentPlanType.SinglePaymentPlan.toString || planDetail.planType == PaymentPlanType.BudgetPaymentPlan.toString)
+  }
+
+  private def isCancelLinkVisible(showAllActions: Boolean, planDetail: PaymentPlanDetails): Boolean = {
+    showAllActions && planDetail.planType != PaymentPlanType.TaxCreditRepaymentPlan.toString
+  }
+
+  private def isSuspendLinkVisible(showAllActions: Boolean, planDetail: PaymentPlanDetails): Boolean = {
+    planDetail.planType match {
+      case planType if planType == PaymentPlanType.BudgetPaymentPlan.toString =>
+        showAllActions && !isSuspendPeriodActive(planDetail)
+      case _ => false
+    }
+  }
+
+  private def isSuspendPeriodActive(planDetail: PaymentPlanDetails): Boolean = {
+    (for {
+      suspensionStartDate <- planDetail.suspensionStartDate
+      suspensionEndDate   <- planDetail.suspensionEndDate
+    } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
+  }
 }

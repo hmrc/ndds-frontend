@@ -61,7 +61,7 @@ trait SpecBase extends AnyFreeSpec with Matchers with TryValues with OptionValue
         initialPaymentAmount      = Some(BigDecimal(25.00)),
         scheduledPaymentEndDate   = Some(currentDate.plusMonths(6)),
         scheduledPaymentFrequency = Some("Monthly"),
-        suspensionStartDate       = Some(currentDate.plusDays(5)),
+        suspensionStartDate       = None,
         suspensionEndDate         = None,
         balancingPaymentAmount    = Some(60.00),
         balancingPaymentDate      = Some(currentDate.plusMonths(6).plusDays(10)),
