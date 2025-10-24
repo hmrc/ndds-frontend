@@ -37,6 +37,7 @@ import models.{CheckMode, NormalMode, SuspensionPeriodRange, UserAnswers}
 import pages.SuspensionPeriodRangeDatePage
 import play.api.i18n.{Lang, Messages}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.Constants
 import utils.DateTimeFormats.formattedDateTimeShort
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
@@ -68,11 +69,11 @@ object SuspensionPeriodRangeDateSummary {
 
   def row(suspendStartDate: Option[LocalDate], suspendEndDate: Option[LocalDate])(implicit messages: Messages): SummaryListRow = {
     val formattedStartDate = suspendStartDate
-      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
       .getOrElse("")
 
     val formattedEndDate = suspendEndDate
-      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+      .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
       .getOrElse("")
 
     val formattedValue =

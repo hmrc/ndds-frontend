@@ -35,6 +35,7 @@ import viewmodels.checkAnswers.{SuspensionPeriodRangeDateSummary, *}
 import views.html.PaymentPlanDetailsView
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import scala.concurrent.Future
 
 class PaymentPlanDetailsControllerSpec extends SpecBase {
@@ -118,7 +119,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             val result = route(application, request).value
             val view = application.injector.instanceOf[PaymentPlanDetailsView]
             status(result) mustEqual OK
-            contentAsString(result) mustEqual view("singlePaymentPlan", paymentPlanReference, true, true, false, summaryListRows)(
+            contentAsString(result) mustEqual view("singlePaymentPlan", paymentPlanReference, true, true, false, false, "", "", summaryListRows)(
               request,
               messages(application)
             ).toString
@@ -222,7 +223,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, false, "", "", summaryListRows)(
                   request,
                   messages(application)
                 ).toString
@@ -281,7 +282,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, false, "", "", summaryListRows)(
                   request,
                   messages(application)
                 ).toString
@@ -342,7 +343,16 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, false, false, false, summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan",
+                                                       paymentPlanReference,
+                                                       false,
+                                                       false,
+                                                       false,
+                                                       false,
+                                                       "",
+                                                       "",
+                                                       summaryListRows
+                                                      )(
                   request,
                   messages(application)
                 ).toString
@@ -403,7 +413,16 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, false, false, false, summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan",
+                                                       paymentPlanReference,
+                                                       false,
+                                                       false,
+                                                       false,
+                                                       false,
+                                                       "",
+                                                       "",
+                                                       summaryListRows
+                                                      )(
                   request,
                   messages(application)
                 ).toString
@@ -465,7 +484,16 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, false, false, false, summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan",
+                                                       paymentPlanReference,
+                                                       false,
+                                                       false,
+                                                       false,
+                                                       false,
+                                                       "",
+                                                       "",
+                                                       summaryListRows
+                                                      )(
                   request,
                   messages(application)
                 ).toString
@@ -486,6 +514,14 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   )
                 )
 
+              val formattedSuspensionStartDate = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.suspensionStartDate
+                .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                .getOrElse("")
+
+              val formattedSuspensionEndDate = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.suspensionEndDate
+                .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                .getOrElse("")
+
               val paymentPlanReference = "ppReference"
               val directDebitReference = "ddReference"
 
@@ -528,7 +564,16 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, false, summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan",
+                                                       paymentPlanReference,
+                                                       true,
+                                                       true,
+                                                       false,
+                                                       true,
+                                                       formattedSuspensionStartDate,
+                                                       formattedSuspensionEndDate,
+                                                       summaryListRows
+                                                      )(
                   request,
                   messages(application)
                 ).toString
@@ -547,6 +592,14 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   )
                 )
 
+              val formattedSuspensionStartDate = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.suspensionStartDate
+                .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                .getOrElse("")
+
+              val formattedSuspensionEndDate = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.suspensionEndDate
+                .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                .getOrElse("")
+
               val paymentPlanReference = "ppReference"
               val directDebitReference = "ddReference"
 
@@ -587,7 +640,16 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, false, summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan",
+                                                       paymentPlanReference,
+                                                       true,
+                                                       true,
+                                                       false,
+                                                       true,
+                                                       formattedSuspensionStartDate,
+                                                       formattedSuspensionEndDate,
+                                                       summaryListRows
+                                                      )(
                   request,
                   messages(application)
                 ).toString
@@ -605,6 +667,14 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     suspensionEndDate         = Some(LocalDateTime.now().plusDays(15).toLocalDate)
                   )
                 )
+
+              val formattedSuspensionStartDate = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.suspensionStartDate
+                .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                .getOrElse("")
+
+              val formattedSuspensionEndDate = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.suspensionEndDate
+                .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                .getOrElse("")
 
               val paymentPlanReference = "ppReference"
               val directDebitReference = "ddReference"
@@ -648,7 +718,16 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, false, summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan",
+                                                       paymentPlanReference,
+                                                       true,
+                                                       true,
+                                                       false,
+                                                       true,
+                                                       formattedSuspensionStartDate,
+                                                       formattedSuspensionEndDate,
+                                                       summaryListRows
+                                                      )(
                   request,
                   messages(application)
                 ).toString
@@ -707,7 +786,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             val result = route(application, request).value
             val view = application.injector.instanceOf[PaymentPlanDetailsView]
             status(result) mustEqual OK
-            contentAsString(result) mustEqual view("variablePaymentPlan", paymentPlanReference, false, true, false, summaryListRows)(
+            contentAsString(result) mustEqual view("variablePaymentPlan", paymentPlanReference, false, true, false, false, "", "", summaryListRows)(
               request,
               messages(application)
             ).toString
@@ -760,7 +839,16 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             val result = route(application, request).value
             val view = application.injector.instanceOf[PaymentPlanDetailsView]
             status(result) mustEqual OK
-            contentAsString(result) mustEqual view("taxCreditRepaymentPlan", paymentPlanReference, false, false, false, summaryListRows)(
+            contentAsString(result) mustEqual view("taxCreditRepaymentPlan",
+                                                   paymentPlanReference,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   false,
+                                                   "",
+                                                   "",
+                                                   summaryListRows
+                                                  )(
               request,
               messages(application)
             ).toString

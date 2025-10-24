@@ -404,9 +404,8 @@ directDebitPaymentSummary.addPaymentButton = Add payment plan
 
 paymentPlanDetails.title = Your payment plan details
 paymentPlanDetails.heading = Your payment plan details
-paymentPlanDetails.p1 = You can amend the details of your payment plan, or cancel it if it is no longer required, by following either the ''Amend payment plan'' or ''Cancel payment plan'' links below.
-paymentPlanDetails.p2 = If you wish to suspend your payment plan please follow the ''Suspend payment plan'' link below.
-paymentPlanDetails.inset.text = Payments due within the next 3 working days will not be affected by any changes made.
+paymentPlanDetails.p1 = If a payment is due within the next 3 working days, you will not be able to make any changes.
+paymentPlanDetails.inset.text = This payment plan is suspended from {0} to {1}.
 paymentPlanDetails.details.paymentReference = Payment reference: {0}
 paymentPlanDetails.details.amend = Amend
 paymentPlanDetails.details.cancel = Cancel

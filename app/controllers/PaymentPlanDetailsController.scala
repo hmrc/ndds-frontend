@@ -29,10 +29,11 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
-import viewmodels.checkAnswers.{SuspensionPeriodRangeDateSummary, *}
+import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -84,7 +85,29 @@ class PaymentPlanDetailsController @Inject() (
             val showCancelLink = isCancelLinkVisible(showActions, planDetail)
             val showSuspendLink = isSuspendLinkVisible(showActions, planDetail)
             val summaryRows: Seq[SummaryListRow] = buildSummaryRows(planDetail)
-            Ok(view(planDetail.planType, paymentPlanReference, showAmendLink, showCancelLink, showSuspendLink, summaryRows))
+            val isSuspensionActive = isSuspendPeriodActive(planDetail)
+
+            val formattedSuspensionStartDate = planDetail.suspensionStartDate
+              .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+              .getOrElse("")
+
+            val formattedSuspensionEndDate = planDetail.suspensionEndDate
+              .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+              .getOrElse("")
+
+            Ok(
+              view(
+                planDetail.planType,
+                paymentPlanReference,
+                showAmendLink,
+                showCancelLink,
+                showSuspendLink,
+                isSuspensionActive,
+                formattedSuspensionStartDate,
+                formattedSuspensionEndDate,
+                summaryRows
+              )
+            )
           }
         }
       case _ =>

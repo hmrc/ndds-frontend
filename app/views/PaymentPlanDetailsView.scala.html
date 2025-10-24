@@ -15,6 +15,7 @@
  *@
 
 @import models.responses.*
+@import java.time.LocalDate
 @import java.time.format.DateTimeFormatter
 @import views.html.components.*
 @import utils.MaskAndFormatUtils.*
@@ -29,14 +30,17 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, isSuspensionActive: Boolean, suspensionStartDate: String, suspensionEndDate: String, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
     @header1("paymentPlanDetails.heading")
     @paragraph("paymentPlanDetails.p1")
-    @paragraph("paymentPlanDetails.p2")
-    <p class="govuk-inset-text">@messages("paymentPlanDetails.inset.text")</p>
-    @header2("paymentPlanDetails.heading")
+
+    @if(isSuspensionActive) {
+        <p class="govuk-inset-text">
+            @messages("paymentPlanDetails.inset.text", suspensionStartDate, suspensionEndDate)
+        </p>
+    }
 
     @govukSummaryList(SummaryList(
         card = Some(Card(
