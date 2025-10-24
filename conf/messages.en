@@ -15,6 +15,9 @@ site.startAgain = Start again
 site.signIn = Sign in
 site.govuk = GOV.UK
 site.accept.continue = Accept and continue
+site.pagination.landmark = Pagination
+site.pagination.previous = Previous
+site.pagination.next = Next
 
 date.day = Day
 date.month = Month
