@@ -145,6 +145,18 @@ POST       /change-already-have-payment-plan            controllers.DuplicateWar
 GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
 POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
 
+GET        /suspending-this-payment-plan                        controllers.SuspendPaymentPlanController.onPageLoad(mode: Mode = NormalMode)
 GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()
+
+
+GET        /how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = NormalMode)
+GET        /change-how-long-suspension-period-last                       controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-how-long-suspension-period-last                        controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
+
+GET        /check-suspension-details                        controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = NormalMode)
+POST       /check-suspension-details                        controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = NormalMode)
+GET        /change-check-suspension-details                 controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-check-suspension-details                 controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-plan-suspension-removed             controllers.RemoveSuspensionConfirmationController.onPageLoad()

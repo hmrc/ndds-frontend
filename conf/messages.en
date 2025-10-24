@@ -538,6 +538,38 @@ duplicateWarning.change.hidden = DuplicateWarning
 duplicateWarning.yes= Yes
 duplicateWarning.no= No
 
+suspendPaymentPlan.title = Suspending this payment plan
+suspendPaymentPlan.heading = Suspending this payment plan
+suspendPaymentPlan.p1 = You can suspend this payment plan if you need to pause payments.
+suspendPaymentPlan.p2 = When you suspend a payment plan:
+suspendPaymentPlan.l1 = no payments will be taken during the suspension period
+suspendPaymentPlan.l2 = you can remove the suspension at any time
+suspendPaymentPlan.l3 = interest may continue to accrue on your outstanding balance
+suspendPaymentPlan.l4 = your payment plan will resume automatically after the suspension ends
+suspendPaymentPlan.p3 = Payments due within the next 3 working days cannot be suspended.
+suspendPaymentPlan.continue = Continue
+suspendPaymentPlan.cancel.link = Cancel and return to payment plan
+
+suspensionPeriodRangeDate.title = Enter suspension dates
+suspensionPeriodRangeDate.heading = How long will the suspension period last?
+suspensionPeriodRangeDate.startDate = Start date
+suspensionPeriodRangeDate.endDate = End date
+suspensionPeriodRangeDate.hint = For example, 27 3 2020
+suspensionPeriodRangeEndDate.hint = For example, 28 4 2020
+suspensionPeriodRangeDate.p1.line1 = Payment reference: <strong>{0}</strong>
+suspensionPeriodRangeDate.p1.line2 = Regular payment amount: <strong>{0}</strong>
+suspensionPeriodRangeStartDate.error.required = Enter a valid date.
+suspensionPeriodRangeEndDate.error.required = Enter a valid date.
+suspensionPeriodRangeStartDate.error.required.two = Enter a valid date.
+suspensionPeriodRangeEndDate.error.required.two = Enter a valid date.
+suspensionPeriodRangeDate.error.endBeforeStart = The end date you have entered is not valid. It cannot be before start date.
+suspensionPeriodRangeDate.to = to
+suspensionPeriodRangeDate.checkYourAnswersLabel = Suspension period
+
+checkYourSuspensionDetails.title = Check your suspension details
+checkYourSuspensionDetails.heading = Check your suspension details
+checkYourSuspensionDetails.confirm = Confirm and continue
+
 removeSuspensionConfirmation.title = Payment plan suspension removed
 removeSuspensionConfirmation.heading = Payment plan suspension removed
 removeSuspensionConfirmation.panel.title = Payment plan suspension removed
