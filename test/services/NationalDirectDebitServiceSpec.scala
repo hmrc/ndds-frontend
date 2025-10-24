@@ -888,12 +888,8 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       result mustBe false
     }
 
-    "must return false if payment plan is empty for suspend journey" in {
-      val expectedUserAnswers = emptyUserAnswers
-        .set(ManagePaymentPlanTypePage, "")
-        .success
-        .value
-      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+    "must return false if payment plan is not set" in {
+      val result = service.suspendPaymentPlanGuard(emptyUserAnswers)
       result mustBe false
     }
   }
