@@ -398,4 +398,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       )
   }
 
+  def suspendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =
+    isBudgetPaymentPlan(userAnswers)
+
 }
