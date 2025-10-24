@@ -168,7 +168,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
         "must return OK and the correct view for a GET" - {
 
           "when Suspension is inactive" - {
-            "should show Amend, Cancel and Suspend actions when payment plan is already started but active" in {
+            "should show Amend, Cancel and Suspend actions when payment plan is started but active" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -229,7 +229,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            "should show Amend, Cancel and Suspend actions when payment plan is already started but scheduledPaymentEndDate is None" in {
+            "should show Amend, Cancel and Suspend actions when payment plan is started but scheduledPaymentEndDate is None" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -349,7 +349,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            "should not show  Amend, Cancel and Suspend actions when scheduledPaymentEndDate is three day prior" in {
+            "should not show Amend, Cancel and Suspend actions when scheduledPaymentEndDate is three day prior" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -410,7 +410,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            "should not show  Amend, Cancel and Suspend actions when payment plan is inactive" in {
+            // Defensive test: user should not be able to alter data if they somehow reach this screen
+            "should not show Amend, Cancel and Suspend actions when payment plan is inactive" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -473,7 +474,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           }
 
           "when Suspension is active" - {
-            "should not show Amend, Cancel and Suspend actions" in {
+            "should show Amend and Cancel action but not Suspend actions when payment plan is started" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -534,7 +535,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            "should not show Amend, Cancel and Suspend actions when payment plan is already started but scheduledPaymentEndDate is None" in {
+            "should show Amend and Cancel action but not Suspend action when payment plan is started but scheduledPaymentEndDate is None" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -580,6 +581,67 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                   .thenReturn(Future.successful(false))
+
+                val summaryListRows = summaryListWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+                val result = route(application, request).value
+                val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                status(result) mustEqual OK
+                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, false, summaryListRows)(
+                  request,
+                  messages(application)
+                ).toString
+              }
+            }
+
+            "should show Amend and Cancel actions but not Suspend action when payment plan is not started" in {
+              val mockBudgetPaymentPlanDetailResponse =
+                dummyPlanDetailResponse.copy(paymentPlanDetails =
+                  dummyPlanDetailResponse.paymentPlanDetails.copy(
+                    planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
+                    scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(5).toLocalDate),
+                    scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(30).toLocalDate),
+                    suspensionStartDate       = Some(LocalDateTime.now().plusDays(10).toLocalDate),
+                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(15).toLocalDate)
+                  )
+                )
+
+              val paymentPlanReference = "ppReference"
+              val directDebitReference = "ddReference"
+
+              val userAnswersWithPaymentReference =
+                emptyUserAnswers
+                  .set(
+                    PaymentPlanReferenceQuery,
+                    paymentPlanReference
+                  )
+                  .success
+                  .value
+                  .set(
+                    DirectDebitReferenceQuery,
+                    directDebitReference
+                  )
+                  .success
+                  .value
+
+              val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+                .overrides(
+                  bind[SessionRepository].toInstance(mockSessionRepository),
+                  bind[NationalDirectDebitService].toInstance(mockService)
+                )
+                .build()
+
+              running(application) {
+                when(mockSessionRepository.set(any()))
+                  .thenReturn(Future.successful(true))
+                when(mockSessionRepository.get(any()))
+                  .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+                when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
+                  .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
+                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
+                  .thenReturn(Future.successful(true))
+                when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
+                  .thenReturn(Future.successful(true))
 
                 val summaryListRows = summaryListWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)

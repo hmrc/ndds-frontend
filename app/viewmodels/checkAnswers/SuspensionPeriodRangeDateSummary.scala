@@ -33,7 +33,7 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
-import models.{CheckMode, SuspensionPeriodRange, UserAnswers}
+import models.{CheckMode, NormalMode, SuspensionPeriodRange, UserAnswers}
 import pages.SuspensionPeriodRangeDatePage
 import play.api.i18n.{Lang, Messages}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -82,9 +82,9 @@ object SuspensionPeriodRangeDateSummary {
       key   = "suspensionPeriodRangeDate.checkYourAnswersLabel",
       value = ValueViewModel(formattedValue),
       actions = Seq(
-        ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
+        ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(NormalMode).url)
           .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden")),
-        ActionItemViewModel("site.remove", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
+        ActionItemViewModel("site.remove", routes.JourneyRecoveryController.onPageLoad().url) // TODO Updated after RM1
           .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
       )
     )
