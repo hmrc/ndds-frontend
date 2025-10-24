@@ -22,7 +22,7 @@ import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePa
 import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentPlanReferenceQuery
+import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -46,32 +46,60 @@ class RemoveSuspensionConfirmationController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    val userAnswers = request.userAnswers
+  def onPageLoad: Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+      val userAnswers = request.userAnswers
 
-    if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
-      (for {
-        paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
-        paymentAmount        <- userAnswers.get(AmendPaymentAmountPage)
-        startDate            <- userAnswers.get(AmendPlanStartDatePage)
-      } yield {
-        val formattedRegPaymentAmount = formatAmount(paymentAmount)
-        val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
+      if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
+        val maybeResult = for {
+          paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
+          paymentAmount <- userAnswers
+                             .get(AmendPaymentAmountPage)
+                             .orElse(
+                               userAnswers
+                                 .get(PaymentPlanDetailsQuery)
+                                 .flatMap(_.paymentPlanDetails.scheduledPaymentAmount)
+                             )
+          startDate <- userAnswers
+                         .get(PaymentPlanDetailsQuery)
+                         .flatMap(_.paymentPlanDetails.scheduledPaymentStartDate)
+        } yield {
 
-        Future.successful(
-          Ok(view(formattedRegPaymentAmount, formattedStartDate, summaryRows, routes.PaymentPlanDetailsController.onPageLoad()))
+          val formattedRegPaymentAmount =
+            formatAmount(paymentAmount)
+
+          val formattedStartDate =
+            startDate.format(
+              DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)
+            )
+
+          val summaryRows: Seq[SummaryListRow] =
+            buildSummaryRows(userAnswers, paymentPlanReference)
+
+          Ok(
+            view(
+              formattedRegPaymentAmount,
+              formattedStartDate,
+              summaryRows,
+              routes.PaymentPlanDetailsController.onPageLoad()
+            )
+          )
+        }
+
+        maybeResult match {
+          case Some(result) => Future.successful(result)
+          case None =>
+            logger.warn("Missing data in userAnswers for Payment Plan summary")
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        }
+
+      } else {
+        logger.error(
+          s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
         )
-      }).getOrElse {
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
-    } else {
-      logger.error(
-        s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
-      )
-      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
-  }
 
   private def buildSummaryRows(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
 
