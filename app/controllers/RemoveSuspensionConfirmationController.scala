@@ -19,11 +19,11 @@ package controllers
 import controllers.actions.*
 import models.{PaymentPlanType, UserAnswers}
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
-
-import javax.inject.Inject
+import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanReferenceQuery
+import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
@@ -32,53 +32,64 @@ import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSumma
 import views.html.RemoveSuspensionConfirmationView
 
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
+import scala.concurrent.Future
 
 class RemoveSuspensionConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: RemoveSuspensionConfirmationView
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
 
-    (for {
-      paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
-      paymentAmount        <- userAnswers.get(AmendPaymentAmountPage)
-      startDate            <- userAnswers.get(AmendPlanStartDatePage)
-    } yield {
-      val formattedRegPaymentAmount = formatAmount(paymentAmount)
-      val formattedStartDate =
-        startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-      val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
+    if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
+      (for {
+        paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
+        paymentAmount        <- userAnswers.get(AmendPaymentAmountPage)
+        startDate            <- userAnswers.get(AmendPlanStartDatePage)
+      } yield {
+        val formattedRegPaymentAmount = formatAmount(paymentAmount)
+        val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+        val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
 
-      Ok(view(formattedRegPaymentAmount, formattedStartDate, summaryRows, routes.PaymentPlanDetailsController.onPageLoad()))
-    }).getOrElse {
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Future.successful(
+          Ok(view(formattedRegPaymentAmount, formattedStartDate, summaryRows, routes.PaymentPlanDetailsController.onPageLoad()))
+        )
+      }).getOrElse {
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    } else {
+      logger.error(
+        s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
+      )
+      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
 
   private def buildSummaryRows(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
-    
+
     val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
     val planStartDate = userAnswers.get(AmendPlanStartDatePage)
     val planEndDate = userAnswers.get(AmendPlanEndDatePage)
 
     val baseRows = Seq(
-          PaymentReferenceSummary.row(paymentPlanReference),
-          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
-          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)
-        )
+      PaymentReferenceSummary.row(paymentPlanReference),
+      AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
+      AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)
+    )
 
-        planEndDate match {
-          case Some(endDate) =>
-            baseRows :+ AmendPlanEndDateSummary.row(Some(endDate), Constants.longDateTimeFormatPattern)
-          case None =>
-            baseRows
-        }
+    planEndDate match {
+      case Some(endDate) =>
+        baseRows :+ AmendPlanEndDateSummary.row(Some(endDate), Constants.longDateTimeFormatPattern)
+      case None =>
+        baseRows
     }
+  }
 }

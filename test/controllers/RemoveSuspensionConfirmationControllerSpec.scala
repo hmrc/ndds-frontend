@@ -21,13 +21,18 @@ import models.responses.PaymentPlanDetails
 import models.{PaymentPlanType, UserAnswers}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Application
 import play.api.i18n.Messages
+import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import services.NationalDirectDebitService
 import utils.Constants
 import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.checkAnswers.*
@@ -47,42 +52,59 @@ class RemoveSuspensionConfirmationControllerSpec extends SpecBase {
   val endDate: LocalDate = LocalDate.of(2025, 10, 25)
 
   "RemoveSuspensionConfirmation Controller" - {
+    val mockNddsService = mock[NationalDirectDebitService]
 
-    "must return OK and the correct view for a GET with BudgetPaymentPlan (with and without Plan End Date)" in {
+    "must return OK and the correct view for a GET with BudgetPaymentPlan with endDate" in {
 
-      def summaryList(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
+      when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
+
+      def summaryList(userAnswers: UserAnswers, paymentPlanReference: String, app: Application): Seq[SummaryListRow] = {
+        val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
+        val planStartDate = userAnswers.get(AmendPlanStartDatePage)
+        val planEndDate = userAnswers.get(AmendPlanEndDatePage)
+
         val baseRows = Seq(
-          PaymentReferenceSummary.row(paymentPlanReference),
-          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers.get(AmendPaymentAmountPage)),
-          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, userAnswers.get(AmendPlanStartDatePage), Constants.longDateTimeFormatPattern)
+          PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
+          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)(messages(app)),
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app))
         )
 
-        userAnswers.get(AmendPlanEndDatePage) match {
-          case Some(endDate) => baseRows :+ AmendPlanEndDateSummary.row(Some(endDate), Constants.longDateTimeFormatPattern)
+        planEndDate match {
+          case Some(endDate) =>
+            baseRows :+ AmendPlanEndDateSummary.row(Some(endDate), Constants.longDateTimeFormatPattern)(messages(app))
           case None => baseRows
         }
       }
 
-      val baseAnswers = emptyUserAnswers
-        .set(PaymentPlanReferenceQuery, "987654321L").success.value
-        .set(AmendPaymentAmountPage, regPaymentAmount).success.value
-        .set(AmendPlanStartDatePage, startDate).success.value
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanReferenceQuery, "123456789K")
+        .success
+        .value
+        .set(AmendPaymentAmountPage, regPaymentAmount)
+        .success
+        .value
+        .set(AmendPlanStartDatePage, startDate)
+        .success
+        .value
+        .set(AmendPlanEndDatePage, endDate)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
-      // With Plan End Date
-      val userAnswersWithEndDate = baseAnswers
-        .set(AmendPlanEndDatePage, endDate).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
+        .build()
 
-      val applicationWithEndDate = applicationBuilder(userAnswers = Some(userAnswersWithEndDate)).build()
-
-      running(applicationWithEndDate) {
+      running(application) {
         val request = FakeRequest(GET, removeSuspensionConfirmationRoute)
-        val result = route(applicationWithEndDate, request).value
-        val view = applicationWithEndDate.injector.instanceOf[RemoveSuspensionConfirmationView]
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[RemoveSuspensionConfirmationView]
 
-        val formattedRegPaymentAmount = formatAmount(userAnswersWithEndDate.get(AmendPaymentAmountPage).get)
-        val formattedStartDate = userAnswersWithEndDate.get(AmendPlanStartDatePage).get.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val summaryListRows = summaryList(userAnswersWithEndDate, "987654321L")(messages(applicationWithEndDate))
+        val formattedRegPaymentAmount = formatAmount(regPaymentAmount)
+        val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+        val summaryListRows = summaryList(userAnswers, "123456789K", application)
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(
@@ -90,28 +112,75 @@ class RemoveSuspensionConfirmationControllerSpec extends SpecBase {
           formattedStartDate,
           summaryListRows,
           routes.PaymentPlanDetailsController.onPageLoad()
-        )(request, messages(applicationWithEndDate)).toString
+        )(request, messages(application)).toString
       }
+    }
 
-      // Without Plan End Date
-      val applicationWithoutEndDate = applicationBuilder(userAnswers = Some(baseAnswers)).build()
+    "must return OK and the correct view for a GET with BudgetPaymentPlan and no plan end date" in {
 
-      running(applicationWithoutEndDate) {
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanReferenceQuery, "123456789K")
+        .success
+        .value
+        .set(AmendPaymentAmountPage, regPaymentAmount)
+        .success
+        .value
+        .set(AmendPlanStartDatePage, startDate)
+        .success
+        .value
+        // No set for AmendPlanEndDatePage here
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
+        .build()
+
+      when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
+
+      running(application) {
         val request = FakeRequest(GET, removeSuspensionConfirmationRoute)
-        val result = route(applicationWithoutEndDate, request).value
-        val view = applicationWithoutEndDate.injector.instanceOf[RemoveSuspensionConfirmationView]
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[RemoveSuspensionConfirmationView]
 
-        val formattedRegPaymentAmount = formatAmount(baseAnswers.get(AmendPaymentAmountPage).get)
-        val formattedStartDate = baseAnswers.get(AmendPlanStartDatePage).get.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val summaryListRows = summaryList(baseAnswers, "987654321L")(messages(applicationWithoutEndDate))
+        val summaryListRows = Seq(
+          PaymentReferenceSummary.row("123456789K")(messages(application)),
+          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, Some(regPaymentAmount))(messages(application)),
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, Some(startDate), Constants.longDateTimeFormatPattern)(
+            messages(application)
+          )
+        )
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(
-          formattedRegPaymentAmount,
-          formattedStartDate,
+          formatAmount(regPaymentAmount),
+          startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)),
           summaryListRows,
           routes.PaymentPlanDetailsController.onPageLoad()
-        )(request, messages(applicationWithoutEndDate)).toString
+        )(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to JourneyRecoveryController when suspendPaymentPlanGuard returns false" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanReferenceQuery, "123456789K")
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
+        .build()
+
+      when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(false)
+
+      running(application) {
+        val request = FakeRequest(GET, removeSuspensionConfirmationRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
