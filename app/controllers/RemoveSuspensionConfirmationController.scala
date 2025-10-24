@@ -60,9 +60,13 @@ class RemoveSuspensionConfirmationController @Inject() (
                                  .get(PaymentPlanDetailsQuery)
                                  .flatMap(_.paymentPlanDetails.scheduledPaymentAmount)
                              )
-          startDate <- userAnswers
-                         .get(PaymentPlanDetailsQuery)
-                         .flatMap(_.paymentPlanDetails.scheduledPaymentStartDate)
+          startDate <-  userAnswers
+            .get(AmendPlanStartDatePage)
+            .orElse(
+              userAnswers
+                .get(PaymentPlanDetailsQuery)
+                .flatMap(_.paymentPlanDetails.scheduledPaymentStartDate)
+            )
         } yield {
 
           val formattedRegPaymentAmount =
