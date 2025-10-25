@@ -162,7 +162,8 @@ class CheckYourAnswersController @Inject() (
       paymentAmount                   = ua.get(PaymentAmountPage),
       regularPaymentAmount            = ua.get(RegularPaymentAmountPage),
       amendPaymentAmount              = None,
-      calculation                     = calculationOpt
+      calculation                     = calculationOpt,
+      suspensionPeriodRangeDate       = None
     )
   }
 

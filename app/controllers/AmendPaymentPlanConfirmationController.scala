@@ -162,7 +162,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
           regularPaymentAmount            = None,
           amendPaymentAmount              = userAnswers.get(AmendPaymentAmountPage),
           calculation                     = None,
-          amendPlan                       = true
+          amendPlan                       = true,
+          suspensionPeriodRangeDate       = None
         )
 
       case None =>
