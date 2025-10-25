@@ -851,4 +851,48 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       service.isPaymentPlanCancellable(userAnswers) mustBe false
     }
   }
+
+  "suspendPaymentPlanGuard" - {
+
+    "must return false if single payment for suspend journey" in {
+      val expectedUserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+      result mustBe false
+    }
+
+    "must return true if budget payment for suspend journey" in {
+      val expectedUserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+      result mustBe true
+    }
+
+    "must return false if variable payment for suspend journey" in {
+      val expectedUserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
+        .success
+        .value
+      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+      result mustBe false
+    }
+
+    "must return false if tax credit repayment payment for suspend journey" in {
+      val expectedUserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .success
+        .value
+      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+      result mustBe false
+    }
+
+    "must return false if payment plan is not set" in {
+      val result = service.suspendPaymentPlanGuard(emptyUserAnswers)
+      result mustBe false
+    }
+  }
 }
