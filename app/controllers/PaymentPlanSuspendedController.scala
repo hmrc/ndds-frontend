@@ -34,37 +34,37 @@ import views.html.PaymentPlanSuspendedView
 import java.time.format.DateTimeFormatter
 
 class PaymentPlanSuspendedController @Inject() (
-                                                 override val messagesApi: MessagesApi,
-                                                 identify: IdentifierAction,
-                                                 getData: DataRetrievalAction,
-                                                 requireData: DataRequiredAction,
-                                                 val controllerComponents: MessagesControllerComponents,
-                                                 view: PaymentPlanSuspendedView
-                                               ) extends FrontendBaseController
-  with I18nSupport {
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  val controllerComponents: MessagesControllerComponents,
+  view: PaymentPlanSuspendedView
+) extends FrontendBaseController
+    with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val userAnswers = request.userAnswers
 
     val maybeResult = for {
-      planDetails <- userAnswers.get(PaymentPlanDetailsQuery)
-      paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
+      planDetails           <- userAnswers.get(PaymentPlanDetailsQuery)
+      paymentPlanReference  <- userAnswers.get(PaymentPlanReferenceQuery)
       suspensionPeriodRange <- userAnswers.get(SuspensionPeriodRangeDatePage)
     } yield {
       val formattedStartDate = suspensionPeriodRange.startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
       val formattedEndDate = suspensionPeriodRange.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-      val rows = buildRows(paymentPlanReference, userAnswers,  planDetails.paymentPlanDetails)
+      val rows = buildRows(paymentPlanReference, userAnswers, planDetails.paymentPlanDetails)
       Ok(view(paymentPlanReference, formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows))
     }
 
     maybeResult match {
       case Some(result) => result
-      case _ => Redirect(routes.JourneyRecoveryController.onPageLoad())
+      case _            => Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
 
   private def buildRows(paymentPlanReference: String, userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanDetails)(implicit
-                                                                                                                        messages: Messages
+    messages: Messages
   ): Seq[SummaryListRow] =
     Seq(
       Some(PaymentReferenceSummary.row(paymentPlanReference)),

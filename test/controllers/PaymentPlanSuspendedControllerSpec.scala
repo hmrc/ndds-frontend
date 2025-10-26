@@ -39,7 +39,7 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
   private val suspensionRange = SuspensionPeriodRange(
     startDate = java.time.LocalDate.of(2025, 10, 25),
-    endDate = java.time.LocalDate.of(2025, 11, 16)
+    endDate   = java.time.LocalDate.of(2025, 11, 16)
   )
 
   private val paymentPlanReference = "ppReference"
@@ -73,7 +73,11 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
 
-      def summaryList(paymentPlanReference: String, userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanDetails, app: Application): Seq[SummaryListRow] =
+      def summaryList(paymentPlanReference: String,
+                      userAnswers: UserAnswers,
+                      paymentPlanDetails: PaymentPlanDetails,
+                      app: Application
+                     ): Seq[SummaryListRow] =
         Seq(
           Some(PaymentReferenceSummary.row(paymentPlanReference)(messages(app))),
           Some(AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)(messages(app))),
@@ -87,15 +91,25 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[PaymentPlanSuspendedView]
 
-        val formattedStartDate = userAnswersWithData.get(SuspensionPeriodRangeDatePage).get.startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val formattedEndDate = userAnswersWithData.get(SuspensionPeriodRangeDatePage).get.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+        val formattedStartDate = userAnswersWithData
+          .get(SuspensionPeriodRangeDatePage)
+          .get
+          .startDate
+          .format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+        val formattedEndDate =
+          userAnswersWithData.get(SuspensionPeriodRangeDatePage).get.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
 
-        val summaryListRows = summaryList(paymentPlanReference, userAnswersWithData, userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
+        val summaryListRows =
+          summaryList(paymentPlanReference, userAnswersWithData, userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(paymentPlanReference, formattedStartDate, formattedEndDate,
-          Call("GET", routes.PaymentPlanDetailsController.onPageLoad().url), summaryListRows)(
+        contentAsString(result) mustEqual view(paymentPlanReference,
+                                               formattedStartDate,
+                                               formattedEndDate,
+                                               Call("GET", routes.PaymentPlanDetailsController.onPageLoad().url),
+                                               summaryListRows
+                                              )(
           request,
           messages(application)
         ).toString
