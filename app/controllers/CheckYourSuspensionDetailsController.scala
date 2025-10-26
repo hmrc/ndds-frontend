@@ -75,27 +75,13 @@ class CheckYourSuspensionDetailsController @Inject() (
                                     request.userAnswers.set(SuspensionDetailsCheckYourAnswerPage, confirmed)
                                   )
                 _ <- sessionRepository.set(updatedAnswers)
-//                directDebitReference <- Future.fromTry(
-//                  Try(updatedAnswers.get(queries.DirectDebitReferenceQuery).get)
-//                )
-//                paymentPlanReference <- Future.fromTry(
-//                  Try(updatedAnswers.get(queries.PaymentPlanReferenceQuery).get)
-//                )
-                //   lockResponse <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
               } yield {
-//                if (lockResponse.lockSuccessful) {
-//                  logger.info(s"Payment plan lock successful for DDI Ref [$ddiReference]")
-//                } else {
-//                  logger.warn(s"Payment plan lock failed for DDI Ref [$ddiReference]")
-//                }
-
                 Redirect(routes.LandingController.onPageLoad())
               }
             } else {
-              logger.error(s"CHRIS submission failed for DDI Ref [$ddiReference]")
+              logger.error(s"CHRIS submission for suspend budgeting payment plan failed with DDI Ref [$ddiReference]")
               Future.successful(
                 Redirect(routes.JourneyRecoveryController.onPageLoad())
-                  .flashing("error" -> "There was a problem submitting your suspension request. Please try again later.")
               )
             }
           }
