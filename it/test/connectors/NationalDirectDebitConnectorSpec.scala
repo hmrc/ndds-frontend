@@ -309,7 +309,8 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       paymentAmount        = Some(BigDecimal(100.00)),
       regularPaymentAmount = Some(BigDecimal(90.00)),
       amendPaymentAmount   = None,
-      calculation          = None
+      calculation          = None,
+      suspensionPeriodRangeDate = None
     )
 
     "successfully return true when CHRIS submission succeeds with 200 OK" in {

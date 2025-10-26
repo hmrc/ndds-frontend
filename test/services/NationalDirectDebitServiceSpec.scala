@@ -520,18 +520,18 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           auddisStatus      = false,
           accountVerified   = false
         ),
-        planStartDate         = Some(planStartDateDetails),
-        planEndDate           = None,
-        paymentDate           = Some(paymentDateDetails),
-        yearEndAndMonth       = None,
-        ddiReferenceNo        = "DDI123456789",
-        paymentReference      = "testReference",
-        totalAmountDue        = Some(BigDecimal(200)),
-        paymentAmount         = Some(BigDecimal(100)),
-        regularPaymentAmount  = Some(BigDecimal(90)),
-        amendPaymentAmount    = None,
-        calculation           = None,
-        suspensionPeriodRange = None
+        planStartDate             = Some(planStartDateDetails),
+        planEndDate               = None,
+        paymentDate               = Some(paymentDateDetails),
+        yearEndAndMonth           = None,
+        ddiReferenceNo            = "DDI123456789",
+        paymentReference          = "testReference",
+        totalAmountDue            = Some(BigDecimal(200)),
+        paymentAmount             = Some(BigDecimal(100)),
+        regularPaymentAmount      = Some(BigDecimal(90)),
+        amendPaymentAmount        = None,
+        calculation               = None,
+        suspensionPeriodRangeDate = None
       )
 
       "must return true when CHRIS submission succeeds" in {
@@ -556,19 +556,19 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           auddisStatus      = true,
           accountVerified   = true
         ),
-        planStartDate         = Some(planStartDateDetails),
-        planEndDate           = Some(currentTime.toLocalDate.plusYears(1)),
-        paymentDate           = Some(paymentDateDetails),
-        yearEndAndMonth       = None,
-        ddiReferenceNo        = "DDI123456789",
-        paymentReference      = "testReference",
-        totalAmountDue        = Some(BigDecimal(200)),
-        paymentAmount         = Some(BigDecimal(100)),
-        regularPaymentAmount  = Some(BigDecimal(90)),
-        amendPaymentAmount    = None,
-        calculation           = None,
-        amendPlan             = true,
-        suspensionPeriodRange = None
+        planStartDate             = Some(planStartDateDetails),
+        planEndDate               = Some(currentTime.toLocalDate.plusYears(1)),
+        paymentDate               = Some(paymentDateDetails),
+        yearEndAndMonth           = None,
+        ddiReferenceNo            = "DDI123456789",
+        paymentReference          = "testReference",
+        totalAmountDue            = Some(BigDecimal(200)),
+        paymentAmount             = Some(BigDecimal(100)),
+        regularPaymentAmount      = Some(BigDecimal(90)),
+        amendPaymentAmount        = None,
+        calculation               = None,
+        amendPlan                 = true,
+        suspensionPeriodRangeDate = None
       )
 
       "must return true when CHRIS submission succeeds for amend" in {
