@@ -17,7 +17,8 @@
 package controllers
 
 import base.SpecBase
-import models.NormalMode
+import models.{NormalMode, PaymentPlanType, UserAnswers}
+import pages.ManagePaymentPlanTypePage
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import views.html.SuspendPaymentPlanView
@@ -27,8 +28,12 @@ class SuspendPaymentPlanControllerSpec extends SpecBase {
   "SuspendPaymentPlan Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      val userAnswers: UserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.SuspendPaymentPlanController.onPageLoad().url)

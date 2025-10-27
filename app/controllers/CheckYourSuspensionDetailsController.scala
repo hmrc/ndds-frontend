@@ -19,11 +19,13 @@ package controllers
 import controllers.actions.*
 import models.Mode
 import navigation.Navigator
-import pages.SuspensionDetailsCheckYourAnswerPage
+import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage}
 import play.api.Logging
+import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
@@ -40,6 +42,7 @@ class CheckYourSuspensionDetailsController @Inject() (
   requireData: DataRequiredAction,
   sessionRepository: SessionRepository,
   navigator: Navigator,
+  nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: CheckYourSuspensionDetailsView
 )(implicit ec: ExecutionContext)
@@ -49,8 +52,18 @@ class CheckYourSuspensionDetailsController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     logger.info("Display suspension details confirmation page")
-    val summaryList = buildSummaryList(request.userAnswers)
-    Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+    val userAnswers = request.userAnswers
+
+    if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
+      val summaryList = buildSummaryList(userAnswers)
+      Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+    } else {
+      logger.error(
+        s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
+      )
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
+
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =

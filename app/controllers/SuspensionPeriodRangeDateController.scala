@@ -23,14 +23,16 @@ import models.requests.DataRequest
 import javax.inject.Inject
 import models.{Mode, PaymentPlanType}
 import navigation.Navigator
-import pages.SuspensionPeriodRangeDatePage
+import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
+import play.api.i18n.Lang.logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,6 +43,7 @@ class SuspensionPeriodRangeDateController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
   formProvider: SuspensionPeriodRangeDateFormProvider,
   val controllerComponents: MessagesControllerComponents,
   view: SuspensionPeriodRangeDateView
@@ -55,7 +58,10 @@ class SuspensionPeriodRangeDateController @Inject() (
           val planDetail = response.paymentPlanDetails
 
           // ✅ Only allow suspension for BudgetPaymentPlan
-          if (planDetail.planType != PaymentPlanType.BudgetPaymentPlan.toString) {
+          if (!nddsService.suspendPaymentPlanGuard(request.userAnswers)) {
+            logger.error(
+              s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${request.userAnswers.get(ManagePaymentPlanTypePage)}"
+            )
             Redirect(routes.JourneyRecoveryController.onPageLoad())
           } else {
             val form = formProvider()

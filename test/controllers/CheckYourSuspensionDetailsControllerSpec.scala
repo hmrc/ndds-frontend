@@ -17,11 +17,11 @@
 package controllers
 
 import base.SpecBase
-import models.{NormalMode, SuspensionPeriodRange, UserAnswers}
+import models.{NormalMode, PaymentPlanType, SuspensionPeriodRange, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
-import pages.SuspensionPeriodRangeDatePage
+import pages.{ManagePaymentPlanTypePage, PaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -39,6 +39,9 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
 
   private val userAnswers: UserAnswers = emptyUserAnswers
     .set(SuspensionPeriodRangeDatePage, suspensionRange)
+    .success
+    .value
+    .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
     .success
     .value
 
