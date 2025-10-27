@@ -22,7 +22,7 @@ import controllers.routes
 import models.requests.IdentifierRequest
 import play.api.mvc.Results.*
 import play.api.mvc.*
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
@@ -40,13 +40,37 @@ class AuthenticatedIdentifierAction @Inject() (
     extends IdentifierAction
     with AuthorisedFunctions {
 
+  val acceptedEnrolments = Set(
+    "IR-SA",
+    "IR-SA-TRUST-ORG",
+    "IR-SA-PART-ORG",
+    "IR-CT",
+    "IR-PAYE",
+    "HMRC-CIS-ORG",
+    "HMRC-PSA-ORG",
+    "HMRC-MGD-ORG",
+    "HMRC-ECL-ORG"
+  )
+
+  private def usingSupportedEnrolments(enrolments: Enrolments): Boolean = {
+    enrolments.enrolments
+      .exists {
+        case e @ Enrolment(key, _, state, _) if e.isActivated || state == "NotYetActivated" => acceptedEnrolments(key)
+      }
+  }
+
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised().retrieve(Retrievals.internalId and Retrievals.credentials) {
-      case Some(internalId) ~ Some(credentials) => block(IdentifierRequest(request, credentials.providerId))
-      case _                                    => throw new UnauthorizedException("Unable to retrieve credential id")
+    authorised().retrieve(Retrievals.internalId and Retrievals.credentials and Retrievals.allEnrolments) {
+      case Some(internalId) ~ Some(credentials) ~ userEnrolments =>
+        if (usingSupportedEnrolments(userEnrolments)) {
+          block(IdentifierRequest(request, credentials.providerId))
+        } else {
+          throw InsufficientEnrolments(s"User had none of ${acceptedEnrolments.mkString(", ")}")
+        }
+      case _ => throw new UnauthorizedException("Unable to retrieve credential id")
     } recover {
       case _: NoActiveSession =>
         Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
