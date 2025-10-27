@@ -69,12 +69,12 @@ class PaymentPlanDetailsController @Inject() (
                                 case _ => Future.successful(updatedAnswers)
                               }
             updatedAnswers <- planDetail.scheduledPaymentStartDate match {
-                                case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
-                                case None          => Future.successful(updatedAnswers)
+                                case Some(paymentStartDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentStartDate))
+                                case None                   => Future.successful(updatedAnswers)
                               }
             updatedAnswers <- planDetail.scheduledPaymentEndDate match {
-                                case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
-                                case None          => Future.successful(updatedAnswers)
+                                case Some(paymentEndDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentEndDate))
+                                case None                 => Future.successful(updatedAnswers)
                               }
             updatedAnswers <- cleanseSessionPages(updatedAnswers)
             _              <- sessionRepository.set(updatedAnswers)
