@@ -56,7 +56,7 @@ class CheckYourSuspensionDetailsController @Inject() (
 
     if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
       val summaryList = buildSummaryList(userAnswers)
-      Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+      Ok(view(summaryList, mode, routes.PaymentPlanSuspendedController.onPageLoad(mode)))
     } else {
       logger.error(
         s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
