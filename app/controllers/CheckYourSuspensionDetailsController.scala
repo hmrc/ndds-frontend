@@ -50,7 +50,7 @@ class CheckYourSuspensionDetailsController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     logger.info("Display suspension details confirmation page")
     val summaryList = buildSummaryList(request.userAnswers)
-    Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+    Ok(view(summaryList, mode, routes.PaymentPlanSuspendedController.onPageLoad()))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =

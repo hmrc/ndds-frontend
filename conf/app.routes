@@ -159,3 +159,5 @@ POST       /check-suspension-details                        controllers.CheckYou
 GET        /change-check-suspension-details                 controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-check-suspension-details                 controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = CheckMode)
 
+
+GET        /payment-plan-suspended                        controllers.PaymentPlanSuspendedController.onPageLoad()

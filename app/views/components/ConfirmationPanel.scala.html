@@ -21,12 +21,15 @@
 
 @this(govukPanel: GovukPanel)
 
-@(title: String, body: Html = Html(emptyString), classes: String = emptyString)
+@(title: String, body: Html = Html(emptyString), classes: String = emptyString, isAllContentStrong: Boolean = true)
 
 @govukPanel(
   Panel(
     title = HtmlContent(title),
-    content = HtmlContent(s"<strong>${body.body}</strong>"),
+    content = if (isAllContentStrong)
+                HtmlContent(s"<strong>${body.body}</strong>")
+              else
+                HtmlContent(body.body),
     classes = classes
   )
 ) 
