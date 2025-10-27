@@ -154,7 +154,7 @@ class Navigator @Inject() () {
     answers
       .get(RemovingThisSuspensionPage)
       .map {
-        case true  => routes.PaymentPlanDetailsController.onPageLoad()
+        case true  => routes.JourneyRecoveryController.onPageLoad()
         case false => routes.PaymentPlanDetailsController.onPageLoad()
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())

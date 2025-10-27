@@ -594,5 +594,5 @@ removingThisSuspension.paymentDetails = Payment reference: <strong>{0}</strong>
 removingThisSuspension.suspensionInfo = This suspension period is from <strong>{0}</strong> to <strong>{1}</strong>
 removingThisSuspension.question = Are you sure you want to remove this suspension?
 removingThisSuspension.checkYourAnswersLabel = removingThisSuspension
-removingThisSuspension.error.required = Select yes if removingThisSuspension
+removingThisSuspension.error.required = Select one option.
 removingThisSuspension.change.hidden = RemovingThisSuspension
