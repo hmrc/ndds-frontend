@@ -24,7 +24,7 @@ import models.audits.GetDDIs
 import models.requests.*
 import pages.*
 import models.responses.*
-import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers}
+import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, NextPaymentValidationResult2, PaymentPlanType, UserAnswers}
 import play.api.Logging
 import play.api.mvc.Request
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
@@ -208,6 +208,58 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
+  def calculateNextPaymentDate2(
+    planStartDate: LocalDate,
+    planEndDate: Option[LocalDate],
+    paymentFrequency: Frequency
+  )(implicit hc: HeaderCarrier): Future[NextPaymentValidationResult2] = {
+    planEndDate.fold {
+      // when planEndDate is open end date or None
+      Future.successful(
+        NextPaymentValidationResult2(
+          potentialNextPaymentDate = None,
+          nextPaymentDateValid     = true
+        )
+      )
+    } { endDate => // when planEndDate has a future date
+      {
+        val today = LocalDate.now()
+
+        for {
+          // Step 1.1 – check if start date is beyond 3 working days
+          isBeyondThreeDays <- isThreeDaysPriorPlanEndDate(planStartDate)
+
+          // Step 1.2 – calculate potential next payment date
+          potentialNextPaymentDate <-
+            if (planStartDate.isAfter(today) && isBeyondThreeDays) {
+              // Start date is after today and beyond 3 working days
+              // Skip frequency logic — per business rule Step 1.1
+              Future.successful(planStartDate)
+            } else {
+              //  Otherwise, calculate next payment date using frequency logic (Step 1.2)
+              Future.successful(
+                calculateFrequencyBasedNextDate(planStartDate, today, paymentFrequency)
+              )
+            }
+
+        } yield {
+          // Step 2 – Validate potentialNextPaymentDate against planEndDate
+          val nextPaymentDateValid =
+            if (planEndDate != null) {
+              !potentialNextPaymentDate.isAfter(endDate)
+            } else {
+              true
+            }
+
+          NextPaymentValidationResult2(
+            potentialNextPaymentDate = Some(potentialNextPaymentDate),
+            nextPaymentDateValid     = nextPaymentDateValid
+          )
+        }
+      }
+    }
+  }
+
   private def calculateFrequencyBasedNextDate(
     startDate: LocalDate,
     today: LocalDate,
@@ -249,7 +301,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     val weeksUntilNextPayment = daysFrequency / daysInWeek
 
     // Step 4 – potential next payment date
-    var potentialNext = startDate.plusWeeks(paymentsTakenToDate * weeksUntilNextPayment)
+    var potentialNext = startDate.plusWeeks(paymentsTakenToDate.toLong * weeksUntilNextPayment)
 
     // Step 5 – if within 3 working days → add one cycle
     if (!potentialNext.isAfter(today.plusDays(3))) {

@@ -820,6 +820,39 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
   }
 
+  "calculateNextPaymentDate2" - {
+
+    val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
+
+    "when planEndDate is None" in {
+      val today = LocalDate.now()
+      val startDate = today.plusDays(10)
+      val planEndDate = None
+
+      when(mockNddService.isThreeDaysPriorPlanEndDate(any())(any()))
+        .thenReturn(Future.successful(true))
+
+      val result = service.calculateNextPaymentDate2(startDate, planEndDate, Monthly).futureValue
+
+      result.potentialNextPaymentDate mustBe None
+      result.nextPaymentDateValid mustBe true
+    }
+
+//    "when planEndDate is within three day prior" in {
+//      val today = LocalDate.now()
+//      val startDate = today.plusDays(10)
+//      val planEndDate = None
+//
+//      when(mockConnector.(any())(any()))
+//        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+//
+//      val result = service.calculateNextPaymentDate2(startDate, planEndDate, Monthly).futureValue
+//
+//      result.potentialNextPaymentDate mustBe None
+//      result.nextPaymentDateValid mustBe true
+//    }
+  }
+
   "isPaymentPlanCancellable" - {
     "must return true when plan type is SinglePaymentPlan" in {
       val userAnswers =

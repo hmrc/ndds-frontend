@@ -22,3 +22,8 @@ case class NextPaymentValidationResult(
   potentialNextPaymentDate: LocalDate,
   nextPaymentDateValid: Boolean
 )
+
+case class NextPaymentValidationResult2(
+  potentialNextPaymentDate: Option[LocalDate],
+  nextPaymentDateValid: Boolean
+)
