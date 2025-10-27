@@ -222,6 +222,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
         firstCaptured.get(AmendPaymentAmountPage) mustBe None
         firstCaptured.get(AmendPlanStartDatePage) mustBe None
         firstCaptured.get(AmendPlanEndDatePage) mustBe None
+        firstCaptured.get(SuspensionPeriodRangeDatePage) mustBe None
       }
     }
   }
