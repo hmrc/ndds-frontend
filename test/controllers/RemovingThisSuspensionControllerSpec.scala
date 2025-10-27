@@ -19,6 +19,7 @@ package controllers
 import base.SpecBase
 import forms.RemovingThisSuspensionFormProvider
 import models.{NormalMode, UserAnswers}
+import models.responses.{PaymentPlanDetails, PaymentPlanResponse}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -28,9 +29,11 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import views.html.RemovingThisSuspensionView
 
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
 class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
@@ -46,14 +49,22 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val paymentPlanResponse = dummyPlanDetailResponse.copy(
+        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+          paymentReference    = "1234567890K",
+          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
+          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
+        )
+      )
+
+      val userAnswers = emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, removingThisSuspensionRoute)
 
         val result = route(application, request).value
-
-        val view = application.injector.instanceOf[RemovingThisSuspensionView]
 
         status(result) mustEqual OK
       }
@@ -61,14 +72,26 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(RemovingThisSuspensionPage, true).success.value
+      val paymentPlanResponse = dummyPlanDetailResponse.copy(
+        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+          paymentReference    = "1234567890K",
+          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
+          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
+        )
+      )
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .success
+        .value
+        .set(RemovingThisSuspensionPage, true)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, removingThisSuspensionRoute)
-
-        val view = application.injector.instanceOf[RemovingThisSuspensionView]
 
         val result = route(application, request).value
 
@@ -78,12 +101,22 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
 
     "must redirect to the next page when valid data is submitted" in {
 
+      val paymentPlanResponse = dummyPlanDetailResponse.copy(
+        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+          paymentReference    = "1234567890K",
+          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
+          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
+        )
+      )
+
+      val userAnswers = emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+
       val mockSessionRepository = mock[SessionRepository]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -104,20 +137,50 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val paymentPlanResponse = dummyPlanDetailResponse.copy(
+        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+          paymentReference    = "1234567890K",
+          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
+          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
+        )
+      )
+
+      val userAnswers = emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request =
           FakeRequest(POST, removingThisSuspensionRoute)
             .withFormUrlEncodedBody(("value", ""))
 
-        val boundForm = form.bind(Map("value" -> ""))
-
-        val view = application.injector.instanceOf[RemovingThisSuspensionView]
-
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
+      }
+    }
+
+    "must display suspension details when payment plan has suspension" in {
+
+      val paymentPlanResponse = dummyPlanDetailResponse.copy(
+        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+          paymentReference    = "1234567890K",
+          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
+          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
+        )
+      )
+
+      val userAnswers = emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, removingThisSuspensionRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+        contentAsString(result) must include("1234567890K")
       }
     }
 
