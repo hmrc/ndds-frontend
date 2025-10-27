@@ -20,10 +20,12 @@ import controllers.actions.*
 import forms.RemovingThisSuspensionFormProvider
 import javax.inject.Inject
 import models.Mode
+import models.responses.PaymentPlanResponse
 import navigation.Navigator
 import pages.RemovingThisSuspensionPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.RemovingThisSuspensionView
@@ -53,15 +55,41 @@ class RemovingThisSuspensionController @Inject() (
       case Some(value) => form.fill(value)
     }
 
-    Ok(view(preparedForm, mode, "", None, None))
+    val paymentReference = request.userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .map(_.paymentPlanDetails.paymentReference)
+      .getOrElse("")
+
+    val suspensionStartDate = request.userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .flatMap(_.paymentPlanDetails.suspensionStartDate)
+
+    val suspensionEndDate = request.userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .flatMap(_.paymentPlanDetails.suspensionEndDate)
+
+    Ok(view(preparedForm, mode, paymentReference, suspensionStartDate, suspensionEndDate))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
 
+    val paymentReference = request.userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .map(_.paymentPlanDetails.paymentReference)
+      .getOrElse("")
+
+    val suspensionStartDate = request.userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .flatMap(_.paymentPlanDetails.suspensionStartDate)
+
+    val suspensionEndDate = request.userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .flatMap(_.paymentPlanDetails.suspensionEndDate)
+
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, "", None, None))),
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, paymentReference, suspensionStartDate, suspensionEndDate))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(RemovingThisSuspensionPage, value))
