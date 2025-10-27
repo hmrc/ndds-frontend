@@ -69,11 +69,11 @@ object SuspensionPeriodRangeDateSummary {
 
   def row(suspendStartDate: Option[LocalDate], suspendEndDate: Option[LocalDate])(implicit messages: Messages): SummaryListRow = {
     val formattedStartDate = suspendStartDate
-      .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+      .map(_.format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern)))
       .getOrElse("")
 
     val formattedEndDate = suspendEndDate
-      .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+      .map(_.format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern)))
       .getOrElse("")
 
     val formattedValue =
