@@ -116,7 +116,7 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return SEE_OTHER for a GET when UserAnswers is missing PaymentPlanReference" in {
+    "must return Journey Recover page for a GET when UserAnswers is missing PaymentPlanReference" in {
 
       val userAnswersWithData: UserAnswers =
         emptyUserAnswers
@@ -138,10 +138,11 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
-    "must return SEE_OTHER for a GET when UserAnswers is missing PaymentPlanDetails" in {
+    "must return Journey Recover page for a GET when UserAnswers is missing PaymentPlanDetails" in {
 
       val userAnswersWithData: UserAnswers =
         emptyUserAnswers
@@ -163,10 +164,11 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
-    "must return SEE_OTHER for a GET when UserAnswers is missing SuspensionPeriodRangeDate" in {
+    "must return Journey Recover page for a GET when UserAnswers is missing SuspensionPeriodRangeDate" in {
 
       val userAnswersWithData: UserAnswers =
         emptyUserAnswers
@@ -191,6 +193,7 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
