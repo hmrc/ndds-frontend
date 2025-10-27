@@ -30,7 +30,7 @@ class CryptoProvider @Inject() (
   override def get(): Encrypter with Decrypter = {
     val mongodbEncryptionEnabled = configuration
       .getOptional[Boolean]("mongodb.encryption.enabled")
-      .getOrElse(false)
+      .getOrElse(true)
     if (mongodbEncryptionEnabled) {
       SymmetricCryptoFactory.aesGcmCryptoFromConfig(baseConfigKey = "mongodb.encryption", configuration.underlying)
     } else {
