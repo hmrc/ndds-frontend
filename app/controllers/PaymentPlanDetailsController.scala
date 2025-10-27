@@ -68,7 +68,7 @@ class PaymentPlanDetailsController @Inject() (
                                   Future.fromTry(updatedAnswers.set(SuspensionPeriodRangeDatePage, SuspensionPeriodRange(startDate, endDate)))
                                 case _ => Future.successful(updatedAnswers)
                               }
-            updatedAnswers <- planDetail.scheduledPaymentEndDate match {
+            updatedAnswers <- planDetail.scheduledPaymentStartDate match {
                                 case Some(endDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, endDate))
                                 case None          => Future.successful(updatedAnswers)
                               }
