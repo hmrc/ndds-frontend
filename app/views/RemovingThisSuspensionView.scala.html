@@ -17,7 +17,6 @@
 @import views.html.components.*
 @import java.time.LocalDate
 @import java.time.format.DateTimeFormatter
-@import play.twirl.api.Html
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.fieldset.Fieldset
 
@@ -43,14 +42,12 @@
 
         @h1("removingThisSuspension.heading")
 
-        <p class="govuk-body">
-            @Html(messages("removingThisSuspension.paymentDetails", paymentReference))<br/>
-            @{
-                val formattedStartDate = suspensionStartDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")
-                val formattedEndDate = suspensionEndDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")
-                Html(messages("removingThisSuspension.suspensionInfo", formattedStartDate, formattedEndDate))
+        @defining(suspensionStartDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedStartDate =>
+            @defining(suspensionEndDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedEndDate =>
+                @paragraph(messages("removingThisSuspension.paymentDetails", paymentReference))
+                @paragraph(messages("removingThisSuspension.suspensionInfo", formattedStartDate, formattedEndDate))
             }
-        </p>
+        }
 
         @paragraph("removingThisSuspension.question", bold = true)
 

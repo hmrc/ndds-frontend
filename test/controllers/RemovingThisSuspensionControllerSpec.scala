@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.RemovingThisSuspensionFormProvider
-import models.{NormalMode, UserAnswers}
+import models.NormalMode
 import models.responses.{PaymentPlanDetails, PaymentPlanResponse}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -31,7 +31,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
-import views.html.RemovingThisSuspensionView
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
