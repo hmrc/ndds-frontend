@@ -116,8 +116,6 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
-
-        redirectLocation(result).value mustEqual controllers.routes.PaymentPlanSuspendedController.onPageLoad().url
       }
     }
 

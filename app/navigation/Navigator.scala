@@ -47,7 +47,6 @@ class Navigator @Inject() () {
     case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
-    case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
     case SuspensionDetailsCheckYourAnswerPage => _ => routes.LandingController.onPageLoad()
     case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
     case _                                    => _ => routes.LandingController.onPageLoad()
@@ -71,7 +70,7 @@ class Navigator @Inject() () {
     case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
-    case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
+    case SuspensionDetailsCheckYourAnswerPage => _ => routes.LandingController.onPageLoad()
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
