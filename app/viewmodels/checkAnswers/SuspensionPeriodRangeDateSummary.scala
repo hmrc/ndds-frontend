@@ -33,13 +33,17 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
-import models.{CheckMode, SuspensionPeriodRange, UserAnswers}
+import models.{CheckMode, NormalMode, SuspensionPeriodRange, UserAnswers}
 import pages.SuspensionPeriodRangeDatePage
 import play.api.i18n.{Lang, Messages}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.Constants
 import utils.DateTimeFormats.formattedDateTimeShort
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object SuspensionPeriodRangeDateSummary {
   def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
@@ -62,4 +66,29 @@ object SuspensionPeriodRangeDateSummary {
         }
       )
     }
+
+  def row(suspendStartDate: Option[LocalDate], suspendEndDate: Option[LocalDate])(implicit messages: Messages): SummaryListRow = {
+    val formattedStartDate = suspendStartDate
+      .map(_.format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern)))
+      .getOrElse("")
+
+    val formattedEndDate = suspendEndDate
+      .map(_.format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern)))
+      .getOrElse("")
+
+    val formattedValue =
+      s"$formattedStartDate ${messages("suspensionPeriodRangeDate.to")} $formattedEndDate"
+
+    SummaryListRowViewModel(
+      key   = "suspensionPeriodRangeDate.checkYourAnswersLabel",
+      value = ValueViewModel(formattedValue),
+      actions = Seq(
+        ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(NormalMode).url)
+          .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden")),
+        ActionItemViewModel("site.remove", routes.JourneyRecoveryController.onPageLoad().url) // TODO Updated after RM1
+          .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
+      )
+    )
+  }
+
 }

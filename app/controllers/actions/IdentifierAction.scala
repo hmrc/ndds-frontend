@@ -47,7 +47,6 @@ class AuthenticatedIdentifierAction @Inject() (
     "IR-CT",
     "IR-PAYE",
     "HMRC-CIS-ORG",
-    "HMRC-PSA-ORG",
     "HMRC-MGD-ORG",
     "HMRC-ECL-ORG"
   )
@@ -55,7 +54,9 @@ class AuthenticatedIdentifierAction @Inject() (
   private def usingSupportedEnrolments(enrolments: Enrolments): Boolean = {
     enrolments.enrolments
       .exists {
+        case e @ Enrolment("HMRC-PSA-ORG", _, _, _) if e.isActivated                        => true
         case e @ Enrolment(key, _, state, _) if e.isActivated || state == "NotYetActivated" => acceptedEnrolments(key)
+        case _                                                                              => false
       }
   }
 
