@@ -18,7 +18,9 @@
 @import java.time.LocalDate
 @import java.time.format.DateTimeFormatter
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
-@import uk.gov.hmrc.govukfrontend.views.viewmodels.fieldset.Fieldset
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.Radios
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.errormessage.ErrorMessage
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
 @this(
     layout: templates.Layout,
@@ -26,8 +28,9 @@
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
     govukButton: GovukButton,
-    h1: Header1,
-    paragraph: Paragraph
+    fieldSet: FieldSet,
+    paragraph: Paragraph,
+    mainErrorSummary: MainErrorSummary
 )
 
 @(form: Form[_], mode: Mode, paymentReference: String, suspensionStartDate: Option[LocalDate], suspensionEndDate: Option[LocalDate])(implicit request: Request[_], messages: Messages)
@@ -36,31 +39,37 @@
 
     @formHelper(action = routes.RemovingThisSuspensionController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
-        }
+        @mainErrorSummary(form)
 
-        @h1("removingThisSuspension.heading")
-
-        @defining(suspensionStartDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedStartDate =>
-            @defining(suspensionEndDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedEndDate =>
-                @paragraph(messages("removingThisSuspension.paymentDetails", paymentReference))
-                @paragraph(messages("removingThisSuspension.suspensionInfo", formattedStartDate, formattedEndDate))
+        @fieldSet(
+            legend = "removingThisSuspension.heading",
+            asHeading = true,
+            describedBy = None
+        ) {
+            @defining(suspensionStartDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedStartDate =>
+                @defining(suspensionEndDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedEndDate =>
+                    @paragraph(messages("removingThisSuspension.paymentDetails", paymentReference))
+                    @paragraph(messages("removingThisSuspension.suspensionInfo", formattedStartDate, formattedEndDate))
+                }
             }
+
+            @paragraph("removingThisSuspension.question", bold = true)
+
+            @govukRadios(
+                Radios(
+                    fieldset = None,
+                    name = form("value").name,
+                    items = Seq(
+                        RadioItem(content = Text(messages("site.yes")), value = Some("true"), id = Some("value_0"), checked = form("value").value.exists(_ == "true")),
+                        RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"), checked = form("value").value.exists(_ == "false"))
+                    ),
+                    errorMessage = if(form("value").hasErrors) Some(ErrorMessage(
+                        content = Text(messages(form("value").error.get.message, form("value").error.get.args: _*)),
+                        visuallyHiddenText = Some(messages("error.prefix"))
+                    )) else None
+                ).copy(classes = "govuk-radios--inline")
+            )
         }
-
-        @paragraph("removingThisSuspension.question", bold = true)
-
-        @govukRadios(
-            RadiosViewModel(
-                field = form("value"),
-                items = Seq(
-                    RadioItem(content = Text(messages("site.yes")), value = Some("true"), id = Some("value_0")),
-                    RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"))
-                ),
-                fieldset = Fieldset(legend = None)
-            ).withCssClass("govuk-radios--inline")
-        )
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))
