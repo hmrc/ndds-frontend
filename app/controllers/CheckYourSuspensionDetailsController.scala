@@ -51,7 +51,7 @@ class CheckYourSuspensionDetailsController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    logger.info("Display suspension details confirmation page")
+    logger.debug("Display suspension details confirmation page")
     val userAnswers = request.userAnswers
 
     if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
