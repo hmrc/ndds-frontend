@@ -409,7 +409,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-          flash(result).get("error").value mustBe "There was a problem submitting your direct debit. Please try again later."
         }
       }
     }

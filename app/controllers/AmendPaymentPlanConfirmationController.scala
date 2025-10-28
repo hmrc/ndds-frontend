@@ -91,7 +91,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
           val chrisRequest = buildChrisSubmissionRequest(ua, ddiReference)
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
-              logger.info(s"CHRIS submission successful for DDI Ref [$ddiReference]")
+              logger.info(s"CHRIS submission successful for amend payment plan for DDI Ref [$ddiReference]")
               for {
                 directDebitReference <- Future.fromTry(Try(ua.get(DirectDebitReferenceQuery).get))
                 paymentPlanReference <- Future.fromTry(Try(ua.get(PaymentPlanReferenceQuery).get))
@@ -105,11 +105,9 @@ class AmendPaymentPlanConfirmationController @Inject() (
                 Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
               }
             } else {
-              logger.error(s"CHRIS submission failed for DDI Ref [$ddiReference]")
+              logger.error(s"CHRIS submission failed amend payment plan for DDI Ref [$ddiReference]")
               Future.successful(
                 Redirect(routes.JourneyRecoveryController.onPageLoad())
-                  .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
-                  // TODO Must not use content from outside of messages, cannot translate (also shouldn't use flashing)
               )
             }
           }
@@ -162,8 +160,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
           regularPaymentAmount            = None,
           amendPaymentAmount              = userAnswers.get(AmendPaymentAmountPage),
           calculation                     = None,
-          amendPlan                       = true,
-          suspensionPeriodRangeDate       = None
+          suspensionPeriodRangeDate       = None,
+          amendPlan                       = true
         )
 
       case None =>

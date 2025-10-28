@@ -136,8 +136,6 @@ class CancelPaymentPlanController @Inject() (
             logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
             Future.successful(
               Redirect(routes.JourneyRecoveryController.onPageLoad())
-                .flashing("error" -> "There was a problem cancelling your direct debit plan. Please try again later.")
-                // TODO Must not use content from outside of messages, cannot translate (also shouldn't use flashing)
             )
         }
 

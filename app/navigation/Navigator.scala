@@ -28,27 +28,28 @@ import models.PaymentPlanType.*
 class Navigator @Inject() () {
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case PaymentDatePage                => _ => routes.CheckYourAnswersController.onPageLoad()
-    case PaymentReferencePage           => userAnswers => checkPaymentReferenceLogic(userAnswers)
-    case PaymentAmountPage              => _ => routes.PaymentDateController.onPageLoad(NormalMode)
-    case PersonalOrBusinessAccountPage  => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
-    case YourBankDetailsPage            => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
-    case BankDetailsCheckYourAnswerPage => _ => routes.ConfirmAuthorityController.onPageLoad(NormalMode)
-    case ConfirmAuthorityPage           => nextAfterConfirmAuthority(NormalMode)
-    case DirectDebitSourcePage          => checkDirectDebitSource
-    case PaymentPlanTypePage            => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
-    case PaymentsFrequencyPage          => _ => routes.RegularPaymentAmountController.onPageLoad(NormalMode)
-    case RegularPaymentAmountPage       => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
-    case TotalAmountDuePage             => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
-    case PlanStartDatePage              => userAnswers => checkPlanStartDateLogic(userAnswers)
-    case PlanEndDatePage                => _ => routes.CheckYourAnswersController.onPageLoad()
-    case YearEndAndMonthPage            => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
-    case AmendPaymentAmountPage         => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
-    case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
-    case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
-    case SuspensionPeriodRangeDatePage  => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
-    case CancelPaymentPlanPage          => navigateFromCancelPaymentPlanPage
-    case _                              => _ => routes.LandingController.onPageLoad()
+    case PaymentDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentReferencePage                 => userAnswers => checkPaymentReferenceLogic(userAnswers)
+    case PaymentAmountPage                    => _ => routes.PaymentDateController.onPageLoad(NormalMode)
+    case PersonalOrBusinessAccountPage        => _ => routes.YourBankDetailsController.onPageLoad(NormalMode)
+    case YourBankDetailsPage                  => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode)
+    case BankDetailsCheckYourAnswerPage       => _ => routes.ConfirmAuthorityController.onPageLoad(NormalMode)
+    case ConfirmAuthorityPage                 => nextAfterConfirmAuthority(NormalMode)
+    case DirectDebitSourcePage                => checkDirectDebitSource
+    case PaymentPlanTypePage                  => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
+    case PaymentsFrequencyPage                => _ => routes.RegularPaymentAmountController.onPageLoad(NormalMode)
+    case RegularPaymentAmountPage             => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
+    case TotalAmountDuePage                   => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
+    case PlanStartDatePage                    => userAnswers => checkPlanStartDateLogic(userAnswers)
+    case PlanEndDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
+    case YearEndAndMonthPage                  => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
+    case AmendPaymentAmountPage               => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
+    case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+    case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+    case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
+    case SuspensionDetailsCheckYourAnswerPage => _ => routes.LandingController.onPageLoad()
+    case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
+    case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {

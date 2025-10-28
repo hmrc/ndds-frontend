@@ -21,7 +21,7 @@ import models.requests.ChrisSubmissionRequest
 import models.responses.DirectDebitDetails
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{AmendPlanEndDatePage, AmendPlanStartDatePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
+import pages.{SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -36,7 +36,6 @@ import views.html.CheckYourSuspensionDetailsView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class CheckYourSuspensionDetailsController @Inject() (
   override val messagesApi: MessagesApi,
@@ -65,18 +64,18 @@ class CheckYourSuspensionDetailsController @Inject() (
 
       request.userAnswers.get(queries.DirectDebitReferenceQuery) match {
         case Some(ddiReference) =>
-          val chrisRequest = SuspendChrisSubmissionRequest(request.userAnswers, ddiReference)
+          val chrisRequest = suspendChrisSubmissionRequest(request.userAnswers, ddiReference)
 
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
-              logger.info(s"CHRIS submission successful for DDI Ref [$ddiReference]")
+              logger.info(s"CHRIS submission successful for suspend budgeting payment plan for DDI Ref [$ddiReference]")
               for {
                 updatedAnswers <- Future.fromTry(
                                     request.userAnswers.set(SuspensionDetailsCheckYourAnswerPage, confirmed)
                                   )
                 _ <- sessionRepository.set(updatedAnswers)
               } yield {
-                Redirect(routes.LandingController.onPageLoad())
+                Redirect(navigator.nextPage(SuspensionDetailsCheckYourAnswerPage, mode, updatedAnswers))
               }
             } else {
               logger.error(s"CHRIS submission for suspend budgeting payment plan failed with DDI Ref [$ddiReference]")
@@ -87,16 +86,15 @@ class CheckYourSuspensionDetailsController @Inject() (
           }
 
         case None =>
-          logger.warn("Missing DirectDebitReference in UserAnswers when trying to submit suspension details")
+          logger.error("Missing DirectDebitReference in UserAnswers when trying to submit suspension details")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
 
-  private def SuspendChrisSubmissionRequest(
+  private def suspendChrisSubmissionRequest(
     userAnswers: UserAnswers,
     ddiReference: String
   ): ChrisSubmissionRequest = {
-
     userAnswers.get(PaymentPlanDetailsQuery) match {
       case Some(response) =>
         val planDetail = response.paymentPlanDetails
@@ -105,9 +103,7 @@ class CheckYourSuspensionDetailsController @Inject() (
           DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
 
         val planStartDateDetails: Option[PlanStartDateDetails] = planDetail.scheduledPaymentStartDate.map { date =>
-          PlanStartDateDetails(enteredDate           = date,
-                               earliestPlanStartDate = date.toString // you can adjust this if you have a different logic
-                              )
+          PlanStartDateDetails(enteredDate = date, earliestPlanStartDate = date.toString)
         }
         val paymentPlanType: PaymentPlanType =
           PaymentPlanType.values
@@ -132,9 +128,9 @@ class CheckYourSuspensionDetailsController @Inject() (
           paymentAmount                   = planDetail.scheduledPaymentAmount,
           regularPaymentAmount            = None,
           amendPaymentAmount              = None,
+          suspensionPeriodRangeDate       = userAnswers.get(SuspensionPeriodRangeDatePage),
           calculation                     = None,
-          suspendPlan                     = true,
-          suspensionPeriodRangeDate       = userAnswers.get(SuspensionPeriodRangeDatePage)
+          suspendPlan                     = true
         )
       case None =>
         throw new IllegalStateException("Missing PaymentPlanDetails in userAnswers")
