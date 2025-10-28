@@ -55,7 +55,7 @@ class CheckYourSuspensionDetailsController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     logger.info("Display suspension details confirmation page")
     val summaryList = buildSummaryList(request.userAnswers)
-    Ok(view(summaryList, mode, routes.PaymentPlanSuspendedController.onPageLoad()))
+    Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
@@ -85,7 +85,7 @@ class CheckYourSuspensionDetailsController @Inject() (
             }
           }
 
-        case None =>
+        case _ =>
           logger.error("Missing DirectDebitReference in UserAnswers when trying to submit suspension details")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }

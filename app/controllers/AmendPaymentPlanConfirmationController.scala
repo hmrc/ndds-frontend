@@ -164,7 +164,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
           amendPlan                       = true
         )
 
-      case None =>
+      case _ =>
         throw new IllegalStateException("Missing PaymentPlanDetails in userAnswers")
     }
   }
