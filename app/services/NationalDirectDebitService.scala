@@ -240,7 +240,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
               //  Otherwise, calculate next payment date using frequency logic (Step 1.2)
               paymentFrequency match {
                 case Frequency.Weekly | Frequency.Fortnightly | Frequency.FourWeekly =>
-                  Future.successful(calculateWeeklyBasedNextDate(planStartDate, today, paymentFrequency))
+                  calculateWeeklyBasedNextDate2(planStartDate, today, paymentFrequency)
 
                 case Frequency.Monthly | Frequency.Quarterly | Frequency.SixMonthly | Frequency.Annually =>
                   Future.successful(calculateMonthlyBasedNextDate2(planStartDate, today, paymentFrequency))
@@ -260,23 +260,11 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
-  private def calculateFrequencyBasedNextDate(
+  private def calculateWeeklyBasedNextDate2(
     startDate: LocalDate,
     today: LocalDate,
     frequency: Frequency
-  ): LocalDate = frequency match {
-    case Frequency.Weekly | Frequency.Fortnightly | Frequency.FourWeekly =>
-      calculateWeeklyBasedNextDate(startDate, today, frequency)
-
-    case Frequency.Monthly | Frequency.Quarterly | Frequency.SixMonthly | Frequency.Annually =>
-      calculateMonthlyBasedNextDate(startDate, today, frequency)
-  }
-
-  private def calculateWeeklyBasedNextDate(
-    startDate: LocalDate,
-    today: LocalDate,
-    frequency: Frequency
-  ): LocalDate = {
+  )(implicit hc: HeaderCarrier): Future[LocalDate] = {
 
     val daysInWeek = 7
 
@@ -290,33 +278,44 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
 
     // Step 1 – find days difference
-    val daysDiff = ChronoUnit.DAYS.between(startDate, today).toInt
+    val daysDiff = Math.abs(ChronoUnit.DAYS.between(today, startDate)).toInt
 
     // Step 2 – number of payments taken to date
-    val paymentsTakenToDate = Math.max(0, daysDiff / daysFrequency)
+    val paymentsTakenToDate = Math.max(0, Math.ceil(daysDiff.toDouble / daysFrequency))
 
     // Step 3 – number of weeks until next payment
     val weeksUntilNextPayment = daysFrequency / daysInWeek
 
     // Step 4 – potential next payment date
-    var potentialNext = startDate.plusWeeks(paymentsTakenToDate.toLong * weeksUntilNextPayment)
+    val potentialNext = startDate.plusWeeks(paymentsTakenToDate.toLong * weeksUntilNextPayment)
 
     // Step 5 – if within 3 working days → add one cycle
-    if (!potentialNext.isAfter(today.plusDays(3))) {
-      potentialNext = potentialNext.plusWeeks(weeksUntilNextPayment)
+    isThreeDaysPriorPlanEndDate(potentialNext).map { isBeyondThreeWorkingDays =>
+      if (isBeyondThreeWorkingDays) {
+        logger.debug(
+          s"""|[calculateWeeklyBasedNextDate]
+              |  Frequency: $frequency
+              |  Start date: $startDate
+              |  Today: $today
+              |  Payments taken so far: $paymentsTakenToDate
+              |  Next payment date: $potentialNext
+              |""".stripMargin
+        )
+        potentialNext
+      } else {
+        val newPotentialNextDate = potentialNext.plusWeeks(weeksUntilNextPayment)
+        logger.debug(
+          s"""|[calculateWeeklyBasedNextDate]
+              |  Frequency: $frequency
+              |  Start date: $startDate
+              |  Today: $today
+              |  Payments taken so far: $paymentsTakenToDate
+              |  Next payment date: $newPotentialNextDate
+              |""".stripMargin
+        )
+        newPotentialNextDate
+      }
     }
-
-    logger.debug(
-      s"""|[calculateWeeklyBasedNextDate]
-          |  Frequency: $frequency
-          |  Start date: $startDate
-          |  Today: $today
-          |  Payments taken so far: $paymentsTakenToDate
-          |  Next payment date: $potentialNext
-          |""".stripMargin
-    )
-
-    potentialNext
   }
 
   private def calculateMonthlyBasedNextDate2(
@@ -398,6 +397,65 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           |  Today: $today
           |  Months diff: $monthsDiff
           |  Payments to date: $paymentsTakenToDate
+          |  Next payment date: $potentialNext
+          |""".stripMargin
+    )
+
+    potentialNext
+  }
+
+  private def calculateFrequencyBasedNextDate(
+    startDate: LocalDate,
+    today: LocalDate,
+    frequency: Frequency
+  ): LocalDate = frequency match {
+    case Frequency.Weekly | Frequency.Fortnightly | Frequency.FourWeekly =>
+      calculateWeeklyBasedNextDate(startDate, today, frequency)
+
+    case Frequency.Monthly | Frequency.Quarterly | Frequency.SixMonthly | Frequency.Annually =>
+      calculateMonthlyBasedNextDate(startDate, today, frequency)
+  }
+
+  private def calculateWeeklyBasedNextDate(
+    startDate: LocalDate,
+    today: LocalDate,
+    frequency: Frequency
+  ): LocalDate = {
+
+    val daysInWeek = 7
+
+    // map enum to days per payment cycle
+    val daysFrequency = frequency match {
+      case Frequency.Weekly      => 7
+      case Frequency.Fortnightly => 14
+      case Frequency.FourWeekly  => 28
+      case other =>
+        throw new IllegalArgumentException(s"Invalid weekly frequency: $other")
+    }
+
+    // Step 1 – find days difference
+    val daysDiff = ChronoUnit.DAYS.between(startDate, today).toInt
+
+    // Step 2 – number of payments taken to date
+    val paymentsTakenToDate = Math.max(0, daysDiff / daysFrequency)
+
+    // Step 3 – number of weeks until next payment
+    val weeksUntilNextPayment = daysFrequency / daysInWeek
+
+    // Step 4 – potential next payment date
+    var potentialNext = startDate.plusWeeks(paymentsTakenToDate.toLong * weeksUntilNextPayment)
+
+    // Step 5 – if within 3 working days → add one cycle
+    if (!potentialNext.isAfter(today.plusDays(3))) {
+      potentialNext = potentialNext.plusWeeks(weeksUntilNextPayment)
+    }
+
+    logger.debug(
+      s"""|[calculateWeeklyBasedNextDate]
+          |  Frequency: $frequency
+          |  Start date: $startDate
+          |  Today: $today
+          |  Payments taken so far: $paymentsTakenToDate
           |  Next payment date: $potentialNext
           |""".stripMargin
     )
@@ -504,7 +562,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
   def isDuplicatePaymentPlan(ua: UserAnswers)(implicit hc: HeaderCarrier, request: Request[?]): Future[DuplicateCheckResponse] = {
     ua.get(PaymentPlansCountQuery) match {
-      case Some(count) => {
+      case Some(count) =>
         if (count > 1) {
           val request: PaymentPlanDuplicateCheckRequest =
             Utils.buildPaymentPlanCheckRequest(ua, ua.get(DirectDebitReferenceQuery).get)
@@ -514,11 +572,9 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           logger.debug("There is only 1 payment plan so not checking duplicate as in no RDS Call")
           Future.successful(DuplicateCheckResponse(false))
         }
-      }
-      case None => {
+      case None =>
         logger.error(s"Could not find the count of Payment Plans: ${ua.get(PaymentPlansCountQuery)}")
         throw new IllegalStateException("Count of payment plans is missing or invalid")
-      }
     }
   }
 
