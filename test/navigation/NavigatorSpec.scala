@@ -36,6 +36,10 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(UnknownPage, NormalMode, userAnswers) mustBe routes.LandingController.onPageLoad()
       }
 
+      "must go from a SuspensionDetailsCheckYourAnswerPage to PaymentPlanSuspended confirmation page " in {
+        navigator.nextPage(SuspensionDetailsCheckYourAnswerPage, NormalMode, userAnswers) mustBe routes.PaymentPlanSuspendedController.onPageLoad()
+      }
+
       "must go from a PersonalOrBusinessAccountPage to YourBankDetailsPage" in {
         navigator.nextPage(PersonalOrBusinessAccountPage, NormalMode, userAnswers) mustBe routes.YourBankDetailsController.onPageLoad(NormalMode)
       }

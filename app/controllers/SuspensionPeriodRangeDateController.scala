@@ -23,11 +23,13 @@ import models.requests.DataRequest
 import javax.inject.Inject
 import models.{Mode, PaymentPlanType}
 import navigation.Navigator
-import pages.SuspensionPeriodRangeDatePage
+import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
@@ -43,33 +45,31 @@ class SuspensionPeriodRangeDateController @Inject() (
   requireData: DataRequiredAction,
   formProvider: SuspensionPeriodRangeDateFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: SuspensionPeriodRangeDateView
+  view: SuspensionPeriodRangeDateView,
+  nddsService: NationalDirectDebitService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData) { implicit request =>
-      request.userAnswers.get(PaymentPlanDetailsQuery) match {
-        case Some(response) =>
-          val planDetail = response.paymentPlanDetails
 
-          // ✅ Only allow suspension for BudgetPaymentPlan
-          if (planDetail.planType != PaymentPlanType.BudgetPaymentPlan.toString) {
-            Redirect(routes.JourneyRecoveryController.onPageLoad())
-          } else {
-            val form = formProvider()
-            val preparedForm = request.userAnswers.get(SuspensionPeriodRangeDatePage) match {
-              case Some(value) => form.fill(value)
-              case None        => form
-            }
+      val userAnswers = request.userAnswers
+      if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
+        val form = formProvider()
+        val preparedForm = request.userAnswers.get(SuspensionPeriodRangeDatePage) match {
+          case Some(value) => form.fill(value)
+          case None        => form
+        }
 
-            val (planReference, paymentAmount) = extractPlanData
-            Ok(view(preparedForm, mode, planReference, paymentAmount))
-          }
-
-        case None =>
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
+        val (planReference, paymentAmount) = extractPlanData
+        Ok(view(preparedForm, mode, planReference, paymentAmount))
+      } else {
+        logger.error(
+          s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
+        )
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
     }
 

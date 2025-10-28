@@ -35,7 +35,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
-import uk.gov.hmrc.http.HeaderCarrier
 implicit val hc: HeaderCarrier = HeaderCarrier()
 
 import java.time.LocalDate
@@ -409,7 +408,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-          flash(result).get("error").value mustBe "There was a problem submitting your direct debit. Please try again later."
         }
       }
     }

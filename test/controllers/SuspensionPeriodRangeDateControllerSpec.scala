@@ -32,6 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
 
@@ -120,7 +121,12 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
   "SuspensionPeriodRangeDateController" - {
 
     "must return OK and the correct view for GET with BudgetPaymentPlan" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan)).build()
+      val mockNddsService = mock[NationalDirectDebitService]
+      when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
+        .build()
 
       running(application) {
         val request = getRequest()
@@ -137,7 +143,10 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
     }
 
     "must redirect to Journey Recovery for GET with non-Budget plan" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePlan)).build()
+      val mockNddsService = mock[NationalDirectDebitService]
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePlan))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
+        .build()
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -147,12 +156,16 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
     }
 
     "must populate the view correctly on GET when previously answered" in {
+      val mockNddsService = mock[NationalDirectDebitService]
+      when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
       val userAnswers = userAnswersWithBudgetPlan
         .set(SuspensionPeriodRangeDatePage, validAnswer)
         .success
         .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
+        .build()
 
       running(application) {
         val request = getRequest()
