@@ -59,8 +59,9 @@ class SuspensionPeriodRangeDateController @Inject() (
 
           // ✅ Only allow suspension for BudgetPaymentPlan
           if (!nddsService.suspendPaymentPlanGuard(request.userAnswers)) {
+            val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
             logger.error(
-              s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${request.userAnswers.get(ManagePaymentPlanTypePage)}"
+              s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
             )
             Redirect(routes.JourneyRecoveryController.onPageLoad())
           } else {
