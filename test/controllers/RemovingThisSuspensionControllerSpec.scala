@@ -18,13 +18,13 @@ package controllers
 
 import base.SpecBase
 import forms.RemovingThisSuspensionFormProvider
-import models.NormalMode
-import models.responses.{PaymentPlanDetails, PaymentPlanResponse}
+import models.{NormalMode, PaymentPlanType}
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.RemovingThisSuspensionPage
+import pages.{ManagePaymentPlanTypePage, RemovingThisSuspensionPage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -46,17 +46,51 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
 
   "RemovingThisSuspension Controller" - {
 
-    "must return OK and the correct view for a GET" in {
-
-      val paymentPlanResponse = dummyPlanDetailResponse.copy(
-        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
-          paymentReference    = "1234567890K",
-          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
-          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
-        )
+    val budgetPaymentPlanResponse: PaymentPlanResponse = {
+      val paymentPlanDetails = PaymentPlanDetails(
+        hodService                = "sa",
+        planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
+        paymentReference          = "1234567890K",
+        submissionDateTime        = LocalDateTime.now.minusDays(5),
+        scheduledPaymentAmount    = Some(120.00),
+        scheduledPaymentStartDate = Some(LocalDate.now.plusDays(5)),
+        initialPaymentStartDate   = Some(LocalDate.now),
+        initialPaymentAmount      = Some(BigDecimal(25.00)),
+        scheduledPaymentEndDate   = Some(LocalDate.now.plusMonths(6)),
+        scheduledPaymentFrequency = Some("Monthly"),
+        suspensionStartDate       = Some(LocalDate.now().plusDays(5)),
+        suspensionEndDate         = Some(LocalDate.now().plusDays(35)),
+        balancingPaymentAmount    = Some(60.00),
+        balancingPaymentDate      = Some(LocalDate.now.plusMonths(6).plusDays(10)),
+        totalLiability            = None,
+        paymentPlanEditable       = true
       )
 
-      val userAnswers = emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+      PaymentPlanResponse(
+        directDebitDetails = DirectDebitDetails(
+          bankSortCode       = Some("123456"),
+          bankAccountNumber  = Some("12345678"),
+          bankAccountName    = Some("John Doe"),
+          auDdisFlag         = true,
+          submissionDateTime = LocalDateTime.now.minusDays(5)
+        ),
+        paymentPlanDetails = paymentPlanDetails
+      )
+    }
+
+    val singlePaymentPlanResponse = budgetPaymentPlanResponse.copy(
+      paymentPlanDetails = budgetPaymentPlanResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
+    )
+
+    "must return OK and the correct view for a GET with Budget Payment Plan" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -69,18 +103,35 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must populate the view correctly on a GET when the question has previously been answered" in {
-
-      val paymentPlanResponse = dummyPlanDetailResponse.copy(
-        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
-          paymentReference    = "1234567890K",
-          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
-          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
-        )
-      )
+    "must redirect to Journey Recovery for a GET with non-Budget Payment Plan" in {
 
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .set(PaymentPlanDetailsQuery, singlePaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, removingThisSuspensionRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must populate the view correctly on a GET when the question has previously been answered" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
         .set(RemovingThisSuspensionPage, true)
@@ -98,17 +149,15 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must redirect to the next page when valid data is submitted with Budget Payment Plan" in {
 
-      val paymentPlanResponse = dummyPlanDetailResponse.copy(
-        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
-          paymentReference    = "1234567890K",
-          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
-          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
-        )
-      )
-
-      val userAnswers = emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
       val mockSessionRepository = mock[SessionRepository]
 
@@ -134,17 +183,49 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to Journey Recovery for a POST with non-Budget Payment Plan" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, singlePaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+
+      val mockSessionRepository = mock[SessionRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, removingThisSuspensionRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val paymentPlanResponse = dummyPlanDetailResponse.copy(
-        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
-          paymentReference    = "1234567890K",
-          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
-          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
-        )
-      )
-
-      val userAnswers = emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -161,15 +242,13 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
 
     "must display suspension details when payment plan has suspension" in {
 
-      val paymentPlanResponse = dummyPlanDetailResponse.copy(
-        paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
-          paymentReference    = "1234567890K",
-          suspensionStartDate = Some(LocalDate.now().plusDays(5)),
-          suspensionEndDate   = Some(LocalDate.now().plusDays(35))
-        )
-      )
-
-      val userAnswers = emptyUserAnswers.set(PaymentPlanDetailsQuery, paymentPlanResponse).success.value
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
