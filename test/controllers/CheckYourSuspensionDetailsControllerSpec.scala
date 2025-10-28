@@ -94,7 +94,7 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.LandingController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.PaymentPlanSuspendedController.onPageLoad().url
 
         verify(mockNddService, times(1)).submitChrisData(any())(any())
         verify(mockSessionRepository, times(1)).set(any())
