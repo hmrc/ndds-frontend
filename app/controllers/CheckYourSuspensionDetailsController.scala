@@ -68,7 +68,7 @@ class CheckYourSuspensionDetailsController @Inject() (
 
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
-              logger.info(s"CHRIS submission successful for suspend budgeting payment plan for DDI Ref [$ddiReference]")
+              logger.debug(s"CHRIS submission successful for suspend budgeting payment plan for DDI Ref [$ddiReference]")
               for {
                 updatedAnswers <- Future.fromTry(
                                     request.userAnswers.set(SuspensionDetailsCheckYourAnswerPage, confirmed)

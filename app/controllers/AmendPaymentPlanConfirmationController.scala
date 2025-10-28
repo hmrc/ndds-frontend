@@ -98,9 +98,9 @@ class AmendPaymentPlanConfirmationController @Inject() (
                 lockResponse         <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
               } yield {
                 if (lockResponse.lockSuccessful) {
-                  logger.info(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                  logger.debug(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
                 } else {
-                  logger.error(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                  logger.debug(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
                 }
                 Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
               }
