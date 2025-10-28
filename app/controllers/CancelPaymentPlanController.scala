@@ -185,10 +185,9 @@ class CancelPaymentPlanController @Inject() (
           paymentAmount                   = planDetail.scheduledPaymentAmount,
           regularPaymentAmount            = None,
           amendPaymentAmount              = None,
-          suspensionPeriodRangeDate       = None,
           calculation                     = None,
+          suspensionPeriodRangeDate       = None,
           cancelPlan                      = true
-
         )
 
       case None =>
