@@ -30,6 +30,7 @@
     govukButton: GovukButton,
     fieldSet: FieldSet,
     paragraph: Paragraph,
+    header2: Header2,
     mainErrorSummary: MainErrorSummary
 )
 
@@ -53,7 +54,7 @@
                 }
             }
 
-            @paragraph("removingThisSuspension.question", bold = true)
+            @header2("removingThisSuspension.question")
 
             @govukRadios(
                 Radios(

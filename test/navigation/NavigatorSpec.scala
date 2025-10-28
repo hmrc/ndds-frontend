@@ -333,14 +333,14 @@ class NavigatorSpec extends SpecBase {
             routes.PaymentPlanDetailsController.onPageLoad()
         }
 
-        "must go from a RemovingThisSuspensionPage to JourneyRecoveryController when Yes" in {
+        "must go from a RemovingThisSuspensionPage to RemoveSuspensionConfirmationController when Yes" in {
           val ua = userAnswers
             .set(RemovingThisSuspensionPage, true)
             .success
             .value
 
           navigator.nextPage(RemovingThisSuspensionPage, NormalMode, ua) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.RemoveSuspensionConfirmationController.onPageLoad()
         }
 
         "must go from a RemovingThisSuspensionPage to Journey Recovery Page when no answer" in {
@@ -474,14 +474,14 @@ class NavigatorSpec extends SpecBase {
             routes.PaymentPlanDetailsController.onPageLoad()
         }
 
-        "must go from a RemovingThisSuspensionPage to JourneyRecoveryController when Yes in Check mode" in {
+        "must go from a RemovingThisSuspensionPage to RemoveSuspensionConfirmationController when Yes in Check mode" in {
           val ua = userAnswers
             .set(RemovingThisSuspensionPage, true)
             .success
             .value
 
           navigator.nextPage(RemovingThisSuspensionPage, CheckMode, ua) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.RemoveSuspensionConfirmationController.onPageLoad()
         }
 
         "must go from a RemovingThisSuspensionPage to Journey Recovery Page when no answer in Check mode" in {
