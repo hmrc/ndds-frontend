@@ -464,7 +464,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-          flash(result).get("error") mustBe Some("There was a problem submitting your direct debit. Please try again later.")
         }
       }
 

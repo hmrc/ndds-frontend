@@ -98,7 +98,7 @@ class CheckYourAnswersController @Inject() (
               .submitChrisData(chrisRequest)
               .flatMap { success =>
                 if (success) {
-                  logger.info(s"CHRIS submission successful for DDI Ref [${reference.ddiRefNumber}]")
+                  logger.info(s"CHRIS submission successful for creating for DDI Ref [${reference.ddiRefNumber}]")
 
                   for {
                     updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
@@ -109,19 +109,15 @@ class CheckYourAnswersController @Inject() (
                     Redirect(routes.DirectDebitConfirmationController.onPageLoad())
                   }
                 } else {
-                  logger.error(s"CHRIS submission failed for DDI Ref [${reference.ddiRefNumber}]")
+                  logger.error(s"CHRIS submission failed for creating for DDI Ref [${reference.ddiRefNumber}]")
                   Future.successful(
                     Redirect(routes.JourneyRecoveryController.onPageLoad())
-                      .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
-                      // TODO Must not use content from outside of messages, cannot translate (also shouldn't use flashing)
                   )
                 }
               }
               .recover { case ex =>
                 logger.error("CHRIS submission or session update failed", ex)
                 Redirect(routes.JourneyRecoveryController.onPageLoad())
-                  .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
-              // TODO Must not use content from outside of messages, cannot translate (also shouldn't use flashing)
               }
           }
 
@@ -162,7 +158,8 @@ class CheckYourAnswersController @Inject() (
       paymentAmount                   = ua.get(PaymentAmountPage),
       regularPaymentAmount            = ua.get(RegularPaymentAmountPage),
       amendPaymentAmount              = None,
-      calculation                     = calculationOpt
+      calculation                     = calculationOpt,
+      suspensionPeriodRangeDate       = None
     )
   }
 

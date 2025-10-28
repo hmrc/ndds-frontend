@@ -35,8 +35,7 @@ import views.html.PaymentPlanDetailsView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import scala.concurrent.duration.*
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 class PaymentPlanDetailsController @Inject() (
   override val messagesApi: MessagesApi,
