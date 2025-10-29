@@ -569,7 +569,14 @@ checkYourSuspensionDetails.title = Check your suspension details
 checkYourSuspensionDetails.heading = Check your suspension details
 checkYourSuspensionDetails.confirm = Confirm and continue
 
-
+removeSuspensionConfirmation.title = Payment plan suspension removed
+removeSuspensionConfirmation.heading = Payment plan suspension removed
+removeSuspensionConfirmation.panel.title = Payment plan suspension removed
+removeSuspensionConfirmation.h1 = What happens next
+removeSuspensionConfirmation.p1 = This suspension for this payment plan has now been removed. The next payment of {0} for this plan will be collected on {1}. You may still see this suspension in your account for up to 36 hours.
+removeSuspensionConfirmation.h2 = Payment plan details
+removeSuspensionConfirmation.print = You can print this page for your records using the print function on your browser.
+removeSuspensionConfirmation.link = Return to payment plan
 
 paymentPlanSuspended.title = Payment plan suspended
 paymentPlanSuspended.panel.title = Payment plan suspended

@@ -17,6 +17,8 @@
 package controllers
 
 import base.SpecBase
+import models.{NormalMode, SuspensionPeriodRange, UserAnswers}
+import models.responses.PaymentPlanResponse
 import models.{NormalMode, PaymentPlanType, SuspensionPeriodRange, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
@@ -26,31 +28,47 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import services.NationalDirectDebitService
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSugar {
 
   private val mockSessionRepository = mock[SessionRepository]
+  private val mockNddService = mock[NationalDirectDebitService]
+
   private val suspensionRange = SuspensionPeriodRange(
-    startDate = java.time.LocalDate.of(2025, 10, 10),
-    endDate   = java.time.LocalDate.of(2025, 12, 10)
+    startDate = LocalDate.of(2025, 10, 10),
+    endDate   = LocalDate.of(2025, 12, 10)
   )
 
-  private val userAnswers: UserAnswers = emptyUserAnswers
-    .set(SuspensionPeriodRangeDatePage, suspensionRange)
-    .success
-    .value
-    .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
-    .success
-    .value
+  private val userAnswersWithSuspensionRange: UserAnswers =
+    emptyUserAnswers
+      .set(SuspensionPeriodRangeDatePage, suspensionRange)
+      .success
+      .value
+      .set(PaymentPlanDetailsQuery, dummyPlanDetailResponse)
+      .success
+      .value
+      .set(PaymentPlanReferenceQuery, "PREF123")
+      .success
+      .value
+      .set(DirectDebitReferenceQuery, "DDI123")
+      .success
+      .value
+      .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+      .success
+      .value
 
   "CheckYourSuspensionDetailsController" - {
 
-    "must return OK and the correct view for a GET in NormalMode" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+    "must return OK and render the correct view for a GET in NormalMode" in {
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithSuspensionRange))
         .overrides(
-          bind[SessionRepository].toInstance(mockSessionRepository)
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockNddService)
         )
         .build()
 
@@ -59,17 +77,19 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your suspension details ")
+        contentAsString(result) must include("Check your suspension details")
         contentAsString(result) must include("10 Oct 2025 to 10 Dec 2025")
       }
     }
 
-    "must redirect to the next page on POST" in {
+    "must call CHRIS, update session, and redirect to Landing page when POST succeeds" in {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.submitChrisData(any())(any())) thenReturn Future.successful(true)
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithSuspensionRange))
         .overrides(
-          bind[SessionRepository].toInstance(mockSessionRepository)
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockNddService)
         )
         .build()
 
@@ -79,10 +99,49 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.PaymentPlanSuspendedController.onPageLoad().url
+
+        verify(mockNddService, times(1)).submitChrisData(any())(any())
+        verify(mockSessionRepository, times(1)).set(any())
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no data is found" in {
+    "must redirect to JourneyRecovery when CHRIS submission fails" in {
+      when(mockNddService.submitChrisData(any())(any())) thenReturn Future.successful(false)
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithSuspensionRange))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourSuspensionDetailsController.onSubmit(NormalMode).url)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to JourneyRecovery when DirectDebitReference is missing" in {
+      val userAnswersWithoutDDI = userAnswersWithSuspensionRange.remove(DirectDebitReferenceQuery).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithoutDDI))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourSuspensionDetailsController.onSubmit(NormalMode).url)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to JourneyRecovery for a GET if no user answers are found" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
@@ -94,7 +153,7 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
       }
     }
 
-    "must redirect to Journey Recovery for a POST if no data is found" in {
+    "must redirect to JourneyRecovery for a POST if no user answers are found" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
