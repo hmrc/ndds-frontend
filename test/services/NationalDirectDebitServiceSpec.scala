@@ -131,6 +131,39 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       }
     }
 
+    "earliestSuspendStartDate" - {
+      "must successfully return a date that is 3 working days ahead of today" in {
+        val today = LocalDate.now()
+        val expectedDate = today.plusDays(5)
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate(expectedDate.toString)))
+
+        val result = service.earliestSuspendStartDate()(hc).futureValue
+
+        result mustBe expectedDate
+      }
+
+      "must successfully return a date that is N working days ahead of today when offset is provided" in {
+        val today = LocalDate.now()
+        val expectedDate = today.plusDays(10)
+
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate(expectedDate.toString)))
+
+        val result = service.earliestSuspendStartDate(workingDaysOffset = 7)(hc).futureValue
+
+        result mustBe expectedDate
+      }
+
+      "must fail when connector call fails" in {
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.failed(new Exception("service unavailable")))
+
+        val exception = intercept[Exception](service.earliestSuspendStartDate()(hc).futureValue)
+        exception.getMessage must include("service unavailable")
+      }
+    }
+
     "getEarliestPaymentDate" - {
       "must successfully return the Earliest Payment Date" in {
         val expectedUserAnswers = emptyUserAnswers.set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value

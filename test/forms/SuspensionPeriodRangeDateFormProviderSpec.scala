@@ -29,8 +29,7 @@ class SuspensionPeriodRangeDateFormProviderSpec extends DateBehaviours {
 
   private val planStartDate = LocalDate.of(2025, 10, 1)
   private val planEndDate = LocalDate.of(2025, 12, 31)
-  private val earliestStartDate = LocalDate.of(2025, 9, 28) // 3 working days from today
-  private val latestStartDate = LocalDate.now().plusMonths(6)
+  private val earliestStartDate = LocalDate.of(2025, 9, 28)
 
   private val formProvider = new SuspensionPeriodRangeDateFormProvider()
   private def form = formProvider(Some(planStartDate), Some(planEndDate), earliestStartDate)
