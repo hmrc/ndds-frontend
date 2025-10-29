@@ -149,6 +149,25 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to Journey Recovery for a GET when Budget plan but missing PaymentPlanDetails" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, removingThisSuspensionRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
     "must redirect to the next page when valid data is submitted with Budget Payment Plan" in {
 
       val userAnswers = emptyUserAnswers
@@ -284,6 +303,25 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val request =
           FakeRequest(POST, removingThisSuspensionRoute)
             .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when non-Budget plan and missing PaymentPlanDetails" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, removingThisSuspensionRoute)
 
         val result = route(application, request).value
 
