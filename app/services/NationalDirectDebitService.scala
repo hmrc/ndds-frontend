@@ -167,6 +167,15 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
+  def earliestSuspendStartDate(workingDaysOffset: Int = 3)(implicit hc: HeaderCarrier): Future[LocalDate] = {
+    val today = LocalDate.now()
+    val request = WorkingDaysOffsetRequest(baseDate = today.toString, offsetWorkingDays = workingDaysOffset)
+
+    nddConnector.getFutureWorkingDays(request).map { response =>
+      LocalDate.parse(response.date)
+    }
+  }
+
   def calculateNextPaymentDate(
     planStartDate: LocalDate,
     planEndDate: LocalDate,

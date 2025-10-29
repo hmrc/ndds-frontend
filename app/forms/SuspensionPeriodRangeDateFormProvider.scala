@@ -23,11 +23,18 @@ import play.api.data.Forms.mapping
 import play.api.i18n.Messages
 import utils.DateFormats
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
+  def apply(
+    planStartDateOpt: Option[LocalDate],
+    planEndDateOpt: Option[LocalDate],
+    earliestStartDate: LocalDate
+  )(implicit messages: Messages): Form[SuspensionPeriodRange] = {
 
-  def apply()(implicit messages: Messages): Form[SuspensionPeriodRange] =
+    val latestStartDate = LocalDate.now().plusMonths(6)
+
     Form(
       mapping(
         "suspensionPeriodRangeStartDate" -> customPaymentDate(
@@ -45,9 +52,48 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
           dateFormats    = DateFormats.defaultDateFormats
         )
       )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
+
+        // Suspend start date must be on or after plan start date ** comments will be removed later once local testing done
+        .verifying(
+          "suspensionPeriodRangeDate.error.startBeforePlanStart",
+          range => planStartDateOpt.forall(planStart => !range.startDate.isBefore(planStart))
+        )
+
+        // Suspend start date must be on or before plan end date (if exists)
+        .verifying(
+          "suspensionPeriodRangeDate.error.startAfterPlanEnd",
+          range => planEndDateOpt.forall(planEnd => !range.startDate.isAfter(planEnd))
+        )
+
+        // Suspend start date must be no earlier than 3 working days from today
+        .verifying(
+          "suspensionPeriodRangeDate.error.startBeforeEarliestAllowed",
+          range => !range.startDate.isBefore(earliestStartDate)
+        )
+
+        // Suspend start date must be no later than 6 months from today
+        .verifying(
+          "suspensionPeriodRangeDate.error.startAfterLatestAllowed",
+          range => !range.startDate.isAfter(latestStartDate)
+        )
+
+        // Suspend end date must be on or after suspend start date
         .verifying(
           "suspensionPeriodRangeDate.error.endBeforeStart",
           range => !range.endDate.isBefore(range.startDate)
         )
+
+        // Suspend end date must be no later than 6 months from the suspend start date
+        .verifying(
+          "suspensionPeriodRangeDate.error.endAfterLatestAllowed",
+          range => !range.endDate.isAfter(range.startDate.plusMonths(6))
+        )
+
+        // Suspend end date must be on or before plan end date (if exists)
+        .verifying(
+          "suspensionPeriodRangeDate.error.endAfterPlanEnd",
+          range => planEndDateOpt.forall(planEnd => !range.endDate.isAfter(planEnd))
+        )
     )
+  }
 }

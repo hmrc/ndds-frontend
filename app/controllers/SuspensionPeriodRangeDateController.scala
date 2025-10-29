@@ -53,23 +53,31 @@ class SuspensionPeriodRangeDateController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
-    (identify andThen getData andThen requireData) { implicit request =>
-
+    (identify andThen getData andThen requireData).async { implicit request =>
       val userAnswers = request.userAnswers
-      if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
-        val form = formProvider()
-        val preparedForm = request.userAnswers.get(SuspensionPeriodRangeDatePage) match {
-          case Some(value) => form.fill(value)
-          case None        => form
-        }
 
-        val (planReference, paymentAmount) = extractPlanData
-        Ok(view(preparedForm, mode, planReference, paymentAmount))
-      } else {
+      if (!nddsService.suspendPaymentPlanGuard(userAnswers)) {
         logger.error(
           s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
         )
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      } else {
+        val planDates = userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails)
+        val planStart = planDates.flatMap(_.scheduledPaymentStartDate)
+        val planEnd = planDates.flatMap(_.scheduledPaymentEndDate)
+
+        // Fetch earliest allowed suspend start date asynchronously
+        nddsService.earliestSuspendStartDate().map { earliestStartDate =>
+          val form = formProvider(planStart, planEnd, earliestStartDate)
+
+          val preparedForm = userAnswers.get(SuspensionPeriodRangeDatePage) match {
+            case Some(value) => form.fill(value)
+            case None        => form
+          }
+
+          val (planReference, paymentAmount) = extractPlanData
+          Ok(view(preparedForm, mode, planReference, paymentAmount))
+        }
       }
     }
 
@@ -82,17 +90,24 @@ class SuspensionPeriodRangeDateController @Inject() (
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
           } else {
             val (planReference, paymentAmount) = extractPlanData
-            val form = formProvider()
-            form
-              .bindFromRequest()
-              .fold(
-                formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, planReference, paymentAmount))),
-                value =>
-                  for {
-                    updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(navigator.nextPage(SuspensionPeriodRangeDatePage, mode, updatedAnswers))
-              )
+            val planStart = planDetail.scheduledPaymentStartDate
+            val planEnd = planDetail.scheduledPaymentEndDate
+
+            // Fetch earliest allowed suspend start date asynchronously
+            nddsService.earliestSuspendStartDate().flatMap { earliestStartDate =>
+              val form = formProvider(planStart, planEnd, earliestStartDate)
+
+              form
+                .bindFromRequest()
+                .fold(
+                  formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, planReference, paymentAmount))),
+                  value =>
+                    for {
+                      updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))
+                      _              <- sessionRepository.set(updatedAnswers)
+                    } yield Redirect(navigator.nextPage(SuspensionPeriodRangeDatePage, mode, updatedAnswers))
+                )
+            }
           }
 
         case None =>

@@ -565,6 +565,17 @@ suspensionPeriodRangeDate.error.endBeforeStart = The end date you have entered i
 suspensionPeriodRangeDate.to = to
 suspensionPeriodRangeDate.checkYourAnswersLabel = Suspension period
 
+suspensionPeriodRangeDate.error.startBeforePlanStart = The suspend start date cannot be before the plan start date.
+suspensionPeriodRangeDate.error.startAfterPlanEnd = The suspend start date cannot be after the plan end date.
+suspensionPeriodRangeDate.error.startBeforeEarliestAllowed = The suspend start date must be at least 3 working days from today.
+suspensionPeriodRangeDate.error.startAfterLatestAllowed = The suspend start date must be within 6 months from today.
+suspensionPeriodRangeDate.error.endBeforeStart = The suspend end date cannot be before the suspend start date.
+suspensionPeriodRangeDate.error.endAfterLatestAllowed = The suspend end date must be within 6 months from the suspend start date.
+suspensionPeriodRangeDate.error.endAfterPlanEnd = The suspend end date cannot be after the plan end date.
+
+
+
+
 checkYourSuspensionDetails.title = Check your suspension details
 checkYourSuspensionDetails.heading = Check your suspension details
 checkYourSuspensionDetails.confirm = Confirm and continue

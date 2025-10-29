@@ -43,7 +43,12 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
 
   implicit private val messages: Messages = stubMessages()
   private val formProvider = new SuspensionPeriodRangeDateFormProvider()
-  private def form = formProvider()
+
+  private val PlanStartDate = Some(LocalDate.of(2025, 10, 1))
+  private val planEndDate = Some(LocalDate.of(2025, 10, 10))
+  private val earliestStartDateMock = LocalDate.now().plusDays(3)
+
+  private def form = formProvider(PlanStartDate, planEndDate, earliestStartDateMock)
 
   private val onwardRoute = Call("GET", "/foo")
 
