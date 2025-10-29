@@ -19,9 +19,11 @@ package controllers
 import base.SpecBase
 import models.PaymentPlanType
 import models.responses.PaymentPlanResponse
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.{atLeastOnce, verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.RemovingThisSuspensionPage
 import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -946,6 +948,64 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "must remove RemovingThisSuspensionPage from session when page loads" in {
+        val mockSinglePaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
+          )
+
+        val paymentPlanReference = "ppReference"
+        val directDebitReference = "ddReference"
+
+        val userAnswersWithPaymentReference =
+          emptyUserAnswers
+            .set(
+              PaymentPlanReferenceQuery,
+              paymentPlanReference
+            )
+            .success
+            .value
+            .set(
+              DirectDebitReferenceQuery,
+              directDebitReference
+            )
+            .success
+            .value
+            .set(RemovingThisSuspensionPage, true)
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockService)
+          )
+          .build()
+
+        running(application) {
+          when(mockSessionRepository.set(any()))
+            .thenReturn(Future.successful(true))
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+          when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
+            .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
+          when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
+            .thenReturn(Future.successful(true))
+
+          val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual OK
+
+          val captor = ArgumentCaptor.forClass(classOf[models.UserAnswers])
+          verify(mockSessionRepository, atLeastOnce()).set(captor.capture())
+
+          val capturedList = captor.getAllValues
+          val finalSavedAnswers = capturedList.get(capturedList.size() - 1)
+          finalSavedAnswers.get(RemovingThisSuspensionPage) mustBe None
         }
       }
     }

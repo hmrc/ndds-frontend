@@ -49,6 +49,7 @@ class Navigator @Inject() () {
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
     case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
     case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
+    case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
@@ -70,6 +71,7 @@ class Navigator @Inject() () {
     case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case SuspensionPeriodRangeDatePage  => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
+    case RemovingThisSuspensionPage     => navigateFromRemovingThisSuspensionPage
     case _                              => _ => routes.LandingController.onPageLoad()
   }
 
@@ -144,6 +146,15 @@ class Navigator @Inject() () {
       .get(CancelPaymentPlanPage)
       .map {
         case true  => routes.PaymentPlanCancelledController.onPageLoad()
+        case false => routes.PaymentPlanDetailsController.onPageLoad()
+      }
+      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
+  private def navigateFromRemovingThisSuspensionPage(answers: UserAnswers): Call =
+    answers
+      .get(RemovingThisSuspensionPage)
+      .map {
+        case true  => routes.RemoveSuspensionConfirmationController.onPageLoad()
         case false => routes.PaymentPlanDetailsController.onPageLoad()
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())

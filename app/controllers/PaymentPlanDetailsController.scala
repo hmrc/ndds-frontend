@@ -194,6 +194,7 @@ class PaymentPlanDetailsController @Inject() (
     for {
       updatedUserAnswers <- Future.fromTry(userAnswers.remove(CancelPaymentPlanPage))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(DuplicateWarningPage))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(RemovingThisSuspensionPage))
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 
