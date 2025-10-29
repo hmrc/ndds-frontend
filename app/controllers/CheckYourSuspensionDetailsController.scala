@@ -58,7 +58,7 @@ class CheckYourSuspensionDetailsController @Inject() (
     logger.debug("Display suspension details confirmation page")
     val userAnswers = request.userAnswers
 
-    if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
+    if (nddService.suspendPaymentPlanGuard(userAnswers)) {
       val summaryList = buildSummaryList(request.userAnswers)
       Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
     } else {

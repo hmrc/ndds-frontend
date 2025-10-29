@@ -135,6 +135,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
         .build()
 
       running(application) {
+        when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
         val request = getRequest()
         val result = route(application, request).value
 
@@ -155,6 +156,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
         .build()
 
       running(application) {
+        when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(false)
         val result = route(application, getRequest()).value
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
