@@ -338,7 +338,49 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     // Step 1: Plan start date is after today and due to start within next 3 working days
     val initialPotentialStartDate = startDate.plusMonths(monthsFrequency)
 
-    // TODO Step 2
+    // Step 2:
+    // If the plan start date is equal to or before today, determine how many months have passed
+    // since the plan began to calculate how many payments have been taken to date.
+    // Use the current and start years to compute the difference correctly even if the plan
+    // spans multiple calendar years.
+    val (potentialNextFromHistoryOpt, numberOfMonthsToAdd) =
+      if (!startDate.isAfter(today)) {
+
+        val startYear = startDate.getYear
+        val currentYear = today.getYear
+        val startMonth = startDate.getMonthValue
+        val currentMonth = today.getMonthValue
+        val yearsDiff = currentYear - startYear
+
+        val monthsDiff =
+          if (yearsDiff == 0) {
+            currentMonth - startMonth
+          } else if (yearsDiff == 1) {
+            (annualMonths - startMonth) + currentMonth
+          } else {
+            ((annualMonths - startMonth) + currentMonth) + ((yearsDiff - 1) * annualMonths)
+          }
+
+        val basePaymentsTaken = monthsDiff / monthsFrequency
+        val isPaymentDueThisMonth = monthsDiff % monthsFrequency == 0
+        val paymentsTaken =
+          if (isPaymentDueThisMonth) {
+            basePaymentsTaken
+          } else {
+            basePaymentsTaken + 1
+          }
+
+        val monthsToAddBase = paymentsTaken * monthsFrequency
+        val potentialNextBase = startDate.plusMonths(monthsToAddBase)
+        val potentialNext =
+          if (potentialNextBase.isAfter(today)) {
+            potentialNextBase
+          } else {
+            potentialNextBase.plusMonths(monthsFrequency)
+          }
+
+        (Some(potentialNext), monthsToAddBase)
+      } else (None, 0)
 
     // Step 3:
     // Adjust for shorter months where the calculated next date falls on a day
@@ -346,9 +388,11 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     // In such cases, move the potential next payment date to the 1st day of the
     // following month to maintain consistency with monthly cycles.
 
+    val baseNextDate = potentialNextFromHistoryOpt.getOrElse(initialPotentialStartDate)
+
     val adjustedNextDate =
       if (initialPotentialStartDate.getDayOfMonth < startDate.getDayOfMonth) {
-        val nextMonth = initialPotentialStartDate.plusMonths(1)
+        val nextMonth = baseNextDate.plusMonths(1)
         nextMonth.withDayOfMonth(1)
       } else {
         initialPotentialStartDate
@@ -363,86 +407,43 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
     isThreeDaysPriorPlanEndDate(adjustedNextDate).map { isWithinNextThreeWorkingDays =>
       if (isWithinNextThreeWorkingDays) {
-        val potentialNext = startDate.plusMonths(monthsFrequency * 2) // TODO to verify
+        val potentialNext = startDate.plusMonths(numberOfMonthsToAdd + monthsFrequency)
 
         if (potentialNext.getDayOfMonth < startDate.getDayOfMonth) {
           val nextMonth = potentialNext.plusMonths(1)
-          nextMonth.withDayOfMonth(1)
+          val nextMonthFirstDay = nextMonth.withDayOfMonth(1)
+          logger.debug(
+            s"""|[calculateMonthlyBasedNextDate]
+                |  Frequency: $frequency
+                |  Start date: $startDate
+                |  Today: $today
+                |  Next payment date: $nextMonthFirstDay
+                |""".stripMargin
+          )
+          nextMonthFirstDay
         } else {
+          logger.debug(
+            s"""|[calculateMonthlyBasedNextDate]
+                |  Frequency: $frequency
+                |  Start date: $startDate
+                |  Today: $today
+                |  Next payment date: $potentialNext
+                |""".stripMargin
+          )
           potentialNext
         }
       } else {
+        logger.debug(
+          s"""|[calculateMonthlyBasedNextDate]
+              |  Frequency: $frequency
+              |  Start date: $startDate
+              |  Today: $today
+              |  Next payment date: $adjustedNextDate
+              |""".stripMargin
+        )
         adjustedNextDate
       }
     }
-
-//    // Step 1: If the plan start date is after today and due to start within next 3 working days
-//    val withinNext3Days = !startDate.isAfter(today.plusDays(3))
-//    if (startDate.isAfter(today) && withinNext3Days) {
-//      return startDate.plusMonths(monthsFrequency)
-//    }
-//
-//    // Step 2: Calculate months difference based on year difference
-//    val yearsDiff = today.getYear - startDate.getYear
-//
-//    val monthsDiff =
-//      if (yearsDiff == 0) {
-//        today.getMonthValue - startDate.getMonthValue
-//      } else if (yearsDiff == 1) {
-//        (annualMonths - startDate.getMonthValue) + today.getMonthValue
-//      } else {
-//        (annualMonths - startDate.getMonthValue) + today.getMonthValue + ((yearsDiff - 1) * annualMonths)
-//      }
-//
-//    // Step 3: Calculate how many payments have been taken to-date
-//    var paymentsTakenToDate = monthsDiff / monthsFrequency
-//
-//    // If payment is not due this month (i.e. remainder months exist), then add 1
-//    if ((monthsDiff % monthsFrequency) != 0) {
-//      paymentsTakenToDate += 1
-//    }
-//
-//    // Step 4: Calculate number of months to add and potential next date
-//    var monthsToAdd = paymentsTakenToDate * monthsFrequency
-//    var potentialNext = startDate.plusMonths(monthsToAdd)
-//
-//    // Step 5: If potential next payment date <= today → already taken this month
-//    if (!potentialNext.isAfter(today)) {
-//      monthsToAdd += monthsFrequency
-//      potentialNext = startDate.plusMonths(monthsToAdd)
-//    }
-//
-//    // Step 6: If potential next payment month is before the start month, move to 1st of next month
-//    if (potentialNext.getMonthValue < startDate.getMonthValue) {
-//      potentialNext = potentialNext
-//        .plusMonths(1)
-//        .`with`(TemporalAdjusters.firstDayOfMonth())
-//    }
-//
-//    // Step 7: If potential next payment date is within next 3 working days, move one more frequency ahead
-//    if (!potentialNext.isAfter(today.plusDays(3))) {
-//      monthsToAdd += monthsFrequency
-//      potentialNext = startDate.plusMonths(monthsToAdd)
-//
-//      if (potentialNext.getMonthValue < startDate.getMonthValue) {
-//        potentialNext = potentialNext
-//          .plusMonths(1)
-//          .`with`(TemporalAdjusters.firstDayOfMonth())
-//      }
-//    }
-//
-//    logger.debug(
-//      s"""|[calculateMonthlyBasedNextDate]
-//          |  Frequency: $frequency
-//          |  Start date: $startDate
-//          |  Today: $today
-//          |  Months diff: $monthsDiff
-//          |  Payments to date: $paymentsTakenToDate
-//          |  Next payment date: $potentialNext
-//          |""".stripMargin
-//    )
-//
-//    potentialNext
   }
 
   private def calculateFrequencyBasedNextDate(
