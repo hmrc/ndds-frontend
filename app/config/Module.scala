@@ -16,26 +16,22 @@
 
 package config
 
-import com.google.inject.AbstractModule
+import play.api.inject.{Binding, Module as PlayModule}
 import controllers.actions.*
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
 import java.time.{Clock, ZoneOffset}
 
-class Module extends AbstractModule {
+class Module extends PlayModule {
 
-  override def configure(): Unit = {
-
-    bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
-    bind(classOf[DataRequiredAction]).to(classOf[DataRequiredActionImpl]).asEagerSingleton()
-    bind(classOf[FrontendAppConfig]).asEagerSingleton()
-
-    bind(classOf[Encrypter]).toProvider(classOf[CryptoProvider]).asEagerSingleton()
-    bind(classOf[Decrypter]).toProvider(classOf[CryptoProvider]).asEagerSingleton()
-
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
+    bind[DataRetrievalAction].to(classOf[DataRetrievalActionImpl]),
+    bind[DataRequiredAction].to[DataRequiredActionImpl],
+    bind[FrontendAppConfig].toSelf,
+    bind[Encrypter with Decrypter].toProvider[CryptoProvider],
     // For session based storage instead of persistent, change to SessionIdentifierAction
-    bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
-
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
-  }
+    bind[IdentifierAction].to[AuthenticatedIdentifierAction],
+    bind[Clock].toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
+  )
 }
