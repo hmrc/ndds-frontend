@@ -22,7 +22,9 @@ import models.responses.DirectDebitDetails
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.{SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
+import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage}
 import play.api.Logging
+import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
@@ -53,9 +55,20 @@ class CheckYourSuspensionDetailsController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    logger.info("Display suspension details confirmation page")
-    val summaryList = buildSummaryList(request.userAnswers)
-    Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+    logger.debug("Display suspension details confirmation page")
+    val userAnswers = request.userAnswers
+
+    if (nddService.suspendPaymentPlanGuard(userAnswers)) {
+      val summaryList = buildSummaryList(request.userAnswers)
+      Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(
+        s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
+      )
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
+
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =

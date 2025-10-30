@@ -17,20 +17,32 @@
 package controllers
 
 import base.SpecBase
-import models.NormalMode
+import models.{NormalMode, PaymentPlanType, UserAnswers}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.ManagePaymentPlanTypePage
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import services.NationalDirectDebitService
 import views.html.SuspendPaymentPlanView
 
 class SuspendPaymentPlanControllerSpec extends SpecBase {
 
+  private val mockNddService = mock[NationalDirectDebitService]
+
   "SuspendPaymentPlan Controller" - {
 
     "must return OK and the correct view for a GET" in {
+      val userAnswers: UserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
+        when(mockNddService.suspendPaymentPlanGuard(any())).thenReturn(true)
         val request = FakeRequest(GET, routes.SuspendPaymentPlanController.onPageLoad().url)
 
         val result = route(application, request).value

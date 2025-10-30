@@ -53,13 +53,23 @@ class AmendPlanStartDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     {
-      val form = formProvider()
-      val preparedForm = request.userAnswers
-        .get(AmendPlanStartDatePage)
-        .orElse(request.userAnswers.get(AmendPlanStartDatePage))
-        .fold(form)(form.fill)
+      val answers = request.userAnswers
 
-      Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+      if (nddsService.amendPaymentPlanGuard(answers)) {
+
+        val form = formProvider()
+        val preparedForm = request.userAnswers
+          .get(AmendPlanStartDatePage)
+          .orElse(request.userAnswers.get(AmendPlanStartDatePage))
+          .fold(form)(form.fill)
+
+        Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+      } else {
+        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
+
     }
   }
 
@@ -92,7 +102,9 @@ class AmendPlanStartDateController @Inject() (
                 Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
             }
           } else {
-            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}")
+            val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
           }
       )
   }

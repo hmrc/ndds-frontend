@@ -33,6 +33,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
+import play.api.i18n.Lang.logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -66,8 +67,9 @@ class SuspensionPeriodRangeDateController @Inject() (
         val (planReference, paymentAmount) = extractPlanData
         Ok(view(preparedForm, mode, planReference, paymentAmount))
       } else {
+        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(
-          s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
+          s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
         )
         Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
