@@ -596,3 +596,6 @@ removingThisSuspension.question = Are you sure you want to remove this suspensio
 removingThisSuspension.checkYourAnswersLabel = removingThisSuspension
 removingThisSuspension.error.required = Select one option.
 removingThisSuspension.change.hidden = RemovingThisSuspension
+
+amendingPaymentPlan.title = amendingPaymentPlan
+amendingPaymentPlan.heading = amendingPaymentPlan
