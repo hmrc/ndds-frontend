@@ -17,12 +17,12 @@
 package controllers
 
 import base.SpecBase
-import models.{NormalMode, SuspensionPeriodRange, UserAnswers}
+import models.{NormalMode, PaymentPlanType, SuspensionPeriodRange, UserAnswers}
 import models.responses.PaymentPlanResponse
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
-import pages.SuspensionPeriodRangeDatePage
+import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -57,6 +57,9 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
       .set(DirectDebitReferenceQuery, "DDI123")
       .success
       .value
+      .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+      .success
+      .value
 
   "CheckYourSuspensionDetailsController" - {
 
@@ -69,6 +72,7 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
         .build()
 
       running(application) {
+        when(mockNddService.suspendPaymentPlanGuard(any())).thenReturn(true)
         val request = FakeRequest(GET, routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode).url)
         val result = route(application, request).value
 

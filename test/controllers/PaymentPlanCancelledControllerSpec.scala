@@ -22,6 +22,7 @@ import models.PaymentPlanType
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import org.scalatestplus.mockito.MockitoSugar
+import pages.ManagePaymentPlanTypePage
 import play.api.Application
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -65,6 +66,9 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
             PaymentPlanDetailsQuery,
             mockBudgetPaymentPlanDetailResponse
           )
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
 
@@ -117,6 +121,9 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
             PaymentPlanDetailsQuery,
             mockBudgetPaymentPlanDetailResponse
           )
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
           .value
 

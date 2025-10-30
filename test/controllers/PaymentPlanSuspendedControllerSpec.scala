@@ -20,7 +20,7 @@ import base.SpecBase
 import models.responses.PaymentPlanDetails
 import models.{PaymentPlanType, SuspensionPeriodRange, UserAnswers}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.SuspensionPeriodRangeDatePage
+import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.Application
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -68,6 +68,9 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
           .set(SuspensionPeriodRangeDatePage, suspensionRange)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
 
@@ -127,6 +130,9 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
           .set(SuspensionPeriodRangeDatePage, suspensionRange)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
 

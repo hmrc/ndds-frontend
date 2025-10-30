@@ -19,12 +19,14 @@ package controllers
 import controllers.actions.*
 import models.UserAnswers
 import models.responses.PaymentPlanDetails
-import pages.SuspensionPeriodRangeDatePage
+import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.Lang.logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
@@ -38,6 +40,7 @@ class PaymentPlanSuspendedController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: PaymentPlanSuspendedView
 ) extends FrontendBaseController
@@ -46,21 +49,31 @@ class PaymentPlanSuspendedController @Inject() (
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val userAnswers = request.userAnswers
 
-    val maybeResult = for {
-      planDetails           <- userAnswers.get(PaymentPlanDetailsQuery)
-      paymentPlanReference  <- userAnswers.get(PaymentPlanReferenceQuery)
-      suspensionPeriodRange <- userAnswers.get(SuspensionPeriodRangeDatePage)
-    } yield {
-      val formattedStartDate = suspensionPeriodRange.startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-      val formattedEndDate = suspensionPeriodRange.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-      val rows = buildRows(paymentPlanReference, userAnswers, planDetails.paymentPlanDetails)
-      Ok(view(paymentPlanReference, formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows))
+    if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
+
+      val maybeResult = for {
+        planDetails           <- userAnswers.get(PaymentPlanDetailsQuery)
+        paymentPlanReference  <- userAnswers.get(PaymentPlanReferenceQuery)
+        suspensionPeriodRange <- userAnswers.get(SuspensionPeriodRangeDatePage)
+      } yield {
+        val formattedStartDate = suspensionPeriodRange.startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+        val formattedEndDate = suspensionPeriodRange.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+        val rows = buildRows(paymentPlanReference, userAnswers, planDetails.paymentPlanDetails)
+        Ok(view(paymentPlanReference, formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows))
+      }
+
+      maybeResult match {
+        case Some(result) => result
+        case _            => Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(
+        s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
+      )
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
 
-    maybeResult match {
-      case Some(result) => result
-      case _            => Redirect(routes.JourneyRecoveryController.onPageLoad())
-    }
   }
 
   private def buildRows(paymentPlanReference: String, userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanDetails)(implicit
