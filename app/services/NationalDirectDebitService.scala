@@ -380,7 +380,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           }
 
         (Some(potentialNext), monthsToAddBase)
-      } else (None, 0)
+      } else (None, monthsFrequency)
 
     // Step 3:
     // Adjust for shorter months where the calculated next date falls on a day
@@ -405,8 +405,18 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     // day of month is less than the plan start date’s day — in that case, move the
     // date to the 1st of the following month.
 
-    isThreeDaysPriorPlanEndDate(adjustedNextDate).map { isWithinNextThreeWorkingDays =>
-      if (isWithinNextThreeWorkingDays) {
+    isThreeDaysPriorPlanEndDate(adjustedNextDate).map { isBeyondThreeworkingDays =>
+      if (isBeyondThreeworkingDays) {
+        logger.debug(
+          s"""|[calculateMonthlyBasedNextDate]
+              |  Frequency: $frequency
+              |  Start date: $startDate
+              |  Today: $today
+              |  Next payment date: $adjustedNextDate
+              |""".stripMargin
+        )
+        adjustedNextDate
+      } else {
         val potentialNext = startDate.plusMonths(numberOfMonthsToAdd + monthsFrequency)
 
         if (potentialNext.getDayOfMonth < startDate.getDayOfMonth) {
@@ -432,16 +442,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           )
           potentialNext
         }
-      } else {
-        logger.debug(
-          s"""|[calculateMonthlyBasedNextDate]
-              |  Frequency: $frequency
-              |  Start date: $startDate
-              |  Today: $today
-              |  Next payment date: $adjustedNextDate
-              |""".stripMargin
-        )
-        adjustedNextDate
       }
     }
   }
