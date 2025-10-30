@@ -14,14 +14,53 @@
  * limitations under the License.
  *@
 
+@import views.html.components._
+
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        paragraph: Paragraph,
+        paragraphWithLink: ParagraphMessageWithLink,
+        govukButton: GovukButton,
+        h1: Header1,
+        bulletList: BulletList
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String, p1MessageKey: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("amendingPaymentPlan.title"))) {
+@layout(pageTitle = titleNoFormManagePlan(messages("amendingPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
-    <h1 class="govuk-heading-xl">@messages("amendingPaymentPlan.heading")</h1>
+    @h1("amendingPaymentPlan.heading")
+
+    @paragraph(p1MessageKey)
+
+    @paragraphWithLink(
+        message1 = Some(messages("amendingPaymentPlan.p2.prefix")),
+        linkMessage = messages("amendingPaymentPlan.p2.link"),
+        message2 = Some(messages("amendingPaymentPlan.p2.suffix")),
+        linkUrl = hmrcHelplineUrl,
+        linkRel = "noreferrer noopener",
+        target = "_blank"
+    )
+
+    @bulletList(
+        items = Seq(
+            "amendingPaymentPlan.list.1",
+            "amendingPaymentPlan.list.2",
+            "amendingPaymentPlan.list.3"
+        )
+    )
+
+    @paragraph("amendingPaymentPlan.p3")
+
+    @govukButton(Button(
+      href = Some(routes.PaymentAmountController.onPageLoad(mode = NormalMode).url),
+      isStartButton = false,
+      content = Text(messages("site.continue")),
+      attributes = Map("id" -> "continue-button")
+    ))
+
+    @paragraphWithLink(
+        linkMessage = messages("amendingPaymentPlan.cancel.link"),
+        linkUrl = routes.PaymentPlanDetailsController.onPageLoad().url,
+    )
 }

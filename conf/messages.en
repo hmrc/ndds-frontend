@@ -597,5 +597,15 @@ removingThisSuspension.checkYourAnswersLabel = removingThisSuspension
 removingThisSuspension.error.required = Select one option.
 removingThisSuspension.change.hidden = RemovingThisSuspension
 
-amendingPaymentPlan.title = amendingPaymentPlan
-amendingPaymentPlan.heading = amendingPaymentPlan
+amendingPaymentPlan.title = Amending this payment plan
+amendingPaymentPlan.heading = Amending this payment plan
+amendingPaymentPlan.p1.single = You can amend the payment amount and the payment date.
+amendingPaymentPlan.p1.budget = You can amend the payment amount and the payment end date.
+amendingPaymentPlan.p2.prefix = For security reasons,
+amendingPaymentPlan.p2.link = you must contact the HMRC Helpline
+amendingPaymentPlan.p2.suffix = to change the:
+amendingPaymentPlan.list.1 = Direct Debit reference
+amendingPaymentPlan.list.2 = bank account details
+amendingPaymentPlan.list.3 = payment reference
+amendingPaymentPlan.p3 = Payments due within the next 3 working days cannot be amended.
+amendingPaymentPlan.cancel.link = Cancel and return to payment plan
