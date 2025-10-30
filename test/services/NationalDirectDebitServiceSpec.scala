@@ -40,7 +40,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 import utils.Frequency.*
 
-import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId}
+import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,7 +58,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
   val mockCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   val mockAuditService: AuditService = mock[AuditService]
-  val currentClock: Clock = Clock.fixed(Instant.now(), ZoneId.of("UTC"))
+  val currentClock: Clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
   val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, currentClock)
 
   val testId = "id"
