@@ -24,7 +24,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.SuspensionPeriodRangeDatePage
+import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -99,6 +99,9 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       .set(PaymentPlanReferenceQuery, "PP123456")
       .success
       .value
+      .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+      .success
+      .value
 
   private val userAnswersWithSinglePlan =
     emptyUserAnswers
@@ -106,6 +109,9 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       .success
       .value
       .set(PaymentPlanReferenceQuery, "SPP654321")
+      .success
+      .value
+      .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
       .success
       .value
 
@@ -137,6 +143,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
         .build()
 
       running(application) {
+        when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
         val request = getRequest()
         val result = route(application, request).value
 
@@ -157,6 +164,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
         .build()
 
       running(application) {
+        when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(false)
         val result = route(application, getRequest()).value
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url

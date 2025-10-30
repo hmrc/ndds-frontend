@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright 2025 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package controllers
 
 import controllers.actions.*
@@ -49,6 +33,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
+import play.api.i18n.Lang.logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -70,14 +55,9 @@ class SuspensionPeriodRangeDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      val userAnswers = request.userAnswers
 
-      if (!nddsService.suspendPaymentPlanGuard(userAnswers)) {
-        logger.error(
-          s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${userAnswers.get(ManagePaymentPlanTypePage)}"
-        )
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-      } else {
+      val userAnswers = request.userAnswers
+      if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
         val planDates = userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails)
         val planStart = planDates.flatMap(_.scheduledPaymentStartDate)
         val planEnd = planDates.flatMap(_.scheduledPaymentEndDate)
@@ -93,6 +73,12 @@ class SuspensionPeriodRangeDateController @Inject() (
           val (planReference, paymentAmount) = extractPlanData
           Ok(view(preparedForm, mode, planReference, paymentAmount))
         }
+      } else {
+        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        logger.error(
+          s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
+        )
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
 
