@@ -53,13 +53,21 @@ class AmendPlanEndDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
-    val form = formProvider()
-    val preparedForm = request.userAnswers.get(AmendPlanEndDatePage) match {
-      case None        => form
-      case Some(value) => form.fill(value)
-    }
+    val answers = request.userAnswers
 
-    Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+    if (nddsService.amendPaymentPlanGuard(answers)) {
+      val form = formProvider()
+      val preparedForm = request.userAnswers.get(AmendPlanEndDatePage) match {
+        case None        => form
+        case Some(value) => form.fill(value)
+      }
+
+      Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>

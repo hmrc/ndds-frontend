@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
+import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -70,9 +70,15 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
     val mockService = mock[NationalDirectDebitService]
     "onPageLoad" - {
       "must return OK and the correct view for a GET" in {
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        val userAnswers: UserAnswers = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
           val result = route(application, getRequest()).value
           val view = application.injector.instanceOf[AmendPlanEndDateView]
 
@@ -82,10 +88,17 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must populate the view correctly on a GET when the question has previously been answered" in {
-        val userAnswers = emptyUserAnswers.set(AmendPlanEndDatePage, validAnswer).success.value
+        val userAnswers = emptyUserAnswers
+          .set(AmendPlanEndDatePage, validAnswer)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
           val view = application.injector.instanceOf[AmendPlanEndDateView]
           val result = route(application, getRequest()).value
 
