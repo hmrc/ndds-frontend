@@ -33,7 +33,6 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
-import play.api.i18n.Lang.logger
 
 import scala.concurrent.{ExecutionContext, Future}
 

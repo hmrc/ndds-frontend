@@ -565,8 +565,13 @@ suspensionPeriodRangeDate.error.endBeforeStart = The end date you have entered i
 suspensionPeriodRangeDate.to = to
 suspensionPeriodRangeDate.checkYourAnswersLabel = Suspension period
 
-suspensionPeriodRangeDate.error.invalid.endDate = The suspend end date you have entered is not valid. The date must be after the suspend start date and last for no longer than six months. It must not be after the end date of the payment plan.
-suspensionPeriodRangeDate.error.invalid.startDate = The suspend start date you have entered is not valid. It must be between three working days and six months from the current date and between the start and end dates of the payment plan.
+##suspensionPeriodRangeDate.error.invalid.endDate = The suspend end date you have entered is not valid. The date must be after the suspend start date and last for no longer than six months. It must not be after the end date of the payment plan.
+##suspensionPeriodRangeDate.error.invalid.startDate = The suspend start date you have entered is not valid. It must be between three working days and six months from the current date and between the start and end dates of the payment plan.
+
+suspensionPeriodRangeDate.error.startDate = Suspension period start date must be between {0} and {2}
+suspensionPeriodRangeDate.error.endDate = Suspension period end date must be between {0} and {1}
+
+
 
 
 checkYourSuspensionDetails.title = Check your suspension details
