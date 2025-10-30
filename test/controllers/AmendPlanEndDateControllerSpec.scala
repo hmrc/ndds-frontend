@@ -475,10 +475,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
             .thenReturn(Future.successful(NextPaymentValidationResult(validAnswer, nextPaymentDateValid = true)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
-          val result = intercept[Exception](route(application, request).value.futureValue)
+          val result = route(application, request).value
 
-          val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-          result.getMessage must include(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
         }
       }
 

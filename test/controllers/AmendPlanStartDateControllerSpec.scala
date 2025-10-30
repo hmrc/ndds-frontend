@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import forms.AmendPlanStartDateFormProvider
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.NormalMode
+import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -71,9 +71,15 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     val mockService = mock[NationalDirectDebitService]
     "onPageLoad" - {
       "must return OK and the correct view for a GET" in {
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        val userAnswers: UserAnswers = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
           val result = route(application, getRequest()).value
           val view = application.injector.instanceOf[AmendPlanStartDateView]
 
@@ -83,7 +89,13 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must populate the view correctly on a GET when the question has previously been answered" in {
-        val userAnswers = emptyUserAnswers.set(AmendPlanStartDatePage, validAnswer).success.value
+        val userAnswers = emptyUserAnswers
+          .set(AmendPlanStartDatePage, validAnswer)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
         val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
         running(application) {

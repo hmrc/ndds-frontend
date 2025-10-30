@@ -52,34 +52,41 @@ class AmendPaymentPlanConfirmationController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
 
-    userAnswers.get(PaymentPlanDetailsQuery) match {
-      case Some(response) =>
-        val planDetail = response.paymentPlanDetails
-        val directDebitDetails = response.directDebitDetails
+    if (nddService.amendPaymentPlanGuard(userAnswers)) {
+      userAnswers.get(PaymentPlanDetailsQuery) match {
+        case Some(response) =>
+          val planDetail = response.paymentPlanDetails
+          val directDebitDetails = response.directDebitDetails
 
-        val (rows, backLink) = buildRows(userAnswers, planDetail, mode)
+          val (rows, backLink) = buildRows(userAnswers, planDetail, mode)
 
-        for {
-          directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
-          paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
-          planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
-        } yield {
-          Ok(
-            view(
-              mode,
-              paymentPlanReference,
-              directDebitReference,
-              directDebitDetails.bankSortCode.getOrElse(""),
-              directDebitDetails.bankAccountNumber.getOrElse(""),
-              rows,
-              backLink
+          for {
+            directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
+            paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
+            planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
+          } yield {
+            Ok(
+              view(
+                mode,
+                paymentPlanReference,
+                directDebitReference,
+                directDebitDetails.bankSortCode.getOrElse(""),
+                directDebitDetails.bankAccountNumber.getOrElse(""),
+                rows,
+                backLink
+              )
             )
-          )
-        }
+          }
 
-      case None =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        case None =>
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
+
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =

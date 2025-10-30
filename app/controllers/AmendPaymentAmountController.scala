@@ -62,7 +62,7 @@ class AmendPaymentAmountController @Inject() (
       Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
