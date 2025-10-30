@@ -68,7 +68,7 @@ class PaymentPlanDetailsController @Inject() (
                                 case _ => Future.successful(updatedAnswers)
                               }
             updatedAnswers <- planDetail.scheduledPaymentStartDate match {
-                                case Some(paymentStartDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentStartDate))
+                                case Some(paymentStartDate) => Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentStartDate))
                                 case _                      => Future.successful(updatedAnswers)
                               }
             updatedAnswers <- planDetail.scheduledPaymentEndDate match {
