@@ -118,7 +118,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
           }
 
         case _ =>
-          logger.warn("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to amend payment plan")
+          logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to amend payment plan")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }

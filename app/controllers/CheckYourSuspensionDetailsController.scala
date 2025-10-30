@@ -103,7 +103,7 @@ class CheckYourSuspensionDetailsController @Inject() (
           }
 
         case _ =>
-          logger.error("Missing DirectDebitReference and/or PaymentPlanReference  in UserAnswers when trying to submit suspension details")
+          logger.error("Missing DirectDebitReference and/or PaymentPlanReference  in UserAnswers when trying to suspend payment plan")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
