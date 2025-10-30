@@ -181,7 +181,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           nextPaymentDateValid     = true
         )
       )
-    } { endDate => // when planEndDate has a future date
+    } { currentPaymentPlanEndDate => // when planEndDate has a date
       {
         val today = LocalDate.now()
 
@@ -205,10 +205,9 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
                   calculateMonthlyBasedNextDate(planStartDate, today, paymentFrequency)
               }
             }
-
         } yield {
           // Step 2 – Validate potentialNextPaymentDate against planEndDate
-          val nextPaymentDateValid = !potentialNextPaymentDate.isAfter(endDate)
+          val nextPaymentDateValid = !potentialNextPaymentDate.isAfter(currentPaymentPlanEndDate)
 
           NextPaymentValidationResult(
             potentialNextPaymentDate = Some(potentialNextPaymentDate),
