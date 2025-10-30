@@ -35,7 +35,7 @@ package viewmodels.checkAnswers
 import controllers.routes
 import models.{CheckMode, NormalMode, SuspensionPeriodRange, UserAnswers}
 import pages.SuspensionPeriodRangeDatePage
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.Constants
 import utils.DateTimeFormats.formattedDateTimeShort
@@ -48,8 +48,6 @@ import java.time.format.DateTimeFormatter
 object SuspensionPeriodRangeDateSummary {
   def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(SuspensionPeriodRangeDatePage).map { answer =>
-
-      implicit val lang: Lang = messages.lang
 
       val formattedValue =
         s"${formattedDateTimeShort(answer.startDate.toString)} ${messages("suspensionPeriodRangeDate.to")} ${formattedDateTimeShort(answer.endDate.toString)}"

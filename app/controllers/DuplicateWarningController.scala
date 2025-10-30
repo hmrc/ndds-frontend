@@ -49,7 +49,7 @@ class DuplicateWarningController @Inject() (
     planType match {
       case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(mode)
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(mode)
-      case None                                             => routes.PaymentPlanDetailsController.onPageLoad()
+      case _                                                => routes.PaymentPlanDetailsController.onPageLoad()
     }
   }
 
