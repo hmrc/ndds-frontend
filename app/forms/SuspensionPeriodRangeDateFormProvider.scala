@@ -85,10 +85,12 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
     startDate: LocalDate,
     planEndDateOpt: Option[LocalDate]
   ): Boolean = {
-    val within6Months = !endDate.isAfter(startDate.plusMonths(MaxMonthsAhead))
+    val latestAllowedEndDate = LocalDate.now().plusMonths(MaxMonthsAhead)
+    val within6Months = !endDate.isAfter(latestAllowedEndDate)
     val afterStart = !endDate.isBefore(startDate)
     val beforePlanEnd = planEndDateOpt.forall(planEnd => !endDate.isAfter(planEnd))
 
-    within6Months && afterStart && beforePlanEnd
+    afterStart && within6Months && beforePlanEnd
   }
+
 }
