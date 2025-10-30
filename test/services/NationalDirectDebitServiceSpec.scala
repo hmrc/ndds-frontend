@@ -749,7 +749,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       result.nextPaymentDateValid mustBe true
     }
 
-    "when planStartDate is beyond three business days then potentialNextPaymentDate should return startDate" in {
+    "when planStartDate is beyond three working days then potentialNextPaymentDate should return startDate" in {
       val today = LocalDate.now()
       val startDate = today.plusDays(10)
       val planEndDate = today.plusDays(20)
@@ -811,7 +811,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           result.nextPaymentDateValid mustBe true
         }
 
-        "when planStartDate is prior to next three business days but potentialNextPaymentDate is not within 3 working days" in {
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is not within 3 working days" in {
           val today = LocalDate.now()
           val startDate = today.plusDays(3)
           val planEndDate = today.plusDays(20)
@@ -825,7 +825,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           result.nextPaymentDateValid mustBe true
         }
 
-        "when planStartDate is prior to next three business days but potentialNextPaymentDate is within 3 working days" in {
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is within 3 working days" in {
           val today = LocalDate.now()
           val startDate = today.plusDays(3)
           val planEndDate = today.plusDays(20)
@@ -875,7 +875,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           result.nextPaymentDateValid mustBe true
         }
 
-        "when planStartDate is prior to next three business days but potentialNextPaymentDate is not within 3 working days" in {
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is not within 3 working days" in {
           val today = LocalDate.now()
           val startDate = today.plusDays(2)
           val planEndDate = today.plusDays(20)
@@ -889,7 +889,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           result.nextPaymentDateValid mustBe true
         }
 
-        "when planStartDate is prior to next three business days but potentialNextPaymentDate is within 3 working days" in {
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is within 3 working days" in {
           val today = LocalDate.now()
           val startDate = today.plusDays(2)
           val planEndDate = today.plusMonths(3)
@@ -939,7 +939,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           result.nextPaymentDateValid mustBe true
         }
 
-        "when planStartDate is prior to next three business days but potentialNextPaymentDate is not within 3 working days" in {
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is not within 3 working days" in {
           val today = LocalDate.now()
           val startDate = today.plusDays(2)
           val planEndDate = today.plusMonths(3)
@@ -953,7 +953,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           result.nextPaymentDateValid mustBe true
         }
 
-        "when planStartDate is prior to next three business days but potentialNextPaymentDate is within 3 working days" in {
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is within 3 working days" in {
           val today = LocalDate.now()
           val startDate = today.plusDays(2)
           val planEndDate = today.plusMonths(3)
