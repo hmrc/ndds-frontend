@@ -53,7 +53,7 @@
     @paragraph("amendingPaymentPlan.p3")
 
     @govukButton(Button(
-      href = Some(routes.PaymentAmountController.onPageLoad(mode = NormalMode).url),
+      href = Some(routes.AmendPaymentAmountController.onPageLoad(mode = NormalMode).url),
       isStartButton = false,
       content = Text(messages("site.continue")),
       attributes = Map("id" -> "continue-button")
