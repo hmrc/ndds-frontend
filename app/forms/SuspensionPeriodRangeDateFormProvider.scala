@@ -23,11 +23,19 @@ import play.api.data.Forms.mapping
 import play.api.i18n.Messages
 import utils.DateFormats
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
 
-  def apply()(implicit messages: Messages): Form[SuspensionPeriodRange] =
+  private val MaxMonthsAhead = 6
+
+  def apply(
+    planStartDateOpt: Option[LocalDate],
+    planEndDateOpt: Option[LocalDate],
+    earliestStartDate: LocalDate
+  )(implicit messages: Messages): Form[SuspensionPeriodRange] = {
+
     Form(
       mapping(
         "suspensionPeriodRangeStartDate" -> customPaymentDate(
@@ -46,8 +54,41 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
         )
       )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
         .verifying(
-          "suspensionPeriodRangeDate.error.endBeforeStart",
-          range => !range.endDate.isBefore(range.startDate)
+          "suspensionPeriodRangeDate.error.invalid.startDate",
+          range => isSuspendStartDateValid(range.startDate, planStartDateOpt, planEndDateOpt, earliestStartDate)
+        )
+        .verifying(
+          "suspensionPeriodRangeDate.error.invalid.endDate",
+          range => isSuspendEndDateValid(range.endDate, range.startDate, planEndDateOpt)
         )
     )
+  }
+
+  private def isSuspendStartDateValid(
+    startDate: LocalDate,
+    planStartDateOpt: Option[LocalDate],
+    planEndDateOpt: Option[LocalDate],
+    earliestStartDate: LocalDate
+  ): Boolean = {
+    val latestStartDate = LocalDate.now().plusMonths(MaxMonthsAhead)
+
+    val afterPlanStart = planStartDateOpt.forall(planStart => !startDate.isBefore(planStart))
+    val beforePlanEnd = planEndDateOpt.forall(planEnd => !startDate.isAfter(planEnd))
+    val afterEarliest = !startDate.isBefore(earliestStartDate)
+    val beforeLatest = !startDate.isAfter(latestStartDate)
+
+    afterPlanStart && beforePlanEnd && afterEarliest && beforeLatest
+  }
+
+  private def isSuspendEndDateValid(
+    endDate: LocalDate,
+    startDate: LocalDate,
+    planEndDateOpt: Option[LocalDate]
+  ): Boolean = {
+    val within6Months = !endDate.isAfter(startDate.plusMonths(MaxMonthsAhead))
+    val afterStart = !endDate.isBefore(startDate)
+    val beforePlanEnd = planEndDateOpt.forall(planEnd => !endDate.isAfter(planEnd))
+
+    within6Months && afterStart && beforePlanEnd
+  }
 }
