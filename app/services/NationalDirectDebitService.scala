@@ -34,7 +34,7 @@ import utils.Utils
 import utils.Frequency
 
 import java.time.temporal.TemporalAdjusters
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import java.time.temporal.ChronoUnit
@@ -43,7 +43,8 @@ import java.time.temporal.ChronoUnit
 class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitConnector,
                                             val directDebitCache: DirectDebitCacheRepository,
                                             config: FrontendAppConfig,
-                                            auditService: AuditService
+                                            auditService: AuditService,
+                                            clock: Clock
                                            )(implicit ec: ExecutionContext)
     extends Logging {
   def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[?]): Future[NddResponse] = {
@@ -183,7 +184,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       )
     } { currentPaymentPlanEndDate => // when planEndDate has a date
       {
-        val today = LocalDate.now()
+        val today = LocalDate.now(clock)
 
         for {
           // Step 1.1 – check if start date is beyond 3 working days
