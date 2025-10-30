@@ -1195,6 +1195,50 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
             result.nextPaymentDateValid mustBe true
           }
 
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-03-30T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.of(2025, 3, 30)
+
+            val startDate = LocalDate.of(2024, 3, 31)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 7, 1)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-02-28T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.of(2025, 2, 28)
+
+            val startDate = LocalDate.of(2024, 2, 28)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 5, 28)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val actualToday = LocalDate.now()
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
@@ -1289,6 +1333,28 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
             val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
 
             result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(6))
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-05-30T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.of(2025, 5, 30)
+
+            val startDate = LocalDate.of(2024, 5, 31)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 12, 1)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }
 
