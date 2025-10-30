@@ -288,10 +288,10 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
     )
 
     val submission = ChrisSubmissionRequest(
-      serviceType = DirectDebitSource.TC,
-      paymentPlanType = PaymentPlanType.TaxCreditRepaymentPlan,
+      serviceType                = DirectDebitSource.TC,
+      paymentPlanType            = PaymentPlanType.TaxCreditRepaymentPlan,
       paymentPlanReferenceNumber = None,
-      paymentFrequency = Some(PaymentsFrequency.Monthly.toString),
+      paymentFrequency           = Some(PaymentsFrequency.Monthly.toString),
       yourBankDetailsWithAuddisStatus = YourBankDetailsWithAuddisStatus(
         accountHolderName = "Test",
         sortCode          = "123456",
@@ -299,17 +299,18 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
         auddisStatus      = false,
         accountVerified   = false
       ),
-      planStartDate   = Some(planStartDateDetails),
-      planEndDate     = None,
-      paymentDate     = Some(paymentDateDetails),
-      yearEndAndMonth = None,
-      ddiReferenceNo = "DDI123456789",
-      paymentReference = "testReference",
-      totalAmountDue = Some(BigDecimal(200)),
-      paymentAmount = Some(BigDecimal(100.00)),
+      planStartDate        = Some(planStartDateDetails),
+      planEndDate          = None,
+      paymentDate          = Some(paymentDateDetails),
+      yearEndAndMonth      = None,
+      ddiReferenceNo       = "DDI123456789",
+      paymentReference     = "testReference",
+      totalAmountDue       = Some(BigDecimal(200)),
+      paymentAmount        = Some(BigDecimal(100.00)),
       regularPaymentAmount = Some(BigDecimal(90.00)),
-      amendPaymentAmount = None,
-      calculation = None
+      amendPaymentAmount   = None,
+      calculation          = None,
+      suspensionPeriodRangeDate = None
     )
 
     "successfully return true when CHRIS submission succeeds with 200 OK" in {
@@ -894,7 +895,6 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
     }
 
     "successfully retrieve payment plan details when hodService is MGD" in {
-
       val responseJson =
         """
           |{
@@ -938,6 +938,32 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val result = connector.getPaymentPlanDetails("test-dd-ref", "test-pp-ref").futureValue
 
       result.paymentPlanDetails.hodService shouldBe DirectDebitSource.MGD.toString
+    }
+  }
+
+  "lockPaymentPlan" should {
+    "successfully lock payment plan" in {
+
+      val responseJson =
+        """
+          |{
+          |  "lockSuccessful": true
+          |}
+          """.stripMargin
+
+      stubFor(
+        put(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref/lock"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue
+
+      result.lockSuccessful shouldBe true
+
     }
   }
 

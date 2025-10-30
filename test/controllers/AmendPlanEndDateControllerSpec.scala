@@ -18,11 +18,8 @@ package controllers
 
 import base.SpecBase
 import forms.AmendPlanEndDateFormProvider
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
-import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
-import models.{NextPaymentValidationResult, NormalMode}
-import models.{NormalMode, PaymentPlanType}
+import models.{NextPaymentValidationResult, NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -480,7 +477,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = intercept[Exception](route(application, request).value.futureValue)
 
-          result.getMessage must include("NDDS Payment Plan Guard: Cannot amend this plan type: Variable payment")
+          result.getMessage must include("NDDS Payment Plan Guard: Cannot amend this plan type: Some(Variable payment)")
         }
       }
 

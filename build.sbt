@@ -9,14 +9,10 @@ ThisBuild / scalaVersion := "3.3.6"
 
 lazy val microservice = (project in file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
-  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
+  .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(inConfig(Test)(testSettings): _*)
   .settings(ThisBuild / useSuperShell := false)
-  .settings(scalafmtOnCompile := true,
-    scalafmtDetailedError := true,
-    scalafmtPrintDiff := true,
-    scalafmtFailOnErrors := true
-  )
+  .settings(scalafmtOnCompile := true, scalafmtDetailedError := true, scalafmtPrintDiff := true, scalafmtFailOnErrors := true)
   .settings(
     name := "ndds-frontend",
     PlayKeys.playDefaultPort := 6990,
@@ -57,7 +53,7 @@ lazy val microservice = (project in file("."))
     Assets / pipelineStages := Seq(concat)
   )
 
-lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   fork := true,
   unmanagedSourceDirectories += baseDirectory.value / "test-utils"
 )
@@ -71,8 +67,8 @@ lazy val sCoverageSettings = {
   Seq(
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;git .*config.*;.*models.*;" +
       ".*Routes*.*;.*viewmodels.*;.*views.*;testOnlyDoNotUseInAppConf.*;",
-    ScoverageKeys.coverageMinimumStmtTotal := 70,
-    ScoverageKeys.coverageFailOnMinimum := false,
+    ScoverageKeys.coverageMinimumStmtTotal := 80,
+    ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
 }

@@ -14,15 +14,74 @@
  * limitations under the License.
  *@
 
+@import viewmodels.InputWidth.*
+@import views.html.components.*
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     mainErrorSummary: components.MainErrorSummary,
-    govukDateInput: GovukDateInput,
-    govukButton: GovukButton
+    govukDetails: GovukDetails,
+    govukInput: GovukInput,
+    govukButton: GovukButton,
+    govukWarningText: GovukWarningText,
+    govukFieldset: GovukFieldset,
+    header1: Header1,
+    paragraph: Paragraph,
+    bulletList: BulletList
 )
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
+
+@html = {
+
+    @govukWarningText(WarningText(content = Text(messages("yearEndAndMonth.warning"))))
+    @paragraph("yearEndAndMonth.p1")
+
+    @govukInput(
+        InputViewModel(
+            field = form("value.year"),
+            label = LabelViewModel(messages("yearEndAndMonth.deductionYearEnd")).withCssClass("govuk-label--m")
+        )
+        .withWidth(Fixed4)
+        .withHint(Hint(content = Text(messages("yearEndAndMonth.deductionYearEnd.hint"))))
+        .asNumeric()
+    )
+
+    @govukInput(
+        InputViewModel(
+            field = form("value.month"),
+            label = LabelViewModel(messages("yearEndAndMonth.monthOrQuarter")).withCssClass("govuk-label--m")
+        )
+        .withWidth(Fixed2)
+        .withHint(Hint(content = Text(messages("yearEndAndMonth.monthOrQuarter.hint"))))
+        .asNumeric()
+    )
+
+    @defining(HtmlFormat.fill(Seq(
+
+        paragraph("yearEndAndMonth.collapsable.examples.p1", true),
+        bulletList(
+        items = Seq(
+            "yearEndAndMonth.collapsable.examples.b1",
+            "yearEndAndMonth.collapsable.examples.b2",
+            "yearEndAndMonth.collapsable.examples.b3"
+        )
+        ),
+        paragraph("yearEndAndMonth.collapsable.monthCodes.p1", true),
+        paragraph("yearEndAndMonth.collapsable.monthCodes.p2"),
+        paragraph("yearEndAndMonth.collapsable.quarterCodes.p1"),
+
+    ))) { content =>
+
+        @govukDetails(
+            Details(
+                summary = messages("yearEndAndMonth.collapsable"),
+                content = HtmlContent(content)
+            )
+        )
+    }
+}
 
 @layout(pageTitle = titleForSetupJourney(form, messages("yearEndAndMonth.title")), backLink = Some(call.url)) {
 
@@ -30,13 +89,14 @@
 
         @mainErrorSummary(form)
 
-        @govukDateInput(
-            YearMonthViewModel(
-                field  = form("value"),
-                legend = LegendViewModel(messages("yearEndAndMonth.heading")).asPageHeading()
-            )
-            .withHint(HintViewModel(HtmlContent(messages("yearEndAndMonth.hint"))))
-        )
+        @govukFieldset(Fieldset(
+            legend = Some(Legend(
+                content = Text(messages("yearEndAndMonth.heading")),
+                classes = "govuk-fieldset__legend--xl",
+                isPageHeading = true
+            )),
+            html = html
+        ))
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))

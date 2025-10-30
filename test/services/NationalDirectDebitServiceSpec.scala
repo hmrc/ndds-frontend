@@ -520,17 +520,18 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           auddisStatus      = false,
           accountVerified   = false
         ),
-        planStartDate        = Some(planStartDateDetails),
-        planEndDate          = None,
-        paymentDate          = Some(paymentDateDetails),
-        yearEndAndMonth      = None,
-        ddiReferenceNo       = "DDI123456789",
-        paymentReference     = "testReference",
-        totalAmountDue       = Some(BigDecimal(200)),
-        paymentAmount        = Some(BigDecimal(100)),
-        regularPaymentAmount = Some(BigDecimal(90)),
-        amendPaymentAmount   = None,
-        calculation          = None
+        planStartDate             = Some(planStartDateDetails),
+        planEndDate               = None,
+        paymentDate               = Some(paymentDateDetails),
+        yearEndAndMonth           = None,
+        ddiReferenceNo            = "DDI123456789",
+        paymentReference          = "testReference",
+        totalAmountDue            = Some(BigDecimal(200)),
+        paymentAmount             = Some(BigDecimal(100)),
+        regularPaymentAmount      = Some(BigDecimal(90)),
+        amendPaymentAmount        = None,
+        calculation               = None,
+        suspensionPeriodRangeDate = None
       )
 
       "must return true when CHRIS submission succeeds" in {
@@ -555,18 +556,19 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           auddisStatus      = true,
           accountVerified   = true
         ),
-        planStartDate        = Some(planStartDateDetails),
-        planEndDate          = Some(currentTime.toLocalDate.plusYears(1)),
-        paymentDate          = Some(paymentDateDetails),
-        yearEndAndMonth      = None,
-        ddiReferenceNo       = "DDI123456789",
-        paymentReference     = "testReference",
-        totalAmountDue       = Some(BigDecimal(200)),
-        paymentAmount        = Some(BigDecimal(100)),
-        regularPaymentAmount = Some(BigDecimal(90)),
-        amendPaymentAmount   = None,
-        calculation          = None,
-        amendPlan            = true
+        planStartDate             = Some(planStartDateDetails),
+        planEndDate               = Some(currentTime.toLocalDate.plusYears(1)),
+        paymentDate               = Some(paymentDateDetails),
+        yearEndAndMonth           = None,
+        ddiReferenceNo            = "DDI123456789",
+        paymentReference          = "testReference",
+        totalAmountDue            = Some(BigDecimal(200)),
+        paymentAmount             = Some(BigDecimal(100)),
+        regularPaymentAmount      = Some(BigDecimal(90)),
+        amendPaymentAmount        = None,
+        calculation               = None,
+        amendPlan                 = true,
+        suspensionPeriodRangeDate = None
       )
 
       "must return true when CHRIS submission succeeds for amend" in {
@@ -608,6 +610,26 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         val result = intercept[Exception](service.getPaymentPlanDetails("test-ddRef", "test-pp-ref").futureValue)
 
         result.getMessage must include("error")
+      }
+    }
+
+    "lockPaymentPlan" - {
+      "must successfully return Ok" in {
+        when(mockConnector.lockPaymentPlan(any(), any())(any()))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+        val result = service.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue
+
+        result mustBe AmendLockResponse(lockSuccessful = true)
+      }
+
+      "fail when the connector call fails" in {
+        when(mockConnector.lockPaymentPlan(any(), any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.lockPaymentPlan("test-dd-ref", "test-pp-ref").futureValue)
+
+        result.getMessage must include("bang")
       }
     }
 
@@ -798,7 +820,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       result.nextPaymentDateValid mustBe true
     }
-
   }
 
   "isPaymentPlanCancellable" - {
@@ -828,6 +849,50 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         emptyUserAnswers.set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString).success.value
 
       service.isPaymentPlanCancellable(userAnswers) mustBe false
+    }
+  }
+
+  "suspendPaymentPlanGuard" - {
+
+    "must return false if single payment for suspend journey" in {
+      val expectedUserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+      result mustBe false
+    }
+
+    "must return true if budget payment for suspend journey" in {
+      val expectedUserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+      result mustBe true
+    }
+
+    "must return false if variable payment for suspend journey" in {
+      val expectedUserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
+        .success
+        .value
+      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+      result mustBe false
+    }
+
+    "must return false if tax credit repayment payment for suspend journey" in {
+      val expectedUserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .success
+        .value
+      val result = service.suspendPaymentPlanGuard(expectedUserAnswers)
+      result mustBe false
+    }
+
+    "must return false if payment plan is not set" in {
+      val result = service.suspendPaymentPlanGuard(emptyUserAnswers)
+      result mustBe false
     }
   }
 }

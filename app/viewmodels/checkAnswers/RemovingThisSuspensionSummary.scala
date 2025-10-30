@@ -16,29 +16,28 @@
 
 package viewmodels.checkAnswers
 
+import controllers.routes
+import models.{CheckMode, UserAnswers}
+import pages.RemovingThisSuspensionPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+object RemovingThisSuspensionSummary {
 
-object AmendSuspendDateSummary {
+  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(RemovingThisSuspensionPage).map { answer =>
 
-  def row(suspendDate: Option[LocalDate], isStartDate: Boolean)(implicit messages: Messages): SummaryListRow =
-    val label = if (isStartDate) {
-      "paymentPlanDetails.details.suspendStartDate"
-    } else {
-      "paymentPlanDetails.details.suspendEndDate"
+      val value = if (answer) "site.yes" else "site.no"
+
+      SummaryListRowViewModel(
+        key   = "removingThisSuspension.checkYourAnswersLabel",
+        value = ValueViewModel(value),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.RemovingThisSuspensionController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("removingThisSuspension.change.hidden"))
+        )
+      )
     }
-    val formattedDate = suspendDate
-      .map(_.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
-      .getOrElse("")
-    SummaryListRowViewModel(
-      key     = label,
-      value   = ValueViewModel(formattedDate),
-      actions = Seq.empty
-    )
-
 }

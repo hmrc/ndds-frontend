@@ -66,7 +66,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
         success
       }
       .recover { case ex =>
-        logger.error(s"Failed to submit Chris data: ${ex.getMessage}", ex)
+        logger.warn(s"Failed to submit Chris data", ex)
         false
       }
   }
@@ -112,7 +112,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   }
 
   private[services] def calculateOffset(auddisStatus: Boolean): Int = {
-    logger.info(s"Calculate offset Auddis flag: $auddisStatus")
+    logger.debug(s"Calculate offset Auddis flag: $auddisStatus")
     val dynamicDelay = if (auddisStatus) {
       config.paymentDelayDynamicAuddisEnabled
     } else {
@@ -150,7 +150,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2)).map { futureWorkingDays =>
       {
         val twoDaysPrior = planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
-        logger.info(s"twoDaysPrior flag is set to: $twoDaysPrior")
+        logger.debug(s"twoDaysPrior flag is set to: $twoDaysPrior")
         twoDaysPrior
       }
     }
@@ -161,7 +161,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map { futureWorkingDays =>
       {
         val isThreeDaysPrior = planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
-        logger.info(s"planEndWithinThreeDays flag is set to: $isThreeDaysPrior")
+        logger.debug(s"planEndWithinThreeDays flag is set to: $isThreeDaysPrior")
         isThreeDaysPrior
       }
     }
@@ -256,7 +256,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       potentialNext = potentialNext.plusWeeks(weeksUntilNextPayment)
     }
 
-    logger.info(
+    logger.debug(
       s"""|[calculateWeeklyBasedNextDate]
           |  Frequency: $frequency
           |  Start date: $startDate
@@ -341,7 +341,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       }
     }
 
-    logger.info(
+    logger.debug(
       s"""|[calculateMonthlyBasedNextDate]
           |  Frequency: $frequency
           |  Start date: $startDate
@@ -362,6 +362,10 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.getPaymentPlanDetails(directDebitReference, paymentPlanReference)
   }
 
+  def lockPaymentPlan(directDebitReference: String, paymentPlanReference: String)(implicit hc: HeaderCarrier): Future[AmendLockResponse] = {
+    nddConnector.lockPaymentPlan(directDebitReference, paymentPlanReference)
+  }
+
   def isDuplicatePaymentPlan(ua: UserAnswers)(implicit hc: HeaderCarrier, request: Request[?]): Future[DuplicateCheckResponse] = {
     ua.get(PaymentPlansCountQuery) match {
       case Some(count) => {
@@ -371,12 +375,12 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
           nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
         } else {
-          logger.info("There is only 1 payment plan so not checking duplicate as in no RDS Call")
+          logger.debug("There is only 1 payment plan so not checking duplicate as in no RDS Call")
           Future.successful(DuplicateCheckResponse(false))
         }
       }
       case None => {
-        logger.error("Could not find the count of Payment Plans" + ua.get(PaymentPlansCountQuery).get)
+        logger.error(s"Could not find the count of Payment Plans: ${ua.get(PaymentPlansCountQuery)}")
         throw new IllegalStateException("Count of payment plans is missing or invalid")
       }
     }
@@ -393,4 +397,8 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
         ).contains(planType)
       )
   }
+
+  def suspendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =
+    isBudgetPaymentPlan(userAnswers)
+
 }

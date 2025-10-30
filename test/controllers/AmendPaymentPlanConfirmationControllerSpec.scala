@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.responses.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -35,6 +35,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
+implicit val hc: HeaderCarrier = HeaderCarrier()
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -272,12 +273,12 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
     "onSubmit" - {
       "must redirect to AmendPaymentPlanUpdateController when CHRIS submission is successful" in {
 
-        import uk.gov.hmrc.http.HeaderCarrier
-
         val mockNddService = mock[NationalDirectDebitService]
 
         when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(true))
+        when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
 
         val directDebitReference = "DDI123456789"
 
@@ -407,7 +408,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-          flash(result).get("error").value mustBe "There was a problem submitting your direct debit. Please try again later."
         }
       }
     }

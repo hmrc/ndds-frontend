@@ -90,7 +90,7 @@ class CheckYourAnswersController @Inject() (
 
       (ua.get(pages.MacValuePage), maybeMac2) match {
         case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-          logger.info(s"MAC validation successful")
+          logger.debug(s"MAC validation successful")
           nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
             val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
 
@@ -98,33 +98,31 @@ class CheckYourAnswersController @Inject() (
               .submitChrisData(chrisRequest)
               .flatMap { success =>
                 if (success) {
-                  logger.info(s"CHRIS submission successful for DDI Ref [${reference.ddiRefNumber}]")
+                  logger.info(s"CHRIS submission successful for creating for DDI Ref [${reference.ddiRefNumber}]")
 
                   for {
                     updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
                     _              <- sessionRepository.set(updatedAnswers)
                   } yield {
                     auditService.sendSubmitDirectDebitPaymentPlan
-                    logger.info(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
+                    logger.debug(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
                     Redirect(routes.DirectDebitConfirmationController.onPageLoad())
                   }
                 } else {
-                  logger.error(s"CHRIS submission failed for DDI Ref [${reference.ddiRefNumber}]")
+                  logger.error(s"CHRIS submission failed for creating for DDI Ref [${reference.ddiRefNumber}]")
                   Future.successful(
                     Redirect(routes.JourneyRecoveryController.onPageLoad())
-                      .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
                   )
                 }
               }
               .recover { case ex =>
                 logger.error("CHRIS submission or session update failed", ex)
                 Redirect(routes.JourneyRecoveryController.onPageLoad())
-                  .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
               }
           }
 
         case (Some(mac1), Some(mac2)) =>
-          logger.error(s"MAC validation failed")
+          logger.error(s"MAC validation failed for user ${request.userId}")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
 
         case _ =>
@@ -160,7 +158,8 @@ class CheckYourAnswersController @Inject() (
       paymentAmount                   = ua.get(PaymentAmountPage),
       regularPaymentAmount            = ua.get(RegularPaymentAmountPage),
       amendPaymentAmount              = None,
-      calculation                     = calculationOpt
+      calculation                     = calculationOpt,
+      suspensionPeriodRangeDate       = None
     )
   }
 

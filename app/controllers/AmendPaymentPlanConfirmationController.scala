@@ -91,19 +91,29 @@ class AmendPaymentPlanConfirmationController @Inject() (
           val chrisRequest = buildChrisSubmissionRequest(ua, ddiReference)
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
-              logger.info(s"CHRIS submission successful for DDI Ref [$ddiReference]")
-              Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
+              logger.info(s"CHRIS submission successful for amend payment plan for DDI Ref [$ddiReference]")
+              for {
+                directDebitReference <- Future.fromTry(Try(ua.get(DirectDebitReferenceQuery).get))
+                paymentPlanReference <- Future.fromTry(Try(ua.get(PaymentPlanReferenceQuery).get))
+                lockResponse         <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
+              } yield {
+                if (lockResponse.lockSuccessful) {
+                  logger.debug(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                } else {
+                  logger.debug(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                }
+                Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
+              }
             } else {
-              logger.error(s"CHRIS submission failed for DDI Ref [$ddiReference]")
+              logger.error(s"CHRIS submission failed amend payment plan for DDI Ref [$ddiReference]")
               Future.successful(
                 Redirect(routes.JourneyRecoveryController.onPageLoad())
-                  .flashing("error" -> "There was a problem submitting your direct debit. Please try again later.")
               )
             }
           }
 
         case None =>
-          logger.error("Missing DirectDebitReference in UserAnswers")
+          logger.warn("Missing DirectDebitReference in UserAnswers when trying to amend payment plan")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
@@ -150,10 +160,11 @@ class AmendPaymentPlanConfirmationController @Inject() (
           regularPaymentAmount            = None,
           amendPaymentAmount              = userAnswers.get(AmendPaymentAmountPage),
           calculation                     = None,
+          suspensionPeriodRangeDate       = None,
           amendPlan                       = true
         )
 
-      case None =>
+      case _ =>
         throw new IllegalStateException("Missing PaymentPlanDetails in userAnswers")
     }
   }

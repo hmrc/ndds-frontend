@@ -61,7 +61,7 @@ class AmendPaymentAmountController @Inject() (
 
       Ok(view(preparedForm, mode, routes.PaymentPlanDetailsController.onPageLoad()))
     } else {
-      throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${answers.get(ManagePaymentPlanTypePage).get}")
+      throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: ${answers.get(ManagePaymentPlanTypePage)}")
     }
   }
 

@@ -35,6 +35,7 @@ import views.html.CancelPaymentPlanView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class CancelPaymentPlanController @Inject() (
   override val messagesApi: MessagesApi,
@@ -67,12 +68,12 @@ class CancelPaymentPlanController @Inject() (
           Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
 
         case _ =>
-          logger.error("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+          logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
+      logger.warn(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
@@ -101,7 +102,7 @@ class CancelPaymentPlanController @Inject() (
           )
         )
       case _ =>
-        logger.error(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+        logger.warn(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
@@ -118,14 +119,23 @@ class CancelPaymentPlanController @Inject() (
             logger.info(s"CHRIS Cancel payment plan payload submission successful for DDI Ref [$ddiReference]")
 
             for {
-              updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
-              _              <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
+              updatedAnswers       <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
+              directDebitReference <- Future.fromTry(Try(ua.get(DirectDebitReferenceQuery).get))
+              paymentPlanReference <- Future.fromTry(Try(ua.get(PaymentPlanReferenceQuery).get))
+              lockResponse         <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
+              _                    <- sessionRepository.set(updatedAnswers)
+            } yield {
+              if (lockResponse.lockSuccessful) {
+                logger.info(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+              } else {
+                logger.error(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+              }
+              Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
+            }
           case false =>
             logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
             Future.successful(
               Redirect(routes.JourneyRecoveryController.onPageLoad())
-                .flashing("error" -> "There was a problem cancelling your direct debit plan. Please try again later.")
             )
         }
 
@@ -176,6 +186,7 @@ class CancelPaymentPlanController @Inject() (
           regularPaymentAmount            = None,
           amendPaymentAmount              = None,
           calculation                     = None,
+          suspensionPeriodRangeDate       = None,
           cancelPlan                      = true
         )
 
