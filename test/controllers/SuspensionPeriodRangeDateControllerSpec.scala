@@ -43,7 +43,12 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
 
   implicit private val messages: Messages = stubMessages()
   private val formProvider = new SuspensionPeriodRangeDateFormProvider()
-  private def form = formProvider()
+
+  private val PlanStartDate = Some(LocalDate.of(2025, 10, 1))
+  private val planEndDate = Some(LocalDate.of(2025, 10, 10))
+  private val earliestStartDateMock = LocalDate.now().plusDays(3)
+
+  private def form = formProvider(PlanStartDate, planEndDate, earliestStartDateMock)
 
   private val onwardRoute = Call("GET", "/foo")
 
@@ -128,7 +133,10 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
 
     "must return OK and the correct view for GET with BudgetPaymentPlan" in {
       val mockNddsService = mock[NationalDirectDebitService]
+
       when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
+      when(mockNddsService.earliestSuspendStartDate(any())(any()))
+        .thenReturn(Future.successful(LocalDate.now().plusDays(3)))
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan))
         .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
@@ -166,6 +174,8 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
     "must populate the view correctly on GET when previously answered" in {
       val mockNddsService = mock[NationalDirectDebitService]
       when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
+      when(mockNddsService.earliestSuspendStartDate(any())(any()))
+        .thenReturn(Future.successful(LocalDate.now().plusDays(3)))
       val userAnswers = userAnswersWithBudgetPlan
         .set(SuspensionPeriodRangeDatePage, validAnswer)
         .success
@@ -191,18 +201,37 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
 
     "must redirect to next page when valid POST with BudgetPaymentPlan" in {
       val mockSessionRepository = mock[SessionRepository]
+      val mockNddsService = mock[NationalDirectDebitService]
+
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
+      when(mockNddsService.earliestSuspendStartDate(any())(any()))
+        .thenReturn(Future.successful(LocalDate.now().plusDays(3)))
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockNddsService)
           )
           .build()
 
+      val startDate = LocalDate.now().plusDays(4)
+      val endDate = LocalDate.now().plusDays(10)
+
+      val validPostRequest = FakeRequest(POST, suspensionPeriodRangeDateRoute)
+        .withFormUrlEncodedBody(
+          "suspensionPeriodRangeStartDate.day"   -> startDate.getDayOfMonth.toString,
+          "suspensionPeriodRangeStartDate.month" -> startDate.getMonthValue.toString,
+          "suspensionPeriodRangeStartDate.year"  -> startDate.getYear.toString,
+          "suspensionPeriodRangeEndDate.day"     -> endDate.getDayOfMonth.toString,
+          "suspensionPeriodRangeEndDate.month"   -> endDate.getMonthValue.toString,
+          "suspensionPeriodRangeEndDate.year"    -> endDate.getYear.toString
+        )
+
       running(application) {
-        val result = route(application, postRequest()).value
+        val result = route(application, validPostRequest).value
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
       }
@@ -210,13 +239,17 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
 
     "must redirect to Journey Recovery for POST with non-Budget plan" in {
       val mockSessionRepository = mock[SessionRepository]
+      val mockNddsService = mock[NationalDirectDebitService]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddsService.earliestSuspendStartDate(any())(any()))
+        .thenReturn(Future.successful(LocalDate.now().plusDays(3)))
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswersWithSinglePlan))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockNddsService)
           )
           .build()
 
@@ -228,7 +261,19 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
     }
 
     "must return BadRequest and errors when invalid POST data submitted" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan)).build()
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNddsService = mock[NationalDirectDebitService]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddsService.earliestSuspendStartDate(any())(any()))
+        .thenReturn(Future.successful(LocalDate.now().plusDays(3)))
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPlan))
+        .overrides(
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
 
       val request =
         FakeRequest(POST, suspensionPeriodRangeDateRoute)

@@ -386,6 +386,38 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
+  import java.time.LocalDate
+
+  private val MaxMonthsAhead = 6
+
+  def isSuspendStartDateValid(
+    startDate: LocalDate,
+    planStartDateOpt: Option[LocalDate],
+    planEndDateOpt: Option[LocalDate],
+    earliestStartDate: LocalDate
+  ): Boolean = {
+    val latestStartDate = LocalDate.now().plusMonths(MaxMonthsAhead)
+
+    val afterPlanStart = planStartDateOpt.forall(planStart => !startDate.isBefore(planStart))
+    val beforePlanEnd = planEndDateOpt.forall(planEnd => !startDate.isAfter(planEnd))
+    val afterEarliest = !startDate.isBefore(earliestStartDate)
+    val beforeLatest = !startDate.isAfter(latestStartDate)
+
+    afterPlanStart && beforePlanEnd && afterEarliest && beforeLatest
+  }
+
+  def isSuspendEndDateValid(
+    endDate: LocalDate,
+    startDate: LocalDate,
+    planEndDateOpt: Option[LocalDate]
+  ): Boolean = {
+    val within6Months = !endDate.isAfter(startDate.plusMonths(MaxMonthsAhead))
+    val afterStart = !endDate.isBefore(startDate)
+    val beforePlanEnd = planEndDateOpt.forall(planEnd => !endDate.isAfter(planEnd))
+
+    within6Months && afterStart && beforePlanEnd
+  }
+
   def isPaymentPlanCancellable(userAnswers: UserAnswers): Boolean = {
     userAnswers
       .get(ManagePaymentPlanTypePage)
@@ -396,6 +428,15 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           PaymentPlanType.VariablePaymentPlan.toString
         ).contains(planType)
       )
+  }
+
+  def earliestSuspendStartDate(workingDaysOffset: Int = 3)(implicit hc: HeaderCarrier): Future[LocalDate] = {
+    val today = LocalDate.now()
+    val request = WorkingDaysOffsetRequest(baseDate = today.toString, offsetWorkingDays = workingDaysOffset)
+
+    nddConnector.getFutureWorkingDays(request).map { response =>
+      LocalDate.parse(response.date)
+    }
   }
 
   def suspendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =

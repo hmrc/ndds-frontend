@@ -25,10 +25,17 @@ import java.time.LocalDate
 class SuspensionPeriodRangeDateFormProviderSpec extends DateBehaviours {
 
   private implicit val messages: Messages = stubMessages()
-  private val form = new SuspensionPeriodRangeDateFormProvider()()
 
-  private val validStartDate = LocalDate.of(2025, 10, 1)
-  private val validEndDate = LocalDate.of(2025, 10, 10)
+  private val today = LocalDate.of(2025, 10, 1)
+  private val earliestStart = today.plusDays(3) // 3 working days from today
+  private val planStart = LocalDate.of(2025, 11, 4)
+  private val planEnd = LocalDate.of(2026, 1, 30)
+
+  private val formProvider = new SuspensionPeriodRangeDateFormProvider()
+  private val form = formProvider(Some(planStart), Some(planEnd), earliestStart)
+
+  private val validStartDate = planStart.plusDays(1)
+  private val validEndDate = validStartDate.plusDays(10)
 
   "SuspensionPeriodRangeDateFormProvider" - {
 
@@ -47,82 +54,94 @@ class SuspensionPeriodRangeDateFormProviderSpec extends DateBehaviours {
       result.value.value mustBe SuspensionPeriodRange(validStartDate, validEndDate)
     }
 
-    "must return an error when end date is before start date" in {
+    "must fail when start date is before plan start" in {
+      val invalidStart = planStart.minusDays(1)
       val data = Map(
-        "suspensionPeriodRangeStartDate.day"   -> "10",
-        "suspensionPeriodRangeStartDate.month" -> "10",
-        "suspensionPeriodRangeStartDate.year"  -> "2025",
-        "suspensionPeriodRangeEndDate.day"     -> "05",
-        "suspensionPeriodRangeEndDate.month"   -> "10",
-        "suspensionPeriodRangeEndDate.year"    -> "2025"
+        "suspensionPeriodRangeStartDate.day"   -> invalidStart.getDayOfMonth.toString,
+        "suspensionPeriodRangeStartDate.month" -> invalidStart.getMonthValue.toString,
+        "suspensionPeriodRangeStartDate.year"  -> invalidStart.getYear.toString,
+        "suspensionPeriodRangeEndDate.day"     -> validEndDate.getDayOfMonth.toString,
+        "suspensionPeriodRangeEndDate.month"   -> validEndDate.getMonthValue.toString,
+        "suspensionPeriodRangeEndDate.year"    -> validEndDate.getYear.toString
       )
 
       val result = form.bind(data)
-      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.endBeforeStart")
+      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.startDate")
     }
 
-    "must return generic date errors when start date is missing" in {
+    "must fail when start date is after plan end" in {
+      val invalidStart = planEnd.plusDays(1)
       val data = Map(
-        "suspensionPeriodRangeEndDate.day"   -> "10",
-        "suspensionPeriodRangeEndDate.month" -> "10",
-        "suspensionPeriodRangeEndDate.year"  -> "2025"
+        "suspensionPeriodRangeStartDate.day"   -> invalidStart.getDayOfMonth.toString,
+        "suspensionPeriodRangeStartDate.month" -> invalidStart.getMonthValue.toString,
+        "suspensionPeriodRangeStartDate.year"  -> invalidStart.getYear.toString,
+        "suspensionPeriodRangeEndDate.day"     -> validEndDate.getDayOfMonth.toString,
+        "suspensionPeriodRangeEndDate.month"   -> validEndDate.getMonthValue.toString,
+        "suspensionPeriodRangeEndDate.year"    -> validEndDate.getYear.toString
       )
 
       val result = form.bind(data)
-      result.errors.map(_.message) must contain allElementsOf Seq(
-        "date.error.day",
-        "date.error.month",
-        "date.error.year"
-      )
+      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.startDate")
     }
 
-    "must return generic date errors when end date is missing" in {
+    "must fail when start date is before earliest allowed" in {
+      val invalidStart = earliestStart.minusDays(1)
       val data = Map(
-        "suspensionPeriodRangeStartDate.day"   -> "10",
-        "suspensionPeriodRangeStartDate.month" -> "10",
-        "suspensionPeriodRangeStartDate.year"  -> "2025"
+        "suspensionPeriodRangeStartDate.day"   -> invalidStart.getDayOfMonth.toString,
+        "suspensionPeriodRangeStartDate.month" -> invalidStart.getMonthValue.toString,
+        "suspensionPeriodRangeStartDate.year"  -> invalidStart.getYear.toString,
+        "suspensionPeriodRangeEndDate.day"     -> validEndDate.getDayOfMonth.toString,
+        "suspensionPeriodRangeEndDate.month"   -> validEndDate.getMonthValue.toString,
+        "suspensionPeriodRangeEndDate.year"    -> validEndDate.getYear.toString
       )
 
       val result = form.bind(data)
-      result.errors.map(_.message) must contain allElementsOf Seq(
-        "date.error.day",
-        "date.error.month",
-        "date.error.year"
-      )
+      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.startDate")
     }
 
-    "must return generic date errors when start date is invalid" in {
+    "must fail when end date is before start date" in {
+      val invalidEnd = validStartDate.minusDays(1)
       val data = Map(
-        "suspensionPeriodRangeStartDate.day"   -> "32",
-        "suspensionPeriodRangeStartDate.month" -> "13",
-        "suspensionPeriodRangeStartDate.year"  -> "2025",
-        "suspensionPeriodRangeEndDate.day"     -> "10",
-        "suspensionPeriodRangeEndDate.month"   -> "10",
-        "suspensionPeriodRangeEndDate.year"    -> "2025"
+        "suspensionPeriodRangeStartDate.day"   -> validStartDate.getDayOfMonth.toString,
+        "suspensionPeriodRangeStartDate.month" -> validStartDate.getMonthValue.toString,
+        "suspensionPeriodRangeStartDate.year"  -> validStartDate.getYear.toString,
+        "suspensionPeriodRangeEndDate.day"     -> invalidEnd.getDayOfMonth.toString,
+        "suspensionPeriodRangeEndDate.month"   -> invalidEnd.getMonthValue.toString,
+        "suspensionPeriodRangeEndDate.year"    -> invalidEnd.getYear.toString
       )
 
       val result = form.bind(data)
-      result.errors.map(_.message) must contain allElementsOf Seq(
-        "date.error.day",
-        "date.error.month"
-      )
+      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.endDate")
     }
 
-    "must return generic date errors when end date is invalid" in {
+    "must fail when end date is more than 6 months after start date" in {
+      val invalidEnd = validStartDate.plusMonths(7)
       val data = Map(
-        "suspensionPeriodRangeStartDate.day"   -> "01",
-        "suspensionPeriodRangeStartDate.month" -> "10",
-        "suspensionPeriodRangeStartDate.year"  -> "2025",
-        "suspensionPeriodRangeEndDate.day"     -> "99",
-        "suspensionPeriodRangeEndDate.month"   -> "99",
-        "suspensionPeriodRangeEndDate.year"    -> "2025"
+        "suspensionPeriodRangeStartDate.day"   -> validStartDate.getDayOfMonth.toString,
+        "suspensionPeriodRangeStartDate.month" -> validStartDate.getMonthValue.toString,
+        "suspensionPeriodRangeStartDate.year"  -> validStartDate.getYear.toString,
+        "suspensionPeriodRangeEndDate.day"     -> invalidEnd.getDayOfMonth.toString,
+        "suspensionPeriodRangeEndDate.month"   -> invalidEnd.getMonthValue.toString,
+        "suspensionPeriodRangeEndDate.year"    -> invalidEnd.getYear.toString
       )
 
       val result = form.bind(data)
-      result.errors.map(_.message) must contain allElementsOf Seq(
-        "date.error.day",
-        "date.error.month"
+      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.endDate")
+    }
+
+    "must fail when end date is after plan end date" in {
+      val invalidEnd = planEnd.plusDays(1)
+      val data = Map(
+        "suspensionPeriodRangeStartDate.day"   -> validStartDate.getDayOfMonth.toString,
+        "suspensionPeriodRangeStartDate.month" -> validStartDate.getMonthValue.toString,
+        "suspensionPeriodRangeStartDate.year"  -> validStartDate.getYear.toString,
+        "suspensionPeriodRangeEndDate.day"     -> invalidEnd.getDayOfMonth.toString,
+        "suspensionPeriodRangeEndDate.month"   -> invalidEnd.getMonthValue.toString,
+        "suspensionPeriodRangeEndDate.year"    -> invalidEnd.getYear.toString
       )
+
+      val result = form.bind(data)
+      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.endDate")
     }
   }
 }
