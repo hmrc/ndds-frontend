@@ -350,11 +350,11 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     val baseNextDate = potentialNextFromHistoryOpt.getOrElse(initialPotentialStartDate)
 
     val adjustedNextDate =
-      if (initialPotentialStartDate.getDayOfMonth < startDate.getDayOfMonth) {
+      if (baseNextDate.getDayOfMonth < startDate.getDayOfMonth) {
         val nextMonth = baseNextDate.plusMonths(1)
         nextMonth.withDayOfMonth(1)
       } else {
-        initialPotentialStartDate
+        baseNextDate
       }
 
     // Step 4 – If the Potential Next Payment Date within 3 working days,
