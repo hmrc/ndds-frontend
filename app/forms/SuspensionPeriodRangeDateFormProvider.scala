@@ -23,7 +23,6 @@ import play.api.data.Forms.mapping
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.i18n.Messages
 import utils.DateFormats
-
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -36,7 +35,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
   def apply(
     planStartDateOpt: Option[LocalDate],
     planEndDateOpt: Option[LocalDate],
-    earliestStartDate: LocalDate
+    earliestStartDate: LocalDate // 3 working days from today
   )(implicit messages: Messages): Form[SuspensionPeriodRange] = {
 
     Form(
@@ -57,7 +56,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
         )
       )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
         .verifying(startDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate))
-        .verifying(endDateConstraint(planEndDateOpt))
+        .verifying(endDateConstraint(planStartDateOpt, planEndDateOpt))
     )
   }
 
@@ -67,59 +66,54 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
     planEndDateOpt: Option[LocalDate],
     earliestStartDate: LocalDate
   ): Boolean = {
-    val latestStartDate = LocalDate.now().plusMonths(MaxMonthsAhead)
-
-    val afterPlanStart = planStartDateOpt.forall(planStart => !startDate.isBefore(planStart))
-    val beforePlanEnd = planEndDateOpt.forall(planEnd => !startDate.isAfter(planEnd))
-    val afterEarliest = !startDate.isBefore(earliestStartDate)
-    val beforeLatest = !startDate.isAfter(latestStartDate)
-
-    afterPlanStart && beforePlanEnd && afterEarliest && beforeLatest
+    val lowerBound = planStartDateOpt.fold(earliestStartDate)(psd => if (psd.isAfter(earliestStartDate)) psd else earliestStartDate)
+    val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
+      val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
+      if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
+    }
+    !startDate.isBefore(lowerBound) && !startDate.isAfter(upperBound)
   }
 
   private def isSuspendEndDateValid(
     endDate: LocalDate,
     startDate: LocalDate,
+    planStartDateOpt: Option[LocalDate],
     planEndDateOpt: Option[LocalDate]
   ): Boolean = {
-    val latestAllowedEndDate = LocalDate.now().plusMonths(MaxMonthsAhead)
-    val within6Months = !endDate.isAfter(latestAllowedEndDate)
-    val afterStart = !endDate.isBefore(startDate)
-    val beforePlanEnd = planEndDateOpt.forall(planEnd => !endDate.isAfter(planEnd))
-
-    afterStart && within6Months && beforePlanEnd
+    val lowerBound = planStartDateOpt.fold(startDate)(psd => if (psd.isAfter(startDate)) psd else startDate)
+    val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
+      val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
+      if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
+    }
+    !endDate.isBefore(lowerBound) && !endDate.isAfter(upperBound)
   }
 
-  private def startDateConstraint(planStartDateOpt: Option[LocalDate], planEndDateOpt: Option[LocalDate], earliestStartDate: LocalDate)(implicit
-    messages: Messages
-  ): Constraint[SuspensionPeriodRange] =
+  private def startDateConstraint(
+    planStartDateOpt: Option[LocalDate],
+    planEndDateOpt: Option[LocalDate],
+    earliestStartDate: LocalDate
+  )(implicit messages: Messages): Constraint[SuspensionPeriodRange] =
     Constraint[SuspensionPeriodRange]("suspensionPeriodRangeDate.error.startDate") { range =>
+      val lowerBound = planStartDateOpt.fold(earliestStartDate)(psd => if (psd.isAfter(earliestStartDate)) psd else earliestStartDate)
+      val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
+        val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
+        if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
+      }
       if (isSuspendStartDateValid(range.startDate, planStartDateOpt, planEndDateOpt, earliestStartDate)) Valid
-      else
-        Invalid(
-          messages(
-            "suspensionPeriodRangeDate.error.startDate",
-            earliestStartDate.format(dateFormatter),
-            planStartDateOpt.map(_.format(dateFormatter)).getOrElse(""),
-            LocalDate.now().plusMonths(MaxMonthsAhead).format(dateFormatter),
-            planEndDateOpt.map(_.format(dateFormatter)).getOrElse("")
-          )
-        )
+      else Invalid(messages("suspensionPeriodRangeDate.error.startDate", lowerBound.format(dateFormatter), upperBound.format(dateFormatter)))
     }
 
-  private def endDateConstraint(planEndDateOpt: Option[LocalDate])(implicit messages: Messages): Constraint[SuspensionPeriodRange] =
+  private def endDateConstraint(
+    planStartDateOpt: Option[LocalDate],
+    planEndDateOpt: Option[LocalDate]
+  )(implicit messages: Messages): Constraint[SuspensionPeriodRange] =
     Constraint[SuspensionPeriodRange]("suspensionPeriodRangeDate.error.endDate") { range =>
-      if (isSuspendEndDateValid(range.endDate, range.startDate, planEndDateOpt)) Valid
-      else
-        Invalid(
-          messages(
-            "suspensionPeriodRangeDate.error.endDate",
-            range.startDate.format(dateFormatter),
-            formatUpperBoundEnd(planEndDateOpt)
-          )
-        )
+      val lowerBound = planStartDateOpt.fold(range.startDate)(psd => if (psd.isAfter(range.startDate)) psd else range.startDate)
+      val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
+        val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
+        if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
+      }
+      if (isSuspendEndDateValid(range.endDate, range.startDate, planStartDateOpt, planEndDateOpt)) Valid
+      else Invalid(messages("suspensionPeriodRangeDate.error.endDate", lowerBound.format(dateFormatter), upperBound.format(dateFormatter)))
     }
-
-  private def formatUpperBoundEnd(planEndDateOpt: Option[LocalDate]): String =
-    planEndDateOpt.map(_.format(dateFormatter)).getOrElse(LocalDate.now().plusMonths(MaxMonthsAhead).format(dateFormatter))
 }
