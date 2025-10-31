@@ -51,7 +51,7 @@
                 Some(Actions(
                     items = Seq(
                         if (showAmendLink) ActionItem(
-                            href = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url,
+                            href = routes.AmendingPaymentPlanController.onPageLoad().url,
                             content = messages("paymentPlanDetails.details.amend"),
                             visuallyHiddenText = Some(messages("Amend"))
                         ) else null,
