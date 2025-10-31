@@ -108,12 +108,33 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
     planEndDateOpt: Option[LocalDate]
   )(implicit messages: Messages): Constraint[SuspensionPeriodRange] =
     Constraint[SuspensionPeriodRange]("suspensionPeriodRangeDate.error.endDate") { range =>
-      val lowerBound = planStartDateOpt.fold(range.startDate)(psd => if (psd.isAfter(range.startDate)) psd else range.startDate)
-      val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
-        val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
-        if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
+
+      val startValid = isSuspendStartDateValid(
+        range.startDate,
+        planStartDateOpt,
+        planEndDateOpt,
+        LocalDate.now().plusDays(3)
+      )
+
+      if (!startValid) {
+        Valid
+      } else {
+
+        val lowerBound = planStartDateOpt.fold(range.startDate)(psd => if (psd.isAfter(range.startDate)) psd else range.startDate)
+        val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
+          val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
+          if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
+        }
+
+        if (
+          !range.endDate.isBefore(range.startDate) &&
+          isSuspendEndDateValid(range.endDate, range.startDate, planStartDateOpt, planEndDateOpt)
+        ) {
+          Valid
+        } else {
+          Invalid(messages("suspensionPeriodRangeDate.error.endDate", lowerBound.format(dateFormatter), upperBound.format(dateFormatter)))
+        }
       }
-      if (isSuspendEndDateValid(range.endDate, range.startDate, planStartDateOpt, planEndDateOpt)) Valid
-      else Invalid(messages("suspensionPeriodRangeDate.error.endDate", lowerBound.format(dateFormatter), upperBound.format(dateFormatter)))
     }
+
 }
