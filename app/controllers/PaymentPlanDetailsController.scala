@@ -174,7 +174,14 @@ class PaymentPlanDetailsController @Inject() (
           case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
           case None            => Future.successful(true)
         }
-      case PaymentPlanType.BudgetPaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        for {
+          isThreeDaysBeforeEnd <- planDetail.scheduledPaymentEndDate match {
+                                    case Some(endDate) => nddService.isThreeDaysPriorPlanEndDate(endDate)
+                                    case _             => Future.successful(true)
+                                  }
+        } yield isThreeDaysBeforeEnd
+      case PaymentPlanType.VariablePaymentPlan.toString =>
         for {
           isTwoDaysBeforeStart <- planDetail.scheduledPaymentStartDate match {
                                     case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)

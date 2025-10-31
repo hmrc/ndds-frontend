@@ -215,8 +215,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
                 when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
-                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
-                  .thenReturn(Future.successful(true))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
@@ -276,7 +274,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
                 when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
-                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
+                when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
                 val summaryListRows = summaryListWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
@@ -291,12 +289,12 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            "should not show Amend, Cancel and Suspend actions when scheduledPaymentStartDate is two day prior start date" in {
+            "should show Amend, Cancel and Suspend actions when scheduledPaymentStartDate is a past date" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
                     planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
-                    scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(2).toLocalDate),
+                    scheduledPaymentStartDate = Some(LocalDateTime.now().minusDays(30).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(10).toLocalDate),
                     suspensionStartDate       = None,
                     suspensionEndDate         = None
@@ -335,8 +333,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
                 when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
-                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
-                  .thenReturn(Future.successful(false))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
@@ -345,23 +341,14 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan",
-                                                       paymentPlanReference,
-                                                       false,
-                                                       false,
-                                                       false,
-                                                       false,
-                                                       "",
-                                                       "",
-                                                       summaryListRows
-                                                      )(
+                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, false, "", "", summaryListRows)(
                   request,
                   messages(application)
                 ).toString
               }
             }
 
-            "should not show Amend, Cancel and Suspend actions when scheduledPaymentEndDate is three day prior end date" in {
+            "should not show Amend, Cancel and Suspend actions when scheduledPaymentEndDate is within 3 working days" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -431,14 +418,13 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            // Defensive test: user should not be able to alter data if they somehow reach this screen
             "should not show Amend, Cancel and Suspend actions when payment plan is inactive" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
                     planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
                     scheduledPaymentStartDate = Some(LocalDateTime.now().minusDays(30).toLocalDate),
-                    scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(5).toLocalDate),
+                    scheduledPaymentEndDate   = Some(LocalDateTime.now().minusDays(5).toLocalDate),
                     suspensionStartDate       = None,
                     suspensionEndDate         = None
                   )
@@ -476,8 +462,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
                 when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
-                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
-                  .thenReturn(Future.successful(false))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
 
@@ -556,8 +540,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
                 when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
-                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
-                  .thenReturn(Future.successful(true))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
@@ -658,12 +640,13 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            "should not show Amend, Cancel and Suspend actions when scheduledPaymentStartDate is two day prior start date but should show the suspend period" in {
+            // TODO to be fixed
+            "should not show Amend, Cancel and Suspend actions when scheduledPaymentStartDate is past date but should show the suspend period" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
                     planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
-                    scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(2).toLocalDate),
+                    scheduledPaymentStartDate = Some(LocalDateTime.now().minusDays(5).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(30).toLocalDate),
                     suspensionStartDate       = Some(LocalDateTime.now().plusDays(5).toLocalDate),
                     suspensionEndDate         = Some(LocalDateTime.now().plusDays(10).toLocalDate)
@@ -710,8 +693,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
                 when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
-                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
-                  .thenReturn(Future.successful(false))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
@@ -736,8 +717,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            // Defensive test: user should not be able to set suspend date if two day prior start and three day prior end date
-            "should not show Amend, Cancel and Suspend actions when scheduledPaymentEndDate is two day prior start date and three day prior end date but should show the suspend period" in {
+            "should not show Amend, Cancel and Suspend actions when scheduledPaymentEndDate is within 3 working days but should show the suspend period" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -789,8 +769,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
                 when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
-                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
-                  .thenReturn(Future.successful(false))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
 
