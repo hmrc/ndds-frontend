@@ -29,7 +29,12 @@ class AmendingPaymentPlanControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val ua = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(ua)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
