@@ -114,13 +114,10 @@ class RemovingThisSuspensionController @Inject() (
                   request.userAnswers.get(queries.DirectDebitReferenceQuery) match {
                     case Some(ddiReference) =>
                       val chrisRequest = removeSuspensionChrisSubmissionRequest(request.userAnswers, ddiReference)
-
-                      // Step 1: Submit CHRIS request first
                       nddsService.submitChrisData(chrisRequest).flatMap { success =>
                         if (success) {
                           logger.info(s"CHRIS submission successful for removing suspension [DDI Ref: $ddiReference]")
 
-                          // Step 2: Only proceed if CHRIS succeeded
                           for {
                             updatedAnswers <- Future.fromTry(request.userAnswers.set(RemovingThisSuspensionPage, value))
                             _              <- sessionRepository.set(updatedAnswers)
@@ -137,7 +134,6 @@ class RemovingThisSuspensionController @Inject() (
                       Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
                   }
               )
-
           case _ =>
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
         }
