@@ -19,6 +19,6 @@ package models
 import java.time.LocalDate
 
 case class NextPaymentValidationResult(
-  potentialNextPaymentDate: LocalDate,
+  potentialNextPaymentDate: Option[LocalDate],
   nextPaymentDateValid: Boolean
 )
