@@ -17,19 +17,16 @@
 package controllers
 
 import base.SpecBase
-import models.responses.PaymentPlanDetails
 import models.{PaymentPlanType, UserAnswers}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.PaymentPlanReferenceQuery
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Application
-import play.api.i18n.Messages
 import play.api.inject.bind
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.NationalDirectDebitService
