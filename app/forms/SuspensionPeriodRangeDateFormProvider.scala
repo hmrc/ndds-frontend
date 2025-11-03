@@ -81,9 +81,9 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
     planEndDateOpt: Option[LocalDate]
   ): Boolean = {
     val lowerBound = planStartDateOpt.fold(startDate)(psd => if (psd.isAfter(startDate)) psd else startDate)
-    val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
-      val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
-      if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
+    val upperBound = planEndDateOpt.fold(startDate.plusMonths(MaxMonthsAhead)) { ped =>
+      val sixMonthsFromStart = startDate.plusMonths(MaxMonthsAhead)
+      if (ped.isBefore(sixMonthsFromStart)) ped else sixMonthsFromStart
     }
     !endDate.isBefore(lowerBound) && !endDate.isAfter(upperBound)
   }
