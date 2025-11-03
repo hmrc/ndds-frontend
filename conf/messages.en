@@ -153,19 +153,18 @@ bankApproval.p2 = If your bank/building society will not give approval, use anot
 bankApproval.p2.link = paying HMRC
 bankApproval.p2.link.after = .
 
-directDebitSource.title = Where do you need to make direct debit payment?
-directDebitSource.heading = Where do you need to make direct debit payment?
-directDebitSource.checkYourAnswersLabel = Where do you need to make direct debit payment?
-directDebitSource.hint = Select the tax or duty you want to pay.
+directDebitSource.title = Which tax or duty is this payment plan for?
+directDebitSource.heading = Which tax or duty is this payment plan for?
+directDebitSource.checkYourAnswersLabel = Which tax or duty is this payment plan for?
 directDebitSource.ct = Corporation Tax (CT)
 directDebitSource.mgd = Machine Games Duty (MGD)
 directDebitSource.nic = National Insurance Contributions (NIC)
-directDebitSource.otherLiability = Other Liability
 directDebitSource.paye = Pay As You Earn (PAYE)
 directDebitSource.sa = Self Assessment (SA)
 directDebitSource.sdlt = Stamp Duty Land Tax (SDLT)
-directDebitSource.tc = Tax Credits (TC)
+directDebitSource.tc = Tax credits (TC)
 directDebitSource.vat = Value Added Tax (VAT)
+directDebitSource.otherLiability = Other liability
 directDebitSource.error.required = Select one option.
 directDebitSource.change.hidden = DirectDebitSource
 
