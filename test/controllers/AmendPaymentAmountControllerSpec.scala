@@ -45,7 +45,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
   private lazy val paymentPlanAmountRoute = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
 
   "PaymentPlanAmount Controller" - {
-    lazy val paymentPlanRoute = routes.PaymentPlanDetailsController.onPageLoad().url
+    lazy val paymentPlanRoute = routes.AmendingPaymentPlanController.onPageLoad().url
     val mockService = mock[NationalDirectDebitService]
 
     "must return OK and the correct view for a GET with SinglePaymentPlan" in {

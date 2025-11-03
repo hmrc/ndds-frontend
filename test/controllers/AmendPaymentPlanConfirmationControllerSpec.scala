@@ -35,7 +35,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Constants, DirectDebitDetailsData}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
-implicit val hc: HeaderCarrier = HeaderCarrier()
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -410,6 +409,137 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
         }
       }
+
+      "must redirect to JourneyRecoveryController when DirectDebitReference is missing" in {
+
+        val mockNddService = mock[NationalDirectDebitService]
+
+        when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(false))
+
+        val paymentPlanDetails = models.responses.PaymentPlanResponse(
+          directDebitDetails = models.responses.DirectDebitDetails(
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
+            submissionDateTime = java.time.LocalDateTime.now()
+          ),
+          paymentPlanDetails = models.responses.PaymentPlanDetails(
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
+            scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = Some(600),
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
+          )
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.AmendPaymentPlanConfirmationController.onSubmit(NormalMode).url)
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "must redirect to JourneyRecoveryController when PaymentPlanReference is missing" in {
+
+        val mockNddService = mock[NationalDirectDebitService]
+
+        when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(false))
+
+        val directDebitReference = "DDI123456789"
+
+        val paymentPlanDetails = models.responses.PaymentPlanResponse(
+          directDebitDetails = models.responses.DirectDebitDetails(
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
+            submissionDateTime = java.time.LocalDateTime.now()
+          ),
+          paymentPlanDetails = models.responses.PaymentPlanDetails(
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
+            scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = Some(600),
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
+          )
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.AmendPaymentPlanConfirmationController.onSubmit(NormalMode).url)
+          val result = route(application, request).value
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
     }
 
   }
