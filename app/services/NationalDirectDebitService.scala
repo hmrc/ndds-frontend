@@ -22,19 +22,18 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.audits.GetDDIs
 import models.requests.*
-import pages.*
 import models.responses.*
 import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers}
+import pages.*
 import play.api.Logging
 import play.api.mvc.Request
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
-import utils.Utils
-import utils.Frequency
+import utils.{Frequency, Utils}
 
-import java.time.temporal.TemporalAdjusters
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
