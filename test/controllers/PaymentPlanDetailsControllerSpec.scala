@@ -640,8 +640,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               }
             }
 
-            // TODO to be fixed
-            "should not show Amend, Cancel and Suspend actions when scheduledPaymentStartDate is past date but should show the suspend period" in {
+            "should show Amend and Cancel actions but not Suspend action when scheduledPaymentStartDate is past date but should show the suspend period" in {
               val mockBudgetPaymentPlanDetailResponse =
                 dummyPlanDetailResponse.copy(paymentPlanDetails =
                   dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -703,8 +702,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view("budgetPaymentPlan",
                                                        paymentPlanReference,
-                                                       false,
-                                                       false,
+                                                       true,
+                                                       true,
                                                        false,
                                                        true,
                                                        formattedSuspensionStartDate,
