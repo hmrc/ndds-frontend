@@ -56,7 +56,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
         )
       )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
         .verifying(startDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate))
-        .verifying(endDateConstraint(planStartDateOpt, planEndDateOpt))
+        .verifying(endDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate))
     )
   }
 
@@ -105,7 +105,8 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
 
   private def endDateConstraint(
     planStartDateOpt: Option[LocalDate],
-    planEndDateOpt: Option[LocalDate]
+    planEndDateOpt: Option[LocalDate],
+    earlyStartDate: LocalDate
   )(implicit messages: Messages): Constraint[SuspensionPeriodRange] =
     Constraint[SuspensionPeriodRange]("suspensionPeriodRangeDate.error.endDate") { range =>
 
@@ -113,7 +114,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
         range.startDate,
         planStartDateOpt,
         planEndDateOpt,
-        LocalDate.now().plusDays(3)
+        earlyStartDate
       )
 
       if (!startValid) {
@@ -121,9 +122,9 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
       } else {
 
         val lowerBound = planStartDateOpt.fold(range.startDate)(psd => if (psd.isAfter(range.startDate)) psd else range.startDate)
-        val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
-          val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
-          if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
+        val upperBound = planEndDateOpt.fold(range.startDate.plusMonths(MaxMonthsAhead)) { ped =>
+          val SixMonthsFromSuspendStartDate = range.startDate.plusMonths(MaxMonthsAhead)
+          if (ped.isBefore(SixMonthsFromSuspendStartDate)) ped else SixMonthsFromSuspendStartDate
         }
 
         if (
