@@ -52,7 +52,7 @@ class AmendingPaymentPlanController @Inject() (
       Ok(view(appConfig.hmrcHelplineUrl, p1Key))
     } else {
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
 }
