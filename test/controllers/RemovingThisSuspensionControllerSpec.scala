@@ -17,13 +17,12 @@
 package controllers
 
 import base.SpecBase
-import com.sun.tools.doclint.Entity.times
 import forms.RemovingThisSuspensionFormProvider
-import models.{NormalMode, PaymentPlanType}
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.{NormalMode, PaymentPlanType}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{ManagePaymentPlanTypePage, RemovingThisSuspensionPage}
 import play.api.inject.bind
@@ -41,7 +40,6 @@ import scala.concurrent.Future
 class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
-  private val mockNddService = mock[NationalDirectDebitService]
   val formProvider = new RemovingThisSuspensionFormProvider()
   val form = formProvider()
 
