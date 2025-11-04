@@ -46,20 +46,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
     val mockService = mock[NationalDirectDebitService]
     val mockSessionRepository = mock[SessionRepository]
 
-    def varRepaySummaryList(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
-      val planDetail = paymentPlanData.paymentPlanDetails
-      Seq(
-        AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
-        AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
-        DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
-        TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
-        MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability)(messages(app)),
-        FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability)(messages(app)),
-        AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(messages(app)),
-        AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)(messages(app))
-      )
-    }
-
     "onPageLoad" - {
       ".SinglePayment Plan" - {
 
@@ -1004,63 +990,88 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
       }
 
       ".TaxCreditRepayment Plan" - {
-        "must return OK and the correct view for a GET" in {
-          val mockTaxCreditRepaymentPlanDetailResponse =
-            dummyPlanDetailResponse.copy(paymentPlanDetails =
-              dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.TaxCreditRepaymentPlan.toString)
-            )
 
-          val paymentPlanReference = "ppReference"
-          val directDebitReference = "ddReference"
+        def varRepaySummaryList(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+          val planDetail = paymentPlanData.paymentPlanDetails
+          Seq(
+            AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
+            AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
+            DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
+            TotalAmountDueSummary.row(planDetail.totalLiability)(messages(app)),
+            MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability)(messages(app)),
+            FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability)(messages(app)),
+            AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(
+              messages(app)
+            ),
+            AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)(messages(app))
+          )
+        }
 
-          val userAnswersWithPaymentReference =
-            emptyUserAnswers
-              .set(
-                PaymentPlanReferenceQuery,
-                paymentPlanReference
+        "must return OK and the correct view for a GET" - {
+          "should not show Amend, Cancel and Suspend actions" in {
+            val mockTaxCreditRepaymentPlanDetailResponse =
+              dummyPlanDetailResponse.copy(paymentPlanDetails =
+                dummyPlanDetailResponse.paymentPlanDetails.copy(
+                  planType                  = PaymentPlanType.TaxCreditRepaymentPlan.toString,
+                  scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(2).toLocalDate),
+                  scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
+                  suspensionStartDate       = None,
+                  suspensionEndDate         = None
+                )
               )
-              .success
-              .value
-              .set(
-                DirectDebitReferenceQuery,
-                directDebitReference
+
+            val paymentPlanReference = "ppReference"
+            val directDebitReference = "ddReference"
+
+            val userAnswersWithPaymentReference =
+              emptyUserAnswers
+                .set(
+                  PaymentPlanReferenceQuery,
+                  paymentPlanReference
+                )
+                .success
+                .value
+                .set(
+                  DirectDebitReferenceQuery,
+                  directDebitReference
+                )
+                .success
+                .value
+
+            val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+              .overrides(
+                bind[SessionRepository].toInstance(mockSessionRepository),
+                bind[NationalDirectDebitService].toInstance(mockService)
               )
-              .success
-              .value
+              .build()
 
-          val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
-            .overrides(
-              bind[SessionRepository].toInstance(mockSessionRepository),
-              bind[NationalDirectDebitService].toInstance(mockService)
-            )
-            .build()
+            running(application) {
+              when(mockSessionRepository.set(any()))
+                .thenReturn(Future.successful(true))
+              when(mockSessionRepository.get(any()))
+                .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+              when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
+                .thenReturn(Future.successful(mockTaxCreditRepaymentPlanDetailResponse))
 
-          running(application) {
-            when(mockSessionRepository.set(any()))
-              .thenReturn(Future.successful(true))
-            when(mockSessionRepository.get(any()))
-              .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
-            when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
-              .thenReturn(Future.successful(mockTaxCreditRepaymentPlanDetailResponse))
-
-            val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
-            val summaryListRows = varRepaySummaryList(mockTaxCreditRepaymentPlanDetailResponse, application)
-            val result = route(application, request).value
-            val view = application.injector.instanceOf[PaymentPlanDetailsView]
-            status(result) mustEqual OK
-            contentAsString(result) mustEqual view("taxCreditRepaymentPlan",
-                                                   paymentPlanReference,
-                                                   false,
-                                                   false,
-                                                   false,
-                                                   false,
-                                                   "",
-                                                   "",
-                                                   summaryListRows
-                                                  )(
-              request,
-              messages(application)
-            ).toString
+              val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+              val summaryListRows = varRepaySummaryList(mockTaxCreditRepaymentPlanDetailResponse, application)
+              val result = route(application, request).value
+              val view = application.injector.instanceOf[PaymentPlanDetailsView]
+              status(result) mustEqual OK
+              contentAsString(result) mustEqual view("taxCreditRepaymentPlan",
+                                                     paymentPlanReference,
+                                                     false,
+                                                     false,
+                                                     false,
+                                                     false,
+                                                     "",
+                                                     "",
+                                                     summaryListRows
+                                                    )(
+                request,
+                messages(application)
+              ).toString
+            }
           }
         }
       }

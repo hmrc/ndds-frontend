@@ -153,7 +153,7 @@ class PaymentPlanDetailsController @Inject() (
           DateSetupSummary.row(planDetail.submissionDateTime),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
         )
-      case _ => // Tax repayment plan
+      case PaymentPlanType.TaxCreditRepaymentPlan.toString =>
         Seq(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
@@ -172,7 +172,7 @@ class PaymentPlanDetailsController @Inject() (
     ec: ExecutionContext
   ): Future[Boolean] = {
     planDetail.planType match {
-      case PaymentPlanType.SinglePaymentPlan.toString =>
+      case PaymentPlanType.SinglePaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
         planDetail.scheduledPaymentStartDate match {
           case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
           case None            => Future.successful(true)
@@ -184,15 +184,7 @@ class PaymentPlanDetailsController @Inject() (
                                     case _             => Future.successful(true)
                                   }
         } yield isThreeDaysBeforeEnd
-      case PaymentPlanType.VariablePaymentPlan.toString =>
-        for {
-          isTwoDaysBeforeStart <- planDetail.scheduledPaymentStartDate match {
-                                    case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
-                                    case _               => Future.successful(true)
-                                  }
-        } yield isTwoDaysBeforeStart
-
-      case _ => Future.successful(false) // For TaxCredit repayment plan
+      case PaymentPlanType.TaxCreditRepaymentPlan.toString => Future.successful(false)
     }
   }
 
@@ -205,7 +197,12 @@ class PaymentPlanDetailsController @Inject() (
     } yield updatedUserAnswers
 
   private def isAmendLinkVisible(showAllActionsFlag: Boolean, planDetail: PaymentPlanDetails): Boolean = {
-    showAllActionsFlag && (planDetail.planType == PaymentPlanType.SinglePaymentPlan.toString || planDetail.planType == PaymentPlanType.BudgetPaymentPlan.toString)
+    val amendableTypes = Set(
+      PaymentPlanType.SinglePaymentPlan.toString,
+      PaymentPlanType.BudgetPaymentPlan.toString
+    )
+
+    showAllActionsFlag && amendableTypes.contains(planDetail.planType)
   }
 
   private def isCancelLinkVisible(showAllActionsFlag: Boolean, planDetail: PaymentPlanDetails): Boolean = {
