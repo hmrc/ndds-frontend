@@ -38,9 +38,9 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
-import utils.Frequency.{Monthly, Weekly}
+import utils.Frequency.*
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,8 +58,8 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
   val mockCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   val mockAuditService: AuditService = mock[AuditService]
-
-  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService)
+  val currentClock: Clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
+  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, currentClock)
 
   val testId = "id"
   val testSortCode = "123456"
@@ -738,87 +738,800 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
   "calculateNextPaymentDate" - {
 
-    "must return start date when start date is after today and beyond 3 working days (Step 1.1)" in {
+    "when planEndDate is None then potentialNextPaymentDate should return None" in {
+      val today = LocalDate.now()
+      val startDate = today.plusDays(1) // start date is tomorrow
+      val planEndDate = None
+
+      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
+
+      result.potentialNextPaymentDate mustBe None
+      result.nextPaymentDateValid mustBe true
+    }
+
+    "when planStartDate is beyond three working days then potentialNextPaymentDate should return startDate" in {
       val today = LocalDate.now()
       val startDate = today.plusDays(10)
-      val planEndDate = today.plusMonths(3)
+      val planEndDate = today.plusDays(20)
 
       when(mockConnector.getFutureWorkingDays(any())(any()))
-        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+        .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
+      val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-      result.potentialNextPaymentDate mustBe startDate
+      result.potentialNextPaymentDate mustBe Some(startDate)
       result.nextPaymentDateValid mustBe true
     }
 
-    "must calculate next payment date when start date is within next 3 working days (Step 1.2 triggered)" in {
+    "when planStartDate is within three working days then potentialNextPaymentDate is after planEndDate nextPaymentDateValid must be false" in {
       val today = LocalDate.now()
-      val startDate = today.plusDays(1)
-      val planEndDate = today.plusMonths(3)
+      val startDate = today.plusDays(10)
+      val planEndDate = today.plusDays(20)
 
       when(mockConnector.getFutureWorkingDays(any())(any()))
-        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+        .thenReturn(Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)))
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
+      val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-      (result.potentialNextPaymentDate.isAfter(startDate) ||
-        result.potentialNextPaymentDate.isEqual(startDate)) mustBe true
-      result.nextPaymentDateValid mustBe true
-    }
-
-    "must calculate weekly next payment date correctly when plan already started" in {
-      val today = LocalDate.now()
-      val startDate = today.minusWeeks(2)
-      val planEndDate = today.plusWeeks(6)
-
-      when(mockConnector.getFutureWorkingDays(any())(any()))
-        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
-
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
-
-      result.potentialNextPaymentDate.isAfter(startDate) mustBe true
-      result.nextPaymentDateValid mustBe true
-    }
-
-    "must calculate monthly next payment date correctly when plan already started" in {
-      val today = LocalDate.now()
-      val startDate = today.minusMonths(4)
-      val planEndDate = today.plusMonths(12)
-
-      when(mockConnector.getFutureWorkingDays(any())(any()))
-        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
-
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, Monthly).futureValue
-
-      result.potentialNextPaymentDate.isAfter(startDate) mustBe true
-      result.nextPaymentDateValid mustBe true
-    }
-
-    "must set nextPaymentDateValid = false when potential next payment date is after plan end date (Step 2 validation)" in {
-      val today = LocalDate.now()
-      val startDate = today.minusWeeks(2)
-      val planEndDate = today.minusDays(1) // plan ended yesterday
-
-      when(mockConnector.getFutureWorkingDays(any())(any()))
-        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
-
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
-
+      result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(1))
       result.nextPaymentDateValid mustBe false
     }
 
-    "must set nextPaymentDateValid = true when plan end date is null" in {
-      val today = LocalDate.now()
-      val startDate = today.minusWeeks(2)
-      val planEndDate: LocalDate = null
+    ".forWeeklyFrequency" - {
 
-      when(mockConnector.getFutureWorkingDays(any())(any()))
-        .thenReturn(Future.successful(EarliestPaymentDate(today.toString)))
+      ".frequency is Weekly" - {
+        "when planStartDate is a past date but potentialNextPaymentDate is not within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.minusDays(10)
+          val planEndDate = today.plusDays(20)
 
-      val result = service.calculateNextPaymentDate(startDate, planEndDate, Weekly).futureValue
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-      result.nextPaymentDateValid mustBe true
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is a past date but potentialNextPaymentDate is within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.minusDays(10)
+          val planEndDate = today.plusDays(20)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(
+              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
+              Future.successful(EarliestPaymentDate(startDate.plusWeeks(2).plusDays(3).toString))
+            )
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(3))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is not within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.plusDays(3)
+          val planEndDate = today.plusDays(20)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(1))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.plusDays(3)
+          val planEndDate = today.plusDays(20)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(
+              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
+              Future.successful(EarliestPaymentDate(startDate.plusWeeks(1).plusDays(3).toString))
+            )
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
+          result.nextPaymentDateValid mustBe true
+        }
+      }
+
+      ".frequency is Fortnightly" - {
+        "when planStartDate is a past date but potentialNextPaymentDate is not within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.minusDays(10)
+          val planEndDate = today.plusMonths(3)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Fortnightly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is a past date but potentialNextPaymentDate is within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.minusDays(10)
+          val planEndDate = today.plusMonths(3)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(
+              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
+              Future.successful(EarliestPaymentDate(startDate.plusWeeks(2).plusDays(3).toString))
+            )
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Fortnightly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is not within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.plusDays(2)
+          val planEndDate = today.plusDays(20)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Fortnightly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.plusDays(2)
+          val planEndDate = today.plusMonths(3)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(
+              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
+              Future.successful(EarliestPaymentDate(startDate.plusWeeks(2).plusDays(3).toString))
+            )
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Fortnightly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
+          result.nextPaymentDateValid mustBe true
+        }
+      }
+
+      ".frequency is FourWeekly" - {
+        "when planStartDate is a past date but potentialNextPaymentDate is not within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.minusDays(10)
+          val planEndDate = today.plusMonths(3)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), FourWeekly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is a past date but potentialNextPaymentDate is within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.minusDays(10)
+          val planEndDate = today.plusMonths(3)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(
+              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
+              Future.successful(EarliestPaymentDate(startDate.plusWeeks(4).plusDays(3).toString))
+            )
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), FourWeekly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(8))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is not within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.plusDays(2)
+          val planEndDate = today.plusMonths(3)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), FourWeekly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
+          result.nextPaymentDateValid mustBe true
+        }
+
+        "when planStartDate is prior to next three working days but potentialNextPaymentDate is within 3 working days" in {
+          val today = LocalDate.now()
+          val startDate = today.plusDays(2)
+          val planEndDate = today.plusMonths(3)
+
+          when(mockConnector.getFutureWorkingDays(any())(any()))
+            .thenReturn(
+              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
+              Future.successful(EarliestPaymentDate(startDate.plusWeeks(4).plusDays(3).toString))
+            )
+
+          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), FourWeekly).futureValue
+
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(8))
+          result.nextPaymentDateValid mustBe true
+        }
+      }
+    }
+
+    ".forMonthlyFrequency" - {
+
+      ".frequency is Monthly" - {
+        "when planStartDate is within 3 working days" - {
+
+          "but potentialNextPaymentDate is not within 3 working days" in {
+            val today = LocalDate.now()
+            val startDate = today.plusDays(2)
+            val planEndDate = today.plusMonths(3)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(1))
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but potentialNextPaymentDate is not within 3 working days and next month is a shorter month" in {
+            val today = LocalDate.of(LocalDate.now().getYear + 1, 1, 31)
+            val startDate = today
+            val planEndDate = today.plusMonths(3)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+
+            val expectedPotentialDate = today.plusMonths(2).withDayOfMonth(1)
+
+            result.potentialNextPaymentDate mustBe Some(expectedPotentialDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but potentialNextPaymentDate is not within 3 working days and next month is not a shorter month" in {
+            val today = LocalDate.of(LocalDate.now().getYear + 1, 4, 30)
+            val startDate = today
+            val planEndDate = today.plusMonths(3)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(today.plusMonths(1))
+            result.nextPaymentDateValid mustBe true
+          }
+        }
+
+        "when planStartDate is a past date" - {
+
+          "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusMonths(3)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 11, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusMonths(3)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 11, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-01-30T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.now(fixedClock)
+
+            val startDate = LocalDate.of(2024, 1, 31)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 3, 1)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.now(fixedClock)
+
+            val startDate = LocalDate.of(2024, 4, 29)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 5, 29)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusMonths(3)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 11, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+        }
+      }
+
+      ".frequency is Quarterly" - {
+        "when planStartDate is within 3 working days" - {
+
+          "but potentialNextPaymentDate is not within 3 working days" in {
+            val today = LocalDate.now()
+            val startDate = today.plusDays(2)
+            val planEndDate = today.plusMonths(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(3))
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but potentialNextPaymentDate is not within 3 working days and next month is a shorter month" in {
+            val today = LocalDate.of(LocalDate.now().getYear + 1, 1, 31)
+            val startDate = today
+            val planEndDate = today.plusMonths(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedPotentialDate = today.plusMonths(4).withDayOfMonth(1)
+
+            result.potentialNextPaymentDate mustBe Some(expectedPotentialDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but potentialNextPaymentDate is not within 3 working days and next month is not a shorter month" in {
+            val today = LocalDate.of(LocalDate.now().getYear + 1, 4, 30)
+            val startDate = today
+            val planEndDate = today.plusMonths(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(today.plusMonths(3))
+            result.nextPaymentDateValid mustBe true
+          }
+        }
+
+        "when planStartDate is a past date" - {
+
+          "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusMonths(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 12, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusMonths(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 12, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-03-30T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.now(fixedClock)
+
+            val startDate = LocalDate.of(2024, 3, 31)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 7, 1)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-02-28T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.now(fixedClock)
+
+            val startDate = LocalDate.of(2024, 2, 28)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 5, 28)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusMonths(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 12, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is more than one calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-10-29T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.now(fixedClock)
+            val startDate = LocalDate.of(2020, 3, 29)
+            val planEndDate = today.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 12, 29)
+
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+        }
+      }
+
+      ".frequency is SixMonthly" - {
+        "when planStartDate is within 3 working days" - {
+
+          "but potentialNextPaymentDate is not within 3 working days" in {
+            val today = LocalDate.now()
+            val startDate = today.plusDays(2)
+            val planEndDate = today.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(6))
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but potentialNextPaymentDate is not within 3 working days and next month is a shorter month" in {
+            val today = LocalDate.of(LocalDate.now().getYear + 1, 3, 31)
+            val startDate = today
+            val planEndDate = today.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            val expectedPotentialDate = today.plusMonths(7).withDayOfMonth(1)
+
+            result.potentialNextPaymentDate mustBe Some(expectedPotentialDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but potentialNextPaymentDate is not within 3 working days and next month is not a shorter month" in {
+            val today = LocalDate.of(LocalDate.now().getYear + 1, 4, 30)
+            val startDate = today
+            val planEndDate = today.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(today.plusMonths(6))
+            result.nextPaymentDateValid mustBe true
+          }
+        }
+
+        "when planStartDate is a past date" - {
+
+          "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            val expectedDate = LocalDate.of(2026, 3, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            val expectedDate = LocalDate.of(2026, 3, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-05-30T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.now(fixedClock)
+
+            val startDate = LocalDate.of(2024, 5, 31)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 12, 1)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.now(fixedClock)
+
+            val startDate = LocalDate.of(2024, 4, 29)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            val expectedDate = LocalDate.of(2025, 10, 29)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+
+            val expectedDate = LocalDate.of(2026, 3, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+        }
+      }
+
+      ".frequency is Annually" - {
+        "when planStartDate is within 3 working days" - {
+
+          "but potentialNextPaymentDate is not within 3 working days" in {
+            val today = LocalDate.now()
+            val startDate = today.plusDays(2)
+            val planEndDate = today.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(12))
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but potentialNextPaymentDate is not within 3 working days and next month is not a shorter month" in {
+            val today = LocalDate.of(LocalDate.now().getYear + 1, 1, 31)
+            val startDate = today
+            val planEndDate = today.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(today.plusMonths(12))
+            result.nextPaymentDateValid mustBe true
+          }
+        }
+
+        "when planStartDate is a past date" - {
+
+          "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+
+            result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(12))
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+
+            val expectedDate = LocalDate.of(2026, 3, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
+            val actualToday = LocalDate.now()
+            val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
+            val startDate = today
+            val planEndDate = actualToday.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
+
+            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+
+            val expectedDate = LocalDate.of(2026, 3, 15)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+
+          "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
+            val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
+            val today = LocalDate.now(fixedClock)
+
+            val startDate = LocalDate.of(2024, 4, 29)
+            val planEndDate = startDate.plusYears(6)
+
+            when(mockConnector.getFutureWorkingDays(any())(any()))
+              .thenReturn(
+                Future.successful(EarliestPaymentDate(startDate.plusDays(3).toString)),
+                Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
+              )
+
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+
+            val expectedDate = LocalDate.of(2026, 4, 29)
+            result.potentialNextPaymentDate mustBe Some(expectedDate)
+            result.nextPaymentDateValid mustBe true
+          }
+        }
+      }
     }
   }
 

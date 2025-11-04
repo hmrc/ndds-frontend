@@ -92,5 +92,24 @@ class AmendingPaymentPlanControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view(appConfig.hmrcHelplineUrl, "amendingPaymentPlan.p1.single")(request, messages(application)).toString
       }
     }
+
+    "must redirect to JourneyRecovery when guard fails" in {
+
+      val ua = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(ua)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
   }
 }

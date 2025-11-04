@@ -41,7 +41,8 @@ case class ChrisSubmissionRequest(
   suspensionPeriodRangeDate: Option[SuspensionPeriodRange],
   amendPlan: Boolean = false,
   cancelPlan: Boolean = false,
-  suspendPlan: Boolean = false
+  suspendPlan: Boolean = false,
+  removeSuspensionPlan: Boolean = false
 )
 
 object ChrisSubmissionRequest {
