@@ -17,18 +17,19 @@
 package controllers
 
 import base.SpecBase
-import models.{NormalMode, SuspensionPeriodRange, UserAnswers}
-import models.responses.PaymentPlanResponse
+import models.{NormalMode, PaymentPlanType, SuspensionPeriodRange, UserAnswers}
+import models.responses.{AmendLockResponse, PaymentPlanResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
-import pages.SuspensionPeriodRangeDatePage
+import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -57,6 +58,9 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
       .set(DirectDebitReferenceQuery, "DDI123")
       .success
       .value
+      .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+      .success
+      .value
 
   "CheckYourSuspensionDetailsController" - {
 
@@ -69,6 +73,7 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
         .build()
 
       running(application) {
+        when(mockNddService.suspendPaymentPlanGuard(any())).thenReturn(true)
         val request = FakeRequest(GET, routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode).url)
         val result = route(application, request).value
 
@@ -81,6 +86,8 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
     "must call CHRIS, update session, and redirect to Landing page when POST succeeds" in {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
       when(mockNddService.submitChrisData(any())(any())) thenReturn Future.successful(true)
+      when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithSuspensionRange))
         .overrides(
@@ -121,6 +128,24 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
 
     "must redirect to JourneyRecovery when DirectDebitReference is missing" in {
       val userAnswersWithoutDDI = userAnswersWithSuspensionRange.remove(DirectDebitReferenceQuery).success.value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithoutDDI))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourSuspensionDetailsController.onSubmit(NormalMode).url)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to JourneyRecovery when PaymentPlanReference is missing" in {
+      val userAnswersWithoutDDI = userAnswersWithSuspensionRange.remove(PaymentPlanReferenceQuery).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithoutDDI))
         .overrides(

@@ -35,7 +35,6 @@ import views.html.CancelPaymentPlanView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class CancelPaymentPlanController @Inject() (
   override val messagesApi: MessagesApi,
@@ -73,7 +72,7 @@ class CancelPaymentPlanController @Inject() (
       }
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.warn(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
+      logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
@@ -110,8 +109,8 @@ class CancelPaymentPlanController @Inject() (
   private def handleValidSubmission(value: Boolean)(implicit request: DataRequest[AnyContent]): Future[Result] = {
     val ua = request.userAnswers
 
-    ua.get(DirectDebitReferenceQuery) match {
-      case Some(ddiReference) =>
+    (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
+      case (Some(ddiReference), Some(paymentPlanReference)) =>
         val chrisRequest = buildCancelChrisRequest(ua, ddiReference)
 
         nddService.submitChrisData(chrisRequest).flatMap {
@@ -119,16 +118,14 @@ class CancelPaymentPlanController @Inject() (
             logger.info(s"CHRIS Cancel payment plan payload submission successful for DDI Ref [$ddiReference]")
 
             for {
-              updatedAnswers       <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
-              directDebitReference <- Future.fromTry(Try(ua.get(DirectDebitReferenceQuery).get))
-              paymentPlanReference <- Future.fromTry(Try(ua.get(PaymentPlanReferenceQuery).get))
-              lockResponse         <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
-              _                    <- sessionRepository.set(updatedAnswers)
+              updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
+              lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
+              _              <- sessionRepository.set(updatedAnswers)
             } yield {
               if (lockResponse.lockSuccessful) {
-                logger.info(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                logger.info(s"Cancel payment plan lock returns: ${lockResponse.lockSuccessful}")
               } else {
-                logger.error(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                logger.error(s"Cancel payment plan lock returns: ${lockResponse.lockSuccessful}")
               }
               Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
             }
@@ -139,8 +136,8 @@ class CancelPaymentPlanController @Inject() (
             )
         }
 
-      case None =>
-        logger.error("Missing DirectDebitReference in UserAnswers")
+      case _ =>
+        logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to cancel payment plan")
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }

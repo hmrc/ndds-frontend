@@ -21,9 +21,12 @@ import models.PaymentPlanType
 
 import javax.inject.Inject
 import models.responses.PaymentPlanDetails
+import pages.ManagePaymentPlanTypePage
+import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
@@ -34,6 +37,7 @@ class PaymentPlanCancelledController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  nddService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: PaymentPlanCancelledView
 ) extends FrontendBaseController
@@ -42,15 +46,22 @@ class PaymentPlanCancelledController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val userAnswers = request.userAnswers
 
-    (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(PaymentPlanReferenceQuery)) match {
-      case (Some(planDetails), Some(paymentPlanReference)) =>
-        val paymentPlanDetails = planDetails.paymentPlanDetails
-        val rows = buildRows(paymentPlanDetails)
+    if (nddService.isPaymentPlanCancellable(userAnswers)) {
+      (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(PaymentPlanReferenceQuery)) match {
+        case (Some(planDetails), Some(paymentPlanReference)) =>
+          val paymentPlanDetails = planDetails.paymentPlanDetails
+          val rows = buildRows(paymentPlanDetails)
 
-        Ok(view(paymentPlanReference, routes.DirectDebitSummaryController.onPageLoad(), rows))
-      case _ =>
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+          Ok(view(paymentPlanReference, routes.DirectDebitSummaryController.onPageLoad(), rows))
+        case _ =>
+          Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
+
   }
 
   private def buildRows(paymentPlanDetails: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {

@@ -22,10 +22,12 @@ import models.responses.DirectDebitDetails
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.{SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
+import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage}
 import play.api.Logging
+import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
@@ -53,28 +55,43 @@ class CheckYourSuspensionDetailsController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    logger.info("Display suspension details confirmation page")
-    val summaryList = buildSummaryList(request.userAnswers)
-    Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+    logger.debug("Display suspension details confirmation page")
+    val userAnswers = request.userAnswers
+
+    if (nddService.suspendPaymentPlanGuard(userAnswers)) {
+      val summaryList = buildSummaryList(request.userAnswers)
+      Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(
+        s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
+      )
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
+
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      val confirmed = true
+      val ua = request.userAnswers
 
-      request.userAnswers.get(queries.DirectDebitReferenceQuery) match {
-        case Some(ddiReference) =>
-          val chrisRequest = suspendChrisSubmissionRequest(request.userAnswers, ddiReference)
+      (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
+        case (Some(ddiReference), Some(paymentPlanReference)) =>
+          val chrisRequest = suspendChrisSubmissionRequest(ua, ddiReference)
 
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
               logger.debug(s"CHRIS submission successful for suspend budgeting payment plan for DDI Ref [$ddiReference]")
               for {
-                updatedAnswers <- Future.fromTry(
-                                    request.userAnswers.set(SuspensionDetailsCheckYourAnswerPage, confirmed)
-                                  )
-                _ <- sessionRepository.set(updatedAnswers)
+                lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
+                updatedAnswers <- Future.fromTry(ua.set(SuspensionDetailsCheckYourAnswerPage, true))
+                _              <- sessionRepository.set(updatedAnswers)
               } yield {
+                if (lockResponse.lockSuccessful) {
+                  logger.debug(s"Suspend payment plan lock returns: ${lockResponse.lockSuccessful}")
+                } else {
+                  logger.debug(s"Suspend payment plan lock returns: ${lockResponse.lockSuccessful}")
+                }
                 Redirect(navigator.nextPage(SuspensionDetailsCheckYourAnswerPage, mode, updatedAnswers))
               }
             } else {
@@ -86,7 +103,7 @@ class CheckYourSuspensionDetailsController @Inject() (
           }
 
         case _ =>
-          logger.error("Missing DirectDebitReference in UserAnswers when trying to submit suspension details")
+          logger.error("Missing DirectDebitReference and/or PaymentPlanReference  in UserAnswers when trying to suspend payment plan")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }

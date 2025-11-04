@@ -166,3 +166,5 @@ GET        /removing-this-suspension                        controllers.Removing
 POST       /removing-this-suspension                        controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = NormalMode)
 GET        /change-removing-this-suspension                  controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-removing-this-suspension                  controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = CheckMode)
+
+GET        /amending-payment-plan                       controllers.AmendingPaymentPlanController.onPageLoad()

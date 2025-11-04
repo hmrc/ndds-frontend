@@ -263,6 +263,97 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to JourneyRecoveryController when DirectDebitReference is missing" in {
+
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
+      val paymentPlanReference = "ppReference"
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNddService = mock[NationalDirectDebitService]
+
+      val userAnswersWithData =
+        emptyUserAnswers
+          .set(PaymentPlanReferenceQuery, paymentPlanReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+          .success
+          .value
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.submitChrisData(any())(any[HeaderCarrier])) thenReturn Future.successful(true)
+      when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+      val onwardRoute = Call("GET", "/foo")
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService),
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, cancelPaymentPlanRoute)
+          .withFormUrlEncodedBody("value" -> "true")
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to JourneyRecoveryController when PaymentPlanReference is missing" in {
+
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
+      val mockSessionRepository = mock[SessionRepository]
+      val mockNddService = mock[NationalDirectDebitService]
+
+      val userAnswersWithData =
+        emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, "DDI123456")
+          .success
+          .value
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.submitChrisData(any())(any[HeaderCarrier])) thenReturn Future.successful(true)
+      when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+      val onwardRoute = Call("GET", "/foo")
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService),
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, cancelPaymentPlanRoute)
+          .withFormUrlEncodedBody("value" -> "true")
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
     "must return BadRequest when form submission is invalid" in {
 
       val mockNddService = mock[NationalDirectDebitService]

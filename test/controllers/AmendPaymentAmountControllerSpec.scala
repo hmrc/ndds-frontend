@@ -45,7 +45,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
   private lazy val paymentPlanAmountRoute = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
 
   "PaymentPlanAmount Controller" - {
-    lazy val paymentPlanRoute = routes.PaymentPlanDetailsController.onPageLoad().url
+    lazy val paymentPlanRoute = routes.AmendingPaymentPlanController.onPageLoad().url
     val mockService = mock[NationalDirectDebitService]
 
     "must return OK and the correct view for a GET with SinglePaymentPlan" in {
@@ -120,7 +120,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return NDDS error if amend payment plan guard returns false" in {
+    "must redirect to journey recovery if amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
         .success
@@ -131,9 +131,10 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
         val request = FakeRequest(GET, routes.AmendPaymentAmountController.onPageLoad(NormalMode).url)
-        val result = intercept[Exception](route(application, request).value.futureValue)
+        val result = route(application, request).value
 
-        result.getMessage must include("NDDS Payment Plan Guard: Cannot amend this plan type: Some(taxCreditRepaymentPlan)")
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 

@@ -52,55 +52,60 @@ class AmendPaymentPlanConfirmationController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
 
-    userAnswers.get(PaymentPlanDetailsQuery) match {
-      case Some(response) =>
-        val planDetail = response.paymentPlanDetails
-        val directDebitDetails = response.directDebitDetails
+    if (nddService.amendPaymentPlanGuard(userAnswers)) {
+      userAnswers.get(PaymentPlanDetailsQuery) match {
+        case Some(response) =>
+          val planDetail = response.paymentPlanDetails
+          val directDebitDetails = response.directDebitDetails
 
-        val (rows, backLink) = buildRows(userAnswers, planDetail, mode)
+          val (rows, backLink) = buildRows(userAnswers, planDetail, mode)
 
-        for {
-          directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
-          paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
-          planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
-        } yield {
-          Ok(
-            view(
-              mode,
-              paymentPlanReference,
-              directDebitReference,
-              directDebitDetails.bankSortCode.getOrElse(""),
-              directDebitDetails.bankAccountNumber.getOrElse(""),
-              rows,
-              backLink
+          for {
+            directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
+            paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
+            planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
+          } yield {
+            Ok(
+              view(
+                mode,
+                paymentPlanReference,
+                directDebitReference,
+                directDebitDetails.bankSortCode.getOrElse(""),
+                directDebitDetails.bankAccountNumber.getOrElse(""),
+                rows,
+                backLink
+              )
             )
-          )
-        }
+          }
 
-      case None =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        case None =>
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
+
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
       val ua = request.userAnswers
 
-      ua.get(DirectDebitReferenceQuery) match {
-        case Some(ddiReference) =>
+      (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
+        case (Some(ddiReference), Some(paymentPlanReference)) =>
           val chrisRequest = buildChrisSubmissionRequest(ua, ddiReference)
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
               logger.info(s"CHRIS submission successful for amend payment plan for DDI Ref [$ddiReference]")
               for {
-                directDebitReference <- Future.fromTry(Try(ua.get(DirectDebitReferenceQuery).get))
-                paymentPlanReference <- Future.fromTry(Try(ua.get(PaymentPlanReferenceQuery).get))
-                lockResponse         <- nddService.lockPaymentPlan(directDebitReference, paymentPlanReference)
+                lockResponse <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
               } yield {
                 if (lockResponse.lockSuccessful) {
-                  logger.debug(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                  logger.debug(s"Amend payment plan lock returns: ${lockResponse.lockSuccessful}")
                 } else {
-                  logger.debug(s"Payment plan lock returns: ${lockResponse.lockSuccessful}")
+                  logger.debug(s"Amend payment plan lock returns: ${lockResponse.lockSuccessful}")
                 }
                 Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
               }
@@ -112,8 +117,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
             }
           }
 
-        case None =>
-          logger.warn("Missing DirectDebitReference in UserAnswers when trying to amend payment plan")
+        case _ =>
+          logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to amend payment plan")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     }
