@@ -146,8 +146,14 @@ class PaymentPlanDetailsController @Inject() (
            } else {
              Seq.empty
            })
-
-      case _ => // For Variable and Tax repayment plan
+      case PaymentPlanType.VariablePaymentPlan.toString =>
+        Seq(
+          AmendPaymentPlanTypeSummary.row(planDetail.planType),
+          AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+          DateSetupSummary.row(planDetail.submissionDateTime),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
+        )
+      case _ => // Tax repayment plan
         Seq(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
@@ -184,11 +190,7 @@ class PaymentPlanDetailsController @Inject() (
                                     case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
                                     case _               => Future.successful(true)
                                   }
-          isThreeDaysBeforeEnd <- planDetail.scheduledPaymentEndDate match {
-                                    case Some(endDate) => nddService.isThreeDaysPriorPlanEndDate(endDate)
-                                    case _             => Future.successful(true)
-                                  }
-        } yield isTwoDaysBeforeStart && isThreeDaysBeforeEnd
+        } yield isTwoDaysBeforeStart
 
       case _ => Future.successful(false) // For TaxCredit repayment plan
     }
