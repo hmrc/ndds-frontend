@@ -138,9 +138,12 @@ class PaymentPlanDetailsController @Inject() (
           DateSetupSummary.row(planDetail.submissionDateTime),
           AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
           PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
-          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern),
-          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
         ) ++
+          planDetail.scheduledPaymentEndDate.fold(Seq.empty[SummaryListRow]) { scheduledPaymentEndDate =>
+            Seq(AmendPlanEndDateSummary.row(Some(scheduledPaymentEndDate), Constants.shortDateTimeFormatPattern))
+          }
+          ++
           (if (isSuspendPeriodActive(planDetail)) {
              Seq(SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate))
            } else {

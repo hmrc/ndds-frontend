@@ -185,7 +185,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
 
       ".BudgetPayment Plan" - {
 
-        def summaryListWithoutSuspendPeriod(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+        def summaryListWithEndDateAndWithoutSuspendPeriod(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
           val planDetail = paymentPlanData.paymentPlanDetails
           Seq(
             AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
@@ -200,7 +200,21 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           )
         }
 
-        def summaryListWithSuspendPeriod(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+        def summaryListWithoutEndDateAndWithoutSuspendPeriod(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+          val planDetail = paymentPlanData.paymentPlanDetails
+          Seq(
+            AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
+            AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
+            DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
+            AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)(messages(app)),
+            PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency)(messages(app)),
+            AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(
+              messages(app)
+            )
+          )
+        }
+
+        def summaryListWithEndDateAndWithSuspendPeriod(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
           val planDetail = paymentPlanData.paymentPlanDetails
           Seq(
             AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
@@ -212,6 +226,21 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               messages(app)
             ),
             AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)(messages(app)),
+            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate)(messages(app))
+          )
+        }
+
+        def summaryListWithoutEndDateAndWithSuspendPeriod(paymentPlanData: PaymentPlanResponse, app: Application): Seq[SummaryListRow] = {
+          val planDetail = paymentPlanData.paymentPlanDetails
+          Seq(
+            AmendPaymentPlanTypeSummary.row(planDetail.planType)(messages(app)),
+            AmendPaymentPlanSourceSummary.row(planDetail.hodService)(messages(app)),
+            DateSetupSummary.row(planDetail.submissionDateTime)(messages(app)),
+            AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount)(messages(app)),
+            PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency)(messages(app)),
+            AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(
+              messages(app)
+            ),
             SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate)(messages(app))
           )
         }
@@ -266,7 +295,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
-                val summaryListRows = summaryListWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
@@ -325,7 +354,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
-                val summaryListRows = summaryListWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithoutEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
@@ -384,7 +413,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
-                val summaryListRows = summaryListWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
@@ -445,7 +474,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
 
-                val summaryListRows = summaryListWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
@@ -513,7 +542,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
 
-                val summaryListRows = summaryListWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
@@ -591,7 +620,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
-                val summaryListRows = summaryListWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithEndDateAndWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
@@ -667,7 +696,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
-                val summaryListRows = summaryListWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithoutEndDateAndWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
@@ -743,7 +772,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
 
-                val summaryListRows = summaryListWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithEndDateAndWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
@@ -819,7 +848,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
 
-                val summaryListRows = summaryListWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
+                val summaryListRows = summaryListWithEndDateAndWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
