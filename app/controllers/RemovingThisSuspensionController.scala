@@ -120,7 +120,7 @@ class RemovingThisSuspensionController @Inject() (
             if (lockResponse.lockSuccessful) {
               logger.debug(s"Remove  payment plan lock returns: ${lockResponse.lockSuccessful}")
             } else {
-              logger.debug(s"Amend payment plan lock returns: ${lockResponse.lockSuccessful}")
+              logger.debug(s"Remove payment plan lock returns: ${lockResponse.lockSuccessful}")
             }
             result
           }
