@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import forms.RemovingThisSuspensionFormProvider
 import models.{NormalMode, PaymentPlanType}
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.responses.{AmendLockResponse, DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -29,8 +29,10 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentPlanDetailsQuery
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
@@ -43,6 +45,9 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
   val form = formProvider()
 
   lazy val removingThisSuspensionRoute = routes.RemovingThisSuspensionController.onPageLoad(NormalMode).url
+
+  private val mockSessionRepository = mock[SessionRepository]
+  private val mockNddService = mock[NationalDirectDebitService]
 
   "RemovingThisSuspension Controller" - {
 
@@ -177,16 +182,25 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
-
-      val mockSessionRepository = mock[SessionRepository]
+        .set(PaymentPlanReferenceQuery, "PREF123")
+        .success
+        .value
+        .set(DirectDebitReferenceQuery, "DDI123")
+        .success
+        .value
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.suspendPaymentPlanGuard(any()))
+        .thenReturn(true)
+      when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockNddService)
           )
           .build()
 
@@ -211,8 +225,6 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
-
-      val mockSessionRepository = mock[SessionRepository]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -245,8 +257,27 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
+        .set(PaymentPlanReferenceQuery, "PREF123")
+        .success
+        .value
+        .set(DirectDebitReferenceQuery, "DDI123")
+        .success
+        .value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.suspendPaymentPlanGuard(any()))
+        .thenReturn(true)
+      when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          )
+          .build()
 
       running(application) {
         val request =
@@ -322,6 +353,82 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, removingThisSuspensionRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when missing DirectDebitReference" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, "PREF123")
+        .success
+        .value
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.suspendPaymentPlanGuard(any()))
+        .thenReturn(true)
+      when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          )
+          .build()
+
+      running(application) {
+        val request = FakeRequest(POST, removingThisSuspensionRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when missing PaymentPlanReference" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(DirectDebitReferenceQuery, "DDI123")
+        .success
+        .value
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.suspendPaymentPlanGuard(any()))
+        .thenReturn(true)
+      when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          )
+          .build()
+
+      running(application) {
+        val request = FakeRequest(POST, removingThisSuspensionRoute)
 
         val result = route(application, request).value
 
