@@ -38,7 +38,9 @@ class BackSubmissionControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[BackSubmissionView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(Call("GET", routes.DirectDebitSummaryController.onPageLoad().url))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(Call("GET", routes.YourDirectDebitInstructionsController.onPageLoad().url))(request,
+                                                                                                                           messages(application)
+                                                                                                                          ).toString
       }
     }
   }

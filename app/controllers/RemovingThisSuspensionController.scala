@@ -24,7 +24,7 @@ import javax.inject.Inject
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import models.responses.{DirectDebitDetails, PaymentPlanResponse}
 import navigation.Navigator
-import pages.{RemovingThisSuspensionPage, SuspensionPeriodRangeDatePage}
+import pages.{RemovingThisSuspensionPage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -56,37 +56,45 @@ class RemovingThisSuspensionController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
-    if (nddsService.suspendPaymentPlanGuard(request.userAnswers)) {
+    val alreadyConfirmed: Boolean =
+      request.userAnswers.get(RemovingThisSuspensionPage).contains(true)
 
-      val maybeResult = for {
-        planDetails <- request.userAnswers.get(PaymentPlanDetailsQuery)
-      } yield {
-        val planDetail = planDetails.paymentPlanDetails
-        val preparedForm = request.userAnswers.get(RemovingThisSuspensionPage) match {
-          case None        => form
-          case Some(value) => form.fill(value)
+    if (alreadyConfirmed) {
+      logger.warn("Attempt to load  Removing this suspension confirmation; redirecting to Page Not Found.")
+      Redirect(routes.BackSubmissionController.onPageLoad())
+    } else {
+      if (nddsService.suspendPaymentPlanGuard(request.userAnswers)) {
+
+        val maybeResult = for {
+          planDetails <- request.userAnswers.get(PaymentPlanDetailsQuery)
+        } yield {
+          val planDetail = planDetails.paymentPlanDetails
+          val preparedForm = request.userAnswers.get(RemovingThisSuspensionPage) match {
+            case None        => form
+            case Some(value) => form.fill(value)
+          }
+
+          val paymentReference = planDetail.paymentReference
+          val suspensionStartDate = planDetail.suspensionStartDate
+          val suspensionEndDate = planDetail.suspensionEndDate
+
+          Ok(view(preparedForm, mode, paymentReference, suspensionStartDate, suspensionEndDate))
         }
 
-        val paymentReference = planDetail.paymentReference
-        val suspensionStartDate = planDetail.suspensionStartDate
-        val suspensionEndDate = planDetail.suspensionEndDate
-
-        Ok(view(preparedForm, mode, paymentReference, suspensionStartDate, suspensionEndDate))
-      }
-
-      maybeResult match {
-        case Some(result) => result
-        case _            => Redirect(routes.JourneyRecoveryController.onPageLoad())
-      }
-    } else {
-      request.userAnswers.get(PaymentPlanDetailsQuery) match {
-        case Some(planDetails) =>
-          val errorMessage =
-            s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${planDetails.paymentPlanDetails.planType}"
-          logger.error(errorMessage)
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
-        case _ =>
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
+        maybeResult match {
+          case Some(result) => result
+          case _            => Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+      } else {
+        request.userAnswers.get(PaymentPlanDetailsQuery) match {
+          case Some(planDetails) =>
+            val errorMessage =
+              s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${planDetails.paymentPlanDetails.planType}"
+            logger.error(errorMessage)
+            Redirect(routes.JourneyRecoveryController.onPageLoad())
+          case _ =>
+            Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
       }
     }
   }
