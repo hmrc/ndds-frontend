@@ -419,6 +419,7 @@ paymentPlanDetails.details.paymentFor = Payment for
 paymentPlanDetails.details.dateSetUp = Date set up
 paymentPlanDetails.details.amount.budgetPaymentPlan = Regular payment amount
 paymentPlanDetails.details.amount.singlePaymentPlan = Payment amount
+paymentPlanDetails.details.amount.taxCreditRepaymentPlan = Total amount due
 paymentPlanDetails.details.startDate = Plan start date
 paymentPlanDetails.details.date = Payment date
 paymentPlanDetails.details.planStartDate = Plan start date

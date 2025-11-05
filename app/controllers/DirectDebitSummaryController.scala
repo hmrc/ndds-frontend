@@ -125,15 +125,7 @@ class DirectDebitSummaryController @Inject() (
             optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v))
           ).flatten
 
-        case PaymentPlanType.TaxCreditRepaymentPlan.toString =>
-          Seq(
-            optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
-            optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
-            optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v))
-            // optionalRow(Option(plan.totalAmountDue))(v => TotalAmountDueSummary.row(v))
-          ).flatten
-
-        case _ => // For Single and Budget plan
+        case _ => // For Single, TaxCreditRepaymentPlan and Budget plan
           Seq(
             optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
             optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
