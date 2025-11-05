@@ -233,12 +233,12 @@ paymentReference.sdlt.hint = Your Stamp Duty Land Tax (SDLT) payment reference i
 paymentReference.tc.hint = Your Tax Credit (TC) payment reference is 16 digits long, starting and ending with two alpha characters, with an ’N’ as the 15th digit, for example, AB123456311204NC.
 paymentReference.vat.hint = Your Value Added Tax (VAT) payment reference is the same as your VAT Registration Number, which is nine digits long, for example 123456789.
 
-paymentAmount.title = What amount do you want to pay?
-paymentAmount.heading = What amount do you want to pay?
+paymentAmount.title = How much do you want to pay, in pounds?
+paymentAmount.heading = How much do you want to pay, in pounds?
 paymentAmount.checkYourAnswersLabel = Payment amount
 paymentAmount.error.nonNumeric = Enter a valid amount
 paymentAmount.error.required = Enter an amount
-paymentAmount.hint = Value must be in pounds and pence, like 967.82
+paymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
 paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
 paymentAmount.error.max.min.range = The amount entered must between 1.00 and 20,000,000.00
 paymentAmount.change.hidden =  Payment amount
