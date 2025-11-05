@@ -17,18 +17,23 @@
 package controllers
 
 import controllers.actions.*
-import models.UserAnswers
+import models.{PaymentPlanType, UserAnswers}
+import models.responses.NddPaymentPlan
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Actions, Card, CardTitle, SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, DateSetupSummary, TotalAmountDueSummary}
 import views.html.DirectDebitSummaryView
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 
 class DirectDebitSummaryController @Inject() (
   override val messagesApi: MessagesApi,
@@ -56,7 +61,8 @@ class DirectDebitSummaryController @Inject() (
               Ok(
                 view(
                   reference,
-                  ddPaymentPlans
+                  ddPaymentPlans,
+                  buildCards(ddPaymentPlans.paymentPlanList)
                 )
               )
             }
@@ -73,6 +79,69 @@ class DirectDebitSummaryController @Inject() (
       updatedAnswers <- Future.fromTry(userAnswers.set(DirectDebitReferenceQuery, directDebitReference))
       _              <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.DirectDebitSummaryController.onPageLoad())
+  }
+
+  private def buildCards(paymentPlanList: Seq[NddPaymentPlan])(implicit messages: Messages): Seq[SummaryList] = {
+    paymentPlanList.map { plan =>
+      SummaryList(
+        card = Some(
+          Card(
+            title = Some(
+              CardTitle(
+                content = Text(messages("directDebitPaymentSummary.activePayment.summary.title", plan.planRefNumber))
+              )
+            ),
+            actions = Some(
+              Actions(
+                items = Seq(
+                  ActionItem(
+                    href               = routes.PaymentPlanDetailsController.onRedirect(plan.planRefNumber).url,
+                    content            = Text(messages("directDebitPaymentSummary.activePayment.summary.action")),
+                    visuallyHiddenText = Some(messages(plan.planRefNumber))
+                  )
+                )
+              )
+            )
+          )
+        ),
+        rows = buildSummaryRows(Seq(plan))
+      )
+    }
+  }
+
+  // this is to build rows based on the plan type - similar pp1
+  private def buildSummaryRows(paymentPlanList: Seq[NddPaymentPlan])(implicit messages: Messages): Seq[SummaryListRow] = {
+    paymentPlanList.flatMap { plan =>
+
+      def optionalRow[T](maybeValue: Option[T])(build: T => SummaryListRow): Option[SummaryListRow] =
+        maybeValue.map(build)
+
+      plan.planType match {
+
+        case PaymentPlanType.VariablePaymentPlan.toString =>
+          Seq(
+            optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
+            optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
+            optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v))
+          ).flatten
+
+        case PaymentPlanType.TaxCreditRepaymentPlan.toString =>
+          Seq(
+            optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
+            optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
+            optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v))
+            // optionalRow(Option(plan.totalAmountDue))(v => TotalAmountDueSummary.row(v))
+          ).flatten
+
+        case _ => // For Single and Budget plan
+          Seq(
+            optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
+            optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
+            optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v)),
+            optionalRow(Option(plan.scheduledPaymentAmount))(amount => AmendPaymentAmountSummary.row(plan.planType, Some(amount), showChange = true))
+          ).flatten
+      }
+    }
   }
 
   private def cleanseUserData(userAnswers: UserAnswers): Future[UserAnswers] =
