@@ -22,7 +22,7 @@ import models.requests.{ChrisSubmissionRequest, DataRequest}
 import models.responses.DirectDebitDetails
 import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{CancelPaymentPlanPage, ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage}
+import pages.{CancelPaymentPlanConfirmationPage, CancelPaymentPlanPage, ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -56,7 +56,7 @@ class CancelPaymentPlanController @Inject() (
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val alreadyConfirmed: Boolean =
-      request.userAnswers.get(CancelPaymentPlanPage).contains(true)
+      request.userAnswers.get(CancelPaymentPlanConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
       logger.warn("Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")
@@ -126,6 +126,7 @@ class CancelPaymentPlanController @Inject() (
 
             for {
               updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(CancelPaymentPlanConfirmationPage, true))
               lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
               _              <- sessionRepository.set(updatedAnswers)
             } yield {

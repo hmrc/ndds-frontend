@@ -57,7 +57,7 @@ class CheckYourAnswersController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
     val alreadyConfirmed: Boolean =
-      request.userAnswers.get(AmendPaymentPlanConfirmationPage).contains(true)
+      request.userAnswers.get(CreateConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
       logger.warn("Attempt to  Check your answers  confirmation; redirecting to Page Not Found.")

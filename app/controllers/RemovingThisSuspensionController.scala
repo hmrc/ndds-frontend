@@ -24,7 +24,7 @@ import javax.inject.Inject
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import models.responses.{DirectDebitDetails, PaymentPlanResponse}
 import navigation.Navigator
-import pages.{RemovingThisSuspensionPage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
+import pages.{RemovingThisSuspensionConfirmationPage, RemovingThisSuspensionPage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -57,7 +57,7 @@ class RemovingThisSuspensionController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
     val alreadyConfirmed: Boolean =
-      request.userAnswers.get(RemovingThisSuspensionPage).contains(true)
+      request.userAnswers.get(RemovingThisSuspensionConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
       logger.warn("Attempt to load  Removing this suspension confirmation; redirecting to Page Not Found.")
@@ -128,6 +128,7 @@ class RemovingThisSuspensionController @Inject() (
 
                           for {
                             updatedAnswers <- Future.fromTry(request.userAnswers.set(RemovingThisSuspensionPage, value))
+                            updatedAnswers <- Future.fromTry(updatedAnswers.set(RemovingThisSuspensionConfirmationPage, value))
                             _              <- sessionRepository.set(updatedAnswers)
                           } yield Redirect(navigator.nextPage(RemovingThisSuspensionPage, mode, updatedAnswers))
 

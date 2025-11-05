@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import models.UserAnswers
-import pages.{AmendPaymentPlanConfirmationPage, CancelPaymentPlanPage, RemovingThisSuspensionPage, SuspensionDetailsCheckYourAnswerPage}
+import pages.{AmendPaymentPlanConfirmationPage, CancelPaymentPlanConfirmationPage, CancelPaymentPlanPage, CreateConfirmationPage, RemovingThisSuspensionPage, SuspensionDetailsCheckYourAnswerPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
@@ -50,9 +50,10 @@ class YourDirectDebitInstructionsController @Inject() (
     // Remove both pages before proceeding
     val cleansedAnswersFut = for {
       updatedAnswers <- Future.fromTry(userAnswers.remove(AmendPaymentPlanConfirmationPage))
+      updatedAnswers <- Future.fromTry(updatedAnswers.remove(CreateConfirmationPage))
       updatedAnswers <- Future.fromTry(updatedAnswers.remove(SuspensionDetailsCheckYourAnswerPage))
       updatedAnswers <- Future.fromTry(updatedAnswers.remove(RemovingThisSuspensionPage))
-      updatedAnswers <- Future.fromTry(updatedAnswers.remove(CancelPaymentPlanPage))
+      updatedAnswers <- Future.fromTry(updatedAnswers.remove(CancelPaymentPlanConfirmationPage))
     } yield updatedAnswers
 
     cleansedAnswersFut.flatMap { cleansedAnswers =>
