@@ -51,6 +51,14 @@ class PaymentPlanDetailsController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    if (nddService.isVariablePaymentPlan(request.userAnswers)) {
+      nddService
+        .isAdvanceNoticePresent(request.userAnswers.get(DirectDebitReferenceQuery).get, request.userAnswers.get(PaymentPlanReferenceQuery).get)
+        .map { flag =>
+
+          println(s"Advance Notice present: $flag")
+        }
+    }
     (request.userAnswers.get(DirectDebitReferenceQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
       case (Some(directDebitReference), Some(paymentPlanReference)) =>
         nddService.getPaymentPlanDetails(directDebitReference, paymentPlanReference).flatMap { response =>
