@@ -21,10 +21,8 @@ import models.requests.ChrisSubmissionRequest
 import models.responses.DirectDebitDetails
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
-import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage}
+import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
-import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
