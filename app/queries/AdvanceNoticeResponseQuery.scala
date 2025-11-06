@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package models.responses
+package queries
 
-import play.api.libs.json.{Json, OFormat}
+import models.responses.AdvanceNoticeResponse
+import play.api.libs.json.{Format, JsPath, Json}
+import pages.QuestionPage
 
-import java.time.LocalDate
+case object AdvanceNoticeResponseQuery extends QuestionPage[AdvanceNoticeResponse] {
 
-case class AdvanceNoticeResponse(totalAmount: Option[BigDecimal], dueDate: Option[LocalDate])
+  override def path: JsPath = JsPath \ "advanceNoticeResponse"
 
-object AdvanceNoticeResponse {
-  implicit val format: OFormat[AdvanceNoticeResponse] = Json.format
+  implicit val format: Format[AdvanceNoticeResponse] = Json.format[AdvanceNoticeResponse]
 }

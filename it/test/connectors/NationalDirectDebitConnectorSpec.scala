@@ -1021,7 +1021,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val responseJson =
         """
           |{
-          |  "totalAmount": "100.00",
+          |  "totalAmount": 100.00,
           |  "dueDate": "2025-12-01"
           |}
           |""".stripMargin
@@ -1038,8 +1038,8 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val result = connector.isAdvanceNoticePresent("test-dd-ref", "test-pp-ref").futureValue
 
       result.isDefined shouldBe true
-      result.get.totalAmount shouldBe Some("100.00")
-      result.get.dueDate shouldBe Some("2025-12-01")
+      result.get.totalAmount shouldBe Some(BigDecimal("100.00")) 
+      result.get.dueDate shouldBe Some(LocalDate.parse("2025-12-01"))
     }
 
     "return None when no advance notice details are present (404)" in {

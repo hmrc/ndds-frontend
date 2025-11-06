@@ -496,19 +496,16 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   def isAdvanceNoticePresent(
     directDebitReference: String,
     paymentPlanReference: String
-  )(implicit hc: HeaderCarrier): Future[Boolean] = {
-    nddConnector.isAdvanceNoticePresent(directDebitReference, paymentPlanReference).map {
-      case Some(AdvanceNoticeResponse(Some(_), Some(_))) | Some(AdvanceNoticeResponse(Some(_), None)) | Some(AdvanceNoticeResponse(None, Some(_))) =>
-        true // Advance notice details are present
-
-      case Some(AdvanceNoticeResponse(None, None)) =>
-        false // no advance notice details
-
-      case None =>
-        false // Not present at all
-    } recover { case _ =>
-      false // Default false on failure
-    }
+  )(implicit hc: HeaderCarrier): Future[AdvanceNoticeResponse] = {
+    nddConnector
+      .isAdvanceNoticePresent(directDebitReference, paymentPlanReference)
+      .map {
+        case Some(response) => response
+        case None           => AdvanceNoticeResponse(None, None) // no details
+      }
+      .recover { case _ =>
+        AdvanceNoticeResponse(None, None) // default on failure
+      }
   }
 
 }
