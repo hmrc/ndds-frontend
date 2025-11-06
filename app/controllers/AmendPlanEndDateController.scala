@@ -125,11 +125,7 @@ class AmendPlanEndDateController @Inject() (
                       }
                       for {
                         updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                        updatedAnswers <-
-                          Future.fromTry(
-                            updatedAnswers.set(AmendPlanStartDatePage, potentialNextPaymentDate)
-                          ) // this needed for budgeting amend end date for chris submission
-                        _ <- sessionRepository.set(updatedAnswers)
+                        _              <- sessionRepository.set(updatedAnswers)
                       } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers))
                     }
                   }
@@ -172,11 +168,7 @@ class AmendPlanEndDateController @Inject() (
                       for {
                         duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers) // F26 check
                         updatedAnswers         <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                        updatedAnswers <-
-                          Future.fromTry(
-                            updatedAnswers.set(AmendPlanStartDatePage, potentialNextPaymentDate)
-                          ) // this needed for budgeting amend end date for chris submission
-                        _ <- sessionRepository.set(updatedAnswers)
+                        _                      <- sessionRepository.set(updatedAnswers)
                       } yield {
                         val logMsg = s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}"
                         if (duplicateCheckResponse.isDuplicate) {
