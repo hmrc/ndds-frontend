@@ -28,9 +28,10 @@ import pages.*
 import play.api.Logging
 import play.api.mvc.Request
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
-import repositories.DirectDebitCacheRepository
+import repositories.{DirectDebitCacheRepository, PaymentPlanCacheRepository}
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
+
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, LocalDate}
 import javax.inject.{Inject, Singleton}
@@ -41,7 +42,8 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
                                             val directDebitCache: DirectDebitCacheRepository,
                                             config: FrontendAppConfig,
                                             auditService: AuditService,
-                                            clock: Clock
+                                            clock: Clock,
+                                            val paymentPlansCache: PaymentPlanCacheRepository
                                            )(implicit ec: ExecutionContext)
     extends Logging {
   def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[?]): Future[NddResponse] = {
@@ -138,7 +140,14 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   def retrieveDirectDebitPaymentPlans(
     directDebitReference: String
   )(implicit hc: HeaderCarrier, request: Request[?]): Future[NddDDPaymentPlansResponse] = {
-    nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
+    paymentPlansCache.retrieveCache(directDebitReference) flatMap {
+      case Some(existingCache) => Future.successful(existingCache)
+      case _ =>
+        for {
+          ddPaymentPlans <- nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
+          _              <- paymentPlansCache.saveToCache(directDebitReference, ddPaymentPlans)
+        } yield ddPaymentPlans
+    }
   }
 
   def amendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =

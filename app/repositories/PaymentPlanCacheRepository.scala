@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.responses.{NddPaymentPlan, PaymentPlanDAO}
+import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan, PaymentPlanDAO}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.*
 import play.api.libs.json.Format
@@ -32,10 +32,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DirectDebitPaymentPlansCacheRepository @Inject() (mongoComponent: MongoComponent, appConfig: FrontendAppConfig, clock: Clock)(implicit
+class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent, appConfig: FrontendAppConfig, clock: Clock)(implicit
   ec: ExecutionContext
 ) extends PlayMongoRepository[PaymentPlanDAO](
-      collectionName = "direct-debit-payment-plans-cache",
+      collectionName = "payment-plans-cache",
       mongoComponent = mongoComponent,
       domainFormat   = PaymentPlanDAO.format,
       indexes = Seq(
@@ -50,29 +50,14 @@ class DirectDebitPaymentPlansCacheRepository @Inject() (mongoComponent: MongoCom
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private def byDdReference(ddReference: String): Bson = Filters.equal("_id", ddReference)
+  def saveToCache(directDebitReference: String, ddPaymentPlans: NddDDPaymentPlansResponse): Future[Boolean] = Mdc.preservingMdc {
+    val document = PaymentPlanDAO(Instant.now(clock), ddPaymentPlans)
 
-  private def retrieveCache(ddReference: String): Future[Seq[NddPaymentPlan]] = Mdc.preservingMdc {
-    keepAlive(ddReference).flatMap { _ =>
-      collection
-        .find(byDdReference(ddReference))
-        .headOption()
-        .map {
-          case Some(cache) => cache.paymentPlans
-          case _           => Seq()
-        }
-        .recover(_ => Seq())
-    }
-  }
-
-  def cacheResponse(ddReference: String, paymentPlans: Seq[NddPaymentPlan])(id: String): Future[Boolean] = Mdc.preservingMdc {
-    val document = PaymentPlanDAO(id, Instant.now(clock), paymentPlans)
-
-    retrieveCache(ddReference) flatMap {
-      case Seq() =>
+    retrieveCache(directDebitReference) flatMap {
+      case None =>
         collection
           .replaceOne(
-            filter      = byDdReference(id),
+            filter      = byDirectDebitReference(directDebitReference),
             replacement = document,
             options     = ReplaceOptions().upsert(true)
           )
@@ -83,10 +68,25 @@ class DirectDebitPaymentPlansCacheRepository @Inject() (mongoComponent: MongoCom
     }
   }
 
-  private[repositories] def keepAlive(ddReference: String): Future[Boolean] = Mdc.preservingMdc {
+  def retrieveCache(directDebitReference: String): Future[Option[NddDDPaymentPlansResponse]] = Mdc.preservingMdc {
+    keepAlive(directDebitReference).flatMap { _ =>
+      collection
+        .find(byDirectDebitReference(directDebitReference))
+        .headOption()
+        .map {
+          case Some(cache) => Some(cache.ddPaymentPlans)
+          case _           => None
+        }
+        .recover(_ => None)
+    }
+  }
+
+  private def byDirectDebitReference(directDebitReference: String): Bson = Filters.equal("_id", directDebitReference)
+
+  private[repositories] def keepAlive(directDebitReference: String): Future[Boolean] = Mdc.preservingMdc {
     collection
       .updateOne(
-        filter = byDdReference(ddReference),
+        filter = byDirectDebitReference(directDebitReference),
         update = Updates.set("lastUpdated", Instant.now(clock))
       )
       .toFuture()

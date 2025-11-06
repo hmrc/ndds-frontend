@@ -16,6 +16,7 @@
 
 package models.responses
 
+import models.responses.PaymentPlanDetails.planTypeMapping
 import models.{DirectDebitSource, PaymentPlanType}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
@@ -42,7 +43,9 @@ object NddPaymentPlan {
   implicit val reads: Reads[NddPaymentPlan] = (
     (__ \ "scheduledPaymentAmount").read[BigDecimal] and
       (__ \ "planRefNumber").read[String] and
-      (__ \ "planType").read[String].map(code => planTypeMapping.getOrElse(code, "unknownPlanType")) and
+      (__ \ "planType").read[String].map { code =>
+        planTypeMapping.getOrElse(code, code)
+      } and
       (__ \ "paymentReference").read[String] and
       (__ \ "hodService").read[String].map { code =>
         DirectDebitSource.hodServiceMapping.getOrElse(code, code)
@@ -67,10 +70,10 @@ object NddDDPaymentPlansResponse {
   implicit val format: OFormat[NddDDPaymentPlansResponse] = Json.format[NddDDPaymentPlansResponse]
 }
 
-case class PaymentPlanDAO(id: String, lastUpdated: Instant, paymentPlans: Seq[NddPaymentPlan])
+case class PaymentPlanDAO(lastUpdated: Instant, ddPaymentPlans: NddDDPaymentPlansResponse)
 
 object PaymentPlanDAO {
-  import NddPaymentPlan.format
+  import NddDDPaymentPlansResponse.format
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
   implicit val format: OFormat[PaymentPlanDAO] = Json.format[PaymentPlanDAO]
 }
