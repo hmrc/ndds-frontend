@@ -26,10 +26,11 @@
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList,
+    govukInsetText: GovukInsetText,
     directDebitPagination: DirectDebitPagination
 )
 
-@(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false, paginationViewModel: PaginationViewModel = PaginationViewModel())(implicit request: Request[_], messages: Messages)
+@(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false, paginationViewModel: PaginationViewModel = PaginationViewModel(), hmrcHelplineUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForSetupJourneyNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
 
@@ -50,7 +51,7 @@
     @paragraph("yourDirectDebitInstructions.p1")
 
     @paragraphMessageWithLink(
-        Some(messages("yourDirectDebitInstructions.p2")),
+        Some(messages("yourDirectDebitInstructions.p2.beforeLink")),
         linkMessage = messages("yourDirectDebitInstructions.p2.link"),
         linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
         linkFullStop = false,
@@ -58,7 +59,20 @@
         maxLimit = maxLimitReached
     )
 
-    @paragraph("yourDirectDebitInstructions.p3.note")
+    @govukInsetText(
+        InsetText(
+            content = HtmlContent(
+                paragraphMessageWithLink(
+                    message1   = Some(messages("yourDirectDebitInstructions.p3.beforeLink")),
+                    linkMessage = messages("yourDirectDebitInstructions.p3.link"),
+                    message2   = Some(messages("yourDirectDebitInstructions.p3.afterLink")),
+                    linkUrl    = hmrcHelplineUrl,
+                    linkRel    = "noreferrer noopener",
+                    target     = "_blank"
+                )
+            )
+        )
+    )
 
     @for(dd <- directDebitDetails) {
         @govukSummaryList(SummaryList(

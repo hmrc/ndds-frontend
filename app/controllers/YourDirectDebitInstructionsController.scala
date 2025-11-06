@@ -72,7 +72,8 @@ class YourDirectDebitInstructionsController @Inject() (
             view(
               directDebitDetails  = paginationResult.paginatedData,
               maxLimitReached     = maxLimitReached,
-              paginationViewModel = paginationResult.paginationViewModel
+              paginationViewModel = paginationResult.paginationViewModel,
+              hmrcHelplineUrl     = appConfig.hmrcHelplineUrl
             )
           )
         }
