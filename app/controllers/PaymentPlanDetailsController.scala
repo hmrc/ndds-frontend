@@ -156,7 +156,7 @@ class PaymentPlanDetailsController @Inject() (
           DateSetupSummary.row(planDetail.submissionDateTime),
           AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
         )
-      case PaymentPlanType.TaxCreditRepaymentPlan.toString =>
+      case _ =>
         Seq(
           AmendPaymentPlanTypeSummary.row(planDetail.planType),
           AmendPaymentPlanSourceSummary.row(planDetail.hodService),
