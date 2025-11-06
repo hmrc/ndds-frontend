@@ -19,8 +19,9 @@ package models.responses
 import models.{DirectDebitSource, PaymentPlanType}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime}
 
 case class NddPaymentPlan(scheduledPaymentAmount: BigDecimal,
                           planRefNumber: String,
@@ -50,6 +51,8 @@ object NddPaymentPlan {
   )(NddPaymentPlan.apply _)
 
   implicit val writes: OWrites[NddPaymentPlan] = Json.writes[NddPaymentPlan]
+
+  implicit val format: OFormat[NddPaymentPlan] = OFormat(reads, writes)
 }
 
 case class NddDDPaymentPlansResponse(bankSortCode: String,
@@ -62,4 +65,12 @@ case class NddDDPaymentPlansResponse(bankSortCode: String,
 
 object NddDDPaymentPlansResponse {
   implicit val format: OFormat[NddDDPaymentPlansResponse] = Json.format[NddDDPaymentPlansResponse]
+}
+
+case class PaymentPlanDAO(id: String, lastUpdated: Instant, paymentPlans: Seq[NddPaymentPlan])
+
+object PaymentPlanDAO {
+  import NddPaymentPlan.format
+  implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+  implicit val format: OFormat[PaymentPlanDAO] = Json.format[PaymentPlanDAO]
 }
