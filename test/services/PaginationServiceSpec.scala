@@ -44,13 +44,13 @@ class PaginationServiceSpec extends SpecBase with Matchers {
       }
 
       "must return correct pagination for last page" in {
-        val testData = createTestNddDetails(5)
-        val result = paginationService.paginateDirectDebits(testData, currentPage = 2, baseUrl = "/test")
+        val testData = createTestNddDetails(25)
+        val result = paginationService.paginateDirectDebits(testData, currentPage = 3, baseUrl = "/test")
 
-        result.paginatedData.length mustBe 2
-        result.currentPage mustBe 2
-        result.totalPages mustBe 2
-        result.totalRecords mustBe 5
+        result.paginatedData.length mustBe 5
+        result.currentPage mustBe 3
+        result.totalPages mustBe 3
+        result.totalRecords mustBe 25
         result.paginationViewModel.previous mustBe defined
         result.paginationViewModel.next mustBe None
       }
@@ -82,7 +82,7 @@ class PaginationServiceSpec extends SpecBase with Matchers {
         val result = paginationService.paginateDirectDebits(testData, baseUrl = "/test")
 
         result.totalRecords mustBe 99
-        result.totalPages mustBe 33
+        result.totalPages mustBe 10
       }
 
       "must sort by submission date in descending order (newest first)" in {
@@ -107,7 +107,7 @@ class PaginationServiceSpec extends SpecBase with Matchers {
         resultNegative.currentPage mustBe 1
 
         val resultTooHigh = paginationService.paginateDirectDebits(testData, currentPage = 999, baseUrl = "/test")
-        resultTooHigh.currentPage mustBe 2
+        resultTooHigh.currentPage mustBe 1
       }
 
       "must generate correct pagination links" in {

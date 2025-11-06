@@ -17,32 +17,41 @@
 package views.components
 
 import base.SpecBase
+import controllers.routes
 import models.DirectDebitDetails
 import org.scalatest.matchers.must.Matchers
-import play.api.test.Helpers.*
-import uk.gov.hmrc.govukfrontend.views.html.components.GovukTable
+import play.api.i18n.Messages
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import views.html.components.DirectDebitTable
 
 class DirectDebitTableSpec extends SpecBase with Matchers {
 
   "DirectDebitTable" - {
 
-    "must render a table with headers and rows" in {
-      val component = new DirectDebitTable(new GovukTable())
+    "must render a table with headers and rows" in new Setup {
       val rows = Seq(
         DirectDebitDetails("DD001", "1 Jan 2025", "123456", "12345678", "0"),
         DirectDebitDetails("DD002", "2 Jan 2025", "123456", "87654321", "2")
       )
 
-      val html = component.apply(rows)(fakeRequest, messages).toString
+      val html = component.apply(rows).toString
 
-      html must include(messages("yourDirectDebitInstructions.dl.direct.debit.reference"))
-      html must include(messages("yourDirectDebitInstructions.dl.account.number"))
-      html must include(messages("yourDirectDebitInstructions.dl.date.setup"))
-      html must include(messages("yourDirectDebitInstructions.dl.payment.plans"))
+      html must include(msgs("yourDirectDebitInstructions.dl.direct.debit.reference"))
+      html must include(msgs("yourDirectDebitInstructions.dl.account.number"))
+      html must include(msgs("yourDirectDebitInstructions.dl.date.setup"))
+      html must include(msgs("yourDirectDebitInstructions.dl.payment.plans"))
 
       html must include(routes.DirectDebitSummaryController.onRedirect("DD001").url)
       html must include(routes.DirectDebitSummaryController.onRedirect("DD002").url)
     }
+  }
+
+  trait Setup {
+    val app = applicationBuilder().build()
+    implicit val request: Request[?] = FakeRequest()
+    implicit val msgs: Messages = messages(app)
+
+    val component: DirectDebitTable = app.injector.instanceOf[DirectDebitTable]
   }
 }

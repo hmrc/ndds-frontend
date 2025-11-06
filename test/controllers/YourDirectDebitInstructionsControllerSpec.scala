@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{NddDetails, NddResponse, UserAnswers}
+import models.{NddDetails, NddResponse}
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any

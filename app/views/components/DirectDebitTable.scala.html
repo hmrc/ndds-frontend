@@ -27,12 +27,16 @@
 @govukTable(
   Table(
     classes = "direct-debit-table",
-    head = Some(Seq(
-      HeadCell(content = Text(messages("yourDirectDebitInstructions.dl.direct.debit.reference"))),
-      HeadCell(content = Text(messages("yourDirectDebitInstructions.dl.account.number"))),
-      HeadCell(content = Text(messages("yourDirectDebitInstructions.dl.date.setup"))),
-      HeadCell(content = Text(messages("yourDirectDebitInstructions.dl.payment.plans")))
-    )),
+    head = Some(
+      Seq(
+        "yourDirectDebitInstructions.dl.direct.debit.reference",
+        "yourDirectDebitInstructions.dl.account.number",
+        "yourDirectDebitInstructions.dl.date.setup",
+        "yourDirectDebitInstructions.dl.payment.plans"
+      ).map { key =>
+        HeadCell(content = Text(messages(key)), classes = "govuk-!-width-one-quarter")
+      }
+    ),
     rows = rows.map { dd =>
       Seq(
         TableRow(
@@ -51,5 +55,3 @@
     }
   )
 )
-
-
