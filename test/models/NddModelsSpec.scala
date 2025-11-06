@@ -69,8 +69,7 @@ class NddModelsSpec extends AnyWordSpec with Matchers {
       directDebitDetails.accountNumber        shouldBe "87654321"
       directDebitDetails.paymentPlans         shouldBe "2"
 
-      // date is formatted with gdsFormatter (yyyy-MM-dd)
-      val expectedDate = details.submissionDateTime.format(utils.MaskAndFormatUtils.gdsFormatter)
+      val expectedDate = details.submissionDateTime.format(utils.MaskAndFormatUtils.gdsShortMonthFormatter)
       directDebitDetails.setupDate shouldBe expectedDate
     }
   }

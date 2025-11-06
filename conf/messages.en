@@ -67,7 +67,7 @@ yourDirectDebitInstructions.dl.direct.debit.reference = Direct Debit reference
 yourDirectDebitInstructions.dl.date.setup = Date set up
 yourDirectDebitInstructions.dl.sort.code = Bank sort code
 yourDirectDebitInstructions.dl.account.number = Account Number
-yourDirectDebitInstructions.dl.payment.plans = Number of payment plans
+yourDirectDebitInstructions.dl.payment.plans = Payment plans
 yourDirectDebitInstructions.error.count = You cannot add a new Direct Debit Instruction (DDI). The maximum number of DDIs you can set up is 99.
 
 setupDirectDebitPayment.title = Set up a Direct Debit payment

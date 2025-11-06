@@ -19,7 +19,7 @@ package views.components
 import base.SpecBase
 import models.DirectDebitDetails
 import org.scalatest.matchers.must.Matchers
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.govukfrontend.views.html.components.GovukTable
 import views.html.components.DirectDebitTable
 
@@ -30,8 +30,8 @@ class DirectDebitTableSpec extends SpecBase with Matchers {
     "must render a table with headers and rows" in {
       val component = new DirectDebitTable(new GovukTable())
       val rows = Seq(
-        DirectDebitDetails("DD001","1 Jan 2025","123456","12345678","0"),
-        DirectDebitDetails("DD002","2 Jan 2025","123456","87654321","2")
+        DirectDebitDetails("DD001", "1 Jan 2025", "123456", "12345678", "0"),
+        DirectDebitDetails("DD002", "2 Jan 2025", "123456", "87654321", "2")
       )
 
       val html = component.apply(rows)(fakeRequest, messages).toString
@@ -46,5 +46,3 @@ class DirectDebitTableSpec extends SpecBase with Matchers {
     }
   }
 }
-
-
