@@ -1,0 +1,55 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import models.DirectDebitDetails
+@import utils.MaskAndFormatUtils.*
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.table._
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content._
+
+@this(govukTable: GovukTable, linkWithHiddenText: LinkWithHiddenText)
+
+@(rows: Seq[DirectDebitDetails])(implicit request: Request[_], messages: Messages)
+
+@govukTable(
+  Table(
+    classes = "direct-debit-table",
+    head = Some(Seq(
+      HeadCell(content = Text(messages("yourDirectDebitInstructions.dl.direct.debit.reference"))),
+      HeadCell(content = Text(messages("yourDirectDebitInstructions.dl.account.number"))),
+      HeadCell(content = Text(messages("yourDirectDebitInstructions.dl.date.setup"))),
+      HeadCell(content = Text(messages("yourDirectDebitInstructions.dl.payment.plans")))
+    )),
+    rows = rows.map { dd =>
+      Seq(
+        TableRow(
+          content = HtmlContent(
+            linkWithHiddenText(
+              url = routes.DirectDebitSummaryController.onRedirect(dd.directDebitReference).url,
+              text = dd.directDebitReference,
+              visuallyHiddenText = None
+            )
+          )
+        ),
+        TableRow(content = Text(maskAccountNumber(dd.accountNumber))),
+        TableRow(content = Text(dd.setupDate)),
+        TableRow(content = Text(dd.paymentPlans))
+      )
+    }
+  )
+)
+
+

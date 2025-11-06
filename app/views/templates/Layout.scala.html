@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.backlink.BackLink
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukBackLink
 @import views.html.helper.CSPNonce
+@import views.html.components.ThreeQuartersMainContent
 
 @this(
     appConfig: FrontendAppConfig,
@@ -30,10 +31,12 @@
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
     betaBanner: StandardBetaBanner,
     hmrcStandardPage: HmrcStandardPage,
-    govukBackLink: GovukBackLink
+    govukBackLink: GovukBackLink,
+    threeQuartersMainContent: ThreeQuartersMainContent,
+    twoThirdsMainContent: TwoThirdsMainContent
 )
 
-@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false, backLink: Option[String] = None)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
+@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false, backLink: Option[String] = None, templateOverrides: TemplateOverrides = TemplateOverrides(), useThreeQuartersGrid: Boolean = false)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
 
 @head = {
     @if(timeout) {
@@ -52,7 +55,7 @@
     }
 }
 
-@content = {
+@mainContent = {
     @contentBlock
     <div class="govuk-!-margin-top-3">
         @hmrcReportTechnicalIssueHelper()
@@ -62,7 +65,8 @@
 @hmrcStandardPage(HmrcStandardPageParams(
     pageTitle = Some(pageTitle),
     templateOverrides = TemplateOverrides(
-        additionalHeadBlock = Some(head)
+        additionalHeadBlock = Some(head),
+        mainContentLayout = Some(if(useThreeQuartersGrid) threeQuartersMainContent(_) else twoThirdsMainContent(_))
     ),
     serviceURLs = ServiceURLs(
         serviceUrl = Some(routes.LandingController.onPageLoad().url),
@@ -74,4 +78,4 @@
     ),
     isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
     backLink = if (showBackLink) backLink.map(BackLink(_)).orElse(Some(BackLink.mimicsBrowserBackButtonViaJavaScript)) else None
-))(content)
+))(mainContent)

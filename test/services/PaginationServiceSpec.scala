@@ -31,16 +31,16 @@ class PaginationServiceSpec extends SpecBase with Matchers {
 
     "paginateDirectDebits" - {
 
-      "must return correct pagination for first page with 3 records per page" in {
+      "must return correct pagination for first page with 10 records per page" in {
         val testData = createTestNddDetails(5)
         val result = paginationService.paginateDirectDebits(testData, currentPage = 1, baseUrl = "/test")
 
-        result.paginatedData.length mustBe 3
+        result.paginatedData.length mustBe 5
         result.currentPage mustBe 1
-        result.totalPages mustBe 2
+        result.totalPages mustBe 1
         result.totalRecords mustBe 5
         result.paginationViewModel.previous mustBe None
-        result.paginationViewModel.next mustBe defined
+        result.paginationViewModel.next mustBe None
       }
 
       "must return correct pagination for last page" in {
@@ -56,13 +56,13 @@ class PaginationServiceSpec extends SpecBase with Matchers {
       }
 
       "must return correct pagination for middle page" in {
-        val testData = createTestNddDetails(10)
+        val testData = createTestNddDetails(25)
         val result = paginationService.paginateDirectDebits(testData, currentPage = 2, baseUrl = "/test")
 
-        result.paginatedData.length mustBe 3
+        result.paginatedData.length mustBe 10
         result.currentPage mustBe 2
-        result.totalPages mustBe 4
-        result.totalRecords mustBe 10
+        result.totalPages mustBe 3
+        result.totalRecords mustBe 25
         result.paginationViewModel.previous mustBe defined
         result.paginationViewModel.next mustBe defined
       }
@@ -111,7 +111,7 @@ class PaginationServiceSpec extends SpecBase with Matchers {
       }
 
       "must generate correct pagination links" in {
-        val testData = createTestNddDetails(10)
+        val testData = createTestNddDetails(25)
         val result = paginationService.paginateDirectDebits(testData, currentPage = 2, baseUrl = "/test")
 
         result.paginationViewModel.previous.get.href mustBe "/test?page=1"

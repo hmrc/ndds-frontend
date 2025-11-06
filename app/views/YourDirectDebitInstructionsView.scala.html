@@ -26,13 +26,14 @@
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList,
+    directDebitTable: DirectDebitTable,
     govukInsetText: GovukInsetText,
     directDebitPagination: DirectDebitPagination
 )
 
 @(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false, paginationViewModel: PaginationViewModel = PaginationViewModel(), hmrcHelplineUrl: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false) {
+@layout(pageTitle = titleForSetupJourneyNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false, useThreeQuartersGrid = true) {
 
     @if(maxLimitReached) {
         @govukErrorSummary(
@@ -74,44 +75,7 @@
         )
     )
 
-    @for(dd <- directDebitDetails) {
-        @govukSummaryList(SummaryList(
-            card = Some(Card(
-                title = Some(CardTitle(content = Text(dd.directDebitReference))),
-                actions = Some(Actions(
-                    items = Seq(
-                        ActionItem(
-                            href = routes.DirectDebitSummaryController.onRedirect(dd.directDebitReference).url,
-                            content = messages("yourDirectDebitInstructions.dl.view.add"),
-                            visuallyHiddenText = Some(messages(dd.directDebitReference))
-                        )
-                    )
-                ))
-            )),
-            rows = Seq(
-                SummaryListRow(
-                    key = Key(content = messages("yourDirectDebitInstructions.dl.direct.debit.reference")),
-                    value = Value(content = HtmlContent(dd.directDebitReference))
-                ),
-                SummaryListRow(
-                    key = Key(content = messages("yourDirectDebitInstructions.dl.date.setup")),
-                    value = Value(content = HtmlContent(dd.setupDate))
-                ),
-                SummaryListRow(
-                    key = Key(content = messages("yourDirectDebitInstructions.dl.sort.code")),
-                    value = Value(content = HtmlContent(maskSortCode(dd.sortCode)))
-                ),
-                SummaryListRow(
-                    key = Key(content = messages("yourDirectDebitInstructions.dl.account.number")),
-                    value = Value(content = HtmlContent(maskAccountNumber(dd.accountNumber)))
-                ),
-                SummaryListRow(
-                    key = Key(content = messages("yourDirectDebitInstructions.dl.payment.plans")),
-                    value = Value(content = HtmlContent(dd.paymentPlans))
-                )
-            )
-        ))
-    }
+    @directDebitTable(directDebitDetails)
 
     @directDebitPagination(paginationViewModel)
 }

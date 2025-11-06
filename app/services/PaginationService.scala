@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
 
 case class PaginationConfig(
-  recordsPerPage: Int = 3,
+  recordsPerPage: Int = 10,
   maxRecords: Int = 99,
   maxVisiblePages: Int = 5
 )
