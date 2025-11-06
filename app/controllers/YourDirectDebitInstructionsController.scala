@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import models.UserAnswers
-import pages.{AmendPaymentPlanConfirmationPage, CancelPaymentPlanConfirmationPage, CancelPaymentPlanPage, CreateConfirmationPage, RemovingThisSuspensionPage, SuspensionDetailsCheckYourAnswerPage}
+import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
@@ -47,7 +47,6 @@ class YourDirectDebitInstructionsController @Inject() (
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
 
-    // Remove both pages before proceeding
     val cleansedAnswersFut = for {
       updatedAnswers <- Future.fromTry(userAnswers.remove(AmendPaymentPlanConfirmationPage))
       updatedAnswers <- Future.fromTry(updatedAnswers.remove(CreateConfirmationPage))

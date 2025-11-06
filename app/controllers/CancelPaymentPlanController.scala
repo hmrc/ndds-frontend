@@ -22,7 +22,7 @@ import models.requests.{ChrisSubmissionRequest, DataRequest}
 import models.responses.DirectDebitDetails
 import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{CancelPaymentPlanConfirmationPage, CancelPaymentPlanPage, ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage}
+import pages.{CancelPaymentPlanConfirmationPage, CancelPaymentPlanPage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}

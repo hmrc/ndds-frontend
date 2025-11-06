@@ -19,21 +19,20 @@ package controllers
 import controllers.actions.*
 import forms.RemovingThisSuspensionFormProvider
 import models.requests.ChrisSubmissionRequest
-
-import javax.inject.Inject
-import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import models.responses.{DirectDebitDetails, PaymentPlanResponse}
+import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{RemovingThisSuspensionConfirmationPage, RemovingThisSuspensionPage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
+import pages.{RemovingThisSuspensionConfirmationPage, RemovingThisSuspensionPage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.RemovingThisSuspensionView
-import services.NationalDirectDebitService
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class RemovingThisSuspensionController @Inject() (
