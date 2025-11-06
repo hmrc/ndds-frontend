@@ -110,7 +110,7 @@ class CheckYourAnswersController @Inject() (
 
                   for {
                     updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
-                    updatedAnswers <- Future.fromTry(ua.set(CreateConfirmationPage, true))
+                    updatedAnswers <- Future.fromTry(updatedAnswers.set(CreateConfirmationPage, true))
                     _              <- sessionRepository.set(updatedAnswers)
                   } yield {
                     auditService.sendSubmitDirectDebitPaymentPlan
