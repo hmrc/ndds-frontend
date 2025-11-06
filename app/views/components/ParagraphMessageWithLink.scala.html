@@ -46,11 +46,8 @@
             @if(linkRel.nonEmpty) { rel="@linkRel" }
             @if(target.nonEmpty) { target="@target" }
     >
-        @linkMessage
-    </a>
+        @linkMessage</a>@if(linkFullStop)(".")
     }
-
-    @{ if(linkFullStop)(".") }
 
     @message2.map { message => @message }
 

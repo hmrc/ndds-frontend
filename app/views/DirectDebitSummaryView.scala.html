@@ -34,8 +34,6 @@
 @layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
     @header1("directDebitPaymentSummary.heading")
-    @paragraph("directDebitPaymentSummary.p1")
-    @paragraph("directDebitPaymentSummary.p2")
 
     <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.directDebit.title")</h1>
 
@@ -56,17 +54,30 @@
         )
     ))
 
-    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.activePayment.h1")</h1>
+    @if(paymentPlansList.size > 0) {
+        <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.activePayment.h1")</h1>
 
-    @for(plan <- paymentPlansList) {
-        @govukSummaryList(plan)
-    }
-
-    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.setupPayment.h1")</h1>
-
-    @paragraph("directDebitPaymentSummary.setupPayment.p1")
-
-    @govukButton(
-        ButtonViewModel(messages("directDebitPaymentSummary.addPaymentButton"))
+    @paragraphMessageWithLink(
+        Some(messages("directDebitPaymentSummary.activePayment.p1")),
+        linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
+        linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
+        linkFullStop = true
     )
+
+    @paragraph("directDebitPaymentSummary.activePayment.p2")
+
+        @for(plan <- paymentPlansList) {
+            @govukSummaryList(plan)
+        }
+    } else {
+        @paragraph("directDebitPaymentSummary.noActivePaymentPlans.p1")
+
+        <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.setupPayment.h1")</h1>
+
+        @paragraph("directDebitPaymentSummary.setupPayment.p1")
+
+        @govukButton(
+            ButtonViewModel(messages("directDebitPaymentSummary.addPaymentButton"))
+        )
+    }
 }
