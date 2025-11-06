@@ -55,7 +55,7 @@
     }
 }
 
-@mainContent = {
+@content = {
     @contentBlock
     <div class="govuk-!-margin-top-3">
         @hmrcReportTechnicalIssueHelper()
@@ -78,4 +78,4 @@
     ),
     isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
     backLink = if (showBackLink) backLink.map(BackLink(_)).orElse(Some(BackLink.mimicsBrowserBackButtonViaJavaScript)) else None
-))(mainContent)
+))(content)

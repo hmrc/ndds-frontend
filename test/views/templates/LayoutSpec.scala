@@ -85,10 +85,9 @@ class LayoutSpec extends SpecBase with Matchers {
 
   trait Setup {
     val app: Application = applicationBuilder().build()
-    implicit val request: Request[_] = FakeRequest()
+    implicit val request: Request[?] = FakeRequest()
     implicit val msgs: Messages = messages(app)
 
     val layout = app.injector.instanceOf[Layout]
   }
 }
-

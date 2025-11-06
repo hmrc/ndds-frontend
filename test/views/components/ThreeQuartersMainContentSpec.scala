@@ -27,15 +27,13 @@ class ThreeQuartersMainContentSpec extends SpecBase with Matchers {
 
     "must render content inside a three-quarters grid column" in {
       val component = new ThreeQuartersMainContent()
-      val inner     = Html("<p>Inner content</p>")
+      val inner = Html("<p>Inner content</p>")
 
       val html = component.apply(inner).toString
 
-      html must include ("govuk-grid-row")
-      html must include ("govuk-grid-column-three-quarters")
-      html must include ("<p>Inner content</p>")
+      html must include("govuk-grid-row")
+      html must include("govuk-grid-column-three-quarters")
+      html must include("<p>Inner content</p>")
     }
   }
 }
-
-
