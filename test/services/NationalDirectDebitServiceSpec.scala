@@ -734,6 +734,36 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         result shouldBe DuplicateCheckResponse(false)
       }
     }
+
+    "isAdvanceNoticePresent" - {
+      "return true when AdvanceNoticeResponse is present" in {
+        val response = new AdvanceNoticeResponse(Some("100.00"), Some("2025-11-30"))
+        when(mockConnector.isAdvanceNoticePresent(any(), any())(any()))
+          .thenReturn(Future.successful(Some(response)))
+
+        service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
+          result shouldBe true
+        }
+      }
+
+      "return false when no AdvanceNoticeResponse is present" in {
+        when(mockConnector.isAdvanceNoticePresent(any(), any())(any()))
+          .thenReturn(Future.successful(None))
+
+        service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
+          result shouldBe false
+        }
+      }
+
+      "return false when the connector call fails" in {
+        when(mockConnector.isAdvanceNoticePresent(any(), any())(any()))
+          .thenReturn(Future.failed(new RuntimeException("boom")))
+
+        service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
+          result shouldBe false
+        }
+      }
+    }
   }
 
   "calculateNextPaymentDate" - {

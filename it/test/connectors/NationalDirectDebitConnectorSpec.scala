@@ -24,9 +24,9 @@ import models.responses.*
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YourBankDetailsWithAuddisStatus}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
-import play.api.http.Status.{BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, OK}
+import play.api.http.Status.{BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import java.time.LocalDate
 
@@ -1013,6 +1013,64 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       result shouldBe DuplicateCheckResponse(false)
     }
 
+  }
+
+  "isAdvanceNoticePresent" should{
+    "successfully return advance notice details when present" in {
+
+      val responseJson =
+        """
+          |{
+          |  "totalAmount": "100.00",
+          |  "dueDate": "2025-12-01"
+          |}
+          |""".stripMargin
+
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref/advance-notice-details"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withBody(responseJson)
+          )
+      )
+
+      val result = connector.isAdvanceNoticePresent("test-dd-ref", "test-pp-ref").futureValue
+
+      result.isDefined shouldBe true
+      result.get.totalAmount shouldBe Some("100.00")
+      result.get.dueDate shouldBe Some("2025-12-01")
+    }
+
+    "return None when no advance notice details are present (404)" in {
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref/advance-notice-details"))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+
+      val result = connector.isAdvanceNoticePresent("test-dd-ref", "test-pp-ref").futureValue
+
+      result shouldBe None
+    }
+
+    "return a failed future when the service returns 500" in {
+      stubFor(
+        get(urlEqualTo("/national-direct-debit/direct-debits/test-dd-ref/payment-plans/test-pp-ref/advance-notice-details"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+
+      val result = connector.isAdvanceNoticePresent("test-dd-ref", "test-pp-ref")
+
+      whenReady(result.failed) { ex =>
+        ex shouldBe a[UpstreamErrorResponse]
+      }
+    }
   }
 
 }
