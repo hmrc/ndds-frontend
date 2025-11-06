@@ -27,7 +27,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Actions, Card, CardTitle, SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, DateSetupSummary, TotalAmountDueSummary}
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, DateSetupSummary}
 import views.html.DirectDebitSummaryView
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
@@ -130,7 +130,7 @@ class DirectDebitSummaryController @Inject() (
             optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
             optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
             optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v)),
-            optionalRow(Option(plan.scheduledPaymentAmount))(amount => AmendPaymentAmountSummary.row(plan.planType, Some(amount), showChange = true))
+            optionalRow(Option(plan.scheduledPaymentAmount))(amount => AmendPaymentAmountSummary.row(plan.planType, Some(amount)))
           ).flatten
       }
     }
