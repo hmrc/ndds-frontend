@@ -76,6 +76,21 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
+    "must redirect to not found page if user click browser back button from confirmation page" in {
+      val updatedUserAnswer = userAnswer
+        .setOrException(CreateConfirmationPage, true)
+
+      val application = applicationBuilder(userAnswers = Some(updatedUserAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustEqual routes.BackSubmissionController.onPageLoad().url
+
+      }
+    }
+
     "must return OK and the correct view if MGD selected and type is single for a GET" in {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)

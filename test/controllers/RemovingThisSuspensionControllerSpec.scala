@@ -24,7 +24,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{ManagePaymentPlanTypePage, RemovingThisSuspensionPage}
+import pages.{ManagePaymentPlanTypePage, RemovingThisSuspensionConfirmationPage, RemovingThisSuspensionPage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -104,6 +104,31 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
+      }
+    }
+
+    "must redirect to not found page if user click browser back button from confirmation page" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(RemovingThisSuspensionConfirmationPage, true)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, removingThisSuspensionRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustEqual routes.BackSubmissionController.onPageLoad().url
       }
     }
 
