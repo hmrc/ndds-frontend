@@ -21,7 +21,8 @@
 
 @this(
     layout: templates.Layout,
-    header1: Header1,
+    h1: Header1,
+    h2: Header2,
     paragraph: Paragraph,
     paragraphMessageWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
@@ -33,9 +34,9 @@
 
 @layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
-    @header1("directDebitPaymentSummary.heading")
+    @h1("directDebitPaymentSummary.heading")
 
-    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.directDebit.title")</h1>
+    @h2("directDebitPaymentSummary.directDebit.title")
 
     @govukSummaryList(SummaryList(
         rows = Seq(
@@ -55,16 +56,16 @@
     ))
 
     @if(paymentPlansList.size > 0) {
-        <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.activePayment.h1")</h1>
+        @h2("directDebitPaymentSummary.activePayment.h1")
 
-    @paragraphMessageWithLink(
-        Some(messages("directDebitPaymentSummary.activePayment.p1")),
-        linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
-        linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
-        linkFullStop = true
-    )
+        @paragraphMessageWithLink(
+            Some(messages("directDebitPaymentSummary.activePayment.p1")),
+            linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
+            linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
+            linkFullStop = true
+        )
 
-    @paragraph("directDebitPaymentSummary.activePayment.p2")
+        @paragraph("directDebitPaymentSummary.activePayment.p2")
 
         @for(plan <- paymentPlansList) {
             @govukSummaryList(plan)
@@ -72,7 +73,7 @@
     } else {
         @paragraph("directDebitPaymentSummary.noActivePaymentPlans.p1")
 
-        <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.setupPayment.h1")</h1>
+        @h2("directDebitPaymentSummary.setupPayment.h1")
 
         @paragraph("directDebitPaymentSummary.setupPayment.p1")
 
