@@ -22,6 +22,7 @@
 @this(
     layout: templates.Layout,
     h1: Header1,
+    h2: Header2,
     paragraph: Paragraph,
     paragraphMessageWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
@@ -37,7 +38,7 @@
     @paragraph("directDebitPaymentSummary.p1")
     @paragraph("directDebitPaymentSummary.p2")
 
-    @h1("directDebitPaymentSummary.directDebit.title")
+    @h2("directDebitPaymentSummary.directDebit.title")
 
     @govukSummaryList(SummaryList(
         rows = Seq(
@@ -56,13 +57,13 @@
         )
     ))
 
-    @h1("directDebitPaymentSummary.activePayment.h1")
+    @h2("directDebitPaymentSummary.activePayment.h1")
 
     @for(plan <- paymentPlansList) {
         @govukSummaryList(plan)
     }
 
-    @h1("directDebitPaymentSummary.setupPayment.h1")
+    @h2("directDebitPaymentSummary.setupPayment.h1")
 
     @paragraph("directDebitPaymentSummary.setupPayment.p1")
 
