@@ -168,3 +168,5 @@ GET        /change-removing-this-suspension                  controllers.Removin
 POST       /change-removing-this-suspension                  controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = CheckMode)
 
 GET        /amending-payment-plan                       controllers.AmendingPaymentPlanController.onPageLoad()
+
+GET        /advance-notice-direct-debit-payment          controllers.AdvanceNoticeController.onPageLoad()

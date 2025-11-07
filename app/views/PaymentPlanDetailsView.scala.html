@@ -27,10 +27,11 @@
         header1: Header1,
         header2: Header2,
         paragraph: Paragraph,
-        govukSummaryList: GovukSummaryList
+        govukSummaryList: GovukSummaryList,
+        link: Link
 )
 
-@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, isSuspensionActive: Boolean, suspensionStartDate: String, suspensionEndDate: String, rows: Seq[SummaryListRow], isAdvanceNoticePresent: Boolean, totalAmount: String, dueDate: String)(implicit request: Request[_], messages: Messages)
+@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, isSuspensionActive: Boolean, suspensionStartDate: String, suspensionEndDate: String, rows: Seq[SummaryListRow], isAdvanceNoticePresent: Boolean, totalAmount: String, dueDate: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
     @header1("paymentPlanDetails.heading")
@@ -46,7 +47,7 @@
         @if(isAdvanceNoticePresent) {
             <p class="govuk-inset-text">
                 @messages("paymentPlanDetails.inset.advanceNotice.text", totalAmount, dueDate)
-                <a href="@routes.JourneyRecoveryController.onPageLoad().url">@messages("paymentPlanDetails.advanceNotice.link")</a>
+                <a href="@call.url">@messages("paymentPlanDetails.advanceNotice.link")</a>
             </p>
         } else {
             <p class="govuk-inset-text">

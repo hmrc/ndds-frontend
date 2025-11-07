@@ -116,7 +116,8 @@ class PaymentPlanDetailsController @Inject() (
                     summaryRows,
                     isAdvanceNoticePresent,
                     formattedTotalAmount,
-                    formattedDueDate
+                    formattedDueDate,
+                    routes.JourneyRecoveryController.onPageLoad()
                   )
                 )
               }

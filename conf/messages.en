@@ -618,3 +618,7 @@ amendingPaymentPlan.list.2 = bank account details
 amendingPaymentPlan.list.3 = payment reference
 amendingPaymentPlan.p3 = Payments due within the next 3 working days cannot be amended.
 amendingPaymentPlan.cancel.link = Cancel and return to payment plan
+
+advanceNotice.title = Advance notice of your Direct Debit payment
+advanceNotice.heading = Advance notice of your Direct Debit payment
+
