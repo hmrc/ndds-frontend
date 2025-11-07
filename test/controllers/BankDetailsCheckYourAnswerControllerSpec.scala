@@ -43,8 +43,8 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       accountNumber: String,
       sortCode: String,
       lines: Seq[String],
-      town: String,
-      postcode: String,
+      town: Option[String],
+      postcode: Option[String],
       bankName: String,
       bacsNumber: String
     ): String = "TEST-MAC"
@@ -64,7 +64,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), Some("Reading"), Country("UNITED KINGDOM"), Some("RG1 8BW")))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(bind[MacGenerator].toInstance(new FakeMacGenerator))
@@ -91,7 +91,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
         .setOrException(PersonalOrBusinessAccountPage, PersonalOrBusinessAccount.Personal)
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), Some("Reading"), Country("UNITED KINGDOM"), Some("RG1 8BW")))
         .set(BankDetailsCheckYourAnswerPage, true)
         .success
         .value
@@ -122,7 +122,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       val userAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Account Holder Name", "123212", "34211234", auddisStatus = true, false))
         .setOrException(BankDetailsBankNamePage, "BARCLAYS BANK UK PLC")
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), "Reading", Country("UNITED KINGDOM"), "RG1 8BW"))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("P.O. Box 44"), Some("Reading"), Country("UNITED KINGDOM"), Some("RG1 8BW")))
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
         .overrides(
