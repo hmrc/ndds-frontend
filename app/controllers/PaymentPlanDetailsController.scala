@@ -96,7 +96,7 @@ class PaymentPlanDetailsController @Inject() (
             Ok(
               view(
                 planDetail.planType,
-                paymentPlanReference,
+                planDetail.paymentReference,
                 showAmendLink,
                 showCancelLink,
                 showSuspendLink,

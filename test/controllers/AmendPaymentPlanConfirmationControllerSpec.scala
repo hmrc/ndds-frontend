@@ -174,7 +174,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            paymentPlanReference,
+            mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference,
             directDebitReference,
             mockBudgetPaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
             mockBudgetPaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,
