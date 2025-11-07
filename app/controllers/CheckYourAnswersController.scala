@@ -55,33 +55,41 @@ class CheckYourAnswersController @Inject() (
     with Logging {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
-    val showStartDate = if (directDebitSource.contains(DirectDebitSource.PAYE)) {
-      YearEndAndMonthSummary.row(request.userAnswers)
+
+    val alreadyConfirmed: Boolean =
+      request.userAnswers.get(CreateConfirmationPage).contains(true)
+
+    if (alreadyConfirmed) {
+      logger.warn("Attempt to  Check your answers  confirmation; redirecting to Page Not Found.")
+      Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
-      PlanStartDateSummary.row(request.userAnswers)
+      val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
+      val showStartDate = if (directDebitSource.contains(DirectDebitSource.PAYE)) {
+        YearEndAndMonthSummary.row(request.userAnswers)
+      } else {
+        PlanStartDateSummary.row(request.userAnswers)
+      }
+
+      val list = SummaryListViewModel(
+        rows = Seq(
+          PaymentReferenceSummary.row(request.userAnswers),
+          TotalAmountDueSummary.row(request.userAnswers),
+          PaymentAmountSummary.row(request.userAnswers),
+          PaymentDateSummary.row(request.userAnswers),
+          PaymentsFrequencySummary.row(request.userAnswers),
+          RegularPaymentAmountSummary.row(request.userAnswers),
+          showStartDate,
+          PlanEndDateSummary.row(request.userAnswers),
+          MonthlyPaymentAmountSummary.row(request.userAnswers),
+          FinalPaymentDateSummary.row(request.userAnswers, appConfig),
+          FinalPaymentAmountSummary.row(request.userAnswers)
+        ).flatten
+      )
+
+      val currentDate = DateTimeFormats.formattedCurrentDate
+      Ok(view(list, currentDate))
     }
-
-    val list = SummaryListViewModel(
-      rows = Seq(
-        PaymentReferenceSummary.row(request.userAnswers),
-        TotalAmountDueSummary.row(request.userAnswers),
-        PaymentAmountSummary.row(request.userAnswers),
-        PaymentDateSummary.row(request.userAnswers),
-        PaymentsFrequencySummary.row(request.userAnswers),
-        RegularPaymentAmountSummary.row(request.userAnswers),
-        showStartDate,
-        PlanEndDateSummary.row(request.userAnswers),
-        MonthlyPaymentAmountSummary.row(request.userAnswers),
-        FinalPaymentDateSummary.row(request.userAnswers, appConfig),
-        FinalPaymentAmountSummary.row(request.userAnswers)
-      ).flatten
-    )
-
-    val currentDate = DateTimeFormats.formattedCurrentDate
-    Ok(view(list, currentDate))
   }
-
   def onSubmit(): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
       implicit val ua: UserAnswers = request.userAnswers
@@ -102,6 +110,7 @@ class CheckYourAnswersController @Inject() (
 
                   for {
                     updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
+                    updatedAnswers <- Future.fromTry(updatedAnswers.set(CreateConfirmationPage, true))
                     _              <- sessionRepository.set(updatedAnswers)
                   } yield {
                     auditService.sendSubmitDirectDebitPaymentPlan

@@ -49,10 +49,10 @@ POST       /change-confirm-bank-details                 controllers.BankDetailsC
 
 GET        /bank-approval                               controllers.BankApprovalController.onPageLoad()
 
-GET        /where-are-you-making-a-payment              controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
-POST       /where-are-you-making-a-payment              controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
-GET        /change-where-are-you-making-a-payment       controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-where-are-you-making-a-payment       controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
+GET        /which-tax-duty-payment-plan                 controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
+POST       /which-tax-duty-payment-plan                 controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
+GET        /change-which-tax-duty-payment-plan          controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-which-tax-duty-payment-plan          controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-plan-type                           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-plan-type                           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
@@ -64,10 +64,10 @@ POST       /payment-reference                           controllers.PaymentRefer
 GET        /change-payment-reference                    controllers.PaymentReferenceController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-payment-reference                    controllers.PaymentReferenceController.onSubmit(mode: Mode = CheckMode)
 
-GET        /payment-amount                              controllers.PaymentAmountController.onPageLoad(mode: Mode = NormalMode)
-POST       /payment-amount                              controllers.PaymentAmountController.onSubmit(mode: Mode = NormalMode)
-GET        /change-payment-amount                       controllers.PaymentAmountController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-payment-amount                       controllers.PaymentAmountController.onSubmit(mode: Mode = CheckMode)
+GET        /how-much-want-to-pay                        controllers.PaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST       /how-much-want-to-pay                        controllers.PaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET        /change-how-much-want-to-pay                 controllers.PaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-how-much-want-to-pay                 controllers.PaymentAmountController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-date                                controllers.PaymentDateController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-date                                controllers.PaymentDateController.onSubmit(mode: Mode = NormalMode)
@@ -168,5 +168,7 @@ GET        /change-removing-this-suspension                  controllers.Removin
 POST       /change-removing-this-suspension                  controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = CheckMode)
 
 GET        /amending-payment-plan                       controllers.AmendingPaymentPlanController.onPageLoad()
+
+GET        /page-not-found                       controllers.BackSubmissionController.onPageLoad()
 
 GET        /advance-notice-direct-debit-payment          controllers.AdvanceNoticeController.onPageLoad()

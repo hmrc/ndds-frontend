@@ -19,6 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import models.UserAnswers
+import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
@@ -45,10 +46,21 @@ class YourDirectDebitInstructionsController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
-    cleanseDirectDebitReference(userAnswers).flatMap { _ =>
-      nddService.retrieveAllDirectDebits(request.userId) map { directDebitDetailsData =>
-        val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
-        Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
+
+    val cleansedAnswersFut = for {
+      updatedAnswers <- Future.fromTry(userAnswers.remove(AmendPaymentPlanConfirmationPage))
+      updatedAnswers <- Future.fromTry(updatedAnswers.remove(CreateConfirmationPage))
+      updatedAnswers <- Future.fromTry(updatedAnswers.remove(SuspensionDetailsCheckYourAnswerPage))
+      updatedAnswers <- Future.fromTry(updatedAnswers.remove(RemovingThisSuspensionPage))
+      updatedAnswers <- Future.fromTry(updatedAnswers.remove(CancelPaymentPlanConfirmationPage))
+    } yield updatedAnswers
+
+    cleansedAnswersFut.flatMap { cleansedAnswers =>
+      cleanseDirectDebitReference(cleansedAnswers).flatMap { _ =>
+        nddService.retrieveAllDirectDebits(request.userId).map { directDebitDetailsData =>
+          val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
+          Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
+        }
       }
     }
   }

@@ -33,8 +33,8 @@ class YourBankDetailsAddressSummarySpec extends SpecBase {
       "must return a SummaryListRow when UserAnswers has BankDetailsAddressPage set" in new Setup {
         val address = BankAddress(
           lines    = Seq("Line1", "Line2"),
-          town     = "London",
-          postCode = "SW1A 1AA",
+          town     = Some("London"),
+          postCode = Some("SW1A 1AA"),
           country  = Country("United Kingdom")
         )
         val userAnswers = UserAnswers("id").set(BankDetailsAddressPage, address).success.value
@@ -44,6 +44,23 @@ class YourBankDetailsAddressSummarySpec extends SpecBase {
         result.value.key.content.asHtml.toString must include("Bank address")
 
         val expectedHtml = "Line1<br/>Line2<br/>London<br/>SW1A 1AA<br/>United Kingdom"
+        result.value.value.content.asHtml.toString mustEqual Html(expectedHtml).toString
+      }
+
+      "must return a SummaryListRow when UserAnswers has BankDetailsAddressPage set but town and postCode are None" in new Setup {
+        val address = BankAddress(
+          lines    = Seq("Line1", "Line2"),
+          town     = None,
+          postCode = None,
+          country  = Country("United Kingdom")
+        )
+        val userAnswers = UserAnswers("id").set(BankDetailsAddressPage, address).success.value
+        val result = YourBankDetailsAddressSummary.row(userAnswers)(messages)
+
+        result mustBe defined
+        result.value.key.content.asHtml.toString must include("Bank address")
+
+        val expectedHtml = "Line1<br/>Line2<br/>United Kingdom"
         result.value.value.content.asHtml.toString mustEqual Html(expectedHtml).toString
       }
 

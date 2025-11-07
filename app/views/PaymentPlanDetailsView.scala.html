@@ -35,12 +35,15 @@
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
     @header1("paymentPlanDetails.heading")
-    @paragraph("paymentPlanDetails.p1")
 
-    @if(isSuspensionActive) {
-        <p class="govuk-inset-text">
-            @messages("paymentPlanDetails.inset.text", suspensionStartDate, suspensionEndDate)
-        </p>
+    @if(planType == PaymentPlanType.BudgetPaymentPlan.toString) {
+        @paragraph("paymentPlanDetails.p1")
+
+        @if(isSuspensionActive) {
+            <p class="govuk-inset-text">
+                @messages("paymentPlanDetails.inset.text", suspensionStartDate, suspensionEndDate)
+            </p>
+        }
     }
 
     @if(planType == PaymentPlanType.VariablePaymentPlan.toString) {

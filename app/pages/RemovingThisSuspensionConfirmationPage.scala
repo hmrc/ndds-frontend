@@ -14,35 +14,13 @@
  * limitations under the License.
  */
 
-package models.responses
+package pages
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.JsPath
 
-case class BankAddress(
-  lines: Seq[String],
-  town: Option[String],
-  country: Country,
-  postCode: Option[String]
-)
+case object RemovingThisSuspensionConfirmationPage extends QuestionPage[Boolean] {
 
-case class Country(
-  name: String
-)
+  override def path: JsPath = JsPath \ toString
 
-object Country {
-  implicit val format: OFormat[Country] = Json.format[Country]
-}
-
-case class Bank(
-  bankName: String,
-  ddiVoucherFlag: Option[String],
-  address: BankAddress
-)
-
-object Bank {
-  implicit val format: OFormat[Bank] = Json.format[Bank]
-}
-
-object BankAddress {
-  implicit val format: OFormat[BankAddress] = Json.format[BankAddress]
+  override def toString: String = "removingThisSuspensionConfirmation"
 }

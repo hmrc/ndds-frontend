@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,37 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package models.responses
+@import views.html.components.*
 
-import play.api.libs.json.{Json, OFormat}
-
-case class BankAddress(
-  lines: Seq[String],
-  town: Option[String],
-  country: Country,
-  postCode: Option[String]
+@this(
+        layout: templates.Layout,
+        govukButton: GovukButton,
+        header1: Header1,
+        paragraph: Paragraph,
+        govukSummaryList: GovukSummaryList,
+        link: Link
 )
 
-case class Country(
-  name: String
-)
+@(call: Call)(implicit request: Request[_], messages: Messages)
 
-object Country {
-  implicit val format: OFormat[Country] = Json.format[Country]
-}
+@layout(pageTitle = titleNoForm(messages("backSubmission.title")), showBackLink = false) {
 
-case class Bank(
-  bankName: String,
-  ddiVoucherFlag: Option[String],
-  address: BankAddress
-)
-
-object Bank {
-  implicit val format: OFormat[Bank] = Json.format[Bank]
-}
-
-object BankAddress {
-  implicit val format: OFormat[BankAddress] = Json.format[BankAddress]
+    @header1("backSubmission.heading")
+    @paragraph(messages("backSubmission.p1"))
+    @link("paymentPlanCancelled.link", call.url)
 }
