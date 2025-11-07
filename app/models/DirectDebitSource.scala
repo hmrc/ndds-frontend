@@ -47,12 +47,12 @@ object DirectDebitSource extends Enumerable.Implicits {
     CT,
     MGD,
     NIC,
-    OL,
     PAYE,
     SA,
     SDLT,
     TC,
-    VAT
+    VAT,
+    OL
   )
 
   val hodServiceMapping: Map[String, String] = Map(
