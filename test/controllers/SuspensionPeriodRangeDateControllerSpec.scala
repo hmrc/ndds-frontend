@@ -153,7 +153,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, NormalMode, planReference, paymentAmount)(request, messages(application)).toString
+          view(form, NormalMode, planReference, paymentAmount, "12-12-2025", "3-3-2026")(request, messages(application)).toString
       }
     }
 
@@ -195,7 +195,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form.fill(validAnswer), NormalMode, planReference, paymentAmount)(request, messages(application)).toString
+          view(form.fill(validAnswer), NormalMode, planReference, paymentAmount, "12-12-2025", "3-3-2026")(request, messages(application)).toString
       }
     }
 
@@ -288,7 +288,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
         val result = route(application, request).value
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual
-          view(boundForm, NormalMode, planReference, paymentAmount)(request, messages(application)).toString
+          view(boundForm, NormalMode, planReference, paymentAmount, "12-12-2025", "3-3-2026")(request, messages(application)).toString
       }
     }
 
