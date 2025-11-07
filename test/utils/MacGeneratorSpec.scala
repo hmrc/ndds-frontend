@@ -47,13 +47,13 @@ class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {
         accountNumber,
         sortCode,
         lines,
-        town,
-        postcode,
+        Some(town),
+        Some(postcode),
         bankName,
         bacsNumber
       )
 
-      val expectedMac = "HLfhORXoYm54KiRTo4eN6sW6Is0="
+      val expectedMac = "LTkYQNkusGfcQorgX0bOkZMATjg="
       mac must not be empty
       mac mustEqual expectedMac
     }
@@ -69,8 +69,8 @@ class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {
         "12345678",
         "112233",
         Seq("10 Downing Street", "Flat 2"),
-        "London",
-        "SW1A 2AA",
+        Some("London"),
+        Some("SW1A 2AA"),
         "Bank of Scala",
         "111222"
       )
@@ -80,8 +80,8 @@ class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {
         "12345678",
         "112233",
         Seq("10 Downing Street", "Flat 2"),
-        "London",
-        "SW1A 2AA",
+        Some("London"),
+        Some("SW1A 2AA"),
         "Bank of Scala",
         "111222"
       )

@@ -20,9 +20,9 @@ import play.api.libs.json.{Json, OFormat}
 
 case class BankAddress(
   lines: Seq[String],
-  town: String,
+  town: Option[String],
   country: Country,
-  postCode: String
+  postCode: Option[String]
 )
 
 case class Country(
@@ -35,7 +35,7 @@ object Country {
 
 case class Bank(
   bankName: String,
-  ddiVoucherFlag: String,
+  ddiVoucherFlag: Option[String],
   address: BankAddress
 )
 

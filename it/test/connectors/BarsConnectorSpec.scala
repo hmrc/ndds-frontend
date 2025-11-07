@@ -35,12 +35,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext
 
-class BarsConnectorSpec
-  extends AnyWordSpec
-    with Matchers
-    with ScalaFutures
-    with BeforeAndAfterAll
-    with OptionValues {
+class BarsConnectorSpec extends AnyWordSpec with Matchers with ScalaFutures with BeforeAndAfterAll with OptionValues {
 
   private val wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
 
@@ -73,13 +68,13 @@ class BarsConnectorSpec
 
   private val bankDetails = YourBankDetails(
     accountHolderName = "Teddy Dickson",
-    sortCode = "443116",
-    accountNumber = "55207102"
+    sortCode          = "443116",
+    accountNumber     = "55207102"
   )
 
   private val personalRequestJson = Json.obj(
     "account" -> Json.obj(
-      "sortCode" -> bankDetails.sortCode,
+      "sortCode"      -> bankDetails.sortCode,
       "accountNumber" -> bankDetails.accountNumber
     ),
     "name" -> bankDetails.accountHolderName
@@ -109,9 +104,9 @@ class BarsConnectorSpec
 
       val result = connector.verify("personal", personalRequestJson).futureValue
       result.accountNumberIsWellFormatted shouldBe BarsResponse.Yes
-      result.sortCodeIsPresentOnEISCD shouldBe BarsResponse.Yes
-      result.accountExists shouldBe BarsResponse.Yes
-      result.nameMatches shouldBe BarsResponse.Yes
+      result.sortCodeIsPresentOnEISCD     shouldBe BarsResponse.Yes
+      result.accountExists                shouldBe BarsResponse.Yes
+      result.nameMatches                  shouldBe BarsResponse.Yes
     }
 
     "fail when verification endpoint returns 500" in {
@@ -152,11 +147,11 @@ class BarsConnectorSpec
       )
 
       val result = connector.getMetadata("443116").futureValue
-      result.bankName shouldBe "Some Bank"
+      result.bankName         shouldBe "Some Bank"
       result.address.lines shouldEqual Seq("123 Bank Street")
-      result.address.town shouldBe "London"
-      result.address.country shouldBe Country("United Kingdom")
-      result.address.postCode shouldBe "SW1A 1AA"
+      result.address.town     shouldBe Some("London")
+      result.address.country  shouldBe Country("United Kingdom")
+      result.address.postCode shouldBe Some("SW1A 1AA")
     }
 
     "fail when metadata endpoint responds with 500" in {
