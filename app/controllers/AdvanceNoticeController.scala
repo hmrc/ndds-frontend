@@ -16,24 +16,73 @@
 
 package controllers
 
-import controllers.actions._
-import javax.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import config.FrontendAppConfig
+import controllers.actions.*
+import models.requests.ChrisSubmissionRequest
+import models.responses.{DirectDebitDetails, PaymentPlanDetails}
+import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import pages.*
+import play.api.Logging
+import play.api.i18n.Lang.logger
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
+import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import services.NationalDirectDebitService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
+import viewmodels.checkAnswers.*
 import views.html.AdvanceNoticeView
 
-class AdvanceNoticeController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalAction,
-                                       requireData: DataRequiredAction,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       view: AdvanceNoticeView
-                                     ) extends FrontendBaseController with I18nSupport {
+import java.text.NumberFormat
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      Ok(view())
+class AdvanceNoticeController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  val controllerComponents: MessagesControllerComponents,
+  nddService: NationalDirectDebitService,
+  view: AdvanceNoticeView,
+  appConfig: FrontendAppConfig
+) extends FrontendBaseController
+    with I18nSupport {
+
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val userAnswers = request.userAnswers
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+    val dateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
+    userAnswers.get(PaymentPlanDetailsQuery) match {
+      case Some(response) =>
+        val planDetail = response.paymentPlanDetails
+        val directDebitDetails = response.directDebitDetails
+        val totalAmount: String = userAnswers.get(AdvanceNoticeResponseQuery).flatMap(_.totalAmount).map(currencyFormat.format).getOrElse("£0.00")
+        val dueDate: String = userAnswers.get(AdvanceNoticeResponseQuery).flatMap(_.dueDate).map(_.format(dateFormat)).getOrElse("")
+
+        for {
+          directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
+          paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
+          planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
+        } yield {
+          Ok(
+            view(
+              appConfig.hmrcHelplineUrl,
+              totalAmount,
+              dueDate,
+              directDebitReference,
+              directDebitDetails.bankAccountName.getOrElse(""),
+              directDebitDetails.bankSortCode.getOrElse(""),
+              directDebitDetails.bankAccountNumber.getOrElse(""),
+              paymentPlanReference
+            )
+          )
+        }
+    }
   }
 }

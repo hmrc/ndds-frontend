@@ -117,7 +117,7 @@ class PaymentPlanDetailsController @Inject() (
                     isAdvanceNoticePresent,
                     formattedTotalAmount,
                     formattedDueDate,
-                    routes.JourneyRecoveryController.onPageLoad()
+                    routes.AdvanceNoticeController.onPageLoad()
                   )
                 )
               }

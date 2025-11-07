@@ -16,12 +16,104 @@
 
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        govukButton: GovUkButton,
+        h1: Header1,
+        h2: Header2,
+        paragraph: Paragraph,
+        govukInsetText: GovUkInsetText,
+        govukSummaryList: GovUkSummaryList,
+        link: Link,
+        paragraphWithLink: ParagraphMessageWithLink,
+        govUkAccordion: GovUkAccordion
 )
 
-@()(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String, totalAmount: String, dueDate: String,  directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForManageJourneyNoForm(messages("advanceNotice.title"))) {
+@layout(pageTitle = titleForManageJourneyNoForm(messages("advanceNotice.title")), backLink = Some(paymentPlanLink.url)) {
 
-    <h1 class="govuk-heading-xl">@messages("advanceNotice.heading")</h1>
+    @h1("advanceNotice.heading")
+
+    @paragraph("advanceNotice.p1",totalAmount, dueDate)
+
+    @paragraphWithLink(
+        message1 = Some(messages("advanceNotice.p2")),
+        linkMessage = messages("advanceNotice.p2.link"),
+        linkUrl = hmrcHelplineUrl,
+        linkRel = "noreferrer noopener",
+        target = "_blank"
+    )    
+
+    @paragraph("advanceNotice.p3")
+
+    <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
+
+    @govukAccordion(
+        id = "hmrc-accordion",
+        sections = Seq(
+            AccordionSection(
+                heading = @h2("advanceNotice.accordion.heading"),
+                content = Seq(
+                        Html(messages("advanceNotice.accordion.p1")),
+                        Html(messages("advanceNotice.accordion.p2")),
+                        Html(messages("advanceNotice.accordion.p3")),
+                        Html(messages("advanceNotice.accordion.p4")),
+                        Html(messages("advanceNotice.accordion.p5"))
+                        )
+            )
+        )
+    )
+
+    @h2("advanceNotice.directDebitDetails")
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.directDebit.reference")),
+                value = Value(content = HtmlContent(directDebitReference))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.directDebit.accountName")),
+                value = Value(content = HtmlContent(bankAccountName))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.directDebit.accountNumber")),
+                value = Value(content = HtmlContent(maskAccountNumber(accountNumber)))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.directDebit.sortCode")),
+                value = Value(content = HtmlContent(maskSortCode(sortCode)))
+            )
+        )
+    ))
+
+    @h2("advanceNotice.yourPaymentDetails")
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.yourPaymentDetails.reference")),
+                value = Value(content = HtmlContent(directDebitReference))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.yourPaymentDetails.totalAmount")),
+                value = Value(content = HtmlContent(totalAmount))
+            ),
+            SummaryListRow(
+            key = Key(content = messages("advanceNotice.yourPaymentDetails.dueDate")),
+            value = Value(content = HtmlContent(dueDate))
+            )
+        )
+    ))
+
+    @govukInsetText(
+        InsetText(
+        content = Text(messages("advanceNotice.print.inset"))
+        )
+    )
+
+    @paragraphWithLink(
+        linkMessage = messages("advanceNotice.returnLink"),
+        linkUrl = routes.PaymentPlanDetailsController.onPageLoad().url,
+    )
+
 }

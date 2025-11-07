@@ -621,4 +621,24 @@ amendingPaymentPlan.cancel.link = Cancel and return to payment plan
 
 advanceNotice.title = Advance notice of your Direct Debit payment
 advanceNotice.heading = Advance notice of your Direct Debit payment
-
+advanceNotice.p1 = This notification confirms that {0} will be collected on {1} by Direct Debit.
+advanceNotice.p2 = You must have enough funds in your account for this payment to be collected. If any of the details are incorrect,
+advanceNotice.p2.link = you must contact the HMRC Helpline.
+advanceNotice.p3 = Your Direct Debit is covered by the terms of the Direct Debit Guarantee.
+advanceNotice.accordion.heading = The Direct Debit Guarantee
+advanceNotice.accordion.p1 = This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.
+advanceNotice.accordion.p2 = If there are any changes to the amount, date or frequency of your Direct Debit, HMRC will notify you 10 working days in advance of your account being debited, or as otherwise agreed. If you request HMRC to collect a payment, confirmation of the amount and date will be given to you at the time of the request.
+advanceNotice.accordion.p3 = If an error is made in the payment of your Direct Debit by HMRC, or your bank or building society, you are entitled to a full and immediate refund of the amount paid from your bank or building society.
+advanceNotice.accordion.p4 = If you receive a refund you are not entitled to, you must pay it back when HMRC asks you to.
+advanceNotice.accordion.p5 = You can cancel a Direct Debit at any time, by contacting your bank or building society. Written confirmation may be required.
+advanceNotice.directDebitDetails = Direct Debit details
+advanceNotice.directDebit.reference = 	Direct Debit reference
+advanceNotice.directDebit.accountName =	Name on the account
+advanceNotice.directDebit.accountNumber = Account number
+advanceNotice.directDebit.sortCode = Sort code
+advanceNotice.yourPaymentDetails = Your payment details
+advanceNotice.yourPaymentDetails.reference = Payment reference
+advanceNotice.yourPaymentDetails.totalAmount = Amount to be collected
+advanceNotice.yourPaymentDetails.dueDate = Date of collection
+advanceNotice.print.inset = You can print this page for your records using the print function on your browser.
+advanceNotice.returnLink = Return to payment plan
