@@ -27,8 +27,7 @@
         header1: Header1,
         header2: Header2,
         paragraph: Paragraph,
-        govukSummaryList: GovukSummaryList,
-        link: Link
+        govukSummaryList: GovukSummaryList
 )
 
 @(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, isSuspensionActive: Boolean, suspensionStartDate: String, suspensionEndDate: String, rows: Seq[SummaryListRow], isAdvanceNoticePresent: Boolean, totalAmount: String, dueDate: String)(implicit request: Request[_], messages: Messages)
@@ -47,7 +46,7 @@
         @if(isAdvanceNoticePresent) {
             <p class="govuk-inset-text">
                 @messages("paymentPlanDetails.inset.advanceNotice.text", totalAmount, dueDate)
-                <a href="@routes.DirectDebitSummaryController.onPageLoad().url">@messages("paymentPlanDetails.advanceNotice.link")</a>
+                <a href="@routes.JourneyRecoveryController.onPageLoad().url">@messages("paymentPlanDetails.advanceNotice.link")</a>
             </p>
         } else {
             <p class="govuk-inset-text">
