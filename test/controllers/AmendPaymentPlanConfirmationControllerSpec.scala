@@ -109,18 +109,11 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           )
 
         val directDebitReference = "122222"
-        val paymentPlanReference = "paymentReference"
         val userAnswers =
           emptyUserAnswers
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
-            )
-            .success
-            .value
-            .set(
-              PaymentPlanReferenceQuery,
-              paymentPlanReference
             )
             .success
             .value
@@ -191,18 +184,11 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           )
 
         val directDebitReference = "122222"
-        val paymentPlanReference = "paymentReference"
         val userAnswers =
           emptyUserAnswers
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
-            )
-            .success
-            .value
-            .set(
-              PaymentPlanReferenceQuery,
-              paymentPlanReference
             )
             .success
             .value
@@ -258,7 +244,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            paymentPlanReference,
+            mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference,
             directDebitReference,
             mockSinglePaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
             mockSinglePaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,

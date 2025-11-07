@@ -62,9 +62,6 @@ class AmendPaymentPlanConfirmationController @Inject() (
 
           for {
             directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
-            // this two line don't need?
-            paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
-            planType             <- Future.fromTry(Try(userAnswers.get(ManagePaymentPlanTypePage).get))
           } yield {
             Ok(
               view(
