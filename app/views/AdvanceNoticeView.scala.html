@@ -25,8 +25,7 @@
         govukInsetText: GovukInsetText,
         govukSummaryList: GovukSummaryList,
         link: Link,
-        paragraphWithLink: ParagraphMessageWithLink,
-        govukAccordion: GovukAccordion?
+        paragraphWithLink: ParagraphMessageWithLink
 )
 
 @(hmrcHelplineUrl: String, totalAmount: String, dueDate: String,  directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String, paymentPlanLink: Call)(implicit request: Request[_], messages: Messages)
@@ -35,7 +34,7 @@
 
     @h1("advanceNotice.heading")
 
-    @paragraph("advanceNotice.p1",totalAmount, dueDate)
+    @paragraph(Messages("advanceNotice.p1",totalAmount, dueDate))
 
     @paragraphWithLink(
         message1 = Some(messages("advanceNotice.p2")),
@@ -49,29 +48,21 @@
 
     <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
 
-    @govukAccordion(
-        Accordion(
-            id = "hmrc-accordion",
-            sections = Seq(
-            AccordionSection(
-            heading = AccordionSectionHeading(
-            content = Text(messages("advanceNotice.accordion.heading"))
-        ),
-        content = HtmlContent(
-            Html(
-                s"""
-                    <p>${messages("advanceNotice.accordion.p1")}</p>
-                    <p>${messages("advanceNotice.accordion.p2")}</p>
-                    <p>${messages("advanceNotice.accordion.p3")}</p>
-                    <p>${messages("advanceNotice.accordion.p4")}</p>
-                    <p>${messages("advanceNotice.accordion.p5")}</p>
-                    """
-                )
-            )
-                )
-            )
-        )
-    )
+    <details class="govuk-details">
+        <summary class = "govuk-details__summary">
+            <span class="govuk-details__summary-text">
+                @messages("advanceNotice.accordion.heading")
+            </span>
+        </summary>
+
+        <div class="govuk-details__text">
+            <p>@messages("advanceNotice.accordion.p1")</p>
+            <p>@messages("advanceNotice.accordion.p2")</p>
+            <p>@messages("advanceNotice.accordion.p3")</p>
+            <p>@messages("advanceNotice.accordion.p4")</p>
+            <p>@messages("advanceNotice.accordion.p5")</p>
+        </div>
+    </details>
 
     @h2("advanceNotice.directDebitDetails")
 

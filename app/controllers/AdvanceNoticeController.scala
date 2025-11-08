@@ -50,10 +50,11 @@ class AdvanceNoticeController @Inject() (
   nddService: NationalDirectDebitService,
   view: AdvanceNoticeView,
   appConfig: FrontendAppConfig
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
     val dateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
@@ -84,6 +85,8 @@ class AdvanceNoticeController @Inject() (
             )
           )
         }
+      case None =>
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
 }
