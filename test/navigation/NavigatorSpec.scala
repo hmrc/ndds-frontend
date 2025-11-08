@@ -37,7 +37,9 @@ class NavigatorSpec extends SpecBase {
       }
 
       "must go from a SuspensionDetailsCheckYourAnswerPage to PaymentPlanSuspended confirmation page " in {
-        navigator.nextPage(SuspensionDetailsCheckYourAnswerPage, NormalMode, userAnswers) mustBe routes.PaymentPlanSuspendedController.onPageLoad()
+        navigator.nextPage(SuspensionDetailsCheckYourAnswerPage, NormalMode, userAnswers) mustBe routes.PaymentPlanSuspendedController.onPageLoad(
+          NormalMode
+        )
       }
 
       "must go from a PersonalOrBusinessAccountPage to YourBankDetailsPage" in {
@@ -361,6 +363,12 @@ class NavigatorSpec extends SpecBase {
 
       "must go from YourBankDetailsPage to BankDetailsCheckYourAnswersPage - Checkmode" in {
         navigator.nextPage(YourBankDetailsPage, CheckMode, userAnswers) mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
+      }
+
+      "must go from a SuspensionDetailsCheckYourAnswerPage to PaymentPlanSuspended confirmation page - CheckMode" in {
+        navigator.nextPage(SuspensionDetailsCheckYourAnswerPage, CheckMode, userAnswers) mustBe routes.PaymentPlanSuspendedController.onPageLoad(
+          CheckMode
+        )
       }
 
       "must go from BankDetailsCheckYourAnswersPage to ConfirmAuthorityPage.1" in {

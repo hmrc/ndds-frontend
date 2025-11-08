@@ -41,9 +41,17 @@
 
     @header2("paymentPlanSuspended.h1")
 
-    @paragraph(messages("paymentPlanSuspended.p1", startDate, endDate))
+     @if(mode == NormalMode) {
+        @paragraph(messages("paymentPlanSuspended.p1.normal", startDate, endDate))
+     } else {
+        @paragraph(messages("paymentPlanSuspended.p1.change", startDate, endDate))
+     }
 
-    @paragraph(messages("paymentPlanSuspended.p2"))
+     @if(mode == NormalMode) {
+       @paragraph(messages("paymentPlanSuspended.p2.normal"))
+     } else {
+       @paragraph(messages("paymentPlanSuspended.p2.change"))
+     }
 
     @header2("paymentPlanSuspended.h2")
 

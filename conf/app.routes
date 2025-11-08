@@ -161,7 +161,8 @@ POST       /change-check-suspension-details                 controllers.CheckYou
 
 GET        /payment-plan-suspension-removed             controllers.RemoveSuspensionConfirmationController.onPageLoad()
 
-GET        /payment-plan-suspended                        controllers.PaymentPlanSuspendedController.onPageLoad()
+GET        /payment-plan-suspended                        controllers.PaymentPlanSuspendedController.onPageLoad(mode: Mode = NormalMode)
+GET        /change-payment-plan-suspended                  controllers.PaymentPlanSuspendedController.onPageLoad(mode: Mode = CheckMode)
 GET        /removing-this-suspension                        controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = NormalMode)
 POST       /removing-this-suspension                        controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = NormalMode)
 GET        /change-removing-this-suspension                  controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = CheckMode)
