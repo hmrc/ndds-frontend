@@ -616,3 +616,8 @@ amendingPaymentPlan.cancel.link = Cancel and return to payment plan
 backSubmission.title = Page not found
 backSubmission.heading = Page not found
 backSubmission.p1 = You cannot undo or resubmit this information.
+
+paymentPlanLockedWarning.title = You cannot view or manage this payment plan
+paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
+paymentPlanLockedWarning.paragraph = A payment is being collected. You will be able to view or manage this payment plan within 36 hours.
+paymentPlanLockedWarning.returnLink = Return to payment plans.

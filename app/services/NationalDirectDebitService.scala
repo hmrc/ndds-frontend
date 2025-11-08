@@ -27,10 +27,11 @@ import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, Paym
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
+
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, LocalDate}
 import javax.inject.{Inject, Singleton}
@@ -487,4 +488,9 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   def suspendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =
     isBudgetPaymentPlan(userAnswers)
 
+  def isPaymentPlanLocked(userAnswers: UserAnswers): Boolean = {
+    userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .exists(_.paymentPlanDetails.paymentPlanEditable)
+  }
 }

@@ -115,10 +115,14 @@ class PaymentPlanDetailsController @Inject() (
 
   def onRedirect(paymentPlanReference: String): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      for {
-        updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanReferenceQuery, paymentPlanReference))
-        _              <- sessionRepository.set(updatedAnswers)
-      } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
+      if (true) {
+        Future.successful(Redirect(routes.PaymentPlanLockedWarningController.onPageLoad()))
+      } else {
+        for {
+          updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanReferenceQuery, paymentPlanReference))
+          _              <- sessionRepository.set(updatedAnswers)
+        } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
+      }
     }
 
   private def buildSummaryRows(planDetail: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {

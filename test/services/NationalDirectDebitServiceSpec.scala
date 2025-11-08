@@ -734,6 +734,97 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         result shouldBe DuplicateCheckResponse(false)
       }
     }
+
+    "isPaymentPlanLocked" - {
+
+      "return true when paymentPlanEditable is true" in {
+        val paymentPlanDetails = PaymentPlanDetails(
+          hodService                = "HOD2",
+          planType                  = "TypeB",
+          paymentReference          = "REF456",
+          submissionDateTime        = LocalDateTime.now(),
+          scheduledPaymentAmount    = Some(BigDecimal(500)),
+          scheduledPaymentStartDate = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentStartDate   = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentAmount      = Some(BigDecimal(50)),
+          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(5)),
+          scheduledPaymentFrequency = Some("Weekly"),
+          suspensionStartDate       = None,
+          suspensionEndDate         = None,
+          balancingPaymentAmount    = Some(BigDecimal(100)),
+          balancingPaymentDate      = Some(LocalDate.now().plusMonths(6)),
+          totalLiability            = Some(BigDecimal(600)),
+          paymentPlanEditable       = true
+        )
+
+        val directDebitDetails = DirectDebitDetails(
+          bankSortCode       = Some("12-34-56"),
+          bankAccountNumber  = Some("12345678"),
+          bankAccountName    = Some("John Doe"),
+          auDdisFlag         = true,
+          submissionDateTime = LocalDateTime.now()
+        )
+
+        val paymentPlanResponse = PaymentPlanResponse(
+          directDebitDetails = directDebitDetails,
+          paymentPlanDetails = paymentPlanDetails
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+
+        service.isPaymentPlanLocked(userAnswers) shouldBe true
+      }
+
+      "return false when paymentPlanEditable is false" in {
+        val paymentPlanDetails = PaymentPlanDetails(
+          hodService                = "HOD2",
+          planType                  = "TypeB",
+          paymentReference          = "REF456",
+          submissionDateTime        = LocalDateTime.now(),
+          scheduledPaymentAmount    = Some(BigDecimal(500)),
+          scheduledPaymentStartDate = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentStartDate   = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentAmount      = Some(BigDecimal(50)),
+          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(5)),
+          scheduledPaymentFrequency = Some("Weekly"),
+          suspensionStartDate       = None,
+          suspensionEndDate         = None,
+          balancingPaymentAmount    = Some(BigDecimal(100)),
+          balancingPaymentDate      = Some(LocalDate.now().plusMonths(6)),
+          totalLiability            = Some(BigDecimal(600)),
+          paymentPlanEditable       = false
+        )
+
+        val directDebitDetails = DirectDebitDetails(
+          bankSortCode       = Some("12-34-56"),
+          bankAccountNumber  = Some("12345678"),
+          bankAccountName    = Some("John Doe"),
+          auDdisFlag         = true,
+          submissionDateTime = LocalDateTime.now()
+        )
+
+        val paymentPlanResponse = PaymentPlanResponse(
+          directDebitDetails = directDebitDetails,
+          paymentPlanDetails = paymentPlanDetails
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+
+        service.isPaymentPlanLocked(userAnswers) shouldBe false
+      }
+
+      "return false when PaymentPlanDetailsQuery is not present in userAnswers" in {
+        val userAnswers = emptyUserAnswers
+
+        service.isPaymentPlanLocked(userAnswers) shouldBe false
+      }
+    }
   }
 
   "calculateNextPaymentDate" - {

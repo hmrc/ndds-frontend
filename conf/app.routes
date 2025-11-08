@@ -170,3 +170,5 @@ POST       /change-removing-this-suspension                  controllers.Removin
 GET        /amending-payment-plan                       controllers.AmendingPaymentPlanController.onPageLoad()
 
 GET        /page-not-found                       controllers.BackSubmissionController.onPageLoad()
+
+GET        /cannot-view-manage-payment-plan                       controllers.PaymentPlanLockedWarningController.onPageLoad()
