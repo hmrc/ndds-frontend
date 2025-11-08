@@ -24,7 +24,7 @@
     h1: Header1,
     h2: Header2,
     paragraph: Paragraph,
-    paragraphMessageWithLink: ParagraphMessageWithLink,
+    paragraphWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList
@@ -35,8 +35,6 @@
 @layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
     @h1("directDebitPaymentSummary.heading")
-    @paragraph("directDebitPaymentSummary.p1")
-    @paragraph("directDebitPaymentSummary.p2")
 
     @h2("directDebitPaymentSummary.directDebit.title")
 
@@ -59,15 +57,15 @@
 
     @h2("directDebitPaymentSummary.activePayment.h1")
 
-    @for(plan <- paymentPlansList) {
-        @govukSummaryList(plan)
-    }
-
-    @h2("directDebitPaymentSummary.setupPayment.h1")
+    @paragraphWithLink(
+        Some(messages("directDebitPaymentSummary.p1")),
+        linkMessage = messages("directDebitPaymentSummary.p1.link"),
+        linkUrl = messages("accountDetailsNotVerified.p2.url")
+    )
 
     @paragraph("directDebitPaymentSummary.setupPayment.p1")
 
-    @govukButton(
-        ButtonViewModel(messages("directDebitPaymentSummary.addPaymentButton"))
-    )
+    @for(plan <- paymentPlansList) {
+        @govukSummaryList(plan)
+    }
 }
