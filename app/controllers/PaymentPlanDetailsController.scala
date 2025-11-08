@@ -138,7 +138,9 @@ class PaymentPlanDetailsController @Inject() (
 
   def onRedirect(directDebitReference: String, paymentPlanReference: String): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      val isVariablePlan = nddService.isVariablePaymentPlan(request.userAnswers)
+      // TODO: Correction as hardcoding now because of stub data
+      // val isVariablePlan = nddService.isVariablePaymentPlan(request.userAnswers)
+      val isVariablePlan = true
       getAdvanceNoticeData(directDebitReference, paymentPlanReference, isVariablePlan).flatMap { (advanceNoticeResponse, isAdvanceNoticePresent) =>
         for {
           updatedAnswers <- Future.fromTry(request.userAnswers.set(DirectDebitReferenceQuery, directDebitReference))
