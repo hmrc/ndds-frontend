@@ -59,18 +59,10 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
         )
 
-      val paymentPlanReference = "ppReference"
-
       val paymentPlan = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails
 
       val userAnswersWithData =
         emptyUserAnswers
-          .set(
-            PaymentPlanReferenceQuery,
-            paymentPlanReference
-          )
-          .success
-          .value
           .set(
             PaymentPlanDetailsQuery,
             mockBudgetPaymentPlanDetailResponse
@@ -96,12 +88,12 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
             request,
             messages(application)
           ).toString
 
-        contentAsString(result) must include(s"Payment reference: <strong>$paymentPlanReference</strong>")
+        contentAsString(result) must include(s"Payment reference: <strong>${paymentPlan.paymentReference}</strong>")
         contentAsString(result) must include(s"Regular payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
       }
     }
@@ -113,18 +105,10 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
         )
 
-      val paymentPlanReference = "ppReference"
-
       val paymentPlan = mockSinglePaymentPlanDetailResponse.paymentPlanDetails
 
       val userAnswersWithData =
         emptyUserAnswers
-          .set(
-            PaymentPlanReferenceQuery,
-            paymentPlanReference
-          )
-          .success
-          .value
           .set(
             PaymentPlanDetailsQuery,
             mockSinglePaymentPlanDetailResponse
@@ -150,12 +134,12 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
             request,
             messages(application)
           ).toString
 
-        contentAsString(result) must include(s"Payment reference: <strong>$paymentPlanReference</strong>")
+        contentAsString(result) must include(s"Payment reference: <strong>${paymentPlan.paymentReference}</strong>")
         contentAsString(result) must include(s"Payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
       }
     }
@@ -167,18 +151,10 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
         )
 
-      val paymentPlanReference = "ppReference"
-
       val paymentPlan = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails
 
       val userAnswersWithData =
         emptyUserAnswers
-          .set(
-            PaymentPlanReferenceQuery,
-            paymentPlanReference
-          )
-          .success
-          .value
           .set(
             PaymentPlanDetailsQuery,
             mockBudgetPaymentPlanDetailResponse
@@ -207,7 +183,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form.fill(true), paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form.fill(true), paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
             request,
             messages(application)
           ).toString
@@ -362,9 +338,6 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
       val userAnswersWithData =
         emptyUserAnswers
           .set(PaymentPlanDetailsQuery, dummyPlanDetailResponse)
-          .success
-          .value
-          .set(PaymentPlanReferenceQuery, "DDI123")
           .success
           .value
 

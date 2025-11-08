@@ -57,17 +57,17 @@ class CancelPaymentPlanController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
 
     if (nddService.isPaymentPlanCancellable(request.userAnswers)) {
-      (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
-        case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
+      request.userAnswers.get(PaymentPlanDetailsQuery) match {
+        case Some(paymentPlanDetail) =>
           val paymentPlan = paymentPlanDetail.paymentPlanDetails
           val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
             case None        => form
             case Some(value) => form.fill(value)
           }
-          Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
+          Ok(view(preparedForm, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get))
 
         case _ =>
-          logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+          logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery")
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
     } else {
@@ -87,21 +87,21 @@ class CancelPaymentPlanController @Inject() (
   }
 
   private def handleFormErrors(formWithErrors: Form[?])(implicit request: DataRequest[AnyContent]): Future[Result] = {
-    (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
-      case (Some(planDetail), Some(paymentPlanReference)) =>
+    request.userAnswers.get(PaymentPlanDetailsQuery) match {
+      case Some(planDetail) =>
         val paymentPlan = planDetail.paymentPlanDetails
         Future.successful(
           BadRequest(
             view(
               formWithErrors,
               paymentPlan.planType,
-              paymentPlanReference,
+              paymentPlan.paymentReference,
               paymentPlan.scheduledPaymentAmount.get
             )
           )
         )
       case _ =>
-        logger.warn(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+        logger.warn(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery")
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
