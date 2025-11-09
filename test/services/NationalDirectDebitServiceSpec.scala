@@ -762,7 +762,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
         service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
           result.totalAmount shouldBe None
-          result.dueDate shouldBe None
+          result.dueDate     shouldBe None
         }
       }
 
@@ -772,7 +772,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
         service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
           result.totalAmount shouldBe None
-          result.dueDate shouldBe None
+          result.dueDate     shouldBe None
         }
       }
     }
