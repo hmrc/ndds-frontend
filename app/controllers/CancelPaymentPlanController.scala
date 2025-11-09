@@ -22,7 +22,7 @@ import models.requests.{ChrisSubmissionRequest, DataRequest}
 import models.responses.DirectDebitDetails
 import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{CancelPaymentPlanPage, ManagePaymentPlanTypePage}
+import pages.{CancelPaymentPlanConfirmationPage, CancelPaymentPlanPage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -55,25 +55,32 @@ class CancelPaymentPlanController @Inject() (
   private val form = formProvider()
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val alreadyConfirmed: Boolean =
+      request.userAnswers.get(CancelPaymentPlanConfirmationPage).contains(true)
 
-    if (nddService.isPaymentPlanCancellable(request.userAnswers)) {
-      request.userAnswers.get(PaymentPlanDetailsQuery) match {
-        case Some(paymentPlanDetail) =>
-          val paymentPlan = paymentPlanDetail.paymentPlanDetails
-          val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
-            case None        => form
-            case Some(value) => form.fill(value)
-          }
-          Ok(view(preparedForm, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get))
-
-        case _ =>
-          logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery")
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
-      }
+    if (alreadyConfirmed) {
+      logger.warn("Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")
+      Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
-      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      if (nddService.isPaymentPlanCancellable(request.userAnswers)) {
+        (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
+          case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
+            val paymentPlan = paymentPlanDetail.paymentPlanDetails
+            val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
+              case None        => form
+              case Some(value) => form.fill(value)
+            }
+            Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
+
+          case _ =>
+            logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+            Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+      } else {
+        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
+        Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
     }
   }
 
@@ -119,6 +126,7 @@ class CancelPaymentPlanController @Inject() (
 
             for {
               updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(CancelPaymentPlanConfirmationPage, true))
               lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
               _              <- sessionRepository.set(updatedAnswers)
             } yield {

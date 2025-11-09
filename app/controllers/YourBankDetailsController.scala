@@ -105,7 +105,10 @@ class YourBankDetailsController @Inject() (
       case Right((verificationResponse, bank)) =>
         onSuccessfulVerification(
           userAnswers,
-          auddisFlag  = if (bank.ddiVoucherFlag == "N") true else false,
+          auddisFlag = bank.ddiVoucherFlag match {
+            case Some("N") => true
+            case _         => false
+          },
           bankDetails = bankDetails,
           bankName    = bank.bankName,
           bankAddress = bank.address

@@ -52,22 +52,31 @@ class CheckYourSuspensionDetailsController @Inject() (
     with I18nSupport
     with Logging {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    logger.debug("Display suspension details confirmation page")
-    val userAnswers = request.userAnswers
+  def onPageLoad(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData) { implicit request =>
+      logger.debug("Display suspension details confirmation page")
 
-    if (nddService.suspendPaymentPlanGuard(userAnswers)) {
-      val summaryList = buildSummaryList(request.userAnswers)
-      Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
-    } else {
-      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.error(
-        s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
-      )
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      val alreadyConfirmed: Boolean =
+        request.userAnswers.get(SuspensionDetailsCheckYourAnswerPage).contains(true)
+
+      if (alreadyConfirmed) {
+        logger.warn("Attempt to load Suspension Details CYA after confirmation; redirecting to Page Not Found.")
+        Redirect(routes.BackSubmissionController.onPageLoad())
+      } else {
+        val userAnswers = request.userAnswers
+
+        if (nddService.suspendPaymentPlanGuard(userAnswers)) {
+          val summaryList = buildSummaryList(userAnswers)
+          Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
+        } else {
+          val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+          logger.error(
+            s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
+          )
+          Redirect(routes.JourneyRecoveryController.onPageLoad())
+        }
+      }
     }
-
-  }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>

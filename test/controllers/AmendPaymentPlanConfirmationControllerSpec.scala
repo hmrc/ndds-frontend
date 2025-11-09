@@ -101,6 +101,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
     }
 
     "onPageLoad" - {
+
       "must return OK and the correct view for a GET with a Budget Payment Plan" in {
 
         val mockBudgetPaymentPlanDetailResponse =
@@ -174,6 +175,83 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             summaryListRows,
             routes.AmendPlanEndDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
+        }
+      }
+      "must redirect to page not found if already value is submitted and click browser back from confirmation page" in {
+
+        val mockBudgetPaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+          )
+
+        val directDebitReference = "122222"
+        val paymentPlanReference = "paymentReference"
+        val userAnswers =
+          emptyUserAnswers
+            .set(
+              AmendPaymentPlanConfirmationPage,
+              true
+            )
+            .success
+            .value
+            .set(
+              DirectDebitReferenceQuery,
+              directDebitReference
+            )
+            .success
+            .value
+            .set(
+              PaymentPlanReferenceQuery,
+              paymentPlanReference
+            )
+            .success
+            .value
+            .set(
+              ManagePaymentPlanTypePage,
+              PaymentPlanType.BudgetPaymentPlan.toString
+            )
+            .success
+            .value
+            .set(
+              PaymentPlanDetailsQuery,
+              mockBudgetPaymentPlanDetailResponse
+            )
+            .success
+            .value
+            .set(
+              AmendPaymentAmountPage,
+              150.0
+            )
+            .success
+            .value
+            .set(
+              AmendPlanStartDatePage,
+              LocalDate.now()
+            )
+            .success
+            .value
+            .set(
+              AmendPlanEndDatePage,
+              LocalDate.now().plusMonths(2)
+            )
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+          val request = FakeRequest(GET, routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url)
+          val result = route(application, request).value
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustEqual routes.BackSubmissionController.onPageLoad().url
+
         }
       }
 

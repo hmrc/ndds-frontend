@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.CancelPaymentPlanPage
+import pages.{CancelPaymentPlanConfirmationPage, CancelPaymentPlanPage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -95,6 +95,57 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         contentAsString(result) must include(s"Payment reference: <strong>${paymentPlan.paymentReference}</strong>")
         contentAsString(result) must include(s"Regular payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
+      }
+    }
+
+    "must redirect to not found page if browser back link is clicked from confirmation page" in {
+
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
+      val paymentPlanReference = "ppReference"
+
+      val paymentPlan = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails
+
+      val userAnswersWithData =
+        emptyUserAnswers
+          .set(
+            PaymentPlanReferenceQuery,
+            paymentPlanReference
+          )
+          .success
+          .value
+          .set(
+            CancelPaymentPlanConfirmationPage,
+            true
+          )
+          .success
+          .value
+          .set(
+            PaymentPlanDetailsQuery,
+            mockBudgetPaymentPlanDetailResponse
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddsService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockNddsService.isPaymentPlanCancellable(any())).thenReturn(true)
+
+        val request = FakeRequest(GET, cancelPaymentPlanRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.BackSubmissionController.onPageLoad().url
       }
     }
 

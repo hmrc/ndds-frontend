@@ -25,6 +25,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -43,7 +44,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   view: AmendPaymentPlanConfirmationView,
-  nddService: NationalDirectDebitService
+  nddService: NationalDirectDebitService,
+  sessionRepository: SessionRepository
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -51,40 +53,47 @@ class AmendPaymentPlanConfirmationController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
+    val alreadyConfirmed: Boolean =
+      request.userAnswers.get(AmendPaymentPlanConfirmationPage).contains(true)
 
-    if (nddService.amendPaymentPlanGuard(userAnswers)) {
-      userAnswers.get(PaymentPlanDetailsQuery) match {
-        case Some(response) =>
-          val planDetail = response.paymentPlanDetails
-          val directDebitDetails = response.directDebitDetails
-
-          val (rows, backLink) = buildRows(userAnswers, planDetail, mode)
-
-          for {
-            directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
-          } yield {
-            Ok(
-              view(
-                mode,
-                planDetail.paymentReference,
-                directDebitReference,
-                directDebitDetails.bankSortCode.getOrElse(""),
-                directDebitDetails.bankAccountNumber.getOrElse(""),
-                rows,
-                backLink
-              )
-            )
-          }
-
-        case None =>
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-      }
+    if (alreadyConfirmed) {
+      logger.warn("Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")
+      Future.successful(Redirect(routes.BackSubmissionController.onPageLoad()))
     } else {
-      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-    }
+      if (nddService.amendPaymentPlanGuard(userAnswers)) {
+        userAnswers.get(PaymentPlanDetailsQuery) match {
+          case Some(response) =>
+            val planDetail = response.paymentPlanDetails
+            val directDebitDetails = response.directDebitDetails
 
+            val (rows, backLink) = buildRows(userAnswers, planDetail, mode)
+
+            for {
+              directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
+            } yield {
+              Ok(
+                view(
+                  mode,
+                  planDetail.paymentReference,
+                  directDebitReference,
+                  directDebitDetails.bankSortCode.getOrElse(""),
+                  directDebitDetails.bankAccountNumber.getOrElse(""),
+                  rows,
+                  backLink
+                )
+              )
+            }
+
+          case None =>
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        }
+      } else {
+        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+
+    }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
@@ -98,7 +107,10 @@ class AmendPaymentPlanConfirmationController @Inject() (
             if (success) {
               logger.info(s"CHRIS submission successful for amend payment plan for DDI Ref [$ddiReference]")
               for {
-                lockResponse <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
+                lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
+                updatedAnswers <- Future.fromTry(ua.set(AmendPaymentPlanConfirmationPage, true))
+                _              <- sessionRepository.set(updatedAnswers)
+
               } yield {
                 if (lockResponse.lockSuccessful) {
                   logger.debug(s"Amend payment plan lock returns: ${lockResponse.lockSuccessful}")
