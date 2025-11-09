@@ -19,16 +19,11 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import pages.*
-import play.api.Logging
-import play.api.i18n.Lang.logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
+import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Constants
-import viewmodels.checkAnswers.*
 import views.html.AdvanceNoticeView
 
 import java.text.NumberFormat

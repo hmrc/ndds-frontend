@@ -32,7 +32,6 @@ import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPl
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import uk.gov.hmrc.http.HeaderCarrier
 import utils.Constants
 import viewmodels.checkAnswers.{SuspensionPeriodRangeDateSummary, *}
 import views.html.PaymentPlanDetailsView
@@ -41,7 +40,7 @@ import java.text.NumberFormat
 import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class PaymentPlanDetailsControllerSpec extends SpecBase {
 
@@ -117,6 +116,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(true))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(false)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                 .thenReturn(Future.successful(advanceNoticeResponse))
 
@@ -196,6 +197,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(false))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(false)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                 .thenReturn(Future.successful(advanceNoticeResponse))
 
@@ -342,6 +345,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -417,6 +422,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -492,6 +499,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -568,6 +577,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(true))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -643,6 +654,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -727,6 +740,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -810,6 +825,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -893,6 +910,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -976,6 +995,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                   .thenReturn(Future.successful((advanceNoticeResponse, false)))
 
@@ -1075,6 +1096,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(true))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(false)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                 .thenReturn(Future.successful(advanceNoticeResponse))
 
@@ -1154,6 +1177,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(false))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(false)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                 .thenReturn(Future.successful(advanceNoticeResponse))
 
@@ -1236,6 +1261,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(false))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(true)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                 .thenReturn(Future.successful(advanceNoticeResponse))
 
@@ -1344,6 +1371,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
               when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                 .thenReturn(Future.successful(mockTaxCreditRepaymentPlanDetailResponse))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(false)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
                 .thenReturn(Future.successful(advanceNoticeResponse))
 

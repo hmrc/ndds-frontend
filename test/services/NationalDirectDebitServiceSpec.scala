@@ -738,7 +738,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     "isAdvanceNoticePresent" - {
       val currentTime = LocalDateTime.now().withNano(0)
       "return AdvanceNoticeResponse with totalAmount and dueDate when present" in {
-        val currentTime = LocalDateTime.now()
 
         val response = AdvanceNoticeResponse(
           totalAmount = Some(BigDecimal(500)),
