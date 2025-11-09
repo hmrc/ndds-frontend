@@ -57,98 +57,88 @@ class PaymentPlanDetailsController @Inject() (
       case (Some(directDebitReference), Some(paymentPlanReference)) =>
         nddService.getPaymentPlanDetails(directDebitReference, paymentPlanReference).flatMap { response =>
           val planDetail = response.paymentPlanDetails
+          val isVariablePlan = nddService.isVariablePaymentPlan(planDetail.planType)
+          getAdvanceNoticeData(directDebitReference, paymentPlanReference, isVariablePlan).flatMap {
+            case (advanceNoticeResponse, isAdvanceNoticePresent) =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
+                updatedAnswers <- Future.fromTry(updatedAnswers.set(ManagePaymentPlanTypePage, planDetail.planType))
+                updatedAnswers <- Future.fromTry(updatedAnswers.set(AdvanceNoticeResponseQuery, advanceNoticeResponse))
+                updatedAnswers <- planDetail.scheduledPaymentAmount match {
+                                    case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
+                                    case _            => Future.successful(updatedAnswers)
+                                  }
+                updatedAnswers <- (planDetail.suspensionStartDate, planDetail.suspensionEndDate) match {
+                                    case (Some(startDate), Some(endDate)) =>
+                                      Future.fromTry(updatedAnswers.set(SuspensionPeriodRangeDatePage, SuspensionPeriodRange(startDate, endDate)))
+                                    case _ => Future.successful(updatedAnswers)
+                                  }
+                updatedAnswers <- planDetail.scheduledPaymentStartDate match {
+                                    case Some(paymentStartDate) => Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentStartDate))
+                                    case _                      => Future.successful(updatedAnswers)
+                                  }
+                updatedAnswers <- planDetail.scheduledPaymentEndDate match {
+                                    case Some(paymentEndDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentEndDate))
+                                    case _                    => Future.successful(updatedAnswers)
+                                  }
+                updatedAnswers     <- cleanseSessionPages(updatedAnswers)
+                showAllActionsFlag <- calculateShowAction(nddService, planDetail)
+                _                  <- sessionRepository.set(updatedAnswers)
+              } yield {
+                val showAmendLink = isAmendLinkVisible(showAllActionsFlag, planDetail)
+                val showCancelLink = isCancelLinkVisible(showAllActionsFlag, planDetail)
+                val showSuspendLink = isSuspendLinkVisible(showAllActionsFlag, planDetail)
+                val summaryRows: Seq[SummaryListRow] = buildSummaryRows(planDetail)
+                val isSuspensionActive = isSuspendPeriodActive(planDetail)
 
-          val advanceNoticeResponse = request.userAnswers.get(AdvanceNoticeResponseQuery)
-          val isAdvanceNoticePresent = advanceNoticeResponse.isDefined
-          println("Advanmce " + advanceNoticeResponse.flatMap(_.totalAmount))
+                val formattedSuspensionStartDate = planDetail.suspensionStartDate
+                  .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                  .getOrElse("")
 
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(ManagePaymentPlanTypePage, planDetail.planType))
-            updatedAnswers <- planDetail.scheduledPaymentAmount match {
-                                case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
-                                case _            => Future.successful(updatedAnswers)
-                              }
-            updatedAnswers <- (planDetail.suspensionStartDate, planDetail.suspensionEndDate) match {
-                                case (Some(startDate), Some(endDate)) =>
-                                  Future.fromTry(updatedAnswers.set(SuspensionPeriodRangeDatePage, SuspensionPeriodRange(startDate, endDate)))
-                                case _ => Future.successful(updatedAnswers)
-                              }
-            updatedAnswers <- planDetail.scheduledPaymentStartDate match {
-                                case Some(paymentStartDate) => Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentStartDate))
-                                case _                      => Future.successful(updatedAnswers)
-                              }
-            updatedAnswers <- planDetail.scheduledPaymentEndDate match {
-                                case Some(paymentEndDate) => Future.fromTry(updatedAnswers.set(AmendPlanEndDatePage, paymentEndDate))
-                                case _                    => Future.successful(updatedAnswers)
-                              }
-            updatedAnswers     <- cleanseSessionPages(updatedAnswers)
-            showAllActionsFlag <- calculateShowAction(nddService, planDetail)
-            _                  <- sessionRepository.set(updatedAnswers)
-          } yield {
-            val showAmendLink = isAmendLinkVisible(showAllActionsFlag, planDetail)
-            val showCancelLink = isCancelLinkVisible(showAllActionsFlag, planDetail)
-            val showSuspendLink = isSuspendLinkVisible(showAllActionsFlag, planDetail)
-            val summaryRows: Seq[SummaryListRow] = buildSummaryRows(planDetail)
-            val isSuspensionActive = isSuspendPeriodActive(planDetail)
+                val formattedSuspensionEndDate = planDetail.suspensionEndDate
+                  .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                  .getOrElse("")
 
-            val formattedSuspensionStartDate = planDetail.suspensionStartDate
-              .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
-              .getOrElse("")
+                val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+                val formattedTotalAmount = advanceNoticeResponse.totalAmount
+                  .map(amount => currencyFormat.format(amount.bigDecimal))
+                  .getOrElse("")
 
-            val formattedSuspensionEndDate = planDetail.suspensionEndDate
-              .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
-              .getOrElse("")
+                val formattedDueDate = advanceNoticeResponse.dueDate
+                  .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                  .getOrElse("")
 
-            val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
-            val formattedTotalAmount: String = advanceNoticeResponse
-              .flatMap(_.totalAmount)
-              .map(amount => currencyFormat.format(amount.bigDecimal))
-              .getOrElse("")
-
-            val formattedDueDate = advanceNoticeResponse
-              .flatMap(_.dueDate)
-              .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
-              .getOrElse("")
-
-            Ok(
-              view(
-                planDetail.planType,
-                paymentPlanReference,
-                showAmendLink,
-                showCancelLink,
-                showSuspendLink,
-                isSuspensionActive,
-                formattedSuspensionStartDate,
-                formattedSuspensionEndDate,
-                summaryRows,
-                isAdvanceNoticePresent,
-                formattedTotalAmount,
-                formattedDueDate,
-                routes.AdvanceNoticeController.onPageLoad()
-              )
-            )
+                Ok(
+                  view(
+                    planDetail.planType,
+                    paymentPlanReference,
+                    showAmendLink,
+                    showCancelLink,
+                    showSuspendLink,
+                    isSuspensionActive,
+                    formattedSuspensionStartDate,
+                    formattedSuspensionEndDate,
+                    summaryRows,
+                    isAdvanceNoticePresent,
+                    formattedTotalAmount,
+                    formattedDueDate,
+                    routes.AdvanceNoticeController.onPageLoad()
+                  )
+                )
+              }
           }
         }
-
       case _ =>
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
 
-  def onRedirect(directDebitReference: String, paymentPlanReference: String): Action[AnyContent] =
+  def onRedirect(paymentPlanReference: String): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      // TODO: Correction as hardcoding now because of stub data
-      // val isVariablePlan = nddService.isVariablePaymentPlan(request.userAnswers)
-      val isVariablePlan = true
-      getAdvanceNoticeData(directDebitReference, paymentPlanReference, isVariablePlan).flatMap { (advanceNoticeResponse, isAdvanceNoticePresent) =>
-        for {
-          updatedAnswers <- Future.fromTry(request.userAnswers.set(DirectDebitReferenceQuery, directDebitReference))
-          updatedAnswers <- Future.fromTry(updatedAnswers.set(PaymentPlanReferenceQuery, paymentPlanReference))
-          updatedAnswers <- Future.fromTry(updatedAnswers.set(AdvanceNoticeResponseQuery, advanceNoticeResponse))
-          _              <- sessionRepository.set(updatedAnswers)
-        } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
-      }
+      for {
+        updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanReferenceQuery, paymentPlanReference))
+        _              <- sessionRepository.set(updatedAnswers)
+      } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
     }
 
   private def buildSummaryRows(planDetail: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {

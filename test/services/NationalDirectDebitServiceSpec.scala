@@ -736,13 +736,23 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
 
     "isAdvanceNoticePresent" - {
-      "return true when AdvanceNoticeResponse is present" in {
-        val response = new AdvanceNoticeResponse(Some("100.00"), Some("2025-11-30"))
+      val currentTime = LocalDateTime.now().withNano(0)
+      "return AdvanceNoticeResponse with totalAmount and dueDate when present" in {
+        val currentTime = LocalDateTime.now()
+
+        val response = AdvanceNoticeResponse(
+          totalAmount = Some(BigDecimal(500)),
+          dueDate     = Some(currentTime.toLocalDate.plusMonths(1))
+        )
+
         when(mockConnector.isAdvanceNoticePresent(any(), any())(any()))
           .thenReturn(Future.successful(Some(response)))
 
-        service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
-          result shouldBe true
+        val result = service.isAdvanceNoticePresent("ddRef", "planRef")
+
+        result.map { r =>
+          r.totalAmount mustBe Some(BigDecimal(500))
+          r.dueDate mustBe Some(currentTime.toLocalDate.plusMonths(1))
         }
       }
 
@@ -751,7 +761,8 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .thenReturn(Future.successful(None))
 
         service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
-          result shouldBe false
+          result.totalAmount shouldBe None
+          result.dueDate shouldBe None
         }
       }
 
@@ -760,7 +771,8 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .thenReturn(Future.failed(new RuntimeException("boom")))
 
         service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
-          result shouldBe false
+          result.totalAmount shouldBe None
+          result.dueDate shouldBe None
         }
       }
     }

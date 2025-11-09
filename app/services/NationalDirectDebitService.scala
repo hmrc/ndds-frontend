@@ -132,10 +132,8 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       .get(ManagePaymentPlanTypePage)
       .getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
 
-  def isVariablePaymentPlan(userAnswers: UserAnswers): Boolean =
-    userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.VariablePaymentPlan) || userAnswers
-      .get(ManagePaymentPlanTypePage)
-      .getOrElse("") == PaymentPlanType.VariablePaymentPlan.toString
+  def isVariablePaymentPlan(planType: String): Boolean =
+    planType == PaymentPlanType.VariablePaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))

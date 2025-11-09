@@ -1,28 +1,113 @@
 package controllers
 
 import base.SpecBase
+import models.responses.{AdvanceNoticeResponse, DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import config.FrontendAppConfig
+import pages.ManagePaymentPlanTypePage
+
+import java.time.{LocalDate, LocalDateTime}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import views.html.AdvanceNoticeView
+
+import java.time.LocalDateTime
+import java.text.NumberFormat
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class AdvanceNoticeControllerSpec extends SpecBase {
 
   "AdvanceNotice Controller" - {
+    val currentTime = LocalDateTime.now()
 
     "must return OK and the correct view for a GET" in {
+      val directDebitReference = "DD123"
+      val paymentPlanReference = "PP456"
+      val planType = "04"
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+        bankSortCode       = Some("12-34-56"),
+        bankAccountNumber  = Some("12345678"),
+        bankAccountName    = Some("John Doe"),
+        auDdisFlag         = true,
+        submissionDateTime = LocalDateTime.now()
+      )
+
+      val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
+        hodService                = "HOD1",
+        planType                  = planType,
+        paymentReference          = paymentPlanReference,
+        submissionDateTime        = LocalDateTime.now(),
+        scheduledPaymentAmount    = Some(BigDecimal(100)),
+        scheduledPaymentStartDate = Some(LocalDate.now()),
+        initialPaymentStartDate   = Some(LocalDate.now()),
+        initialPaymentAmount      = Some(BigDecimal(50)),
+        scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(6)),
+        scheduledPaymentFrequency = Some("Monthly"),
+        suspensionStartDate       = None,
+        suspensionEndDate         = None,
+        balancingPaymentAmount    = None,
+        balancingPaymentDate      = None,
+        totalLiability            = Some(BigDecimal(600)),
+        paymentPlanEditable       = true
+      )
+
+      val paymentPlanResponse: PaymentPlanResponse = PaymentPlanResponse(
+        directDebitDetails = directDebitDetails,
+        paymentPlanDetails = paymentPlanDetails
+      )
+
+      val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
+        totalAmount = Some(BigDecimal(500)),
+        dueDate     = Some(currentTime.toLocalDate.plusMonths(1))
+      )
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .success
+        .value
+        .set(DirectDebitReferenceQuery, directDebitReference)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, paymentPlanReference)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, planType)
+        .success
+        .value
+        .set(AdvanceNoticeResponseQuery, advanceNoticeResponse)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, routes.AdvanceNoticeController.onPageLoad().url)
 
         val result = route(application, request).value
-
         val view = application.injector.instanceOf[AdvanceNoticeView]
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+
+        val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+        val dateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
+        val expectedView = view(
+          appConfig.hmrcHelplineUrl,
+          currencyFormat.format(BigDecimal(500)),
+          LocalDate.now().plusDays(10).format(dateFormat),
+          directDebitReference,
+          directDebitDetails.bankAccountName.get,
+          directDebitDetails.bankSortCode.get,
+          directDebitDetails.bankAccountNumber.get,
+          paymentPlanReference,
+          routes.PaymentPlanDetailsController.onPageLoad()
+        )(request, messages(application))
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, messages(application)).toString
+        contentAsString(result) mustEqual expectedView.toString
       }
     }
   }
+
 }

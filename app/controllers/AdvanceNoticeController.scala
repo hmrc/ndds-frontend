@@ -18,9 +18,6 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.requests.ChrisSubmissionRequest
-import models.responses.{DirectDebitDetails, PaymentPlanDetails}
-import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import pages.*
 import play.api.Logging
 import play.api.i18n.Lang.logger

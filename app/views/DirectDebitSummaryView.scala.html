@@ -67,7 +67,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.PaymentPlanDetailsController.onRedirect(directDebitReference,pp.planRefNumber).url,
+                            href = routes.PaymentPlanDetailsController.onRedirect(pp.planRefNumber).url,
                             content = messages("directDebitPaymentSummary.activePayment.summary.action"),
                             visuallyHiddenText = Some(messages(pp.planRefNumber))
                         )
