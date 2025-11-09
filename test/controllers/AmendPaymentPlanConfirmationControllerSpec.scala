@@ -377,7 +377,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPaymentAmountPage, BigDecimal(100))
           .success
           .value
-          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
           .success
           .value
 
@@ -441,7 +441,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPaymentAmountPage, BigDecimal(100))
           .success
           .value
-          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
           .success
           .value
 

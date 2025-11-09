@@ -95,7 +95,7 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
           userAnswersWithData.get(SuspensionPeriodRangeDatePage).get.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
 
         val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
-        
+
         val summaryListRows =
           summaryList(mockPaymentReference, userAnswersWithData, userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
 
@@ -111,7 +111,7 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
         ).toString
       }
     }
-    
+
     "must return Journey Recover page for a GET when UserAnswers is missing PaymentPlanDetails" in {
 
       val userAnswersWithData: UserAnswers =
