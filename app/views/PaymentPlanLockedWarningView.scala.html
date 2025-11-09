@@ -25,7 +25,7 @@
 
 @(call:Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("paymentPlanLockedWarning.title")), showBackLink = true) {
+@layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanLockedWarning.title")), showBackLink = true) {
 
     @h1("paymentPlanLockedWarning.heading")
 
