@@ -53,13 +53,13 @@ class PaymentPlanSuspendedController @Inject() (
 
       val maybeResult = for {
         planDetails           <- userAnswers.get(PaymentPlanDetailsQuery)
-        paymentPlanReference  <- userAnswers.get(PaymentPlanReferenceQuery)
         suspensionPeriodRange <- userAnswers.get(SuspensionPeriodRangeDatePage)
       } yield {
         val formattedStartDate = suspensionPeriodRange.startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
         val formattedEndDate = suspensionPeriodRange.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val rows = buildRows(paymentPlanReference, userAnswers, planDetails.paymentPlanDetails)
-        Ok(view(paymentPlanReference, formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows))
+        val paymentReference = planDetails.paymentPlanDetails.paymentReference
+        val rows = buildRows(paymentReference, userAnswers, planDetails.paymentPlanDetails)
+        Ok(view(formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows))
       }
 
       maybeResult match {
