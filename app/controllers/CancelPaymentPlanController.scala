@@ -63,17 +63,17 @@ class CancelPaymentPlanController @Inject() (
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
       if (nddService.isPaymentPlanCancellable(request.userAnswers)) {
-        (request.userAnswers.get(PaymentPlanDetailsQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
-          case (Some(paymentPlanDetail), Some(paymentPlanReference)) =>
+        request.userAnswers.get(PaymentPlanDetailsQuery) match {
+          case Some(paymentPlanDetail) =>
             val paymentPlan = paymentPlanDetail.paymentPlanDetails
             val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
               case None        => form
               case Some(value) => form.fill(value)
             }
-            Ok(view(preparedForm, paymentPlan.planType, paymentPlanReference, paymentPlan.scheduledPaymentAmount.get))
+            Ok(view(preparedForm, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get))
 
           case _ =>
-            logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery or PaymentPlanReferenceQuery")
+            logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery")
             Redirect(routes.JourneyRecoveryController.onPageLoad())
         }
       } else {
