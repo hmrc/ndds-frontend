@@ -263,7 +263,7 @@ class PaymentPlanDetailsController @Inject() (
       }
     advanceNoticeResult.map { advanceNoticeResponse =>
       val isAdvanceNoticePresent =
-        advanceNoticeResponse.totalAmount.isDefined || advanceNoticeResponse.dueDate.isDefined
+        advanceNoticeResponse.totalAmount.isDefined && advanceNoticeResponse.dueDate.isDefined
 
       (advanceNoticeResponse, isAdvanceNoticePresent)
     }
