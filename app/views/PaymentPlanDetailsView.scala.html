@@ -52,7 +52,7 @@
             @paragraphWithLink(
                 Some(messages("paymentPlanDetails.inset.advanceNotice.text", totalAmount, dueDate)),
                 linkMessage = messages("paymentPlanDetails.advanceNotice.link"),
-                linkUrl = messages("call.url")
+                linkUrl = call.url
             )
         } else {
             @paragraph("paymentPlanDetails.inset.noAdvanceNotice.text")
