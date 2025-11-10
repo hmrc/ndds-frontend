@@ -15,7 +15,6 @@
  *@
 
 @import views.html.components._
-@import utils.MaskAndFormatUtils.*
 
 @this(
         layout: templates.Layout,
@@ -78,11 +77,11 @@
             ),
             SummaryListRow(
                 key = Key(content = messages("advanceNotice.directDebit.accountNumber")),
-                value = Value(content = HtmlContent(maskAccountNumber(accountNumber)))
+                value = Value(content = HtmlContent(accountNumber))
             ),
             SummaryListRow(
                 key = Key(content = messages("advanceNotice.directDebit.sortCode")),
-                value = Value(content = HtmlContent(maskSortCode(sortCode)))
+                value = Value(content = HtmlContent(sortCode))
             )
         )
     ))
