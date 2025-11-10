@@ -185,7 +185,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           )
 
         val directDebitReference = "122222"
-        val paymentPlanReference = "paymentReference"
         val userAnswers =
           emptyUserAnswers
             .set(
@@ -197,12 +196,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
-            )
-            .success
-            .value
-            .set(
-              PaymentPlanReferenceQuery,
-              paymentPlanReference
             )
             .success
             .value
@@ -386,7 +379,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPaymentAmountPage, BigDecimal(100))
           .success
           .value
-          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
           .success
           .value
 
