@@ -27,6 +27,7 @@
         header1: Header1,
         header2: Header2,
         paragraph: Paragraph,
+        paragraphWithLink: ParagraphMessageWithLink,
         govukSummaryList: GovukSummaryList,
         link: Link
 )
@@ -48,14 +49,13 @@
 
     @if(planType == PaymentPlanType.VariablePaymentPlan.toString) {
         @if(isAdvanceNoticePresent) {
-            <p class="govuk-inset-text">
-                @messages("paymentPlanDetails.inset.advanceNotice.text", totalAmount, dueDate)
-                <a href="@call.url">@messages("paymentPlanDetails.advanceNotice.link")</a>
-            </p>
+            @paragraphWithLink(
+                Some(messages("paymentPlanDetails.inset.advanceNotice.text", totalAmount, dueDate)),
+                linkMessage = messages("paymentPlanDetails.advanceNotice.link"),
+                linkUrl = messages("call.url")
+            )
         } else {
-            <p class="govuk-inset-text">
-                @messages("paymentPlanDetails.inset.noAdvanceNotice.text")
-            </p>
+            @paragraph("paymentPlanDetails.inset.noAdvanceNotice.text")
         }
     }
 

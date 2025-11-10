@@ -498,8 +498,11 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector
       .isAdvanceNoticePresent(directDebitReference, paymentPlanReference)
       .map {
-        case Some(response) => response
-        case None           => AdvanceNoticeResponse(None, None) // no details
+        case Some(response) => {
+          println("response is" + response)
+          response
+        }
+        case None => AdvanceNoticeResponse(None, None) // no details
       }
       .recover { case _ =>
         AdvanceNoticeResponse(None, None) // default on failure
