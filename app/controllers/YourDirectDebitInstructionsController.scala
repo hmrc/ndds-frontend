@@ -24,7 +24,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
-import services.NationalDirectDebitService
+import services.{NationalDirectDebitService, PaginationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.YourDirectDebitInstructionsView
 
@@ -39,6 +39,7 @@ class YourDirectDebitInstructionsController @Inject() (
   view: YourDirectDebitInstructionsView,
   appConfig: FrontendAppConfig,
   nddService: NationalDirectDebitService,
+  paginationService: PaginationService,
   sessionRepository: SessionRepository
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -46,6 +47,7 @@ class YourDirectDebitInstructionsController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+    val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
 
     val cleansedAnswersFut = for {
       updatedAnswers <- Future.fromTry(userAnswers.remove(AmendPaymentPlanConfirmationPage))
@@ -59,7 +61,21 @@ class YourDirectDebitInstructionsController @Inject() (
       cleanseDirectDebitReference(cleansedAnswers).flatMap { _ =>
         nddService.retrieveAllDirectDebits(request.userId).map { directDebitDetailsData =>
           val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
-          Ok(view(directDebitDetailsData.directDebitList.map(_.toDirectDebitDetails), maxLimitReached))
+
+          val paginationResult = paginationService.paginateDirectDebits(
+            allDirectDebits = directDebitDetailsData.directDebitList,
+            currentPage     = currentPage,
+            baseUrl         = routes.YourDirectDebitInstructionsController.onPageLoad().url
+          )
+
+          Ok(
+            view(
+              directDebitDetails  = paginationResult.paginatedData,
+              maxLimitReached     = maxLimitReached,
+              paginationViewModel = paginationResult.paginationViewModel,
+              hmrcHelplineUrl     = appConfig.hmrcHelplineUrl
+            )
+          )
         }
       }
     }

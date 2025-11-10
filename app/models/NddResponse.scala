@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
-import utils.MaskAndFormatUtils.gdsFormatter
+import utils.MaskAndFormatUtils.gdsShortMonthFormatter
 
 import java.time.{Instant, LocalDateTime}
 
@@ -32,7 +32,7 @@ case class NddDetails(ddiRefNumber: String,
                      ) {
   val toDirectDebitDetails: DirectDebitDetails = DirectDebitDetails(
     directDebitReference = ddiRefNumber,
-    setupDate            = submissionDateTime.format(gdsFormatter),
+    setupDate            = submissionDateTime.format(gdsShortMonthFormatter),
     sortCode             = bankSortCode,
     accountNumber        = bankAccountNumber,
     paymentPlans         = numberOfPayPlans.toString
