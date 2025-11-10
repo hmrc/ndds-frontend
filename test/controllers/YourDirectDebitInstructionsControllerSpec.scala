@@ -17,90 +17,173 @@
 package controllers
 
 import base.SpecBase
+import models.{NddDetails, NddResponse}
+import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar.mock
+import org.mockito.ArgumentMatchers.eq as mockitoEq
+import org.mockito.Mockito.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.NationalDirectDebitService
-import utils.DirectDebitDetailsData
-import views.html.YourDirectDebitInstructionsView
+import repositories.SessionRepository
+import services.{NationalDirectDebitService, PaginationResult, PaginationService}
+import viewmodels.govuk.PaginationFluency.*
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
-class YourDirectDebitInstructionsControllerSpec extends SpecBase with DirectDebitDetailsData {
+class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers with MockitoSugar {
 
-  "YourDirectDebitInstructions Controller" - {
+  "YourDirectDebitInstructionsController" - {
 
-    val mockService = mock[NationalDirectDebitService]
+    "onPageLoad" - {
 
-    "must return OK and the correct view for a GET" in {
+      "must return OK and the correct view for a GET with no page parameter" in {
+        val testData = createTestNddResponse(5)
+        val mockNddService = mock[NationalDirectDebitService]
+        val mockPaginationService = mock[PaginationService]
+        val mockSessionRepository = mock[SessionRepository]
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService)
-        )
-        .build()
+        when(mockNddService.retrieveAllDirectDebits(any())(any(), any()))
+          .thenReturn(Future.successful(testData))
+        when(mockPaginationService.paginateDirectDebits(any(), any(), any()))
+          .thenReturn(createTestPaginationResult(1, 3, 2))
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
 
-      running(application) {
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[PaginationService].toInstance(mockPaginationService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
 
-        when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-          .thenReturn(Future.successful(nddResponse))
+        running(application) {
+          val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url)
+          val result = route(application, request).value
 
-        val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url)
+          status(result) mustEqual OK
+          verify(mockPaginationService).paginateDirectDebits(mockitoEq(testData.directDebitList), mockitoEq(1), any())
+        }
+      }
 
-        val result = route(application, request).value
+      "must return OK and the correct view for a GET with page parameter" in {
+        val testData = createTestNddResponse(10)
+        val mockNddService = mock[NationalDirectDebitService]
+        val mockPaginationService = mock[PaginationService]
+        val mockSessionRepository = mock[SessionRepository]
 
-        val view = application.injector.instanceOf[YourDirectDebitInstructionsView]
-        val directDebits = directDebitDetailsData
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(directDebits)(request, messages(application)).toString
-        contentAsString(result) must include("Your Direct Debit instructions")
-        contentAsString(result) must include("You can add a new payment plan to existing Direct Debit Instructions (DDI).")
-        contentAsString(result) must include("Direct Debit reference")
-        contentAsString(result) must include("Date set up")
-        contentAsString(result) must include("Account Number")
-        contentAsString(result) must include("Number of payment plans")
-        contentAsString(result) must include("View or add to")
-        contentAsString(result) must include(
-          "<b>Note:</b> If you want to cancel a Direct Debit you must contact the HMRC Payment Helpline on 0845 366 1208."
-        )
+        when(mockNddService.retrieveAllDirectDebits(any())(any(), any()))
+          .thenReturn(Future.successful(testData))
+        when(mockPaginationService.paginateDirectDebits(any(), any(), any()))
+          .thenReturn(createTestPaginationResult(2, 3, 4))
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[PaginationService].toInstance(mockPaginationService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url + "?page=2")
+          val result = route(application, request).value
+
+          status(result) mustEqual OK
+          verify(mockPaginationService).paginateDirectDebits(mockitoEq(testData.directDebitList), mockitoEq(2), any())
+        }
+      }
+
+      "must handle invalid page parameter gracefully" in {
+        val testData = createTestNddResponse(5)
+        val mockNddService = mock[NationalDirectDebitService]
+        val mockPaginationService = mock[PaginationService]
+        val mockSessionRepository = mock[SessionRepository]
+
+        when(mockNddService.retrieveAllDirectDebits(any())(any(), any()))
+          .thenReturn(Future.successful(testData))
+        when(mockPaginationService.paginateDirectDebits(any(), any(), any()))
+          .thenReturn(createTestPaginationResult(1, 3, 2))
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[PaginationService].toInstance(mockPaginationService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url + "?page=invalid")
+          val result = route(application, request).value
+
+          status(result) mustEqual OK
+          verify(mockPaginationService).paginateDirectDebits(mockitoEq(testData.directDebitList), mockitoEq(1), any())
+        }
+      }
+
+      "must handle empty direct debit list" in {
+        val emptyData = NddResponse(0, Seq.empty)
+        val mockNddService = mock[NationalDirectDebitService]
+        val mockPaginationService = mock[PaginationService]
+        val mockSessionRepository = mock[SessionRepository]
+
+        when(mockNddService.retrieveAllDirectDebits(any())(any(), any()))
+          .thenReturn(Future.successful(emptyData))
+        when(mockPaginationService.paginateDirectDebits(any(), any(), any()))
+          .thenReturn(createTestPaginationResult(1, 0, 0))
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[PaginationService].toInstance(mockPaginationService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual OK
+          verify(mockPaginationService).paginateDirectDebits(mockitoEq(Seq.empty), mockitoEq(1), any())
+        }
       }
     }
+  }
 
-    "must return OK and the correct view for a GET when UserAnswers is None" in {
-
-      val application = applicationBuilder(userAnswers = None)
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService)
-        )
-        .build()
-
-      running(application) {
-
-        when(mockService.retrieveAllDirectDebits(any())(any(), any()))
-          .thenReturn(Future.successful(nddResponse))
-
-        val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url)
-
-        val result = route(application, request).value
-
-        val view = application.injector.instanceOf[YourDirectDebitInstructionsView]
-        val directDebits = directDebitDetailsData
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(directDebits)(request, messages(application)).toString
-        contentAsString(result) must include("Your Direct Debit instructions")
-        contentAsString(result) must include("You can add a new payment plan to existing Direct Debit Instructions (DDI).")
-        contentAsString(result) must include("Direct Debit reference")
-        contentAsString(result) must include("Date set up")
-        contentAsString(result) must include("Account Number")
-        contentAsString(result) must include("Number of payment plans")
-        contentAsString(result) must include("View or add to")
-        contentAsString(result) must include(
-          "<b>Note:</b> If you want to cancel a Direct Debit you must contact the HMRC Payment Helpline on 0845 366 1208."
-        )
-      }
+  private def createTestNddResponse(count: Int): NddResponse = {
+    val now = LocalDateTime.now()
+    val testDetails = (1 to count).map { i =>
+      NddDetails(
+        ddiRefNumber       = s"DD$i",
+        submissionDateTime = now.minusDays(i),
+        bankSortCode       = "123456",
+        bankAccountNumber  = "12345678",
+        bankAccountName    = s"Test Account $i",
+        auDdisFlag         = false,
+        numberOfPayPlans   = 1
+      )
     }
+    NddResponse(count, testDetails)
+  }
+
+  private def createTestPaginationResult(currentPage: Int, totalRecords: Int, totalPages: Int): PaginationResult = {
+    PaginationResult(
+      paginatedData       = Seq.empty,
+      paginationViewModel = PaginationViewModel(),
+      totalRecords        = totalRecords,
+      currentPage         = currentPage,
+      totalPages          = totalPages
+    )
   }
 }

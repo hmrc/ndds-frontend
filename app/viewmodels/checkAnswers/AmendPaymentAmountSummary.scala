@@ -30,6 +30,8 @@ object AmendPaymentAmountSummary {
   def row(planType: String, answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
     val label = if (PaymentPlanType.BudgetPaymentPlan.toString == planType) {
       "paymentPlanDetails.details.amount.budgetPaymentPlan"
+    } else if (PaymentPlanType.TaxCreditRepaymentPlan.toString == planType) {
+      "paymentPlanDetails.details.amount.taxCreditRepaymentPlan"
     } else {
       "paymentPlanDetails.details.amount.singlePaymentPlan"
     }
