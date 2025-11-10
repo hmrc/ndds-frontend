@@ -83,13 +83,20 @@
                     items = Seq(
                         "paymentPlan.collapsable.sa.b1",
                         "paymentPlan.collapsable.sa.b2",
-                        "paymentPlan.collapsable.sa.b3",
-                        "paymentPlan.collapsable.sa.b4"
+                        "paymentPlan.collapsable.sa.b3"
                     )
                 ),
                 paragraph("paymentPlan.collapsable.sa.p5"),
-                paragraph("paymentPlan.collapsable.sa.p6"),
-
+                payingHmrcUrl.map { url =>
+                    paragraphWithLink(
+                        message1 = Some(messages("paymentPlan.collapsable.sa.p6")),
+                        linkMessage = messages("paymentPlan.collapsable.sa.p6.link"),
+                        linkUrl = url,
+                        message2 = Some(messages("paymentPlan.collapsable.sa.p7")),
+                        linkRel  = "noreferrer noopener",
+                        target   = "_blank",
+                    )
+                }.getOrElse(HtmlFormat.empty)
             ))) { content =>
 
                 @govukDetails(
