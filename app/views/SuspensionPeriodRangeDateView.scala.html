@@ -14,18 +14,17 @@
  * limitations under the License.
  *@
 
-@import viewmodels.DateRangeErrorHelper
 @import views.html.components.*
 
 @this(
     header1: Header1,
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
     paragraph: Paragraph,
     govukButton: GovukButton,
-    govukInsetText: GovukInsetText
+    govukInsetText: GovukInsetText,
+    mainErrorSummary: MainErrorSummary
 )
 
 @(form: Form[_], mode: Mode, planReference: String, paymentAmount: String, suspensionStartDate: String, suspensionEndDate: String)(implicit request: Request[_], messages: Messages)
@@ -45,17 +44,17 @@
                 )
             ) {
 
-    @defining(DateRangeErrorHelper.collapseErrors(
-        form,
-        Seq("suspensionPeriodRangeStartDate", "suspensionPeriodRangeEndDate")
-    )) { result =>
+    @defining({
+        val constraintErrors = form.errors.filter(e => e.key.isEmpty || e.key == "suspensionPeriodRangeDate.error.endDate")
+        val endDateConstraintError = constraintErrors.find(e => e.message == "suspensionPeriodRangeDate.error.endDate")
+        val otherErrors = form.errors.filterNot(e => constraintErrors.contains(e))
+        val endDateFieldError = endDateConstraintError.map(e => play.api.data.FormError("suspensionPeriodRangeEndDate", e.message, e.args))
+        form.copy(errors = otherErrors ++ endDateFieldError.toSeq)
+    }) { adjustedForm =>
 
         @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-
-            @if(result.form.errors.nonEmpty) {
-                @govukErrorSummary(ErrorSummaryViewModel(result.form, errorLinkOverrides = result.errorLinkOverrides))
-            }
+        @mainErrorSummary(adjustedForm)
 
             @if(mode == NormalMode) {
                 @header1("suspensionPeriodRangeDate.heading.normal")
@@ -82,7 +81,7 @@
 
         @govukDateInput(
             DateViewModel(
-                field  = form("suspensionPeriodRangeStartDate"),
+                field  = adjustedForm("suspensionPeriodRangeStartDate"),
                 legend = LegendViewModel(messages("suspensionPeriodRangeDate.startDate")).withCssClass("govuk-fieldset__legend--m")
             )
 
@@ -91,7 +90,7 @@
 
             @govukDateInput(
                 DateViewModel(
-                    field  = form("suspensionPeriodRangeEndDate"),
+                    field  = adjustedForm("suspensionPeriodRangeEndDate"),
                     legend = LegendViewModel(messages("suspensionPeriodRangeDate.endDate")).withCssClass("govuk-fieldset__legend--m")
                 )
                 .withHint(HintViewModel(messages("suspensionPeriodRangeEndDate.hint")))

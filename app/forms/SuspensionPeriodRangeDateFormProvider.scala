@@ -40,12 +40,15 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
 
     Form(
       mapping(
-        "suspensionPeriodRangeStartDate" -> customPaymentDate(
-          invalidKey     = "suspensionPeriodRangeDate.error.invalid.startDate.base",
-          allRequiredKey = "suspensionPeriodRangeStartDate.error.required.all",
-          twoRequiredKey = "suspensionPeriodRangeStartDate.error.required.two",
-          requiredKey    = "suspensionPeriodRangeStartDate.error.required",
-          dateFormats    = DateFormats.defaultDateFormats
+        "suspensionPeriodRangeStartDate" -> suspensionPeriodRangeStartDate(
+          invalidKey        = "suspensionPeriodRangeDate.error.invalid.startDate.base",
+          allRequiredKey    = "suspensionPeriodRangeStartDate.error.required.all",
+          twoRequiredKey    = "suspensionPeriodRangeStartDate.error.required.two",
+          requiredKey       = "suspensionPeriodRangeStartDate.error.required",
+          dateFormats       = DateFormats.defaultDateFormats,
+          planStartDateOpt  = planStartDateOpt,
+          planEndDateOpt    = planEndDateOpt,
+          earliestStartDate = earliestStartDate
         ),
         "suspensionPeriodRangeEndDate" -> customPaymentDate(
           invalidKey     = "suspensionPeriodRangeDate.error.invalid.endDate.base",
@@ -55,7 +58,6 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
           dateFormats    = DateFormats.defaultDateFormats
         )
       )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
-        .verifying(startDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate))
         .verifying(endDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate))
     )
   }
@@ -88,21 +90,6 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
     !endDate.isBefore(lowerBound) && !endDate.isAfter(upperBound)
   }
 
-  private def startDateConstraint(
-    planStartDateOpt: Option[LocalDate],
-    planEndDateOpt: Option[LocalDate],
-    earliestStartDate: LocalDate
-  )(implicit messages: Messages): Constraint[SuspensionPeriodRange] =
-    Constraint[SuspensionPeriodRange]("suspensionPeriodRangeDate.error.startDate") { range =>
-      val lowerBound = planStartDateOpt.fold(earliestStartDate)(psd => if (psd.isAfter(earliestStartDate)) psd else earliestStartDate)
-      val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
-        val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
-        if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
-      }
-      if (isSuspendStartDateValid(range.startDate, planStartDateOpt, planEndDateOpt, earliestStartDate)) Valid
-      else Invalid(messages("suspensionPeriodRangeDate.error.startDate", lowerBound.format(dateFormatter), upperBound.format(dateFormatter)))
-    }
-
   private def endDateConstraint(
     planStartDateOpt: Option[LocalDate],
     planEndDateOpt: Option[LocalDate],
@@ -120,20 +107,20 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
       if (!startValid) {
         Valid
       } else {
-
         val lowerBound = planStartDateOpt.fold(range.startDate)(psd => if (psd.isAfter(range.startDate)) psd else range.startDate)
         val upperBound = planEndDateOpt.fold(range.startDate.plusMonths(MaxMonthsAhead)) { ped =>
           val SixMonthsFromSuspendStartDate = range.startDate.plusMonths(MaxMonthsAhead)
           if (ped.isBefore(SixMonthsFromSuspendStartDate)) ped else SixMonthsFromSuspendStartDate
         }
 
-        if (
-          !range.endDate.isBefore(range.startDate) &&
-          isSuspendEndDateValid(range.endDate, range.startDate, planStartDateOpt, planEndDateOpt)
-        ) {
+        if (isSuspendEndDateValid(range.endDate, range.startDate, planStartDateOpt, planEndDateOpt)) {
           Valid
         } else {
-          Invalid(messages("suspensionPeriodRangeDate.error.endDate", lowerBound.format(dateFormatter), upperBound.format(dateFormatter)))
+          Invalid(
+            "suspensionPeriodRangeDate.error.endDate",
+            lowerBound.format(dateFormatter),
+            upperBound.format(dateFormatter)
+          )
         }
       }
     }
