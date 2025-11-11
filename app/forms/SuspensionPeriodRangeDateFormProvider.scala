@@ -18,7 +18,7 @@ package forms
 
 import forms.mappings.Mappings
 import models.SuspensionPeriodRange
-import play.api.data.Form
+import play.api.data.{Form, FormError}
 import play.api.data.Forms.mapping
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.i18n.Messages
@@ -60,6 +60,20 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
       )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
         .verifying(endDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate))
     )
+  }
+
+  def withMappedErrors(form: Form[SuspensionPeriodRange]): Form[SuspensionPeriodRange] = {
+    val constraintKey = "suspensionPeriodRangeDate.error.endDate"
+    val endDateConstraintError = form.errors.find(e =>
+      (e.key.isEmpty || e.key == constraintKey) &&
+        e.message == constraintKey
+    )
+    val otherErrors = form.errors.filterNot(e =>
+      (e.key.isEmpty || e.key == constraintKey) &&
+        e.message == constraintKey
+    )
+    val endDateFieldError = endDateConstraintError.map(e => FormError("suspensionPeriodRangeEndDate", e.message, e.args))
+    form.copy(errors = otherErrors ++ endDateFieldError.toSeq)
   }
 
   private def isSuspendStartDateValid(

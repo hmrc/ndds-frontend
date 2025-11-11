@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import forms.SuspensionPeriodRangeDateFormProvider
+@import models.SuspensionPeriodRange
 @import views.html.components.*
 
 @this(
@@ -24,7 +26,8 @@
     paragraph: Paragraph,
     govukButton: GovukButton,
     govukInsetText: GovukInsetText,
-    mainErrorSummary: MainErrorSummary
+    mainErrorSummary: MainErrorSummary,
+    formProvider: SuspensionPeriodRangeDateFormProvider
 )
 
 @(form: Form[_], mode: Mode, planReference: String, paymentAmount: String, suspensionStartDate: String, suspensionEndDate: String)(implicit request: Request[_], messages: Messages)
@@ -44,20 +47,7 @@
                 )
             ) {
 
-    @defining({
-        val endDateConstraintError = form.errors.find(e => 
-            (e.key.isEmpty || e.key == "suspensionPeriodRangeDate.error.endDate") && 
-            e.message == "suspensionPeriodRangeDate.error.endDate"
-        )
-        val otherErrors = form.errors.filterNot(e => 
-            (e.key.isEmpty || e.key == "suspensionPeriodRangeDate.error.endDate") && 
-            e.message == "suspensionPeriodRangeDate.error.endDate"
-        )
-        val endDateFieldError = endDateConstraintError.map(e => 
-            play.api.data.FormError("suspensionPeriodRangeEndDate", e.message, e.args)
-        )
-        form.copy(errors = otherErrors ++ endDateFieldError.toSeq)
-    }) { adjustedForm =>
+    @defining(formProvider.withMappedErrors(form.asInstanceOf[Form[SuspensionPeriodRange]])) { adjustedForm =>
 
         @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
