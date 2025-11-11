@@ -16,7 +16,9 @@
 
 package services
 
+import models.responses.NddPaymentPlan
 import models.{DirectDebitDetails, NddDetails}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import viewmodels.govuk.PaginationFluency.*
 
 import java.time.LocalDateTime
@@ -30,6 +32,14 @@ case class PaginationConfig(
 
 case class PaginationResult(
   paginatedData: Seq[DirectDebitDetails],
+  paginationViewModel: PaginationViewModel,
+  totalRecords: Int,
+  currentPage: Int,
+  totalPages: Int
+)
+
+case class PaymentPlanPaginationResult(
+  paginatedData: Seq[NddPaymentPlan],
   paginationViewModel: PaginationViewModel,
   totalRecords: Int,
   currentPage: Int,
@@ -76,6 +86,39 @@ class PaginationService @Inject() {
     )
   }
 
+  def paginatePaymentPlans(
+    allPaymentPlans: Seq[NddPaymentPlan],
+    currentPage: Int = 1,
+    baseUrl: String
+  ): PaymentPlanPaginationResult = {
+
+    val sortedPaymentPlans = allPaymentPlans
+      .sortBy(_.submissionDateTime)(Ordering[LocalDateTime].reverse)
+      .take(config.maxRecords)
+
+    val totalRecords = sortedPaymentPlans.length
+    val totalPages = calculateTotalPaymentPlanCardPages(totalRecords)
+    val validCurrentPage = validateCurrentPage(currentPage, totalPages)
+
+    val (startIndex, endIndex) = calculatePaymentPlanCardPageIndices(validCurrentPage, totalRecords)
+
+    val paginatedData = sortedPaymentPlans.slice(startIndex, endIndex)
+
+    val paginationViewModel = createPaginationViewModel(
+      currentPage = validCurrentPage,
+      totalPages  = totalPages,
+      baseUrl     = baseUrl
+    )
+
+    PaymentPlanPaginationResult(
+      paginatedData       = paginatedData,
+      paginationViewModel = paginationViewModel,
+      totalRecords        = totalRecords,
+      currentPage         = validCurrentPage,
+      totalPages          = totalPages
+    )
+  }
+
   private def calculateTotalPages(totalRecords: Int): Int =
     Math.ceil(totalRecords.toDouble / config.recordsPerPage).toInt
 
@@ -85,6 +128,15 @@ class PaginationService @Inject() {
   private def calculatePageIndices(currentPage: Int, totalRecords: Int): (Int, Int) = {
     val startIndex = (currentPage - 1) * config.recordsPerPage
     val endIndex = Math.min(startIndex + config.recordsPerPage, totalRecords)
+    (startIndex, endIndex)
+  }
+
+  private def calculateTotalPaymentPlanCardPages(totalRecords: Int): Int =
+    Math.ceil(totalRecords.toDouble / 3).toInt
+
+  private def calculatePaymentPlanCardPageIndices(currentPage: Int, totalRecords: Int): (Int, Int) = {
+    val startIndex = (currentPage - 1) * 3
+    val endIndex = Math.min(startIndex + 3, totalRecords)
     (startIndex, endIndex)
   }
 

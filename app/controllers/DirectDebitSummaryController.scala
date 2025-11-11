@@ -22,7 +22,7 @@ import models.responses.NddPaymentPlan
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.NationalDirectDebitService
+import services.{NationalDirectDebitService, PaginationService}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Actions, Card, CardTitle, SummaryList, SummaryListRow}
@@ -42,13 +42,15 @@ class DirectDebitSummaryController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   view: DirectDebitSummaryView,
   nddService: NationalDirectDebitService,
-  sessionRepository: SessionRepository
+  sessionRepository: SessionRepository,
+  paginationService: PaginationService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+    val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
         cleanseUserData(userAnswers).flatMap { cleansedUserAnswers =>
@@ -58,11 +60,17 @@ class DirectDebitSummaryController @Inject() (
               updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
               _              <- sessionRepository.set(updatedAnswers)
             } yield {
+              val paginationResult = paginationService.paginatePaymentPlans(
+                allPaymentPlans = ddPaymentPlans.paymentPlanList,
+                currentPage     = currentPage,
+                baseUrl         = routes.DirectDebitSummaryController.onPageLoad().url
+              )
               Ok(
                 view(
                   reference,
                   ddPaymentPlans,
-                  buildCards(ddPaymentPlans.paymentPlanList)
+                  buildCards(paginationResult.paginatedData),
+                  paginationViewModel = paginationResult.paginationViewModel
                 )
               )
             }

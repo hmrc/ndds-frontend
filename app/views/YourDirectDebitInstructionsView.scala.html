@@ -28,7 +28,7 @@
     govukSummaryList: GovukSummaryList,
     directDebitTable: DirectDebitTable,
     govukInsetText: GovukInsetText,
-    directDebitPagination: DirectDebitPagination
+    pageNavigator: PageNavigator
 )
 
 @(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false, paginationViewModel: PaginationViewModel = PaginationViewModel(), hmrcHelplineUrl: String)(implicit request: Request[_], messages: Messages)
@@ -77,5 +77,5 @@
 
     @directDebitTable(directDebitDetails)
 
-    @directDebitPagination(paginationViewModel)
+    @pageNavigator(paginationViewModel)
 }
