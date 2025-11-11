@@ -16,6 +16,7 @@
 
 @import models.DirectDebitSource.*
 @import views.html.components.*
+@import config.FrontendAppConfig
 
 @this(
     layout: templates.Layout,
@@ -27,10 +28,11 @@
     h1: Header1,
     h3: Header3,
     govukButton: GovukButton,
+    paragraphWithLink: ParagraphMessageWithLink,
     bulletList: BulletList
 )
 
-@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], payingHmrcUrl: String,  call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForSetupJourney(form, messages("paymentPlanType.title")), backLink = Some(call.url)) {
 
@@ -120,7 +122,14 @@
                         "paymentPlan.collapsable.tc.b4"
                     )
                 ),
-                paragraph("paymentPlan.collapsable.tc.p6"),
+                paragraphWithLink(
+                    message1    = Some(messages("paymentPlan.collapsable.tc.p6")),
+                    linkMessage = messages("paymentPlan.collapsable.tc.p6.link"),
+                    linkUrl     = payingHmrcUrl,
+                    linkFullStop = true,
+                    linkRel     = "noreferrer noopener",
+                    target      = "_blank",
+                )
 
             ))) { content =>
 

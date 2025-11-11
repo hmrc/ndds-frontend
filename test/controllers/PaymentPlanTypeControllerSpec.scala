@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
 import forms.PaymentPlanTypeFormProvider
 import models.DirectDebitSource.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
@@ -56,12 +57,19 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
         val result = route(application, request).value
 
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+
         val view = application.injector.instanceOf[PaymentPlanTypeView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Some(TC), Call("GET", directDebitSourceRoute))(request,
-                                                                                                                messages(application)
-                                                                                                               ).toString
+        contentAsString(result) mustEqual
+          view(
+            form,
+            NormalMode,
+            Some(TC),
+            appConfig.payingHmrcUrl,
+            Call("GET", directDebitSourceRoute)
+          )(request, messages(application)).toString
       }
     }
 
@@ -136,12 +144,19 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[PaymentPlanTypeView]
 
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, None, Call("GET", directDebitSourceRoute))(request,
-                                                                                                                 messages(application)
-                                                                                                                ).toString
+        contentAsString(result) mustEqual
+          view(
+            boundForm,
+            NormalMode,
+            None,
+            appConfig.payingHmrcUrl,
+            Call("GET", directDebitSourceRoute)
+          )(request, messages(application)).toString
       }
     }
 
