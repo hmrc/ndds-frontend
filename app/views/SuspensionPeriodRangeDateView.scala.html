@@ -45,10 +45,17 @@
             ) {
 
     @defining({
-        val constraintErrors = form.errors.filter(e => e.key.isEmpty || e.key == "suspensionPeriodRangeDate.error.endDate")
-        val endDateConstraintError = constraintErrors.find(e => e.message == "suspensionPeriodRangeDate.error.endDate")
-        val otherErrors = form.errors.filterNot(e => constraintErrors.contains(e))
-        val endDateFieldError = endDateConstraintError.map(e => play.api.data.FormError("suspensionPeriodRangeEndDate", e.message, e.args))
+        val endDateConstraintError = form.errors.find(e => 
+            (e.key.isEmpty || e.key == "suspensionPeriodRangeDate.error.endDate") && 
+            e.message == "suspensionPeriodRangeDate.error.endDate"
+        )
+        val otherErrors = form.errors.filterNot(e => 
+            (e.key.isEmpty || e.key == "suspensionPeriodRangeDate.error.endDate") && 
+            e.message == "suspensionPeriodRangeDate.error.endDate"
+        )
+        val endDateFieldError = endDateConstraintError.map(e => 
+            play.api.data.FormError("suspensionPeriodRangeEndDate", e.message, e.args)
+        )
         form.copy(errors = otherErrors ++ endDateFieldError.toSeq)
     }) { adjustedForm =>
 
