@@ -21,23 +21,22 @@
 
 @this(
     layout: templates.Layout,
-    header1: Header1,
+    h1: Header1,
+    h2: Header2,
     paragraph: Paragraph,
-    paragraphMessageWithLink: ParagraphMessageWithLink,
+    paragraphWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList
 )
 
-@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse)(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
-    @header1("directDebitPaymentSummary.heading")
-    @paragraph("directDebitPaymentSummary.p1")
-    @paragraph("directDebitPaymentSummary.p2")
+    @h1("directDebitPaymentSummary.heading")
 
-    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.directDebit.title")</h1>
+    @h2("directDebitPaymentSummary.directDebit.title")
 
     @govukSummaryList(SummaryList(
         rows = Seq(
@@ -56,50 +55,17 @@
         )
     ))
 
-    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.activePayment.h1")</h1>
+    @h2("directDebitPaymentSummary.activePayment.h1")
 
-    @for(pp <- directDebitDetails.paymentPlanList) {
-        @govukSummaryList(SummaryList(
-            card = Some(Card(
-                title = Some(CardTitle(
-                    content = messages("directDebitPaymentSummary.activePayment.summary.title", pp.paymentReference)
-                )),
-                actions = Some(Actions(
-                    items = Seq(
-                        ActionItem(
-                            href = routes.PaymentPlanDetailsController.onRedirect(pp.planRefNumber).url,
-                            content = messages("directDebitPaymentSummary.activePayment.summary.action"),
-                            visuallyHiddenText = Some(messages(pp.planRefNumber))
-                        )
-                    )
-                ))
-            )),
-            rows = Seq(
-                SummaryListRow(
-                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.planType")),
-                    value = Value(content = HtmlContent(messages(s"directDebitPaymentSummary.activePayment.summary.planType.${pp.planType}")))
-                ),
-                SummaryListRow(
-                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.paymentFor")),
-                    value = Value(content = HtmlContent(messages(s"paymentPlanDetails.details.hodService.${pp.hodService}")))
-                ),
-                SummaryListRow(
-                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.date")),
-                    value = Value(content = HtmlContent(pp.submissionDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy"))))
-                ),
-                SummaryListRow(
-                    key = Key(content = messages("directDebitPaymentSummary.activePayment.summary.amount")),
-                    value = Value(content = HtmlContent(formatAmount(pp.scheduledPaymentAmount)))
-                )
-            )
-        ))
-    }
-
-    <h1 class="govuk-heading-m">@messages("directDebitPaymentSummary.setupPayment.h1")</h1>
-
-    <p class="govuk-inset-text">@messages("directDebitPaymentSummary.setupPayment.p1")</p>
-
-    @govukButton(
-        ButtonViewModel(messages("directDebitPaymentSummary.addPaymentButton"))
+    @paragraphWithLink(
+        Some(messages("directDebitPaymentSummary.p1")),
+        linkMessage = messages("directDebitPaymentSummary.p1.link"),
+        linkUrl = messages("accountDetailsNotVerified.p2.url")
     )
+
+    @paragraph("directDebitPaymentSummary.setupPayment.p1")
+
+    @for(plan <- paymentPlansList) {
+        @govukSummaryList(plan)
+    }
 }

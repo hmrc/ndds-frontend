@@ -17,14 +17,12 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import itutil.{ApplicationWithWiremock, WireMockConstants}
+import itutil.ApplicationWithWiremock
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, OptionValues}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 class LockConnectorSpec
   extends AnyWordSpec
@@ -35,12 +33,8 @@ class LockConnectorSpec
     with BeforeAndAfterAll
     with IntegrationPatience {
 
-
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  lazy private val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
-  lazy private val config: ServicesConfig = app.injector.instanceOf[ServicesConfig]
   lazy private val connector = app.injector.instanceOf[LockConnector]
-  
 
   private val lockResponseJson =
     """{
