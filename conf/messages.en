@@ -390,6 +390,9 @@ directDebitPaymentSummary.directDebit.reference = Direct Debit reference
 directDebitPaymentSummary.directDebit.accountNumber = Account number
 directDebitPaymentSummary.directDebit.sortCode = Bank sort code
 directDebitPaymentSummary.activePayment.h1 = Active payment plans
+directDebitPaymentSummary.activePayment.p1 = Manage an active payment plan, or
+directDebitPaymentSummary.activePayment.p1.linkText = set up a new payment plan
+directDebitPaymentSummary.activePayment.p2 = When you set up a new Direct Debit payment, it may take up to 36 hours to appear in your account.
 directDebitPaymentSummary.activePayment.summary.title = Payment reference: {0}
 directDebitPaymentSummary.activePayment.summary.action = Manage plan
 directDebitPaymentSummary.activePayment.summary.planType = Plan type
@@ -404,6 +407,7 @@ directDebitPaymentSummary.activePayment.summary.amount = Payment amount
 directDebitPaymentSummary.setupPayment.h1 = Set up a new payment plan
 directDebitPaymentSummary.setupPayment.p1 = When you set up a new Direct Debit payment, it may take up to 36 hours to appear in your account.
 directDebitPaymentSummary.addPaymentButton = Set up payment plan
+directDebitPaymentSummary.noActivePaymentPlans.p1 = This Direct Debit has no active payment plans.
 
 paymentPlanDetails.title = Your payment plan details
 paymentPlanDetails.heading = Your payment plan details
