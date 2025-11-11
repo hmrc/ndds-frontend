@@ -18,7 +18,7 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import pages.CheckYourAnswerPage
+import pages.{CheckYourAnswerPage, PaymentDatePage, PaymentReferencePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery}
@@ -70,11 +70,11 @@ class DirectDebitConfirmationController @Inject() (
             value = ValueViewModel(
               Text(
                 request.userAnswers
-                  .get(PaymentPlanReferenceQuery)
+                  .get(PaymentReferencePage)
                   .getOrElse("Missing payment reference")
               )
             ),
-            actions = Seq.empty // disables the "Change" link
+            actions = Seq.empty
           )
         ),
         PaymentAmountSummary.row(request.userAnswers).map(_.copy(actions = None)),
