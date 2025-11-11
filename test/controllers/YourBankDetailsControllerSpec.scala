@@ -188,12 +188,12 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       val bank = Bank(
         bankName       = "Test Bank",
-        ddiVoucherFlag = "N",
+        ddiVoucherFlag = Some("N"),
         address = BankAddress(
           lines    = Seq("1 Bank Street"),
-          town     = "London",
+          town     = Some("London"),
           country  = Country("UK"),
-          postCode = "EC1A 1AA"
+          postCode = Some("EC1A 1AA")
         )
       )
 
@@ -248,12 +248,12 @@ class YourBankDetailsControllerSpec extends SpecBase with MockitoSugar {
 
       val bank = Bank(
         bankName       = "Test Bank",
-        ddiVoucherFlag = "Y",
+        ddiVoucherFlag = Some("Y"),
         address = BankAddress(
           lines    = Seq("1 Bank Street"),
-          town     = "London",
+          town     = Some("London"),
           country  = Country("UK"),
-          postCode = "EC1A 1AA"
+          postCode = Some("EC1A 1AA")
         )
       )
 

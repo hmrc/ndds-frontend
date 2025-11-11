@@ -27,22 +27,40 @@
         header1: Header1,
         header2: Header2,
         paragraph: Paragraph,
-        govukSummaryList: GovukSummaryList
+        paragraphWithLink: ParagraphMessageWithLink,
+        govukSummaryList: GovukSummaryList,
+        link: Link
 )
 
-@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, isSuspensionActive: Boolean, suspensionStartDate: String, suspensionEndDate: String, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, isSuspensionActive: Boolean, suspensionStartDate: String, suspensionEndDate: String, rows: Seq[SummaryListRow], isAdvanceNoticePresent: Boolean, totalAmount: String, dueDate: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
     @header1("paymentPlanDetails.heading")
-    @paragraph("paymentPlanDetails.p1")
 
-    @if(isSuspensionActive) {
-        <p class="govuk-inset-text">
-            @messages("paymentPlanDetails.inset.text", suspensionStartDate, suspensionEndDate)
-        </p>
+    @if(planType == PaymentPlanType.BudgetPaymentPlan.toString) {
+        @paragraph("paymentPlanDetails.p1")
+
+        @if(isSuspensionActive) {
+            <p class="govuk-inset-text">
+                @messages("paymentPlanDetails.inset.text", suspensionStartDate, suspensionEndDate)
+            </p>
+        }
     }
 
-    @govukSummaryList(SummaryList(
+    @if(planType == PaymentPlanType.VariablePaymentPlan.toString) {
+        @if(isAdvanceNoticePresent) {
+            @paragraphWithLink(
+                Some(messages("paymentPlanDetails.inset.advanceNotice.text", totalAmount, dueDate)),
+                linkMessage = messages("paymentPlanDetails.advanceNotice.link"),
+                linkUrl = call.url
+            )
+        } else {
+            @paragraph("paymentPlanDetails.inset.noAdvanceNotice.text")
+        }
+    }
+
+
+@govukSummaryList(SummaryList(
         card = Some(Card(
             title = Some(CardTitle(
             content = messages("paymentPlanDetails.details.paymentReference", paymentReference)

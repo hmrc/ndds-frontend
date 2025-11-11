@@ -120,4 +120,13 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
       .withBody(Json.toJson(request))
       .execute[DuplicateCheckResponse]
   }
+
+  def isAdvanceNoticePresent(
+    directDebitReference: String,
+    paymentPlanReference: String
+  )(implicit hc: HeaderCarrier): Future[Option[AdvanceNoticeResponse]] = {
+    http
+      .get(url"$nationalDirectDebitBaseUrl/direct-debits/$directDebitReference/payment-plans/$paymentPlanReference/advance-notice-details")(hc)
+      .execute[Option[AdvanceNoticeResponse]]
+  }
 }

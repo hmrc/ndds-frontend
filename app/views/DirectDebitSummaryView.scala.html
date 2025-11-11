@@ -24,7 +24,7 @@
     h1: Header1,
     h2: Header2,
     paragraph: Paragraph,
-    paragraphMessageWithLink: ParagraphMessageWithLink,
+    paragraphWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
     govukSummaryList: GovukSummaryList
@@ -55,30 +55,17 @@
         )
     ))
 
-    @if(paymentPlansList.size > 0) {
-        @h2("directDebitPaymentSummary.activePayment.h1")
+    @h2("directDebitPaymentSummary.activePayment.h1")
 
-        @paragraphMessageWithLink(
-            Some(messages("directDebitPaymentSummary.activePayment.p1")),
-            linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
-            linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
-            linkFullStop = true
-        )
+    @paragraphWithLink(
+        Some(messages("directDebitPaymentSummary.p1")),
+        linkMessage = messages("directDebitPaymentSummary.p1.link"),
+        linkUrl = messages("accountDetailsNotVerified.p2.url")
+    )
 
-        @paragraph("directDebitPaymentSummary.activePayment.p2")
+    @paragraph("directDebitPaymentSummary.setupPayment.p1")
 
-        @for(plan <- paymentPlansList) {
-            @govukSummaryList(plan)
-        }
-    } else {
-        @paragraph("directDebitPaymentSummary.noActivePaymentPlans.p1")
-
-        @h2("directDebitPaymentSummary.setupPayment.h1")
-
-        @paragraph("directDebitPaymentSummary.setupPayment.p1")
-
-        @govukButton(
-            ButtonViewModel(messages("directDebitPaymentSummary.addPaymentButton"))
-        )
+    @for(plan <- paymentPlansList) {
+        @govukSummaryList(plan)
     }
 }

@@ -45,11 +45,15 @@ object YourBankDetailsAddressSummary extends DirectDebitDetailsData {
       .map { answer =>
 
         val field1 = answer.lines.map(HtmlFormat.escape).mkString("<br/>")
-        val field2 = HtmlFormat.escape(answer.town).toString
-        val field3 = HtmlFormat.escape(answer.postCode).toString
+        val field2 = HtmlFormat.escape(answer.town.getOrElse("")).toString
+        val field3 = HtmlFormat.escape(answer.postCode.getOrElse("")).toString
         val field4 = HtmlFormat.escape(answer.country.name).toString
 
-        val fullAddress = Html(s"$field1<br/>$field2<br/>$field3<br/>$field4")
+        val fullAddress = Html(
+          Seq(field1, field2, field3, field4)
+            .filter(_.nonEmpty)
+            .mkString("<br/>")
+        )
 
         SummaryListRowViewModel(
           key     = "bankDetailsCheckYourAnswer.account.bank.address",

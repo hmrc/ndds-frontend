@@ -32,8 +32,8 @@ class MacGenerator @Inject() (appConfig: FrontendAppConfig) {
     accountNumber: String,
     sortCode: String,
     lines: Seq[String],
-    town: String,
-    postcode: String,
+    town: Option[String],
+    postcode: Option[String],
     bankName: String,
     bacsNumber: String
   ): String = {

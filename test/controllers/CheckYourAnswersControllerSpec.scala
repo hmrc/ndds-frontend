@@ -76,6 +76,21 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
+    "must redirect to not found page if user click browser back button from confirmation page" in {
+      val updatedUserAnswer = userAnswer
+        .setOrException(CreateConfirmationPage, true)
+
+      val application = applicationBuilder(userAnswers = Some(updatedUserAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustEqual routes.BackSubmissionController.onPageLoad().url
+
+      }
+    }
+
     "must return OK and the correct view if MGD selected and type is single for a GET" in {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
@@ -183,15 +198,15 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         )
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("1234567")
-        contentAsString(result) must include("Total Amount Due")
+        contentAsString(result) must include("Total amount due")
         contentAsString(result) must include("4,533")
         contentAsString(result) must include("Plan Start Date")
         contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must include("Monthly Payment Amount")
+        contentAsString(result) must include("Monthly payment amount")
         contentAsString(result) must include("£377.75")
         contentAsString(result) must include("Final Payment Date")
         contentAsString(result) must include("19 June 2026")
-        contentAsString(result) must include("Final Payment Amount")
+        contentAsString(result) must include("Final payment amount")
         contentAsString(result) must include("£377.75")
         contentAsString(result) must include("Accept and Continue")
       }
@@ -212,7 +227,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(pages.MacValuePage, "valid-mac")
@@ -225,8 +240,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           any[String],
           any[String],
           any[Seq[String]],
-          any[String],
-          any[String],
+          any[Option[String]],
+          any[Option[String]],
           any[String],
           any[String]
         )
@@ -249,7 +264,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
     "must redirect to Journey Recovery for a POST if DirectDebitSource data is missing" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(PaymentReferencePage, "testRef")
@@ -261,8 +276,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           any[String],
           any[String],
           any[Seq[String]],
-          any[String],
-          any[String],
+          any[Option[String]],
+          any[Option[String]],
           any[String],
           any[String]
         )
@@ -301,8 +316,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           any[String],
           any[String],
           any[Seq[String]],
-          any[String],
-          any[String],
+          any[Option[String]],
+          any[Option[String]],
           any[String],
           any[String]
         )
@@ -343,7 +358,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(pages.MacValuePage, "valid-mac")
           .setOrException(
             BankDetailsAddressPage,
-            BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
+            BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH"))
           )
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
@@ -356,8 +371,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
             any[String],
             any[String],
             any[Seq[String]],
-            any[String],
-            any[String],
+            any[Option[String]],
+            any[Option[String]],
             any[String],
             any[String]
           )
@@ -389,7 +404,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(TotalAmountDuePage, 5000)
           .setOrException(PlanStartDatePage, planStartDateDetails)
           .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
 
@@ -427,7 +442,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(PaymentReferencePage, "testReference")
           .setOrException(
             BankDetailsAddressPage,
-            BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH")
+            BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH"))
           )
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
@@ -444,8 +459,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
             any[String],
             any[String],
             any[Seq[String]],
-            any[String],
-            any[String],
+            any[Option[String]],
+            any[Option[String]],
             any[String],
             any[String]
           )
@@ -482,8 +497,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
             any[String],
             any[String],
             any[Seq[String]],
-            any[String],
-            any[String],
+            any[Option[String]],
+            any[Option[String]],
             any[String],
             any[String]
           )
@@ -519,8 +534,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
             any[String],
             any[String],
             any[Seq[String]],
-            any[String],
-            any[String],
+            any[Option[String]],
+            any[Option[String]],
             any[String],
             any[String]
           )
@@ -551,7 +566,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(TotalAmountDuePage, totalDueAmount)
           .setOrException(PlanStartDatePage, planStartDateDetails)
           .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), "Town", Country("UK"), "NE5 2DH"))
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
 
@@ -565,8 +580,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
             any[String],
             any[String],
             any[Seq[String]],
-            any[String],
-            any[String],
+            any[Option[String]],
+            any[Option[String]],
             any[String],
             any[String]
           )
