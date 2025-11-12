@@ -21,6 +21,7 @@ import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan, PaymentPlanD
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.*
 import play.api.libs.json.Format
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -32,7 +33,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent, appConfig: FrontendAppConfig, clock: Clock)(implicit
+class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent,
+                                            appConfig: FrontendAppConfig,
+                                            clock: Clock,
+                                            crypto: Encrypter & Decrypter
+                                           )(implicit
   ec: ExecutionContext
 ) extends PlayMongoRepository[PaymentPlanDAO](
       collectionName = "payment-plans-cache",
@@ -49,16 +54,17 @@ class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent, appC
     ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+  implicit val encryption: Encrypter & Decrypter = crypto
 
   def saveToCache(directDebitReference: String, ddPaymentPlans: NddDDPaymentPlansResponse): Future[Boolean] = Mdc.preservingMdc {
-    val document = PaymentPlanDAO(Instant.now(clock), ddPaymentPlans)
+    val encryptedDocument = PaymentPlanDAO(Instant.now(clock), ddPaymentPlans.encrypted)
 
     retrieveCache(directDebitReference) flatMap {
       case None =>
         collection
           .replaceOne(
             filter      = byDirectDebitReference(directDebitReference),
-            replacement = document,
+            replacement = encryptedDocument,
             options     = ReplaceOptions().upsert(true)
           )
           .toFuture()
@@ -74,7 +80,7 @@ class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent, appC
         .find(byDirectDebitReference(directDebitReference))
         .headOption()
         .map {
-          case Some(cache) => Some(cache.ddPaymentPlans)
+          case Some(cache) => Some(cache.ddPaymentPlans.decrypted)
           case _           => None
         }
         .recover(_ => None)
