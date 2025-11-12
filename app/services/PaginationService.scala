@@ -18,7 +18,6 @@ package services
 
 import models.responses.NddPaymentPlan
 import models.{DirectDebitDetails, NddDetails}
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import viewmodels.govuk.PaginationFluency.*
 
 import java.time.LocalDateTime
@@ -163,12 +162,15 @@ class PaginationService @Inject() {
   private def createPreviousLink(currentPage: Int, baseUrl: String): Option[PaginationLinkViewModel] =
     if (currentPage > 1) {
       Some(PaginationLinkViewModel(s"$baseUrl?page=${currentPage - 1}").withText("site.pagination.previous"))
-    } else None
-
+    } else {
+      None
+    }
   private def createNextLink(currentPage: Int, totalPages: Int, baseUrl: String): Option[PaginationLinkViewModel] =
     if (currentPage < totalPages) {
       Some(PaginationLinkViewModel(s"$baseUrl?page=${currentPage + 1}").withText("site.pagination.next"))
-    } else None
+    } else {
+      None
+    }
 
   private def generatePageItems(
     currentPage: Int,
