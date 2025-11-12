@@ -96,9 +96,6 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
       .success
       .value
-      .set(PaymentPlanReferenceQuery, "PP123456")
-      .success
-      .value
       .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
       .success
       .value
@@ -106,9 +103,6 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
   private val userAnswersWithSinglePlan =
     emptyUserAnswers
       .set(PaymentPlanDetailsQuery, singlePaymentPlanResponse)
-      .success
-      .value
-      .set(PaymentPlanReferenceQuery, "SPP654321")
       .success
       .value
       .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)

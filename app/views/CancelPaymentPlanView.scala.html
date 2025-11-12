@@ -25,7 +25,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], planType: String, paymentPlanReference: String, paymentAmount: BigDecimal)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], planType: String, paymentReference: String, paymentAmount: BigDecimal)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourney(form, messages("cancelPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
@@ -38,7 +38,7 @@
         <h1 class="govuk-heading-xl">@messages("cancelPaymentPlan.heading")</h1>
 
         <p class="govuk-body">
-            @messages("cancelPaymentPlan.paymentReference") <strong>@paymentPlanReference</strong><br/>
+            @messages("cancelPaymentPlan.paymentReference") <strong>@paymentReference</strong><br/>
             @if(planType == PaymentPlanType.SinglePaymentPlan.toString) {
                 @messages("cancelPaymentPlan.paymentAmount.single") <strong>@formatAmount(paymentAmount)</strong><br/>
             } else {

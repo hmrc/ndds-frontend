@@ -47,12 +47,12 @@ class PaymentPlanCancelledController @Inject() (
     val userAnswers = request.userAnswers
 
     if (nddService.isPaymentPlanCancellable(userAnswers)) {
-      (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(PaymentPlanReferenceQuery)) match {
-        case (Some(planDetails), Some(paymentPlanReference)) =>
+      userAnswers.get(PaymentPlanDetailsQuery) match {
+        case Some(planDetails) =>
           val paymentPlanDetails = planDetails.paymentPlanDetails
           val rows = buildRows(paymentPlanDetails)
 
-          Ok(view(paymentPlanReference, routes.DirectDebitSummaryController.onPageLoad(), rows))
+          Ok(view(paymentPlanDetails.paymentReference, routes.DirectDebitSummaryController.onPageLoad(), rows))
         case _ =>
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
