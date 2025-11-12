@@ -507,6 +507,11 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   }
 
   def isPaymentPlanLocked(userAnswers: UserAnswers): Boolean = {
+    println(
+      "Payment Plan Editable status is : " + userAnswers
+        .get(PaymentPlanDetailsQuery)
+        .exists(_.paymentPlanDetails.paymentPlanEditable)
+    )
     userAnswers
       .get(PaymentPlanDetailsQuery)
       .exists(_.paymentPlanDetails.paymentPlanEditable)
