@@ -28,19 +28,10 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import org.scalatestplus.mockito.MockitoSugar
 
 import java.time.{LocalDate, LocalDateTime}
 
-trait SpecBase
-    extends AnyFreeSpec
-    with Matchers
-    with TryValues
-    with OptionValues
-    with ScalaFutures
-    with IntegrationPatience
-    with BeforeAndAfterEach
-    with MockitoSugar {
+trait SpecBase extends AnyFreeSpec with Matchers with TryValues with OptionValues with ScalaFutures with IntegrationPatience with BeforeAndAfterEach {
 
   val userAnswersId: String = "id"
 
