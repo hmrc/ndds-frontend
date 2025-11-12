@@ -18,11 +18,11 @@ package controllers
 
 import controllers.actions.*
 import models.*
-import models.responses.PaymentPlanDetails
+import models.responses.{AdvanceNoticeResponse, PaymentPlanDetails}
 import pages.*
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -32,8 +32,10 @@ import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,6 +60,7 @@ class PaymentPlanDetailsController @Inject() (
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanDetailsQuery, response))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(ManagePaymentPlanTypePage, planDetail.planType))
+
             updatedAnswers <- planDetail.scheduledPaymentAmount match {
                                 case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
                                 case _            => Future.successful(updatedAnswers)
@@ -77,7 +80,10 @@ class PaymentPlanDetailsController @Inject() (
                               }
             updatedAnswers     <- cleanseSessionPages(updatedAnswers)
             showAllActionsFlag <- calculateShowAction(nddService, planDetail)
-            _                  <- sessionRepository.set(updatedAnswers)
+            isVariablePlan = nddService.isVariablePaymentPlan(planDetail.planType)
+            (advanceNoticeResponse, isAdvanceNoticePresent) <- getAdvanceNoticeData(directDebitReference, paymentPlanReference, isVariablePlan)
+            updatedAnswers                                  <- Future.fromTry(updatedAnswers.set(AdvanceNoticeResponseQuery, advanceNoticeResponse))
+            _                                               <- sessionRepository.set(updatedAnswers)
           } yield {
             val showAmendLink = isAmendLinkVisible(showAllActionsFlag, planDetail)
             val showCancelLink = isCancelLinkVisible(showAllActionsFlag, planDetail)
@@ -93,6 +99,15 @@ class PaymentPlanDetailsController @Inject() (
               .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
               .getOrElse("")
 
+            val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+            val formattedTotalAmount = advanceNoticeResponse.totalAmount
+              .map(amount => currencyFormat.format(amount.bigDecimal))
+              .getOrElse("")
+
+            val formattedDueDate = advanceNoticeResponse.dueDate
+              .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+              .getOrElse("")
+
             Ok(
               view(
                 planDetail.planType,
@@ -103,7 +118,11 @@ class PaymentPlanDetailsController @Inject() (
                 isSuspensionActive,
                 formattedSuspensionStartDate,
                 formattedSuspensionEndDate,
-                summaryRows
+                summaryRows,
+                isAdvanceNoticePresent,
+                formattedTotalAmount,
+                formattedDueDate,
+                routes.AdvanceNoticeController.onPageLoad()
               )
             )
           }
@@ -224,5 +243,28 @@ class PaymentPlanDetailsController @Inject() (
     (for {
       suspensionEndDate <- planDetail.suspensionEndDate
     } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
+  }
+
+  private def getAdvanceNoticeData(
+    directDebitReference: String,
+    paymentPlanReference: String,
+    isVariablePlan: Boolean
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[(AdvanceNoticeResponse, Boolean)] = {
+    val advanceNoticeResult: Future[AdvanceNoticeResponse] =
+      if (isVariablePlan) {
+        nddService
+          .isAdvanceNoticePresent(directDebitReference, paymentPlanReference)
+          .recover { case _ =>
+            AdvanceNoticeResponse(None, None)
+          }
+      } else {
+        Future.successful(AdvanceNoticeResponse(None, None))
+      }
+    advanceNoticeResult.map { advanceNoticeResponse =>
+      val isAdvanceNoticePresent =
+        advanceNoticeResponse.totalAmount.isDefined && advanceNoticeResponse.dueDate.isDefined
+
+      (advanceNoticeResponse, isAdvanceNoticePresent)
+    }
   }
 }

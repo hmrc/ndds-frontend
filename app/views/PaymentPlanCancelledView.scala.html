@@ -30,7 +30,6 @@
 @(paymentReference: String, call: Call, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanCancelled.title")), showBackLink = false) {
-
     @confirmationPanel(
         title = messages("paymentPlanCancelled.panel.title"),
         body = Html(
