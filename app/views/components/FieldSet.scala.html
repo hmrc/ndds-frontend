@@ -18,12 +18,12 @@
 
 @this(govukFieldset: GovukFieldset)
 
-@(legend: String, asHeading: Boolean = true, describedBy: Option[String])(content: Html)(implicit messages: Messages)
+@(legend: String, asHeading: Boolean = true, describedBy: Option[String], extraClasses: String = emptyString)(content: Html)(implicit messages: Messages)
 
 @govukFieldset(Fieldset(
     legend = Some(Legend(
         content = Text(messages(legend)),
-        classes = if(asHeading) "govuk-fieldset__legend--xl govuk-!-margin-bottom-8" else emptyString,
+        classes = if(asHeading) s"govuk-fieldset__legend--xl ${extraClasses}".trim else extraClasses,
         isPageHeading = asHeading
     )),
     describedBy = describedBy,

@@ -21,24 +21,23 @@ import models.{CheckMode, UserAnswers}
 import pages.AddPaymentPlanEndDatePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import viewmodels.govuk.summarylist._
-import viewmodels.implicits._
+import viewmodels.govuk.summarylist.*
+import viewmodels.implicits.*
 
-object AddPaymentPlanEndDateSummary  {
+object AddPaymentPlanEndDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(AddPaymentPlanEndDatePage).map {
-      answer =>
+    answers.get(AddPaymentPlanEndDatePage).map { answer =>
 
-        val value = if (answer) "site.yes" else "site.no"
+      val value = if (answer) "site.yes" else "site.no"
 
-        SummaryListRowViewModel(
-          key     = "addPaymentPlanEndDate.checkYourAnswersLabel",
-          value   = ValueViewModel(value),
-          actions = Seq(
-            ActionItemViewModel("site.change", routes.AddPaymentPlanEndDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("addPaymentPlanEndDate.change.hidden"))
-          )
+      SummaryListRowViewModel(
+        key   = "addPaymentPlanEndDate.checkYourAnswersLabel",
+        value = ValueViewModel(value),
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.AddPaymentPlanEndDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("addPaymentPlanEndDate.change.hidden"))
         )
+      )
     }
 }
