@@ -46,7 +46,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   lazy val amendPlanStartDateRoute: String = routes.AmendPlanStartDateController.onPageLoad(NormalMode).url
   lazy val amendPlanStartDateRoutePost: String = routes.AmendPlanStartDateController.onSubmit(NormalMode).url
   lazy val amendPaymentAmountRoute: String = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
-  lazy val planConfirmationPage: String = routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url
+  lazy val addPaymentPlanEndDatePage: String = routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode).url
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, amendPlanStartDateRoute)
@@ -260,7 +260,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual planConfirmationPage
+          redirectLocation(result).value mustEqual addPaymentPlanEndDatePage
         }
       }
 
@@ -322,7 +322,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual planConfirmationPage
+          redirectLocation(result).value mustEqual addPaymentPlanEndDatePage
         }
       }
 
@@ -384,7 +384,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual planConfirmationPage
+          redirectLocation(result).value mustEqual addPaymentPlanEndDatePage
         }
       }
 
