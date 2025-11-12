@@ -21,6 +21,7 @@ import models.{NddDAO, NddDetails, NddResponse}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes, ReplaceOptions, Updates}
 import play.api.libs.json.Format
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -32,7 +33,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DirectDebitCacheRepository @Inject() (mongoComponent: MongoComponent, appConfig: FrontendAppConfig, clock: Clock)(implicit ec: ExecutionContext)
+class DirectDebitCacheRepository @Inject() (
+  mongoComponent: MongoComponent,
+  appConfig: FrontendAppConfig,
+  clock: Clock,
+  crypto: Encrypter & Decrypter
+)(implicit ec: ExecutionContext)
     extends PlayMongoRepository[NddDAO](
       collectionName = "direct-debit-cache",
       mongoComponent = mongoComponent,
@@ -48,6 +54,7 @@ class DirectDebitCacheRepository @Inject() (mongoComponent: MongoComponent, appC
     ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+  implicit val encryption: Encrypter & Decrypter = crypto
 
   private def byId(id: String): Bson = Filters.equal("_id", id)
 
@@ -57,7 +64,7 @@ class DirectDebitCacheRepository @Inject() (mongoComponent: MongoComponent, appC
         .find(byId(id))
         .headOption()
         .map {
-          case Some(cache) => cache.directDebits
+          case Some(cache) => cache.directDebits.map(_.decrypted)
           case _           => Seq()
         }
         .recover(_ => Seq())
@@ -65,14 +72,14 @@ class DirectDebitCacheRepository @Inject() (mongoComponent: MongoComponent, appC
   }
 
   def cacheResponse(response: NddResponse)(id: String): Future[Boolean] = Mdc.preservingMdc {
-    val document = NddDAO(id, Instant.now(clock), response.directDebitList)
+    val encryptedDocument = NddDAO(id, Instant.now(clock), response.directDebitList.map(_.encrypted))
 
     retrieveCache(id) flatMap {
       case Seq() =>
         collection
           .replaceOne(
             filter      = byId(id),
-            replacement = document,
+            replacement = encryptedDocument,
             options     = ReplaceOptions().upsert(true)
           )
           .toFuture()

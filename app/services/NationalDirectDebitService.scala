@@ -23,7 +23,7 @@ import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, Variab
 import models.audits.GetDDIs
 import models.requests.*
 import models.responses.*
-import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers}
+import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers, responses}
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
@@ -31,6 +31,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
+
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, LocalDate}
 import javax.inject.{Inject, Singleton}
@@ -130,6 +131,9 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan) || userAnswers
       .get(ManagePaymentPlanTypePage)
       .getOrElse("") == PaymentPlanType.BudgetPaymentPlan.toString
+
+  def isVariablePaymentPlan(planType: String): Boolean =
+    planType == PaymentPlanType.VariablePaymentPlan.toString
 
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
@@ -486,5 +490,20 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
   def suspendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =
     isBudgetPaymentPlan(userAnswers)
+
+  def isAdvanceNoticePresent(
+    directDebitReference: String,
+    paymentPlanReference: String
+  )(implicit hc: HeaderCarrier): Future[AdvanceNoticeResponse] = {
+    nddConnector
+      .isAdvanceNoticePresent(directDebitReference, paymentPlanReference)
+      .map {
+        case Some(response) => response
+        case None           => AdvanceNoticeResponse(None, None) // no details
+      }
+      .recover { case _ =>
+        AdvanceNoticeResponse(None, None) // default on failure
+      }
+  }
 
 }

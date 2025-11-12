@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.PaymentPlanType
-import models.responses.PaymentPlanResponse
+import models.responses.{AdvanceNoticeResponse, PaymentPlanResponse}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{atLeastOnce, verify, when}
@@ -28,7 +28,7 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.{DirectDebitReferenceQuery, PaymentPlanReferenceQuery}
+import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -36,8 +36,10 @@ import utils.Constants
 import viewmodels.checkAnswers.{SuspensionPeriodRangeDateSummary, *}
 import views.html.PaymentPlanDetailsView
 
-import java.time.LocalDateTime
+import java.text.NumberFormat
+import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import scala.concurrent.Future
 
 class PaymentPlanDetailsControllerSpec extends SpecBase {
@@ -61,6 +63,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             )
           )
         }
+
+        val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
+          totalAmount = None,
+          dueDate     = None
+        )
 
         "must return OK and the correct view for a GET" - {
           "should show Amend, Cancel actions but not Suspend action when scheduledPaymentStartDate is beyond 2 working days" in {
@@ -109,13 +116,33 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(true))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(false)
 
               val summaryListRows = summaryList(mockSinglePaymentPlanDetailResponse, application)
               val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
               val result = route(application, request).value
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
+
+              val formattedTotalAmount = ""
+              val formattedDueDate = ""
+
               status(result) mustEqual OK
-              contentAsString(result) mustEqual view("singlePaymentPlan", paymentPlanReference, true, true, false, false, "", "", summaryListRows)(
+              contentAsString(result) mustEqual view(
+                "singlePaymentPlan",
+                paymentPlanReference,
+                true,
+                true,
+                false,
+                false,
+                "",
+                "",
+                summaryListRows,
+                false,
+                formattedTotalAmount,
+                formattedDueDate,
+                routes.AdvanceNoticeController.onPageLoad()
+              )(
                 request,
                 messages(application)
               ).toString
@@ -168,13 +195,28 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(false))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(false)
 
               val summaryListRows = summaryList(mockSinglePaymentPlanDetailResponse, application)
               val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
               val result = route(application, request).value
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
               status(result) mustEqual OK
-              contentAsString(result) mustEqual view("singlePaymentPlan", paymentPlanReference, false, false, false, false, "", "", summaryListRows)(
+              contentAsString(result) mustEqual view("singlePaymentPlan",
+                                                     paymentPlanReference,
+                                                     false,
+                                                     false,
+                                                     false,
+                                                     false,
+                                                     "",
+                                                     "",
+                                                     summaryListRows,
+                                                     false,
+                                                     "",
+                                                     "",
+                                                     routes.AdvanceNoticeController.onPageLoad()
+                                                    )(
                 request,
                 messages(application)
               ).toString
@@ -245,6 +287,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           )
         }
 
+        val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
+          totalAmount = None,
+          dueDate     = None
+        )
+
         "must return OK and the correct view for a GET" - {
 
           "when Suspension is inactive" - {
@@ -294,13 +341,29 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, false, "", "", summaryListRows)(
+                contentAsString(result) mustEqual view(
+                  "budgetPaymentPlan",
+                  paymentPlanReference,
+                  true,
+                  true,
+                  true,
+                  false,
+                  "",
+                  "",
+                  summaryListRows,
+                  false,
+                  "",
+                  "",
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(
                   request,
                   messages(application)
                 ).toString
@@ -353,13 +416,29 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithoutEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, false, "", "", summaryListRows)(
+                contentAsString(result) mustEqual view(
+                  "budgetPaymentPlan",
+                  paymentPlanReference,
+                  true,
+                  true,
+                  true,
+                  false,
+                  "",
+                  "",
+                  summaryListRows,
+                  false,
+                  "",
+                  "",
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(
                   request,
                   messages(application)
                 ).toString
@@ -412,13 +491,28 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan", paymentPlanReference, true, true, true, false, "", "", summaryListRows)(
+                contentAsString(result) mustEqual view("budgetPaymentPlan",
+                                                       paymentPlanReference,
+                                                       true,
+                                                       true,
+                                                       true,
+                                                       false,
+                                                       "",
+                                                       "",
+                                                       summaryListRows,
+                                                       false,
+                                                       "",
+                                                       "",
+                                                       routes.AdvanceNoticeController.onPageLoad()
+                                                      )(
                   request,
                   messages(application)
                 ).toString
@@ -473,22 +567,29 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(true))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan",
-                                                       paymentPlanReference,
-                                                       false,
-                                                       false,
-                                                       false,
-                                                       false,
-                                                       "",
-                                                       "",
-                                                       summaryListRows
-                                                      )(
+                contentAsString(result) mustEqual view(
+                  "budgetPaymentPlan",
+                  paymentPlanReference,
+                  false,
+                  false,
+                  false,
+                  false,
+                  "",
+                  "",
+                  summaryListRows,
+                  false,
+                  "",
+                  "",
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(
                   request,
                   messages(application)
                 ).toString
@@ -541,6 +642,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithEndDateAndWithoutSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
@@ -555,7 +658,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                        false,
                                                        "",
                                                        "",
-                                                       summaryListRows
+                                                       summaryListRows,
+                                                       false,
+                                                       "",
+                                                       "",
+                                                       routes.AdvanceNoticeController.onPageLoad()
                                                       )(
                   request,
                   messages(application)
@@ -619,22 +726,29 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithEndDateAndWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan",
-                                                       paymentPlanReference,
-                                                       true,
-                                                       true,
-                                                       false,
-                                                       true,
-                                                       formattedSuspensionStartDate,
-                                                       formattedSuspensionEndDate,
-                                                       summaryListRows
-                                                      )(
+                contentAsString(result) mustEqual view(
+                  "budgetPaymentPlan",
+                  paymentPlanReference,
+                  true,
+                  true,
+                  false,
+                  true,
+                  formattedSuspensionStartDate,
+                  formattedSuspensionEndDate,
+                  summaryListRows,
+                  false,
+                  "",
+                  "",
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(
                   request,
                   messages(application)
                 ).toString
@@ -695,22 +809,29 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithoutEndDateAndWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan",
-                                                       paymentPlanReference,
-                                                       true,
-                                                       true,
-                                                       false,
-                                                       true,
-                                                       formattedSuspensionStartDate,
-                                                       formattedSuspensionEndDate,
-                                                       summaryListRows
-                                                      )(
+                contentAsString(result) mustEqual view(
+                  "budgetPaymentPlan",
+                  paymentPlanReference,
+                  true,
+                  true,
+                  false,
+                  true,
+                  formattedSuspensionStartDate,
+                  formattedSuspensionEndDate,
+                  summaryListRows,
+                  false,
+                  "",
+                  "",
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(
                   request,
                   messages(application)
                 ).toString
@@ -771,22 +892,29 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithEndDateAndWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan",
-                                                       paymentPlanReference,
-                                                       true,
-                                                       true,
-                                                       false,
-                                                       true,
-                                                       formattedSuspensionStartDate,
-                                                       formattedSuspensionEndDate,
-                                                       summaryListRows
-                                                      )(
+                contentAsString(result) mustEqual view(
+                  "budgetPaymentPlan",
+                  paymentPlanReference,
+                  true,
+                  true,
+                  false,
+                  true,
+                  formattedSuspensionStartDate,
+                  formattedSuspensionEndDate,
+                  summaryListRows,
+                  false,
+                  "",
+                  "",
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(
                   request,
                   messages(application)
                 ).toString
@@ -847,22 +975,29 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(false)
 
                 val summaryListRows = summaryListWithEndDateAndWithSuspendPeriod(mockBudgetPaymentPlanDetailResponse, application)
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
                 status(result) mustEqual OK
-                contentAsString(result) mustEqual view("budgetPaymentPlan",
-                                                       paymentPlanReference,
-                                                       false,
-                                                       false,
-                                                       false,
-                                                       true,
-                                                       formattedSuspensionStartDate,
-                                                       formattedSuspensionEndDate,
-                                                       summaryListRows
-                                                      )(
+                contentAsString(result) mustEqual view(
+                  "budgetPaymentPlan",
+                  paymentPlanReference,
+                  false,
+                  false,
+                  false,
+                  true,
+                  formattedSuspensionStartDate,
+                  formattedSuspensionEndDate,
+                  summaryListRows,
+                  false,
+                  "",
+                  "",
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(
                   request,
                   messages(application)
                 ).toString
@@ -900,6 +1035,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 )
               )
 
+            val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
+              totalAmount = None,
+              dueDate     = None
+            )
+
             val paymentPlanReference = "ppReference"
             val directDebitReference = "ddReference"
 
@@ -934,13 +1074,30 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(true))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(true)
+              when(mockService.isAdvanceNoticePresent(any(), any())(any()))
+                .thenReturn(Future.successful(advanceNoticeResponse))
 
               val summaryListRows = summaryList(mockVariablePaymentPlanDetailResponse, application)
               val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
               val result = route(application, request).value
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
               status(result) mustEqual OK
-              contentAsString(result) mustEqual view("variablePaymentPlan", paymentPlanReference, false, true, false, false, "", "", summaryListRows)(
+              contentAsString(result) mustEqual view("variablePaymentPlan",
+                                                     paymentPlanReference,
+                                                     false,
+                                                     true,
+                                                     false,
+                                                     false,
+                                                     "",
+                                                     "",
+                                                     summaryListRows,
+                                                     false,
+                                                     "",
+                                                     "",
+                                                     routes.AdvanceNoticeController.onPageLoad()
+                                                    )(
                 request,
                 messages(application)
               ).toString
@@ -961,6 +1118,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
 
             val paymentPlanReference = "ppReference"
             val directDebitReference = "ddReference"
+
+            val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
+              totalAmount = None,
+              dueDate     = None
+            )
 
             val userAnswersWithPaymentReference =
               emptyUserAnswers
@@ -993,6 +1155,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(false))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(true)
+              when(mockService.isAdvanceNoticePresent(any(), any())(any()))
+                .thenReturn(Future.successful(advanceNoticeResponse))
 
               val summaryListRows = summaryList(mockVariablePaymentPlanDetailResponse, application)
               val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
@@ -1007,15 +1173,194 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                      false,
                                                      "",
                                                      "",
-                                                     summaryListRows
+                                                     summaryListRows,
+                                                     false,
+                                                     "",
+                                                     "",
+                                                     routes.AdvanceNoticeController.onPageLoad()
                                                     )(
                 request,
                 messages(application)
               ).toString
             }
           }
-        }
 
+          "Advance Notice Details Present" - {
+            "should show advance notice details when present" in {
+              val mockVariablePaymentPlanDetailResponse =
+                dummyPlanDetailResponse.copy(paymentPlanDetails =
+                  dummyPlanDetailResponse.paymentPlanDetails.copy(
+                    planType                  = PaymentPlanType.VariablePaymentPlan.toString,
+                    scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(4).toLocalDate),
+                    scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
+                    suspensionStartDate       = None,
+                    suspensionEndDate         = None
+                  )
+                )
+
+              val paymentPlanReference = "ppReference"
+              val directDebitReference = "ddReference"
+
+              val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
+                totalAmount = Some(BigDecimal(500)),
+                dueDate     = Some(LocalDate.now().plusMonths(1))
+              )
+
+              val userAnswersWithPaymentReference =
+                emptyUserAnswers
+                  .set(
+                    PaymentPlanReferenceQuery,
+                    paymentPlanReference
+                  )
+                  .success
+                  .value
+                  .set(
+                    DirectDebitReferenceQuery,
+                    directDebitReference
+                  )
+                  .success
+                  .value
+                  .set(AdvanceNoticeResponseQuery, advanceNoticeResponse)
+                  .success
+                  .value
+
+              val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+                .overrides(
+                  bind[SessionRepository].toInstance(mockSessionRepository),
+                  bind[NationalDirectDebitService].toInstance(mockService)
+                )
+                .build()
+
+              running(application) {
+                when(mockSessionRepository.set(any()))
+                  .thenReturn(Future.successful(true))
+                when(mockSessionRepository.get(any()))
+                  .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+                when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
+                  .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
+                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
+                  .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(true)
+                when(mockService.isAdvanceNoticePresent(any(), any())(any()))
+                  .thenReturn(Future.successful(advanceNoticeResponse))
+
+                val summaryListRows = summaryList(mockVariablePaymentPlanDetailResponse, application)
+                val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+                val result = route(application, request).value
+                val view = application.injector.instanceOf[PaymentPlanDetailsView]
+
+                val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+                val formattedTotalAmount = advanceNoticeResponse.totalAmount
+                  .map(amount => currencyFormat.format(amount.bigDecimal))
+                  .getOrElse("£0.00")
+
+                val formattedDueDate = advanceNoticeResponse.dueDate
+                  .map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy")))
+                  .getOrElse("")
+
+                status(result) mustEqual OK
+                contentAsString(result) mustEqual view(
+                  "variablePaymentPlan",
+                  paymentPlanReference,
+                  false,
+                  true,
+                  false,
+                  false,
+                  "",
+                  "",
+                  summaryListRows,
+                  true,
+                  formattedTotalAmount,
+                  formattedDueDate,
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(request, messages(application)).toString
+              }
+            }
+          }
+          "Advance Notice Details Not Present" - {
+            "should not show advance notice details when not present" in {
+              val mockVariablePaymentPlanDetailResponse =
+                dummyPlanDetailResponse.copy(paymentPlanDetails =
+                  dummyPlanDetailResponse.paymentPlanDetails.copy(
+                    planType                  = PaymentPlanType.VariablePaymentPlan.toString,
+                    scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(4).toLocalDate),
+                    scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
+                    suspensionStartDate       = None,
+                    suspensionEndDate         = None
+                  )
+                )
+
+              val paymentPlanReference = "ppReference"
+              val directDebitReference = "ddReference"
+
+              val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
+                totalAmount = None,
+                dueDate     = None
+              )
+
+              val userAnswersWithPaymentReference =
+                emptyUserAnswers
+                  .set(
+                    PaymentPlanReferenceQuery,
+                    paymentPlanReference
+                  )
+                  .success
+                  .value
+                  .set(
+                    DirectDebitReferenceQuery,
+                    directDebitReference
+                  )
+                  .success
+                  .value
+
+              val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+                .overrides(
+                  bind[SessionRepository].toInstance(mockSessionRepository),
+                  bind[NationalDirectDebitService].toInstance(mockService)
+                )
+                .build()
+
+              running(application) {
+                when(mockSessionRepository.set(any()))
+                  .thenReturn(Future.successful(true))
+                when(mockSessionRepository.get(any()))
+                  .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+                when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
+                  .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
+                when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
+                  .thenReturn(Future.successful(true))
+                when(mockService.isVariablePaymentPlan(any()))
+                  .thenReturn(true)
+                when(mockService.isAdvanceNoticePresent(any(), any())(any()))
+                  .thenReturn(Future.successful(advanceNoticeResponse))
+
+                val summaryListRows = summaryList(mockVariablePaymentPlanDetailResponse, application)
+                val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+                val result = route(application, request).value
+                val view = application.injector.instanceOf[PaymentPlanDetailsView]
+
+                status(result) mustEqual OK
+                contentAsString(result) mustEqual view(
+                  "variablePaymentPlan",
+                  paymentPlanReference,
+                  false,
+                  true,
+                  false,
+                  false,
+                  "",
+                  "",
+                  summaryListRows,
+                  false,
+                  "",
+                  "",
+                  routes.AdvanceNoticeController.onPageLoad()
+                )(request, messages(application)).toString
+              }
+            }
+
+          }
+        }
       }
 
       ".TaxCreditRepayment Plan" - {
@@ -1035,6 +1380,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)(messages(app))
           )
         }
+
+        val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
+          totalAmount = None,
+          dueDate     = None
+        )
 
         "must return OK and the correct view for a GET" - {
           "should not show Amend, Cancel and Suspend actions" in {
@@ -1081,6 +1431,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
               when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                 .thenReturn(Future.successful(mockTaxCreditRepaymentPlanDetailResponse))
+              when(mockService.isVariablePaymentPlan(any()))
+                .thenReturn(false)
+              when(mockService.isAdvanceNoticePresent(any(), any())(any()))
+                .thenReturn(Future.successful(advanceNoticeResponse))
 
               val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
               val summaryListRows = varRepaySummaryList(mockTaxCreditRepaymentPlanDetailResponse, application)
@@ -1095,7 +1449,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                      false,
                                                      "",
                                                      "",
-                                                     summaryListRows
+                                                     summaryListRows,
+                                                     false,
+                                                     "",
+                                                     "",
+                                                     routes.AdvanceNoticeController.onPageLoad()
                                                     )(
                 request,
                 messages(application)

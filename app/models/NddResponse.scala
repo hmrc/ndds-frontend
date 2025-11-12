@@ -17,6 +17,7 @@
 package models
 
 import play.api.libs.json.{Format, Json, OFormat}
+import uk.gov.hmrc.crypto.{Crypted, Decrypter, Encrypter, PlainText}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import utils.MaskAndFormatUtils.gdsShortMonthFormatter
 
@@ -37,11 +38,24 @@ case class NddDetails(ddiRefNumber: String,
     accountNumber        = bankAccountNumber,
     paymentPlans         = numberOfPayPlans.toString
   )
+
+  private val encryptString = (encrypter: Encrypter) => (value: String) => encrypter.encrypt(PlainText(value)).value
+  private val decryptString = (decrypter: Decrypter) => (value: String) => decrypter.decrypt(Crypted(value)).value
+
+  private def modifyBankDetails(f: String => String): NddDetails = {
+    this.copy(
+      bankSortCode      = f(this.bankSortCode),
+      bankAccountNumber = f(this.bankAccountNumber),
+      bankAccountName   = f(this.bankAccountName)
+    )
+  }
+
+  def encrypted(implicit crypto: Encrypter & Decrypter): NddDetails = modifyBankDetails(encryptString(crypto))
+  def decrypted(implicit crypto: Encrypter & Decrypter): NddDetails = modifyBankDetails(decryptString(crypto))
 }
 
 object NddDetails {
   implicit val format: OFormat[NddDetails] = Json.format[NddDetails]
-  java.time.Month.values()
 }
 
 case class NddResponse(directDebitCount: Int, directDebitList: Seq[NddDetails])
