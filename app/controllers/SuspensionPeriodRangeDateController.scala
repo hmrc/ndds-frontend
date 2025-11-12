@@ -115,7 +115,7 @@ class SuspensionPeriodRangeDateController @Inject() (
     }
 
   private def extractPlanData(implicit request: DataRequest[?]): (String, String) = {
-    val planReference = request.userAnswers.get(PaymentPlanReferenceQuery).getOrElse("")
+    val planReference = request.userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails.paymentReference).getOrElse("")
     val planDetailsOpt = request.userAnswers.get(PaymentPlanDetailsQuery)
     val paymentAmount =
       formatAmount(planDetailsOpt.flatMap(_.paymentPlanDetails.scheduledPaymentAmount).getOrElse(BigDecimal(0)))

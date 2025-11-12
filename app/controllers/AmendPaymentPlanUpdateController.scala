@@ -22,7 +22,7 @@ import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentPlanReferenceQuery
+import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -51,16 +51,17 @@ class AmendPaymentPlanUpdateController @Inject() (
     val userAnswers = request.userAnswers
     if (nddsService.amendPaymentPlanGuard(userAnswers)) {
       val maybeResult = for {
-        paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
-        paymentAmount        <- userAnswers.get(AmendPaymentAmountPage)
-        startDate            <- userAnswers.get(AmendPlanStartDatePage)
+        paymentPlan   <- userAnswers.get(PaymentPlanDetailsQuery)
+        paymentAmount <- userAnswers.get(AmendPaymentAmountPage)
+        startDate     <- userAnswers.get(AmendPlanStartDatePage)
       } yield {
         val formattedRegPaymentAmount = formatAmount(paymentAmount)
         val formattedStartDate =
           startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentPlanReference)
+        val paymentReference = paymentPlan.paymentPlanDetails.paymentReference
+        val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentReference)
 
-        Ok(view(paymentPlanReference, formattedRegPaymentAmount, formattedStartDate, summaryRows))
+        Ok(view(paymentReference, formattedRegPaymentAmount, formattedStartDate, summaryRows))
       }
       maybeResult match {
         case Some(result) => Future.successful(result)
