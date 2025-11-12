@@ -366,14 +366,14 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
                                                             paymentPlanList   = Seq.empty
                                                            )
 
-        when(mockPaymentPlanCache.retrieveCache(any()))
+        when(mockPaymentPlanCache.retrieveCache(any(), any()))
           .thenReturn(Future.successful(None))
-        when(mockPaymentPlanCache.saveToCache(any(), any()))
+        when(mockPaymentPlanCache.saveToCache(any(), any(), any()))
           .thenReturn(Future.successful(true))
         when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
           .thenReturn(Future.successful(paymentPlanResponse))
 
-        val result = service.retrieveDirectDebitPaymentPlans("testRef").futureValue
+        val result = service.retrieveDirectDebitPaymentPlans("userId", "testRef").futureValue
 
         result mustBe paymentPlanResponse
       }
@@ -387,23 +387,23 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
                                                             paymentPlanList   = Seq.empty
                                                            )
 
-        when(mockPaymentPlanCache.retrieveCache(any()))
+        when(mockPaymentPlanCache.retrieveCache(any(), any()))
           .thenReturn(Future.successful(Some(paymentPlanResponse)))
 
-        val result = service.retrieveDirectDebitPaymentPlans("testRef").futureValue
+        val result = service.retrieveDirectDebitPaymentPlans("userId", "testRef").futureValue
 
         result mustBe paymentPlanResponse
       }
 
       "fail when the connector call fails" in {
 
-        when(mockPaymentPlanCache.retrieveCache(any()))
+        when(mockPaymentPlanCache.retrieveCache(any(), any()))
           .thenReturn(Future.successful(None))
 
         when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
-        val result = intercept[Exception](service.retrieveDirectDebitPaymentPlans("testRef").futureValue)
+        val result = intercept[Exception](service.retrieveDirectDebitPaymentPlans("userId", "testRef").futureValue)
 
         result.getMessage must include("bang")
       }

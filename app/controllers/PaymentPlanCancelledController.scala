@@ -18,19 +18,19 @@ package controllers
 
 import controllers.actions.*
 import models.PaymentPlanType
-
-import javax.inject.Inject
 import models.responses.PaymentPlanDetails
 import pages.ManagePaymentPlanTypePage
 import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanCancelledView
+
+import javax.inject.Inject
 
 class PaymentPlanCancelledController @Inject() (
   override val messagesApi: MessagesApi,

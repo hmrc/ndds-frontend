@@ -16,7 +16,6 @@
 
 package models.responses
 
-import models.responses.PaymentPlanDetails.planTypeMapping
 import models.{DirectDebitSource, PaymentPlanType}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
@@ -86,10 +85,11 @@ object NddDDPaymentPlansResponse {
   implicit val format: OFormat[NddDDPaymentPlansResponse] = Json.format[NddDDPaymentPlansResponse]
 }
 
-case class PaymentPlanDAO(lastUpdated: Instant, ddPaymentPlans: NddDDPaymentPlansResponse)
+case class PaymentPlanDAO(userId: String, directDebitReference: String, lastUpdated: Instant, ddPaymentPlans: NddDDPaymentPlansResponse)
 
 object PaymentPlanDAO {
   import NddDDPaymentPlansResponse.format
+
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
   implicit val format: OFormat[PaymentPlanDAO] = Json.format[PaymentPlanDAO]
 }

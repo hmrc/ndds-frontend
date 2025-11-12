@@ -20,7 +20,7 @@ import base.SpecBase
 import models.responses.PaymentPlanDetails
 import models.PaymentPlanType
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.PaymentPlanDetailsQuery
 import org.scalatestplus.mockito.MockitoSugar
 import pages.ManagePaymentPlanTypePage
 import play.api.Application

@@ -64,11 +64,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           )
         }
 
-        val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
-          totalAmount = None,
-          dueDate     = None
-        )
-
         "must return OK and the correct view for a GET" - {
           "should show Amend, Cancel actions but not Suspend action when scheduledPaymentStartDate is beyond 2 working days" in {
             val mockSinglePaymentPlanDetailResponse =
@@ -288,11 +283,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate)(messages(app))
           )
         }
-
-        val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
-          totalAmount = None,
-          dueDate     = None
-        )
 
         "must return OK and the correct view for a GET" - {
 

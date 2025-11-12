@@ -29,7 +29,6 @@ import pages.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import utils.DirectDebitDetailsData
-import views.html.DirectDebitSummaryView
 
 import scala.concurrent.Future
 
@@ -64,7 +63,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
           .thenReturn(Future.successful(true))
         when(mockSessionRepository.get(any()))
           .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
-        when(mockService.retrieveDirectDebitPaymentPlans(any())(any(), any()))
+        when(mockService.retrieveDirectDebitPaymentPlans(any(), any())(any(), any()))
           .thenReturn(Future.successful(mockDDPaymentPlansResponse))
 
         val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)
@@ -204,7 +203,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
           .thenReturn(Future.successful(true))
         when(mockSessionRepository.get(any()))
           .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
-        when(mockService.retrieveDirectDebitPaymentPlans(any())(any(), any()))
+        when(mockService.retrieveDirectDebitPaymentPlans(any(), any())(any(), any()))
           .thenReturn(Future.successful(mockDDPaymentPlansResponse))
 
         val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)

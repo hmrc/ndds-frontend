@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan, PaymentPlanDAO}
+import models.responses.{NddDDPaymentPlansResponse, PaymentPlanDAO}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.*
 import play.api.libs.json.Format
@@ -49,6 +49,15 @@ class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent,
           IndexOptions()
             .name("lastUpdatedIdx")
             .expireAfter(appConfig.cacheTtl, TimeUnit.SECONDS)
+        ),
+        IndexModel(
+          Indexes.compoundIndex(
+            Indexes.ascending("userId"),
+            Indexes.ascending("directDebitReference")
+          ),
+          IndexOptions()
+            .name("userIdDirectDebitRefIdx")
+            .unique(true)
         )
       )
     ) {
@@ -56,14 +65,15 @@ class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent,
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
   implicit val encryption: Encrypter & Decrypter = crypto
 
-  def saveToCache(directDebitReference: String, ddPaymentPlans: NddDDPaymentPlansResponse): Future[Boolean] = Mdc.preservingMdc {
-    val encryptedDocument = PaymentPlanDAO(Instant.now(clock), ddPaymentPlans.encrypted)
+  def saveToCache(userId: String, directDebitReference: String, ddPaymentPlans: NddDDPaymentPlansResponse): Future[Boolean] = Mdc.preservingMdc {
+    val encryptedDocument =
+      PaymentPlanDAO(userId = userId, directDebitReference: String, lastUpdated = Instant.now(clock), ddPaymentPlans = ddPaymentPlans.encrypted)
 
-    retrieveCache(directDebitReference) flatMap {
+    retrieveCache(userId, directDebitReference) flatMap {
       case None =>
         collection
           .replaceOne(
-            filter      = byDirectDebitReference(directDebitReference),
+            filter      = filterBy(userId, directDebitReference),
             replacement = encryptedDocument,
             options     = ReplaceOptions().upsert(true)
           )
@@ -74,10 +84,10 @@ class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent,
     }
   }
 
-  def retrieveCache(directDebitReference: String): Future[Option[NddDDPaymentPlansResponse]] = Mdc.preservingMdc {
-    keepAlive(directDebitReference).flatMap { _ =>
+  def retrieveCache(userId: String, directDebitReference: String): Future[Option[NddDDPaymentPlansResponse]] = Mdc.preservingMdc {
+    keepAlive(userId, directDebitReference).flatMap { _ =>
       collection
-        .find(byDirectDebitReference(directDebitReference))
+        .find(filterBy(userId, directDebitReference))
         .headOption()
         .map {
           case Some(cache) => Some(cache.ddPaymentPlans.decrypted)
@@ -87,12 +97,15 @@ class PaymentPlanCacheRepository @Inject() (mongoComponent: MongoComponent,
     }
   }
 
-  private def byDirectDebitReference(directDebitReference: String): Bson = Filters.equal("_id", directDebitReference)
+  private def filterBy(userId: String, directDebitReference: String): Bson = Filters.and(
+    Filters.equal("userId", userId),
+    Filters.equal("directDebitReference", directDebitReference)
+  )
 
-  private[repositories] def keepAlive(directDebitReference: String): Future[Boolean] = Mdc.preservingMdc {
+  private[repositories] def keepAlive(userId: String, directDebitReference: String): Future[Boolean] = Mdc.preservingMdc {
     collection
       .updateOne(
-        filter = byDirectDebitReference(directDebitReference),
+        filter = filterBy(userId, directDebitReference),
         update = Updates.set("lastUpdated", Instant.now(clock))
       )
       .toFuture()

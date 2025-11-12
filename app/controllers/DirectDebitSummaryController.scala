@@ -40,6 +40,7 @@ class DirectDebitSummaryController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   view: DirectDebitSummaryView,
   nddService: NationalDirectDebitService,
@@ -49,14 +50,14 @@ class DirectDebitSummaryController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val userAnswers = request.userAnswers
     val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
         cleanConfirmationFlags(userAnswers).flatMap { cleansedAnswers =>
           cleanseUserData(cleansedAnswers).flatMap { furtherCleansedAnswers =>
-            nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
+            nddService.retrieveDirectDebitPaymentPlans(request.userId, reference).flatMap { ddPaymentPlans =>
               for {
                 updatedAnswers <- Future.fromTry(furtherCleansedAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
                 updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))

@@ -140,15 +140,16 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
   }
 
-  def retrieveDirectDebitPaymentPlans(
-    directDebitReference: String
-  )(implicit hc: HeaderCarrier, request: Request[?]): Future[NddDDPaymentPlansResponse] = {
-    paymentPlansCache.retrieveCache(directDebitReference) flatMap {
+  def retrieveDirectDebitPaymentPlans(userId: String, directDebitReference: String)(implicit
+    hc: HeaderCarrier,
+    request: Request[?]
+  ): Future[NddDDPaymentPlansResponse] = {
+    paymentPlansCache.retrieveCache(userId, directDebitReference) flatMap {
       case Some(existingCache) => Future.successful(existingCache)
       case _ =>
         for {
           ddPaymentPlans <- nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
-          _              <- paymentPlansCache.saveToCache(directDebitReference, ddPaymentPlans)
+          _              <- paymentPlansCache.saveToCache(userId, directDebitReference, ddPaymentPlans)
         } yield ddPaymentPlans
     }
   }

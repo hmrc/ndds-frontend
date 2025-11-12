@@ -20,12 +20,10 @@ import controllers.actions.*
 import models.UserAnswers
 import models.responses.PaymentPlanDetails
 import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
-
-import javax.inject.Inject
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.i18n.Lang.logger
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -34,6 +32,7 @@ import viewmodels.checkAnswers.{AmendPaymentAmountSummary, PaymentReferenceSumma
 import views.html.PaymentPlanSuspendedView
 
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
 class PaymentPlanSuspendedController @Inject() (
   override val messagesApi: MessagesApi,
