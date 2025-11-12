@@ -29,6 +29,8 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import views.html.DirectDebitConfirmationView
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class DirectDebitConfirmationController @Inject() (
@@ -46,6 +48,13 @@ class DirectDebitConfirmationController @Inject() (
     val referenceNumber = request.userAnswers
       .get(CheckYourAnswerPage)
       .getOrElse(throw new Exception("Missing generated DDI reference number"))
+
+    val paymentDate: LocalDate = request.userAnswers
+      .get(PaymentDatePage)
+      .map(_.enteredDate)
+      .getOrElse(throw new Exception("Missing entered payment date"))
+
+    val paymentDateString: String = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
     val directDebitDetails = SummaryListViewModel(
       rows = Seq(
@@ -86,6 +95,7 @@ class DirectDebitConfirmationController @Inject() (
       view(
         appConfig.hmrcHelplineUrl,
         referenceNumber.ddiRefNumber,
+        paymentDateString,
         directDebitDetails,
         paymentPlanDetails
       )
