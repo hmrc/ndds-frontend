@@ -21,10 +21,10 @@
     layout: templates.Layout,
     heading: Header1,
     paragraph: Paragraph,
-    textWithLinkAndReference: TextWithLinkAndReference
+    link: Link
 )
 
-@(incidentReferenceNumber: String)(implicit request: RequestHeader, appConfig: FrontendAppConfig, messages: Messages)
+@()(implicit request: RequestHeader, appConfig: FrontendAppConfig, messages: Messages)
 
 @layout(
     pageTitle = titleNoForm(messages("systemError.title")),
@@ -34,12 +34,8 @@
 
     @heading(messages("systemError.heading"), classes = "govuk-heading-xl")
     @paragraph(messages("systemError.p1"))
-
-    @textWithLinkAndReference(
+    @link(
         "systemError.link",
-        appConfig.hmrcOnlineServiceDeskUrl,
-        prefixTextKey = "systemError.p2",
-        suffixTextKey = "systemError.p3",
-        referenceNumber = incidentReferenceNumber
+        appConfig.hmrcOnlineServiceDeskUrl
     )
 }

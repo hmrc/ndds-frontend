@@ -664,11 +664,10 @@ pageNotFound.p4         = if you need to speak to someone.
 
 accessDenied.title      = Sorry, there is a problem with the service
 accessDenied.heading    = Sorry, there is a problem with the service
-accessDenied.link       = Return to the National Direct Debit Service start page.
+accessDenied.p1         = You do not have access to this service.
+accessDenied.link       = Continue to your account.
 
 systemError.title       = Sorry, there is a problem with this service
 systemError.heading     = Sorry, there is a problem with this service
-systemError.p1          = Try again later.
-systemError.p2          = Contact the
+systemError.p1          = Try again later or contact the
 systemError.link        = HMRC Online Services Helpdesk
-systemError.p3          = if you need to speak to someone about National Direct Debit Service and quote the reference number:

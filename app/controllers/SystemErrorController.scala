@@ -18,26 +18,19 @@ package controllers
 
 import config.FrontendAppConfig
 import javax.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.ReferenceGenerator
 import views.html.SystemErrorView
-import play.api.Logging
 
 class SystemErrorController @Inject() (
-  override val messagesApi: MessagesApi,
   val controllerComponents: MessagesControllerComponents,
-  view: SystemErrorView,
-  referenceGenerator: ReferenceGenerator
+  view: SystemErrorView
 )(implicit appConfig: FrontendAppConfig)
     extends FrontendBaseController
-    with I18nSupport
-    with Logging {
+    with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = Action { implicit request =>
-    val referenceNumber = referenceGenerator.generateReference()
-    logger.error(s"NDDS internal server error. Reference number: $referenceNumber")
-    Ok(view(referenceNumber))
+    Ok(view())
   }
 }

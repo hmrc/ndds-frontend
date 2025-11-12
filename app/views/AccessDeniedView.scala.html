@@ -20,6 +20,7 @@
 @this(
     layout: templates.Layout,
     header: Header1,
+    paragraph: Paragraph,
     link: Link
 )
 
@@ -32,8 +33,9 @@
 ) {
 
     @header(messages("accessDenied.heading"), classes = "govuk-heading-xl")
+    @paragraph(messages("accessDenied.p1"))
     @link(
         "accessDenied.link",
-        appConfig.govUkNDDSGuidanceUrl
+        appConfig.hmrcOnlineServiceDeskUrl
     )
 }

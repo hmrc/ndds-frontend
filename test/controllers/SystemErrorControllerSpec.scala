@@ -16,21 +16,27 @@
 
 package controllers
 
-import config.FrontendAppConfig
-import javax.inject.Inject
-import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.PageNotFoundView
+import base.SpecBase
+import org.scalatest.matchers.must.Matchers
+import play.api.test.FakeRequest
+import play.api.test.Helpers.*
 
-class PageNotFoundController @Inject() (
-  val controllerComponents: MessagesControllerComponents,
-  view: PageNotFoundView
-)(implicit appConfig: FrontendAppConfig)
-    extends FrontendBaseController
-    with I18nSupport {
+class SystemErrorControllerSpec extends SpecBase with Matchers {
 
-  def onPageLoad: Action[AnyContent] = Action { implicit request =>
-    Ok(view())
+  "SystemError Controller" - {
+
+    "must return OK and the correct view for a GET" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.SystemErrorController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+      }
+    }
   }
 }

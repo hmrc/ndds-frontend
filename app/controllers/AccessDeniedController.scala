@@ -23,11 +23,11 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AccessDeniedView
 
 class AccessDeniedController @Inject() (
-                                         override val messagesApi: MessagesApi,
-                                         val controllerComponents: MessagesControllerComponents,
-                                         view: AccessDeniedView
-                                       )(implicit appConfig: FrontendAppConfig)
-  extends FrontendBaseController
+  override val messagesApi: MessagesApi,
+  val controllerComponents: MessagesControllerComponents,
+  view: AccessDeniedView
+)(implicit appConfig: FrontendAppConfig)
+    extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = Action { implicit request =>
