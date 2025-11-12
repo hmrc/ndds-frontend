@@ -70,8 +70,8 @@ class AdvanceNoticeController @Inject() (
               dueDate,
               directDebitReference,
               directDebitDetails.bankAccountName.getOrElse(""),
-              directDebitDetails.bankSortCode.getOrElse(""),
               directDebitDetails.bankAccountNumber.getOrElse(""),
+              directDebitDetails.bankSortCode.getOrElse(""),
               paymentPlanReference,
               routes.PaymentPlanDetailsController.onPageLoad()
             )
