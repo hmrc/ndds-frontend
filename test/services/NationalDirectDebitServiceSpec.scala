@@ -357,31 +357,56 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
 
     "retrieveDirectDebitPaymentPlans" - {
-//      "must successfully return the direct debit payment plans" in {
-//        val paymentPlanResponse = NddDDPaymentPlansResponse(bankSortCode      = "123456",
-//                                                            bankAccountNumber = "12345678",
-//                                                            bankAccountName   = "MyBankAcc",
-//                                                            auDdisFlag        = "01",
-//                                                            paymentPlanCount  = 2,
-//                                                            paymentPlanList   = Seq.empty
-//                                                           )
-//
-//        when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
-//          .thenReturn(Future.successful(paymentPlanResponse))
-//
-//        val result = service.retrieveDirectDebitPaymentPlans("testRef").futureValue
-//
-//        result mustBe paymentPlanResponse
-//      }
-//
-//      "fail when the connector call fails" in {
-//        when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
-//          .thenReturn(Future.failed(new Exception("bang")))
-//
-//        val result = intercept[Exception](service.retrieveDirectDebitPaymentPlans("testRef").futureValue)
-//
-//        result.getMessage must include("bang")
-//      }
+      "must successfully return the direct debit payment plans when paymentPlan cache is empty" in {
+        val paymentPlanResponse = NddDDPaymentPlansResponse(bankSortCode      = "123456",
+                                                            bankAccountNumber = "12345678",
+                                                            bankAccountName   = "MyBankAcc",
+                                                            auDdisFlag        = "01",
+                                                            paymentPlanCount  = 2,
+                                                            paymentPlanList   = Seq.empty
+                                                           )
+
+        when(mockPaymentPlanCache.retrieveCache(any()))
+          .thenReturn(Future.successful(None))
+        when(mockPaymentPlanCache.saveToCache(any(), any()))
+          .thenReturn(Future.successful(true))
+        when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
+          .thenReturn(Future.successful(paymentPlanResponse))
+
+        val result = service.retrieveDirectDebitPaymentPlans("testRef").futureValue
+
+        result mustBe paymentPlanResponse
+      }
+
+      "must successfully return the direct debit payment plans from payment plans cache" in {
+        val paymentPlanResponse = NddDDPaymentPlansResponse(bankSortCode      = "123456",
+                                                            bankAccountNumber = "12345678",
+                                                            bankAccountName   = "MyBankAcc",
+                                                            auDdisFlag        = "01",
+                                                            paymentPlanCount  = 2,
+                                                            paymentPlanList   = Seq.empty
+                                                           )
+
+        when(mockPaymentPlanCache.retrieveCache(any()))
+          .thenReturn(Future.successful(Some(paymentPlanResponse)))
+
+        val result = service.retrieveDirectDebitPaymentPlans("testRef").futureValue
+
+        result mustBe paymentPlanResponse
+      }
+
+      "fail when the connector call fails" in {
+
+        when(mockPaymentPlanCache.retrieveCache(any()))
+          .thenReturn(Future.successful(None))
+
+        when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.retrieveDirectDebitPaymentPlans("testRef").futureValue)
+
+        result.getMessage must include("bang")
+      }
     }
 
     "amendPaymentPlanGuard" - {
