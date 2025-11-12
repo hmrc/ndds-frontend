@@ -110,18 +110,11 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           )
 
         val directDebitReference = "122222"
-        val paymentPlanReference = "paymentReference"
         val userAnswers =
           emptyUserAnswers
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
-            )
-            .success
-            .value
-            .set(
-              PaymentPlanReferenceQuery,
-              paymentPlanReference
             )
             .success
             .value
@@ -175,7 +168,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            paymentPlanReference,
+            mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference,
             directDebitReference,
             mockBudgetPaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
             mockBudgetPaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,
@@ -192,7 +185,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           )
 
         val directDebitReference = "122222"
-        val paymentPlanReference = "paymentReference"
         val userAnswers =
           emptyUserAnswers
             .set(
@@ -204,12 +196,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
-            )
-            .success
-            .value
-            .set(
-              PaymentPlanReferenceQuery,
-              paymentPlanReference
             )
             .success
             .value
@@ -269,18 +255,11 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           )
 
         val directDebitReference = "122222"
-        val paymentPlanReference = "paymentReference"
         val userAnswers =
           emptyUserAnswers
             .set(
               DirectDebitReferenceQuery,
               directDebitReference
-            )
-            .success
-            .value
-            .set(
-              PaymentPlanReferenceQuery,
-              paymentPlanReference
             )
             .success
             .value
@@ -336,7 +315,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            paymentPlanReference,
+            mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference,
             directDebitReference,
             mockSinglePaymentPlanDetailResponse.directDebitDetails.bankSortCode.get,
             mockSinglePaymentPlanDetailResponse.directDebitDetails.bankAccountNumber.get,
@@ -400,7 +379,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPaymentAmountPage, BigDecimal(100))
           .success
           .value
-          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
           .success
           .value
 
@@ -469,7 +448,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPaymentAmountPage, BigDecimal(100))
           .success
           .value
-          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
           .success
           .value
 
@@ -533,7 +512,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPaymentAmountPage, BigDecimal(100))
           .success
           .value
-          .set(PaymentPlanReferenceQuery, "paymentReference")
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
           .success
           .value
 

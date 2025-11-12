@@ -126,11 +126,12 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
 
               val formattedTotalAmount = ""
               val formattedDueDate = ""
+              val mockPaymentReference = mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
 
               status(result) mustEqual OK
               contentAsString(result) mustEqual view(
                 "singlePaymentPlan",
-                paymentPlanReference,
+                mockPaymentReference,
                 true,
                 true,
                 false,
@@ -202,9 +203,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
               val result = route(application, request).value
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
+              val mockPaymentReference = mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
               status(result) mustEqual OK
               contentAsString(result) mustEqual view("singlePaymentPlan",
-                                                     paymentPlanReference,
+                                                     mockPaymentReference,
                                                      false,
                                                      false,
                                                      false,
@@ -348,10 +350,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   true,
                   true,
                   true,
@@ -423,10 +426,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   true,
                   true,
                   true,
@@ -498,9 +502,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view("budgetPaymentPlan",
-                                                       paymentPlanReference,
+                                                       mockPaymentReference,
                                                        true,
                                                        true,
                                                        true,
@@ -574,10 +579,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   false,
                   false,
                   false,
@@ -649,9 +655,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view("budgetPaymentPlan",
-                                                       paymentPlanReference,
+                                                       mockPaymentReference,
                                                        false,
                                                        false,
                                                        false,
@@ -733,10 +740,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   true,
                   true,
                   false,
@@ -816,10 +824,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   true,
                   true,
                   false,
@@ -899,10 +908,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   true,
                   true,
                   false,
@@ -982,10 +992,11 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   false,
                   false,
                   false,
@@ -1083,9 +1094,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
               val result = route(application, request).value
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
+              val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
               status(result) mustEqual OK
               contentAsString(result) mustEqual view("variablePaymentPlan",
-                                                     paymentPlanReference,
+                                                     mockPaymentReference,
                                                      false,
                                                      true,
                                                      false,
@@ -1164,9 +1176,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
               val result = route(application, request).value
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
+              val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
               status(result) mustEqual OK
               contentAsString(result) mustEqual view("variablePaymentPlan",
-                                                     paymentPlanReference,
+                                                     mockPaymentReference,
                                                      false,
                                                      false,
                                                      false,
@@ -1259,10 +1272,12 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy")))
                   .getOrElse("")
 
+                val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
+
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "variablePaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   false,
                   true,
                   false,
@@ -1339,11 +1354,12 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
 
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "variablePaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   false,
                   true,
                   false,
@@ -1440,9 +1456,10 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               val summaryListRows = varRepaySummaryList(mockTaxCreditRepaymentPlanDetailResponse, application)
               val result = route(application, request).value
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
+              val mockPaymentReference = mockTaxCreditRepaymentPlanDetailResponse.paymentPlanDetails.paymentReference
               status(result) mustEqual OK
               contentAsString(result) mustEqual view("taxCreditRepaymentPlan",
-                                                     paymentPlanReference,
+                                                     mockPaymentReference,
                                                      false,
                                                      false,
                                                      false,

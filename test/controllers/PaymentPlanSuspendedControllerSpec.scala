@@ -42,8 +42,6 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
     endDate   = java.time.LocalDate.of(2025, 11, 16)
   )
 
-  private val paymentPlanReference = "ppReference"
-
   private val mockBudgetPaymentPlanDetailResponse =
     dummyPlanDetailResponse.copy(paymentPlanDetails =
       dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
@@ -55,12 +53,6 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswersWithData: UserAnswers =
         emptyUserAnswers
-          .set(
-            PaymentPlanReferenceQuery,
-            paymentPlanReference
-          )
-          .success
-          .value
           .set(
             PaymentPlanDetailsQuery,
             mockBudgetPaymentPlanDetailResponse
@@ -76,13 +68,13 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
       val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
 
-      def summaryList(paymentPlanReference: String,
+      def summaryList(paymentReference: String,
                       userAnswers: UserAnswers,
                       paymentPlanDetails: PaymentPlanDetails,
                       app: Application
                      ): Seq[SummaryListRow] =
         Seq(
-          Some(PaymentReferenceSummary.row(paymentPlanReference)(messages(app))),
+          Some(PaymentReferenceSummary.row(paymentReference)(messages(app))),
           Some(AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)(messages(app))),
           SuspensionPeriodRangeDateSummary.row(userAnswers)(messages(app))
         ).flatten
@@ -102,13 +94,14 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
         val formattedEndDate =
           userAnswersWithData.get(SuspensionPeriodRangeDatePage).get.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
 
+        val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
+
         val summaryListRows =
-          summaryList(paymentPlanReference, userAnswersWithData, userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
+          summaryList(mockPaymentReference, userAnswersWithData, userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(paymentPlanReference,
-                                               formattedStartDate,
+        contentAsString(result) mustEqual view(formattedStartDate,
                                                formattedEndDate,
                                                Call("GET", routes.PaymentPlanDetailsController.onPageLoad().url),
                                                summaryListRows
@@ -119,45 +112,10 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must return Journey Recover page for a GET when UserAnswers is missing PaymentPlanReference" in {
-
-      val userAnswersWithData: UserAnswers =
-        emptyUserAnswers
-          .set(
-            PaymentPlanDetailsQuery,
-            mockBudgetPaymentPlanDetailResponse
-          )
-          .success
-          .value
-          .set(SuspensionPeriodRangeDatePage, suspensionRange)
-          .success
-          .value
-          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
-          .success
-          .value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithData)).build()
-
-      running(application) {
-        val request = FakeRequest(GET, paymentPlanSuspendedRoute)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
-      }
-    }
-
     "must return Journey Recover page for a GET when UserAnswers is missing PaymentPlanDetails" in {
 
       val userAnswersWithData: UserAnswers =
         emptyUserAnswers
-          .set(
-            PaymentPlanReferenceQuery,
-            paymentPlanReference
-          )
-          .success
-          .value
           .set(SuspensionPeriodRangeDatePage, suspensionRange)
           .success
           .value
@@ -178,12 +136,6 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswersWithData: UserAnswers =
         emptyUserAnswers
-          .set(
-            PaymentPlanReferenceQuery,
-            paymentPlanReference
-          )
-          .success
-          .value
           .set(
             PaymentPlanDetailsQuery,
             mockBudgetPaymentPlanDetailResponse
