@@ -1272,10 +1272,12 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy")))
                   .getOrElse("")
 
+                val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
+
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "variablePaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   false,
                   true,
                   false,
@@ -1352,11 +1354,12 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
                 val result = route(application, request).value
                 val view = application.injector.instanceOf[PaymentPlanDetailsView]
+                val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
 
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view(
                   "variablePaymentPlan",
-                  paymentPlanReference,
+                  mockPaymentReference,
                   false,
                   true,
                   false,
