@@ -22,12 +22,27 @@
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
-    govukButton: GovukButton
+    paragraph: Paragraph,
+    govukButton: GovukButton,
+    govukInsetText: GovukInsetText
 )
 
-@(form: Form[_], mode: Mode, planReference: String, paymentAmount: String )(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, planReference: String, paymentAmount: String, suspensionStartDate: String, suspensionEndDate: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoFormManagePlan(messages("suspensionPeriodRangeDate.title")), backLink = Some(routes.SuspendPaymentPlanController.onPageLoad().url)) {
+            @defining(
+                if (mode == NormalMode) "suspensionPeriodRangeDate.title.normal"
+                else "suspensionPeriodRangeDate.title.change"
+            ) { pageTitleKey =>
+
+            @layout(
+                pageTitle = titleNoFormManagePlan(messages(pageTitleKey)),
+                backLink  = Some(
+                    if (mode == NormalMode)
+                    routes.SuspendPaymentPlanController.onPageLoad().url
+                    else
+                    controllers.routes.PaymentPlanDetailsController.onPageLoad().url
+                )
+            ) {
 
     @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
@@ -36,12 +51,28 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
         }
 
-        @header1("suspensionPeriodRangeDate.heading")
+            @if(mode == NormalMode) {
+                @header1("suspensionPeriodRangeDate.heading.normal")
 
-        <p class="govuk-body">
-            @Html(messages("suspensionPeriodRangeDate.p1.line1", planReference)) <br>
-            @Html(messages("suspensionPeriodRangeDate.p1.line2", paymentAmount))
-        </p>
+                @paragraph((messages("suspensionPeriodRangeDate.p1.line1", planReference)), extraClasses = "govuk-!-margin-bottom-0")
+                @paragraph((messages("suspensionPeriodRangeDate.p1.line2", paymentAmount)))
+
+            } else {
+                @header1("suspensionPeriodRangeDate.heading.change")
+
+                        @paragraph((messages("suspensionPeriodRangeDate.p1.line1", planReference)), extraClasses = "govuk-!-margin-bottom-0")
+                        @paragraph((messages("suspensionPeriodRangeDate.p1.line2", paymentAmount)))
+
+                        @govukInsetText(
+                            InsetText(
+                                content = Text(messages("suspensionPeriodRangeDate.change.inset", suspensionStartDate, suspensionEndDate))
+                            )
+                        )
+
+                @paragraph("suspensionPeriodRangeDate.change.paragraph")
+
+            }
+
 
         @govukDateInput(
             DateViewModel(
@@ -63,5 +94,6 @@
         @govukButton(
             ButtonViewModel(messages("site.continue"))
         )
+    }
     }
 }

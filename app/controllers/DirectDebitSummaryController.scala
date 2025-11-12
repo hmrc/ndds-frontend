@@ -30,6 +30,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, DateSetupSummary}
 import views.html.DirectDebitSummaryView
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+import utils.Utils.cleanConfirmationFlags
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -53,26 +54,28 @@ class DirectDebitSummaryController @Inject() (
     val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
-        cleanseUserData(userAnswers).flatMap { cleansedUserAnswers =>
-          nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
-            for {
-              updatedAnswers <- Future.fromTry(cleansedUserAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
-              updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
-              _              <- sessionRepository.set(updatedAnswers)
-            } yield {
-              val paginationResult = paginationService.paginatePaymentPlans(
-                allPaymentPlans = ddPaymentPlans.paymentPlanList,
-                currentPage     = currentPage,
-                baseUrl         = routes.DirectDebitSummaryController.onPageLoad().url
-              )
-              Ok(
-                view(
-                  reference,
-                  ddPaymentPlans,
-                  buildCards(paginationResult.paginatedData),
-                  paginationViewModel = paginationResult.paginationViewModel
+        cleanConfirmationFlags(userAnswers).flatMap { cleansedAnswers =>
+          cleanseUserData(cleansedAnswers).flatMap { furtherCleansedAnswers =>
+            nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
+              for {
+                updatedAnswers <- Future.fromTry(furtherCleansedAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
+                updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
+                _              <- sessionRepository.set(updatedAnswers)
+              } yield {
+                val paginationResult = paginationService.paginatePaymentPlans(
+                  allPaymentPlans = ddPaymentPlans.paymentPlanList,
+                  currentPage     = currentPage,
+                  baseUrl         = routes.DirectDebitSummaryController.onPageLoad().url
                 )
-              )
+                Ok(
+                  view(
+                    reference,
+                    ddPaymentPlans,
+                    buildCards(paginationResult.paginatedData),
+                    paginationViewModel = paginationResult.paginationViewModel
+                  )
+                )
+              }
             }
           }
         }
@@ -96,7 +99,7 @@ class DirectDebitSummaryController @Inject() (
           Card(
             title = Some(
               CardTitle(
-                content = Text(messages("directDebitPaymentSummary.activePayment.summary.title", plan.planRefNumber))
+                content = Text(messages("directDebitPaymentSummary.activePayment.summary.title", plan.paymentReference))
               )
             ),
             actions = Some(
@@ -105,7 +108,7 @@ class DirectDebitSummaryController @Inject() (
                   ActionItem(
                     href               = routes.PaymentPlanDetailsController.onRedirect(plan.planRefNumber).url,
                     content            = Text(messages("directDebitPaymentSummary.activePayment.summary.action")),
-                    visuallyHiddenText = Some(messages(plan.planRefNumber))
+                    visuallyHiddenText = Some(messages(plan.paymentReference))
                   )
                 )
               )

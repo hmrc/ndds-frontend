@@ -52,7 +52,9 @@ class RemoveSuspensionConfirmationController @Inject() (
 
       if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
         val maybeResult = for {
-          paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
+          paymentReference <- userAnswers
+                                .get(PaymentPlanDetailsQuery)
+                                .map(_.paymentPlanDetails.paymentReference)
           paymentAmount <- userAnswers
                              .get(AmendPaymentAmountPage)
                              .orElse(
@@ -78,7 +80,7 @@ class RemoveSuspensionConfirmationController @Inject() (
             )
 
           val summaryRows: Seq[SummaryListRow] =
-            buildSummaryRows(userAnswers, paymentPlanReference)
+            buildSummaryRows(userAnswers, paymentReference)
 
           Ok(
             view(
@@ -104,14 +106,14 @@ class RemoveSuspensionConfirmationController @Inject() (
       }
     }
 
-  private def buildSummaryRows(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
+  private def buildSummaryRows(userAnswers: UserAnswers, paymentReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
 
     val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
     val planStartDate = userAnswers.get(AmendPlanStartDatePage)
     val planEndDate = userAnswers.get(AmendPlanEndDatePage)
 
     val baseRows = Seq(
-      PaymentReferenceSummary.row(paymentPlanReference),
+      PaymentReferenceSummary.row(paymentReference),
       AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
       AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)
     )
