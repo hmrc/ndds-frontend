@@ -19,7 +19,6 @@ package controllers
 import controllers.actions.*
 import forms.SuspensionPeriodRangeDateFormProvider
 import models.requests.DataRequest
-
 import javax.inject.Inject
 import models.{Mode, PaymentPlanType}
 import navigation.Navigator
@@ -31,10 +30,12 @@ import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.{Constants, MaskAndFormatUtils}
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
 
 import scala.concurrent.{ExecutionContext, Future}
+import java.time.format.DateTimeFormatter
 
 class SuspensionPeriodRangeDateController @Inject() (
   override val messagesApi: MessagesApi,
@@ -52,6 +53,9 @@ class SuspensionPeriodRangeDateController @Inject() (
     with I18nSupport
     with Logging {
 
+  private val dateFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)
+
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
 
@@ -60,6 +64,16 @@ class SuspensionPeriodRangeDateController @Inject() (
         val planDates = userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails)
         val planStart = planDates.flatMap(_.scheduledPaymentStartDate)
         val planEnd = planDates.flatMap(_.scheduledPaymentEndDate)
+
+        val formattedSuspensionStartDate = planDates
+          .flatMap(_.suspensionStartDate)
+          .map(_.format(dateFormatter))
+          .getOrElse("")
+
+        val formattedSuspensionEndDate = planDates
+          .flatMap(_.suspensionEndDate)
+          .map(_.format(dateFormatter))
+          .getOrElse("")
 
         nddsService.earliestSuspendStartDate().map { earliestStartDate =>
           val form = formProvider(planStart, planEnd, earliestStartDate)
@@ -70,10 +84,21 @@ class SuspensionPeriodRangeDateController @Inject() (
           }
 
           val (planReference, paymentAmount) = extractPlanData
-          Ok(view(preparedForm, mode, planReference, paymentAmount))
+
+          Ok(
+            view(
+              preparedForm,
+              mode,
+              planReference,
+              paymentAmount,
+              formattedSuspensionStartDate,
+              formattedSuspensionEndDate
+            )
+          )
         }
+
       } else {
-        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(
           s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
         )
@@ -93,13 +118,26 @@ class SuspensionPeriodRangeDateController @Inject() (
             val planStart = planDetail.scheduledPaymentStartDate
             val planEnd = planDetail.scheduledPaymentEndDate
 
+            val formattedSuspensionStartDate = planDetail.suspensionStartDate
+              .map(_.format(dateFormatter))
+              .getOrElse("")
+
+            val formattedSuspensionEndDate = planDetail.suspensionEndDate
+              .map(_.format(dateFormatter))
+              .getOrElse("")
+
             nddsService.earliestSuspendStartDate().flatMap { earliestStartDate =>
               val form = formProvider(planStart, planEnd, earliestStartDate)
 
               form
                 .bindFromRequest()
                 .fold(
-                  formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, planReference, paymentAmount))),
+                  formWithErrors =>
+                    Future.successful(
+                      BadRequest(
+                        view(formWithErrors, mode, planReference, paymentAmount, formattedSuspensionStartDate, formattedSuspensionEndDate)
+                      )
+                    ),
                   value =>
                     for {
                       updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))
@@ -122,5 +160,4 @@ class SuspensionPeriodRangeDateController @Inject() (
 
     (planReference, paymentAmount)
   }
-
 }
