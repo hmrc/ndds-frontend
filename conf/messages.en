@@ -53,8 +53,8 @@ signedOut.guidance = We did not save your answers.
 unauthorised.title = You can’t access this service with this account
 unauthorised.heading = You can’t access this service with this account
 
-yourDirectDebitInstructions.title = Your Direct Debit instructions
-yourDirectDebitInstructions.heading = Your Direct Debit instructions
+yourDirectDebitInstructions.title = Your Direct Debit Instructions
+yourDirectDebitInstructions.heading = Your Direct Debit Instructions
 yourDirectDebitInstructions.p1 = These are the Direct Debit Instructions you have set up. Choose a Direct Debit reference to view, manage or add a payment plan.
 yourDirectDebitInstructions.p2.beforeLink = If you need to
 yourDirectDebitInstructions.p2.link = set up a new Direct Debit payment
