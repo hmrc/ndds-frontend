@@ -60,7 +60,7 @@ class PaymentPlanDetailsController @Inject() (
 
           nddService.getPaymentPlanDetails(directDebitReference, paymentPlanReference).flatMap { response =>
             val planDetail = response.paymentPlanDetails
-            if (!nddService.isPaymentPlanLocked(request.userAnswers)) {
+            if (!nddService.isPaymentPlanLocked(planDetail)) {
               Future.successful(Redirect(routes.PaymentPlanLockedWarningController.onPageLoad()))
             } else {
               for {

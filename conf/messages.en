@@ -657,5 +657,5 @@ advanceNotice.returnLink = Return to payment plan
 
 paymentPlanLockedWarning.title = You cannot view or manage this payment plan
 paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
-paymentPlanLockedWarning.paragraph = A payment is being collected. You will be able to view or manage this payment plan within the next 3 working days.
+paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.
 paymentPlanLockedWarning.returnLink = Return to payment plans.

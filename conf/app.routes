@@ -173,4 +173,4 @@ GET        /page-not-found                       controllers.BackSubmissionContr
 
 GET        /advance-notice-direct-debit-payment          controllers.AdvanceNoticeController.onPageLoad()
 
-GET        /cannot-view-manage-payment-plan                       controllers.PaymentPlanLockedWarningController.onPageLoad()
+GET        /payment-plan-update-processing                       controllers.PaymentPlanLockedWarningController.onPageLoad()
