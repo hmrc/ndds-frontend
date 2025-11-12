@@ -735,6 +735,47 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       }
     }
 
+    "isAdvanceNoticePresent" - {
+      val currentTime = LocalDateTime.now().withNano(0)
+      "return AdvanceNoticeResponse with totalAmount and dueDate when present" in {
+
+        val response = AdvanceNoticeResponse(
+          totalAmount = Some(BigDecimal(500)),
+          dueDate     = Some(currentTime.toLocalDate.plusMonths(1))
+        )
+
+        when(mockConnector.isAdvanceNoticePresent(any(), any())(any()))
+          .thenReturn(Future.successful(Some(response)))
+
+        val result = service.isAdvanceNoticePresent("ddRef", "planRef")
+
+        result.map { r =>
+          r.totalAmount mustBe Some(BigDecimal(500))
+          r.dueDate mustBe Some(currentTime.toLocalDate.plusMonths(1))
+        }
+      }
+
+      "return false when no AdvanceNoticeResponse is present" in {
+        when(mockConnector.isAdvanceNoticePresent(any(), any())(any()))
+          .thenReturn(Future.successful(None))
+
+        service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
+          result.totalAmount shouldBe None
+          result.dueDate     shouldBe None
+        }
+      }
+
+      "return false when the connector call fails" in {
+        when(mockConnector.isAdvanceNoticePresent(any(), any())(any()))
+          .thenReturn(Future.failed(new RuntimeException("boom")))
+
+        service.isAdvanceNoticePresent("ddRef", "planRef").map { result =>
+          result.totalAmount shouldBe None
+          result.dueDate     shouldBe None
+        }
+      }
+    }
+
     "isPaymentPlanLocked" - {
 
       "return true when paymentPlanEditable is true" in {

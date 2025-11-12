@@ -31,6 +31,7 @@ object MaskAndFormatUtils {
 
   private lazy val inputFormatter = DateTimeFormatter.ofPattern("d/M/yyyy")
   lazy val gdsFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  lazy val gdsShortMonthFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")
 
   def formatDateToGds(dateStr: String): String = {
     val localDate = LocalDate.parse(dateStr, inputFormatter)

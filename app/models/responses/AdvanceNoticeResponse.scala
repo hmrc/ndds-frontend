@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package viewmodels
+package models.responses
 
-package object govuk {
+import play.api.libs.json.{Json, OFormat}
 
-  object all
-      extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with PaginationFluency
-      with RadiosFluency
-      with SummaryListFluency
-      with TagFluency
+import java.time.LocalDate
+
+case class AdvanceNoticeResponse(totalAmount: Option[BigDecimal], dueDate: Option[LocalDate])
+
+object AdvanceNoticeResponse {
+  implicit val format: OFormat[AdvanceNoticeResponse] = Json.format
 }

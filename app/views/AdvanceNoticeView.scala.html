@@ -1,0 +1,119 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import views.html.components._
+
+@this(
+        layout: templates.Layout,
+        h1: Header1,
+        h2: Header2,
+        paragraph: Paragraph,
+        govukInsetText: GovukInsetText,
+        govukSummaryList: GovukSummaryList,
+        link: Link,
+        paragraphWithLink: ParagraphMessageWithLink
+)
+
+@(hmrcHelplineUrl: String, totalAmount: String, dueDate: String,  directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String, paymentPlanLink: Call)(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = titleForManageJourneyNoForm(messages("advanceNotice.title")), backLink = Some(paymentPlanLink.url)) {
+
+    @h1("advanceNotice.heading")
+
+    @paragraph(Messages("advanceNotice.p1",totalAmount, dueDate))
+
+    @paragraphWithLink(
+        message1 = Some(messages("advanceNotice.p2")),
+        linkMessage = messages("advanceNotice.p2.link"),
+        linkUrl = hmrcHelplineUrl,
+        linkRel = "noreferrer noopener",
+        target = "_blank"
+    )
+
+    @paragraph("advanceNotice.p3")
+
+    <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
+
+    <details class="govuk-details">
+        <summary class = "govuk-details__summary">
+            <span class="govuk-details__summary-text">
+                @messages("advanceNotice.accordion.heading")
+            </span>
+        </summary>
+
+        <div class="govuk-details__text">
+            <p>@messages("advanceNotice.accordion.p1")</p>
+            <p>@messages("advanceNotice.accordion.p2")</p>
+            <p>@messages("advanceNotice.accordion.p3")</p>
+            <p>@messages("advanceNotice.accordion.p4")</p>
+            <p>@messages("advanceNotice.accordion.p5")</p>
+        </div>
+    </details>
+
+    @h2("advanceNotice.directDebitDetails")
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.directDebit.reference")),
+                value = Value(content = HtmlContent(directDebitReference))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.directDebit.accountName")),
+                value = Value(content = HtmlContent(bankAccountName))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.directDebit.accountNumber")),
+                value = Value(content = HtmlContent(accountNumber))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.directDebit.sortCode")),
+                value = Value(content = HtmlContent(sortCode))
+            )
+        )
+    ))
+
+    @h2("advanceNotice.yourPaymentDetails")
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.yourPaymentDetails.reference")),
+                value = Value(content = HtmlContent(paymentPlanReference))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("advanceNotice.yourPaymentDetails.totalAmount")),
+                value = Value(content = HtmlContent(totalAmount))
+            ),
+            SummaryListRow(
+            key = Key(content = messages("advanceNotice.yourPaymentDetails.dueDate")),
+            value = Value(content = HtmlContent(dueDate))
+            )
+        )
+    ))
+
+    @govukInsetText(
+        InsetText(
+        content = Text(messages("advanceNotice.print.inset"))
+        )
+    )
+
+    @paragraphWithLink(
+        linkMessage = messages("advanceNotice.returnLink"),
+        linkUrl = routes.PaymentPlanDetailsController.onPageLoad().url,
+    )
+
+}

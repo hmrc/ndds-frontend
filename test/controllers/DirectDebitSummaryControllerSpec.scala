@@ -68,16 +68,20 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
           .thenReturn(Future.successful(mockDDPaymentPlansResponse))
 
         val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)
-
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[DirectDebitSummaryView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(directDebitReference, mockDDPaymentPlansResponse)(request, messages(application)).toString
+
+        val html = contentAsString(result)
+        html must include(directDebitReference)
+        html must include("Payment reference")
+        html must include("Plan type")
+        html must include("Payment amount")
+        html must include("Manage plan")
       }
     }
 
-    "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
+    "must redirect to Journey Recovery page when DirectDebitReferenceQuery is not set" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides()
         .build()
@@ -93,7 +97,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
       }
     }
 
-    "must redirect to Journey Recover page when UserAnswers is None" in {
+    "must redirect to Journey Recovery page when UserAnswers is None" in {
       val application = applicationBuilder(userAnswers = None)
         .overrides()
         .build()

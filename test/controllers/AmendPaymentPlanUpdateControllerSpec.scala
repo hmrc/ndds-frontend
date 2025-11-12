@@ -26,7 +26,7 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentPlanReferenceQuery
+import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.Constants
@@ -49,13 +49,13 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET when plan type is Budget Payment Plan" in {
 
-      def summaryList(userAnswers: UserAnswers, paymentPlanReference: String, app: Application): Seq[SummaryListRow] = {
+      def summaryList(userAnswers: UserAnswers, paymentReference: String, app: Application): Seq[SummaryListRow] = {
         val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
         val planStartDate = userAnswers.get(AmendPlanStartDatePage)
         val planEndDate = userAnswers.get(AmendPlanEndDatePage)
 
         Seq(
-          PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
+          PaymentReferenceSummary.row(paymentReference)(messages(app)),
           AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)(messages(app)),
           AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(
             messages(app)
@@ -64,8 +64,13 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
         )
       }
 
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanReferenceQuery, "123456789K")
+        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
         .success
         .value
         .set(AmendPaymentAmountPage, regPaymentAmount)
@@ -88,30 +93,37 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
 
-        val summaryListRows = summaryList(userAnswers, "123456789K", application)
+        val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
+        val summaryListRows = summaryList(userAnswers, mockPaymentReference, application)
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, summaryListRows)(request,
-                                                                                                                             messages(application)
-                                                                                                                            ).toString
+        contentAsString(result) mustEqual view(mockPaymentReference, formattedRegPaymentAmount, formattedStartDate, summaryListRows)(
+          request,
+          messages(application)
+        ).toString
       }
     }
 
     "must return OK and the correct view for a GET when plan type is Single Payment Plan" in {
 
-      def summaryList(userAnswers: UserAnswers, paymentPlanReference: String, app: Application): Seq[SummaryListRow] = {
+      def summaryList(userAnswers: UserAnswers, paymentReference: String, app: Application): Seq[SummaryListRow] = {
         val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
         val planStartDate = userAnswers.get(AmendPlanStartDatePage)
 
         Seq(
-          PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
+          PaymentReferenceSummary.row(paymentReference)(messages(app)),
           AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount)(messages(app)),
           AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app))
         )
       }
 
+      val mockSinglePaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
+        )
+
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanReferenceQuery, "123456789K")
+        .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
         .success
         .value
         .set(AmendPaymentAmountPage, regPaymentAmount)
@@ -137,21 +149,29 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
 
-        val summaryListRows = summaryList(userAnswers, "123456789K", application)
+        val mockPaymentReference = mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
+        val summaryListRows = summaryList(userAnswers, mockPaymentReference, application)
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view("123456789K", formattedRegPaymentAmount, formattedStartDate, summaryListRows)(request,
-                                                                                                                             messages(application)
-                                                                                                                            ).toString
+        contentAsString(result) mustEqual view(mockPaymentReference, formattedRegPaymentAmount, formattedStartDate, summaryListRows)(
+          request,
+          messages(application)
+        ).toString
       }
     }
 
     "must redirect to Journey Recover page when AmendPlanStartDatePage is None" in {
+
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
-        .set(PaymentPlanReferenceQuery, "123456789K")
+        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
         .success
         .value
         .set(AmendPaymentAmountPage, regPaymentAmount)
@@ -173,11 +193,17 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to Journey Recover page when AmendPaymentAmountPage is None" in {
+
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
-        .set(PaymentPlanReferenceQuery, "123456789K")
+        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
         .success
         .value
         .set(AmendPlanStartDatePage, startDate)
@@ -198,7 +224,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recover page when PaymentPlanReferenceQuery is None" in {
+    "must redirect to Journey Recover page when PaymentPlanDetailsQuery is None" in {
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success

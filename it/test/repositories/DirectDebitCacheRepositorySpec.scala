@@ -16,7 +16,7 @@
 
 package repositories
 
-import config.FrontendAppConfig
+import config.{FakeEncrypterDecrypter, FrontendAppConfig}
 import models.{NddDAO, NddDetails, NddResponse}
 import org.mockito.Mockito.when
 import org.mongodb.scala.model.Filters
@@ -27,6 +27,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.slf4j.MDC
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.play.bootstrap.dispatchers.MDCPropagatingExecutorService
 
@@ -86,10 +87,13 @@ class DirectDebitCacheRepositorySpec
   private val mockAppConfig = mock[FrontendAppConfig]
   when(mockAppConfig.cacheTtl) thenReturn 1L
 
+  private val fakeCrypto: Encrypter with Decrypter = new FakeEncrypterDecrypter()
+
   protected override val repository: DirectDebitCacheRepository = new DirectDebitCacheRepository(
     mongoComponent = mongoComponent,
     appConfig      = mockAppConfig,
-    clock          = stubClock
+    clock          = stubClock,
+    crypto         = fakeCrypto
   )(scala.concurrent.ExecutionContext.Implicits.global)
 
   ".cacheResponse" - {

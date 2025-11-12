@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package viewmodels
+package queries
 
-package object govuk {
+import models.responses.AdvanceNoticeResponse
+import play.api.libs.json.{Format, JsPath, Json}
+import pages.QuestionPage
 
-  object all
-      extends ImplicitConversions
-      with BackLinkFluency
-      with ButtonFluency
-      with CheckboxFluency
-      with DateFluency
-      with ErrorSummaryFluency
-      with FieldsetFluency
-      with HintFluency
-      with InputFluency
-      with LabelFluency
-      with PaginationFluency
-      with RadiosFluency
-      with SummaryListFluency
-      with TagFluency
+case object AdvanceNoticeResponseQuery extends QuestionPage[AdvanceNoticeResponse] {
+
+  override def path: JsPath = JsPath \ "advanceNoticeResponse"
+
+  implicit val format: Format[AdvanceNoticeResponse] = Json.format[AdvanceNoticeResponse]
 }

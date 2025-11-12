@@ -52,16 +52,8 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
           dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
         )
 
-      val paymentPlanReference = "ppReference"
-
       val userAnswersWithData =
         emptyUserAnswers
-          .set(
-            PaymentPlanReferenceQuery,
-            paymentPlanReference
-          )
-          .success
-          .value
           .set(
             PaymentPlanDetailsQuery,
             mockBudgetPaymentPlanDetailResponse
@@ -80,9 +72,10 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         val view = application.injector.instanceOf[PaymentPlanCancelledView]
         val summaryListRows = summaryList(userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
+        val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentPlanReference,
+        contentAsString(result) mustEqual view(mockPaymentReference,
                                                Call("GET", routes.DirectDebitSummaryController.onPageLoad().url),
                                                summaryListRows
                                               )(
@@ -102,24 +95,16 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
           AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)(messages(app))
         )
 
-      val mockBudgetPaymentPlanDetailResponse =
+      val mockSinglePaymentPlanDetailResponse =
         dummyPlanDetailResponse.copy(paymentPlanDetails =
           dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
         )
 
-      val paymentPlanReference = "ppReference"
-
       val userAnswersWithData =
         emptyUserAnswers
           .set(
-            PaymentPlanReferenceQuery,
-            paymentPlanReference
-          )
-          .success
-          .value
-          .set(
             PaymentPlanDetailsQuery,
-            mockBudgetPaymentPlanDetailResponse
+            mockSinglePaymentPlanDetailResponse
           )
           .success
           .value
@@ -135,9 +120,10 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         val view = application.injector.instanceOf[PaymentPlanCancelledView]
         val summaryListRows = summaryList(userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
+        val mockPaymentReference = mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(paymentPlanReference,
+        contentAsString(result) mustEqual view(mockPaymentReference,
                                                Call("GET", routes.DirectDebitSummaryController.onPageLoad().url),
                                                summaryListRows
                                               )(

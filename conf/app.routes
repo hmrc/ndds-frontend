@@ -151,8 +151,8 @@ GET        /payment-plan-cancelled                      controllers.PaymentPlanC
 
 GET        /how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = NormalMode)
 POST       /how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = NormalMode)
-GET        /change-how-long-suspension-period-last                       controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-how-long-suspension-period-last                        controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
+GET        /change-changing-suspension-period                       controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-changing-suspension-period                        controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
 
 GET        /check-suspension-details                        controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = NormalMode)
 POST       /check-suspension-details                        controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = NormalMode)
@@ -170,5 +170,7 @@ POST       /change-removing-this-suspension                  controllers.Removin
 GET        /amending-payment-plan                       controllers.AmendingPaymentPlanController.onPageLoad()
 
 GET        /page-not-found                       controllers.BackSubmissionController.onPageLoad()
+
+GET        /advance-notice-direct-debit-payment          controllers.AdvanceNoticeController.onPageLoad()
 
 GET        /cannot-view-manage-payment-plan                       controllers.PaymentPlanLockedWarningController.onPageLoad()
