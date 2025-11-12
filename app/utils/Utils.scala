@@ -20,6 +20,8 @@ import models.requests.PaymentPlanDuplicateCheckRequest
 import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import pages.*
+import scala.concurrent.{ExecutionContext, Future}
 
 import java.time.LocalDate
 
@@ -38,6 +40,25 @@ object Utils {
     DirectDebitSource.OL   -> "SAFE",
     DirectDebitSource.SDLT -> "SDLT"
   )
+
+  def cleanConfirmationFlags(userAnswers: UserAnswers)(implicit ec: ExecutionContext): Future[UserAnswers] = {
+    val pagesToRemove = Seq(
+      AmendPaymentPlanConfirmationPage,
+      CreateConfirmationPage,
+      SuspensionDetailsCheckYourAnswerPage,
+      RemovingThisSuspensionPage,
+      CancelPaymentPlanConfirmationPage,
+      RemovingThisSuspensionConfirmationPage
+    )
+
+    pagesToRemove
+      .foldLeft(Future.successful(userAnswers)) { case (accFut, page) =>
+        accFut.flatMap(answers => Future.fromTry(answers.remove(page)))
+      }
+      .recover { case ex: Throwable =>
+        userAnswers
+      }
+  }
 
   def generateMacFromAnswers(
     answers: UserAnswers,

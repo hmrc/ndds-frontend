@@ -26,6 +26,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import services.{NationalDirectDebitService, PaginationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Utils.cleanConfirmationFlags
 import views.html.YourDirectDebitInstructionsView
 
 import javax.inject.Inject
@@ -49,15 +50,7 @@ class YourDirectDebitInstructionsController @Inject() (
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
 
-    val cleansedAnswersFut = for {
-      updatedAnswers <- Future.fromTry(userAnswers.remove(AmendPaymentPlanConfirmationPage))
-      updatedAnswers <- Future.fromTry(updatedAnswers.remove(CreateConfirmationPage))
-      updatedAnswers <- Future.fromTry(updatedAnswers.remove(SuspensionDetailsCheckYourAnswerPage))
-      updatedAnswers <- Future.fromTry(updatedAnswers.remove(RemovingThisSuspensionPage))
-      updatedAnswers <- Future.fromTry(updatedAnswers.remove(CancelPaymentPlanConfirmationPage))
-    } yield updatedAnswers
-
-    cleansedAnswersFut.flatMap { cleansedAnswers =>
+    cleanConfirmationFlags(userAnswers).flatMap { cleansedAnswers =>
       cleanseDirectDebitReference(cleansedAnswers).flatMap { _ =>
         nddService.retrieveAllDirectDebits(request.userId).map { directDebitDetailsData =>
           val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
