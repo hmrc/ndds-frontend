@@ -30,6 +30,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, DateSetupSummary}
 import views.html.DirectDebitSummaryView
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+import utils.Utils.cleanConfirmationFlags
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,20 +52,22 @@ class DirectDebitSummaryController @Inject() (
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
-        cleanseUserData(userAnswers).flatMap { cleansedUserAnswers =>
-          nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
-            for {
-              updatedAnswers <- Future.fromTry(cleansedUserAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
-              updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
-              _              <- sessionRepository.set(updatedAnswers)
-            } yield {
-              Ok(
-                view(
-                  reference,
-                  ddPaymentPlans,
-                  buildCards(ddPaymentPlans.paymentPlanList)
+        cleanConfirmationFlags(userAnswers).flatMap { cleansedAnswers =>
+          cleanseUserData(cleansedAnswers).flatMap { furtherCleansedAnswers =>
+            nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
+              for {
+                updatedAnswers <- Future.fromTry(furtherCleansedAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
+                updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
+                _              <- sessionRepository.set(updatedAnswers)
+              } yield {
+                Ok(
+                  view(
+                    reference,
+                    ddPaymentPlans,
+                    buildCards(ddPaymentPlans.paymentPlanList)
+                  )
                 )
-              )
+              }
             }
           }
         }
@@ -88,7 +91,7 @@ class DirectDebitSummaryController @Inject() (
           Card(
             title = Some(
               CardTitle(
-                content = Text(messages("directDebitPaymentSummary.activePayment.summary.title", plan.planRefNumber))
+                content = Text(messages("directDebitPaymentSummary.activePayment.summary.title", plan.paymentReference))
               )
             ),
             actions = Some(
@@ -97,7 +100,7 @@ class DirectDebitSummaryController @Inject() (
                   ActionItem(
                     href               = routes.PaymentPlanDetailsController.onRedirect(plan.planRefNumber).url,
                     content            = Text(messages("directDebitPaymentSummary.activePayment.summary.action")),
-                    visuallyHiddenText = Some(messages(plan.planRefNumber))
+                    visuallyHiddenText = Some(messages(plan.paymentReference))
                   )
                 )
               )

@@ -27,14 +27,14 @@
         link: Link
 )
 
-@(paymentPlanReference: String, call: Call, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(paymentReference: String, call: Call, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanCancelled.title")), showBackLink = false) {
     @confirmationPanel(
         title = messages("paymentPlanCancelled.panel.title"),
         body = Html(
                     s"${messages("paymentPlanCancelled.panel.body1")}" +
-                    s"${messages("paymentPlanCancelled.panel.strong", paymentPlanReference)}" +
+                    s"${messages("paymentPlanCancelled.panel.strong", paymentReference)}" +
                     s"${messages("paymentPlanCancelled.panel.body2")}"
                     ),
         classes = "govuk-!-margin-bottom-2"
@@ -55,7 +55,7 @@
     @govukSummaryList(SummaryList(
         card = Some(Card(
             title = Some(CardTitle(
-                content = messages("paymentPlanCancelled.paymentReference", paymentPlanReference)
+                content = messages("paymentPlanCancelled.paymentReference", paymentReference)
             ))
         )),
         rows = rows

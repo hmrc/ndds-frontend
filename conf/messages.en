@@ -562,8 +562,12 @@ suspendPaymentPlan.p3 = Payments due within the next 3 working days cannot be su
 suspendPaymentPlan.continue = Continue
 suspendPaymentPlan.cancel.link = Cancel and return to payment plan
 
-suspensionPeriodRangeDate.title = Enter suspension dates
-suspensionPeriodRangeDate.heading = How long will the suspension period last?
+suspensionPeriodRangeDate.title.normal = How long will the suspension period last?
+suspensionPeriodRangeDate.heading.normal = How long will the suspension period last?
+suspensionPeriodRangeDate.title.change = Changing this suspension period
+suspensionPeriodRangeDate.heading.change = Changing this suspension period
+suspensionPeriodRangeDate.change.inset = This payment plan is suspended from {0} to {1}.
+suspensionPeriodRangeDate.change.paragraph = To change this suspension period, edit the start date, end date, or both.
 suspensionPeriodRangeDate.startDate = Start date
 suspensionPeriodRangeDate.endDate = End date
 suspensionPeriodRangeDate.hint = For example, 27 3 2020

@@ -19,7 +19,7 @@ package controllers
 import base.SpecBase
 import models.{PaymentPlanType, UserAnswers}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import queries.PaymentPlanReferenceQuery
+import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
 import org.scalatestplus.mockito.MockitoSugar
@@ -55,13 +55,13 @@ class RemoveSuspensionConfirmationControllerSpec extends SpecBase {
 
       when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
 
-      def summaryList(userAnswers: UserAnswers, paymentPlanReference: String, app: Application): Seq[SummaryListRow] = {
+      def summaryList(userAnswers: UserAnswers, paymentReference: String, app: Application): Seq[SummaryListRow] = {
         val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
         val planStartDate = userAnswers.get(AmendPlanStartDatePage)
         val planEndDate = userAnswers.get(AmendPlanEndDatePage)
 
         val baseRows = Seq(
-          PaymentReferenceSummary.row(paymentPlanReference)(messages(app)),
+          PaymentReferenceSummary.row(paymentReference)(messages(app)),
           AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)(messages(app)),
           AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app))
         )
@@ -73,8 +73,13 @@ class RemoveSuspensionConfirmationControllerSpec extends SpecBase {
         }
       }
 
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanReferenceQuery, "123456789K")
+        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
         .success
         .value
         .set(AmendPaymentAmountPage, regPaymentAmount)
@@ -101,7 +106,8 @@ class RemoveSuspensionConfirmationControllerSpec extends SpecBase {
 
         val formattedRegPaymentAmount = formatAmount(regPaymentAmount)
         val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val summaryListRows = summaryList(userAnswers, "123456789K", application)
+        val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
+        val summaryListRows = summaryList(userAnswers, mockPaymentReference, application)
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(
@@ -115,8 +121,13 @@ class RemoveSuspensionConfirmationControllerSpec extends SpecBase {
 
     "must return OK and the correct view for a GET with BudgetPaymentPlan and no plan end date" in {
 
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanReferenceQuery, "123456789K")
+        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
         .success
         .value
         .set(AmendPaymentAmountPage, regPaymentAmount)
@@ -140,9 +151,10 @@ class RemoveSuspensionConfirmationControllerSpec extends SpecBase {
         val request = FakeRequest(GET, removeSuspensionConfirmationRoute)
         val result = route(application, request).value
         val view = application.injector.instanceOf[RemoveSuspensionConfirmationView]
+        val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
 
         val summaryListRows = Seq(
-          PaymentReferenceSummary.row("123456789K")(messages(application)),
+          PaymentReferenceSummary.row(mockPaymentReference)(messages(application)),
           AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, Some(regPaymentAmount))(messages(application)),
           AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, Some(startDate), Constants.longDateTimeFormatPattern)(
             messages(application)
@@ -161,8 +173,13 @@ class RemoveSuspensionConfirmationControllerSpec extends SpecBase {
 
     "must redirect to JourneyRecoveryController when suspendPaymentPlanGuard returns false" in {
 
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
+
       val userAnswers = emptyUserAnswers
-        .set(PaymentPlanReferenceQuery, "123456789K")
+        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
         .success
         .value
 
