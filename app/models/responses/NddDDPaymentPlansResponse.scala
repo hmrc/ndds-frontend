@@ -19,10 +19,8 @@ package models.responses
 import models.{DirectDebitSource, PaymentPlanType}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
-import uk.gov.hmrc.crypto.{Crypted, Decrypter, Encrypter, PlainText}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{Instant, LocalDateTime}
+import java.time.LocalDateTime
 
 case class NddPaymentPlan(scheduledPaymentAmount: BigDecimal,
                           planRefNumber: String,
@@ -64,32 +62,8 @@ case class NddDDPaymentPlansResponse(bankSortCode: String,
                                      auDdisFlag: String,
                                      paymentPlanCount: Int,
                                      paymentPlanList: Seq[NddPaymentPlan]
-                                    ) {
-  private val encryptString = (encrypter: Encrypter) => (value: String) => encrypter.encrypt(PlainText(value)).value
-  private val decryptString = (decrypter: Decrypter) => (value: String) => decrypter.decrypt(Crypted(value)).value
-
-  private def modifyPaymentPlanResponse(f: String => String): NddDDPaymentPlansResponse = {
-    this.copy(
-      bankSortCode      = f(this.bankSortCode),
-      bankAccountNumber = f(this.bankAccountNumber),
-      bankAccountName   = f(this.bankAccountName)
-    )
-  }
-
-  def encrypted(implicit crypto: Encrypter & Decrypter): NddDDPaymentPlansResponse = modifyPaymentPlanResponse(encryptString(crypto))
-
-  def decrypted(implicit crypto: Encrypter & Decrypter): NddDDPaymentPlansResponse = modifyPaymentPlanResponse(decryptString(crypto))
-}
+                                    )
 
 object NddDDPaymentPlansResponse {
   implicit val format: OFormat[NddDDPaymentPlansResponse] = Json.format[NddDDPaymentPlansResponse]
-}
-
-case class PaymentPlanDAO(userId: String, directDebitReference: String, lastUpdated: Instant, ddPaymentPlans: NddDDPaymentPlansResponse)
-
-object PaymentPlanDAO {
-  import NddDDPaymentPlansResponse.format
-
-  implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
-  implicit val format: OFormat[PaymentPlanDAO] = Json.format[PaymentPlanDAO]
 }

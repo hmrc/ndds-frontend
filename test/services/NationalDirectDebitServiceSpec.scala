@@ -530,16 +530,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           paymentPlanList   = Seq.empty
         )
       }
-
-      "fail when the connector call fails" in {
-
-        when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
-          .thenReturn(Future.failed(new Exception("bang")))
-
-        val result = intercept[Exception](service.retrieveDirectDebitPaymentPlans("userId", "testRef").futureValue)
-
-        result.getMessage must include("bang")
-      }
     }
 
     "amendPaymentPlanGuard" - {
