@@ -35,7 +35,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
-import repositories.{DirectDebitCacheRepository, PaymentPlanCacheRepository}
+import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 import utils.Frequency.*
@@ -56,11 +56,10 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
   val mockConnector: NationalDirectDebitConnector = mock[NationalDirectDebitConnector]
   val mockCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
-  val mockPaymentPlanCache: PaymentPlanCacheRepository = mock[PaymentPlanCacheRepository]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   val mockAuditService: AuditService = mock[AuditService]
   val currentClock: Clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
-  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, currentClock, mockPaymentPlanCache)
+  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, currentClock)
 
   val testId = "id"
   val testSortCode = "123456"
@@ -357,48 +356,182 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
 
     "retrieveDirectDebitPaymentPlans" - {
-      "must successfully return the direct debit payment plans when paymentPlan cache is empty" in {
-        val paymentPlanResponse = NddDDPaymentPlansResponse(bankSortCode      = "123456",
-                                                            bankAccountNumber = "12345678",
-                                                            bankAccountName   = "MyBankAcc",
-                                                            auDdisFlag        = "01",
-                                                            paymentPlanCount  = 0,
-                                                            paymentPlanList   = Seq.empty
-                                                           )
+      "must successfully return the direct debit payment plans from cache" in {
+        val bankAccountNumber = "12345678"
+        val bankAccountName = "MyBankAcc"
+        val bankSortCode = "123456"
+        val ddReference = "122222"
 
-        when(mockPaymentPlanCache.retrieveCache(any(), any()))
-          .thenReturn(Future.successful(None))
-        when(mockPaymentPlanCache.saveToCache(any(), any(), any()))
-          .thenReturn(Future.successful(true))
+        val ddListResponse: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 1,
+              paymentPlansList = Some(
+                Seq(
+                  NddPaymentPlan(
+                    scheduledPaymentAmount = 100.0,
+                    planRefNumber          = "planRefNumber",
+                    planType               = "budgetPaymentPlan",
+                    paymentReference       = "1400256374K",
+                    hodService             = "sdlt",
+                    submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+                  )
+                )
+              )
+            )
+          )
+        )
+
+        val ddPaymentPlanResponse = NddDDPaymentPlansResponse(
+          bankSortCode      = bankSortCode,
+          bankAccountNumber = bankAccountNumber,
+          bankAccountName   = bankAccountName,
+          auDdisFlag        = "01",
+          paymentPlanCount  = 1,
+          paymentPlanList = Seq(
+            NddPaymentPlan(
+              scheduledPaymentAmount = 100.0,
+              planRefNumber          = "planRefNumber",
+              planType               = "budgetPaymentPlan",
+              paymentReference       = "1400256374K",
+              hodService             = "sdlt",
+              submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+            )
+          )
+        )
+
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(ddListResponse.directDebitList))
         when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
-          .thenReturn(Future.successful(paymentPlanResponse))
+          .thenReturn(Future.successful(ddPaymentPlanResponse))
 
-        val result = service.retrieveDirectDebitPaymentPlans("userId", "testRef").futureValue
+        val result = service.retrieveDirectDebitPaymentPlans("userId", ddReference).futureValue
 
-        result mustBe paymentPlanResponse
+        result mustBe ddPaymentPlanResponse.copy(auDdisFlag = "false")
       }
 
-      "must successfully return the direct debit payment plans from payment plans cache" in {
-        val paymentPlanResponse = NddDDPaymentPlansResponse(bankSortCode      = "123456",
-                                                            bankAccountNumber = "12345678",
-                                                            bankAccountName   = "MyBankAcc",
-                                                            auDdisFlag        = "01",
-                                                            paymentPlanCount  = 0,
-                                                            paymentPlanList   = Seq.empty
-                                                           )
+      "must successfully return the direct debit payment plans from the api and update the cache" in {
+        val bankAccountNumber = "12345678"
+        val bankAccountName = "MyBankAcc"
+        val bankSortCode = "123456"
+        val ddReference = "122222"
 
-        when(mockPaymentPlanCache.retrieveCache(any(), any()))
-          .thenReturn(Future.successful(Some(paymentPlanResponse)))
+        val ddListResponse: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 1
+            )
+          )
+        )
 
-        val result = service.retrieveDirectDebitPaymentPlans("userId", "testRef").futureValue
+        val updatedDbObject: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 1,
+              paymentPlansList = Some(
+                Seq(
+                  NddPaymentPlan(
+                    scheduledPaymentAmount = 100.0,
+                    planRefNumber          = "planRefNumber",
+                    planType               = "budgetPaymentPlan",
+                    paymentReference       = "1400256374K",
+                    hodService             = "sdlt",
+                    submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+                  )
+                )
+              )
+            )
+          )
+        )
 
-        result mustBe paymentPlanResponse
+        val ddPaymentPlanResponse = NddDDPaymentPlansResponse(
+          bankSortCode      = bankSortCode,
+          bankAccountNumber = bankAccountNumber,
+          bankAccountName   = bankAccountName,
+          auDdisFlag        = "01",
+          paymentPlanCount  = 1,
+          paymentPlanList = Seq(
+            NddPaymentPlan(
+              scheduledPaymentAmount = 100.0,
+              planRefNumber          = "planRefNumber",
+              planType               = "budgetPaymentPlan",
+              paymentReference       = "1400256374K",
+              hodService             = "sdlt",
+              submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+            )
+          )
+        )
+
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(ddListResponse.directDebitList))
+        when(mockCache.updateDirectDebit(any(), any())(any()))
+          .thenReturn(Future.successful(updatedDbObject.directDebitList.head))
+        when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
+          .thenReturn(Future.successful(ddPaymentPlanResponse))
+
+        val result = service.retrieveDirectDebitPaymentPlans("userId", ddReference).futureValue
+
+        result mustBe ddPaymentPlanResponse
+      }
+
+      "must successfully return the direct debit empty payment plans from the cache" in {
+        val bankAccountNumber = "12345678"
+        val bankAccountName = "MyBankAcc"
+        val bankSortCode = "123456"
+        val ddReference = "122222"
+
+        val ddListResponse: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 0
+            )
+          )
+        )
+
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(ddListResponse.directDebitList))
+
+        val result = service.retrieveDirectDebitPaymentPlans("userId", ddReference).futureValue
+
+        result mustBe NddDDPaymentPlansResponse(
+          bankSortCode      = bankSortCode,
+          bankAccountName   = bankAccountName,
+          bankAccountNumber = bankAccountNumber,
+          auDdisFlag        = "false",
+          paymentPlanCount  = 0,
+          paymentPlanList   = Seq.empty
+        )
       }
 
       "fail when the connector call fails" in {
-
-        when(mockPaymentPlanCache.retrieveCache(any(), any()))
-          .thenReturn(Future.successful(None))
 
         when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
@@ -1125,7 +1258,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-01-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock, mockPaymentPlanCache)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
 
             val today = LocalDate.now(fixedClock)
 
@@ -1147,7 +1280,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock, mockPaymentPlanCache)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
 
             val today = LocalDate.now(fixedClock)
 
@@ -1269,7 +1402,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-03-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock, mockPaymentPlanCache)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
 
             val today = LocalDate.now(fixedClock)
 
@@ -1291,7 +1424,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-02-28T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock, mockPaymentPlanCache)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
 
             val today = LocalDate.now(fixedClock)
 
@@ -1329,7 +1462,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-10-29T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock, mockPaymentPlanCache)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
 
             val today = LocalDate.now(fixedClock)
             val startDate = LocalDate.of(2020, 3, 29)
@@ -1435,7 +1568,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-05-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock, mockPaymentPlanCache)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
 
             val today = LocalDate.now(fixedClock)
 
@@ -1457,7 +1590,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock, mockPaymentPlanCache)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
 
             val today = LocalDate.now(fixedClock)
 
@@ -1578,7 +1711,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock, mockPaymentPlanCache)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
 
             val today = LocalDate.now(fixedClock)
 

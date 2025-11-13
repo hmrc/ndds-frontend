@@ -167,7 +167,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
                     bankSortCode      = filteredDirectDebit.bankSortCode,
                     bankAccountName   = filteredDirectDebit.bankAccountName,
                     bankAccountNumber = filteredDirectDebit.bankAccountNumber,
-                    auDdisFlag        = "",
+                    auDdisFlag        = filteredDirectDebit.auDdisFlag.toString,
                     paymentPlanCount  = filteredDirectDebit.numberOfPayPlans,
                     paymentPlanList   = plans
                   )
@@ -179,8 +179,8 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
                     bankSortCode      = filteredDirectDebit.bankSortCode,
                     bankAccountName   = filteredDirectDebit.bankAccountName,
                     bankAccountNumber = filteredDirectDebit.bankAccountNumber,
-                    auDdisFlag        = "",
-                    paymentPlanCount  = 0,
+                    auDdisFlag        = filteredDirectDebit.auDdisFlag.toString,
+                    paymentPlanCount  = filteredDirectDebit.numberOfPayPlans,
                     paymentPlanList   = Seq.empty
                   )
                 )
