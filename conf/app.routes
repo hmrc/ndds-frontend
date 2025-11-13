@@ -47,7 +47,7 @@ GET        /change-confirm-bank-details                 controllers.BankDetailsC
 POST       /confirm-bank-details                        controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = NormalMode)
 POST       /change-confirm-bank-details                 controllers.BankDetailsCheckYourAnswerController.onSubmit(mode: Mode = CheckMode)
 
-GET        /bank-approval                               controllers.BankApprovalController.onPageLoad()
+GET        /there-is-a-problem-with-bank-approval       controllers.BankApprovalController.onPageLoad()
 
 GET        /which-tax-duty-payment-plan                 controllers.DirectDebitSourceController.onPageLoad(mode: Mode = NormalMode)
 POST       /which-tax-duty-payment-plan                 controllers.DirectDebitSourceController.onSubmit(mode: Mode = NormalMode)
