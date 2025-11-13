@@ -28,7 +28,7 @@ import pages.*
 import play.api.Logging
 import play.api.mvc.Request
 import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
-import repositories.{DirectDebitCacheRepository, PaymentPlanCacheRepository}
+import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
 
@@ -42,8 +42,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
                                             val directDebitCache: DirectDebitCacheRepository,
                                             config: FrontendAppConfig,
                                             auditService: AuditService,
-                                            clock: Clock,
-                                            val paymentPlansCache: PaymentPlanCacheRepository
+                                            clock: Clock
                                            )(implicit ec: ExecutionContext)
     extends Logging {
   def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[?]): Future[NddResponse] = {
@@ -144,13 +143,55 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     hc: HeaderCarrier,
     request: Request[?]
   ): Future[NddDDPaymentPlansResponse] = {
-    paymentPlansCache.retrieveCache(userId, directDebitReference) flatMap {
-      case Some(existingCache) => Future.successful(existingCache)
-      case _ =>
-        for {
-          ddPaymentPlans <- nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
-          _              <- paymentPlansCache.saveToCache(userId, directDebitReference, ddPaymentPlans)
-        } yield ddPaymentPlans
+    directDebitCache.retrieveCache(userId) flatMap {
+      case Seq() =>
+        throw new NoSuchElementException(
+          s"No direct debit cache found for Id $userId"
+        )
+      case existingCache =>
+        val filteredDirectDebitOpt = existingCache.find(_.ddiRefNumber == directDebitReference)
+
+        filteredDirectDebitOpt match {
+          case None =>
+            Future.failed(
+              new NoSuchElementException(
+                s"No direct debit found for directDebitReference $directDebitReference in Id $userId"
+              )
+            )
+
+          case Some(filteredDirectDebit) =>
+            filteredDirectDebit.paymentPlansList match {
+              case Some(plans) if plans.nonEmpty =>
+                Future.successful(
+                  NddDDPaymentPlansResponse(
+                    bankSortCode      = filteredDirectDebit.bankSortCode,
+                    bankAccountName   = filteredDirectDebit.bankAccountName,
+                    bankAccountNumber = filteredDirectDebit.bankAccountNumber,
+                    auDdisFlag        = "",
+                    paymentPlanCount  = filteredDirectDebit.numberOfPayPlans,
+                    paymentPlanList   = plans
+                  )
+                )
+
+              case _ if filteredDirectDebit.numberOfPayPlans == 0 =>
+                Future.successful(
+                  NddDDPaymentPlansResponse(
+                    bankSortCode      = filteredDirectDebit.bankSortCode,
+                    bankAccountName   = filteredDirectDebit.bankAccountName,
+                    bankAccountNumber = filteredDirectDebit.bankAccountNumber,
+                    auDdisFlag        = "",
+                    paymentPlanCount  = 0,
+                    paymentPlanList   = Seq.empty
+                  )
+                )
+
+              case _ =>
+                for {
+                  ddPaymentPlans <- nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
+                  _              <- directDebitCache.updateDirectDebit(directDebitReference, ddPaymentPlans.paymentPlanList)(userId)
+                } yield ddPaymentPlans
+            }
+        }
     }
   }
 

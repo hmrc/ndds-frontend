@@ -16,6 +16,7 @@
 
 package models
 
+import models.responses.NddPaymentPlan
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.crypto.{Crypted, Decrypter, Encrypter, PlainText}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
@@ -29,7 +30,8 @@ case class NddDetails(ddiRefNumber: String,
                       bankAccountNumber: String,
                       bankAccountName: String,
                       auDdisFlag: Boolean,
-                      numberOfPayPlans: Int
+                      numberOfPayPlans: Int,
+                      paymentPlansList: Option[Seq[NddPaymentPlan]] = None
                      ) {
   val toDirectDebitDetails: DirectDebitDetails = DirectDebitDetails(
     directDebitReference = ddiRefNumber,
