@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -34,7 +35,8 @@ class AccountDetailsNotVerifiedController @Inject() (
   getData: DataRetrievalAction,
   val controllerComponents: MessagesControllerComponents,
   view: AccountDetailsNotVerifiedView,
-  lockService: LockService
+  lockService: LockService,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -46,7 +48,7 @@ class AccountDetailsNotVerifiedController @Inject() (
         .map(DateTimeFormats.formattedDateTime)
         .getOrElse(throw Exception("Locked user has no expiry time"))
 
-      Ok(view(formattedDate))
+      Ok(view(appConfig.payingHmrcUrl, formattedDate))
     }
   }
 }

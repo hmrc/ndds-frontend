@@ -125,11 +125,12 @@ reachedLimit.title = You’ve reached the limit for confirming your bank details
 reachedLimit.heading = You’ve reached the limit for confirming your bank details
 reachedLimit.p1 = You will need to wait until {0} before trying to confirm your bank detail.
 
-accountDetailsNotVerified.title = Your account details could not be verified
-accountDetailsNotVerified.heading = Your account details could not be verified
-accountDetailsNotVerified.p1 = You will need to wait until {0} before you enter the details of different bank account
-accountDetailsNotVerified.p2 = If you do not have another bank account you will need to pay using an alternative payment option. You can find more information on this on the
-accountDetailsNotVerified.p2.link = Paying HMRC page
+accountDetailsNotVerified.title = Account details could not be verified
+accountDetailsNotVerified.heading = Account details could not be verified
+accountDetailsNotVerified.p1 = You must wait until <strong>{0}</strong> before you can enter the details of another bank account.
+accountDetailsNotVerified.p2 = If you do not have another bank account, you must
+accountDetailsNotVerified.p2.link =  pay with a different payment option
+accountDetailsNotVerified.return.link = Return to Direct Debit Instructions
 
 confirmYourAuthority.title = Confirm your authority
 confirmYourAuthority.heading = Confirm your authority
