@@ -18,7 +18,6 @@ package repositories
 
 import config.{FakeEncrypterDecrypter, FrontendAppConfig}
 import models.responses.{NddDDPaymentPlansResponse, NddPaymentPlan, PaymentPlanDAO}
-import models.{NddDAO, NddDetails}
 import org.mockito.Mockito.when
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters
@@ -115,19 +114,21 @@ class PaymentPlanCacheRepositorySpec
 
   ".retrieveCache" - {
 
-    "when there is a record for this id" - {
+    "when there is a record for this userId and directDebitReference" - {
 
       "must update the lastUpdated time and get the record" in {
-
         repository.saveToCache(userId, directDebitReference, direDebitPaymentPlans).futureValue
 
         val result = repository.retrieveCache(userId, directDebitReference).futureValue
 
-        result.head mustEqual direDebitPaymentPlans
+        val updatedCache = find(filterBy(userId, directDebitReference)).futureValue
+
+        result mustBe Some(direDebitPaymentPlans)
+        updatedCache.head.lastUpdated mustEqual instant
       }
     }
 
-    "when there is no record for this id" - {
+    "when there is no record for this userId and directDebitReference" - {
 
       "must return None" in {
 
@@ -140,7 +141,7 @@ class PaymentPlanCacheRepositorySpec
 
   ".keepAlive" - {
 
-    "when there is a record for this id" - {
+    "when there is a record for this userId and directDebitReference" - {
 
       "must update its lastUpdated to `now` and return true" in {
         repository.saveToCache(userId, directDebitReference, direDebitPaymentPlans).futureValue
@@ -148,7 +149,7 @@ class PaymentPlanCacheRepositorySpec
 
         val updatedCache = find(filterBy(userId, directDebitReference)).futureValue
 
-        updatedCache.head mustEqual direDebitPaymentPlans
+        updatedCache.head.lastUpdated mustEqual instant
       }
     }
 
