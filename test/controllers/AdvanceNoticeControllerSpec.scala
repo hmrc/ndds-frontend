@@ -113,8 +113,8 @@ class AdvanceNoticeControllerSpec extends SpecBase {
           LocalDate.now().plusMonths(1).format(dateFormat),
           directDebitReference,
           directDebitDetails.bankAccountName.get,
-          directDebitDetails.bankSortCode.get,
           directDebitDetails.bankAccountNumber.get,
+          directDebitDetails.bankSortCode.get,
           paymentPlanReference,
           routes.PaymentPlanDetailsController.onPageLoad()
         )(request, messages(application))
