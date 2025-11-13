@@ -54,10 +54,10 @@ POST       /which-tax-duty-payment-plan                 controllers.DirectDebitS
 GET        /change-which-tax-duty-payment-plan          controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-which-tax-duty-payment-plan          controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
 
-GET        /payment-plan-type                           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
-POST       /payment-plan-type                           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
-GET        /change-payment-plan-type                    controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-payment-plan-type                    controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
+GET        /what-type-payment-plan-selecting                           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
+POST       /what-type-payment-plan-selecting                           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
+GET        /change-what-type-payment-plan-selecting                    controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-what-type-payment-plan-selecting                    controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-reference                           controllers.PaymentReferenceController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-reference                           controllers.PaymentReferenceController.onSubmit(mode: Mode = NormalMode)

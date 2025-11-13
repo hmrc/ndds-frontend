@@ -60,7 +60,16 @@ class PaymentPlanTypeController @Inject() (
       case None        => form
       case Some(value) => form.fill(value)
     }
-    Ok(view(preparedForm, mode, selectedAnswers, Some(appConfig.payingHmrcUrl), routes.DirectDebitSourceController.onPageLoad(mode)))
+    Ok(
+      view(
+        preparedForm,
+        mode,
+        selectedAnswers,
+        Some(appConfig.selfAssessmentUrl),
+        Some(appConfig.paymentProblemUrl),
+        routes.DirectDebitSourceController.onPageLoad(mode)
+      )
+    )
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
@@ -75,7 +84,9 @@ class PaymentPlanTypeController @Inject() (
               view(
                 formWithErrors,
                 mode,
-                selectedSource, None,
+                selectedSource,
+                None,
+                None,
                 routes.DirectDebitSourceController.onPageLoad(mode)
               )
             )
