@@ -362,7 +362,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
                                                             bankAccountNumber = "12345678",
                                                             bankAccountName   = "MyBankAcc",
                                                             auDdisFlag        = "01",
-                                                            paymentPlanCount  = 2,
+                                                            paymentPlanCount  = 0,
                                                             paymentPlanList   = Seq.empty
                                                            )
 
@@ -383,7 +383,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
                                                             bankAccountNumber = "12345678",
                                                             bankAccountName   = "MyBankAcc",
                                                             auDdisFlag        = "01",
-                                                            paymentPlanCount  = 2,
+                                                            paymentPlanCount  = 0,
                                                             paymentPlanList   = Seq.empty
                                                            )
 
