@@ -71,7 +71,15 @@ class PaymentPlanTypeController @Inject() (
       .fold(
         formWithErrors => {
           Future.successful(
-            BadRequest(view(formWithErrors, mode, selectedSource, None, routes.DirectDebitSourceController.onPageLoad(mode)))
+            BadRequest(
+              view(
+                formWithErrors,
+                mode,
+                selectedSource,
+                None,
+                routes.DirectDebitSourceController.onPageLoad(mode)
+              )
+            )
           )
         },
         newValue =>
