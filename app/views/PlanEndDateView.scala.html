@@ -19,7 +19,6 @@
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
-    govukDetails: GovukDetails,
     govukButton: GovukButton
 )
 
@@ -42,12 +41,6 @@
                         HtmlContent(
                         Seq(
                             s"<p class='govuk-body'>${messages("planEndDate.p1")}</p>",
-                            govukDetails(
-                                Details(
-                                    summary = messages("planEndDate.detailSummary"),
-                                    content = messages("planEndDate.detailContent")
-                                )
-                            ),
                             messages("planEndDate.hint"),
                             ).mkString
                         )
