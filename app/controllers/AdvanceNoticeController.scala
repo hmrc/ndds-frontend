@@ -51,6 +51,7 @@ class AdvanceNoticeController @Inject() (
 
     userAnswers.get(PaymentPlanDetailsQuery) match {
       case Some(response) =>
+        val planDetail = response.paymentPlanDetails
         val directDebitDetails = response.directDebitDetails
         val totalAmount: String = userAnswers.get(AdvanceNoticeResponseQuery).flatMap(_.totalAmount).map(currencyFormat.format).getOrElse("£0.00")
         val dueDate: String = userAnswers.get(AdvanceNoticeResponseQuery).flatMap(_.dueDate).map(_.format(dateFormat)).getOrElse("")
