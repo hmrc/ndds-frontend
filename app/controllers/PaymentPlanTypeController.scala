@@ -75,8 +75,7 @@ class PaymentPlanTypeController @Inject() (
               view(
                 formWithErrors,
                 mode,
-                selectedSource,
-                None,
+                selectedSource, None,
                 routes.DirectDebitSourceController.onPageLoad(mode)
               )
             )
