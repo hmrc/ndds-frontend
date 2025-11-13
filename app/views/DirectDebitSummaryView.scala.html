@@ -81,8 +81,9 @@
 
         @paragraph("directDebitPaymentSummary.setupPayment.p1")
 
-        @govukButton(
-            ButtonViewModel(messages("directDebitPaymentSummary.addPaymentButton"))
-        )
+        @govukButton(Button(
+            href = Some(routes.SetupDirectDebitPaymentController.onPageLoad().url),
+            content = Text(messages("directDebitPaymentSummary.addPaymentButton"))
+        ))
     }
 }
