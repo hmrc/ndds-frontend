@@ -19,6 +19,7 @@
 @import views.html.components.*
 @import utils.MaskAndFormatUtils.*
 @import viewmodels.govuk.PaginationFluency.*
+@import models.NormalMode
 
 @this(
     layout: templates.Layout,
@@ -63,7 +64,7 @@
         @paragraphWithLink(
             Some(messages("directDebitPaymentSummary.activePayment.p1")),
             linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
-            linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
+            linkUrl = routes.DirectDebitSourceController.onPageLoad(NormalMode).url,
             linkFullStop = true
         )
 
@@ -82,7 +83,7 @@
         @paragraph("directDebitPaymentSummary.setupPayment.p1")
 
         @govukButton(Button(
-            href = Some(routes.SetupDirectDebitPaymentController.onPageLoad().url),
+            href = Some(routes.DirectDebitSourceController.onPageLoad(NormalMode).url),
             content = Text(messages("directDebitPaymentSummary.addPaymentButton"))
         ))
     }
