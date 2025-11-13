@@ -109,6 +109,15 @@ class PaymentPlanCacheRepositorySpec
       updatedRecord.ddPaymentPlans mustEqual direDebitPaymentPlans
     }
 
+    "must not create duplicate records for same userId and directDebitReference" in {
+      repository.saveToCache("user1", "ddRef1", direDebitPaymentPlans).futureValue
+
+      repository.saveToCache("user1", "ddRef1", direDebitPaymentPlans).futureValue
+
+      val records = find(filterBy("user1", "ddRef1")).futureValue
+      records.size mustEqual 1
+    }
+
     mustPreserveMdc(repository.saveToCache(userId, directDebitReference, direDebitPaymentPlans))
   }
 
