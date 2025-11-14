@@ -17,6 +17,7 @@
 @import forms.SuspensionPeriodRangeDateFormProvider
 @import models.SuspensionPeriodRange
 @import views.html.components.*
+@import viewmodels.govuk.errorsummary.ErrorSummaryViewModel
 
 @this(
     header1: Header1,
@@ -26,7 +27,7 @@
     paragraph: Paragraph,
     govukButton: GovukButton,
     govukInsetText: GovukInsetText,
-    mainErrorSummary: MainErrorSummary,
+    govukErrorSummary: GovukErrorSummary,
     formProvider: SuspensionPeriodRangeDateFormProvider
 )
 
@@ -51,7 +52,22 @@
 
         @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @mainErrorSummary(adjustedForm)
+        @if(adjustedForm.errors.nonEmpty) {
+            @defining({
+                val baseFields = Seq("suspensionPeriodRangeStartDate", "suspensionPeriodRangeEndDate")
+                val filteredErrors = baseFields.flatMap { baseField =>
+                    adjustedForm.errors.find(_.key == baseField).orElse {
+                        adjustedForm.errors.find(e => e.key.startsWith(baseField + "."))
+                    }
+                }
+                adjustedForm.copy(errors = filteredErrors)
+            }) { filteredForm =>
+                @govukErrorSummary(ErrorSummaryViewModel(filteredForm, errorLinkOverrides = Map(
+                    "suspensionPeriodRangeStartDate" -> "suspensionPeriodRangeStartDate.day",
+                    "suspensionPeriodRangeEndDate" -> "suspensionPeriodRangeEndDate.day"
+                )))
+            }
+        }
 
             @if(mode == NormalMode) {
                 @header1("suspensionPeriodRangeDate.heading.normal")
