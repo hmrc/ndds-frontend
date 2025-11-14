@@ -40,11 +40,11 @@ class Navigator @Inject() () {
     case PaymentsFrequencyPage                => _ => routes.RegularPaymentAmountController.onPageLoad(NormalMode)
     case RegularPaymentAmountPage             => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
     case TotalAmountDuePage                   => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
-    case PlanStartDatePage                    => userAnswers => checkPlanStartDateLogic(userAnswers)
+    case PlanStartDatePage                    => _ => routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode)
     case PlanEndDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage                  => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
     case AmendPaymentAmountPage               => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
-    case AmendPlanStartDatePage               => _ => routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode)
+    case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case AddPaymentPlanEndDatePage            => userAnswers => navigateFromAddPaymentPlanEndDatePage(NormalMode)(userAnswers)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
@@ -62,14 +62,14 @@ class Navigator @Inject() () {
     case PaymentReferencePage           => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentAmountPage              => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentDatePage                => _ => routes.CheckYourAnswersController.onPageLoad()
-    case PlanStartDatePage              => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PlanStartDatePage              => _ => routes.AddPaymentPlanEndDateController.onPageLoad(CheckMode)
     case PlanEndDatePage                => _ => routes.CheckYourAnswersController.onPageLoad()
     case TotalAmountDuePage             => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentsFrequencyPage          => _ => routes.CheckYourAnswersController.onPageLoad()
     case RegularPaymentAmountPage       => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage            => _ => routes.CheckYourAnswersController.onPageLoad()
     case AmendPaymentAmountPage         => userAnswers => checkPaymentPlanLogic(userAnswers, CheckMode)
-    case AmendPlanStartDatePage         => _ => routes.AddPaymentPlanEndDateController.onPageLoad(CheckMode)
+    case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case AddPaymentPlanEndDatePage      => userAnswers => navigateFromAddPaymentPlanEndDatePage(CheckMode)(userAnswers)
     case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case SuspensionPeriodRangeDatePage  => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
@@ -120,19 +120,6 @@ class Navigator @Inject() () {
       case Some(MGD) | Some(SA) | Some(TC) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
       case _                               => routes.PaymentReferenceController.onPageLoad(NormalMode)
     }
-
-  private def checkPlanStartDateLogic(userAnswers: UserAnswers): Call = {
-    val optSourceType = userAnswers.get(DirectDebitSourcePage)
-    val optPaymentType = userAnswers.get(PaymentPlanTypePage)
-
-    (optSourceType, optPaymentType) match {
-      case (Some(SA), Some(BudgetPaymentPlan)) =>
-        routes.PlanEndDateController.onPageLoad(NormalMode)
-      case (Some(PAYE), _) | (Some(MGD), Some(VariablePaymentPlan)) | (Some(TC), Some(TaxCreditRepaymentPlan)) =>
-        routes.CheckYourAnswersController.onPageLoad()
-      case _ => routes.JourneyRecoveryController.onPageLoad()
-    }
-  }
 
   private def checkPaymentPlanLogic(userAnswers: UserAnswers, mode: Mode): Call = {
     val paymentPlanType = userAnswers.get(ManagePaymentPlanTypePage)
