@@ -37,7 +37,7 @@ class PaymentPlanLockedWarningControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[PaymentPlanLockedWarningView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(routes.PaymentPlanDetailsController.onPageLoad())(request, messages(application)).toString
+        contentAsString(result) mustEqual view(routes.DirectDebitSummaryController.onPageLoad())(request, messages(application)).toString
       }
     }
   }

@@ -798,25 +798,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           paymentPlanEditable       = true
         )
 
-        val directDebitDetails = DirectDebitDetails(
-          bankSortCode       = Some("12-34-56"),
-          bankAccountNumber  = Some("12345678"),
-          bankAccountName    = Some("John Doe"),
-          auDdisFlag         = true,
-          submissionDateTime = LocalDateTime.now()
-        )
-
-        val paymentPlanResponse = PaymentPlanResponse(
-          directDebitDetails = directDebitDetails,
-          paymentPlanDetails = paymentPlanDetails
-        )
-
-        val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
-          .success
-          .value
-
-        service.isPaymentPlanLocked(userAnswers) shouldBe true
+        service.isPaymentPlanEditable(paymentPlanDetails) shouldBe true
       }
 
       "return false when paymentPlanEditable is false" in {
@@ -839,31 +821,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           paymentPlanEditable       = false
         )
 
-        val directDebitDetails = DirectDebitDetails(
-          bankSortCode       = Some("12-34-56"),
-          bankAccountNumber  = Some("12345678"),
-          bankAccountName    = Some("John Doe"),
-          auDdisFlag         = true,
-          submissionDateTime = LocalDateTime.now()
-        )
-
-        val paymentPlanResponse = PaymentPlanResponse(
-          directDebitDetails = directDebitDetails,
-          paymentPlanDetails = paymentPlanDetails
-        )
-
-        val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
-          .success
-          .value
-
-        service.isPaymentPlanLocked(userAnswers) shouldBe false
-      }
-
-      "return false when PaymentPlanDetailsQuery is not present in userAnswers" in {
-        val userAnswers = emptyUserAnswers
-
-        service.isPaymentPlanLocked(userAnswers) shouldBe false
+        service.isPaymentPlanEditable(paymentPlanDetails) shouldBe false
       }
     }
   }
