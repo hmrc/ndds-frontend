@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.*
-import models.UserAnswers
+import models.{Mode, UserAnswers}
 import models.responses.PaymentPlanDetails
 import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 
@@ -46,7 +46,7 @@ class PaymentPlanSuspendedController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val userAnswers = request.userAnswers
 
     if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
@@ -59,7 +59,7 @@ class PaymentPlanSuspendedController @Inject() (
         val formattedEndDate = suspensionPeriodRange.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
         val paymentReference = planDetails.paymentPlanDetails.paymentReference
         val rows = buildRows(paymentReference, userAnswers, planDetails.paymentPlanDetails)
-        Ok(view(formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows))
+        Ok(view(mode, formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows))
       }
 
       maybeResult match {

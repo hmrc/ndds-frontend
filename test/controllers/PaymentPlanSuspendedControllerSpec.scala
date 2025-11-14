@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.responses.PaymentPlanDetails
-import models.{PaymentPlanType, SuspensionPeriodRange, UserAnswers}
+import models.{NormalMode, PaymentPlanType, SuspensionPeriodRange, UserAnswers}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.Application
@@ -35,7 +35,7 @@ import java.time.format.DateTimeFormatter
 
 class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
-  private lazy val paymentPlanSuspendedRoute = routes.PaymentPlanSuspendedController.onPageLoad().url
+  private lazy val paymentPlanSuspendedRoute = routes.PaymentPlanSuspendedController.onPageLoad(NormalMode).url
 
   private val suspensionRange = SuspensionPeriodRange(
     startDate = java.time.LocalDate.of(2025, 10, 25),
@@ -101,14 +101,14 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
 
-        contentAsString(result) mustEqual view(formattedStartDate,
-                                               formattedEndDate,
-                                               Call("GET", routes.PaymentPlanDetailsController.onPageLoad().url),
-                                               summaryListRows
-                                              )(
-          request,
-          messages(application)
-        ).toString
+        contentAsString(result) mustEqual
+          view(
+            NormalMode,
+            formattedStartDate,
+            formattedEndDate,
+            Call("GET", routes.PaymentPlanDetailsController.onPageLoad().url),
+            summaryListRows
+          )(request, messages(application)).toString
       }
     }
 
