@@ -172,3 +172,7 @@ GET        /amending-payment-plan                       controllers.AmendingPaym
 GET        /page-not-found                       controllers.BackSubmissionController.onPageLoad()
 
 GET        /advance-notice-direct-debit-payment          controllers.AdvanceNoticeController.onPageLoad()
+
+GET        /page-not-found                                    controllers.PageNotFoundController.onPageLoad()
+GET        /access-denied                                     controllers.AccessDeniedController.onPageLoad()
+GET        /system-error/there-is-a-problem                   controllers.SystemErrorController.onPageLoad()
