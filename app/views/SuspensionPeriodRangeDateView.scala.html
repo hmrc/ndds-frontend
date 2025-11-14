@@ -14,17 +14,21 @@
  * limitations under the License.
  *@
 
+@import forms.SuspensionPeriodRangeDateFormProvider
+@import models.SuspensionPeriodRange
 @import views.html.components.*
+@import viewmodels.govuk.errorsummary.ErrorSummaryViewModel
 
 @this(
     header1: Header1,
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
     paragraph: Paragraph,
     govukButton: GovukButton,
-    govukInsetText: GovukInsetText
+    govukInsetText: GovukInsetText,
+    govukErrorSummary: GovukErrorSummary,
+    formProvider: SuspensionPeriodRangeDateFormProvider
 )
 
 @(form: Form[_], mode: Mode, planReference: String, paymentAmount: String, suspensionStartDate: String, suspensionEndDate: String)(implicit request: Request[_], messages: Messages)
@@ -44,11 +48,25 @@
                 )
             ) {
 
-    @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @defining(formProvider.withMappedErrors(form.asInstanceOf[Form[SuspensionPeriodRange]])) { adjustedForm =>
 
+        @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
+        @if(adjustedForm.errors.nonEmpty) {
+            @defining({
+                val baseFields = Seq("suspensionPeriodRangeStartDate", "suspensionPeriodRangeEndDate")
+                val filteredErrors = baseFields.flatMap { baseField =>
+                    adjustedForm.errors.find(_.key == baseField).orElse {
+                        adjustedForm.errors.find(e => e.key.startsWith(baseField + "."))
+                    }
+                }
+                adjustedForm.copy(errors = filteredErrors)
+            }) { filteredForm =>
+                @govukErrorSummary(ErrorSummaryViewModel(filteredForm, errorLinkOverrides = Map(
+                    "suspensionPeriodRangeStartDate" -> "suspensionPeriodRangeStartDate.day",
+                    "suspensionPeriodRangeEndDate" -> "suspensionPeriodRangeEndDate.day"
+                )))
+            }
         }
 
             @if(mode == NormalMode) {
@@ -76,7 +94,7 @@
 
         @govukDateInput(
             DateViewModel(
-                field  = form("suspensionPeriodRangeStartDate"),
+                field  = adjustedForm("suspensionPeriodRangeStartDate"),
                 legend = LegendViewModel(messages("suspensionPeriodRangeDate.startDate")).withCssClass("govuk-fieldset__legend--m")
             )
 
@@ -85,7 +103,7 @@
 
             @govukDateInput(
                 DateViewModel(
-                    field  = form("suspensionPeriodRangeEndDate"),
+                    field  = adjustedForm("suspensionPeriodRangeEndDate"),
                     legend = LegendViewModel(messages("suspensionPeriodRangeDate.endDate")).withCssClass("govuk-fieldset__legend--m")
                 )
                 .withHint(HintViewModel(messages("suspensionPeriodRangeEndDate.hint")))
@@ -96,4 +114,5 @@
         )
     }
     }
+}
 }
