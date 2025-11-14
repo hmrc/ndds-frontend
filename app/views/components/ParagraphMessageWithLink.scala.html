@@ -17,15 +17,15 @@
 @this()
 
 @(message1: Option[String] = None,
-    linkMessage: String,
-    message2: Option[String] = None,
-    linkUrl: String,
-    classes: String = "govuk-body",
-    linkClass: String = "govuk-link",
-    linkRel: String = "",
-    target: String = "_self",
-    linkFullStop: Boolean = false,
-    maxLimit: Boolean = false
+linkMessage: String,
+message2: Option[String] = None,
+linkUrl: String,
+classes: String = "govuk-body",
+linkClass: String = "govuk-link",
+linkRel: String = "",
+target: String = "_self",
+linkFullStop: Boolean = false,
+maxLimit: Boolean = false
 )
 
 <p class="@classes">
@@ -45,12 +45,8 @@
             @if(linkClass.nonEmpty) { class="@linkClass" }
             @if(linkRel.nonEmpty) { rel="@linkRel" }
             @if(target.nonEmpty) { target="@target" }
-    >
-        @linkMessage
-    </a>
+    >@linkMessage</a>@if(linkFullStop){.}
     }
-
-    @{ if(linkFullStop)(".") }
 
     @message2.map { message => @message }
 
