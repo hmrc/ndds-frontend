@@ -519,13 +519,12 @@ amendPaymentPlanUpdate.print = Print this confirmation
 amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
 amendPaymentPlanUpdate.close = Close
 
-cancelPaymentPlan.title = Cancel this payment plan
-cancelPaymentPlan.heading = Cancel this payment plan
+cancelPaymentPlan.title = Cancelling this payment plan
+cancelPaymentPlan.heading = Cancelling this payment plan
 cancelPaymentPlan.paymentReference = Payment reference:
 cancelPaymentPlan.paymentAmount.single = Payment amount:
 cancelPaymentPlan.paymentAmount.budget = Regular payment amount:
 cancelPaymentPlan.p1 = Payments due within the next 3 working days cannot be cancelled.
-cancelPaymentPlan.p2 = For security reasons, you may be asked to re-authenticate your details.
 cancelPaymentPlan.h2 = Are you sure you want to cancel this payment plan?
 cancelPaymentPlan.checkYourAnswersLabel = cancelPaymentPlan
 cancelPaymentPlan.error.required = Select one option.
@@ -533,15 +532,12 @@ cancelPaymentPlan.change.hidden = CancelPaymentPlan
 
 paymentPlanCancelled.title = Payment plan cancelled
 paymentPlanCancelled.panel.title = Payment plan cancelled
-paymentPlanCancelled.panel.body1 = Your payment plan reference
-paymentPlanCancelled.panel.strong = <br><strong>{0}</strong>
-paymentPlanCancelled.panel.body2 = <br>has been cancelled
-paymentPlanCancelled.pleaseNote = You can print this page for your records using your browser’s print function.
 paymentPlanCancelled.h1 = What happens next
 paymentPlanCancelled.p1 = This payment plan has now been cancelled. No further payments will be taken. You may still see this payment plan in your account for up to 36 hours.
 paymentPlanCancelled.h2 = Your cancelled payment plan
 paymentPlanCancelled.paymentReference = Payment reference: {0}
-paymentPlanCancelled.link = Return to Direct Debit Instruction
+paymentPlanCancelled.pleaseNote = You can print this page for your records using the print function on your browser.
+paymentPlanCancelled.link = Return to Direct Debit Instructions
 
 duplicateWarning.title = You already have a payment plan with these details
 duplicateWarning.h1 = You already have a payment plan with these details
