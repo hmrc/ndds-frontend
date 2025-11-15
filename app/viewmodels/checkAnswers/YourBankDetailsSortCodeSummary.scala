@@ -42,4 +42,23 @@ object YourBankDetailsSortCodeSummary {
         )
       )
     }
+
+  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(YourBankDetailsPage).map { answer =>
+
+      val value = HtmlFormat.escape(answer.sortCode).toString
+
+      SummaryListRowViewModel(
+        key   = "bankDetailsCheckYourAnswer.account.sort.code",
+        value = ValueViewModel(HtmlContent(value)),
+        actions = if (showChange) {
+          Seq(
+            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+          )
+        } else {
+          Seq.empty
+        }
+      )
+    }
 }

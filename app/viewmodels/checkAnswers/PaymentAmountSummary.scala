@@ -18,7 +18,7 @@ package viewmodels.checkAnswers
 
 import config.CurrencyFormatter.currencyFormat
 import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, PaymentPlanType, UserAnswers}
 import pages.PaymentAmountPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -36,6 +36,27 @@ object PaymentAmountSummary {
           ActionItemViewModel("site.change", routes.PaymentAmountController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("paymentAmount.change.hidden"))
         )
+      )
+    }
+
+  def row(planType: String, answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+    val label = if (PaymentPlanType.BudgetPaymentPlan.toString == planType) {
+      "directDebitConfirmation.details.amount.budgetPaymentPlan"
+    } else {
+      "directDebitConfirmation.details.amount.singlePaymentPlan"
+    }
+    answers.get(PaymentAmountPage).map { amount =>
+      SummaryListRowViewModel(
+        key   = label,
+        value = ValueViewModel(currencyFormat(amount)),
+        actions = if (showChange) {
+          Seq(
+            ActionItemViewModel("site.change", routes.PaymentAmountController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("paymentAmount.change.hidden"))
+          )
+        } else {
+          Seq.empty
+        }
       )
     }
 }

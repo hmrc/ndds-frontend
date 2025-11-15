@@ -46,4 +46,27 @@ object PaymentPlanTypeSummary {
         )
       )
     }
+
+  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PaymentPlanTypePage).map { answer =>
+
+      val value = ValueViewModel(
+        HtmlContent(
+          HtmlFormat.escape(messages(s"directDebitConfirmation.$answer"))
+        )
+      )
+
+      SummaryListRowViewModel(
+        key   = "directDebitConfirmation.planType",
+        value = value,
+        actions = if (showChange) {
+          Seq(
+            ActionItemViewModel("site.change", routes.PaymentPlanTypeController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("paymentPlanType.change.hidden"))
+          )
+        } else {
+          Seq.empty
+        }
+      )
+    }
 }

@@ -41,4 +41,23 @@ object PaymentDateSummary {
         )
       )
     }
+
+  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PaymentDatePage).map { answer =>
+
+      implicit val lang: Lang = messages.lang
+
+      SummaryListRowViewModel(
+        key   = "paymentDate.checkYourAnswersLabel",
+        value = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
+        actions = if (showChange) {
+          Seq(
+            ActionItemViewModel("site.change", routes.PaymentDateController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("paymentDate.change.hidden"))
+          )
+        } else {
+          Seq.empty
+        }
+      )
+    }
 }

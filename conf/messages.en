@@ -379,6 +379,15 @@ directDebitConfirmation.summaryTextDetails.p4 = If you receive a refund you are 
 directDebitConfirmation.summaryTextDetails.p5 = You can cancel a Direct Debit at any time, by contacting your bank or building society. Written confirmation may be required.
 directDebitConfirmation.directDebitDetails = Direct Debit details
 directDebitConfirmation.yourPaymentDetails = Your payment details
+directDebitConfirmation.planType = Plan type
+directDebitConfirmation.singlePaymentPlan = Single payment
+directDebitConfirmation.variablePaymentPlan = Variable payment
+directDebitConfirmation.budgetPaymentPlan = Budget payment
+directDebitConfirmation.taxCreditRepaymentPlan = Tax Credit repayment
+directDebitConfirmation.details.dateSetUp = Date set up
+directDebitConfirmation.details.amount.budgetPaymentPlan = Regular payment amount
+directDebitConfirmation.details.amount.singlePaymentPlan = Payment amount
+
 directDebitConfirmation.printInset = You can print this page for your records using the print function on your browser.
 directDebitConfirmation.viewPaymentPlans = View all payment plans
 directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instructions

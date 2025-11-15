@@ -16,50 +16,36 @@
 
 package viewmodels.checkAnswers
 
-import pages.YourBankDetailsPage
+import pages.DirectDebitSourcePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 import controllers.routes
 import models.{CheckMode, UserAnswers}
 
-object YourBankDetailsAccountHolderNameSummary {
-
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(YourBankDetailsPage).map { answer =>
-
-      val value = HtmlFormat.escape(answer.accountHolderName).toString
-
-      SummaryListRowViewModel(
-        key   = "bankDetailsCheckYourAnswer.account.holder.name",
-        value = ValueViewModel(HtmlContent(value)),
-        actions = Seq(
-          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
-        )
-      )
-    }
+object DirectDebitSourceSummary {
 
   def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(YourBankDetailsPage).map { answer =>
+    answers.get(DirectDebitSourcePage).map { answer =>
 
-      val value = HtmlFormat.escape(answer.accountHolderName).toString
+      val displayValue = messages(s"directDebitSource.${answer.toString}")
 
       SummaryListRowViewModel(
-        key   = "bankDetailsCheckYourAnswer.account.holder.name",
-        value = ValueViewModel(HtmlContent(value)),
+        key   = "directDebitPaymentSummary.activePayment.summary.paymentFor",
+        value = ValueViewModel(Text(displayValue)),
         actions = if (showChange) {
           Seq(
-            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+            ActionItemViewModel(
+              content = "site.change",
+              href    = routes.DirectDebitSourceController.onPageLoad(CheckMode).url
+            ).withVisuallyHiddenText(messages(""))
           )
         } else {
           Seq.empty
         }
       )
     }
-
 }
