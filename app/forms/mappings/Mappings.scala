@@ -105,6 +105,30 @@ trait Mappings extends Formatters with Constraints {
                                 ): FieldMapping[YearEndAndMonth] =
     of(new YearEndAndMonthDateFormatter(invalidKey, args, dateFormats))
 
+  protected def suspensionPeriodRangeStartDate(invalidKey: String,
+                                               allRequiredKey: String,
+                                               twoRequiredKey: String,
+                                               requiredKey: String,
+                                               args: Seq[String] = Seq.empty,
+                                               dateFormats: Seq[DateFormat],
+                                               planStartDateOpt: Option[java.time.LocalDate],
+                                               planEndDateOpt: Option[java.time.LocalDate],
+                                               earliestStartDate: java.time.LocalDate
+                                              )(implicit messages: Messages): FieldMapping[java.time.LocalDate] =
+    of(
+      new SuspensionPeriodRangeStartDateFormatter(
+        invalidKey,
+        allRequiredKey,
+        twoRequiredKey,
+        requiredKey,
+        args,
+        dateFormats,
+        planStartDateOpt,
+        planEndDateOpt,
+        earliestStartDate
+      )
+    )
+
   private def currencyConstraint(
     nonNumericKey: String,
     invalidNumericKey: String

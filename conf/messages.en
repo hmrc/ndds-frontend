@@ -654,6 +654,24 @@ advanceNotice.yourPaymentDetails.dueDate = Date of collection
 advanceNotice.print.inset = You can print this page for your records using the print function on your browser.
 advanceNotice.returnLink = Return to payment plan
 
+pageNotFound.title      = Page not found
+pageNotFound.heading    = Page not found
+pageNotFound.p1         = If you typed the web address, check it is correct.
+pageNotFound.p2         = If you pasted the web address, check you copied the entire address.
+pageNotFound.p3         = If the web address is correct or you selected a link or button, contact the
+pageNotFound.link       = HMRC Online Services Helpdesk
+pageNotFound.p4         = if you need to speak to someone.
+
+accessDenied.title      = Sorry, there is a problem with the service
+accessDenied.heading    = Sorry, there is a problem with the service
+accessDenied.p1         = You do not have access to this service.
+accessDenied.link       = Continue to your account.
+
+systemError.title       = Sorry, there is a problem with this service
+systemError.heading     = Sorry, there is a problem with this service
+systemError.p1          = Try again later or contact the
+systemError.link        = HMRC Online Services Helpdesk
+
 paymentPlanLockedWarning.title = You cannot view or manage this payment plan
 paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
 paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.

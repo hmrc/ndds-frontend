@@ -69,7 +69,7 @@ class AuthenticatedIdentifierAction @Inject() (
         if (usingSupportedEnrolments(userEnrolments)) {
           block(IdentifierRequest(request, credentials.providerId))
         } else {
-          throw InsufficientEnrolments(s"User had none of ${acceptedEnrolments.mkString(", ")}")
+          Future.successful(Redirect(routes.AccessDeniedController.onPageLoad()))
         }
       case _ => throw new UnauthorizedException("Unable to retrieve credential id")
     } recover {
