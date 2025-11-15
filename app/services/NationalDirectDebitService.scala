@@ -507,7 +507,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   }
 
   def isPaymentPlanEditable(planDetail: PaymentPlanDetails): Boolean = {
-    println("Payment Plan Editable status is : " + planDetail.paymentPlanEditable)
     planDetail.paymentPlanEditable
   }
 }
