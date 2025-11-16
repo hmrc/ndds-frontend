@@ -775,6 +775,55 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         }
       }
     }
+
+    "isPaymentPlanLocked" - {
+
+      "return true when paymentPlanEditable is true" in {
+        val paymentPlanDetails = PaymentPlanDetails(
+          hodService                = "HOD2",
+          planType                  = "TypeB",
+          paymentReference          = "REF456",
+          submissionDateTime        = LocalDateTime.now(),
+          scheduledPaymentAmount    = Some(BigDecimal(500)),
+          scheduledPaymentStartDate = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentStartDate   = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentAmount      = Some(BigDecimal(50)),
+          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(5)),
+          scheduledPaymentFrequency = Some("Weekly"),
+          suspensionStartDate       = None,
+          suspensionEndDate         = None,
+          balancingPaymentAmount    = Some(BigDecimal(100)),
+          balancingPaymentDate      = Some(LocalDate.now().plusMonths(6)),
+          totalLiability            = Some(BigDecimal(600)),
+          paymentPlanEditable       = true
+        )
+
+        service.isPaymentPlanEditable(paymentPlanDetails) shouldBe true
+      }
+
+      "return false when paymentPlanEditable is false" in {
+        val paymentPlanDetails = PaymentPlanDetails(
+          hodService                = "HOD2",
+          planType                  = "TypeB",
+          paymentReference          = "REF456",
+          submissionDateTime        = LocalDateTime.now(),
+          scheduledPaymentAmount    = Some(BigDecimal(500)),
+          scheduledPaymentStartDate = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentStartDate   = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentAmount      = Some(BigDecimal(50)),
+          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(5)),
+          scheduledPaymentFrequency = Some("Weekly"),
+          suspensionStartDate       = None,
+          suspensionEndDate         = None,
+          balancingPaymentAmount    = Some(BigDecimal(100)),
+          balancingPaymentDate      = Some(LocalDate.now().plusMonths(6)),
+          totalLiability            = Some(BigDecimal(600)),
+          paymentPlanEditable       = false
+        )
+
+        service.isPaymentPlanEditable(paymentPlanDetails) shouldBe false
+      }
+    }
   }
 
   "calculateNextPaymentDate" - {

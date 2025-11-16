@@ -671,3 +671,8 @@ systemError.title       = Sorry, there is a problem with this service
 systemError.heading     = Sorry, there is a problem with this service
 systemError.p1          = Try again later or contact the
 systemError.link        = HMRC Online Services Helpdesk
+
+paymentPlanLockedWarning.title = You cannot view or manage this payment plan
+paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
+paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.
+paymentPlanLockedWarning.returnLink = Return to payment plans
