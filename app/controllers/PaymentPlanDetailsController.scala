@@ -128,6 +128,7 @@ class PaymentPlanDetailsController @Inject() (
                     isAdvanceNoticePresent,
                     formattedTotalAmount,
                     formattedDueDate,
+                    showAllActionsFlag,
                     routes.AdvanceNoticeController.onPageLoad()
                   )
                 )

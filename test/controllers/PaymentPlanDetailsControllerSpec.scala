@@ -145,6 +145,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 false,
                 formattedTotalAmount,
                 formattedDueDate,
+                true,
                 routes.AdvanceNoticeController.onPageLoad()
               )(
                 request,
@@ -223,6 +224,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                      false,
                                                      "",
                                                      "",
+                                                     false,
                                                      routes.AdvanceNoticeController.onPageLoad()
                                                     )(
                 request,
@@ -374,6 +376,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -453,6 +456,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -531,6 +535,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                        false,
                                                        "",
                                                        "",
+                                                       true,
                                                        routes.AdvanceNoticeController.onPageLoad()
                                                       )(
                   request,
@@ -612,6 +617,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  false,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -690,6 +696,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                        false,
                                                        "",
                                                        "",
+                                                       false,
                                                        routes.AdvanceNoticeController.onPageLoad()
                                                       )(
                   request,
@@ -779,6 +786,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -866,6 +874,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -953,6 +962,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -1040,6 +1050,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  false,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -1144,6 +1155,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                      false,
                                                      "",
                                                      "",
+                                                     true,
                                                      routes.AdvanceNoticeController.onPageLoad()
                                                     )(
                 request,
@@ -1217,20 +1229,22 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
               val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
               status(result) mustEqual OK
-              contentAsString(result) mustEqual view("variablePaymentPlan",
-                                                     mockPaymentReference,
-                                                     false,
-                                                     false,
-                                                     false,
-                                                     false,
-                                                     "",
-                                                     "",
-                                                     summaryListRows,
-                                                     false,
-                                                     "",
-                                                     "",
-                                                     routes.AdvanceNoticeController.onPageLoad()
-                                                    )(
+              contentAsString(result) mustEqual view(
+                "variablePaymentPlan",
+                mockPaymentReference,
+                false,
+                false,
+                false,
+                false,
+                "",
+                "",
+                summaryListRows,
+                false,
+                "",
+                "",
+                false,
+                routes.AdvanceNoticeController.onPageLoad()
+              )(
                 request,
                 messages(application)
               ).toString
@@ -1330,6 +1344,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   true,
                   formattedTotalAmount,
                   formattedDueDate,
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(request, messages(application)).toString
               }
@@ -1415,6 +1430,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(request, messages(application)).toString
               }
@@ -1506,20 +1522,22 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
               val mockPaymentReference = mockTaxCreditRepaymentPlanDetailResponse.paymentPlanDetails.paymentReference
               status(result) mustEqual OK
-              contentAsString(result) mustEqual view("taxCreditRepaymentPlan",
-                                                     mockPaymentReference,
-                                                     false,
-                                                     false,
-                                                     false,
-                                                     false,
-                                                     "",
-                                                     "",
-                                                     summaryListRows,
-                                                     false,
-                                                     "",
-                                                     "",
-                                                     routes.AdvanceNoticeController.onPageLoad()
-                                                    )(
+              contentAsString(result) mustEqual view(
+                "taxCreditRepaymentPlan",
+                mockPaymentReference,
+                false,
+                false,
+                false,
+                false,
+                "",
+                "",
+                summaryListRows,
+                false,
+                "",
+                "",
+                false,
+                routes.AdvanceNoticeController.onPageLoad()
+              )(
                 request,
                 messages(application)
               ).toString
