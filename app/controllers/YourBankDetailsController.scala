@@ -165,18 +165,36 @@ class YourBankDetailsController @Inject() (
       case BarsErrors.BankAccountUnverified => true
       case _                                => false
     }
+    
+    barsError match {
+      case BarsErrors.SortCodeOnDenyList =>
+        handleDenyListError(bankDetails, mode)
+      case _ =>
+        for {
+          lockResponse   <- lockService.updateLockForUser(credId)
+          updatedAnswers <- Future.fromTry(request.userAnswers.set(AccountUnverifiedPage, accountUnverifiedFlag))
+          _              <- sessionRepository.set(updatedAnswers)
+          result <- lockResponse.lockStatus match {
+                      case NotLocked           => handleNotLocked(bankDetails, mode, barsError)
+                      case LockedAndVerified   => handleLockedAndVerified(credId, accountUnverifiedFlag)
+                      case LockedAndUnverified => handleLockedAndUnverified(credId)
+                    }
+        } yield result
+    }
+  }
 
-    for {
-      lockResponse   <- lockService.updateLockForUser(credId)
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(AccountUnverifiedPage, accountUnverifiedFlag))
-      _              <- sessionRepository.set(updatedAnswers)
+  private def handleDenyListError(
+    bankDetails: YourBankDetails,
+    mode: Mode
+  )(implicit request: DataRequest[?]): Future[Result] = {
 
-      result <- lockResponse.lockStatus match {
-                  case NotLocked           => handleNotLocked(bankDetails, mode, barsError)
-                  case LockedAndVerified   => handleLockedAndVerified(credId, accountUnverifiedFlag)
-                  case LockedAndUnverified => handleLockedAndUnverified(credId)
-                }
-    } yield result
+    val formWithError = form
+      .fill(bankDetails)
+      .withError("sortCode", "yourBankDetails.error.sortCodeOnDenyList")
+
+    Future.successful(
+      BadRequest(view(formWithError, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+    )
   }
 
   private def handleNotLocked(bankDetails: YourBankDetails, mode: Mode, barsErrors: BarsErrors)(implicit request: DataRequest[?]): Future[Result] = {
