@@ -54,10 +54,10 @@ POST       /which-tax-duty-payment-plan                 controllers.DirectDebitS
 GET        /change-which-tax-duty-payment-plan          controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-which-tax-duty-payment-plan          controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
 
-GET        /what-type-payment-plan-selecting                           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
-POST       /what-type-payment-plan-selecting                           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
-GET        /change-what-type-payment-plan-selecting                    controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-what-type-payment-plan-selecting                    controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
+GET        /what-type-payment-plan-selecting            controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
+POST       /what-type-payment-plan-selecting            controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
+GET        /change-what-type-payment-plan-selecting     controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-what-type-payment-plan-selecting     controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-reference                           controllers.PaymentReferenceController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-reference                           controllers.PaymentReferenceController.onSubmit(mode: Mode = NormalMode)
@@ -104,8 +104,8 @@ POST       /total-amount-due                            controllers.TotalAmountD
 GET        /change-total-amount-due                     controllers.TotalAmountDueController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-total-amount-due                     controllers.TotalAmountDueController.onSubmit(mode: Mode = CheckMode)
 
-GET        /your-saved-direct-debit-payment             controllers.CheckYourAnswersController.onPageLoad()
-POST       /your-saved-direct-debit-payment             controllers.CheckYourAnswersController.onSubmit()
+GET        /check-payment-plan-details                  controllers.CheckYourAnswersController.onPageLoad()
+POST       /check-payment-plan-details                  controllers.CheckYourAnswersController.onSubmit()
 
 GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
 
@@ -145,36 +145,35 @@ POST       /change-already-have-payment-plan            controllers.DuplicateWar
 GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
 POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
 
-GET        /suspending-this-payment-plan                        controllers.SuspendPaymentPlanController.onPageLoad(mode: Mode = NormalMode)
+GET        /suspending-this-payment-plan                controllers.SuspendPaymentPlanController.onPageLoad(mode: Mode = NormalMode)
 GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()
 
+GET        /how-long-suspension-period-last             controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /how-long-suspension-period-last             controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = NormalMode)
+GET        /change-changing-suspension-period           controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-changing-suspension-period           controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
 
-GET        /how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = NormalMode)
-POST       /how-long-suspension-period-last                  controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = NormalMode)
-GET        /change-changing-suspension-period                       controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-changing-suspension-period                        controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
-
-GET        /check-suspension-details                        controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = NormalMode)
-POST       /check-suspension-details                        controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = NormalMode)
-GET        /change-check-suspension-details                 controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-check-suspension-details                 controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = CheckMode)
+GET        /check-suspension-details                    controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = NormalMode)
+POST       /check-suspension-details                    controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = NormalMode)
+GET        /change-check-suspension-details             controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-check-suspension-details             controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-plan-suspension-removed             controllers.RemoveSuspensionConfirmationController.onPageLoad()
 
-GET        /payment-plan-suspended                        controllers.PaymentPlanSuspendedController.onPageLoad()
-GET        /removing-this-suspension                        controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = NormalMode)
-POST       /removing-this-suspension                        controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = NormalMode)
-GET        /change-removing-this-suspension                  controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-removing-this-suspension                  controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = CheckMode)
+GET        /payment-plan-suspended                      controllers.PaymentPlanSuspendedController.onPageLoad()
+GET        /removing-this-suspension                    controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = NormalMode)
+POST       /removing-this-suspension                    controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = NormalMode)
+GET        /change-removing-this-suspension             controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-removing-this-suspension             controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = CheckMode)
 
 GET        /amending-payment-plan                       controllers.AmendingPaymentPlanController.onPageLoad()
 
-GET        /page-not-found                       controllers.BackSubmissionController.onPageLoad()
+GET        /page-not-found                              controllers.BackSubmissionController.onPageLoad()
 
-GET        /advance-notice-direct-debit-payment          controllers.AdvanceNoticeController.onPageLoad()
+GET        /advance-notice-direct-debit-payment         controllers.AdvanceNoticeController.onPageLoad()
 
-GET        /page-not-found                                    controllers.PageNotFoundController.onPageLoad()
-GET        /access-denied                                     controllers.AccessDeniedController.onPageLoad()
-GET        /system-error/there-is-a-problem                   controllers.SystemErrorController.onPageLoad()
+GET        /page-not-found                              controllers.PageNotFoundController.onPageLoad()
+GET        /access-denied                               controllers.AccessDeniedController.onPageLoad()
+GET        /system-error/there-is-a-problem             controllers.SystemErrorController.onPageLoad()
 
-GET        /payment-plan-update-processing                       controllers.PaymentPlanLockedWarningController.onPageLoad()
+GET        /payment-plan-update-processing              controllers.PaymentPlanLockedWarningController.onPageLoad()

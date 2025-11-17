@@ -70,8 +70,19 @@ class CheckYourAnswersController @Inject() (
         PlanStartDateSummary.row(request.userAnswers)
       }
 
+//      import play.twirl.api.TwirlFeatureImports.twirlOptionToBoolean
+//      import org.scalactic.Prettifier.default
+//      val paymentPlanType = request.userAnswers.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan)
+//      val planType = if (PaymentPlanTypeSummary.row(request.userAnswers) == null) {
+//        PaymentPlanTypeSummary.row(request.userAnswers)
+//      } else {
+//        "Single payment"
+//      }
+
       val list = SummaryListViewModel(
         rows = Seq(
+          PaymentPlanTypeSummary.row(request.userAnswers),
+          DirectDebitSourceSummary.row(request.userAnswers),
           PaymentReferenceSummary.row(request.userAnswers),
           TotalAmountDueSummary.row(request.userAnswers),
           PaymentAmountSummary.row(request.userAnswers),

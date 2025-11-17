@@ -60,8 +60,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -103,8 +102,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -131,8 +129,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -162,8 +159,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -190,8 +186,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."

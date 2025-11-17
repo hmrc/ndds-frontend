@@ -40,8 +40,6 @@ class PageNotFoundControllerSpec extends SpecBase {
 
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[PageNotFoundView]
-
         status(result) mustEqual OK
       }
     }
