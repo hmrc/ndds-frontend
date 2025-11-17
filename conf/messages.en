@@ -406,7 +406,10 @@ directDebitPaymentSummary.addPaymentButton = Set up payment plan
 
 paymentPlanDetails.title = Your payment plan details
 paymentPlanDetails.heading = Your payment plan details
-paymentPlanDetails.p1 = If a payment is due within the next 3 working days, you will not be able to make any changes.
+paymentPlanDetails.budgetCanChange.p1 = If a payment is due within the next 3 working days, it will not be affected by any changes you make.
+paymentPlanDetails.budgetCanNotChange.p1 = You cannot make changes to this plan because the end date is within the next 3 working days.
+paymentPlanDetails.singleCanNotChange.p1 = You cannot make changes to this plan because the next payment is due within 2 working days.
+paymentPlanDetails.variableCanNotChange.p1 = You cannot make changes to this plan because the next payment is due within 2 working days.
 paymentPlanDetails.inset.text = This payment plan is suspended from {0} to {1}.
 paymentPlanDetails.inset.advanceNotice.text = You have an advance notice for this payment plan: {0} will be collected on {1}.
 paymentPlanDetails.inset.noAdvanceNotice.text = You do not currently have an advance notice for this payment plan.
