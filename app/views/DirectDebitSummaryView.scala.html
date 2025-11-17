@@ -32,11 +32,11 @@
     pageNavigator: PageNavigator
 )
 
-@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList], paginationViewModel: PaginationViewModel = PaginationViewModel())(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList], paginationViewModel: PaginationViewModel = PaginationViewModel(), title: String, heading: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
+@layout(pageTitle = titleForSetupJourneyNoForm(messages(title)), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
-    @h1("directDebitPaymentSummary.heading")
+    @h1(heading)
 
     @h2("directDebitPaymentSummary.directDebit.title")
 

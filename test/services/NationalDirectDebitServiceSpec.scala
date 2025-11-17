@@ -1215,33 +1215,37 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         "when planStartDate is a past date" - {
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
             val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(3)
+            val planEndDate = today.plusYears(3)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-            val expectedDate = LocalDate.of(2025, 11, 15)
+            val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
             val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(3)
+            val planEndDate = today.plusYears(3)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-            val expectedDate = LocalDate.of(2025, 11, 15)
+            val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }
@@ -1291,17 +1295,19 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(3)
+            val planEndDate = today.plusYears(3)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-            val expectedDate = LocalDate.of(2025, 11, 15)
+            val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }
@@ -1359,15 +1365,18 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         "when planStartDate is a past date" - {
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
             val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1375,15 +1384,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1435,15 +1445,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1525,15 +1536,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         "when planStartDate is a past date" - {
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1541,15 +1553,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1601,15 +1614,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1653,30 +1667,32 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         "when planStartDate is a past date" - {
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
 
             result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(12))
             result.nextPaymentDateValid mustBe true
           }
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1684,15 +1700,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)

@@ -378,8 +378,10 @@ directDebitConfirmation.downloadButton = Download confirmation
 
 under_construction.heading = Under Construction
 
-directDebitPaymentSummary.title = Summary Payment plan
-directDebitPaymentSummary.heading = Summary of payment plans for this Direct Debit
+directDebitPaymentSummary.title.noPlans = Set up a payment plan for this Direct Debit
+directDebitPaymentSummary.title.withPlans = Summary of payment plans for this Direct Debit
+directDebitPaymentSummary.heading.noPlans = Set up a payment plan for this Direct Debit
+directDebitPaymentSummary.heading.withPlans = Summary of payment plans for this Direct Debit
 directDebitPaymentSummary.p1 = Manage an active payment plan, or
 directDebitPaymentSummary.p1.link = set up a new payment plan.
 directDebitPaymentSummary.p2 = You can view, amend, cancel or suspend payments depending on the type of payment plan.
