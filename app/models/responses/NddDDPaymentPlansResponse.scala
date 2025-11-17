@@ -41,7 +41,9 @@ object NddPaymentPlan {
   implicit val reads: Reads[NddPaymentPlan] = (
     (__ \ "scheduledPaymentAmount").read[BigDecimal] and
       (__ \ "planRefNumber").read[String] and
-      (__ \ "planType").read[String].map(code => planTypeMapping.getOrElse(code, "unknownPlanType")) and
+      (__ \ "planType").read[String].map { code =>
+        planTypeMapping.getOrElse(code, code)
+      } and
       (__ \ "paymentReference").read[String] and
       (__ \ "hodService").read[String].map { code =>
         DirectDebitSource.hodServiceMapping.getOrElse(code, code)
@@ -50,6 +52,8 @@ object NddPaymentPlan {
   )(NddPaymentPlan.apply _)
 
   implicit val writes: OWrites[NddPaymentPlan] = Json.writes[NddPaymentPlan]
+
+  implicit val format: OFormat[NddPaymentPlan] = OFormat(reads, writes)
 }
 
 case class NddDDPaymentPlansResponse(bankSortCode: String,

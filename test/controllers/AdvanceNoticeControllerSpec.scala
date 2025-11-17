@@ -27,7 +27,6 @@ import play.api.test.Helpers.*
 import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import views.html.AdvanceNoticeView
 
-import java.time.LocalDateTime
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.util.Locale
