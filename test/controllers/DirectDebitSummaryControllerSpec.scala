@@ -17,15 +17,14 @@
 package controllers
 
 import base.SpecBase
-import org.mockito.{ArgumentCaptor, Mockito}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito
+import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.*
-import pages.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import utils.DirectDebitDetailsData

@@ -28,6 +28,7 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.DirectDebitReferenceQuery
 import repositories.SessionRepository
 import views.html.DirectDebitSourceView
 
@@ -40,6 +41,7 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
   lazy val directDebitSourceRoute = routes.DirectDebitSourceController.onPageLoad(NormalMode).url
   lazy val ConfirmAuthorityRoute = routes.ConfirmAuthorityController.onPageLoad(NormalMode).url
   lazy val bankDetailsAnswerRoute = routes.BankDetailsCheckYourAnswerController.onPageLoad(NormalMode).url
+  lazy val directDebitRoute = routes.DirectDebitSummaryController.onPageLoad().url
 
   val formProvider = new DirectDebitSourceFormProvider()
   val form = formProvider()
@@ -125,7 +127,7 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", bankDetailsAnswerRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", ConfirmAuthorityRoute))(request, messages(application)).toString
       }
     }
 
@@ -156,6 +158,63 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must start setting up a new payment plan from the Direct Debit page" - {
+
+      "must return OK and the correct view for a GET" in {
+
+        val userAnswersWithDirectDebitReference =
+          emptyUserAnswers
+            .set(
+              DirectDebitReferenceQuery,
+              "directDebitReference"
+            )
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference)).build()
+
+        running(application) {
+          val request = FakeRequest(GET, directDebitSourceRoute)
+
+          val result = route(application, request).value
+
+          val view = application.injector.instanceOf[DirectDebitSourceView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", directDebitRoute))(request, messages(application)).toString
+        }
+      }
+
+      "must return a Bad Request and errors when invalid data is submitted" in {
+
+        val userAnswersWithDirectDebitReference =
+          emptyUserAnswers
+            .set(
+              DirectDebitReferenceQuery,
+              "directDebitReference"
+            )
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference)).build()
+
+        running(application) {
+          val request =
+            FakeRequest(POST, directDebitSourceRoute)
+              .withFormUrlEncodedBody(("value", "invalid value"))
+
+          val boundForm = form.bind(Map("value" -> "invalid value"))
+
+          val view = application.injector.instanceOf[DirectDebitSourceView]
+
+          val result = route(application, request).value
+
+          status(result) mustEqual BAD_REQUEST
+          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", directDebitRoute))(request, messages(application)).toString
+        }
       }
     }
   }
