@@ -32,7 +32,7 @@
     bulletList: BulletList
 )
 
-@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], payingHmrcUrl: Option[String],  call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], selfAssessmentUrl: Option[String], paymentProblemUrl: Option[String], call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForSetupJourney(form, messages("paymentPlanType.title")), backLink = Some(call.url)) {
 
@@ -83,13 +83,20 @@
                     items = Seq(
                         "paymentPlan.collapsable.sa.b1",
                         "paymentPlan.collapsable.sa.b2",
-                        "paymentPlan.collapsable.sa.b3",
-                        "paymentPlan.collapsable.sa.b4"
+                        "paymentPlan.collapsable.sa.b3"
                     )
                 ),
                 paragraph("paymentPlan.collapsable.sa.p5"),
-                paragraph("paymentPlan.collapsable.sa.p6"),
-
+                selfAssessmentUrl.map { url =>
+                    paragraphWithLink(
+                        message1 = Some(messages("paymentPlan.collapsable.sa.p6")),
+                        linkMessage = messages("paymentPlan.collapsable.sa.p6.link"),
+                        linkUrl = url,
+                        message2 = Some(messages("paymentPlan.collapsable.sa.p7")),
+                        linkRel  = "noreferrer noopener",
+                        target   = "_blank",
+                    )
+                }.getOrElse(HtmlFormat.empty)
             ))) { content =>
 
                 @govukDetails(
@@ -122,7 +129,7 @@
                         "paymentPlan.collapsable.tc.b4"
                     )
                 ),
-                payingHmrcUrl.map { url =>
+                paymentProblemUrl.map { url =>
                     paragraphWithLink(
                         message1     = Some(messages("paymentPlan.collapsable.tc.p6")),
                         linkMessage  = messages("paymentPlan.collapsable.tc.p6.link"),

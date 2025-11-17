@@ -54,10 +54,10 @@ POST       /which-tax-duty-payment-plan                 controllers.DirectDebitS
 GET        /change-which-tax-duty-payment-plan          controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-which-tax-duty-payment-plan          controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
 
-GET        /payment-plan-type                           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
-POST       /payment-plan-type                           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
-GET        /change-payment-plan-type                    controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-payment-plan-type                    controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
+GET        /what-type-payment-plan-selecting                           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
+POST       /what-type-payment-plan-selecting                           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
+GET        /change-what-type-payment-plan-selecting                    controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-what-type-payment-plan-selecting                    controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-reference                           controllers.PaymentReferenceController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-reference                           controllers.PaymentReferenceController.onSubmit(mode: Mode = NormalMode)
@@ -110,7 +110,7 @@ POST       /your-saved-direct-debit-payment             controllers.CheckYourAns
 GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
 
 GET        /payment-plan/direct-debit-redirect          controllers.DirectDebitSummaryController.onRedirect(directDebitReference: String)
-GET        /payment-plan/dd-payment-plans-summary       controllers.DirectDebitSummaryController.onPageLoad()
+GET        /payment-plan/payment-plans-direct-debit     controllers.DirectDebitSummaryController.onPageLoad()
 
 GET        /your-payment-plan-details-redirect          controllers.PaymentPlanDetailsController.onRedirect(paymentPlanReference: String)
 GET        /your-payment-plan-details                   controllers.PaymentPlanDetailsController.onPageLoad()
@@ -172,3 +172,9 @@ GET        /amending-payment-plan                       controllers.AmendingPaym
 GET        /page-not-found                       controllers.BackSubmissionController.onPageLoad()
 
 GET        /advance-notice-direct-debit-payment          controllers.AdvanceNoticeController.onPageLoad()
+
+GET        /page-not-found                                    controllers.PageNotFoundController.onPageLoad()
+GET        /access-denied                                     controllers.AccessDeniedController.onPageLoad()
+GET        /system-error/there-is-a-problem                   controllers.SystemErrorController.onPageLoad()
+
+GET        /payment-plan-update-processing                       controllers.PaymentPlanLockedWarningController.onPageLoad()

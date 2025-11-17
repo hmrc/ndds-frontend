@@ -191,18 +191,19 @@ paymentPlan.collapsable.mgd.p5       = It takes at least 10 working days to proc
 paymentPlan.collapsable.mgd.b1       = your payment will then be taken automatically every time it’s due
 paymentPlan.collapsable.mgd.b2       = you’ll need to cancel your Direct Debit if you want to change to a different payment method
 
-paymentPlan.collapsable.sa.p1     = There are two different payment plans available: the single payment plan, and the budget payment plan. Select your payment plan then click ''Continue''.
+paymentPlan.collapsable.sa.p1     = There are 2 different payment plans available: the single payment plan and the budget payment plan.
 paymentPlan.collapsable.sa.single = Single payment
 paymentPlan.collapsable.sa.p2     = If your liability is due, you can make a single payment on a specific date.
 paymentPlan.collapsable.sa.budget = Budget payment plan
 paymentPlan.collapsable.sa.p3     = If you want to pay in advance of your due liability you can set up a budget payment plan. This allows you to make regular payments towards a future Self Assessment liability. It helps reduce the amount you have to pay on the due date by spreading your payments.
-paymentPlan.collapsable.sa.p4     = HMRC collect payments by Direct Debit, as instructed by you, and the advance payments reduce what you have to pay on 31 January and 31 July. You manage the budget payment plan online and you:
-paymentPlan.collapsable.sa.b1     = decide the regular weekly, or monthly, amount you want to pay
-paymentPlan.collapsable.sa.b2     = can change your regular payment amount
-paymentPlan.collapsable.sa.b3     = are free to take a break and suspend payment
-paymentPlan.collapsable.sa.b4     = can cancel the plan at any time
-paymentPlan.collapsable.sa.p5     = The budget payment plan does not mean you can delay payment beyond the due date. You must ensure any balance still owing (after taking into account your budget payment plan payments) is paid by the due date. Any payment made after the due date will attract interest.
-paymentPlan.collapsable.sa.p6     = If you currently owe money for Self Assessment telephone the HMRC Payment Helpline on 0845 366 1208. They will advise you about bringing your affairs up to date and tell you how a budget payment plan can help you.
+paymentPlan.collapsable.sa.p4     = HMRC collect payments by Direct Debit, as instructed by you, and the advance payments reduce what you have to pay on 31 January and 31 July. You manage the budget payment plan online and you decide the regular weekly, or monthly, amount you want to pay. You can also:
+paymentPlan.collapsable.sa.b1     = change your regular payment amount
+paymentPlan.collapsable.sa.b2     = suspend payments, if required
+paymentPlan.collapsable.sa.b3     = cancel the plan at any time
+paymentPlan.collapsable.sa.p5     = The budget payment plan does not mean you can delay payment beyond the due date. You must ensure any balance still owing (after taking into account your budget payment plan payments) is paid. Any payment made after the due date will accrue interest.
+paymentPlan.collapsable.sa.p6     = If you currently owe money for Self Assessment,
+paymentPlan.collapsable.sa.p6.link = you must contact the HMRC Self Assessment Helpline
+paymentPlan.collapsable.sa.p7 = to discuss how a budget payment plan can help you.
 
 paymentPlan.collapsable.tc.p1     = There are 2 different payment plans: the single payment plan and the tax credits repayment plan.
 paymentPlan.collapsable.tc.single = Single payment
@@ -378,8 +379,10 @@ directDebitConfirmation.downloadButton = Download confirmation
 
 under_construction.heading = Under Construction
 
-directDebitPaymentSummary.title = Summary Payment plan
-directDebitPaymentSummary.heading = Summary of payment plans for this Direct Debit
+directDebitPaymentSummary.title.noPlans = Set up a payment plan for this Direct Debit
+directDebitPaymentSummary.title.withPlans = Summary of payment plans for this Direct Debit
+directDebitPaymentSummary.heading.noPlans = Set up a payment plan for this Direct Debit
+directDebitPaymentSummary.heading.withPlans = Summary of payment plans for this Direct Debit
 directDebitPaymentSummary.p1 = Manage an active payment plan, or
 directDebitPaymentSummary.p1.link = set up a new payment plan.
 directDebitPaymentSummary.p2 = You can view, amend, cancel or suspend payments depending on the type of payment plan.
@@ -409,7 +412,10 @@ directDebitPaymentSummary.noActivePaymentPlans.p1 = This Direct Debit has no act
 
 paymentPlanDetails.title = Your payment plan details
 paymentPlanDetails.heading = Your payment plan details
-paymentPlanDetails.p1 = If a payment is due within the next 3 working days, you will not be able to make any changes.
+paymentPlanDetails.budgetCanChange.p1 = If a payment is due within the next 3 working days, it will not be affected by any changes you make.
+paymentPlanDetails.budgetCanNotChange.p1 = You cannot make changes to this plan because the end date is within the next 3 working days.
+paymentPlanDetails.singleCanNotChange.p1 = You cannot make changes to this plan because the next payment is due within 2 working days.
+paymentPlanDetails.variableCanNotChange.p1 = You cannot make changes to this plan because the next payment is due within 2 working days.
 paymentPlanDetails.inset.text = This payment plan is suspended from {0} to {1}.
 paymentPlanDetails.inset.advanceNotice.text = You have an advance notice for this payment plan: {0} will be collected on {1}.
 paymentPlanDetails.inset.noAdvanceNotice.text = You do not currently have an advance notice for this payment plan.
@@ -656,3 +662,26 @@ advanceNotice.yourPaymentDetails.totalAmount = Amount to be collected
 advanceNotice.yourPaymentDetails.dueDate = Date of collection
 advanceNotice.print.inset = You can print this page for your records using the print function on your browser.
 advanceNotice.returnLink = Return to payment plan
+
+pageNotFound.title      = Page not found
+pageNotFound.heading    = Page not found
+pageNotFound.p1         = If you typed the web address, check it is correct.
+pageNotFound.p2         = If you pasted the web address, check you copied the entire address.
+pageNotFound.p3         = If the web address is correct or you selected a link or button, contact the
+pageNotFound.link       = HMRC Online Services Helpdesk
+pageNotFound.p4         = if you need to speak to someone.
+
+accessDenied.title      = Sorry, there is a problem with the service
+accessDenied.heading    = Sorry, there is a problem with the service
+accessDenied.p1         = You do not have access to this service.
+accessDenied.link       = Continue to your account.
+
+systemError.title       = Sorry, there is a problem with this service
+systemError.heading     = Sorry, there is a problem with this service
+systemError.p1          = Try again later or contact the
+systemError.link        = HMRC Online Services Helpdesk
+
+paymentPlanLockedWarning.title = You cannot view or manage this payment plan
+paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
+paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.
+paymentPlanLockedWarning.returnLink = Return to payment plans

@@ -67,7 +67,8 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
             form,
             NormalMode,
             Some(TC),
-            Some(appConfig.payingHmrcUrl),
+            Some(appConfig.selfAssessmentUrl),
+            Some(appConfig.paymentProblemUrl),
             Call("GET", directDebitSourceRoute)
           )(request, messages(application)).toString
       }
@@ -153,6 +154,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
           view(
             boundForm,
             NormalMode,
+            None,
             None,
             None,
             Call("GET", directDebitSourceRoute)

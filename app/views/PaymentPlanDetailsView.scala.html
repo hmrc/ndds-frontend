@@ -32,13 +32,17 @@
         link: Link
 )
 
-@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, isSuspensionActive: Boolean, suspensionStartDate: String, suspensionEndDate: String, rows: Seq[SummaryListRow], isAdvanceNoticePresent: Boolean, totalAmount: String, dueDate: String, call: Call)(implicit request: Request[_], messages: Messages)
+@(planType: String, paymentReference: String, showAmendLink: Boolean, showCancelLink: Boolean, showSuspendLink: Boolean, isSuspensionActive: Boolean, suspensionStartDate: String, suspensionEndDate: String, rows: Seq[SummaryListRow], isAdvanceNoticePresent: Boolean, totalAmount: String, dueDate: String, isPlanChangeable: Boolean, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanDetails.title")), backLink = Some(routes.DirectDebitSummaryController.onPageLoad().url)) {
     @header1("paymentPlanDetails.heading")
 
     @if(planType == PaymentPlanType.BudgetPaymentPlan.toString) {
-        @paragraph("paymentPlanDetails.p1")
+        @if(isPlanChangeable) {
+            @paragraph("paymentPlanDetails.budgetCanChange.p1")
+        } else {
+            @paragraph("paymentPlanDetails.budgetCanNotChange.p1")
+        }
 
         @if(isSuspensionActive) {
             <p class="govuk-inset-text">
@@ -47,7 +51,17 @@
         }
     }
 
+    @if(planType == PaymentPlanType.SinglePaymentPlan.toString) {
+        @if(!isPlanChangeable) {
+            @paragraph("paymentPlanDetails.singleCanNotChange.p1")
+        }
+    }
+
     @if(planType == PaymentPlanType.VariablePaymentPlan.toString) {
+        @if(!isPlanChangeable) {
+            @paragraph("paymentPlanDetails.variableCanNotChange.p1")
+        }
+
         @if(isAdvanceNoticePresent) {
             @paragraphWithLink(
                 Some(messages("paymentPlanDetails.inset.advanceNotice.text", totalAmount, dueDate)),

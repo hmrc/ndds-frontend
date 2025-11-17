@@ -63,6 +63,13 @@ class DirectDebitSummaryController @Inject() (
                 updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
                 _              <- sessionRepository.set(updatedAnswers)
               } yield {
+
+                val (title, heading) = if (ddPaymentPlans.paymentPlanList.nonEmpty) {
+                  ("directDebitPaymentSummary.title.withPlans", "directDebitPaymentSummary.heading.withPlans")
+                } else {
+                  ("directDebitPaymentSummary.title.noPlans", "directDebitPaymentSummary.title.noPlans")
+                }
+
                 val paginationResult = paginationService.paginatePaymentPlans(
                   allPaymentPlans = ddPaymentPlans.paymentPlanList,
                   currentPage     = currentPage,
@@ -73,7 +80,9 @@ class DirectDebitSummaryController @Inject() (
                     reference,
                     ddPaymentPlans,
                     buildCards(paginationResult.paginatedData),
-                    paginationViewModel = paginationResult.paginationViewModel
+                    paginationViewModel = paginationResult.paginationViewModel,
+                    title,
+                    heading
                   )
                 )
               }
