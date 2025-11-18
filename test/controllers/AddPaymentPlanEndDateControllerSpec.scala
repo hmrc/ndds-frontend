@@ -18,12 +18,13 @@ package controllers
 
 import base.SpecBase
 import forms.AddPaymentPlanEndDateFormProvider
+import models.DirectDebitSource.SA
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.AddPaymentPlanEndDatePage
+import pages.{AddPaymentPlanEndDatePage, DirectDebitSourcePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -41,12 +42,13 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   val form = formProvider()
 
   lazy val addPaymentPlanEndDateRoute = routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode).url
+  private val saUserAnswers = emptyUserAnswers.set(DirectDebitSourcePage, SA).success.value
 
   "AddPaymentPlanEndDate Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(saUserAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, addPaymentPlanEndDateRoute)
@@ -62,7 +64,13 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(AddPaymentPlanEndDatePage, true).success.value
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(DirectDebitSourcePage, SA)
+        .success
+        .value
+        .set(AddPaymentPlanEndDatePage, true)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -85,7 +93,7 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(saUserAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -106,7 +114,7 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val application = applicationBuilder(userAnswers = Some(saUserAnswers)).build()
 
       running(application) {
         val request =
@@ -121,6 +129,46 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET when DirectDebitSource is not SA" in {
+
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(DirectDebitSourcePage, models.DirectDebitSource.MGD)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, addPaymentPlanEndDateRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST when DirectDebitSource is not SA" in {
+
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(DirectDebitSourcePage, models.DirectDebitSource.TC)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, addPaymentPlanEndDateRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 

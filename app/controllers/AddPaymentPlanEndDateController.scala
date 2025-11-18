@@ -19,9 +19,9 @@ package controllers
 import controllers.actions.*
 import forms.AddPaymentPlanEndDateFormProvider
 import javax.inject.Inject
-import models.Mode
+import models.{DirectDebitSource, Mode}
 import navigation.Navigator
-import pages.AddPaymentPlanEndDatePage
+import pages.{AddPaymentPlanEndDatePage, DirectDebitSourcePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -46,27 +46,36 @@ class AddPaymentPlanEndDateController @Inject() (
 
   val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-
-    val preparedForm = request.userAnswers.get(AddPaymentPlanEndDatePage) match {
-      case None        => form
-      case Some(value) => form.fill(value)
+  def onPageLoad(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData) { implicit request =>
+      request.userAnswers.get(DirectDebitSourcePage) match {
+        case Some(DirectDebitSource.SA) =>
+          val preparedForm = request.userAnswers.get(AddPaymentPlanEndDatePage) match {
+            case None        => form
+            case Some(value) => form.fill(value)
+          }
+          Ok(view(preparedForm, mode))
+        case _ =>
+          Redirect(routes.JourneyRecoveryController.onPageLoad())
+      }
     }
-
-    Ok(view(preparedForm, mode))
-  }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
 
-    form
-      .bindFromRequest()
-      .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(AddPaymentPlanEndDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(AddPaymentPlanEndDatePage, mode, updatedAnswers))
-      )
+    request.userAnswers.get(DirectDebitSourcePage) match {
+      case Some(DirectDebitSource.SA) =>
+        form
+          .bindFromRequest()
+          .fold(
+            formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(AddPaymentPlanEndDatePage, value))
+                _              <- sessionRepository.set(updatedAnswers)
+              } yield Redirect(navigator.nextPage(AddPaymentPlanEndDatePage, mode, updatedAnswers))
+          )
+      case _ =>
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
   }
 }

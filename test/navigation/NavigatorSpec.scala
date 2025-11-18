@@ -189,9 +189,24 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(YearEndAndMonthPage, NormalMode, userAnswers) mustBe routes.PaymentAmountController.onPageLoad(NormalMode)
       }
 
-      "must go from PlanStartDatePage to AddPaymentPlanEndDateController" in {
-        navigator.nextPage(PlanStartDatePage, NormalMode, userAnswers) mustBe
+      "must go from PlanStartDatePage to AddPaymentPlanEndDateController when DirectDebitSource is SA" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, SA)
+          .success
+          .value
+
+        navigator.nextPage(PlanStartDatePage, NormalMode, ua) mustBe
           routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode)
+      }
+
+      "must go from PlanStartDatePage to CheckYourAnswersController when DirectDebitSource is not SA" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, MGD)
+          .success
+          .value
+
+        navigator.nextPage(PlanStartDatePage, NormalMode, ua) mustBe
+          routes.CheckYourAnswersController.onPageLoad()
       }
 
       "Amend Journey " - {
@@ -352,8 +367,22 @@ class NavigatorSpec extends SpecBase {
         navigator.nextPage(PaymentDatePage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
-      "must go from PlanStartDatePage to AddPaymentPlanEndDateController in CheckMode" in {
-        navigator.nextPage(PlanStartDatePage, CheckMode, userAnswers) mustBe routes.AddPaymentPlanEndDateController.onPageLoad(CheckMode)
+      "must go from PlanStartDatePage to AddPaymentPlanEndDateController in CheckMode when DirectDebitSource is SA" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, SA)
+          .success
+          .value
+
+        navigator.nextPage(PlanStartDatePage, CheckMode, ua) mustBe routes.AddPaymentPlanEndDateController.onPageLoad(CheckMode)
+      }
+
+      "must go from PlanStartDatePage to CheckYourAnswersController in CheckMode when DirectDebitSource is not SA" in {
+        val ua = userAnswers
+          .set(DirectDebitSourcePage, TC)
+          .success
+          .value
+
+        navigator.nextPage(PlanStartDatePage, CheckMode, ua) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
       "must go from PlanEndDatePage to CheckYourAnswersController in CheckMode" in {
