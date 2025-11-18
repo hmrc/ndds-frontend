@@ -685,4 +685,4 @@ paymentPlanLockedWarning.title = You cannot view or manage this payment plan
 paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
 paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.
 paymentPlanLockedWarning.returnLink = Return to payment plans
-yourBankDetails.error.sortCodeOnDenyList = This sort code cannot be used for payments. Enter a different bank account.
+yourBankDetails.error.sortCodeOnDenyList = You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account.

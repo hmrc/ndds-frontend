@@ -136,10 +136,7 @@ class YourBankDetailsController @Inject() (
     val updatedAnswersTry = for {
       ua1 <- userAnswers.set(
                YourBankDetailsPage,
-               YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails,
-                                                                       auddisFlag,
-                                                                       true
-                                                                      ) // defaulting to true as account successful verified
+               YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, auddisFlag, true)
              )
       ua2 <- ua1.set(BankDetailsBankNamePage, bankName)
       ua3 <- ua2.set(BankDetailsAddressPage, bankAddress)
@@ -165,7 +162,7 @@ class YourBankDetailsController @Inject() (
       case BarsErrors.BankAccountUnverified => true
       case _                                => false
     }
-    
+
     barsError match {
       case BarsErrors.SortCodeOnDenyList =>
         handleDenyListError(bankDetails, mode)
