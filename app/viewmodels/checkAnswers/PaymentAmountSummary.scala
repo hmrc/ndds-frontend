@@ -39,12 +39,9 @@ object PaymentAmountSummary {
       )
     }
 
-  def row(planType: String, answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
-    val label = if (PaymentPlanType.BudgetPaymentPlan.toString == planType) {
-      "directDebitConfirmation.details.amount.budgetPaymentPlan"
-    } else {
-      "directDebitConfirmation.details.amount.singlePaymentPlan"
-    }
+  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+    val label = "directDebitConfirmation.details.amount.singlePaymentPlan"
+
     answers.get(PaymentAmountPage).map { amount =>
       SummaryListRowViewModel(
         key   = label,

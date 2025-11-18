@@ -17,18 +17,22 @@
 package controllers
 
 import base.SpecBase
-import models.PaymentDateDetails
+import config.CurrencyFormatter.currencyFormat
+import models.{DirectDebitSource, PaymentDateDetails, YourBankDetailsWithAuddisStatus}
 import models.responses.GenerateDdiRefResponse
-import pages.{CheckYourAnswerPage, PaymentDatePage}
+import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentReferencePage, TotalAmountDuePage, YourBankDetailsPage}
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.Key
+import viewmodels.checkAnswers.{PaymentReferenceSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import views.html.DirectDebitConfirmationView
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class DirectDebitConfirmationControllerSpec extends SpecBase {
 
@@ -37,10 +41,30 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
     "must return OK and the correct view for a GET" in {
       val ddiRefNumber = "ddiRef"
       val ppRef = "ppRef"
+      val paymentAmount = BigDecimal(120)
+      val paymentDate = LocalDate.of(2025, 12, 12)
+      val bankAccountHolderName = "John Doe"
+      val bankAccountNumber = "12345678"
+      val bankSortCode = "205142"
+      val auddisStatus = true
+      val accountVerified = true
+      val dateSetup = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+
+      val yourBankDetails = YourBankDetailsWithAuddisStatus(
+        bankAccountHolderName,
+        bankSortCode,
+        bankAccountNumber,
+        auddisStatus,
+        accountVerified
+      )
 
       val userAnswers = emptyUserAnswers
         .setOrException(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber))
-        .setOrException(PaymentDatePage, PaymentDateDetails(LocalDate.of(2025, 12, 12), "earliest"))
+        .setOrException(PaymentDatePage, PaymentDateDetails(paymentDate, "earliest"))
+        .setOrException(PaymentAmountPage, paymentAmount)
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+        .setOrException(YourBankDetailsPage, yourBankDetails)
+        .setOrException(PaymentReferencePage, ppRef)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -59,33 +83,52 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
 
         val directDebitDetails = SummaryListViewModel(
           rows = Seq(
-            SummaryListRowViewModel(
-              key     = Key(Text("Direct Debit reference")),
-              value   = ValueViewModel(Text(ddiRefNumber)),
-              actions = Seq.empty
-            )
-          )
+            Option(
+              SummaryListRowViewModel(
+                key     = Key(Text("Direct Debit reference")),
+                value   = ValueViewModel(Text(ddiRefNumber)),
+                actions = Seq.empty
+              )
+            ),
+            YourBankDetailsAccountHolderNameSummary.row(userAnswers, false),
+            YourBankDetailsAccountNumberSummary.row(userAnswers, false),
+            YourBankDetailsSortCodeSummary.row(userAnswers, false)
+          ).collect { case Some(row) => row }
         )
 
-        val paymentDateString = "12 December 2025"
+        val formattedPaymentAmount = currencyFormat(paymentAmount)
+        val paymentDateString = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+
         val paymentPlanDetails = SummaryListViewModel(
           rows = Seq(
-            SummaryListRowViewModel(
-              key     = Key(Text("Payment reference")),
-              value   = ValueViewModel(Text("Missing payment reference")),
-              actions = Seq.empty
+            PaymentReferenceSummary.rowNoAction(userAnswers).map(Some(_)).getOrElse(None),
+            Some(
+              SummaryListRowViewModel(
+                key     = Key(Text("Date set up")),
+                value   = ValueViewModel(Text(dateSetup)),
+                actions = Seq.empty
+              )
             ),
-            SummaryListRowViewModel(
-              key     = Key(Text("Payment date")),
-              value   = ValueViewModel(Text(paymentDateString)),
-              actions = Seq.empty
+            Some(
+              SummaryListRowViewModel(
+                key     = Key(Text("Payment amount")),
+                value   = ValueViewModel(Text(formattedPaymentAmount)),
+                actions = Seq.empty
+              )
+            ),
+            Some(
+              SummaryListRowViewModel(
+                key     = Key(Text("Payment date")),
+                value   = ValueViewModel(Text(paymentDateString)),
+                actions = Seq.empty
+              )
             )
-          )
+          ).flatten
         )
-
         val expectedHtml = view(
           appConfig.hmrcHelplineUrl,
           ddiRefNumber,
+          formattedPaymentAmount,
           paymentDateString,
           directDebitDetails,
           paymentPlanDetails

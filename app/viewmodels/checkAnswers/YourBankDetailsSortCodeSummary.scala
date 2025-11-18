@@ -46,10 +46,11 @@ object YourBankDetailsSortCodeSummary {
   def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(YourBankDetailsPage).map { answer =>
 
-      val value = HtmlFormat.escape(answer.sortCode).toString
+      val formattedSortCode = answer.sortCode.grouped(2).mkString(" ")
+      val value = HtmlFormat.escape(formattedSortCode).toString
 
       SummaryListRowViewModel(
-        key   = "bankDetailsCheckYourAnswer.account.sort.code",
+        key   = "directDebitConfirmation.sortCode",
         value = ValueViewModel(HtmlContent(value)),
         actions = if (showChange) {
           Seq(

@@ -38,4 +38,13 @@ object RegularPaymentAmountSummary {
         )
       )
     }
+
+  def rowData(answers: UserAnswers, isShowChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(RegularPaymentAmountPage).map { answer =>
+      SummaryListRowViewModel(
+        key     = "regularPaymentAmount.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(answer)),
+        actions = Seq.empty
+      )
+    }
 }

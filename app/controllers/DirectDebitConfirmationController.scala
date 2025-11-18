@@ -18,12 +18,13 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
-import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, PlanStartDatePage}
+import models.DirectDebitSource
+import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PlanStartDatePage, RegularPaymentAmountPage, TotalAmountDuePage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewmodels.checkAnswers.{DirectDebitSourceSummary, FinalPaymentAmountSummary, MonthlyPaymentAmountSummary, PaymentAmountSummary, PaymentDateSummary, PaymentPlanTypeSummary, PaymentReferenceSummary, PaymentsFrequencySummary, PlanEndDateSummary, PlanStartDateSummary, RegularPaymentAmountSummary, TotalAmountDueSummary, YearEndAndMonthSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
+import config.CurrencyFormatter.currencyFormat
+import viewmodels.checkAnswers.{FinalPaymentAmountSummary, MonthlyPaymentAmountSummary, PaymentAmountSummary, PaymentDateSummary, PaymentReferenceSummary, PaymentsFrequencySummary, PlanEndDateSummary, PlanStartDateSummary, RegularPaymentAmountSummary, TotalAmountDueSummary, YearEndAndMonthSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
@@ -32,6 +33,7 @@ import views.html.DirectDebitConfirmationView
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+import scala.math.BigDecimal.RoundingMode
 
 class DirectDebitConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
@@ -49,10 +51,25 @@ class DirectDebitConfirmationController @Inject() (
       .get(CheckYourAnswerPage)
       .getOrElse(throw new Exception("Missing generated DDI reference number"))
 
-    val paymentDate: LocalDate = request.userAnswers
-      .get(PlanStartDatePage)
-      .map(_.enteredDate)
-      .getOrElse(throw new Exception("Missing entered payment date"))
+    val paymentAmount =
+      request.userAnswers
+        .get(PaymentAmountPage)
+        .orElse(request.userAnswers.get(TotalAmountDuePage).map { totalAmount =>
+          (totalAmount / 12).setScale(2, RoundingMode.DOWN)
+        })
+        .orElse(request.userAnswers.get(RegularPaymentAmountPage))
+        .getOrElse(BigDecimal(0))
+
+    val formattedPaymentAmount = currencyFormat(paymentAmount)
+
+    val paymentDate: LocalDate =
+      request.userAnswers
+        .get(PlanStartDatePage)
+        .map(_.enteredDate)
+        .orElse(
+          request.userAnswers.get(PaymentDatePage).map(_.enteredDate)
+        )
+        .getOrElse(throw new Exception("Missing date"))
 
     val paymentDateString: String = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
@@ -66,40 +83,17 @@ class DirectDebitConfirmationController @Inject() (
           )
         ),
         YourBankDetailsAccountHolderNameSummary.row(request.userAnswers, false),
-        YourBankDetailsSortCodeSummary.row(request.userAnswers, false),
-        YourBankDetailsAccountNumberSummary.row(request.userAnswers, false)
+        YourBankDetailsAccountNumberSummary.row(request.userAnswers, false),
+        YourBankDetailsSortCodeSummary.row(request.userAnswers, false)
       ).flatten
     )
-    val summaryRows: SummaryList = buildSummaryRows(request.userAnswers)
 
-    Ok(
-      view(
-        appConfig.hmrcHelplineUrl,
-        referenceNumber.ddiRefNumber,
-        paymentDateString,
-        directDebitDetails,
-        summaryRows
-      )
-    )
-  }
-
-  private def buildSummaryRows(userAnswers: UserAnswers)(implicit messages: Messages): SummaryList = {
-
-    val planType = userAnswers.get(PaymentPlanTypePage).get
-
-    val firstRow: Seq[SummaryListRow] = Seq(
-      SummaryListRowViewModel(
-        key = Key(Text("Payment reference")),
-        value = ValueViewModel(
-          Text(
-            userAnswers
-              .get(PaymentReferencePage)
-              .getOrElse("Missing payment reference")
-          )
-        ),
-        actions = Seq.empty
-      )
-    )
+    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
+    val showStartDate = if (directDebitSource.contains(DirectDebitSource.PAYE)) {
+      YearEndAndMonthSummary.row(request.userAnswers, false)
+    } else {
+      PlanStartDateSummary.row(request.userAnswers, false)
+    }
 
     val dateSetupRow: Option[SummaryListRow] = Some(
       SummaryListRowViewModel(
@@ -113,81 +107,32 @@ class DirectDebitConfirmationController @Inject() (
       )
     )
 
-    val directDebitSource = userAnswers.get(DirectDebitSourcePage)
-    val showStartDate: Option[SummaryListRow] =
-      if (directDebitSource.contains(DirectDebitSource.PAYE)) {
-        YearEndAndMonthSummary.row(userAnswers)
-      } else {
-        PlanStartDateSummary.row(userAnswers, false)
-      }
+    val list = SummaryListViewModel(
+      rows = Seq(
+        PaymentReferenceSummary.rowNoAction(request.userAnswers),
+        dateSetupRow,
+        PaymentAmountSummary.row(request.userAnswers, false),
+        PaymentDateSummary.row(request.userAnswers, false),
+        TotalAmountDueSummary.rowData(request.userAnswers),
+        MonthlyPaymentAmountSummary.row(request.userAnswers),
+        FinalPaymentAmountSummary.row(request.userAnswers),
+        PaymentsFrequencySummary.rowData(request.userAnswers),
+        RegularPaymentAmountSummary.rowData(request.userAnswers),
+        showStartDate,
+        PlanEndDateSummary.rowData(request.userAnswers)
+      ).flatten
+    )
 
-    val showEndDate: Option[SummaryListRow] =
-      if (directDebitSource.contains(DirectDebitSource.SA)) {
-        if (planType == PaymentPlanType.BudgetPaymentPlan)
-          PlanEndDateSummary.row(userAnswers, false)
-        else
-          None
-      } else if (directDebitSource.contains(DirectDebitSource.TC)) {
-        PlanEndDateSummary.row(userAnswers, false)
-      } else {
-        None
-      }
-
-    val planRows: Seq[SummaryListRow] = planType match {
-
-      case PaymentPlanType.SinglePaymentPlan =>
-        Seq(
-          PaymentPlanTypeSummary.row(userAnswers, false),
-          DirectDebitSourceSummary.row(userAnswers)
-        ).flatten ++
-          dateSetupRow.toSeq ++
-          Seq(
-            PaymentAmountSummary.row(userAnswers),
-            PaymentDateSummary.row(userAnswers)
-          ).flatten
-
-      case PaymentPlanType.BudgetPaymentPlan =>
-        Seq(
-          PaymentPlanTypeSummary.row(userAnswers, false),
-          DirectDebitSourceSummary.row(userAnswers)
-        ).flatten ++
-          dateSetupRow.toSeq ++
-          Seq(
-            RegularPaymentAmountSummary.row(userAnswers),
-            PaymentsFrequencySummary.row(userAnswers),
-            showStartDate,
-            showEndDate
-          ).flatten
-
-      case PaymentPlanType.TaxCreditRepaymentPlan =>
-        Seq(
-          PaymentPlanTypeSummary.row(userAnswers, false),
-          DirectDebitSourceSummary.row(userAnswers)
-        ).flatten ++
-          dateSetupRow.toSeq ++
-          Seq(
-            TotalAmountDueSummary.row(userAnswers, false),
-            MonthlyPaymentAmountSummary.row(userAnswers),
-            FinalPaymentAmountSummary.row(userAnswers),
-            showStartDate,
-            showEndDate
-          ).flatten
-
-      case PaymentPlanType.VariablePaymentPlan =>
-        Seq(
-          PaymentPlanTypeSummary.row(userAnswers, false),
-          DirectDebitSourceSummary.row(userAnswers)
-        ).flatten ++
-          dateSetupRow.toSeq ++
-          Seq(
-            showStartDate
-          ).flatten
-
-      case _ =>
-        Seq.empty
-    }
-
-    SummaryList(rows = firstRow ++ planRows)
+    Ok(
+      view(
+        appConfig.hmrcHelplineUrl,
+        referenceNumber.ddiRefNumber,
+        formattedPaymentAmount,
+        paymentDateString,
+        directDebitDetails,
+        list
+      )
+    )
   }
 
 }

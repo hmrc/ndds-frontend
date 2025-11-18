@@ -29,7 +29,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(hmrcHelplineUrl: String,referenceNumber: String, paymentDate: String, directDebitDetails: SummaryList, paymentDetails: SummaryList)(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String,referenceNumber: String, paymentAmount: String, paymentDate: String, directDebitDetails: SummaryList, paymentDetails: SummaryList)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitConfirmation.title")), showBackLink = false) {
 
@@ -40,7 +40,7 @@
 
     @header2("directDebitConfirmation.h2")
 
-    @paragraph(messages("directDebitConfirmation.p1", referenceNumber, paymentDate))
+    @paragraph(messages("directDebitConfirmation.p1", paymentAmount, paymentDate))
 
     @paragraphWithLink(
         message1 = Some(messages("directDebitConfirmation.p2")),
@@ -76,11 +76,6 @@
         InsetText(
             content = Text(messages("directDebitConfirmation.printInset"))
         )
-    )
-
-    @paragraphWithLink(
-        linkMessage = messages("directDebitConfirmation.viewPaymentPlans"),
-        linkUrl = routes.DirectDebitSummaryController.onPageLoad().url
     )
 
     @paragraphWithLink(

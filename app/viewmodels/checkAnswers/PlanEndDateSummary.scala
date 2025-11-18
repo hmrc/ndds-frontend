@@ -42,22 +42,15 @@ object PlanEndDateSummary {
       )
     }
 
-  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PlanEndDatePage).map { answer =>
 
       implicit val lang: Lang = messages.lang
 
       SummaryListRowViewModel(
-        key   = "planEndDate.checkYourAnswersLabel",
-        value = ValueViewModel(answer.format(dateTimeFormat())),
-        actions = if (showChange) {
-          Seq(
-            ActionItemViewModel("site.change", routes.PlanEndDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("planEndDate.change.hidden"))
-          )
-        } else {
-          Seq.empty
-        }
+        key     = "planEndDate.checkYourAnswersLabel",
+        value   = ValueViewModel(answer.format(dateTimeFormat())),
+        actions = Seq.empty
       )
     }
 }

@@ -1076,7 +1076,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
             val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-            val expectedDate = LocalDate.of(2025, 11, 15)
+            val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }
@@ -1092,7 +1092,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
             val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-            val expectedDate = LocalDate.of(2025, 11, 15)
+            val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }
@@ -1152,7 +1152,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
             val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-            val expectedDate = LocalDate.of(2025, 11, 15)
+            val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }

@@ -49,7 +49,7 @@ object YourBankDetailsAccountNumberSummary {
       val value = HtmlFormat.escape(answer.accountNumber).toString
 
       SummaryListRowViewModel(
-        key   = "bankDetailsCheckYourAnswer.account.account.number",
+        key   = "directDebitConfirmation.accountNumber",
         value = ValueViewModel(HtmlContent(value)),
         actions = if (showChange) {
           Seq(

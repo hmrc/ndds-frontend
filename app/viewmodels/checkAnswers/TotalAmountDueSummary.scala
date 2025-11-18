@@ -40,19 +40,12 @@ object TotalAmountDueSummary {
       )
     }
 
-  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(TotalAmountDuePage).map { answer =>
       SummaryListRowViewModel(
-        key   = "totalAmountDue.checkYourAnswersLabel",
-        value = ValueViewModel(currencyFormat(answer)),
-        actions = if (showChange) {
-          Seq(
-            ActionItemViewModel("site.change", routes.TotalAmountDueController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("totalAmountDue.change.hidden"))
-          )
-        } else {
-          Seq.empty
-        }
+        key     = "totalAmountDue.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(answer)),
+        actions = Seq.empty
       )
     }
 
