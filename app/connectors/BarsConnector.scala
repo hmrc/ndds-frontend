@@ -16,6 +16,7 @@
 
 package connectors
 
+import models.errors.UpstreamBarsException
 import models.responses.{Bank, BarsVerificationResponse}
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
@@ -55,10 +56,11 @@ case class BarsConnector @Inject() (
     logger.debug(s"Account validation called with $url")
     logger.debug(
       s"""|
-           |Account Validation Request:
+        |Account Validation Request:
           |${Json.prettyPrint(requestJson)}
           |""".stripMargin
     )
+
     http
       .post(url"$url")
       .withBody(requestJson)
@@ -67,7 +69,7 @@ case class BarsConnector @Inject() (
         case Right(verificationData) =>
           logger.debug(
             s"""|
-        |Account Validation Results:
+              |Account Validation Results:
                 |  • accountNumberIsWellFormatted = ${verificationData.accountNumberIsWellFormatted}
                 |  • sortCodeIsPresentOnEISCD     = ${verificationData.sortCodeIsPresentOnEISCD}
                 |  • sortCodeBankName             = ${verificationData.sortCodeBankName.getOrElse("N/A")}
@@ -81,10 +83,27 @@ case class BarsConnector @Inject() (
                 |""".stripMargin
           )
           Future.successful(verificationData)
+
         case Left(errorResponse) =>
+          logger.warn(s"BARS verification failed with UpstreamErrorResponse: $errorResponse")
+
+          // Safely extract JSON from message string
+          val errorCode: Option[String] = {
+            val pattern = "\\{.*\\}".r
+            pattern.findFirstIn(errorResponse.message).flatMap { jsonStr =>
+              try {
+                (Json.parse(jsonStr) \ "code").asOpt[String]
+              } catch {
+                case _: Exception => None
+              }
+            }
+          }
+
           Future.failed(
-            new Exception(
-              s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"
+            UpstreamBarsException(
+              status     = errorResponse.statusCode,
+              errorCode  = errorCode,
+              rawMessage = errorResponse.message
             )
           )
       }
