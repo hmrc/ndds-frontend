@@ -302,8 +302,8 @@ yearEndAndMonth.error.required = The yearEndAndMonth must include {0}
 yearEndAndMonth.error.invalid = Enter a real yearEndAndMonth
 yearEndAndMonth.change.hidden = Year end and month
 
-paymentsFrequency.title = What is the frequency of payments?
-paymentsFrequency.heading = What is the frequency of payments?
+paymentsFrequency.title = How often do you want to make payments?
+paymentsFrequency.heading = How often do you want to make payments?
 paymentsFrequency.weekly = Weekly
 paymentsFrequency.monthly = Monthly
 paymentsFrequency.error.required = Select one option
