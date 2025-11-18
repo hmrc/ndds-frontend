@@ -110,7 +110,7 @@ POST       /your-saved-direct-debit-payment             controllers.CheckYourAns
 GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
 
 GET        /payment-plan/direct-debit-redirect          controllers.DirectDebitSummaryController.onRedirect(directDebitReference: String)
-GET        /payment-plan/dd-payment-plans-summary       controllers.DirectDebitSummaryController.onPageLoad()
+GET        /payment-plan/payment-plans-direct-debit     controllers.DirectDebitSummaryController.onPageLoad()
 
 GET        /your-payment-plan-details-redirect          controllers.PaymentPlanDetailsController.onRedirect(paymentPlanReference: String)
 GET        /your-payment-plan-details                   controllers.PaymentPlanDetailsController.onPageLoad()
@@ -142,8 +142,8 @@ POST       /already-have-payment-plan                   controllers.DuplicateWar
 GET        /change-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)
 
-GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
-POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
+GET        /cancelling-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
+POST       /cancelling-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
 
 GET        /suspending-this-payment-plan                        controllers.SuspendPaymentPlanController.onPageLoad(mode: Mode = NormalMode)
 GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()

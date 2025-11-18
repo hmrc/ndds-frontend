@@ -147,6 +147,24 @@ class DirectDebitCacheRepositorySpec
     mustPreserveMdc(repository.retrieveCache("id"))
   }
 
+  ".updateDirectDebit" - {
+
+    "when there is a record for this id" - {
+
+      "must update and get the direct debit" in {
+
+        repository.cacheResponse(rdsResponse)("id").futureValue
+
+        val result = repository.updateDirectDebit("122222", Seq.empty)("id").futureValue
+        val expectedResult = rdsResponse.directDebitList.head.copy(paymentPlansList = Some(Seq.empty))
+
+        result mustEqual expectedResult
+      }
+    }
+
+    mustPreserveMdc(repository.retrieveCache("id"))
+  }
+
   ".keepAlive" - {
 
     "when there is a record for this id" - {

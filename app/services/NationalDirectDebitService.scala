@@ -27,7 +27,7 @@ import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, Paym
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
@@ -139,10 +139,60 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
   }
 
-  def retrieveDirectDebitPaymentPlans(
-    directDebitReference: String
-  )(implicit hc: HeaderCarrier, request: Request[?]): Future[NddDDPaymentPlansResponse] = {
-    nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
+  def retrieveDirectDebitPaymentPlans(userId: String, directDebitReference: String)(implicit
+    hc: HeaderCarrier,
+    request: Request[?]
+  ): Future[NddDDPaymentPlansResponse] = {
+    directDebitCache.retrieveCache(userId) flatMap {
+      case Seq() =>
+        throw new NoSuchElementException(
+          s"No direct debit cache found for Id $userId"
+        )
+      case existingCache =>
+        val filteredDirectDebitOpt = existingCache.find(_.ddiRefNumber == directDebitReference)
+
+        filteredDirectDebitOpt match {
+          case None =>
+            Future.failed(
+              new NoSuchElementException(
+                s"No direct debit found for directDebitReference $directDebitReference in Id $userId"
+              )
+            )
+
+          case Some(filteredDirectDebit) =>
+            filteredDirectDebit.paymentPlansList match {
+              case Some(plans) if plans.nonEmpty =>
+                Future.successful(
+                  NddDDPaymentPlansResponse(
+                    bankSortCode      = filteredDirectDebit.bankSortCode,
+                    bankAccountName   = filteredDirectDebit.bankAccountName,
+                    bankAccountNumber = filteredDirectDebit.bankAccountNumber,
+                    auDdisFlag        = filteredDirectDebit.auDdisFlag.toString,
+                    paymentPlanCount  = filteredDirectDebit.numberOfPayPlans,
+                    paymentPlanList   = plans
+                  )
+                )
+
+              case _ if filteredDirectDebit.numberOfPayPlans == 0 =>
+                Future.successful(
+                  NddDDPaymentPlansResponse(
+                    bankSortCode      = filteredDirectDebit.bankSortCode,
+                    bankAccountName   = filteredDirectDebit.bankAccountName,
+                    bankAccountNumber = filteredDirectDebit.bankAccountNumber,
+                    auDdisFlag        = filteredDirectDebit.auDdisFlag.toString,
+                    paymentPlanCount  = filteredDirectDebit.numberOfPayPlans,
+                    paymentPlanList   = Seq.empty
+                  )
+                )
+
+              case _ =>
+                for {
+                  ddPaymentPlans <- nddConnector.retrieveDirectDebitPaymentPlans(directDebitReference)
+                  _              <- directDebitCache.updateDirectDebit(directDebitReference, ddPaymentPlans.paymentPlanList)(userId)
+                } yield ddPaymentPlans
+            }
+        }
+    }
   }
 
   def amendPaymentPlanGuard(userAnswers: UserAnswers): Boolean =

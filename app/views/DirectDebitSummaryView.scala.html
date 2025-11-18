@@ -18,6 +18,8 @@
 @import java.time.format.DateTimeFormatter
 @import views.html.components.*
 @import utils.MaskAndFormatUtils.*
+@import viewmodels.govuk.PaginationFluency.*
+@import models.NormalMode
 
 @this(
     layout: templates.Layout,
@@ -27,14 +29,15 @@
     paragraphWithLink: ParagraphMessageWithLink,
     govukButton: GovukButton,
     govukErrorSummary: GovukErrorSummary,
-    govukSummaryList: GovukSummaryList
+    govukSummaryList: GovukSummaryList,
+    pageNavigator: PageNavigator
 )
 
-@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList])(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList], paginationViewModel: PaginationViewModel = PaginationViewModel(), title: String, heading: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitPaymentSummary.title")), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
+@layout(pageTitle = titleForSetupJourneyNoForm(messages(title)), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
-    @h1("directDebitPaymentSummary.heading")
+    @h1(heading)
 
     @h2("directDebitPaymentSummary.directDebit.title")
 
@@ -55,17 +58,33 @@
         )
     ))
 
-    @h2("directDebitPaymentSummary.activePayment.h1")
+    @if(paymentPlansList.size > 0) {
+        @h2("directDebitPaymentSummary.activePayment.h1")
 
-    @paragraphWithLink(
-        Some(messages("directDebitPaymentSummary.p1")),
-        linkMessage = messages("directDebitPaymentSummary.p1.link"),
-        linkUrl = messages("accountDetailsNotVerified.p2.url")
-    )
+        @paragraphWithLink(
+            Some(messages("directDebitPaymentSummary.activePayment.p1")),
+            linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
+            linkUrl = routes.DirectDebitSourceController.onPageLoad(NormalMode).url,
+            linkFullStop = true
+        )
 
-    @paragraph("directDebitPaymentSummary.setupPayment.p1")
+        @paragraph("directDebitPaymentSummary.activePayment.p2")
 
-    @for(plan <- paymentPlansList) {
-        @govukSummaryList(plan)
+        @for(plan <- paymentPlansList) {
+            @govukSummaryList(plan)
+        }
+
+        @pageNavigator(paginationViewModel)
+    } else {
+        @paragraph("directDebitPaymentSummary.noActivePaymentPlans.p1")
+
+        @h2("directDebitPaymentSummary.setupPayment.h1")
+
+        @paragraph("directDebitPaymentSummary.setupPayment.p1")
+
+        @govukButton(Button(
+            href = Some(routes.DirectDebitSourceController.onPageLoad(NormalMode).url),
+            content = Text(messages("directDebitPaymentSummary.addPaymentButton"))
+        ))
     }
 }

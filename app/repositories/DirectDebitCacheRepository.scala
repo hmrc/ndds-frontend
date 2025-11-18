@@ -17,6 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
+import models.responses.NddPaymentPlan
 import models.{NddDAO, NddDetails, NddResponse}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes, ReplaceOptions, Updates}
@@ -86,6 +87,49 @@ class DirectDebitCacheRepository @Inject() (
           .map(_ => true)
       case existingCache =>
         Future.successful(true)
+    }
+  }
+
+  def updateDirectDebit(
+    directDebitReference: String,
+    paymentPlanList: Seq[NddPaymentPlan]
+  )(id: String): Future[NddDetails] = Mdc.preservingMdc {
+
+    retrieveCache(id).flatMap { existingCache =>
+      val filteredDirectDebit =
+        existingCache
+          .find(_.ddiRefNumber == directDebitReference)
+          .getOrElse(
+            throw new NoSuchElementException(
+              s"No direct debit found for directDebitReference $directDebitReference in id $id"
+            )
+          )
+
+      val targetDirectDebit = filteredDirectDebit
+        .copy(
+          paymentPlansList = Some(paymentPlanList)
+        )
+        .encrypted
+
+      val updatedDirectDebitList = existingCache.map {
+        case debit if debit.ddiRefNumber == directDebitReference => targetDirectDebit
+        case debit                                               => debit
+      }
+
+      val updatedDoc = NddDAO(
+        id           = id,
+        lastUpdated  = Instant.now(clock),
+        directDebits = updatedDirectDebitList
+      )
+
+      collection
+        .replaceOne(
+          filter      = byId(id),
+          replacement = updatedDoc,
+          options     = ReplaceOptions().upsert(true)
+        )
+        .toFuture()
+        .map(_ => targetDirectDebit)
     }
   }
 

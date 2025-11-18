@@ -16,13 +16,8 @@
 
 package models.errors
 
-enum BarsErrors {
-  case BankAccountUnverified,
-    AccountDetailInvalidFormat,
-    SortCodeNotFound,
-    SortCodeNotSupported,
-    AccountNotFound,
-    NameMismatch,
-    SortCodeOnDenyList,
-    DetailsVerificationFailed
-}
+case class UpstreamBarsException(
+  status: Int,
+  errorCode: Option[String],
+  rawMessage: String
+) extends Exception(s"BARS error: status=$status, code=$errorCode, message=$rawMessage")

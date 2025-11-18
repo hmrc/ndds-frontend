@@ -118,11 +118,6 @@ class AmendPlanEndDateController @Inject() (
                         )
                       Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                     } else {
-                      val potentialNextPaymentDate = paymentValidationResult.potentialNextPaymentDate.getOrElse {
-                        throw new IllegalStateException(
-                          "[AmendPlanEndDateController] nextPaymentDateValid = true but potentialNextPaymentDate is missing"
-                        )
-                      }
                       for {
                         updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
                         _              <- sessionRepository.set(updatedAnswers)
@@ -160,11 +155,6 @@ class AmendPlanEndDateController @Inject() (
                         )
                       Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
                     } else {
-                      val potentialNextPaymentDate = paymentValidationResult.potentialNextPaymentDate.getOrElse {
-                        throw new IllegalStateException(
-                          "[AmendPlanEndDateController] nextPaymentDateValid = true but potentialNextPaymentDate is missing"
-                        )
-                      }
                       for {
                         duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(userAnswers) // F26 check
                         updatedAnswers         <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))

@@ -22,7 +22,6 @@ import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
-import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AdvanceNoticeView
 
@@ -39,7 +38,6 @@ class AdvanceNoticeController @Inject() (
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
-  nddService: NationalDirectDebitService,
   view: AdvanceNoticeView,
   appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)

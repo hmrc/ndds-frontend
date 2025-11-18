@@ -19,23 +19,23 @@ package controllers
 import controllers.actions.*
 import forms.SuspensionPeriodRangeDateFormProvider
 import models.requests.DataRequest
-import javax.inject.Inject
 import models.{Mode, PaymentPlanType}
 import navigation.Navigator
 import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.{Constants, MaskAndFormatUtils}
 import utils.MaskAndFormatUtils.formatAmount
+import utils.{Constants, MaskAndFormatUtils}
 import views.html.SuspensionPeriodRangeDateView
 
-import scala.concurrent.{ExecutionContext, Future}
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class SuspensionPeriodRangeDateController @Inject() (
   override val messagesApi: MessagesApi,
