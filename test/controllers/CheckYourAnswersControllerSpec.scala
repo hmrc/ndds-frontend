@@ -212,6 +212,66 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
+    "must not show Plan End Date when AddPaymentPlanEndDatePage is false (NO)" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+        .setOrException(RegularPaymentAmountPage, 120)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(PlanEndDatePage, endDate)
+        .setOrException(AddPaymentPlanEndDatePage, false)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your answers")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must not include "25 July 2027"
+        contentAsString(result) must not include "Plan End Date"
+      }
+    }
+
+    "must show Plan End Date when AddPaymentPlanEndDatePage is true (YES) and PlanEndDatePage has a value" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+        .setOrException(RegularPaymentAmountPage, 120)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(PlanEndDatePage, endDate)
+        .setOrException(AddPaymentPlanEndDatePage, true)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your answers")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("25 July 2027")
+      }
+    }
+
+    "must show Plan End Date when AddPaymentPlanEndDatePage is not set and PlanEndDatePage has a value (backwards compatibility)" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+        .setOrException(RegularPaymentAmountPage, 120)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(PlanEndDatePage, endDate)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your answers")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("25 July 2027")
+      }
+    }
+
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
       val application = applicationBuilder(userAnswers = None).build()
       running(application) {
