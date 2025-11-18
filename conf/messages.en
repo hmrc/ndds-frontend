@@ -601,11 +601,13 @@ removeSuspensionConfirmation.link = Return to payment plan
 
 paymentPlanSuspended.title = Payment plan suspended
 paymentPlanSuspended.panel.title = Payment plan suspended
-paymentPlanSuspended.panel.p = From <br><strong>{0}</strong> to <strong>{1}</strong>
+paymentPlanSuspended.panel.p = From <strong>{0}</strong> to <strong>{1}</strong>
 paymentPlanSuspended.pleaseNote = You can print this page for your records using the print function on your browser.
 paymentPlanSuspended.h1 = What happens next
-paymentPlanSuspended.p1 = This payment plan has now been suspended. No payments will be taken from {0} to {1}.
-paymentPlanSuspended.p2 = When the suspension period ends, your payment plan will resume on the next working day. It may take up to 36 hours for this suspension to appear in your account.
+paymentPlanSuspended.p1.normal = This payment plan has now been suspended. No payments will be taken from {0} to {1}.
+paymentPlanSuspended.p1.change = This payment plan suspension period has now been changed. No payments will be taken from {0} to {1}.
+paymentPlanSuspended.p2.normal = When the suspension period ends, your payment plan will resume on the next working day. It may take up to 36 hours for this suspension to appear in your account.
+paymentPlanSuspended.p2.change = When the suspension ends, your payment plan will resume on the next working day. It may take up to 36 hours for this suspension change to appear in your account.
 paymentPlanSuspended.h2 = Suspension details
 paymentPlanSuspended.paymentReference = Payment reference
 paymentPlanSuspended.link = Return to payment plan

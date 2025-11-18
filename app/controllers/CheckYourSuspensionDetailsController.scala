@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import models.requests.ChrisSubmissionRequest
-import models.responses.DirectDebitDetails
+import models.responses.{DirectDebitDetails, PaymentPlanDetails}
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
@@ -34,6 +34,7 @@ import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.CheckYourSuspensionDetailsView
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -181,10 +182,20 @@ class CheckYourSuspensionDetailsController @Inject() (
     )
   }
 
+  private def isSuspendPeriodActive(planDetail: PaymentPlanDetails): Boolean = {
+    (for {
+      suspensionEndDate <- planDetail.suspensionEndDate
+    } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
+  }
+
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =
+    val isSuspensionPeriodActive = answers.get(PaymentPlanDetailsQuery) match {
+      case Some(query) => isSuspendPeriodActive(query.paymentPlanDetails)
+      case _           => false
+    }
     SummaryListViewModel(
       rows = Seq(
-        SuspensionPeriodRangeDateSummary.row(answers, true)
+        SuspensionPeriodRangeDateSummary.row(answers, true, isSuspensionPeriodActive)
       ).flatten
     )
 
