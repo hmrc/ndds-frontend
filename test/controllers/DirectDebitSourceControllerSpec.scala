@@ -28,7 +28,7 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.DirectDebitReferenceQuery
+import queries.AddPaymentPlanIdentifierQuery
 import repositories.SessionRepository
 import views.html.DirectDebitSourceView
 
@@ -168,7 +168,7 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
         val userAnswersWithDirectDebitReference =
           emptyUserAnswers
             .set(
-              DirectDebitReferenceQuery,
+              AddPaymentPlanIdentifierQuery,
               "directDebitReference"
             )
             .success
@@ -193,7 +193,7 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
         val userAnswersWithDirectDebitReference =
           emptyUserAnswers
             .set(
-              DirectDebitReferenceQuery,
+              AddPaymentPlanIdentifierQuery,
               "directDebitReference"
             )
             .success

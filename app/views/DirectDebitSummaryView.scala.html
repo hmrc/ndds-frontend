@@ -64,7 +64,7 @@
         @paragraphWithLink(
             Some(messages("directDebitPaymentSummary.activePayment.p1")),
             linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
-            linkUrl = routes.DirectDebitSourceController.onPageLoad(NormalMode).url,
+            linkUrl = routes.DirectDebitSummaryController.onRedirectToDirectDebitSource(directDebitReference).url,
             linkFullStop = true
         )
 
@@ -83,7 +83,7 @@
         @paragraph("directDebitPaymentSummary.setupPayment.p1")
 
         @govukButton(Button(
-            href = Some(routes.DirectDebitSourceController.onPageLoad(NormalMode).url),
+            href = Some(routes.DirectDebitSummaryController.onRedirectToDirectDebitSource(directDebitReference).url),
             content = Text(messages("directDebitPaymentSummary.addPaymentButton"))
         ))
     }
