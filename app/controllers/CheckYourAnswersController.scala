@@ -21,12 +21,14 @@ import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.DirectDebitSource.*
 import models.requests.ChrisSubmissionRequest
+import models.responses.GenerateDdiRefResponse
 import models.{DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import repositories.SessionRepository
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import queries.AddPaymentPlanIdentifierQuery
+import repositories.{DirectDebitCacheRepository, SessionRepository}
 import services.{AuditService, NationalDirectDebitService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{DateTimeFormats, PaymentCalculations}
@@ -35,6 +37,7 @@ import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
 import utils.MacGenerator
 import utils.Utils.generateMacFromAnswers
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject() (
@@ -46,6 +49,7 @@ class CheckYourAnswersController @Inject() (
   nddService: NationalDirectDebitService,
   sessionRepository: SessionRepository,
   val controllerComponents: MessagesControllerComponents,
+  val directDebitCache: DirectDebitCacheRepository,
   view: CheckYourAnswersView,
   appConfig: FrontendAppConfig,
   macGenerator: MacGenerator
@@ -94,56 +98,66 @@ class CheckYourAnswersController @Inject() (
     (identify andThen getData andThen requireData).async { implicit request =>
       implicit val ua: UserAnswers = request.userAnswers
 
-      val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
+      val ddiRefEitherFuture: Future[Either[Result, String]] = ua.get(AddPaymentPlanIdentifierQuery) match {
+        // Existing direct debit: skip MAC and skip generateNewDdiReference
+        case Some(paymentPlanIdentifier) =>
+          logger.debug(s"Using existing DDI reference: $paymentPlanIdentifier")
+          Future.successful(Right(paymentPlanIdentifier))
 
-      (ua.get(pages.MacValuePage), maybeMac2) match {
-        case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-          logger.debug(s"MAC validation successful")
-          nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
-            val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
+        // New direct debit: validate MAC and generate new DDI
+        case None =>
+          val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
 
-            nddService
-              .submitChrisData(chrisRequest)
-              .flatMap { success =>
-                if (success) {
-                  logger.info(s"CHRIS submission successful for creating for DDI Ref [${reference.ddiRefNumber}]")
+          (ua.get(pages.MacValuePage), maybeMac2) match {
+            case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
+              logger.debug("MAC validation successful")
+              nddService
+                .generateNewDdiReference(required(PaymentReferencePage))
+                .map(ref => Right(ref.ddiRefNumber))
 
-                  for {
-                    updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, reference))
-                    updatedAnswers <- Future.fromTry(updatedAnswers.set(CreateConfirmationPage, true))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield {
-                    auditService.sendSubmitDirectDebitPaymentPlan
-                    logger.debug(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
-                    Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-                  }
-                } else {
-                  logger.error(s"CHRIS submission failed for creating for DDI Ref [${reference.ddiRefNumber}]")
-                  Future.successful(
-                    Redirect(routes.JourneyRecoveryController.onPageLoad())
-                  )
-                }
-              }
-              .recover { case ex =>
-                logger.error("CHRIS submission or session update failed", ex)
-                Redirect(routes.JourneyRecoveryController.onPageLoad())
-              }
+            case (Some(_), Some(_)) =>
+              logger.error(s"MAC validation failed for user ${request.userId}")
+              Future.successful(
+                Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+              )
+
+            case _ =>
+              logger.error("MAC generation failed or MAC1 missing in UserAnswers")
+              Future.successful(
+                Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+              )
           }
+      }
 
-        case (Some(mac1), Some(mac2)) =>
-          logger.error(s"MAC validation failed for user ${request.userId}")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      ddiRefEitherFuture.flatMap {
+        case Left(redirect) =>
+          Future.successful(redirect)
 
-        case _ =>
-          logger.error("MAC generation failed or MAC1 not found in UserAnswers")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        case Right(ddiReference) =>
+          buildChrisSubmissionRequest(ua, ddiReference, request.userId).flatMap { chrisRequest =>
+            nddService.submitChrisData(chrisRequest).flatMap { success =>
+              if (success) {
+                for {
+                  updated1 <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber = ddiReference)))
+                  updated2 <- Future.fromTry(updated1.set(CreateConfirmationPage, true))
+                  _        <- sessionRepository.set(updated2)
+                } yield {
+                  auditService.sendSubmitDirectDebitPaymentPlan
+                  Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+                }
+              } else {
+                Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+              }
+            }
+          }
       }
     }
 
   private def buildChrisSubmissionRequest(
     userAnswers: UserAnswers,
-    ddiReference: String
-  ): ChrisSubmissionRequest = {
+    ddiReference: String,
+    userId: String
+  ): Future[ChrisSubmissionRequest] = {
     implicit val ua: UserAnswers = userAnswers
     val calculationOpt: Option[PaymentPlanCalculation] =
       for {
@@ -151,25 +165,47 @@ class CheckYourAnswersController @Inject() (
         plan   <- ua.get(PaymentPlanTypePage) if plan == PaymentPlanType.TaxCreditRepaymentPlan
       } yield calculateTaxCreditRepaymentPlan(ua)
 
-    ChrisSubmissionRequest(
-      serviceType                     = required(DirectDebitSourcePage),
-      paymentPlanType                 = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan),
-      paymentPlanReferenceNumber      = None,
-      paymentFrequency                = ua.get(PaymentsFrequencyPage).map(_.toString),
-      yourBankDetailsWithAuddisStatus = required(YourBankDetailsPage),
-      planStartDate                   = ua.get(PlanStartDatePage),
-      planEndDate                     = ua.get(PlanEndDatePage),
-      paymentDate                     = ua.get(PaymentDatePage),
-      yearEndAndMonth                 = ua.get(YearEndAndMonthPage),
-      ddiReferenceNo                  = ddiReference,
-      paymentReference                = required(PaymentReferencePage),
-      totalAmountDue                  = ua.get(TotalAmountDuePage),
-      paymentAmount                   = ua.get(PaymentAmountPage),
-      regularPaymentAmount            = ua.get(RegularPaymentAmountPage),
-      amendPaymentAmount              = None,
-      calculation                     = calculationOpt,
-      suspensionPeriodRangeDate       = None
-    )
+    val existingDDIOpt: Option[String] = ua.get(AddPaymentPlanIdentifierQuery)
+    val hasExistingDDI: Boolean = existingDDIOpt.isDefined
+
+    val bankDetailsWithAudisFuture = existingDDIOpt match {
+      case Some(directDebitReferenceIdentifier) =>
+        directDebitCache
+          .getDirectDebit(directDebitReferenceIdentifier)(userId)
+          .map(debit =>
+            YourBankDetailsWithAuddisStatus(
+              accountHolderName = debit.bankAccountName,
+              sortCode          = debit.bankSortCode,
+              accountNumber     = debit.bankAccountNumber,
+              auddisStatus      = debit.auDdisFlag,
+              accountVerified   = true
+            )
+          )
+      case _ => Future.successful(required(YourBankDetailsPage))
+    }
+
+    bankDetailsWithAudisFuture.map { bankDetails =>
+      ChrisSubmissionRequest(
+        serviceType                     = required(DirectDebitSourcePage),
+        paymentPlanType                 = ua.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan),
+        paymentPlanReferenceNumber      = None,
+        paymentFrequency                = ua.get(PaymentsFrequencyPage).map(_.toString),
+        yourBankDetailsWithAuddisStatus = bankDetails,
+        planStartDate                   = ua.get(PlanStartDatePage),
+        planEndDate                     = ua.get(PlanEndDatePage),
+        paymentDate                     = ua.get(PaymentDatePage),
+        yearEndAndMonth                 = ua.get(YearEndAndMonthPage),
+        ddiReferenceNo                  = ddiReference,
+        paymentReference                = required(PaymentReferencePage),
+        totalAmountDue                  = ua.get(TotalAmountDuePage),
+        paymentAmount                   = ua.get(PaymentAmountPage),
+        regularPaymentAmount            = ua.get(RegularPaymentAmountPage),
+        amendPaymentAmount              = None,
+        calculation                     = calculationOpt,
+        suspensionPeriodRangeDate       = None,
+        amendPlan                       = hasExistingDDI // TODO add new flag to the model
+      )
+    }
   }
 
   private def calculateTaxCreditRepaymentPlan(userAnswers: UserAnswers): PaymentPlanCalculation = {

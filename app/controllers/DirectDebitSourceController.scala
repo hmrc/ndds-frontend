@@ -59,8 +59,8 @@ class DirectDebitSourceController @Inject() (
     }
 
     val backlinkCall = answers.get(AddPaymentPlanIdentifierQuery) match {
-      case Some(directDebitReference) => routes.DirectDebitSummaryController.onPageLoad()
-      case _                          => routes.ConfirmAuthorityController.onPageLoad(mode)
+      case Some(directDebitReferenceIdentifier) => routes.DirectDebitSummaryController.onPageLoad()
+      case _                                    => routes.ConfirmAuthorityController.onPageLoad(mode)
     }
 
     Ok(view(preparedForm, mode, backlinkCall))
@@ -73,8 +73,8 @@ class DirectDebitSourceController @Inject() (
       .fold(
         formWithErrors => {
           val backlinkCall = request.userAnswers.get(AddPaymentPlanIdentifierQuery) match {
-            case Some(directDebitReference) => routes.DirectDebitSummaryController.onPageLoad()
-            case _                          => routes.ConfirmAuthorityController.onPageLoad(mode)
+            case Some(directDebitReferenceIdentifier) => routes.DirectDebitSummaryController.onPageLoad()
+            case _                                    => routes.ConfirmAuthorityController.onPageLoad(mode)
           }
 
           Future.successful(BadRequest(view(formWithErrors, mode, backlinkCall)))

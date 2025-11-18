@@ -52,7 +52,7 @@ class PaymentDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     {
-      nddService.calculateFutureWorkingDays(request.userAnswers) map { earliestPaymentDate =>
+      nddService.calculateFutureWorkingDays(request.userAnswers, request.userId) map { earliestPaymentDate =>
         val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers)
 
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
@@ -78,7 +78,7 @@ class PaymentDateController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     nddService
-      .calculateFutureWorkingDays(request.userAnswers)
+      .calculateFutureWorkingDays(request.userAnswers, request.userId)
       .flatMap { earliestPaymentDate =>
         val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
@@ -87,7 +87,7 @@ class PaymentDateController @Inject() (
           .bindFromRequest()
           .fold(
             formWithErrors =>
-              nddService.calculateFutureWorkingDays(request.userAnswers).map { earliestPaymentDate =>
+              nddService.calculateFutureWorkingDays(request.userAnswers, request.userId).map { earliestPaymentDate =>
                 BadRequest(
                   view(formWithErrors,
                        mode,
@@ -98,7 +98,7 @@ class PaymentDateController @Inject() (
               },
             value =>
               for {
-                earliestPaymentDate <- nddService.calculateFutureWorkingDays(request.userAnswers)
+                earliestPaymentDate <- nddService.calculateFutureWorkingDays(request.userAnswers, request.userId)
                 updatedAnswers      <- Future.fromTry(request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
                 _                   <- sessionRepository.set(updatedAnswers)
               } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))

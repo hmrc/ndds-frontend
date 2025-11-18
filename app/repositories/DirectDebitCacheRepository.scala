@@ -133,6 +133,23 @@ class DirectDebitCacheRepository @Inject() (
     }
   }
 
+  def getDirectDebit(
+    directDebitReference: String
+  )(id: String): Future[NddDetails] = Mdc.preservingMdc {
+    retrieveCache(id).flatMap { existingCache =>
+      existingCache
+        .find(_.ddiRefNumber == directDebitReference)
+        .map(Future.successful)
+        .getOrElse(
+          Future.failed(
+            new NoSuchElementException(
+              s"No direct debit found for reference $directDebitReference in cache for id $id"
+            )
+          )
+        )
+    }
+  }
+
   private[repositories] def keepAlive(id: String): Future[Boolean] = Mdc.preservingMdc {
     collection
       .updateOne(

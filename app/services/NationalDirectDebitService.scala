@@ -27,7 +27,7 @@ import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, Paym
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
+import queries.{AddPaymentPlanIdentifierQuery, DirectDebitReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
@@ -71,15 +71,30 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       }
   }
 
-  def calculateFutureWorkingDays(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
-    val auddisStatus = userAnswers
-      .get(YourBankDetailsPage)
-      .map(_.auddisStatus)
-      .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
-    val offsetWorkingDays = calculateOffset(auddisStatus)
-    val currentDate = LocalDate.now().toString
+  def calculateFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
 
-    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
+    val auddisStatusFuture = userAnswers.get(AddPaymentPlanIdentifierQuery) match {
+      case Some(directDebitReferenceIdentifier) =>
+        directDebitCache
+          .getDirectDebit(directDebitReferenceIdentifier)(userId)
+          .map(_.auDdisFlag)
+      case _ =>
+        Future.successful(
+          userAnswers
+            .get(YourBankDetailsPage)
+            .map(_.auddisStatus)
+            .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
+        )
+    }
+
+    for {
+      auddisStatus <- auddisStatusFuture
+      offsetWorkingDays = calculateOffset(auddisStatus = auddisStatus)
+      currentDate = LocalDate.now().toString
+      result <- nddConnector.getFutureWorkingDays(
+                  WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays)
+                )
+    } yield result
   }
 
   def getEarliestPlanStartDate(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
