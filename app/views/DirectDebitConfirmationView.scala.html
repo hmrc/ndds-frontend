@@ -79,6 +79,11 @@
     )
 
     @paragraphWithLink(
+        linkMessage = messages("directDebitConfirmation.viewPaymentPlans"),
+        linkUrl = routes.DirectDebitSummaryController.onRedirect(referenceNumber).url
+    )
+
+    @paragraphWithLink(
         linkMessage = messages("directDebitConfirmation.viewDirectDebitInstructions"),
         linkUrl = routes.YourDirectDebitInstructionsController.onPageLoad().url
     )
