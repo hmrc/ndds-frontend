@@ -140,13 +140,13 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
 
-        val result = service.calculateFutureWorkingDays(expectedUserAnswers).futureValue
+        val result = service.calculateFutureWorkingDays(expectedUserAnswers, "123").futureValue
 
         result mustBe EarliestPaymentDate("2025-12-25")
       }
 
       "fail when auddis status is not in user answers" in {
-        val result = intercept[Exception](service.calculateFutureWorkingDays(emptyUserAnswers).futureValue)
+        val result = intercept[Exception](service.calculateFutureWorkingDays(emptyUserAnswers, "123").futureValue)
 
         result.getMessage must include("YourBankDetailsPage details missing from user answers")
       }
@@ -159,7 +159,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
-        val result = intercept[Exception](service.calculateFutureWorkingDays(expectedUserAnswers).futureValue)
+        val result = intercept[Exception](service.calculateFutureWorkingDays(expectedUserAnswers, "123").futureValue)
 
         result.getMessage must include("bang")
       }
