@@ -85,7 +85,7 @@ object SuspensionPeriodRangeDateSummary {
       actions =
         if (showActions)
           Seq(
-            ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(NormalMode).url)
+            ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
               .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden")),
             ActionItemViewModel("site.remove", routes.RemovingThisSuspensionController.onPageLoad(NormalMode).url)
               .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
