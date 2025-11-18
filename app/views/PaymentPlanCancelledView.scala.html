@@ -31,19 +31,7 @@
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanCancelled.title")), showBackLink = false) {
     @confirmationPanel(
-        title = messages("paymentPlanCancelled.panel.title"),
-        body = Html(
-                    s"${messages("paymentPlanCancelled.panel.body1")}" +
-                    s"${messages("paymentPlanCancelled.panel.strong", paymentReference)}" +
-                    s"${messages("paymentPlanCancelled.panel.body2")}"
-                    ),
-        classes = "govuk-!-margin-bottom-2"
-    )
-
-    @govukInsetText(
-        InsetText(
-            content = Text(messages("paymentPlanCancelled.pleaseNote"))
-        )
+        title = messages("paymentPlanCancelled.panel.title")
     )
 
     @header2("paymentPlanCancelled.h1")
@@ -60,6 +48,12 @@
         )),
         rows = rows
     ))
+
+    @govukInsetText(
+        InsetText(
+            content = Text(messages("paymentPlanCancelled.pleaseNote"))
+        )
+    )
 
     @link("paymentPlanCancelled.link", call.url)
 

@@ -27,8 +27,11 @@ import play.api.Application
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanCancelledView
+
+import java.time.LocalDate
 
 class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
 
@@ -43,9 +46,25 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
           AmendPaymentPlanTypeSummary.row(paymentPlanDetails.planType)(messages(app)),
           AmendPaymentPlanSourceSummary.row(paymentPlanDetails.hodService)(messages(app)),
           DateSetupSummary.row(paymentPlanDetails.submissionDateTime)(messages(app)),
+          AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)(messages(app)),
           PaymentsFrequencySummary.row(paymentPlanDetails.scheduledPaymentFrequency)(messages(app)),
-          AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)(messages(app))
-        )
+          AmendPlanStartDateSummary.row(paymentPlanDetails.planType,
+                                        paymentPlanDetails.scheduledPaymentStartDate,
+                                        Constants.shortDateTimeFormatPattern
+                                       )(messages(app))
+        ) ++
+          paymentPlanDetails.scheduledPaymentEndDate.fold(Seq.empty[SummaryListRow]) { endDate =>
+            Seq(AmendPlanEndDateSummary.row(Some(endDate), Constants.shortDateTimeFormatPattern)(messages(app)))
+          } ++
+          (if (paymentPlanDetails.suspensionEndDate.exists(!LocalDate.now().isAfter(_))) {
+             Seq(
+               SuspensionPeriodRangeDateSummary.row(paymentPlanDetails.suspensionStartDate, paymentPlanDetails.suspensionEndDate, showActions = true)(
+                 messages(app)
+               )
+             )
+           } else {
+             Seq.empty
+           })
 
       val mockBudgetPaymentPlanDetailResponse =
         dummyPlanDetailResponse.copy(paymentPlanDetails =
@@ -92,7 +111,11 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
           AmendPaymentPlanTypeSummary.row(paymentPlanDetails.planType)(messages(app)),
           AmendPaymentPlanSourceSummary.row(paymentPlanDetails.hodService)(messages(app)),
           DateSetupSummary.row(paymentPlanDetails.submissionDateTime)(messages(app)),
-          AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)(messages(app))
+          AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)(messages(app)),
+          AmendPlanStartDateSummary.row(paymentPlanDetails.planType,
+                                        paymentPlanDetails.scheduledPaymentStartDate,
+                                        Constants.shortDateTimeFormatPattern
+                                       )(messages(app))
         )
 
       val mockSinglePaymentPlanDetailResponse =
@@ -121,6 +144,58 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PaymentPlanCancelledView]
         val summaryListRows = summaryList(userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
         val mockPaymentReference = mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(mockPaymentReference,
+                                               Call("GET", routes.DirectDebitSummaryController.onPageLoad().url),
+                                               summaryListRows
+                                              )(
+          request,
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with VariablePaymentPlan" in {
+
+      def summaryList(paymentPlanDetails: PaymentPlanDetails, app: Application): Seq[SummaryListRow] =
+        Seq(
+          AmendPaymentPlanTypeSummary.row(paymentPlanDetails.planType)(messages(app)),
+          AmendPaymentPlanSourceSummary.row(paymentPlanDetails.hodService)(messages(app)),
+          DateSetupSummary.row(paymentPlanDetails.submissionDateTime)(messages(app)),
+          AmendPlanStartDateSummary.row(
+            paymentPlanDetails.planType,
+            paymentPlanDetails.scheduledPaymentStartDate,
+            Constants.shortDateTimeFormatPattern
+          )(messages(app))
+        )
+
+      val mockVariablePaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.VariablePaymentPlan.toString)
+        )
+
+      val userAnswersWithData =
+        emptyUserAnswers
+          .set(
+            PaymentPlanDetailsQuery,
+            mockVariablePaymentPlanDetailResponse
+          )
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithData))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(GET, paymentPlanCancelledRoute)
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[PaymentPlanCancelledView]
+        val summaryListRows = summaryList(userAnswersWithData.get(PaymentPlanDetailsQuery).get.paymentPlanDetails, application)
+        val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(mockPaymentReference,

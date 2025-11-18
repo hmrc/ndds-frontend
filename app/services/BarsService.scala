@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import connectors.BarsConnector
 import models.YourBankDetails
-import models.errors.BarsErrors
+import models.errors.{BarsErrors, UpstreamBarsException}
 import models.errors.BarsErrors.*
 import models.requests.{BarsAccount, BarsBusiness, BarsBusinessRequest, BarsPersonalRequest, BarsSubject}
 import models.responses.{Bank, BarsResponse, BarsVerificationResponse}
@@ -73,7 +73,6 @@ case class BarsService @Inject() (
       (response.nameMatches == BarsResponse.Yes || response.nameMatches == BarsResponse.Partial) &&
       response.sortCodeSupportsDirectDebit == BarsResponse.Yes
 
-  // --- Main verification method ---
   def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)(implicit
     hc: HeaderCarrier
   ): Future[Either[BarsErrors, (BarsVerificationResponse, Bank)]] = {
@@ -94,25 +93,39 @@ case class BarsService @Inject() (
       )
     }
 
-    for {
-      verificationResponse <- barsConnector.verify(endpoint, requestJson)
-      result <- if (checkBarsResponseSuccess(verificationResponse)) {
-                  // Only call getMetadata if verification succeeded
-                  barsConnector.getMetadata(bankDetails.sortCode).map { bank =>
-                    Right((verificationResponse, bank))
-                  }
-                } else {
-                  val validatedResult: Either[BarsErrors, Unit] = for {
-                    _ <- checkAccountAndName(verificationResponse.accountExists, verificationResponse.nameMatches)
-                    _ <- checkAccountNumberFormat(verificationResponse.accountNumberIsWellFormatted)
-                    _ <- checkSortCodeExistsOnEiscd(verificationResponse.sortCodeIsPresentOnEISCD)
-                    _ <- checkSortCodeDirectDebitSupport(verificationResponse.sortCodeSupportsDirectDebit)
-                    _ <- checkAccountExists(verificationResponse.accountExists)
-                    _ <- checkNameMatches(verificationResponse.nameMatches, verificationResponse.accountExists)
-                  } yield Right(())
+    // Call BARS and map known errors
+    val verificationFuture: Future[Either[BarsErrors, BarsVerificationResponse]] =
+      barsConnector.verify(endpoint, requestJson).map(Right(_)).recover {
+        case e: UpstreamBarsException if e.status == 400 && e.errorCode.contains("SORT_CODE_ON_DENY_LIST") =>
+          Left(BarsErrors.SortCodeOnDenyList)
+        case e: UpstreamBarsException if e.status == 400 =>
+          Left(BarsErrors.DetailsVerificationFailed)
+        case e =>
+          Left(BarsErrors.DetailsVerificationFailed)
+      }
 
-                  Future.successful(Left(validatedResult.fold(identity, _ => DetailsVerificationFailed)))
-                }
-    } yield result
+    verificationFuture.flatMap {
+      case Left(error) =>
+        Future.successful(Left(error))
+
+      case Right(verificationResponse) =>
+        if (checkBarsResponseSuccess(verificationResponse)) {
+          barsConnector.getMetadata(bankDetails.sortCode).map { bank =>
+            Right((verificationResponse, bank))
+          }
+        } else {
+          val validated: Either[BarsErrors, Unit] = for {
+            _ <- checkAccountAndName(verificationResponse.accountExists, verificationResponse.nameMatches)
+            _ <- checkAccountNumberFormat(verificationResponse.accountNumberIsWellFormatted)
+            _ <- checkSortCodeExistsOnEiscd(verificationResponse.sortCodeIsPresentOnEISCD)
+            _ <- checkSortCodeDirectDebitSupport(verificationResponse.sortCodeSupportsDirectDebit)
+            _ <- checkAccountExists(verificationResponse.accountExists)
+            _ <- checkNameMatches(verificationResponse.nameMatches, verificationResponse.accountExists)
+          } yield Right(())
+
+          Future.successful(Left(validated.fold(identity, _ => DetailsVerificationFailed)))
+        }
+    }
   }
+
 }
