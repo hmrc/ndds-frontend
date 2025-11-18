@@ -58,6 +58,7 @@ class Navigator @Inject() () {
     case BankDetailsCheckYourAnswerPage => _ => routes.ConfirmAuthorityController.onPageLoad(CheckMode)
     case ConfirmAuthorityPage           => nextAfterConfirmAuthority(CheckMode)
     case DirectDebitSourcePage          => checkDirectDebitSource
+    case PaymentPlanTypePage            => _ => routes.PaymentReferenceController.onPageLoad(CheckMode)
     case PaymentReferencePage           => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentAmountPage              => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentDatePage                => _ => routes.CheckYourAnswersController.onPageLoad()

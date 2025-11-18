@@ -29,21 +29,37 @@ import viewmodels.implicits.*
 object PaymentPlanTypeSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentPlanTypePage).map { answer =>
-
-      val value = ValueViewModel(
-        HtmlContent(
-          HtmlFormat.escape(messages(s"checkYourAnswers.paymentPlanType.$answer"))
+    answers.get(PaymentPlanTypePage) match {
+      case Some(planType) =>
+        val value = ValueViewModel(
+          HtmlContent(
+            HtmlFormat.escape(messages(s"checkYourAnswers.paymentPlanType.$planType"))
+          )
         )
-      )
 
-      SummaryListRowViewModel(
-        key   = "checkYourAnswers.paymentPlanType",
-        value = value,
-        actions = Seq(
-          ActionItemViewModel("site.change", routes.PaymentPlanTypeController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("paymentPlanType.change.hidden"))
+        Some(
+          SummaryListRowViewModel(
+            key   = "checkYourAnswers.paymentPlanType",
+            value = value,
+            actions = Seq(
+              ActionItemViewModel("site.change", routes.PaymentPlanTypeController.onPageLoad(CheckMode).url)
+                .withVisuallyHiddenText(messages("paymentPlanType.change.hidden"))
+            )
+          )
         )
-      )
+
+      case None =>
+        val value = ValueViewModel(
+          HtmlContent(
+            HtmlFormat.escape(messages("checkYourAnswers.paymentPlanType.singlePaymentPlan"))
+          )
+        )
+        Some(
+          SummaryListRowViewModel(
+            key     = "checkYourAnswers.paymentPlanType",
+            value   = value,
+            actions = Seq.empty
+          )
+        )
     }
 }

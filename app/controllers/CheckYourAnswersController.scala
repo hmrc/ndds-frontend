@@ -60,7 +60,7 @@ class CheckYourAnswersController @Inject() (
       request.userAnswers.get(CreateConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
-      logger.warn("Attempt to  Check your answers  confirmation; redirecting to Page Not Found.")
+      logger.warn("Attempt to  Check your answers confirmation; redirecting to Page Not Found.")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
       val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
@@ -70,19 +70,10 @@ class CheckYourAnswersController @Inject() (
         PlanStartDateSummary.row(request.userAnswers)
       }
 
-//      import play.twirl.api.TwirlFeatureImports.twirlOptionToBoolean
-//      import org.scalactic.Prettifier.default
-//      val paymentPlanType = request.userAnswers.get(PaymentPlanTypePage).getOrElse(PaymentPlanType.SinglePaymentPlan)
-//      val planType = if (PaymentPlanTypeSummary.row(request.userAnswers) == null) {
-//        PaymentPlanTypeSummary.row(request.userAnswers)
-//      } else {
-//        "Single payment"
-//      }
-
       val list = SummaryListViewModel(
         rows = Seq(
-          PaymentPlanTypeSummary.row(request.userAnswers),
           DirectDebitSourceSummary.row(request.userAnswers),
+          PaymentPlanTypeSummary.row(request.userAnswers),
           PaymentReferenceSummary.row(request.userAnswers),
           TotalAmountDueSummary.row(request.userAnswers),
           PaymentAmountSummary.row(request.userAnswers),
@@ -109,7 +100,6 @@ class CheckYourAnswersController @Inject() (
 
       (ua.get(pages.MacValuePage), maybeMac2) match {
         case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-          logger.debug(s"MAC validation successful")
           nddService.generateNewDdiReference(required(PaymentReferencePage)).flatMap { reference =>
             val chrisRequest = buildChrisSubmissionRequest(ua, reference.ddiRefNumber)
 
