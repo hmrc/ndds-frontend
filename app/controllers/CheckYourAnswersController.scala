@@ -22,6 +22,7 @@ import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierA
 import models.DirectDebitSource.*
 import models.requests.ChrisSubmissionRequest
 import models.{DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.audits.NewDirectDebitAudit
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -173,7 +174,8 @@ class CheckYourAnswersController @Inject() (
       regularPaymentAmount            = ua.get(RegularPaymentAmountPage),
       amendPaymentAmount              = None,
       calculation                     = calculationOpt,
-      suspensionPeriodRangeDate       = None
+      suspensionPeriodRangeDate       = None,
+      auditType                       = Some(NewDirectDebitAudit)
     )
   }
 
