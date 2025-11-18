@@ -16,12 +16,16 @@
 
 @import viewmodels.LegendSize._
 @import utils.MaskAndFormatUtils.*
+@import views.html.components.*
 
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
+    header1: Header1,
+    header2: Header2,
+    paragraph: Paragraph,
     govukButton: GovukButton
 )
 
@@ -35,25 +39,24 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        <h1 class="govuk-heading-xl">@messages("cancelPaymentPlan.heading")</h1>
+        @header1("cancelPaymentPlan.heading")
 
         <p class="govuk-body">
             @messages("cancelPaymentPlan.paymentReference") <strong>@paymentReference</strong><br/>
             @if(planType == PaymentPlanType.SinglePaymentPlan.toString) {
                 @messages("cancelPaymentPlan.paymentAmount.single") <strong>@formatAmount(paymentAmount)</strong><br/>
-            } else {
+            } else if(planType == PaymentPlanType.BudgetPaymentPlan.toString) {
                 @messages("cancelPaymentPlan.paymentAmount.budget") <strong>@formatAmount(paymentAmount)</strong><br/>
             }
         </p>
 
-        <p class="govuk-body">@messages("cancelPaymentPlan.p1")</p>
-        <p class="govuk-body">@messages("cancelPaymentPlan.p2")</p>
+        @paragraph("cancelPaymentPlan.p1")
 
         @govukRadios(
             RadiosViewModel.yesNo(
                 field = form("value"),
                 legend = Legend(messages("cancelPaymentPlan.h2")).asSecondaryHeading(Medium)
-            )
+            ).withCssClass("govuk-radios--inline")
         )
 
         @govukButton(

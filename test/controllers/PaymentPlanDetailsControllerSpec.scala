@@ -273,7 +273,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               messages(app)
             ),
             AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)(messages(app)),
-            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate)(messages(app))
+            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, true)(messages(app))
           )
         }
 
@@ -288,7 +288,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(
               messages(app)
             ),
-            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate)(messages(app))
+            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, true)(messages(app))
           )
         }
 
