@@ -174,6 +174,7 @@ class DirectDebitSummaryController @Inject() (
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanStartDatePage))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanEndDatePage))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(SuspensionPeriodRangeDatePage))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AddPaymentPlanIdentifierQuery))
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 }
