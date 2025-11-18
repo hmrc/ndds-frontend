@@ -99,28 +99,4 @@ object SuspensionPeriodRangeDateSummary {
     )
   }
 
-//  def row2(answers: UserAnswers, showChange: Boolean = false, isSuspendChangeMode: Boolean)(implicit messages: Messages): Option[SummaryListRow] =
-//    answers.get(SuspensionPeriodRangeDatePage).map { answer =>
-//
-//      val mode = if (isSuspendChangeMode) {
-//        CheckMode
-//      } else {
-//        NormalMode
-//      }
-//      val formattedValue =
-//        s"${formattedDateTimeShort(answer.startDate.toString)} ${messages("suspensionPeriodRangeDate.to")} ${formattedDateTimeShort(answer.endDate.toString)}"
-//      SummaryListRowViewModel(
-//        key   = "suspensionPeriodRangeDate.checkYourAnswersLabel",
-//        value = ValueViewModel(formattedValue),
-//        actions = if (showChange) {
-//          Seq(
-//            ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(mode).url)
-//              .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
-//          )
-//        } else {
-//          Seq.empty
-//        }
-//      )
-//    }
-
 }
