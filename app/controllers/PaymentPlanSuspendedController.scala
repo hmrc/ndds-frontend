@@ -31,6 +31,7 @@ import utils.Constants
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, PaymentReferenceSummary, SuspensionPeriodRangeDateSummary}
 import views.html.PaymentPlanSuspendedView
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -57,8 +58,11 @@ class PaymentPlanSuspendedController @Inject() (
         val formattedStartDate = suspensionPeriodRange.startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
         val formattedEndDate = suspensionPeriodRange.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
         val paymentReference = planDetails.paymentPlanDetails.paymentReference
+
+        val suspensionIsActiveMode = isSuspendPeriodActive(planDetails.paymentPlanDetails)
+
         val rows = buildRows(paymentReference, userAnswers, planDetails.paymentPlanDetails)
-        Ok(view(formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows))
+        Ok(view(formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows, suspensionIsActiveMode))
       }
 
       maybeResult match {
@@ -75,13 +79,23 @@ class PaymentPlanSuspendedController @Inject() (
 
   }
 
+  private def isSuspendPeriodActive(planDetail: PaymentPlanDetails): Boolean = {
+    (for {
+      suspensionEndDate <- planDetail.suspensionEndDate
+    } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
+  }
+
   private def buildRows(paymentPlanReference: String, userAnswers: UserAnswers, paymentPlanDetails: PaymentPlanDetails)(implicit
     messages: Messages
   ): Seq[SummaryListRow] =
+    val isSuspensionPeriodActive: Boolean = userAnswers.get(PaymentPlanDetailsQuery) match {
+      case Some(query) => isSuspendPeriodActive(query.paymentPlanDetails)
+      case _           => false
+    }
     Seq(
       Some(PaymentReferenceSummary.row(paymentPlanReference)),
       Some(AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)),
-      SuspensionPeriodRangeDateSummary.row(userAnswers)
+      SuspensionPeriodRangeDateSummary.row(userAnswers, false, isSuspensionPeriodActive)
     ).flatten
 
 }

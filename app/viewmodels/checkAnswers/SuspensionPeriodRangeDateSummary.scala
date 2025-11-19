@@ -46,9 +46,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object SuspensionPeriodRangeDateSummary {
-  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(answers: UserAnswers, showChange: Boolean = false, isSuspendChangeMode: Boolean)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(SuspensionPeriodRangeDatePage).map { answer =>
 
+      val mode = if (isSuspendChangeMode) {
+        CheckMode
+      } else {
+        NormalMode
+      }
       val formattedValue =
         s"${formattedDateTimeShort(answer.startDate.toString)} ${messages("suspensionPeriodRangeDate.to")} ${formattedDateTimeShort(answer.endDate.toString)}"
       SummaryListRowViewModel(
@@ -56,7 +61,7 @@ object SuspensionPeriodRangeDateSummary {
         value = ValueViewModel(formattedValue),
         actions = if (showChange) {
           Seq(
-            ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
+            ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(mode).url)
               .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
           )
         } else {
@@ -65,7 +70,9 @@ object SuspensionPeriodRangeDateSummary {
       )
     }
 
-  def row(suspendStartDate: Option[LocalDate], suspendEndDate: Option[LocalDate])(implicit messages: Messages): SummaryListRow = {
+  def row(suspendStartDate: Option[LocalDate], suspendEndDate: Option[LocalDate], showActions: Boolean)(implicit
+    messages: Messages
+  ): SummaryListRow = {
     val formattedStartDate = suspendStartDate
       .map(_.format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern)))
       .getOrElse("")
@@ -80,12 +87,15 @@ object SuspensionPeriodRangeDateSummary {
     SummaryListRowViewModel(
       key   = "suspensionPeriodRangeDate.checkYourAnswersLabel",
       value = ValueViewModel(formattedValue),
-      actions = Seq(
-        ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
-          .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden")),
-        ActionItemViewModel("site.remove", routes.RemovingThisSuspensionController.onPageLoad(NormalMode).url)
-          .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
-      )
+      actions =
+        if (showActions)
+          Seq(
+            ActionItemViewModel("site.change", routes.SuspensionPeriodRangeDateController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden")),
+            ActionItemViewModel("site.remove", routes.RemovingThisSuspensionController.onPageLoad(NormalMode).url)
+              .withVisuallyHiddenText(messages("suspensionPeriodRangeDate.change.hidden"))
+          )
+        else Seq.empty
     )
   }
 

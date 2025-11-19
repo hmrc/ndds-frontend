@@ -24,6 +24,7 @@ object BarsErrorMapper {
 
   def toFormError(error: BarsErrors): Seq[FormError] = {
     error match {
+      case SortCodeOnDenyList => Seq(FormError("sortCode", "yourBankDetails.error.sortCodeOnDenyList"))
       case BankAccountUnverified =>
         Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
 
@@ -43,6 +44,7 @@ object BarsErrorMapper {
         Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
 
       case null => Seq(FormError("accountHolderName", "yourBankDetails.error.accountHolderName.unverified"))
+
     }
   }
 }

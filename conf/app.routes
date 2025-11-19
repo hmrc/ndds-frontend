@@ -142,8 +142,8 @@ POST       /already-have-payment-plan                   controllers.DuplicateWar
 GET        /change-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)
 
-GET        /cancel-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
-POST       /cancel-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
+GET        /cancelling-payment-plan                         controllers.CancelPaymentPlanController.onPageLoad()
+POST       /cancelling-payment-plan                         controllers.CancelPaymentPlanController.onSubmit()
 
 GET        /suspending-this-payment-plan                controllers.SuspendPaymentPlanController.onPageLoad(mode: Mode = NormalMode)
 GET        /payment-plan-cancelled                      controllers.PaymentPlanCancelledController.onPageLoad()
@@ -177,3 +177,8 @@ GET        /access-denied                               controllers.AccessDenied
 GET        /system-error/there-is-a-problem             controllers.SystemErrorController.onPageLoad()
 
 GET        /payment-plan-update-processing              controllers.PaymentPlanLockedWarningController.onPageLoad()
+
+GET        /add-payment-plan-end-date                   controllers.AddPaymentPlanEndDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /add-payment-plan-end-date                   controllers.AddPaymentPlanEndDateController.onSubmit(mode: Mode = NormalMode)
+GET        /change-add-payment-plan-end-date            controllers.AddPaymentPlanEndDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-add-payment-plan-end-date            controllers.AddPaymentPlanEndDateController.onSubmit(mode: Mode = CheckMode)

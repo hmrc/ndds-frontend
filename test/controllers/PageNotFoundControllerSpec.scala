@@ -22,7 +22,6 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import views.html.PageNotFoundView
 
 class PageNotFoundControllerSpec extends SpecBase {
 

@@ -70,21 +70,27 @@ class CheckYourAnswersController @Inject() (
         PlanStartDateSummary.row(request.userAnswers)
       }
 
+      val showPlanEndDate = request.userAnswers.get(AddPaymentPlanEndDatePage) match {
+        case Some(false) => None
+        case _           => PlanEndDateSummary.row(request.userAnswers)
+      }
+
       val list = SummaryListViewModel(
         rows = Seq(
           DirectDebitSourceSummary.row(request.userAnswers),
           PaymentPlanTypeSummary.row(request.userAnswers),
           PaymentReferenceSummary.row(request.userAnswers),
           TotalAmountDueSummary.row(request.userAnswers),
+          showStartDate,
           PaymentAmountSummary.row(request.userAnswers),
           PaymentDateSummary.row(request.userAnswers),
           PaymentsFrequencySummary.row(request.userAnswers),
           RegularPaymentAmountSummary.row(request.userAnswers),
-          showStartDate,
-          PlanEndDateSummary.row(request.userAnswers),
+          AddPaymentPlanEndDateSummary.row(request.userAnswers),
+          showPlanEndDate,
           MonthlyPaymentAmountSummary.row(request.userAnswers),
-          FinalPaymentDateSummary.row(request.userAnswers, appConfig),
-          FinalPaymentAmountSummary.row(request.userAnswers)
+          FinalPaymentAmountSummary.row(request.userAnswers),
+          FinalPaymentDateSummary.row(request.userAnswers, appConfig)
         ).flatten
       )
 

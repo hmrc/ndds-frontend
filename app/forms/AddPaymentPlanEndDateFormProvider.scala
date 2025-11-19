@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package models.errors
+package forms
 
-enum BarsErrors {
-  case BankAccountUnverified,
-    AccountDetailInvalidFormat,
-    SortCodeNotFound,
-    SortCodeNotSupported,
-    AccountNotFound,
-    NameMismatch,
-    SortCodeOnDenyList,
-    DetailsVerificationFailed
+import javax.inject.Inject
+
+import forms.mappings.Mappings
+import play.api.data.Form
+
+class AddPaymentPlanEndDateFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("addPaymentPlanEndDate.error.required")
+    )
 }

@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package models.errors
+package pages
 
-enum BarsErrors {
-  case BankAccountUnverified,
-    AccountDetailInvalidFormat,
-    SortCodeNotFound,
-    SortCodeNotSupported,
-    AccountNotFound,
-    NameMismatch,
-    SortCodeOnDenyList,
-    DetailsVerificationFailed
+import play.api.libs.json.JsPath
+
+case object AddPaymentPlanEndDatePage extends QuestionPage[Boolean] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "addPaymentPlanEndDate"
 }

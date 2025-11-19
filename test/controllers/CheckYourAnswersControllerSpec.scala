@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import models.responses.{BankAddress, Country, GenerateDdiRefResponse}
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
+import models.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{doNothing, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -71,7 +71,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -113,7 +113,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -142,7 +142,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("£123.01")
         contentAsString(result) must include("Year end and month")
         contentAsString(result) must include("2025 04")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -167,11 +167,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Frequency of payments")
         contentAsString(result) must include("Monthly")
-        contentAsString(result) must include("Regular Payment Amount")
+        contentAsString(result) must include("Regular payment amount")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("25 July 2027")
         contentAsString(result) must include("£120")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -195,15 +195,75 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("1234567")
         contentAsString(result) must include("Total amount due")
         contentAsString(result) must include("4,533")
-        contentAsString(result) must include("Plan Start Date")
+        contentAsString(result) must include("Plan start date")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("Monthly payment amount")
         contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Final Payment Date")
+        contentAsString(result) must include("Final payment date due")
         contentAsString(result) must include("19 June 2026")
         contentAsString(result) must include("Final payment amount")
         contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
+      }
+    }
+
+    "must not show Plan End Date when AddPaymentPlanEndDatePage is false (NO)" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+        .setOrException(RegularPaymentAmountPage, 120)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(PlanEndDatePage, endDate)
+        .setOrException(AddPaymentPlanEndDatePage, false)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must not include "25 July 2027"
+        contentAsString(result) must not include "Plan End Date"
+      }
+    }
+
+    "must show Plan End Date when AddPaymentPlanEndDatePage is true (YES) and PlanEndDatePage has a value" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+        .setOrException(RegularPaymentAmountPage, 120)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(PlanEndDatePage, endDate)
+        .setOrException(AddPaymentPlanEndDatePage, true)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("25 July 2027")
+      }
+    }
+
+    "must show Plan End Date when AddPaymentPlanEndDatePage is not set and PlanEndDatePage has a value (backwards compatibility)" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+        .setOrException(RegularPaymentAmountPage, 120)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(PlanEndDatePage, endDate)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("25 July 2027")
       }
     }
 

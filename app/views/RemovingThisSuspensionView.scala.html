@@ -45,7 +45,8 @@
         @fieldSet(
             legend = "removingThisSuspension.heading",
             asHeading = true,
-            describedBy = None
+            describedBy = None,
+            extraClasses = "govuk-!-margin-bottom-8"
         ) {
             @defining(suspensionStartDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedStartDate =>
                 @defining(suspensionEndDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedEndDate =>

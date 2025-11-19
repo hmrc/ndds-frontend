@@ -27,10 +27,11 @@ import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanCancelledView
-
 import javax.inject.Inject
+import java.time.LocalDate
 
 class PaymentPlanCancelledController @Inject() (
   override val messagesApi: MessagesApi,
@@ -64,22 +65,58 @@ class PaymentPlanCancelledController @Inject() (
 
   }
 
-  private def buildRows(paymentPlanDetails: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {
-    if (paymentPlanDetails.planType == PaymentPlanType.BudgetPaymentPlan.toString) {
-      Seq(
-        AmendPaymentPlanTypeSummary.row(paymentPlanDetails.planType),
-        AmendPaymentPlanSourceSummary.row(paymentPlanDetails.hodService),
-        DateSetupSummary.row(paymentPlanDetails.submissionDateTime),
-        PaymentsFrequencySummary.row(paymentPlanDetails.scheduledPaymentFrequency),
-        AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)
-      )
-    } else {
-      Seq(
-        AmendPaymentPlanTypeSummary.row(paymentPlanDetails.planType),
-        AmendPaymentPlanSourceSummary.row(paymentPlanDetails.hodService),
-        DateSetupSummary.row(paymentPlanDetails.submissionDateTime),
-        AmendPaymentAmountSummary.row(paymentPlanDetails.planType, paymentPlanDetails.scheduledPaymentAmount)
-      )
+  private def isSuspendPeriodActive(planDetail: PaymentPlanDetails): Boolean = {
+    (for {
+      suspensionEndDate <- planDetail.suspensionEndDate
+    } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
+  }
+
+  private def buildRows(planDetail: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {
+    planDetail.planType match {
+      case PaymentPlanType.SinglePaymentPlan.toString =>
+        Seq(
+          AmendPaymentPlanTypeSummary.row(planDetail.planType),
+          AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+          DateSetupSummary.row(planDetail.submissionDateTime),
+          AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
+        )
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        Seq(
+          AmendPaymentPlanTypeSummary.row(planDetail.planType),
+          AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+          DateSetupSummary.row(planDetail.submissionDateTime),
+          AmendPaymentAmountSummary.row(planDetail.planType, planDetail.scheduledPaymentAmount),
+          PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
+        ) ++
+          planDetail.scheduledPaymentEndDate.fold(Seq.empty[SummaryListRow]) { scheduledPaymentEndDate =>
+            Seq(AmendPlanEndDateSummary.row(Some(scheduledPaymentEndDate), Constants.shortDateTimeFormatPattern))
+          }
+          ++
+          (if (isSuspendPeriodActive(planDetail)) {
+             Seq(SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, showActions = true))
+           } else {
+             Seq.empty
+           })
+      case PaymentPlanType.VariablePaymentPlan.toString =>
+        Seq(
+          AmendPaymentPlanTypeSummary.row(planDetail.planType),
+          AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+          DateSetupSummary.row(planDetail.submissionDateTime),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
+        )
+      case _ =>
+        Seq(
+          AmendPaymentPlanTypeSummary.row(planDetail.planType),
+          AmendPaymentPlanSourceSummary.row(planDetail.hodService),
+          DateSetupSummary.row(planDetail.submissionDateTime),
+          TotalAmountDueSummary.row(planDetail.totalLiability),
+          MonthlyPaymentAmountSummary.row(planDetail.scheduledPaymentAmount, planDetail.totalLiability),
+          FinalPaymentAmountSummary.row(planDetail.balancingPaymentAmount, planDetail.totalLiability),
+          AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern),
+          AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)
+        )
     }
   }
 
