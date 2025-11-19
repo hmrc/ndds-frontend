@@ -28,7 +28,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.{AuditService, NationalDirectDebitService}
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{DateTimeFormats, PaymentCalculations}
 import viewmodels.checkAnswers.*
@@ -43,7 +43,6 @@ class CheckYourAnswersController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  auditService: AuditService,
   nddService: NationalDirectDebitService,
   sessionRepository: SessionRepository,
   val controllerComponents: MessagesControllerComponents,
@@ -119,8 +118,6 @@ class CheckYourAnswersController @Inject() (
                     updatedAnswers <- Future.fromTry(updatedAnswers.set(CreateConfirmationPage, true))
                     _              <- sessionRepository.set(updatedAnswers)
                   } yield {
-                    auditService.sendSubmitDirectDebitPaymentPlan
-                    logger.debug(s"Audit event sent for DDI Ref [${reference.ddiRefNumber}], service [${chrisRequest.serviceType}]")
                     Redirect(routes.DirectDebitConfirmationController.onPageLoad())
                   }
                 } else {
@@ -219,7 +216,8 @@ class CheckYourAnswersController @Inject() (
       finalPaymentAmount     = Some(finalPaymentAmount),
       secondPaymentDate      = Some(secondPaymentDate),
       penultimatePaymentDate = Some(penultimatePaymentDate),
-      finalPaymentDate       = Some(finalPaymentDate)
+      finalPaymentDate       = Some(finalPaymentDate),
+      monthlyPaymentAmount   = MonthlyPaymentAmountSummary.getMonthlyPaymentAmount(userAnswers)
     )
   }
 

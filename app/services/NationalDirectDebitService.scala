@@ -20,7 +20,6 @@ import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
-import models.audits.GetDDIs
 import models.requests.*
 import models.responses.*
 import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers, responses}
@@ -41,7 +40,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitConnector,
                                             val directDebitCache: DirectDebitCacheRepository,
                                             config: FrontendAppConfig,
-                                            auditService: AuditService,
                                             clock: Clock
                                            )(implicit ec: ExecutionContext)
     extends Logging {
@@ -50,8 +48,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       case Seq() =>
         for {
           directDebits <- nddConnector.retrieveDirectDebits()
-          _ = auditService.sendEvent(GetDDIs())
-          _ <- directDebitCache.cacheResponse(directDebits)(id)
+          _            <- directDebitCache.cacheResponse(directDebits)(id)
         } yield directDebits
       case existingCache =>
         val response = NddResponse(existingCache.size, existingCache)
