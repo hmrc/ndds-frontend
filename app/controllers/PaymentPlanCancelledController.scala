@@ -95,7 +95,7 @@ class PaymentPlanCancelledController @Inject() (
           }
           ++
           (if (isSuspendPeriodActive(planDetail)) {
-             Seq(SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, showActions = true))
+             Seq(SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, showActions = false))
            } else {
              Seq.empty
            })
