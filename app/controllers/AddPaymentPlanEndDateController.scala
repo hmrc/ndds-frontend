@@ -25,7 +25,7 @@ import navigation.Navigator
 import pages.{AddPaymentPlanEndDatePage, DirectDebitSourcePage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AddPaymentPlanEndDateView
@@ -56,7 +56,7 @@ class AddPaymentPlanEndDateController @Inject() (
             case None        => form
             case Some(value) => form.fill(value)
           }
-          Ok(view(preparedForm, mode))
+          Ok(view(preparedForm, mode, backLink(mode)))
         case _ =>
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
@@ -68,7 +68,7 @@ class AddPaymentPlanEndDateController @Inject() (
         form
           .bindFromRequest()
           .fold(
-            formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+            formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, backLink(mode)))),
             value =>
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(AddPaymentPlanEndDatePage, value))
@@ -79,4 +79,6 @@ class AddPaymentPlanEndDateController @Inject() (
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
+  private def backLink(mode: Mode): Call =
+    routes.PlanStartDateController.onPageLoad(mode)
 }
