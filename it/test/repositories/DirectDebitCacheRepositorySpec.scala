@@ -17,6 +17,7 @@
 package repositories
 
 import config.{FakeEncrypterDecrypter, FrontendAppConfig}
+import models.responses.NddPaymentPlan
 import models.{NddDAO, NddDetails, NddResponse}
 import org.mockito.Mockito.when
 import org.mongodb.scala.model.Filters
@@ -155,8 +156,16 @@ class DirectDebitCacheRepositorySpec
 
         repository.cacheResponse(rdsResponse)("id").futureValue
 
-        val result = repository.updateDirectDebit("122222", Seq.empty)("id").futureValue
-        val expectedResult = rdsResponse.directDebitList.head.copy(paymentPlansList = Some(Seq.empty))
+        val pp = NddPaymentPlan(
+          scheduledPaymentAmount = 100,
+          planRefNumber          = "1234",
+          planType               = "singlePaymentPlan",
+          paymentReference       = "5678",
+          hodService             = "sa",
+          submissionDateTime     = LocalDateTime.parse("2024-03-02T00:00:00")
+        )
+        val result = repository.updateDirectDebit("122222", Seq(pp))("id").futureValue
+        val expectedResult = rdsResponse.directDebitList.head.copy(paymentPlansList = Some(Seq(pp)))
 
         result mustEqual expectedResult
       }
