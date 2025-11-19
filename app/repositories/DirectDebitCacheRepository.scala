@@ -109,23 +109,22 @@ class DirectDebitCacheRepository @Inject() (
         .copy(
           paymentPlansList = Some(paymentPlanList)
         )
-        .encrypted
 
       val updatedDirectDebitList = existingCache.map {
         case debit if debit.ddiRefNumber == directDebitReference => targetDirectDebit
         case debit                                               => debit
       }
 
-      val updatedDoc = NddDAO(
+      val updatedEncryptedDoc = NddDAO(
         id           = id,
         lastUpdated  = Instant.now(clock),
-        directDebits = updatedDirectDebitList
+        directDebits = updatedDirectDebitList.map(_.encrypted)
       )
 
       collection
         .replaceOne(
           filter      = byId(id),
-          replacement = updatedDoc,
+          replacement = updatedEncryptedDoc,
           options     = ReplaceOptions().upsert(true)
         )
         .toFuture()
