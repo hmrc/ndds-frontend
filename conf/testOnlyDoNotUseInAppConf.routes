@@ -10,5 +10,8 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                          prod.Routes
+->         /                                                prod.Routes
+
+GET        /direct-debits/test-only/amount-need-to-pay      controllers.AmendPaymentAmountController.onPageLoadNew(mode: Mode = NormalMode)
+POST       /direct-debits/test-only/amount-need-to-pay      controllers.AmendPaymentAmountController.onSubmitNew(mode: Mode = NormalMode)
 
