@@ -108,6 +108,7 @@ class DirectDebitSourceController @Inject() (
         .flatMap(_.remove(PaymentsFrequencyPage))
         .flatMap(_.remove(TotalAmountDuePage))
         .flatMap(_.remove(PlanStartDatePage))
+        .flatMap(_.remove(AddPaymentPlanEndDatePage))
         .flatMap(_.remove(PlanEndDatePage))
         .flatMap(_.remove(PaymentPlanTypePage))
         .flatMap(_.remove(PaymentDatePage))

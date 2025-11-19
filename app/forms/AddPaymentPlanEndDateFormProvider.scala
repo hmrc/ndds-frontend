@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import utils.Utils.emptyString
+package forms
 
-@this(govukFieldset: GovukFieldset)
+import javax.inject.Inject
 
-@(legend: String, asHeading: Boolean = true, describedBy: Option[String], extraClasses: String = emptyString)(content: Html)(implicit messages: Messages)
+import forms.mappings.Mappings
+import play.api.data.Form
 
-@govukFieldset(Fieldset(
-    legend = Some(Legend(
-        content = Text(messages(legend)),
-        classes = (if(asHeading) s"govuk-fieldset__legend--xl $extraClasses" else extraClasses).trim,
-        isPageHeading = asHeading
-    )),
-    describedBy = describedBy,
-    html = content
-))
+class AddPaymentPlanEndDateFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("addPaymentPlanEndDate.error.required")
+    )
+}

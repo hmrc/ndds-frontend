@@ -179,3 +179,7 @@ GET        /access-denied                                     controllers.Access
 GET        /system-error/there-is-a-problem                   controllers.SystemErrorController.onPageLoad()
 
 GET        /payment-plan-update-processing                       controllers.PaymentPlanLockedWarningController.onPageLoad()
+GET        /add-payment-plan-end-date                        controllers.AddPaymentPlanEndDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /add-payment-plan-end-date                        controllers.AddPaymentPlanEndDateController.onSubmit(mode: Mode = NormalMode)
+GET        /change-add-payment-plan-end-date                 controllers.AddPaymentPlanEndDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-add-payment-plan-end-date                 controllers.AddPaymentPlanEndDateController.onSubmit(mode: Mode = CheckMode)
