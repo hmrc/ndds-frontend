@@ -45,7 +45,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
 
   "Check Your Answers Controller" - {
-
     val userAnswer = emptyUserAnswers
       .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
       .setOrException(PaymentReferencePage, "1234567")
@@ -214,7 +213,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
         .setOrException(RegularPaymentAmountPage, 120)
         .setOrException(PlanStartDatePage, planStartDateDetails)
-        .setOrException(PlanEndDatePage, endDate)
         .setOrException(AddPaymentPlanEndDatePage, false)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
       running(application) {
@@ -224,6 +222,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must not include "25 July 2027"
+        contentAsString(result) must include("Add plan end date")
         contentAsString(result) must not include "Plan End Date"
       }
     }
@@ -245,6 +244,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("19 July 2025")
         contentAsString(result) must include("25 July 2027")
+        contentAsString(result) must include("Plan end date")
+        contentAsString(result) must include("Add plan end date")
       }
     }
 

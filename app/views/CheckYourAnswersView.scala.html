@@ -28,9 +28,9 @@
     formHelper: FormWithCSRF
 )
 
-@(list: SummaryList, currentDate: String)(implicit request: Request[_], messages: Messages)
+@(list: SummaryList, currentDate: String, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.CheckYourAnswersController.onSubmit(), Symbol("autoComplete") -> "off") {
         @h1("checkYourAnswers.heading")

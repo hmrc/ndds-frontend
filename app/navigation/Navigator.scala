@@ -59,7 +59,7 @@ class Navigator @Inject() () {
     case BankDetailsCheckYourAnswerPage       => _ => routes.ConfirmAuthorityController.onPageLoad(CheckMode)
     case ConfirmAuthorityPage                 => nextAfterConfirmAuthority(CheckMode)
     case DirectDebitSourcePage                => checkDirectDebitSource
-    case PaymentPlanTypePage                  => _ => routes.PaymentReferenceController.onPageLoad(CheckMode)
+    case PaymentPlanTypePage                  => _ => routes.PaymentReferenceController.onPageLoad(NormalMode)
     case PaymentReferencePage                 => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentAmountPage                    => _ => routes.CheckYourAnswersController.onPageLoad()
     case PaymentDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
@@ -80,7 +80,6 @@ class Navigator @Inject() () {
   }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
-
     case NormalMode =>
       normalRoutes(page)(userAnswers)
     case CheckMode =>
