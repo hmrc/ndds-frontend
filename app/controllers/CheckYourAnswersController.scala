@@ -203,7 +203,7 @@ class CheckYourAnswersController @Inject() (
         amendPaymentAmount              = None,
         calculation                     = calculationOpt,
         suspensionPeriodRangeDate       = None,
-        amendPlan                       = hasExistingDDI // TODO add new flag to the model
+        addPlan                         = hasExistingDDI
       )
     }
   }

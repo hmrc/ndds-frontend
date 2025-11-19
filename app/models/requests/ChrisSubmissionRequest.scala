@@ -42,7 +42,8 @@ case class ChrisSubmissionRequest(
   amendPlan: Boolean = false,
   cancelPlan: Boolean = false,
   suspendPlan: Boolean = false,
-  removeSuspensionPlan: Boolean = false
+  removeSuspensionPlan: Boolean = false,
+  addPlan: Boolean = false
 )
 
 object ChrisSubmissionRequest {
