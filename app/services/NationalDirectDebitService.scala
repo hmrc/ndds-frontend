@@ -27,7 +27,7 @@ import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, Paym
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.{AddPaymentPlanIdentifierQuery, DirectDebitReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
@@ -73,7 +73,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
   def calculateFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
 
-    val auddisStatusFuture = userAnswers.get(AddPaymentPlanIdentifierQuery) match {
+    val auddisStatusFuture = userAnswers.get(ExistingDirectDebitIdentifierQuery) match {
       case Some(directDebitReferenceIdentifier) =>
         directDebitCache
           .getDirectDebit(directDebitReferenceIdentifier)(userId)

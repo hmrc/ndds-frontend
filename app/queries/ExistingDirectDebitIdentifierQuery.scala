@@ -18,7 +18,7 @@ package queries
 
 import play.api.libs.json.JsPath
 
-case object AddPaymentPlanIdentifierQuery extends Gettable[String] with Settable[String] {
+case object ExistingDirectDebitIdentifierQuery extends Gettable[String] with Settable[String] {
 
-  override def path: JsPath = JsPath \ "addPaymentPlanToDirectDebitIdentifier"
+  override def path: JsPath = JsPath \ "existingDirectDebitIdentifier"
 }

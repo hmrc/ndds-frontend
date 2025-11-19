@@ -27,7 +27,7 @@ import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import queries.AddPaymentPlanIdentifierQuery
+import queries.ExistingDirectDebitIdentifierQuery
 import repositories.{DirectDebitCacheRepository, SessionRepository}
 import services.{AuditService, NationalDirectDebitService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -98,7 +98,7 @@ class CheckYourAnswersController @Inject() (
     (identify andThen getData andThen requireData).async { implicit request =>
       implicit val ua: UserAnswers = request.userAnswers
 
-      val ddiRefEitherFuture: Future[Either[Result, String]] = ua.get(AddPaymentPlanIdentifierQuery) match {
+      val ddiRefEitherFuture: Future[Either[Result, String]] = ua.get(ExistingDirectDebitIdentifierQuery) match {
         // Existing direct debit: skip MAC and skip generateNewDdiReference
         case Some(paymentPlanIdentifier) =>
           logger.debug(s"Using existing DDI reference: $paymentPlanIdentifier")
@@ -165,7 +165,7 @@ class CheckYourAnswersController @Inject() (
         plan   <- ua.get(PaymentPlanTypePage) if plan == PaymentPlanType.TaxCreditRepaymentPlan
       } yield calculateTaxCreditRepaymentPlan(ua)
 
-    val existingDDIOpt: Option[String] = ua.get(AddPaymentPlanIdentifierQuery)
+    val existingDDIOpt: Option[String] = ua.get(ExistingDirectDebitIdentifierQuery)
     val hasExistingDDI: Boolean = existingDDIOpt.isDefined
 
     val bankDetailsWithAudisFuture = existingDDIOpt match {

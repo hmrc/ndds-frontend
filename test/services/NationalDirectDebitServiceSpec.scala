@@ -34,7 +34,7 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
@@ -139,6 +139,21 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+
+        val result = service.calculateFutureWorkingDays(expectedUserAnswers, "123").futureValue
+
+        result mustBe EarliestPaymentDate("2025-12-25")
+      }
+
+      "must successfully return the Earliest Payment Date when direct debit is exists" in {
+        val expectedUserAnswers = emptyUserAnswers.set(ExistingDirectDebitIdentifierQuery, "ddRef").success.value
+
+        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+        when(mockCache.getDirectDebit(any())(any()))
+          .thenReturn(Future.successful(nddResponse.directDebitList.head))
 
         val result = service.calculateFutureWorkingDays(expectedUserAnswers, "123").futureValue
 

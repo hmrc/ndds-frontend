@@ -25,7 +25,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.AddPaymentPlanIdentifierQuery
+import queries.ExistingDirectDebitIdentifierQuery
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSourceView
@@ -58,7 +58,7 @@ class DirectDebitSourceController @Inject() (
       case Some(value) => form.fill(value)
     }
 
-    val backlinkCall = answers.get(AddPaymentPlanIdentifierQuery) match {
+    val backlinkCall = answers.get(ExistingDirectDebitIdentifierQuery) match {
       case Some(directDebitReferenceIdentifier) => routes.DirectDebitSummaryController.onPageLoad()
       case _                                    => routes.ConfirmAuthorityController.onPageLoad(mode)
     }
@@ -72,7 +72,7 @@ class DirectDebitSourceController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => {
-          val backlinkCall = request.userAnswers.get(AddPaymentPlanIdentifierQuery) match {
+          val backlinkCall = request.userAnswers.get(ExistingDirectDebitIdentifierQuery) match {
             case Some(directDebitReferenceIdentifier) => routes.DirectDebitSummaryController.onPageLoad()
             case _                                    => routes.ConfirmAuthorityController.onPageLoad(mode)
           }

@@ -23,7 +23,7 @@ import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePa
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{NationalDirectDebitService, PaginationService}
-import queries.{AddPaymentPlanIdentifierQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Actions, Card, CardTitle, SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -105,7 +105,7 @@ class DirectDebitSummaryController @Inject() (
   def onRedirectToDirectDebitSource(directDebitReference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     for {
-      updatedAnswers <- Future.fromTry(userAnswers.set(AddPaymentPlanIdentifierQuery, directDebitReference))
+      updatedAnswers <- Future.fromTry(userAnswers.set(ExistingDirectDebitIdentifierQuery, directDebitReference))
       _              <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.DirectDebitSourceController.onPageLoad(NormalMode))
   }
@@ -174,7 +174,7 @@ class DirectDebitSummaryController @Inject() (
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanStartDatePage))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanEndDatePage))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(SuspensionPeriodRangeDatePage))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AddPaymentPlanIdentifierQuery))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(ExistingDirectDebitIdentifierQuery))
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 }
