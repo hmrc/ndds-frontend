@@ -27,6 +27,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import connectors.BarsConnector
 import config.FrontendAppConfig
+import models.errors.UpstreamBarsException
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -403,6 +404,23 @@ class BarsServiceSpec extends AsyncWordSpec with Matchers with MockitoSugar with
 
         service.barsVerification("business", validBankDetails).map { result =>
           result shouldBe Left(NameMismatch)
+        }
+      }
+
+      "return Left(SortCodeOnDenyList) when BARS returns SORT_CODE_ON_DENY_LIST" in {
+        when(mockConnector.verify(any(), any())(any()))
+          .thenReturn(
+            Future.failed(
+              UpstreamBarsException(
+                status     = 400,
+                errorCode  = Some("SORT_CODE_ON_DENY_LIST"),
+                rawMessage = """{"code":"SORT_CODE_ON_DENY_LIST","desc":"q"}"""
+              )
+            )
+          )
+
+        service.barsVerification("personal", validBankDetails).map { result =>
+          result shouldBe Left(SortCodeOnDenyList)
         }
       }
 

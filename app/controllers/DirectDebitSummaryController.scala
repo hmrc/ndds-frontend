@@ -22,7 +22,7 @@ import models.responses.NddPaymentPlan
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.NationalDirectDebitService
+import services.{NationalDirectDebitService, PaginationService}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Actions, Card, CardTitle, SummaryList, SummaryListRow}
@@ -40,31 +40,49 @@ class DirectDebitSummaryController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   view: DirectDebitSummaryView,
   nddService: NationalDirectDebitService,
-  sessionRepository: SessionRepository
+  sessionRepository: SessionRepository,
+  paginationService: PaginationService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val userAnswers = request.userAnswers
+    val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(reference) =>
         cleanConfirmationFlags(userAnswers).flatMap { cleansedAnswers =>
           cleanseUserData(cleansedAnswers).flatMap { furtherCleansedAnswers =>
-            nddService.retrieveDirectDebitPaymentPlans(reference).flatMap { ddPaymentPlans =>
+            nddService.retrieveDirectDebitPaymentPlans(request.userId, reference).flatMap { ddPaymentPlans =>
               for {
                 updatedAnswers <- Future.fromTry(furtherCleansedAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
                 updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
                 _              <- sessionRepository.set(updatedAnswers)
               } yield {
+
+                val (title, heading) = if (ddPaymentPlans.paymentPlanList.nonEmpty) {
+                  ("directDebitPaymentSummary.title.withPlans", "directDebitPaymentSummary.heading.withPlans")
+                } else {
+                  ("directDebitPaymentSummary.title.noPlans", "directDebitPaymentSummary.title.noPlans")
+                }
+
+                val paginationResult = paginationService.paginatePaymentPlans(
+                  allPaymentPlans = ddPaymentPlans.paymentPlanList,
+                  currentPage     = currentPage,
+                  baseUrl         = routes.DirectDebitSummaryController.onPageLoad().url
+                )
                 Ok(
                   view(
                     reference,
                     ddPaymentPlans,
-                    buildCards(ddPaymentPlans.paymentPlanList)
+                    buildCards(paginationResult.paginatedData),
+                    paginationViewModel = paginationResult.paginationViewModel,
+                    title,
+                    heading
                   )
                 )
               }

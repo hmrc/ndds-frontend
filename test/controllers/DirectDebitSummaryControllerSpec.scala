@@ -17,19 +17,17 @@
 package controllers
 
 import base.SpecBase
-import org.mockito.{ArgumentCaptor, Mockito}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito
+import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.*
-import pages.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import utils.DirectDebitDetailsData
-import views.html.DirectDebitSummaryView
 
 import scala.concurrent.Future
 
@@ -64,7 +62,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
           .thenReturn(Future.successful(true))
         when(mockSessionRepository.get(any()))
           .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
-        when(mockService.retrieveDirectDebitPaymentPlans(any())(any(), any()))
+        when(mockService.retrieveDirectDebitPaymentPlans(any(), any())(any(), any()))
           .thenReturn(Future.successful(mockDDPaymentPlansResponse))
 
         val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)
@@ -78,6 +76,44 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
         html must include("Plan type")
         html must include("Payment amount")
         html must include("Manage plan")
+        html must include("Summary of payment plans for this Direct Debit")
+      }
+    }
+
+    "must return OK and the correct view for a GET with a valid direct debit reference and empty payment plans" in {
+      val directDebitReference = "ref number 1"
+      val userAnswersWithDirectDebitReference =
+        emptyUserAnswers
+          .set(
+            DirectDebitReferenceQuery,
+            directDebitReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
+        when(mockService.retrieveDirectDebitPaymentPlans(any(), any())(any(), any()))
+          .thenReturn(Future.successful(mockDDPaymentPlansResponse.copy(paymentPlanCount = 0, paymentPlanList = Seq.empty)))
+
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+
+        val html = contentAsString(result)
+        html must include("Set up a payment plan for this Direct Debit")
       }
     }
 
@@ -172,61 +208,6 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.DirectDebitSummaryController.onPageLoad().url
-      }
-    }
-
-    "must call cleansePaymentReference and return OK with the correct view" in {
-      val directDebitReference = "ref number 1"
-      val userAnswersWithDirectDebitReference =
-        emptyUserAnswers
-          .set(
-            DirectDebitReferenceQuery,
-            directDebitReference
-          )
-          .success
-          .value
-          .set(
-            PaymentPlansCountQuery,
-            2
-          )
-          .success
-          .value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference))
-        .overrides(
-          bind[SessionRepository].toInstance(mockSessionRepository),
-          bind[NationalDirectDebitService].toInstance(mockService)
-        )
-        .build()
-
-      running(application) {
-        when(mockSessionRepository.set(any()))
-          .thenReturn(Future.successful(true))
-        when(mockSessionRepository.get(any()))
-          .thenReturn(Future.successful(Some(userAnswersWithDirectDebitReference)))
-        when(mockService.retrieveDirectDebitPaymentPlans(any())(any(), any()))
-          .thenReturn(Future.successful(mockDDPaymentPlansResponse))
-
-        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onPageLoad().url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual OK
-
-        val captor = ArgumentCaptor.forClass(classOf[models.UserAnswers])
-        verify(mockSessionRepository, times(6)).set(captor.capture())
-
-        val capturedList = captor.getAllValues
-
-        val firstCaptured = capturedList.get(0)
-
-        firstCaptured.get(PaymentPlanReferenceQuery) mustBe None
-        firstCaptured.get(PaymentPlanDetailsQuery) mustBe None
-        firstCaptured.get(ManagePaymentPlanTypePage) mustBe None
-        firstCaptured.get(AmendPaymentAmountPage) mustBe None
-        firstCaptured.get(AmendPlanStartDatePage) mustBe None
-        firstCaptured.get(AmendPlanEndDatePage) mustBe None
-        firstCaptured.get(SuspensionPeriodRangeDatePage) mustBe None
       }
     }
   }

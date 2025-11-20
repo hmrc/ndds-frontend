@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
 import models.responses.LockResponse
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mockito.*
@@ -64,10 +65,11 @@ class AccountDetailsNotVerifiedControllerSpec extends SpecBase with MockitoSugar
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[AccountDetailsNotVerifiedView]
-        val expectedDate = "28 June 2025, 16:30pm"
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+        val expectedDate = "28 June 2025, 4:30pm"
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(expectedDate)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(appConfig.payingHmrcUrl, expectedDate)(request, messages(application)).toString
       }
     }
   }

@@ -23,5 +23,6 @@ enum BarsErrors {
     SortCodeNotSupported,
     AccountNotFound,
     NameMismatch,
+    SortCodeOnDenyList,
     DetailsVerificationFailed
 }

@@ -17,21 +17,27 @@
 @import views.html.components.*
 
 @this(
-   header1: Header1,
-   paragraphWithParam: ParagraphWithParameter,
-   paragraphWithLink: ParagraphMessageWithLink,
-   layout: templates.Layout,
-   govukButton: GovukButton
+header1: Header1,
+paragraphWithParam: ParagraphWithParameter,
+paragraphWithLink: ParagraphMessageWithLink,
+layout: templates.Layout,
+govukButton: GovukButton,
+link: Link
 )
 
-@(retryDate: String)(implicit request: Request[_], messages: Messages)
+@(payingHmrcUrl: String, retryDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForSetupJourneyNoForm(messages("accountDetailsNotVerified.title")), showBackLink = false) {
    @header1("accountDetailsNotVerified.heading")
-   @paragraphWithParam("accountDetailsNotVerified.p1", retryDate)
+   @paragraphWithParam("accountDetailsNotVerified.p1", s"<strong>$retryDate</strong>")
    @paragraphWithLink(
       Some(messages("accountDetailsNotVerified.p2")),
-      linkMessage = messages("accountDetailsNotVerified.p2.link"),
-      linkUrl = messages("accountDetailsNotVerified.p2.url")
+      linkMessage   = messages("accountDetailsNotVerified.p2.link"),
+      linkUrl       = payingHmrcUrl,
+      linkFullStop = true,
+      linkRel       = "noreferrer noopener",
+      target        = "_blank"
    )
+
+@link("accountDetailsNotVerified.return.link", routes.YourDirectDebitInstructionsController.onPageLoad().url, linkFullStop = true)
 }

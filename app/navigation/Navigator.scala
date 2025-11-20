@@ -40,11 +40,12 @@ class Navigator @Inject() () {
     case PaymentsFrequencyPage                => _ => routes.RegularPaymentAmountController.onPageLoad(NormalMode)
     case RegularPaymentAmountPage             => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
     case TotalAmountDuePage                   => _ => routes.PlanStartDateController.onPageLoad(NormalMode)
-    case PlanStartDatePage                    => userAnswers => checkPlanStartDateLogic(userAnswers)
+    case PlanStartDatePage                    => userAnswers => navigateFromPlanStartDatePage(NormalMode)(userAnswers)
     case PlanEndDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage                  => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
     case AmendPaymentAmountPage               => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
     case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+    case AddPaymentPlanEndDatePage            => userAnswers => navigateFromAddPaymentPlanEndDatePage(NormalMode)(userAnswers)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
     case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
@@ -54,25 +55,27 @@ class Navigator @Inject() () {
   }
 
   private val checkRouteMap: Page => UserAnswers => Call = {
-    case YourBankDetailsPage            => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
-    case BankDetailsCheckYourAnswerPage => _ => routes.ConfirmAuthorityController.onPageLoad(CheckMode)
-    case ConfirmAuthorityPage           => nextAfterConfirmAuthority(CheckMode)
-    case DirectDebitSourcePage          => checkDirectDebitSource
-    case PaymentReferencePage           => _ => routes.CheckYourAnswersController.onPageLoad()
-    case PaymentAmountPage              => _ => routes.CheckYourAnswersController.onPageLoad()
-    case PaymentDatePage                => _ => routes.CheckYourAnswersController.onPageLoad()
-    case PlanStartDatePage              => _ => routes.CheckYourAnswersController.onPageLoad()
-    case PlanEndDatePage                => _ => routes.CheckYourAnswersController.onPageLoad()
-    case TotalAmountDuePage             => _ => routes.CheckYourAnswersController.onPageLoad()
-    case PaymentsFrequencyPage          => _ => routes.CheckYourAnswersController.onPageLoad()
-    case RegularPaymentAmountPage       => _ => routes.CheckYourAnswersController.onPageLoad()
-    case YearEndAndMonthPage            => _ => routes.CheckYourAnswersController.onPageLoad()
-    case AmendPaymentAmountPage         => userAnswers => checkPaymentPlanLogic(userAnswers, CheckMode)
-    case AmendPlanStartDatePage         => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
-    case AmendPlanEndDatePage           => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
-    case SuspensionPeriodRangeDatePage  => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
-    case RemovingThisSuspensionPage     => navigateFromRemovingThisSuspensionPage
-    case _                              => _ => routes.LandingController.onPageLoad()
+    case YourBankDetailsPage                  => _ => routes.BankDetailsCheckYourAnswerController.onPageLoad(CheckMode)
+    case BankDetailsCheckYourAnswerPage       => _ => routes.ConfirmAuthorityController.onPageLoad(CheckMode)
+    case ConfirmAuthorityPage                 => nextAfterConfirmAuthority(CheckMode)
+    case DirectDebitSourcePage                => checkDirectDebitSource
+    case PaymentReferencePage                 => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentAmountPage                    => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PlanStartDatePage                    => userAnswers => navigateFromPlanStartDatePage(CheckMode)(userAnswers)
+    case PlanEndDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
+    case TotalAmountDuePage                   => _ => routes.CheckYourAnswersController.onPageLoad()
+    case PaymentsFrequencyPage                => _ => routes.CheckYourAnswersController.onPageLoad()
+    case RegularPaymentAmountPage             => _ => routes.CheckYourAnswersController.onPageLoad()
+    case YearEndAndMonthPage                  => _ => routes.CheckYourAnswersController.onPageLoad()
+    case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
+    case AmendPaymentAmountPage               => userAnswers => checkPaymentPlanLogic(userAnswers, CheckMode)
+    case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+    case AddPaymentPlanEndDatePage            => userAnswers => navigateFromAddPaymentPlanEndDatePage(CheckMode)(userAnswers)
+    case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+    case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
+    case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
+    case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
@@ -119,19 +122,6 @@ class Navigator @Inject() () {
       case _                               => routes.PaymentReferenceController.onPageLoad(NormalMode)
     }
 
-  private def checkPlanStartDateLogic(userAnswers: UserAnswers): Call = {
-    val optSourceType = userAnswers.get(DirectDebitSourcePage)
-    val optPaymentType = userAnswers.get(PaymentPlanTypePage)
-
-    (optSourceType, optPaymentType) match {
-      case (Some(SA), Some(BudgetPaymentPlan)) =>
-        routes.PlanEndDateController.onPageLoad(NormalMode)
-      case (Some(PAYE), _) | (Some(MGD), Some(VariablePaymentPlan)) | (Some(TC), Some(TaxCreditRepaymentPlan)) =>
-        routes.CheckYourAnswersController.onPageLoad()
-      case _ => routes.JourneyRecoveryController.onPageLoad()
-    }
-  }
-
   private def checkPaymentPlanLogic(userAnswers: UserAnswers, mode: Mode): Call = {
     val paymentPlanType = userAnswers.get(ManagePaymentPlanTypePage)
     paymentPlanType match {
@@ -140,6 +130,20 @@ class Navigator @Inject() () {
       case _                                                => routes.JourneyRecoveryController.onPageLoad()
     }
   }
+
+  private def navigateFromAddPaymentPlanEndDatePage(mode: Mode)(userAnswers: UserAnswers): Call =
+    userAnswers.get(AddPaymentPlanEndDatePage) match {
+      case Some(true)  => routes.PlanEndDateController.onPageLoad(mode)
+      case Some(false) => routes.CheckYourAnswersController.onPageLoad()
+      case None        => routes.JourneyRecoveryController.onPageLoad()
+    }
+
+  private def navigateFromPlanStartDatePage(mode: Mode)(userAnswers: UserAnswers): Call =
+    userAnswers.get(DirectDebitSourcePage) match {
+      case Some(DirectDebitSource.SA) => routes.AddPaymentPlanEndDateController.onPageLoad(mode)
+      case Some(_)                    => routes.CheckYourAnswersController.onPageLoad()
+      case None                       => routes.JourneyRecoveryController.onPageLoad()
+    }
 
   private def navigateFromCancelPaymentPlanPage(answers: UserAnswers): Call =
     answers

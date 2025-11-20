@@ -356,30 +356,179 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
 
     "retrieveDirectDebitPaymentPlans" - {
-      "must successfully return the direct debit payment plans" in {
-        val paymentPlanResponse = NddDDPaymentPlansResponse(bankSortCode      = "123456",
-                                                            bankAccountNumber = "12345678",
-                                                            bankAccountName   = "MyBankAcc",
-                                                            auDdisFlag        = "01",
-                                                            paymentPlanCount  = 2,
-                                                            paymentPlanList   = Seq.empty
-                                                           )
+      "must successfully return the direct debit payment plans from cache" in {
+        val bankAccountNumber = "12345678"
+        val bankAccountName = "MyBankAcc"
+        val bankSortCode = "123456"
+        val ddReference = "122222"
 
+        val ddListResponse: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 1,
+              paymentPlansList = Some(
+                Seq(
+                  NddPaymentPlan(
+                    scheduledPaymentAmount = 100.0,
+                    planRefNumber          = "planRefNumber",
+                    planType               = "budgetPaymentPlan",
+                    paymentReference       = "1400256374K",
+                    hodService             = "sdlt",
+                    submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+                  )
+                )
+              )
+            )
+          )
+        )
+
+        val ddPaymentPlanResponse = NddDDPaymentPlansResponse(
+          bankSortCode      = bankSortCode,
+          bankAccountNumber = bankAccountNumber,
+          bankAccountName   = bankAccountName,
+          auDdisFlag        = "01",
+          paymentPlanCount  = 1,
+          paymentPlanList = Seq(
+            NddPaymentPlan(
+              scheduledPaymentAmount = 100.0,
+              planRefNumber          = "planRefNumber",
+              planType               = "budgetPaymentPlan",
+              paymentReference       = "1400256374K",
+              hodService             = "sdlt",
+              submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+            )
+          )
+        )
+
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(ddListResponse.directDebitList))
         when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
-          .thenReturn(Future.successful(paymentPlanResponse))
+          .thenReturn(Future.successful(ddPaymentPlanResponse))
 
-        val result = service.retrieveDirectDebitPaymentPlans("testRef").futureValue
+        val result = service.retrieveDirectDebitPaymentPlans("userId", ddReference).futureValue
 
-        result mustBe paymentPlanResponse
+        result mustBe ddPaymentPlanResponse.copy(auDdisFlag = "false")
       }
 
-      "fail when the connector call fails" in {
+      "must successfully return the direct debit payment plans from the api and update the cache" in {
+        val bankAccountNumber = "12345678"
+        val bankAccountName = "MyBankAcc"
+        val bankSortCode = "123456"
+        val ddReference = "122222"
+
+        val ddListResponse: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 1
+            )
+          )
+        )
+
+        val updatedDbObject: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 1,
+              paymentPlansList = Some(
+                Seq(
+                  NddPaymentPlan(
+                    scheduledPaymentAmount = 100.0,
+                    planRefNumber          = "planRefNumber",
+                    planType               = "budgetPaymentPlan",
+                    paymentReference       = "1400256374K",
+                    hodService             = "sdlt",
+                    submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+                  )
+                )
+              )
+            )
+          )
+        )
+
+        val ddPaymentPlanResponse = NddDDPaymentPlansResponse(
+          bankSortCode      = bankSortCode,
+          bankAccountNumber = bankAccountNumber,
+          bankAccountName   = bankAccountName,
+          auDdisFlag        = "01",
+          paymentPlanCount  = 1,
+          paymentPlanList = Seq(
+            NddPaymentPlan(
+              scheduledPaymentAmount = 100.0,
+              planRefNumber          = "planRefNumber",
+              planType               = "budgetPaymentPlan",
+              paymentReference       = "1400256374K",
+              hodService             = "sdlt",
+              submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+            )
+          )
+        )
+
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(ddListResponse.directDebitList))
+        when(mockCache.updateDirectDebit(any(), any())(any()))
+          .thenReturn(Future.successful(updatedDbObject.directDebitList.head))
         when(mockConnector.retrieveDirectDebitPaymentPlans(any())(any()))
-          .thenReturn(Future.failed(new Exception("bang")))
+          .thenReturn(Future.successful(ddPaymentPlanResponse))
 
-        val result = intercept[Exception](service.retrieveDirectDebitPaymentPlans("testRef").futureValue)
+        val result = service.retrieveDirectDebitPaymentPlans("userId", ddReference).futureValue
 
-        result.getMessage must include("bang")
+        result mustBe ddPaymentPlanResponse
+      }
+
+      "must successfully return the direct debit empty payment plans from the cache" in {
+        val bankAccountNumber = "12345678"
+        val bankAccountName = "MyBankAcc"
+        val bankSortCode = "123456"
+        val ddReference = "122222"
+
+        val ddListResponse: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 0
+            )
+          )
+        )
+
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(ddListResponse.directDebitList))
+
+        val result = service.retrieveDirectDebitPaymentPlans("userId", ddReference).futureValue
+
+        result mustBe NddDDPaymentPlansResponse(
+          bankSortCode      = bankSortCode,
+          bankAccountName   = bankAccountName,
+          bankAccountNumber = bankAccountNumber,
+          auDdisFlag        = "false",
+          paymentPlanCount  = 0,
+          paymentPlanList   = Seq.empty
+        )
       }
     }
 
@@ -775,6 +924,55 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         }
       }
     }
+
+    "isPaymentPlanLocked" - {
+
+      "return true when paymentPlanEditable is true" in {
+        val paymentPlanDetails = PaymentPlanDetails(
+          hodService                = "HOD2",
+          planType                  = "TypeB",
+          paymentReference          = "REF456",
+          submissionDateTime        = LocalDateTime.now(),
+          scheduledPaymentAmount    = Some(BigDecimal(500)),
+          scheduledPaymentStartDate = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentStartDate   = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentAmount      = Some(BigDecimal(50)),
+          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(5)),
+          scheduledPaymentFrequency = Some("Weekly"),
+          suspensionStartDate       = None,
+          suspensionEndDate         = None,
+          balancingPaymentAmount    = Some(BigDecimal(100)),
+          balancingPaymentDate      = Some(LocalDate.now().plusMonths(6)),
+          totalLiability            = Some(BigDecimal(600)),
+          paymentPlanEditable       = true
+        )
+
+        service.isPaymentPlanEditable(paymentPlanDetails) shouldBe true
+      }
+
+      "return false when paymentPlanEditable is false" in {
+        val paymentPlanDetails = PaymentPlanDetails(
+          hodService                = "HOD2",
+          planType                  = "TypeB",
+          paymentReference          = "REF456",
+          submissionDateTime        = LocalDateTime.now(),
+          scheduledPaymentAmount    = Some(BigDecimal(500)),
+          scheduledPaymentStartDate = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentStartDate   = Some(LocalDate.now().minusMonths(1)),
+          initialPaymentAmount      = Some(BigDecimal(50)),
+          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(5)),
+          scheduledPaymentFrequency = Some("Weekly"),
+          suspensionStartDate       = None,
+          suspensionEndDate         = None,
+          balancingPaymentAmount    = Some(BigDecimal(100)),
+          balancingPaymentDate      = Some(LocalDate.now().plusMonths(6)),
+          totalLiability            = Some(BigDecimal(600)),
+          paymentPlanEditable       = false
+        )
+
+        service.isPaymentPlanEditable(paymentPlanDetails) shouldBe false
+      }
+    }
   }
 
   "calculateNextPaymentDate" - {
@@ -1066,15 +1264,17 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         "when planStartDate is a past date" - {
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
             val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(3)
+            val planEndDate = today.plusYears(3)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1082,15 +1282,17 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
             val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(3)
+            val planEndDate = today.plusYears(3)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1142,15 +1344,17 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(3)
+            val planEndDate = today.plusYears(3)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1210,15 +1414,18 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         "when planStartDate is a past date" - {
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
+
             val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1226,15 +1433,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1286,15 +1494,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusMonths(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
 
             val expectedDate = LocalDate.of(2025, 12, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1376,15 +1585,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         "when planStartDate is a past date" - {
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1392,15 +1602,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1452,15 +1663,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1504,30 +1716,32 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         "when planStartDate is a past date" - {
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
 
             result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(12))
             result.nextPaymentDateValid mustBe true
           }
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 1, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
@@ -1535,15 +1749,16 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           }
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
-            val actualToday = LocalDate.now()
+            val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, mockAuditService, fixedClock)
             val today = LocalDate.of(LocalDate.now().getYear - 2, 3, 15)
             val startDate = today
-            val planEndDate = actualToday.plusYears(6)
+            val planEndDate = today.plusYears(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))
               .thenReturn(Future.successful(EarliestPaymentDate(today.plusDays(3).toString)))
 
-            val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
+            val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Annually).futureValue
 
             val expectedDate = LocalDate.of(2026, 3, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)

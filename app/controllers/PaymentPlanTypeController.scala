@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
 import forms.PaymentPlanTypeFormProvider
 import models.{DirectDebitSource, Mode, PaymentPlanType, UserAnswers}
@@ -42,7 +43,8 @@ class PaymentPlanTypeController @Inject() (
   requireData: DataRequiredAction,
   formProvider: PaymentPlanTypeFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: PaymentPlanTypeView
+  view: PaymentPlanTypeView,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -58,7 +60,16 @@ class PaymentPlanTypeController @Inject() (
       case None        => form
       case Some(value) => form.fill(value)
     }
-    Ok(view(preparedForm, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode)))
+    Ok(
+      view(
+        preparedForm,
+        mode,
+        selectedAnswers,
+        Some(appConfig.selfAssessmentUrl),
+        Some(appConfig.paymentProblemUrl),
+        routes.DirectDebitSourceController.onPageLoad(mode)
+      )
+    )
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
@@ -68,7 +79,18 @@ class PaymentPlanTypeController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => {
-          Future.successful(BadRequest(view(formWithErrors, mode, selectedSource, routes.DirectDebitSourceController.onPageLoad(mode))))
+          Future.successful(
+            BadRequest(
+              view(
+                formWithErrors,
+                mode,
+                selectedSource,
+                None,
+                None,
+                routes.DirectDebitSourceController.onPageLoad(mode)
+              )
+            )
+          )
         },
         newValue =>
           Future

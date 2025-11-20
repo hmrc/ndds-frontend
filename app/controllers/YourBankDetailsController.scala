@@ -136,10 +136,7 @@ class YourBankDetailsController @Inject() (
     val updatedAnswersTry = for {
       ua1 <- userAnswers.set(
                YourBankDetailsPage,
-               YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails,
-                                                                       auddisFlag,
-                                                                       true
-                                                                      ) // defaulting to true as account successful verified
+               YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(bankDetails, auddisFlag, true)
              )
       ua2 <- ua1.set(BankDetailsBankNamePage, bankName)
       ua3 <- ua2.set(BankDetailsAddressPage, bankAddress)
@@ -166,17 +163,35 @@ class YourBankDetailsController @Inject() (
       case _                                => false
     }
 
-    for {
-      lockResponse   <- lockService.updateLockForUser(credId)
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(AccountUnverifiedPage, accountUnverifiedFlag))
-      _              <- sessionRepository.set(updatedAnswers)
+    barsError match {
+      case BarsErrors.SortCodeOnDenyList =>
+        handleDenyListError(bankDetails, mode)
+      case _ =>
+        for {
+          lockResponse   <- lockService.updateLockForUser(credId)
+          updatedAnswers <- Future.fromTry(request.userAnswers.set(AccountUnverifiedPage, accountUnverifiedFlag))
+          _              <- sessionRepository.set(updatedAnswers)
+          result <- lockResponse.lockStatus match {
+                      case NotLocked           => handleNotLocked(bankDetails, mode, barsError)
+                      case LockedAndVerified   => handleLockedAndVerified(credId, accountUnverifiedFlag)
+                      case LockedAndUnverified => handleLockedAndUnverified(credId)
+                    }
+        } yield result
+    }
+  }
 
-      result <- lockResponse.lockStatus match {
-                  case NotLocked           => handleNotLocked(bankDetails, mode, barsError)
-                  case LockedAndVerified   => handleLockedAndVerified(credId, accountUnverifiedFlag)
-                  case LockedAndUnverified => handleLockedAndUnverified(credId)
-                }
-    } yield result
+  private def handleDenyListError(
+    bankDetails: YourBankDetails,
+    mode: Mode
+  )(implicit request: DataRequest[?]): Future[Result] = {
+
+    val formWithError = form
+      .fill(bankDetails)
+      .withError("sortCode", "yourBankDetails.error.sortCodeOnDenyList")
+
+    Future.successful(
+      BadRequest(view(formWithError, mode, routes.PersonalOrBusinessAccountController.onPageLoad(mode)))
+    )
   }
 
   private def handleNotLocked(bankDetails: YourBankDetails, mode: Mode, barsErrors: BarsErrors)(implicit request: DataRequest[?]): Future[Result] = {

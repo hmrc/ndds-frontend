@@ -64,11 +64,6 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           )
         }
 
-        val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
-          totalAmount = None,
-          dueDate     = None
-        )
-
         "must return OK and the correct view for a GET" - {
           "should show Amend, Cancel actions but not Suspend action when scheduledPaymentStartDate is beyond 2 working days" in {
             val mockSinglePaymentPlanDetailResponse =
@@ -78,7 +73,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(5).toLocalDate),
                   scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
                   suspensionStartDate       = None,
-                  suspensionEndDate         = None
+                  suspensionEndDate         = None,
+                  paymentPlanEditable       = true
                 )
               )
 
@@ -116,6 +112,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(true))
+              when(mockService.isPaymentPlanEditable(any()))
+                .thenReturn(true)
               when(mockService.isVariablePaymentPlan(any()))
                 .thenReturn(false)
 
@@ -142,6 +140,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 false,
                 formattedTotalAmount,
                 formattedDueDate,
+                true,
                 routes.AdvanceNoticeController.onPageLoad()
               )(
                 request,
@@ -158,7 +157,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(2).toLocalDate),
                   scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
                   suspensionStartDate       = None,
-                  suspensionEndDate         = None
+                  suspensionEndDate         = None,
+                  paymentPlanEditable       = true
                 )
               )
 
@@ -196,6 +196,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(false))
+              when(mockService.isPaymentPlanEditable(any()))
+                .thenReturn(true)
               when(mockService.isVariablePaymentPlan(any()))
                 .thenReturn(false)
 
@@ -217,6 +219,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                      false,
                                                      "",
                                                      "",
+                                                     false,
                                                      routes.AdvanceNoticeController.onPageLoad()
                                                     )(
                 request,
@@ -270,7 +273,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               messages(app)
             ),
             AmendPlanEndDateSummary.row(planDetail.scheduledPaymentEndDate, Constants.shortDateTimeFormatPattern)(messages(app)),
-            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate)(messages(app))
+            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, true)(messages(app))
           )
         }
 
@@ -285,14 +288,9 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             AmendPlanStartDateSummary.row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)(
               messages(app)
             ),
-            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate)(messages(app))
+            SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, true)(messages(app))
           )
         }
-
-        val advanceNoticeResponse: AdvanceNoticeResponse = AdvanceNoticeResponse(
-          totalAmount = None,
-          dueDate     = None
-        )
 
         "must return OK and the correct view for a GET" - {
 
@@ -305,7 +303,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(5).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
                     suspensionStartDate       = None,
-                    suspensionEndDate         = None
+                    suspensionEndDate         = None,
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -343,6 +342,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -365,6 +366,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -381,7 +383,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(5).toLocalDate),
                     scheduledPaymentEndDate   = None,
                     suspensionStartDate       = None,
-                    suspensionEndDate         = None
+                    suspensionEndDate         = None,
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -419,6 +422,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -441,6 +446,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -457,7 +463,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().minusDays(30).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(10).toLocalDate),
                     suspensionStartDate       = None,
-                    suspensionEndDate         = None
+                    suspensionEndDate         = None,
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -495,6 +502,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -516,6 +525,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                        false,
                                                        "",
                                                        "",
+                                                       true,
                                                        routes.AdvanceNoticeController.onPageLoad()
                                                       )(
                   request,
@@ -532,7 +542,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().minusDays(3).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(3).toLocalDate),
                     suspensionStartDate       = None,
-                    suspensionEndDate         = None
+                    suspensionEndDate         = None,
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -572,6 +583,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(true))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -594,6 +607,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  false,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -610,7 +624,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().minusDays(30).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().minusDays(5).toLocalDate),
                     suspensionStartDate       = None,
-                    suspensionEndDate         = None
+                    suspensionEndDate         = None,
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -648,6 +663,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -669,6 +686,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                        false,
                                                        "",
                                                        "",
+                                                       false,
                                                        routes.AdvanceNoticeController.onPageLoad()
                                                       )(
                   request,
@@ -687,7 +705,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(5).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(30).toLocalDate),
                     suspensionStartDate       = Some(LocalDateTime.now().plusDays(10).toLocalDate),
-                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(15).toLocalDate)
+                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(15).toLocalDate),
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -733,6 +752,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -755,6 +776,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -771,7 +793,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(5).toLocalDate),
                     scheduledPaymentEndDate   = None,
                     suspensionStartDate       = Some(LocalDateTime.now().plusDays(10).toLocalDate),
-                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(15).toLocalDate)
+                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(15).toLocalDate),
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -817,6 +840,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -839,6 +864,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -855,7 +881,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().minusDays(5).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(30).toLocalDate),
                     suspensionStartDate       = Some(LocalDateTime.now().plusDays(5).toLocalDate),
-                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(10).toLocalDate)
+                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(10).toLocalDate),
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -901,6 +928,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -923,6 +952,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -939,7 +969,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(1).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(3).toLocalDate),
                     suspensionStartDate       = Some(LocalDateTime.now().plusDays(2).toLocalDate),
-                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(2).toLocalDate)
+                    suspensionEndDate         = Some(LocalDateTime.now().plusDays(2).toLocalDate),
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -985,6 +1016,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockBudgetPaymentPlanDetailResponse))
                 when(mockService.isThreeDaysPriorPlanEndDate(any())(any()))
                   .thenReturn(Future.successful(false))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(false)
 
@@ -1007,6 +1040,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  false,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(
                   request,
@@ -1042,7 +1076,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(1).toLocalDate),
                   scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(10).toLocalDate),
                   suspensionStartDate       = None,
-                  suspensionEndDate         = None
+                  suspensionEndDate         = None,
+                  paymentPlanEditable       = true
                 )
               )
 
@@ -1085,6 +1120,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(true))
+              when(mockService.isPaymentPlanEditable(any()))
+                .thenReturn(true)
               when(mockService.isVariablePaymentPlan(any()))
                 .thenReturn(true)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
@@ -1108,6 +1145,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                                                      false,
                                                      "",
                                                      "",
+                                                     true,
                                                      routes.AdvanceNoticeController.onPageLoad()
                                                     )(
                 request,
@@ -1124,7 +1162,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(2).toLocalDate),
                   scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
                   suspensionStartDate       = None,
-                  suspensionEndDate         = None
+                  suspensionEndDate         = None,
+                  paymentPlanEditable       = true
                 )
               )
 
@@ -1167,6 +1206,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                 .thenReturn(Future.successful(false))
+              when(mockService.isPaymentPlanEditable(any()))
+                .thenReturn(true)
               when(mockService.isVariablePaymentPlan(any()))
                 .thenReturn(true)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
@@ -1178,20 +1219,22 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
               val mockPaymentReference = mockVariablePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
               status(result) mustEqual OK
-              contentAsString(result) mustEqual view("variablePaymentPlan",
-                                                     mockPaymentReference,
-                                                     false,
-                                                     false,
-                                                     false,
-                                                     false,
-                                                     "",
-                                                     "",
-                                                     summaryListRows,
-                                                     false,
-                                                     "",
-                                                     "",
-                                                     routes.AdvanceNoticeController.onPageLoad()
-                                                    )(
+              contentAsString(result) mustEqual view(
+                "variablePaymentPlan",
+                mockPaymentReference,
+                false,
+                false,
+                false,
+                false,
+                "",
+                "",
+                summaryListRows,
+                false,
+                "",
+                "",
+                false,
+                routes.AdvanceNoticeController.onPageLoad()
+              )(
                 request,
                 messages(application)
               ).toString
@@ -1207,7 +1250,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(4).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
                     suspensionStartDate       = None,
-                    suspensionEndDate         = None
+                    suspensionEndDate         = None,
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -1253,6 +1297,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
                 when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(true)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
@@ -1288,6 +1334,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   true,
                   formattedTotalAmount,
                   formattedDueDate,
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(request, messages(application)).toString
               }
@@ -1302,7 +1349,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                     scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(4).toLocalDate),
                     scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
                     suspensionStartDate       = None,
-                    suspensionEndDate         = None
+                    suspensionEndDate         = None,
+                    paymentPlanEditable       = true
                   )
                 )
 
@@ -1345,6 +1393,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
                 when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
                   .thenReturn(Future.successful(true))
+                when(mockService.isPaymentPlanEditable(any()))
+                  .thenReturn(true)
                 when(mockService.isVariablePaymentPlan(any()))
                   .thenReturn(true)
                 when(mockService.isAdvanceNoticePresent(any(), any())(any()))
@@ -1370,6 +1420,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   false,
                   "",
                   "",
+                  true,
                   routes.AdvanceNoticeController.onPageLoad()
                 )(request, messages(application)).toString
               }
@@ -1411,7 +1462,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                   scheduledPaymentStartDate = Some(LocalDateTime.now().plusDays(2).toLocalDate),
                   scheduledPaymentEndDate   = Some(LocalDateTime.now().plusDays(20).toLocalDate),
                   suspensionStartDate       = None,
-                  suspensionEndDate         = None
+                  suspensionEndDate         = None,
+                  paymentPlanEditable       = true
                 )
               )
 
@@ -1447,6 +1499,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
               when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                 .thenReturn(Future.successful(mockTaxCreditRepaymentPlanDetailResponse))
+              when(mockService.isPaymentPlanEditable(any()))
+                .thenReturn(true)
               when(mockService.isVariablePaymentPlan(any()))
                 .thenReturn(false)
               when(mockService.isAdvanceNoticePresent(any(), any())(any()))
@@ -1458,20 +1512,22 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               val view = application.injector.instanceOf[PaymentPlanDetailsView]
               val mockPaymentReference = mockTaxCreditRepaymentPlanDetailResponse.paymentPlanDetails.paymentReference
               status(result) mustEqual OK
-              contentAsString(result) mustEqual view("taxCreditRepaymentPlan",
-                                                     mockPaymentReference,
-                                                     false,
-                                                     false,
-                                                     false,
-                                                     false,
-                                                     "",
-                                                     "",
-                                                     summaryListRows,
-                                                     false,
-                                                     "",
-                                                     "",
-                                                     routes.AdvanceNoticeController.onPageLoad()
-                                                    )(
+              contentAsString(result) mustEqual view(
+                "taxCreditRepaymentPlan",
+                mockPaymentReference,
+                false,
+                false,
+                false,
+                false,
+                "",
+                "",
+                summaryListRows,
+                false,
+                "",
+                "",
+                false,
+                routes.AdvanceNoticeController.onPageLoad()
+              )(
                 request,
                 messages(application)
               ).toString
@@ -1480,7 +1536,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
         }
       }
 
-      "must redirect to Journey Recover page when DirectDebitReferenceQuery is not set" in {
+      "must redirect to Journey Recovery page when DirectDebitReferenceQuery is not set" in {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides()
           .build()
@@ -1491,6 +1547,52 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "should redirect to PaymentPlanLockedWarningController when payment plan is locked" in {
+        val mockPaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(
+              planType            = PaymentPlanType.SinglePaymentPlan.toString,
+              paymentPlanEditable = false
+            )
+          )
+
+        val paymentPlanReference = "ppReference"
+        val directDebitReference = "ddReference"
+
+        val userAnswersWithPaymentReference =
+          emptyUserAnswers
+            .set(PaymentPlanReferenceQuery, paymentPlanReference)
+            .success
+            .value
+            .set(DirectDebitReferenceQuery, directDebitReference)
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswersWithPaymentReference))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockService)
+          )
+          .build()
+
+        running(application) {
+          when(mockSessionRepository.set(any()))
+            .thenReturn(Future.successful(true))
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswersWithPaymentReference)))
+          when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
+            .thenReturn(Future.successful(mockPaymentPlanDetailResponse))
+          when(mockService.isPaymentPlanEditable(any()))
+            .thenReturn(false)
+
+          val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.PaymentPlanLockedWarningController.onPageLoad().url
         }
       }
 
@@ -1537,6 +1639,8 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             .thenReturn(Future.successful(mockSinglePaymentPlanDetailResponse))
           when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
             .thenReturn(Future.successful(true))
+          when(mockService.isPaymentPlanEditable(any()))
+            .thenReturn(true)
 
           val request = FakeRequest(GET, routes.PaymentPlanDetailsController.onPageLoad().url)
           val result = route(application, request).value

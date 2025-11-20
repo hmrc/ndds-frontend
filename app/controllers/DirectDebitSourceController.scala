@@ -25,6 +25,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.DirectDebitReferenceQuery
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DirectDebitSourceView
@@ -56,7 +57,13 @@ class DirectDebitSourceController @Inject() (
       case None        => form
       case Some(value) => form.fill(value)
     }
-    Ok(view(preparedForm, mode, routes.ConfirmAuthorityController.onPageLoad(mode)))
+
+    val backlinkCall = answers.get(DirectDebitReferenceQuery) match {
+      case Some(directDebitReference) => routes.DirectDebitSummaryController.onPageLoad()
+      case _                          => routes.ConfirmAuthorityController.onPageLoad(mode)
+    }
+
+    Ok(view(preparedForm, mode, backlinkCall))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
@@ -65,7 +72,12 @@ class DirectDebitSourceController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => {
-          Future.successful(BadRequest(view(formWithErrors, mode, routes.BankDetailsCheckYourAnswerController.onPageLoad(mode))))
+          val backlinkCall = request.userAnswers.get(DirectDebitReferenceQuery) match {
+            case Some(directDebitReference) => routes.DirectDebitSummaryController.onPageLoad()
+            case _                          => routes.ConfirmAuthorityController.onPageLoad(mode)
+          }
+
+          Future.successful(BadRequest(view(formWithErrors, mode, backlinkCall)))
         },
         value => {
           val originalAnswers = request.userAnswers
@@ -96,6 +108,7 @@ class DirectDebitSourceController @Inject() (
         .flatMap(_.remove(PaymentsFrequencyPage))
         .flatMap(_.remove(TotalAmountDuePage))
         .flatMap(_.remove(PlanStartDatePage))
+        .flatMap(_.remove(AddPaymentPlanEndDatePage))
         .flatMap(_.remove(PlanEndDatePage))
         .flatMap(_.remove(PaymentPlanTypePage))
         .flatMap(_.remove(PaymentDatePage))

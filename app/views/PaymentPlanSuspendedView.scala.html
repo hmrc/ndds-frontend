@@ -26,24 +26,33 @@
         link: Link
 )
 
-@(startDate: String, endDate: String, call: Call, rows:Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(startDate: String, endDate: String, call: Call, rows:Seq[SummaryListRow], suspensionIsActiveMode: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanSuspended.title")), showBackLink = false) {
 
     @confirmationPanel(
         title = messages("paymentPlanSuspended.panel.title"),
         body = Html(
-                    s"${messages("paymentPlanSuspended.panel.p", startDate, endDate)}"
-                    ),
+        s"${messages("paymentPlanSuspended.panel.p", startDate, endDate)}"
+    ),
         classes = "govuk-!-margin-bottom-2",
         isAllContentStrong = false
     )
 
     @header2("paymentPlanSuspended.h1")
 
-    @paragraph(messages("paymentPlanSuspended.p1", startDate, endDate))
+    @if(suspensionIsActiveMode) {
+        @paragraph(messages("paymentPlanSuspended.p1.change", startDate, endDate))
+    } else {
+        @paragraph(messages("paymentPlanSuspended.p1.normal", startDate, endDate))
+    }
 
-    @paragraph(messages("paymentPlanSuspended.p2"))
+    @if(suspensionIsActiveMode) {
+        @paragraph(messages("paymentPlanSuspended.p2.change"))
+    } else {
+        @paragraph(messages("paymentPlanSuspended.p2.normal"))
+
+    }
 
     @header2("paymentPlanSuspended.h2")
 

@@ -51,7 +51,7 @@ class PlanEndDateController @Inject() (
         val form = formProvider(startDate.enteredDate)
         val preparedForm = request.userAnswers.get(PlanEndDatePage).map(Some(_)).fold(form)(form.fill)
 
-        Ok(view(preparedForm, mode, routes.PlanStartDateController.onPageLoad(mode)))
+        Ok(view(preparedForm, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode)))
 
       case None =>
         Redirect(routes.JourneyRecoveryController.onPageLoad())
@@ -69,7 +69,7 @@ class PlanEndDateController @Inject() (
             .fold(
               formWithErrors =>
                 Future.successful(
-                  BadRequest(view(formWithErrors, mode, routes.PlanStartDateController.onPageLoad(mode)))
+                  BadRequest(view(formWithErrors, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode)))
                 ),
               {
                 case Some(endDate) =>

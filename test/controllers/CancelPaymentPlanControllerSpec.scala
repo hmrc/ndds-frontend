@@ -107,8 +107,6 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
       val paymentPlanReference = "ppReference"
 
-      val paymentPlan = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails
-
       val userAnswersWithData =
         emptyUserAnswers
           .set(
