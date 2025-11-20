@@ -37,6 +37,16 @@ object PaymentsFrequency extends Enumerable.Implicits {
     Monthly
   )
 
+  val paymentFrequencyMapping: Map[String, Int] = Map(
+    PaymentsFrequency.FortNightly.toString -> 1,
+    PaymentsFrequency.Weekly.toString      -> 2,
+    PaymentsFrequency.FourWeekly.toString  -> 3,
+    PaymentsFrequency.Monthly.toString     -> 5,
+    PaymentsFrequency.Quarterly.toString   -> 6,
+    PaymentsFrequency.SixMonthly.toString  -> 7,
+    PaymentsFrequency.Annually.toString    -> 9
+  )
+
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>
     RadioItem(
       content = Text(messages(s"paymentsFrequency.${value.toString}")),
