@@ -11,3 +11,6 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
+GET        /direct-debits/test-only/amount-need-to-pay                          controllers.AmendPaymentAmountController.testOnlyOnPageLoad(mode: Mode = NormalMode)
+POST       /direct-debits/test-only/amount-need-to-pay                          controllers.AmendPaymentAmountController.testOnlyOnSubmit(mode: Mode = NormalMode)

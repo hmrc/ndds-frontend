@@ -44,6 +44,7 @@ class Navigator @Inject() () {
     case PlanEndDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
     case YearEndAndMonthPage                  => _ => routes.PaymentAmountController.onPageLoad(NormalMode)
     case AmendPaymentAmountPage               => userAnswers => checkPaymentPlanLogic(userAnswers, NormalMode)
+    case TestOnlyAmendPaymentAmountPage       => userAnswers => testOnlyCheckPaymentPlanLogic(userAnswers, NormalMode)
     case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
     case AddPaymentPlanEndDatePage            => userAnswers => navigateFromAddPaymentPlanEndDatePage(NormalMode)(userAnswers)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
@@ -127,6 +128,15 @@ class Navigator @Inject() () {
     paymentPlanType match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(mode)
       case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(mode)
+      case _                                                => routes.JourneyRecoveryController.onPageLoad()
+    }
+  }
+
+  private def testOnlyCheckPaymentPlanLogic(userAnswers: UserAnswers, mode: Mode): Call = {
+    val paymentPlanType = userAnswers.get(ManagePaymentPlanTypePage)
+    paymentPlanType match {
+      case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.testOnlyOnPageLoad(mode)
+      case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.testOnlyOnPageLoad(mode)
       case _                                                => routes.JourneyRecoveryController.onPageLoad()
     }
   }

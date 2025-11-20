@@ -463,6 +463,10 @@ amendPaymentAmount.title = What amount do you need to pay?
 amendPaymentAmount.heading = What amount do you want to pay?
 amendPaymentAmount.hint = 	e.g. £1000.00
 
+testOnlyAmendPaymentAmount.title = Test only : What amount do you need to pay?
+testOnlyAmendPaymentAmount.heading = Test only : What amount do you want to pay?
+testOnlyAmendPaymentAmount.hint = 	Test only : e.g. £1000.00
+
 amendment.noChange = ERROR: You have made no amendments.  Please check the details you have entered.
 
 amendPlanStartDate.title = What date are you starting this payment plan?

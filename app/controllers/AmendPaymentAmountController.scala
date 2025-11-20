@@ -29,6 +29,7 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendPaymentAmountView
+import views.html.TestOnlyAmendPaymentAmountView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,7 +44,8 @@ class AmendPaymentAmountController @Inject() (
   formProvider: AmendPaymentAmountFormProvider,
   nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
-  view: AmendPaymentAmountView
+  view: AmendPaymentAmountView,
+  testOnlyview: TestOnlyAmendPaymentAmountView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -67,6 +69,23 @@ class AmendPaymentAmountController @Inject() (
     }
   }
 
+  def testOnlyOnPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
+
+    if (nddsService.amendPaymentPlanGuard(answers)) {
+      val preparedForm = answers.get(AmendPaymentAmountPage) match {
+        case None        => form
+        case Some(value) => form.fill(value)
+      }
+
+      Ok(testOnlyview(preparedForm, mode, routes.AmendingPaymentPlanController.onPageLoad()))
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
+  }
+
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
 
     form
@@ -78,6 +97,20 @@ class AmendPaymentAmountController @Inject() (
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(AmendPaymentAmountPage, mode, updatedAnswers))
+      )
+  }
+
+  def testOnlyOnSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendingPaymentPlanController.onPageLoad()))),
+        value =>
+          for {
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
+            _              <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(TestOnlyAmendPaymentAmountPage, mode, updatedAnswers))
       )
   }
 
