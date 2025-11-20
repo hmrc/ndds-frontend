@@ -70,10 +70,8 @@ class AmendPlanStartDateController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-
       val userAnswers = request.userAnswers
       val form = buildForm(userAnswers)
-
       form
         .bindFromRequest()
         .fold(
@@ -90,9 +88,7 @@ class AmendPlanStartDateController @Inject() (
                 case (Some(planDetails), Some(amendedAmount)) =>
                   val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
                   val dbStart = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
-
                   val isNoChange = amendedAmount == dbAmount && value == dbStart
-
                   if (isNoChange) {
                     val errorForm = form.fill(value).withError("value", "amendment.noChange")
                     Future.successful(
@@ -101,7 +97,6 @@ class AmendPlanStartDateController @Inject() (
                   } else {
                     checkForDuplicate(mode, userAnswers, value)
                   }
-
                 case _ =>
                   logger.warn("Missing Amend payment amount and/or amend plan start date")
                   Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
