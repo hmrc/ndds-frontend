@@ -23,17 +23,15 @@ import models.DirectDebitSource.*
 import models.requests.ChrisSubmissionRequest
 import models.responses.GenerateDdiRefResponse
 import models.{DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
-import models.audits.NewDirectDebitAudit
+import models.audits.{AddPaymentPlanAudit, NewDirectDebitAudit}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import repositories.SessionRepository
-import services.NationalDirectDebitService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.ExistingDirectDebitIdentifierQuery
 import repositories.{DirectDebitCacheRepository, SessionRepository}
-import services.{AuditService, NationalDirectDebitService}
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{DateTimeFormats, PaymentCalculations}
 import viewmodels.checkAnswers.*
@@ -150,7 +148,6 @@ class CheckYourAnswersController @Inject() (
                   updated2 <- Future.fromTry(updated1.set(CreateConfirmationPage, true))
                   _        <- sessionRepository.set(updated2)
                 } yield {
-                  auditService.sendSubmitDirectDebitPaymentPlan
                   Redirect(routes.DirectDebitConfirmationController.onPageLoad())
                 }
               } else {
@@ -175,7 +172,11 @@ class CheckYourAnswersController @Inject() (
 
     val existingDDIOpt: Option[String] = ua.get(ExistingDirectDebitIdentifierQuery)
     val hasExistingDDI: Boolean = existingDDIOpt.isDefined
-
+    val auditType = if (hasExistingDDI) {
+      Some(AddPaymentPlanAudit)
+    } else {
+      Some(NewDirectDebitAudit)
+    }
     val bankDetailsWithAudisFuture = existingDDIOpt match {
       case Some(directDebitReferenceIdentifier) =>
         directDebitCache
@@ -212,7 +213,7 @@ class CheckYourAnswersController @Inject() (
         calculation                     = calculationOpt,
         suspensionPeriodRangeDate       = None,
         addPlan                         = hasExistingDDI,
-        auditType                       = Some(NewDirectDebitAudit),
+        auditType                       = auditType,
         bankAccountType                 = ua.get(PersonalOrBusinessAccountPage)
       )
     }
