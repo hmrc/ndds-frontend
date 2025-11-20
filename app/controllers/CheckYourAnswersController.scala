@@ -257,7 +257,8 @@ class CheckYourAnswersController @Inject() (
       finalPaymentAmount     = Some(finalPaymentAmount),
       secondPaymentDate      = Some(secondPaymentDate),
       penultimatePaymentDate = Some(penultimatePaymentDate),
-      finalPaymentDate       = Some(finalPaymentDate)
+      finalPaymentDate       = Some(finalPaymentDate),
+      monthlyPaymentAmount   = MonthlyPaymentAmountSummary.getMonthlyPaymentAmount(userAnswers)
     )
   }
 
