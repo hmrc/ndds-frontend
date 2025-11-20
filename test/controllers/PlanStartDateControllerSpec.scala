@@ -91,7 +91,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       running(application) {
@@ -124,7 +124,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers), any())(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       running(application) {
@@ -157,7 +157,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers), any())(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       running(application) {
@@ -181,7 +181,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers), any())(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       running(application) {
@@ -217,7 +217,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
         .thenReturn(Future.failed(new Exception("bang")))
 
       running(application) {
@@ -241,7 +241,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers), any())(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       running(application) {
@@ -262,7 +262,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(userAnswers), any())(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       running(application) {
@@ -279,7 +279,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       val application =
@@ -305,7 +305,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
         .thenReturn(Future.successful(expectedEarliestPlanStartDate))
 
       val request =
@@ -358,7 +358,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
         .thenReturn(Future.failed(new Exception("bang")))
 
       running(application) {
@@ -375,7 +375,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
-      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers))(any()))
+      when(mockService.getEarliestPlanStartDate(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
         .thenReturn(Future.failed(new Exception("bang")))
 
       val request =

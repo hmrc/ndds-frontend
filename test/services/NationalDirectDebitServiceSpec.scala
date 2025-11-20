@@ -198,7 +198,31 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
 
-        val result = service.getEarliestPlanStartDate(expectedUserAnswers).futureValue
+        val result = service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue
+
+        result mustBe EarliestPaymentDate("2025-12-25")
+      }
+
+      "must successfully return the Earliest Payment Date when direct debit is exists" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
+          .set(ExistingDirectDebitIdentifierQuery, "ddRef")
+          .success
+          .value
+
+        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+        when(mockCache.getDirectDebit(any())(any()))
+          .thenReturn(Future.successful(nddResponse.directDebitList.head))
+
+        val result = service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue
 
         result mustBe EarliestPaymentDate("2025-12-25")
       }
@@ -212,7 +236,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
 
-        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue)
 
         result.getMessage must include("YourBankDetailsPage details missing from user answers")
       }
@@ -226,7 +250,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
 
-        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue)
 
         result.getMessage must include("PaymentPlanTypePage details missing from user answers")
       }
@@ -240,7 +264,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
 
-        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue)
 
         result.getMessage must include("DirectDebitSourcePage details missing from user answers")
       }
@@ -262,7 +286,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
-        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers).futureValue)
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue)
 
         result.getMessage must include("bang")
       }
