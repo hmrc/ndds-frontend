@@ -26,6 +26,8 @@ import pages.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.ExistingDirectDebitIdentifierQuery
+import repositories.DirectDebitCacheRepository
 import services.NationalDirectDebitService
 import utils.MacGenerator
 import viewmodels.checkAnswers.YourBankDetailsNameSummary.nddResponse

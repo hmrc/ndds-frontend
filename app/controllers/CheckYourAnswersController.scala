@@ -20,25 +20,23 @@ import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.DirectDebitSource.*
+import models.audits.{AddPaymentPlanAudit, NewDirectDebitAudit}
 import models.requests.ChrisSubmissionRequest
 import models.responses.GenerateDdiRefResponse
 import models.{DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
-import models.audits.{AddPaymentPlanAudit, NewDirectDebitAudit}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.ExistingDirectDebitIdentifierQuery
 import repositories.{DirectDebitCacheRepository, SessionRepository}
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.{DateTimeFormats, PaymentCalculations}
+import utils.Utils.generateMacFromAnswers
+import utils.{DateTimeFormats, MacGenerator, PaymentCalculations}
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
-import utils.MacGenerator
-import utils.Utils.generateMacFromAnswers
 
 import scala.concurrent.{ExecutionContext, Future}
 
