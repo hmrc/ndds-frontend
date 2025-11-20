@@ -64,13 +64,19 @@ class CheckYourAnswersController @Inject() (
       logger.warn("Attempt to access Check Your Answers confirmation; redirecting.")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
-      val showStartDate =
-        if (source.contains(DirectDebitSource.PAYE)) { YearEndAndMonthSummary.row(ua) }
-        else { PlanStartDateSummary.row(ua) }
-
-      val showPlanEndDate =
-        if (hasEndDate.contains(false)) { None }
-        else { PlanEndDateSummary.row(ua) }
+      val showStartDate = if (source.contains(DirectDebitSource.PAYE)) { YearEndAndMonthSummary.row(ua) }
+      else { PlanStartDateSummary.row(ua) }
+      val showPlanEndDate = if (hasEndDate.contains(false)) { None }
+      else { PlanEndDateSummary.row(ua) }
+      val monthlyPaymentAmount = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+        MonthlyPaymentAmountSummary.row(ua)
+      } else { None }
+      val finalPaymentAmount = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+        FinalPaymentAmountSummary.row(ua)
+      } else { None }
+      val finalPaymentDate = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+        FinalPaymentDateSummary.row(ua, appConfig)
+      } else { None }
 
       val list = SummaryListViewModel(
         Seq(
@@ -78,21 +84,20 @@ class CheckYourAnswersController @Inject() (
           PaymentPlanTypeSummary.row(ua),
           PaymentReferenceSummary.row(ua),
           TotalAmountDueSummary.row(ua),
-          showStartDate,
           PaymentAmountSummary.row(ua),
           PaymentDateSummary.row(ua),
           PaymentsFrequencySummary.row(ua),
           RegularPaymentAmountSummary.row(ua),
+          showStartDate,
           AddPaymentPlanEndDateSummary.row(ua),
           showPlanEndDate,
-          MonthlyPaymentAmountSummary.row(ua),
-          FinalPaymentAmountSummary.row(ua),
-          FinalPaymentDateSummary.row(ua, appConfig)
+          monthlyPaymentAmount,
+          finalPaymentAmount,
+          finalPaymentDate
         ).flatten
       )
 
       val backRoute: Call = backRouteCheck(source, hasEndDate)
-
       Ok(view(list, DateTimeFormats.formattedCurrentDate, backRoute))
     }
   }
