@@ -172,7 +172,8 @@ class CheckYourAnswersController @Inject() (
       amendPaymentAmount              = None,
       calculation                     = calculationOpt,
       suspensionPeriodRangeDate       = None,
-      auditType                       = Some(NewDirectDebitAudit)
+      auditType                       = Some(NewDirectDebitAudit),
+      bankAccountType                 = ua.get(PersonalOrBusinessAccountPage)
     )
   }
 
