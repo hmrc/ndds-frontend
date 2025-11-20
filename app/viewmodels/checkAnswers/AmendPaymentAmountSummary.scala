@@ -49,12 +49,17 @@ object AmendPaymentAmountSummary {
   }
 
   def row(planType: String, amount: Option[BigDecimal], showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
-    val label = if (PaymentPlanType.BudgetPaymentPlan.toString == planType) {
+    val label = if (PaymentPlanType.BudgetPaymentPlan.toString == planType || PaymentPlanType.VariablePaymentPlan.toString == planType) {
       "paymentPlanDetails.details.amount.budgetPaymentPlan"
     } else {
       "paymentPlanDetails.details.amount.singlePaymentPlan"
     }
-    val displayValue = amount.map(a => formatAmount(a)).getOrElse("")
+    val displayValue = if (PaymentPlanType.VariablePaymentPlan.toString == planType) {
+      "paymentPlanDetails.details.amount.variablePaymentPlan.value"
+    } else {
+      amount.map(a => formatAmount(a)).getOrElse("")
+    }
+
     SummaryListRowViewModel(
       key   = label,
       value = ValueViewModel(displayValue),
