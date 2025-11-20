@@ -42,11 +42,12 @@
 
     @paragraph(messages("directDebitConfirmation.p1", paymentAmount, paymentDate))
 
-    @paragraphWithLink(
-        message1 = Some(messages("directDebitConfirmation.p2")),
-        linkMessage = messages("directDebitConfirmation.p2.link"),
-        linkUrl = hmrcHelplineUrl
-    )
+    <p class="govuk-body">
+        @messages("directDebitConfirmation.p2")
+        <a href="@hmrcHelplineUrl" target="_blank" rel="noopener noreferrer">
+            @messages("directDebitConfirmation.p2.link")
+        </a>.
+    </p>
 
     <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
 

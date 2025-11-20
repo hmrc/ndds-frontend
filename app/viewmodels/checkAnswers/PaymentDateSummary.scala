@@ -23,6 +23,7 @@ import play.api.i18n.{Lang, Messages}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DateTimeFormats.dateTimeFormat
 import viewmodels.govuk.summarylist.*
+import utils.DateTimeFormats.formattedDateTimeShort
 import viewmodels.implicits.*
 
 object PaymentDateSummary {
@@ -47,9 +48,11 @@ object PaymentDateSummary {
 
       implicit val lang: Lang = messages.lang
 
+      val formattedValue =
+        s"${formattedDateTimeShort(answer.enteredDate.toString)}"
       SummaryListRowViewModel(
         key   = "paymentDate.checkYourAnswersLabel",
-        value = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
+        value = ValueViewModel(formattedValue),
         actions = if (showChange) {
           Seq(
             ActionItemViewModel("site.change", routes.PaymentDateController.onPageLoad(CheckMode).url)

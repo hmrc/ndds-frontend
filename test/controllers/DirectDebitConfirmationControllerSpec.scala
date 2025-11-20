@@ -18,16 +18,16 @@ package controllers
 
 import base.SpecBase
 import config.CurrencyFormatter.currencyFormat
-import models.{DirectDebitSource, PaymentDateDetails, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import models.responses.GenerateDdiRefResponse
-import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentReferencePage, TotalAmountDuePage, YourBankDetailsPage}
+import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, TotalAmountDuePage, YourBankDetailsPage}
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.Key
-import viewmodels.checkAnswers.{PaymentReferenceSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
+import viewmodels.checkAnswers.{DirectDebitSourceSummary, PaymentDateSummary, PaymentPlanTypeSummary, PaymentReferenceSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import views.html.DirectDebitConfirmationView
 
@@ -48,7 +48,7 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
       val bankSortCode = "205142"
       val auddisStatus = true
       val accountVerified = true
-      val dateSetup = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+      val dateSetup = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMM yyyy"))
 
       val yourBankDetails = YourBankDetailsWithAuddisStatus(
         bankAccountHolderName,
@@ -65,6 +65,7 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
         .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
         .setOrException(YourBankDetailsPage, yourBankDetails)
         .setOrException(PaymentReferencePage, ppRef)
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
@@ -101,6 +102,8 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
 
         val paymentPlanDetails = SummaryListViewModel(
           rows = Seq(
+            PaymentPlanTypeSummary.row(userAnswers),
+            DirectDebitSourceSummary.row(userAnswers, false),
             PaymentReferenceSummary.rowNoAction(userAnswers).map(Some(_)).getOrElse(None),
             Some(
               SummaryListRowViewModel(
@@ -116,13 +119,7 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
                 actions = Seq.empty
               )
             ),
-            Some(
-              SummaryListRowViewModel(
-                key     = Key(Text("Payment date")),
-                value   = ValueViewModel(Text(paymentDateString)),
-                actions = Seq.empty
-              )
-            )
+            PaymentDateSummary.row(userAnswers, false)
           ).flatten
         )
         val expectedHtml = view(

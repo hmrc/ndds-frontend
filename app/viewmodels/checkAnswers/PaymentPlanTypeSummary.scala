@@ -29,44 +29,37 @@ import viewmodels.implicits.*
 object PaymentPlanTypeSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentPlanTypePage).map { answer =>
-
-      val value = ValueViewModel(
-        HtmlContent(
-          HtmlFormat.escape(messages(s"paymentPlanType.$answer"))
-        )
-      )
-
-      SummaryListRowViewModel(
-        key   = "paymentPlanType.checkYourAnswersLabel",
-        value = value,
-        actions = Seq(
-          ActionItemViewModel("site.change", routes.PaymentPlanTypeController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("paymentPlanType.change.hidden"))
-        )
-      )
-    }
-
-  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentPlanTypePage).map { answer =>
-
-      val value = ValueViewModel(
-        HtmlContent(
-          HtmlFormat.escape(messages(s"directDebitConfirmation.$answer"))
-        )
-      )
-
-      SummaryListRowViewModel(
-        key   = "directDebitConfirmation.planType",
-        value = value,
-        actions = if (showChange) {
-          Seq(
-            ActionItemViewModel("site.change", routes.PaymentPlanTypeController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("paymentPlanType.change.hidden"))
+    answers.get(PaymentPlanTypePage) match {
+      case Some(planType) =>
+        val value = ValueViewModel(
+          HtmlContent(
+            HtmlFormat.escape(messages(s"checkYourAnswers.paymentPlanType.$planType"))
           )
-        } else {
-          Seq.empty
-        }
-      )
+        )
+
+        Some(
+          SummaryListRowViewModel(
+            key   = "checkYourAnswers.paymentPlanType",
+            value = value,
+            actions = Seq(
+              ActionItemViewModel("site.change", routes.PaymentPlanTypeController.onPageLoad(CheckMode).url)
+                .withVisuallyHiddenText(messages("paymentPlanType.change.hidden"))
+            )
+          )
+        )
+
+      case None =>
+        val value = ValueViewModel(
+          HtmlContent(
+            HtmlFormat.escape(messages("checkYourAnswers.paymentPlanType.singlePaymentPlan"))
+          )
+        )
+        Some(
+          SummaryListRowViewModel(
+            key     = "checkYourAnswers.paymentPlanType",
+            value   = value,
+            actions = Seq.empty
+          )
+        )
     }
 }

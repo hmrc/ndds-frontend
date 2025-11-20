@@ -24,7 +24,7 @@ import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import config.CurrencyFormatter.currencyFormat
-import viewmodels.checkAnswers.{FinalPaymentAmountSummary, MonthlyPaymentAmountSummary, PaymentAmountSummary, PaymentDateSummary, PaymentReferenceSummary, PaymentsFrequencySummary, PlanEndDateSummary, PlanStartDateSummary, RegularPaymentAmountSummary, TotalAmountDueSummary, YearEndAndMonthSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
+import viewmodels.checkAnswers.{DirectDebitSourceSummary, FinalPaymentAmountSummary, MonthlyPaymentAmountSummary, PaymentAmountSummary, PaymentDateSummary, PaymentPlanTypeSummary, PaymentReferenceSummary, PaymentsFrequencySummary, PlanEndDateSummary, PlanStartDateSummary, RegularPaymentAmountSummary, TotalAmountDueSummary, YearEndAndMonthSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
@@ -88,19 +88,12 @@ class DirectDebitConfirmationController @Inject() (
       ).flatten
     )
 
-    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
-    val showStartDate = if (directDebitSource.contains(DirectDebitSource.PAYE)) {
-      YearEndAndMonthSummary.row(request.userAnswers, false)
-    } else {
-      PlanStartDateSummary.row(request.userAnswers, false)
-    }
-
     val dateSetupRow: Option[SummaryListRow] = Some(
       SummaryListRowViewModel(
         key = Key(Text("Date set up")),
         value = ValueViewModel(
           Text(
-            LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+            LocalDate.now().format(DateTimeFormatter.ofPattern("d MMM yyyy"))
           )
         ),
         actions = Seq.empty
@@ -109,6 +102,8 @@ class DirectDebitConfirmationController @Inject() (
 
     val list = SummaryListViewModel(
       rows = Seq(
+        PaymentPlanTypeSummary.row(request.userAnswers),
+        DirectDebitSourceSummary.row(request.userAnswers, false),
         PaymentReferenceSummary.rowNoAction(request.userAnswers),
         dateSetupRow,
         PaymentAmountSummary.row(request.userAnswers, false),
@@ -118,7 +113,7 @@ class DirectDebitConfirmationController @Inject() (
         FinalPaymentAmountSummary.row(request.userAnswers),
         PaymentsFrequencySummary.rowData(request.userAnswers),
         RegularPaymentAmountSummary.rowData(request.userAnswers),
-        showStartDate,
+        PlanStartDateSummary.row(request.userAnswers, false),
         PlanEndDateSummary.rowData(request.userAnswers)
       ).flatten
     )
