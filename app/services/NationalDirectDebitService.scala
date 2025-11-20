@@ -45,6 +45,9 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
                                             clock: Clock
                                            )(implicit ec: ExecutionContext)
     extends Logging {
+
+  private val MaxMonthsAhead = 6
+
   def retrieveAllDirectDebits(id: String)(implicit hc: HeaderCarrier, request: Request[?]): Future[NddResponse] = {
     directDebitCache.retrieveCache(id) flatMap {
       case Seq() =>
@@ -485,10 +488,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
-  import java.time.LocalDate
-
-  private val MaxMonthsAhead = 6
-
   def isSuspendStartDateValid(
     startDate: LocalDate,
     planStartDateOpt: Option[LocalDate],
@@ -559,4 +558,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   def isPaymentPlanEditable(planDetail: PaymentPlanDetails): Boolean = {
     planDetail.paymentPlanEditable
   }
+
+
 }
