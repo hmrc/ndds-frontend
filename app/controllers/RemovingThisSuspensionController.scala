@@ -31,6 +31,7 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.RemovingThisSuspensionView
+import models.audits.RemovePaymentPlanSuspensionAudit
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -227,7 +228,8 @@ class RemovingThisSuspensionController @Inject() (
           amendPaymentAmount              = None,
           suspensionPeriodRangeDate       = userAnswers.get(SuspensionPeriodRangeDatePage),
           calculation                     = None,
-          removeSuspensionPlan            = true
+          removeSuspensionPlan            = true,
+          auditType                       = Some(RemovePaymentPlanSuspensionAudit)
         )
       case None =>
         throw new IllegalStateException("Missing PaymentPlanDetails in userAnswers")
