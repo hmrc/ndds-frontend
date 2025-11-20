@@ -20,13 +20,13 @@ import base.SpecBase
 import models.responses.{BankAddress, Country, GenerateDdiRefResponse}
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.{AuditService, NationalDirectDebitService}
+import services.NationalDirectDebitService
 import utils.MacGenerator
 import viewmodels.govuk.SummaryListFluency
 
@@ -40,7 +40,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(fixedDate, "2025-7-19")
   private val endDate = LocalDate.of(2027, 7, 25)
   private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
-  private val mockAuditService: AuditService = mock[AuditService]
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
 
@@ -441,12 +440,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[MacGenerator].toInstance(mockMacGenerator),
-            bind[AuditService].toInstance(mockAuditService)
+            bind[MacGenerator].toInstance(mockMacGenerator)
           )
           .build()
-
-        doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
 
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
@@ -476,7 +472,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
-            bind[AuditService].toInstance(mockAuditService),
             bind[NationalDirectDebitService].toInstance(mockNddService)
           )
           .build()
@@ -528,7 +523,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
-            bind[AuditService].toInstance(mockAuditService),
             bind[NationalDirectDebitService].toInstance(mockNddService),
             bind[MacGenerator].toInstance(mockMacGenerator)
           )
@@ -617,7 +611,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
-      "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all required data is provided" in {
+      "must redirect to confirmation page if DirectDebitSource is 'TC' and if all required data is provided" in {
         val totalDueAmount = 200
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
@@ -649,13 +643,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
-            bind[AuditService].toInstance(mockAuditService),
             bind[MacGenerator].toInstance(mockMacGenerator),
             bind[NationalDirectDebitService].toInstance(mockNddService)
           )
           .build()
-
-        doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
 
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)

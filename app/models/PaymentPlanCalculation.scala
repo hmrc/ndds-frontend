@@ -24,7 +24,8 @@ case class PaymentPlanCalculation(
   finalPaymentAmount: Option[BigDecimal], // optional if no split
   secondPaymentDate: Option[LocalDate], // optional depending on plan type
   penultimatePaymentDate: Option[LocalDate], // optional depending on plan type
-  finalPaymentDate: Option[LocalDate] // optional for single payment
+  finalPaymentDate: Option[LocalDate], // optional for single payment
+  monthlyPaymentAmount: Option[BigDecimal] = None
 )
 
 object PaymentPlanCalculation {
