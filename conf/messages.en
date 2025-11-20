@@ -470,6 +470,8 @@ amendPlanStartDate.heading = What date are you starting this payment plan?
 amendPlanStartDate.p1 = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
 amendPlanStartDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
 amendPlanStartDate.hint = e.g. 15 5 2025
+amendPlanStartDate.error.beforeEarliest = The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
+amendPlanStartDate.error.afterLatest = The date you have entered is not valid. It cannot be more than 12 months after the current date.
 
 amendPlanEndDate.title = What date are you ending this payment plan?
 amendPlanEndDate.heading = What date are you ending this payment plan?

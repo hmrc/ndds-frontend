@@ -22,7 +22,8 @@ import models.{Mode, UserAnswers}
 import navigation.Navigator
 import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Logging
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.data.Form
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
@@ -52,62 +53,62 @@ class AmendPlanStartDateController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    {
-      val answers = request.userAnswers
 
-      if (nddsService.amendPaymentPlanGuard(answers)) {
+    val answers = request.userAnswers
+    if (!nddsService.amendPaymentPlanGuard(answers)) {
+      val planType = answers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    } else {}
 
-        val form = formProvider()
-        val preparedForm = request.userAnswers
-          .get(AmendPlanStartDatePage)
-          .orElse(request.userAnswers.get(AmendPlanStartDatePage))
-          .fold(form)(form.fill)
+    val form = buildForm(answers)
+    val preparedForm =
+      answers.get(AmendPlanStartDatePage).fold(form)(form.fill)
 
-        Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
-      } else {
-        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
-      }
-
-    }
+    Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    val form = formProvider()
-    val userAnswers = request.userAnswers
-    form
-      .bindFromRequest()
-      .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
-        value =>
-          if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-            (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
-              case (Some(planDetails), Some(amendedAmount)) =>
-                val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-                val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
 
-                val isNoChange = amendedAmount == dbAmount && value == dbStartDate
+      val userAnswers = request.userAnswers
+      val form = buildForm(userAnswers)
 
-                if (isNoChange) {
-                  val key = "amendment.noChange"
-                  val errorForm = form.fill(value).withError("value", key)
-                  Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
-                } else {
-                  checkForDuplicate(mode, userAnswers, value)
-                }
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            Future.successful(
+              BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+            ),
+          value =>
+            if (!nddsService.amendPaymentPlanGuard(userAnswers)) {
+              val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+              throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+            } else {
+              (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
+                case (Some(planDetails), Some(amendedAmount)) =>
+                  val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+                  val dbStart = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
 
-              case _ =>
-                logger.warn("Missing Amend payment amount and/or amend plan start date")
-                Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+                  val isNoChange = amendedAmount == dbAmount && value == dbStart
+
+                  if (isNoChange) {
+                    val errorForm = form.fill(value).withError("value", "amendment.noChange")
+                    Future.successful(
+                      BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+                    )
+                  } else {
+                    checkForDuplicate(mode, userAnswers, value)
+                  }
+
+                case _ =>
+                  logger.warn("Missing Amend payment amount and/or amend plan start date")
+                  Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+              }
             }
-          } else {
-            val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-          }
-      )
-  }
+        )
+    }
 
   private def checkForDuplicate(mode: Mode, userAnswers: UserAnswers, value: LocalDate)(implicit
     hc: HeaderCarrier,
@@ -120,12 +121,18 @@ class AmendPlanStartDateController @Inject() (
       duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(updatedAnswers)
     } yield {
       if (duplicateCheckResponse.isDuplicate) {
-        logger.warn(s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}")
         Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
       } else {
-        logger.debug("Duplicate check response is " + duplicateCheckResponse.isDuplicate)
         Redirect(navigator.nextPage(AmendPlanStartDatePage, mode, updatedAnswers))
       }
     }
   }
+
+  private def buildForm(answers: UserAnswers)(implicit request: Request[?], messages: Messages): Form[LocalDate] = {
+    val planDetails = answers.get(PaymentPlanDetailsQuery).get
+    val earliest = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
+    val max = Some(LocalDate.now().plusYears(1))
+    formProvider(earliest, max)
+  }
+
 }

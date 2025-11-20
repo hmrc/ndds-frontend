@@ -21,6 +21,7 @@
     formHelper: FormWithCSRF,
     govukDateInput: GovukDateInput,
     govukErrorSummary: GovukErrorSummary,
+    mainErrorSummary: MainErrorSummary,
     govukWarningText: GovukWarningText,
     govukButton: GovukButton,
     h1: Header1,
@@ -33,9 +34,7 @@
 
     @formHelper(action = routes.AmendPlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
-        }
+            @mainErrorSummary(form)
 
         @govukDateInput(
             DateViewModel(

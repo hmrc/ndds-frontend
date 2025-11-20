@@ -25,7 +25,8 @@ import play.api.test.Helpers.stubMessages
 class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
   private implicit val messages: Messages = stubMessages()
   private val startDate = LocalDate.of(2024, 4, 6)
-  private val form = new AmendPlanStartDateFormProvider()()
+  private val max = Some(startDate.plusYears(1))
+  private val form = new AmendPlanStartDateFormProvider()(startDate, max)
 
   "PlanEndDateFormProvider" - {
 
@@ -43,8 +44,8 @@ class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
 
     ".value" - {
       val validData = datesBetween(
-        min = LocalDate.of(2000, 1, 1),
-        max = LocalDate.now(ZoneOffset.UTC)
+        min = startDate,
+        max = startDate.plusYears(1)
       )
 
       behave like dateField(form, "value", validData)
