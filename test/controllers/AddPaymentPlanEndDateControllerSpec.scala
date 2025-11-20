@@ -42,6 +42,7 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   val form = formProvider()
 
   lazy val addPaymentPlanEndDateRoute = routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode).url
+  private val backLinkCall = routes.PlanStartDateController.onPageLoad(NormalMode)
   private val saUserAnswers = emptyUserAnswers.set(DirectDebitSourcePage, SA).success.value
 
   "AddPaymentPlanEndDate Controller" - {
@@ -58,7 +59,7 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[AddPaymentPlanEndDateView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, backLinkCall)(request, messages(application)).toString
       }
     }
 
@@ -82,7 +83,7 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(form.fill(true), NormalMode, backLinkCall)(request, messages(application)).toString
       }
     }
 
@@ -128,7 +129,7 @@ class AddPaymentPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, backLinkCall)(request, messages(application)).toString
       }
     }
 

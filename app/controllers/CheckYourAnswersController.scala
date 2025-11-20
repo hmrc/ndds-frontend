@@ -23,9 +23,13 @@ import models.DirectDebitSource.*
 import models.requests.ChrisSubmissionRequest
 import models.responses.GenerateDdiRefResponse
 import models.{DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
+import models.audits.NewDirectDebitAudit
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import repositories.SessionRepository
+import services.NationalDirectDebitService
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.ExistingDirectDebitIdentifierQuery
 import repositories.{DirectDebitCacheRepository, SessionRepository}
@@ -45,7 +49,6 @@ class CheckYourAnswersController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  auditService: AuditService,
   nddService: NationalDirectDebitService,
   sessionRepository: SessionRepository,
   val controllerComponents: MessagesControllerComponents,
@@ -208,7 +211,9 @@ class CheckYourAnswersController @Inject() (
         amendPaymentAmount              = None,
         calculation                     = calculationOpt,
         suspensionPeriodRangeDate       = None,
-        addPlan                         = hasExistingDDI
+        addPlan                         = hasExistingDDI,
+        auditType                       = Some(NewDirectDebitAudit),
+        bankAccountType                 = ua.get(PersonalOrBusinessAccountPage)
       )
     }
   }

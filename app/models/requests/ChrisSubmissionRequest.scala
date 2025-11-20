@@ -16,7 +16,8 @@
 
 package models.requests
 
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PlanStartDateDetails, SuspensionPeriodRange, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PersonalOrBusinessAccount, PlanStartDateDetails, SuspensionPeriodRange, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
+import models.audits.AuditType
 import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
@@ -43,7 +44,9 @@ case class ChrisSubmissionRequest(
   cancelPlan: Boolean = false,
   suspendPlan: Boolean = false,
   removeSuspensionPlan: Boolean = false,
-  addPlan: Boolean = false
+  addPlan: Boolean = false,
+  auditType: Option[AuditType] = None,
+  bankAccountType: Option[PersonalOrBusinessAccount] = None
 )
 
 object ChrisSubmissionRequest {
