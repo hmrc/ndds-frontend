@@ -361,7 +361,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
               paymentPlansList = Some(
                 Seq(
                   NddPaymentPlan(
-                    scheduledPaymentAmount = 100.0,
+                    scheduledPaymentAmount = Some(100.0),
                     planRefNumber          = "planRefNumber",
                     planType               = "budgetPaymentPlan",
                     paymentReference       = "1400256374K",
@@ -382,7 +382,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           paymentPlanCount  = 1,
           paymentPlanList = Seq(
             NddPaymentPlan(
-              scheduledPaymentAmount = 100.0,
+              scheduledPaymentAmount = Some(100.0),
               planRefNumber          = "planRefNumber",
               planType               = "budgetPaymentPlan",
               paymentReference       = "1400256374K",
@@ -437,7 +437,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
               paymentPlansList = Some(
                 Seq(
                   NddPaymentPlan(
-                    scheduledPaymentAmount = 100.0,
+                    scheduledPaymentAmount = Some(100.0),
                     planRefNumber          = "planRefNumber",
                     planType               = "budgetPaymentPlan",
                     paymentReference       = "1400256374K",
@@ -458,7 +458,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           paymentPlanCount  = 1,
           paymentPlanList = Seq(
             NddPaymentPlan(
-              scheduledPaymentAmount = 100.0,
+              scheduledPaymentAmount = Some(100.0),
               planRefNumber          = "planRefNumber",
               planType               = "budgetPaymentPlan",
               paymentReference       = "1400256374K",
