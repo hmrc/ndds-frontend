@@ -169,7 +169,7 @@ directDebitSource.tc = Tax credits (TC)
 directDebitSource.vat = Value Added Tax (VAT)
 directDebitSource.otherLiability = Other liability
 directDebitSource.error.required = Select one option.
-directDebitSource.change.hidden =  Direct Debit Source
+directDebitSource.change.hidden =  Payment for 
 
 paymentPlanType.title = What type of payment plan are you selecting?
 paymentPlanType.heading = What type of payment plan are you selecting?
