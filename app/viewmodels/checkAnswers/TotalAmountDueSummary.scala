@@ -40,6 +40,15 @@ object TotalAmountDueSummary {
       )
     }
 
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(TotalAmountDuePage).map { answer =>
+      SummaryListRowViewModel(
+        key     = "totalAmountDue.checkYourAnswersLabel",
+        value   = ValueViewModel(currencyFormat(answer)),
+        actions = Seq.empty
+      )
+    }
+
   def row(amount: Option[BigDecimal])(implicit messages: Messages): SummaryListRow =
     amount.filter(_ > 0) match {
       case Some(value) =>

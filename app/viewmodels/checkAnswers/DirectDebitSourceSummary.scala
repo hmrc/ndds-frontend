@@ -46,4 +46,20 @@ object DirectDebitSourceSummary {
         )
       )
     }
+
+  def rowNoAction(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(DirectDebitSourcePage).map { answer =>
+
+      val value = ValueViewModel(
+        HtmlContent(
+          HtmlFormat.escape(messages(s"directDebitSource.$answer"))
+        )
+      )
+
+      SummaryListRowViewModel(
+        key     = "checkYourAnswers.directDebitSource",
+        value   = value,
+        actions = Seq.empty
+      )
+    }
 }

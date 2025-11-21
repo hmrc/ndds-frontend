@@ -38,4 +38,14 @@ object YearEndAndMonthSummary {
         )
       )
     }
+
+  def row(answers: UserAnswers, isShowChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(YearEndAndMonthPage).map { answer =>
+
+      SummaryListRowViewModel(
+        key     = "yearEndAndMonth.checkYourAnswersLabel",
+        value   = ValueViewModel(answer.displayFormat),
+        actions = Seq.empty
+      )
+    }
 }
