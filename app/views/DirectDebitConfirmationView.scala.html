@@ -23,38 +23,66 @@
         govukButton: GovukButton,
         paragraph: Paragraph,
         header2: Header2,
-        mainButton: MainButton
+        mainButton: MainButton,
+        paragraphWithLink: ParagraphMessageWithLink,
+        govukSummaryList: GovukSummaryList
 )
 
-@(referenceNumber: String)(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String,referenceNumber: String, paymentAmount: String, paymentDate: String, directDebitDetails: SummaryList, paymentDetails: SummaryList)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("directDebitConfirmation.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title")), showBackLink = false) {
 
     @govukPanel(Panel(
         title = messages("directDebitConfirmation.panel.title"),
         content = HtmlContent(messages("directDebitConfirmation.panel.body", referenceNumber)),
     ))
 
+    @header2("directDebitConfirmation.h2")
+
+    @paragraph(messages("directDebitConfirmation.p1", paymentAmount, paymentDate))
+
+    @paragraphWithLink(
+        Some(messages("directDebitConfirmation.p2")),
+        linkMessage   = messages("directDebitConfirmation.p2.link"),
+        linkUrl       = hmrcHelplineUrl,
+        linkFullStop = true,
+        linkRel       = "noreferrer noopener",
+        target        = "_blank"
+    )
+
+    <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
+
+    <details class="govuk-details">
+        <summary class = "govuk-details__summary">
+                <span class="govuk-details__summary-text">
+                    @messages("directDebitConfirmation.summaryTextDetails.h1")
+                </span>
+        </summary>
+
+        <div class="govuk-details__text">
+            @paragraph("directDebitConfirmation.summaryTextDetails.p1")
+            @paragraph("directDebitConfirmation.summaryTextDetails.p2")
+            @paragraph("directDebitConfirmation.summaryTextDetails.p3")
+            @paragraph("directDebitConfirmation.summaryTextDetails.p4")
+            @paragraph("directDebitConfirmation.summaryTextDetails.p5")
+        </div>
+    </details>
+
+    @header2("directDebitConfirmation.directDebitDetails")
+    @govukSummaryList(directDebitDetails)
+
+    @header2("directDebitConfirmation.yourPaymentDetails")
+    @govukSummaryList(paymentDetails)
+
     @govukInsetText(
         InsetText(
-            content = Text(messages("directDebitConfirmation.inset.text"))
+            content = Text(messages("directDebitConfirmation.printInset"))
         )
     )
 
-    @header2("directDebitConfirmation.h2")
-
-    @paragraph(messages("directDebitConfirmation.p1", referenceNumber))
-
-    <p class="govuk-body">
-        <a href="#" class="govuk-link" download="direct-debit-confirmation.pdf">@messages("directDebitConfirmation.download")</a>
-    </p>
-
-    @header2("directDebitConfirmation.printingHelp.h2")
-    @paragraph(messages("directDebitConfirmation.printSafari"))
-    @paragraph(messages("directDebitConfirmation.printChromeFirefoxEdge"))
-    @paragraph(messages("directDebitConfirmation.printNoPrinter"))
-
-    @govukButton(
-        ButtonViewModel(messages("site.continue")).asSecondaryButton()
+    @paragraphWithLink(
+        linkMessage = messages("directDebitConfirmation.viewDirectDebitInstructions"),
+        linkUrl = routes.YourDirectDebitInstructionsController.onPageLoad().url
     )
+
 }

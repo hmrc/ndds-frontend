@@ -41,4 +41,16 @@ object PlanEndDateSummary {
         )
       )
     }
+
+  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PlanEndDatePage).map { answer =>
+
+      implicit val lang: Lang = messages.lang
+
+      SummaryListRowViewModel(
+        key     = "planEndDate.checkYourAnswersLabel",
+        value   = ValueViewModel(answer.format(dateTimeFormat())),
+        actions = Seq.empty
+      )
+    }
 }

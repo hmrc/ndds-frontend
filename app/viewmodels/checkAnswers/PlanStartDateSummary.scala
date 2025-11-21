@@ -41,4 +41,23 @@ object PlanStartDateSummary {
         )
       )
     }
+
+  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PlanStartDatePage).map { answer =>
+
+      implicit val lang: Lang = messages.lang
+
+      SummaryListRowViewModel(
+        key   = "planStartDate.checkYourAnswersLabel",
+        value = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
+        actions = if (showChange) {
+          Seq(
+            ActionItemViewModel("site.change", routes.PlanStartDateController.onPageLoad(CheckMode).url)
+              .withVisuallyHiddenText(messages("planStartDate.change.hidden"))
+          )
+        } else {
+          Seq.empty
+        }
+      )
+    }
 }
