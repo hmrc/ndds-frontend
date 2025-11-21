@@ -28,13 +28,17 @@ import viewmodels.implicits.*
 import scala.math.BigDecimal.RoundingMode
 
 object MonthlyPaymentAmountSummary {
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(TotalAmountDuePage).map { totalAmount =>
-      val monthlyPayment = (totalAmount / 12).setScale(2, RoundingMode.DOWN)
 
+  def getMonthlyPaymentAmount(answers: UserAnswers): Option[BigDecimal] =
+    answers.get(TotalAmountDuePage).map { totalAmount =>
+      (totalAmount / 12).setScale(2, RoundingMode.DOWN)
+    }
+
+  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    getMonthlyPaymentAmount(answers).map { monthlyPaymentAmount =>
       SummaryListRowViewModel(
         key     = "totalAmountDue.monthly.checkYourAnswersLabel",
-        value   = ValueViewModel(currencyFormat(monthlyPayment)),
+        value   = ValueViewModel(currencyFormat(monthlyPaymentAmount)),
         actions = Seq.empty
       )
     }

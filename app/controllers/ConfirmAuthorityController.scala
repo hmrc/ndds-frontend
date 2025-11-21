@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import forms.ConfirmAuthorityFormProvider
-import models.audits.ConfirmBankDetails
 import models.{ConfirmAuthority, Mode, UserAnswers}
 import navigation.Navigator
 import pages.ConfirmAuthorityPage
@@ -26,7 +25,6 @@ import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ConfirmAuthorityView
 
@@ -40,7 +38,6 @@ class ConfirmAuthorityController @Inject() (
   formProvider: ConfirmAuthorityFormProvider,
   requireData: DataRequiredAction,
   sessionRepository: SessionRepository,
-  auditService: AuditService,
   navigator: Navigator,
   view: ConfirmAuthorityView
 )(implicit ec: ExecutionContext)
@@ -56,7 +53,6 @@ class ConfirmAuthorityController @Inject() (
         case None        => form
         case Some(value) => form.fill(value)
       }
-      auditService.sendEvent(ConfirmBankDetails())
       Ok(view(preparedForm, mode, routes.BankDetailsCheckYourAnswerController.onPageLoad(mode)))
     }
 
@@ -71,7 +67,6 @@ class ConfirmAuthorityController @Inject() (
             updated <- Future.fromTry(updatedTry)
             _       <- sessionRepository.set(updated)
           } yield {
-            auditService.sendEvent(ConfirmBankDetails())
             Redirect(navigator.nextPage(ConfirmAuthorityPage, mode, updated))
           }
         }

@@ -21,6 +21,7 @@ import models.requests.ChrisSubmissionRequest
 import models.responses.{DirectDebitDetails, PaymentPlanDetails}
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import pages.*
+import models.audits.AmendPaymentPlanAudit
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
@@ -176,7 +177,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
           amendPaymentAmount              = userAnswers.get(AmendPaymentAmountPage),
           calculation                     = None,
           suspensionPeriodRangeDate       = None,
-          amendPlan                       = true
+          amendPlan                       = true,
+          auditType                       = Some(AmendPaymentPlanAudit)
         )
 
       case _ =>
