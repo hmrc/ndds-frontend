@@ -114,5 +114,61 @@ class DuplicateWarningControllerSpec extends SpecBase {
         redirectLocation(result).value mustEqual routes.PaymentPlanDetailsController.onPageLoad().url
       }
     }
+
+    "must return OK and view with AmendPaymentPlanConfirmationController when back link is clicked" in {
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoadTestOnly(mode).url)
+
+        val result = route(application, request).value
+        val view = application.injector.instanceOf[DuplicateWarningView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(
+          form,
+          mode,
+          routes.AmendPaymentPlanConfirmationController.onPageLoad(mode)
+        )(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to AmendPaymentPlanUpdateController when user selects Yes (true)" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmitTestOnly(mode).url)
+          .withFormUrlEncodedBody("value" -> "true")
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AmendPaymentPlanUpdateController.onPageLoad().url
+      }
+    }
+
+    "must redirect to AmendPaymentPlanConfirmationController when user selects No (false)" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmitTestOnly(mode).url)
+          .withFormUrlEncodedBody("value" -> "false")
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AmendPaymentPlanConfirmationController.onPageLoad(mode).url
+      }
+    }
   }
 }

@@ -14,3 +14,8 @@
 
 GET        /direct-debits/test-only/amount-need-to-pay      controllers.AmendPaymentAmountController.onPageLoadTestOnly(mode: Mode = NormalMode)
 POST       /direct-debits/test-only/amount-need-to-pay      controllers.AmendPaymentAmountController.onSubmitTestOnly(mode: Mode = NormalMode)
+
+GET        /direct-debits/test-only/amend-already-have-payment-plan                   controllers.DuplicateWarningController.onPageLoadTestOnly(mode: Mode = NormalMode)
+POST       /direct-debits/test-only/amend-already-have-payment-plan                   controllers.DuplicateWarningController.onSubmitTestOnly(mode: Mode = NormalMode)
+GET        /direct-debits/test-only/change-amend-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoadTestOnly(mode: Mode = CheckMode)
+POST       /direct-debits/test-only/change-amend-already-have-payment-plan            controllers.DuplicateWarningController.onSubmitTestOnly(mode: Mode = CheckMode)

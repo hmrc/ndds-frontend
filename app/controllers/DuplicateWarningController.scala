@@ -88,4 +88,39 @@ class DuplicateWarningController @Inject() (
             }
         )
     }
+
+  def onPageLoadTestOnly(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData) { implicit request =>
+
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage)
+
+      val preparedForm = request.userAnswers.get(DuplicateWarningPage) match {
+        case None        => form
+        case Some(value) => form.fill(value)
+      }
+      Ok(view(preparedForm, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad(mode)))
+    }
+
+  def onSubmitTestOnly(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+
+      val from: Option[String] = request.getQueryString("from")
+
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad(mode)))),
+          value =>
+            for {
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningPage, value))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield {
+              if (value) {
+                Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
+              } else {
+                Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad(mode))
+              }
+            }
+        )
+    }
 }
