@@ -39,7 +39,7 @@
             ) { pageTitleKey =>
 
             @layout(
-                pageTitle = titleNoFormManagePlan(messages(pageTitleKey)),
+                pageTitle = titleNoForm(messages(pageTitleKey)),
                 backLink  = Some(
                     if (mode == NormalMode)
                     routes.SuspendPaymentPlanController.onPageLoad().url

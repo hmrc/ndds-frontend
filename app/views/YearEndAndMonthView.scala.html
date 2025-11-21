@@ -83,7 +83,7 @@
     }
 }
 
-@layout(pageTitle = titleForSetupJourney(form, messages("yearEndAndMonth.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("yearEndAndMonth.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.YearEndAndMonthController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 

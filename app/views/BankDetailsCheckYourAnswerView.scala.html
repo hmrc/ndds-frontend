@@ -29,7 +29,7 @@
 
 @(form: Form[_], mode: Mode, list: SummaryList, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourney(form, messages("bankDetailsCheckYourAnswer.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("bankDetailsCheckYourAnswer.title")), backLink = Some(call.url)) {
     @formHelper(action = routes.BankDetailsCheckYourAnswerController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {

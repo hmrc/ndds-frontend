@@ -21,7 +21,7 @@
 @()(implicit request: Request[_], messages: Messages)
 
 @layout(
-    pageTitle = titleForSetupJourneyNoForm(messages("unauthorised.title")),
+    pageTitle = titleNoForm(messages("unauthorised.title")),
     timeout   = false
 ) {
 
