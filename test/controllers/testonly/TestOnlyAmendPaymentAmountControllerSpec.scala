@@ -17,6 +17,7 @@
 package controllers.testonly
 
 import base.SpecBase
+import controllers.routes
 import forms.AmendPaymentAmountFormProvider
 import models.{NormalMode, PaymentPlanType}
 import navigation.{FakeNavigator, Navigator}
@@ -67,7 +68,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form,
           NormalMode,
-          _root_.controllers.routes.AmendingPaymentPlanController.onPageLoad()
+          routes.AmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -95,7 +96,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form,
           NormalMode,
-          _root_.controllers.routes.AmendingPaymentPlanController.onPageLoad()
+          routes.AmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -126,7 +127,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form.fill(validAnswer),
           NormalMode,
-          _root_.controllers.routes.AmendingPaymentPlanController.onPageLoad()
+          routes.AmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -150,7 +151,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         val result = controller.onPageLoad(NormalMode)(request)
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual _root_.controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
@@ -163,7 +164,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         val result = controller.onPageLoad(NormalMode)(request)
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual _root_.controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
@@ -212,7 +213,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           boundForm,
           NormalMode,
-          _root_.controllers.routes.AmendingPaymentPlanController.onPageLoad()
+          routes.AmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -226,7 +227,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         val result = controller.onSubmit(NormalMode)(request)
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual _root_.controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }
