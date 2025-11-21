@@ -26,7 +26,7 @@
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForManageJourney(form, messages("amendPaymentAmount.title")), backLink = Some(call.url)) {
+@layout(pageTitle = titleForManageJourney(form, messages("testOnlyAmendPaymentAmount.title")), backLink = Some(call.url)) {
 
  @formHelper(action = controllers.testonly.routes.TestOnlyAmendPaymentAmountController.onSubmit(), Symbol("autoComplete") -> "off") {
 
@@ -37,12 +37,12 @@
    @govukInput(
      InputViewModel(
      field = form("value"),
-     label = LabelViewModel(messages("amendPaymentAmount.heading"))
-            .asPageHeading().withCssClass("govuk-fieldset__legend--l"),
+     label = LabelViewModel(messages("testOnlyAmendPaymentAmount.heading"))
+            .asPageHeading().withCssClass("govuk-fieldset__legend--xl"),
      )
     .withPrefix(PrefixOrSuffix(content = "£"))
     .withWidth(Fixed10)
-    .withHint(HintViewModel(HtmlContent(messages("amendPaymentAmount.hint"))))
+    .withHint(HintViewModel(HtmlContent(messages("testOnlyAmendPaymentAmount.hint"))))
    )
 
    @govukButton(
