@@ -81,4 +81,34 @@ class AmendPaymentAmountController @Inject() (
       )
   }
 
+  def onPageLoadTestOnly(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val answers = request.userAnswers
+
+    if (nddsService.amendPaymentPlanGuard(answers)) {
+      val preparedForm = answers.get(AmendPaymentAmountPage) match {
+        case None        => form
+        case Some(value) => form.fill(value)
+      }
+
+      Ok(view(preparedForm, mode, routes.AmendingPaymentPlanController.onPageLoad()))
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    }
+  }
+
+  def onSubmitTestOnly(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendingPaymentPlanController.onPageLoad()))),
+        value =>
+          for {
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
+            _              <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(AmendPaymentAmountPage, mode, updatedAnswers))
+      )
+  }
+
 }
