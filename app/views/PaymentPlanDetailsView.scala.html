@@ -44,7 +44,7 @@
             @paragraph("paymentPlanDetails.budgetCanNotChange.p1")
         }
 
-        @if(isSuspensionActive) {
+        @if(isSuspensionActive && isPlanChangeable) {
             <p class="govuk-inset-text">
                 @messages("paymentPlanDetails.inset.text", suspensionStartDate, suspensionEndDate)
             </p>
