@@ -39,11 +39,11 @@ index.title = Set up a direct debit
 index.heading = Set up a direct debit
 index.guidance = Welcome to your NDDS frontend. Please see the README file for a guide to getting started.
 
-journeyRecovery.continue.title = Sorry, there is a problem with the service
-journeyRecovery.continue.heading = Sorry, there is a problem with the service
+journeyRecovery.continue.title = Sorry, there is a problem with this service
+journeyRecovery.continue.heading = Sorry, there is a problem with this service
 journeyRecovery.continue.guidance = You will need to start again to create a direct debit.
-journeyRecovery.startAgain.title = Sorry, there is a problem with the service
-journeyRecovery.startAgain.heading = Sorry, there is a problem with the service
+journeyRecovery.startAgain.title = Sorry, there is a problem with this service
+journeyRecovery.startAgain.heading = Sorry, there is a problem with this service
 journeyRecovery.startAgain.guidance = You will need to start again to create a direct debit.
 
 signedOut.title = For your security, we signed you out
@@ -482,26 +482,26 @@ paymentPlanDetails.details.hodService.tc = Tax credits (TC)
 paymentPlanDetails.details.hodService.vat = Value Added Tax (VAT)
 paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
 
-amendPaymentAmount.title = What amount do you need to pay?
-amendPaymentAmount.heading = What amount do you want to pay?
+amendPaymentAmount.title = How much do you want to pay, in pounds?
+amendPaymentAmount.heading = How much do you want to pay, in pounds?
 amendPaymentAmount.hint = 	e.g. £1000.00
 
 amendment.noChange = ERROR: You have made no amendments.  Please check the details you have entered.
 
-amendPlanStartDate.title = What date are you starting this payment plan?
-amendPlanStartDate.heading = What date are you starting this payment plan?
+amendPlanStartDate.title = When do you want to make this payment?
+amendPlanStartDate.heading = When do you want to make this payment?
 amendPlanStartDate.p1 = This is the earliest date that HM Revenue & Customs (HMRC) will collect payment from your account. <br/><br/> The payment date must be within 12 months.
 amendPlanStartDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
 amendPlanStartDate.hint = e.g. 15 5 2025
 
-amendPlanEndDate.title = What date are you ending this payment plan?
-amendPlanEndDate.heading = What date are you ending this payment plan?
+amendPlanEndDate.title = When do you want this payment plan to end?
+amendPlanEndDate.heading = When do you want this payment plan to end?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.
 amendPlanEndDate.hint = e.g. 16 6 2026
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change  to be processed. Extend or remove the plan end date if you wish to continue.
 
-amendPaymentPlanConfirmation.title = Confirm new payment plan details
-amendPaymentPlanConfirmation.heading = Confirm new payment plan details
+amendPaymentPlanConfirmation.title = Check your amendment details
+amendPaymentPlanConfirmation.heading = Check your amendment details
 amendPaymentPlanConfirmation.p1 = This amendment will remove any suspension that you have in place. Check that the details below are correct, then click ''Continue'' to proceed. For security reasons, you may be asked to re-authenticate your details.
 amendPaymentPlanConfirmation.directDebit.h2 = Direct Debit details
 amendPaymentPlanConfirmation.directDebit.reference = Direct Debit reference
@@ -542,8 +542,8 @@ amendPaymentPlanUpdate.print = Print this confirmation
 amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
 amendPaymentPlanUpdate.close = Close
 
-cancelPaymentPlan.title = Cancelling this payment plan
-cancelPaymentPlan.heading = Cancelling this payment plan
+cancelPaymentPlan.title = Payment plan cancelled
+cancelPaymentPlan.heading = Payment plan cancelled
 cancelPaymentPlan.paymentReference = Payment reference:
 cancelPaymentPlan.paymentAmount.single = Payment amount:
 cancelPaymentPlan.paymentAmount.budget = Regular payment amount:

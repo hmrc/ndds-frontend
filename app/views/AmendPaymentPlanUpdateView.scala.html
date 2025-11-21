@@ -30,7 +30,7 @@
 
 @(paymentPlanReference: String, regularPaymentAmount: String, startDate: String, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForManageJourneyNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
     @confirmationPanel(
         title = messages("amendPaymentPlanUpdate.panel.title"),
