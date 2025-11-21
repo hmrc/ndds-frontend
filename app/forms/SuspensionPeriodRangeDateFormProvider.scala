@@ -18,11 +18,12 @@ package forms
 
 import forms.mappings.Mappings
 import models.SuspensionPeriodRange
-import play.api.data.{Form, FormError}
 import play.api.data.Forms.mapping
 import play.api.data.validation.{Constraint, Invalid, Valid}
+import play.api.data.{Form, FormError}
 import play.api.i18n.Messages
 import utils.DateFormats
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -108,7 +109,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
     planStartDateOpt: Option[LocalDate],
     planEndDateOpt: Option[LocalDate],
     earlyStartDate: LocalDate
-  )(implicit messages: Messages): Constraint[SuspensionPeriodRange] =
+  ): Constraint[SuspensionPeriodRange] =
     Constraint[SuspensionPeriodRange]("suspensionPeriodRangeDate.error.endDate") { range =>
 
       val startValid = isSuspendStartDateValid(

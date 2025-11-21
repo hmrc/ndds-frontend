@@ -22,7 +22,6 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import views.html.PageNotFoundView
 
 class PageNotFoundControllerSpec extends SpecBase {
 
@@ -39,8 +38,6 @@ class PageNotFoundControllerSpec extends SpecBase {
         val request = FakeRequest(GET, routes.PageNotFoundController.onPageLoad().url)
 
         val result = route(application, request).value
-
-        val view = application.injector.instanceOf[PageNotFoundView]
 
         status(result) mustEqual OK
       }

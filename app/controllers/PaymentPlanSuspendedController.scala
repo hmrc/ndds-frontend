@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.*
-import models.{Mode, UserAnswers}
+import models.UserAnswers
 import models.responses.PaymentPlanDetails
 import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.Lang.logger
