@@ -44,6 +44,7 @@ case class ChrisSubmissionRequest(
   cancelPlan: Boolean = false,
   suspendPlan: Boolean = false,
   removeSuspensionPlan: Boolean = false,
+  addPlan: Boolean = false,
   auditType: Option[AuditType] = None,
   bankAccountType: Option[PersonalOrBusinessAccount] = None
 )

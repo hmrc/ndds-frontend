@@ -26,8 +26,11 @@ import pages.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.ExistingDirectDebitIdentifierQuery
+import repositories.DirectDebitCacheRepository
 import services.NationalDirectDebitService
 import utils.MacGenerator
+import viewmodels.checkAnswers.YourBankDetailsNameSummary.nddResponse
 import viewmodels.govuk.SummaryListFluency
 
 import java.time.LocalDate
@@ -42,6 +45,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
+  private val mockDirectDebitCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
 
   "Check Your Answers Controller" - {
     val userAnswer = emptyUserAnswers
@@ -654,6 +658,43 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
     }
 
-  }
+    "must set up a new payment plan for existing Direct Debit" - {
 
+      "when DirectDebitSource is 'CT' for a POST if all required data is provided" in {
+
+        val totalDueAmount = 200
+        val incompleteAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(TotalAmountDuePage, totalDueAmount)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(PaymentReferencePage, "testReference")
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+          .set(ExistingDirectDebitIdentifierQuery, "existingDdRef")
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[DirectDebitCacheRepository].toInstance(mockDirectDebitCache)
+          )
+          .build()
+
+        when(mockNddService.submitChrisData(any())(any()))
+          .thenReturn(Future.successful(true))
+        when(mockDirectDebitCache.getDirectDebit(any())(any()))
+          .thenReturn(Future.successful(nddResponse.directDebitList.head))
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        }
+      }
+    }
+  }
 }
