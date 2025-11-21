@@ -18,10 +18,12 @@ package controllers
 
 import controllers.actions.*
 import forms.AddPaymentPlanEndDateFormProvider
+
 import javax.inject.Inject
 import models.{DirectDebitSource, Mode}
 import navigation.Navigator
 import pages.{AddPaymentPlanEndDatePage, DirectDebitSourcePage}
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -44,7 +46,7 @@ class AddPaymentPlanEndDateController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  val form = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData) { implicit request =>
@@ -61,7 +63,6 @@ class AddPaymentPlanEndDateController @Inject() (
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-
     request.userAnswers.get(DirectDebitSourcePage) match {
       case Some(DirectDebitSource.SA) =>
         form

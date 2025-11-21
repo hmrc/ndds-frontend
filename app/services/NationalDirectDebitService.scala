@@ -35,7 +35,6 @@ import java.time.temporal.ChronoUnit
 import java.time.{Clock, LocalDate}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.runtime.universe.Try
 
 @Singleton
 class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitConnector,

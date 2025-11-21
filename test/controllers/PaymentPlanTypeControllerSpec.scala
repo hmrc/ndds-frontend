@@ -145,8 +145,6 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
         val view = application.injector.instanceOf[PaymentPlanTypeView]
 
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
