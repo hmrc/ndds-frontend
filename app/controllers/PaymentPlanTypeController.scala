@@ -19,9 +19,9 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import forms.PaymentPlanTypeFormProvider
-import models.{DirectDebitSource, Mode, PaymentPlanType, UserAnswers}
+import models.{DirectDebitSource, Mode, PaymentPlanType}
 import navigation.Navigator
-import pages.{DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage}
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -32,7 +32,6 @@ import views.html.PaymentPlanTypeView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class PaymentPlanTypeController @Inject() (
   override val messagesApi: MessagesApi,
@@ -93,32 +92,11 @@ class PaymentPlanTypeController @Inject() (
           )
         },
         newValue =>
-          Future
-            .fromTry(setPaymentPlanType(request.userAnswers, newValue))
-            .flatMap { updatedAnswers =>
-              sessionRepository.set(updatedAnswers).map { _ =>
-                Redirect(navigator.nextPage(PaymentPlanTypePage, mode, updatedAnswers))
-              }
-            }
-            .recoverWith { case ex =>
-              logger.error("Failed to update user answers in setPaymentPlanType", ex)
-              Future.successful(InternalServerError("Unable to update data"))
-            }
+          for {
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentPlanTypePage, newValue))
+            _              <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(PaymentPlanTypePage, mode, updatedAnswers))
       )
-  }
-
-  private def setPaymentPlanType(userAnswers: UserAnswers, newValue: PaymentPlanType): Try[UserAnswers] = {
-    val oldValue = userAnswers.get(PaymentPlanTypePage)
-
-    if (oldValue.contains(newValue)) {
-      userAnswers.set(PaymentPlanTypePage, newValue)
-    } else {
-      userAnswers
-        .remove(PaymentAmountPage)
-        .flatMap(_.remove(PaymentReferencePage))
-        .flatMap(_.remove(PaymentDatePage))
-        .flatMap(_.set(PaymentPlanTypePage, newValue))
-    }
   }
 
 }

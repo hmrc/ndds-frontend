@@ -16,36 +16,34 @@
 
 package viewmodels.checkAnswers
 
+import controllers.routes
+import models.{CheckMode, UserAnswers}
 import pages.DirectDebitSourcePage
 import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.{HtmlContent, Text}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
-import controllers.routes
-import models.{CheckMode, UserAnswers}
 
 object DirectDebitSourceSummary {
 
-  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(DirectDebitSourcePage).map { answer =>
 
-      val displayValue = messages(s"directDebitSource.${answer.toString}")
+      val value = ValueViewModel(
+        HtmlContent(
+          HtmlFormat.escape(messages(s"directDebitSource.$answer"))
+        )
+      )
 
       SummaryListRowViewModel(
-        key   = "directDebitPaymentSummary.activePayment.summary.paymentFor",
-        value = ValueViewModel(Text(displayValue)),
-        actions = if (showChange) {
-          Seq(
-            ActionItemViewModel(
-              content = "site.change",
-              href    = routes.DirectDebitSourceController.onPageLoad(CheckMode).url
-            ).withVisuallyHiddenText(messages(""))
-          )
-        } else {
-          Seq.empty
-        }
+        key   = "checkYourAnswers.directDebitSource",
+        value = value,
+        actions = Seq(
+          ActionItemViewModel("site.change", routes.DirectDebitSourceController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("directDebitSource.change.hidden"))
+        )
       )
     }
 }

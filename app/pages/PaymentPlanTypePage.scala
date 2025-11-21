@@ -27,18 +27,23 @@ case object PaymentPlanTypePage extends QuestionPage[PaymentPlanType] {
 
   override def toString: String = "paymentPlanType"
 
-  override def cleanup(value: Option[PaymentPlanType], userAnswers: UserAnswers): Try[UserAnswers] = {
-    value match {
-      case Some(PaymentPlanType.VariablePaymentPlan) =>
-        userAnswers
-          .remove(PaymentReferencePage)
-          .flatMap(_.remove(PaymentAmountPage))
-          .flatMap(_.remove(YearEndAndMonthPage))
+  override def cleanup(value: Option[PaymentPlanType], ua: UserAnswers): Try[UserAnswers] = {
+    val previousValue = ua.get(PaymentPlanTypePage)
+    (previousValue, value) match {
+      case (Some(oldValue), Some(newValue)) if oldValue != newValue =>
+        // Radio selection plan type changed → clear dependent pages
+        ua.remove(PaymentReferencePage)
           .flatMap(_.remove(PaymentsFrequencyPage))
-          .flatMap(_.remove(TotalAmountDuePage))
+          .flatMap(_.remove(RegularPaymentAmountPage))
+          .flatMap(_.remove(PlanStartDatePage))
+          .flatMap(_.remove(AddPaymentPlanEndDatePage))
+          .flatMap(_.remove(PlanEndDatePage))
+          .flatMap(_.remove(PaymentAmountPage))
           .flatMap(_.remove(PaymentDatePage))
+          .flatMap(_.remove(TotalAmountDuePage))
       case _ =>
-        Try(userAnswers)
+        // No change → do default behavior
+        super.cleanup(value, ua)
     }
   }
 

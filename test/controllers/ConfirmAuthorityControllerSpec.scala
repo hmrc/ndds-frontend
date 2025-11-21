@@ -21,7 +21,7 @@ import models.{ConfirmAuthority, Mode, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, verify, when}
+import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.ConfirmAuthorityPage
 import play.api.data.Form
@@ -29,13 +29,10 @@ import play.api.http.Status.{BAD_REQUEST, OK, SEE_OTHER}
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{GET, POST, redirectLocation, route, running, status}
+import play.api.test.Helpers.*
 import play.twirl.api.Html
 import repositories.SessionRepository
 import views.html.ConfirmAuthorityView
-import play.api.test.Helpers.writeableOf_AnyContentAsFormUrlEncoded
-import play.api.test.Helpers.defaultAwaitTimeout
-import play.api.test.Helpers.writeableOf_AnyContentAsEmpty
 
 import scala.concurrent.Future
 

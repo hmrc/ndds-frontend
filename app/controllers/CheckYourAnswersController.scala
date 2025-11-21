@@ -19,15 +19,15 @@ package controllers
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import models.*
 import models.DirectDebitSource.*
 import models.audits.{AddPaymentPlanAudit, NewDirectDebitAudit}
 import models.requests.ChrisSubmissionRequest
 import models.responses.GenerateDdiRefResponse
-import models.{DirectDebitSource, PaymentPlanCalculation, PaymentPlanType, UserAnswers, YourBankDetailsWithAuddisStatus}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.*
 import queries.ExistingDirectDebitIdentifierQuery
 import repositories.{DirectDebitCacheRepository, SessionRepository}
 import services.NationalDirectDebitService
@@ -58,46 +58,62 @@ class CheckYourAnswersController @Inject() (
     with Logging {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val ua = request.userAnswers
+    val confirmed = ua.get(CreateConfirmationPage).contains(true)
+    val source = ua.get(DirectDebitSourcePage)
+    val hasEndDate = ua.get(AddPaymentPlanEndDatePage)
 
-    val alreadyConfirmed: Boolean =
-      request.userAnswers.get(CreateConfirmationPage).contains(true)
-
-    if (alreadyConfirmed) {
-      logger.warn("Attempt to  Check your answers  confirmation; redirecting to Page Not Found.")
+    if (confirmed) {
+      logger.warn("Attempt to access Check Your Answers confirmation; redirecting.")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
-      val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
-      val showStartDate = if (directDebitSource.contains(DirectDebitSource.PAYE)) {
-        YearEndAndMonthSummary.row(request.userAnswers)
-      } else {
-        PlanStartDateSummary.row(request.userAnswers)
-      }
-
-      val showPlanEndDate = request.userAnswers.get(AddPaymentPlanEndDatePage) match {
-        case Some(false) => None
-        case _           => PlanEndDateSummary.row(request.userAnswers)
-      }
+      val showStartDate = if (source.contains(DirectDebitSource.PAYE)) { YearEndAndMonthSummary.row(ua) }
+      else { PlanStartDateSummary.row(ua) }
+      val showPlanEndDate = if (hasEndDate.contains(false)) { None }
+      else { PlanEndDateSummary.row(ua) }
+      val monthlyPaymentAmount = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+        MonthlyPaymentAmountSummary.row(ua)
+      } else { None }
+      val finalPaymentAmount = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+        FinalPaymentAmountSummary.row(ua)
+      } else { None }
+      val finalPaymentDate = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+        FinalPaymentDateSummary.row(ua, appConfig)
+      } else { None }
 
       val list = SummaryListViewModel(
-        rows = Seq(
-          PaymentReferenceSummary.row(request.userAnswers),
-          TotalAmountDueSummary.row(request.userAnswers),
-          PaymentAmountSummary.row(request.userAnswers),
-          PaymentDateSummary.row(request.userAnswers),
-          PaymentsFrequencySummary.row(request.userAnswers),
-          RegularPaymentAmountSummary.row(request.userAnswers),
+        Seq(
+          DirectDebitSourceSummary.row(ua),
+          PaymentPlanTypeSummary.row(ua),
+          PaymentReferenceSummary.row(ua),
+          TotalAmountDueSummary.row(ua),
+          PaymentAmountSummary.row(ua),
+          PaymentDateSummary.row(ua),
+          PaymentsFrequencySummary.row(ua),
+          RegularPaymentAmountSummary.row(ua),
           showStartDate,
+          AddPaymentPlanEndDateSummary.row(ua),
           showPlanEndDate,
-          MonthlyPaymentAmountSummary.row(request.userAnswers),
-          FinalPaymentDateSummary.row(request.userAnswers, appConfig),
-          FinalPaymentAmountSummary.row(request.userAnswers)
+          monthlyPaymentAmount,
+          finalPaymentDate,
+          finalPaymentAmount
         ).flatten
       )
 
-      val currentDate = DateTimeFormats.formattedCurrentDate
-      Ok(view(list, currentDate))
+      val backRoute: Call = backRouteCheck(source, hasEndDate)
+      Ok(view(list, DateTimeFormats.formattedCurrentDate, backRoute))
     }
   }
+
+  private def backRouteCheck(source: Option[DirectDebitSource], hasEndDate: Option[Boolean]): Call = {
+    (source, hasEndDate) match {
+      case (Some(MGD) | Some(TC), _) => routes.PlanStartDateController.onPageLoad(NormalMode)
+      case (Some(SA), Some(false))   => routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode)
+      case (Some(SA), Some(true))    => routes.PlanEndDateController.onPageLoad(NormalMode)
+      case _                         => routes.PaymentDateController.onPageLoad(NormalMode)
+    }
+  }
+
   def onSubmit(): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
       implicit val ua: UserAnswers = request.userAnswers

@@ -159,7 +159,7 @@ class DirectDebitSummaryController @Inject() (
             optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
             optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
             optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v)),
-            optionalRow(Option(plan.scheduledPaymentAmount))(amount => AmendPaymentAmountSummary.row(plan.planType, Some(amount)))
+            optionalRow(Option(plan.scheduledPaymentAmount))(amount => AmendPaymentAmountSummary.row(plan.planType, amount))
           ).flatten
       }
     }

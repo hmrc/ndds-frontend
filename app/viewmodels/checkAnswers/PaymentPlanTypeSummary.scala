@@ -62,36 +62,4 @@ object PaymentPlanTypeSummary {
           )
         )
     }
-
-  def rowNoAction(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentPlanTypePage) match {
-      case Some(planType) =>
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages(s"checkYourAnswers.paymentPlanType.$planType"))
-          )
-        )
-
-        Some(
-          SummaryListRowViewModel(
-            key     = "checkYourAnswers.paymentPlanType",
-            value   = value,
-            actions = Seq.empty
-          )
-        )
-
-      case None =>
-        val value = ValueViewModel(
-          HtmlContent(
-            HtmlFormat.escape(messages("checkYourAnswers.paymentPlanType.singlePaymentPlan"))
-          )
-        )
-        Some(
-          SummaryListRowViewModel(
-            key     = "checkYourAnswers.paymentPlanType",
-            value   = value,
-            actions = Seq.empty
-          )
-        )
-    }
 }
