@@ -370,7 +370,7 @@ checkYourAnswers.paymentPlanType.budgetPaymentPlan = Budget payment
 checkYourAnswers.paymentPlanType.taxCreditRepaymentPlan = Tax credits repayment plan
 checkYourAnswers.directDebitSource = Payment for
 
-directDebitConfirmation.title = Your direct debit payment was successful
+directDebitConfirmation.title = Direct Debit payment set up
 directDebitConfirmation.panel.title = Direct Debit payment set up
 directDebitConfirmation.panel.body = Your Direct Debit reference is<br /><strong>{0}</strong>
 directDebitConfirmation.h2 = What happens next

@@ -118,7 +118,7 @@ class DirectDebitConfirmationController @Inject() (
 
     val list = SummaryListViewModel(
       rows = Seq(
-        DirectDebitSourceSummary.row(request.userAnswers, false),
+        DirectDebitSourceSummary.rowNoAction(request.userAnswers),
         PaymentPlanTypeSummary.rowNoAction(request.userAnswers),
         PaymentReferenceSummary.rowNoAction(request.userAnswers),
         dateSetupRow,

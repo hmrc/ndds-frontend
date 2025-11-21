@@ -107,7 +107,7 @@ POST       /change-total-amount-due                     controllers.TotalAmountD
 GET        /check-payment-plan-details                  controllers.CheckYourAnswersController.onPageLoad()
 POST       /check-payment-plan-details                  controllers.CheckYourAnswersController.onSubmit()
 
-GET        /direct-debit-payment-submitted              controllers.DirectDebitConfirmationController.onPageLoad()
+GET        /direct-debit-payment-set-up              controllers.DirectDebitConfirmationController.onPageLoad()
 
 GET        /payment-plan/direct-debit-redirect          controllers.DirectDebitSummaryController.onRedirect(directDebitReference: String)
 GET        /payment-plan/payment-plans-direct-debit     controllers.DirectDebitSummaryController.onPageLoad()
