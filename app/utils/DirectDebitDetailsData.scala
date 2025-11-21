@@ -98,7 +98,7 @@ trait DirectDebitDetailsData {
     paymentPlanCount  = 2,
     paymentPlanList = Seq(
       NddPaymentPlan(
-        scheduledPaymentAmount = 100,
+        scheduledPaymentAmount = Some(100),
         planRefNumber          = "ref number 1",
         planType               = "type 1",
         paymentReference       = "payment ref 1",
@@ -106,7 +106,7 @@ trait DirectDebitDetailsData {
         submissionDateTime     = LocalDateTime.of(2025, 11, 12, 12, 12)
       ),
       NddPaymentPlan(
-        scheduledPaymentAmount = 100,
+        scheduledPaymentAmount = Some(100),
         planRefNumber          = "ref number 1",
         planType               = "type 1",
         paymentReference       = "payment ref 1",
