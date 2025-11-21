@@ -42,12 +42,14 @@
 
     @paragraph(messages("directDebitConfirmation.p1", paymentAmount, paymentDate))
 
-    <p class="govuk-body">
-        @messages("directDebitConfirmation.p2")
-        <a href="@hmrcHelplineUrl" target="_blank" rel="noopener noreferrer">
-            @messages("directDebitConfirmation.p2.link")
-        </a>.
-    </p>
+    @paragraphWithLink(
+        Some(messages("directDebitConfirmation.p2")),
+        linkMessage   = messages("directDebitConfirmation.p2.link"),
+        linkUrl       = hmrcHelplineUrl,
+        linkFullStop = true,
+        linkRel       = "noreferrer noopener",
+        target        = "_blank"
+    )
 
     <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
 
@@ -77,11 +79,6 @@
         InsetText(
             content = Text(messages("directDebitConfirmation.printInset"))
         )
-    )
-
-    @paragraphWithLink(
-        linkMessage = messages("directDebitConfirmation.viewPaymentPlans"),
-        linkUrl = routes.DirectDebitSummaryController.onRedirect(referenceNumber).url
     )
 
     @paragraphWithLink(

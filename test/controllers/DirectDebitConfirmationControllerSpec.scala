@@ -102,8 +102,8 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
 
         val paymentPlanDetails = SummaryListViewModel(
           rows = Seq(
-            PaymentPlanTypeSummary.row(userAnswers),
             DirectDebitSourceSummary.row(userAnswers, false),
+            PaymentPlanTypeSummary.rowNoAction(userAnswers),
             PaymentReferenceSummary.rowNoAction(userAnswers).map(Some(_)).getOrElse(None),
             Some(
               SummaryListRowViewModel(

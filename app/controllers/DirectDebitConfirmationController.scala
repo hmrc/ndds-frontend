@@ -18,13 +18,13 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.DirectDebitSource
-import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PlanStartDatePage, RegularPaymentAmountPage, TotalAmountDuePage}
+import models.{DirectDebitSource, PaymentPlanType}
+import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PlanStartDatePage, RegularPaymentAmountPage, TotalAmountDuePage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import config.CurrencyFormatter.currencyFormat
-import viewmodels.checkAnswers.{DirectDebitSourceSummary, FinalPaymentAmountSummary, MonthlyPaymentAmountSummary, PaymentAmountSummary, PaymentDateSummary, PaymentPlanTypeSummary, PaymentReferenceSummary, PaymentsFrequencySummary, PlanEndDateSummary, PlanStartDateSummary, RegularPaymentAmountSummary, TotalAmountDueSummary, YearEndAndMonthSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
+import viewmodels.checkAnswers.{DirectDebitSourceSummary, FinalPaymentAmountSummary, FinalPaymentDateSummary, MonthlyPaymentAmountSummary, PaymentAmountSummary, PaymentDateSummary, PaymentPlanTypeSummary, PaymentReferenceSummary, PaymentsFrequencySummary, PlanEndDateSummary, PlanStartDateSummary, RegularPaymentAmountSummary, TotalAmountDueSummary, YearEndAndMonthSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
@@ -73,6 +73,22 @@ class DirectDebitConfirmationController @Inject() (
 
     val paymentDateString: String = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
 
+    val monthlyPaymentAmount = if (request.userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+      MonthlyPaymentAmountSummary.row(request.userAnswers)
+    } else {
+      None
+    }
+    val finalPaymentAmount = if (request.userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+      FinalPaymentAmountSummary.row(request.userAnswers)
+    } else {
+      None
+    }
+    val finalPaymentDate = if (request.userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
+      FinalPaymentDateSummary.row(request.userAnswers, appConfig)
+    } else {
+      None
+    }
+
     val directDebitDetails = SummaryListViewModel(
       rows = Seq(
         Option(
@@ -102,19 +118,20 @@ class DirectDebitConfirmationController @Inject() (
 
     val list = SummaryListViewModel(
       rows = Seq(
-        PaymentPlanTypeSummary.row(request.userAnswers),
         DirectDebitSourceSummary.row(request.userAnswers, false),
+        PaymentPlanTypeSummary.rowNoAction(request.userAnswers),
         PaymentReferenceSummary.rowNoAction(request.userAnswers),
         dateSetupRow,
+        PaymentsFrequencySummary.rowData(request.userAnswers),
+        RegularPaymentAmountSummary.rowData(request.userAnswers),
         PaymentAmountSummary.row(request.userAnswers, false),
         PaymentDateSummary.row(request.userAnswers, false),
         TotalAmountDueSummary.rowData(request.userAnswers),
-        MonthlyPaymentAmountSummary.row(request.userAnswers),
-        FinalPaymentAmountSummary.row(request.userAnswers),
-        PaymentsFrequencySummary.rowData(request.userAnswers),
-        RegularPaymentAmountSummary.rowData(request.userAnswers),
         PlanStartDateSummary.row(request.userAnswers, false),
-        PlanEndDateSummary.rowData(request.userAnswers)
+        PlanEndDateSummary.rowData(request.userAnswers),
+        monthlyPaymentAmount,
+        finalPaymentDate,
+        finalPaymentAmount
       ).flatten
     )
 

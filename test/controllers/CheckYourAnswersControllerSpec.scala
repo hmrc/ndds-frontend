@@ -73,7 +73,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
         contentAsString(result) must include("Accept and Continue")
       }
@@ -116,7 +116,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
         contentAsString(result) must include("Accept and Continue")
       }
@@ -144,7 +144,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
         contentAsString(result) must include("Year end and month")
         contentAsString(result) must include("2025 04")
@@ -174,9 +174,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Frequency of payments")
         contentAsString(result) must include("Monthly")
-        contentAsString(result) must include("Regular Payment Amount")
-        contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must include("25 July 2027")
+        contentAsString(result) must include("Regular payment amount")
+        contentAsString(result) must include("19 Jul 2025")
+        contentAsString(result) must include("25 Jul 2027")
         contentAsString(result) must include("£120")
         contentAsString(result) must include("Accept and Continue")
       }
@@ -203,12 +203,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("1234567")
         contentAsString(result) must include("Total amount due")
         contentAsString(result) must include("4,533")
-        contentAsString(result) must include("Plan Start Date")
-        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("Plan start date")
+        contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("Monthly payment amount")
         contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Final Payment Date")
-        contentAsString(result) must include("19 June 2026")
+        contentAsString(result) must include("Final payment date")
+        contentAsString(result) must include("19 Jun 2026")
         contentAsString(result) must include("Final payment amount")
         contentAsString(result) must include("£377.75")
         contentAsString(result) must include("Accept and Continue")
@@ -230,9 +230,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
         status(result) mustEqual OK
         contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must not include "25 July 2027"
-        contentAsString(result) must not include "Plan End Date"
+        contentAsString(result) must include("19 Jul 2025")
+        contentAsString(result) must not include "25 Jul 2027"
+        contentAsString(result) must not include "Plan end date"
       }
     }
 
@@ -251,8 +251,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
         status(result) mustEqual OK
         contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must include("25 July 2027")
+        contentAsString(result) must include("19 Jul 2025")
+        contentAsString(result) must include("25 Jul 2027")
       }
     }
 
@@ -270,8 +270,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
         status(result) mustEqual OK
         contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must include("25 July 2027")
+        contentAsString(result) must include("19 Jul 2025")
+        contentAsString(result) must include("25 Jul 2027")
       }
     }
 
