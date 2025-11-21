@@ -19,7 +19,7 @@ package controllers.testonly
 import base.SpecBase
 import controllers.routes
 import forms.AmendPaymentAmountFormProvider
-import models.{NormalMode, PaymentPlanType}
+import models.{CheckMode, NormalMode, PaymentPlanType}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -31,7 +31,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import views.html.TestOnlyAmendPaymentAmountView
+import views.html.testonly.TestOnlyAmendPaymentAmountView
 
 import scala.concurrent.Future
 import scala.math.BigDecimal.RoundingMode
@@ -225,6 +225,195 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
         val request = FakeRequest(POST, "/test-only/amount-need-to-pay").withFormUrlEncodedBody(("value", validAnswer.toString))
         val result = controller.onSubmit(NormalMode)(request)
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+  }
+
+  "TestOnlyAmendPaymentAmountController in CheckMode" - {
+
+    "must return OK and the correct view for a GET with SinglePaymentPlan" in {
+      val userAnswersWithSinglePaymentPlan = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
+
+      val mockService = mock[NationalDirectDebitService]
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePaymentPlan))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
+        val request = FakeRequest(GET, "/test-only/amount-need-to-pay")
+        val result = controller.onPageLoad(CheckMode)(request)
+        val view = application.injector.instanceOf[TestOnlyAmendPaymentAmountView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(
+          form,
+          CheckMode,
+          routes.AmendingPaymentPlanController.onPageLoad()
+        )(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET with BudgetPaymentPlan" in {
+      val userAnswersWithBudgetPaymentPlan = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+
+      val mockService = mock[NationalDirectDebitService]
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithBudgetPaymentPlan))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
+        val request = FakeRequest(GET, "/test-only/amount-need-to-pay")
+        val result = controller.onPageLoad(CheckMode)(request)
+        val view = application.injector.instanceOf[TestOnlyAmendPaymentAmountView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(
+          form,
+          CheckMode,
+          routes.AmendingPaymentPlanController.onPageLoad()
+        )(request, messages(application)).toString
+      }
+    }
+
+    "must populate the view correctly on a GET when the question has previously been answered" in {
+      val userAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(AmendPaymentAmountPage, validAnswer)
+        .success
+        .value
+
+      val mockService = mock[NationalDirectDebitService]
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
+        val request = FakeRequest(GET, "/test-only/amount-need-to-pay")
+        val result = controller.onPageLoad(CheckMode)(request)
+        val view = application.injector.instanceOf[TestOnlyAmendPaymentAmountView]
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(
+          form.fill(validAnswer),
+          CheckMode,
+          routes.AmendingPaymentPlanController.onPageLoad()
+        )(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to journey recovery if amend payment plan guard returns false" in {
+      val userAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .success
+        .value
+
+      val mockService = mock[NationalDirectDebitService]
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+
+        val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
+        val request = FakeRequest(GET, "/test-only/amount-need-to-pay")
+        val result = controller.onPageLoad(CheckMode)(request)
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
+        val request = FakeRequest(GET, "/test-only/amount-need-to-pay")
+        val result = controller.onPageLoad(CheckMode)(request)
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the next page when valid data is submitted" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val mockService = mock[NationalDirectDebitService]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockService)
+        )
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
+        val request = FakeRequest(POST, "/test-only/amount-need-to-pay").withFormUrlEncodedBody(("value", validAnswer.toString))
+        val result = controller.onSubmit(CheckMode)(request)
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual onwardRoute.url
+      }
+    }
+
+    "must return a Bad Request and errors when invalid data is submitted" in {
+      val mockService = mock[NationalDirectDebitService]
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
+        val request = FakeRequest(POST, "/test-only/amount-need-to-pay").withFormUrlEncodedBody(("value", "invalid value"))
+        val boundForm = form.bind(Map("value" -> "invalid value"))
+        val view = application.injector.instanceOf[TestOnlyAmendPaymentAmountView]
+        val result = controller.onSubmit(CheckMode)(request)
+
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) mustEqual view(
+          boundForm,
+          CheckMode,
+          routes.AmendingPaymentPlanController.onPageLoad()
+        )(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val controller = application.injector.instanceOf[TestOnlyAmendPaymentAmountController]
+        val request = FakeRequest(POST, "/test-only/amount-need-to-pay").withFormUrlEncodedBody(("value", validAnswer.toString))
+        val result = controller.onSubmit(CheckMode)(request)
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url

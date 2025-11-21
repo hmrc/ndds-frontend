@@ -28,7 +28,7 @@
 
 @layout(pageTitle = titleForManageJourney(form, messages("testOnlyAmendPaymentAmount.title")), backLink = Some(call.url)) {
 
- @formHelper(action = controllers.testonly.routes.TestOnlyAmendPaymentAmountController.onSubmit(), Symbol("autoComplete") -> "off") {
+ @formHelper(action = controllers.testonly.routes.TestOnlyAmendPaymentAmountController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
    @if(form.errors.nonEmpty) {
      @govukErrorSummary(ErrorSummaryViewModel(form))
