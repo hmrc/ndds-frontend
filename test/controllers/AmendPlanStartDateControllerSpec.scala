@@ -23,6 +23,7 @@ import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.matchers.must.Matchers.*
 import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
@@ -39,19 +40,25 @@ import scala.concurrent.Future
 class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
   private val formProvider = new AmendPlanStartDateFormProvider()
-  private def form = formProvider()
-  val validAnswer: LocalDate = LocalDate.now()
-  val singlePlan: String = "Single Payment"
+  private val earliestDummy = LocalDate.now().minusYears(1)
+  private val maxDummy = Some(LocalDate.now().plusYears(1))
+  private def form = formProvider(earliestDummy, maxDummy)
 
-  lazy val amendPlanStartDateRoute: String = routes.AmendPlanStartDateController.onPageLoad(NormalMode).url
-  lazy val amendPlanStartDateRoutePost: String = routes.AmendPlanStartDateController.onSubmit(NormalMode).url
-  lazy val amendPaymentAmountRoute: String = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
-  lazy val planConfirmationPage: String = routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url
+  private val validAnswer: LocalDate = LocalDate.now()
+  private val singlePlan: String = "Single Payment"
 
-  def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
+  private lazy val amendPlanStartDateRoute: String = routes.AmendPlanStartDateController.onPageLoad(NormalMode).url
+
+  private lazy val amendPlanStartDateRoutePost: String = routes.AmendPlanStartDateController.onSubmit(NormalMode).url
+
+  private lazy val amendPaymentAmountRoute: String = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
+
+  private lazy val planConfirmationPage: String = routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url
+
+  private def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, amendPlanStartDateRoute)
 
-  def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
+  private def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, amendPlanStartDateRoutePost)
       .withFormUrlEncodedBody(
         "value.day"   -> validAnswer.getDayOfMonth.toString,
@@ -59,7 +66,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         "value.year"  -> validAnswer.getYear.toString
       )
 
-  def postRequestWithDate(date: LocalDate): FakeRequest[AnyContentAsFormUrlEncoded] =
+  private def postRequestWithDate(date: LocalDate): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, amendPlanStartDateRoutePost)
       .withFormUrlEncodedBody(
         "value.day"   -> date.getDayOfMonth.toString,
@@ -67,50 +74,95 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         "value.year"  -> date.getYear.toString
       )
 
+  private val defaultPlanResponse = PaymentPlanResponse(
+    DirectDebitDetails(
+      bankSortCode       = Some("123456"),
+      bankAccountNumber  = Some("12345678"),
+      bankAccountName    = Some("Test Bank"),
+      auDdisFlag         = true,
+      submissionDateTime = LocalDateTime.now()
+    ),
+    PaymentPlanDetails(
+      hodService                = "TC",
+      planType                  = "Budget payment",
+      paymentReference          = "XYZ123",
+      submissionDateTime        = LocalDateTime.now(),
+      scheduledPaymentAmount    = Some(BigDecimal(1500)),
+      scheduledPaymentStartDate = Some(LocalDate.now()),
+      scheduledPaymentEndDate   = Some(LocalDate.now()),
+      scheduledPaymentFrequency = Some("Monthly"),
+      initialPaymentStartDate   = Some(LocalDate.now()),
+      initialPaymentAmount      = Some(BigDecimal(1500)),
+      suspensionStartDate       = Some(LocalDate.now()),
+      suspensionEndDate         = Some(LocalDate.now()),
+      balancingPaymentAmount    = Some(BigDecimal(1500)),
+      balancingPaymentDate      = Some(LocalDate.now()),
+      totalLiability            = Some(BigDecimal(1500)),
+      paymentPlanEditable       = true
+    )
+  )
+
   "AmendPlanStartDate Controller" - {
     val mockService = mock[NationalDirectDebitService]
     "onPageLoad" - {
       "must return OK and the correct view for a GET" in {
-        val userAnswers: UserAnswers = emptyUserAnswers
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, defaultPlanResponse)
+          .success
+          .value
           .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val application =
+          applicationBuilder(Some(userAnswers))
+            .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+            .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-          val result = route(application, getRequest()).value
           val view = application.injector.instanceOf[AmendPlanStartDateView]
-
+          val result = route(application, getRequest()).value
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(), messages(application)).toString
+
+          contentAsString(result) mustEqual
+            view(form, NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(), messages(application)).toString
         }
       }
 
-      "must populate the view correctly on a GET when the question has previously been answered" in {
+      "must populate view correctly when previously answered" in {
         val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, defaultPlanResponse)
+          .success
+          .value
           .set(AmendPlanStartDatePage, validAnswer)
           .success
           .value
           .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+        val application =
+          applicationBuilder(Some(userAnswers))
+            .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+            .build()
 
         running(application) {
           val view = application.injector.instanceOf[AmendPlanStartDateView]
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(),
-                                                                                                                           messages(application)
-                                                                                                                          ).toString
+
+          contentAsString(result) mustEqual
+            view(form.fill(validAnswer), NormalMode, Call("GET", amendPaymentAmountRoute))(
+              getRequest(),
+              messages(application)
+            ).toString
         }
       }
 
-      "must redirect to Journey Recovery for a GET if no existing data is found" in {
-        val application = applicationBuilder(userAnswers = None).build()
+      "must redirect to Journey Recovery when no user data exists" in {
+        val application = applicationBuilder(None).build()
 
         running(application) {
           val result = route(application, getRequest()).value
@@ -149,10 +201,16 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       )
       val paymentPlanResponse = PaymentPlanResponse(directDebitDetails, planDetails)
 
-      "must return a Bad Request and errors when invalid data is submitted" in {
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
-          .build()
+      "must return Bad Request when invalid data is submitted" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, defaultPlanResponse)
+          .success
+          .value
+
+        val application =
+          applicationBuilder(Some(userAnswers))
+            .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+            .build()
 
         val request =
           FakeRequest(POST, amendPlanStartDateRoute)
@@ -160,15 +218,15 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-          val boundForm = form.bind(Map("value" -> "invalid value"))
+
           val view = application.injector.instanceOf[AmendPlanStartDateView]
+          val boundForm = form.bind(Map("value" -> "invalid value"))
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
           contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
         }
       }
-
       "must return a Bad Request when no amendment is made" in {
         val userAnswers = emptyUserAnswers
           .set(PaymentPlanDetailsQuery, paymentPlanResponse)

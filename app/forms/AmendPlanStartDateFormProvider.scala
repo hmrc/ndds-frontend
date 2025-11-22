@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 class AmendPlanStartDateFormProvider @Inject() extends Mappings {
 
-  def apply()(implicit messages: Messages): Form[LocalDate] =
+  def apply(earliestDate: LocalDate, maxDate: Option[LocalDate] = None)(implicit messages: Messages): Form[LocalDate] = {
     Form(
       "value" -> customPaymentDate(
         invalidKey     = "planStartDate.error.invalid",
@@ -35,6 +35,14 @@ class AmendPlanStartDateFormProvider @Inject() extends Mappings {
         requiredKey    = "planStartDate.error.required",
         dateFormats    = DateFormats.defaultDateFormats
       )
+        .verifying(
+          "amendPlanStartDate.error.beforeEarliest",
+          date => !date.isBefore(earliestDate)
+        )
+        .verifying(
+          "amendPlanStartDate.error.afterLatest",
+          date => maxDate.forall(m => !date.isAfter(m))
+        )
     )
-
+  }
 }
