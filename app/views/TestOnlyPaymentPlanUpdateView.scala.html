@@ -20,60 +20,110 @@
         layout: templates.Layout,
         govukButton: GovukButton,
         paragraph: Paragraph,
-        header2: Header2,
+        h2: Header2,
         confirmationPanel: ConfirmationPanel,
         mainButton: MainButton,
         govukSummaryList: GovukSummaryList,
         govukDetails: GovukDetails,
-        govukInsetText: GovukInsetText
+        govukInsetText: GovukInsetText,
+        paragraphWithLink: ParagraphMessageWithLink
 )
 
-@(paymentPlanReference: String, regularPaymentAmount: String, startDate: String, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String, dateSetup: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
     @confirmationPanel(
         title = messages("amendPaymentPlanUpdate.panel.title"),
-        body = Html(
-                s"${messages("amendPaymentPlanUpdate.panel.body1")}" +
-                s"${messages("amendPaymentPlanUpdate.panel.strong",paymentPlanReference)}" +
-                s"${messages("amendPaymentPlanUpdate.panel.body2")}"
-                ),
         classes = "govuk-!-margin-bottom-2"
     )
 
-    @header2("amendPaymentPlanUpdate.h1")
+    @h2("amendPaymentPlanUpdate.h1")
 
-    @paragraph(messages("amendPaymentPlanUpdate.p1"))
+    @paragraph(messages("newAmendPaymentPlanUpdate.p1", paymentAmount, startDate))
+    @paragraph(messages("newAmendPaymentPlanUpdate.p2"))
 
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@messages("amendPaymentPlanUpdate.l1", regularPaymentAmount, startDate)</li>
-        <li>@messages("amendPaymentPlanUpdate.l2")</li>
-        <li>@messages("amendPaymentPlanUpdate.l3")</li>
-    </ul>
+    @paragraphWithLink(
+        Some(messages("newAmendPaymentPlanUpdate.p3")),
+        linkMessage   = messages("newAmendPaymentPlanUpdate.p3.link"),
+        linkUrl       = hmrcHelplineUrl,
+        linkFullStop = true,
+        linkRel       = "noreferrer noopener",
+        target        = "_blank"
+    )
+
+    <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
+
+    <details class="govuk-details">
+        <summary class = "govuk-details__summary">
+                    <span class="govuk-details__summary-text">
+                        @messages("newAmendPaymentPlanUpdate.summary.title")
+                    </span>
+        </summary>
+
+        <div class="govuk-details__text">
+            @paragraph("newAmendPaymentPlanUpdate.summary.p1")
+            @paragraph("newAmendPaymentPlanUpdate.summary.p2")
+            @paragraph("newAmendPaymentPlanUpdate.summary.p3")
+            @paragraph("newAmendPaymentPlanUpdate.summary.p4")
+            @paragraph("newAmendPaymentPlanUpdate.summary.p5")
+        </div>
+    </details>
+
+    @h2("newAmendPaymentPlanUpdate.directDebitDetails")
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+        SummaryListRow(
+            key = Key(content = messages("newAmendPaymentPlanUpdate.directDebit.reference")),
+            value = Value(content = HtmlContent(directDebitReference))
+            ),
+        SummaryListRow(
+            key = Key(content = messages("newAmendPaymentPlanUpdate.directDebit.accountName")),
+            value = Value(content = HtmlContent(bankAccountName))
+            ),
+        SummaryListRow(
+            key = Key(content = messages("newAmendPaymentPlanUpdate.directDebit.accountNumber")),
+            value = Value(content = HtmlContent(accountNumber))
+            ),
+        SummaryListRow(
+            key = Key(content = messages("newAmendPaymentPlanUpdate.directDebit.sortCode")),
+            value = Value(content = HtmlContent(sortCode))
+            )
+        )
+    ))
+
+    @h2("newAmendPaymentPlanUpdate.amendedPlan")
+
+    @govukSummaryList(SummaryList(
+        rows = Seq(
+            SummaryListRow(
+                key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.reference")),
+                value = Value(content = HtmlContent(paymentPlanReference))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.dateSetup")),
+                value = Value(content = HtmlContent(dateSetup))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.paymentAmount")),
+                value = Value(content = HtmlContent(paymentAmount))
+            ),
+            SummaryListRow(
+                key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.paymentDate")),
+                value = Value(content = HtmlContent(startDate))
+            )
+        )
+    ))
 
     @govukInsetText(
         InsetText(
-            content = Text(messages("amendPaymentPlanUpdate.pleaseNote"))
+            content = Text(messages("newAmendPaymentPlanUpdate.printInset"))
         )
     )
 
-    @header2("amendPaymentPlanUpdate.h2")
-
-    @govukSummaryList(SummaryList(
-        rows = rows
-    ))
-
-    @govukDetails(
-        Details(
-            summary = Text(messages("amendPaymentPlanUpdate.print")),
-            content =Text(messages("amendPaymentPlanUpdate.printDetails"))
-        )
-    )
-
-    @govukButton(Button(
-        href = Some(routes.DirectDebitSummaryController.onPageLoad().url),
-        content = Text(messages("amendPaymentPlanUpdate.close"))
-        )
+    @paragraphWithLink(
+        linkMessage = messages("newAmendPaymentPlanUpdate.returnLink"),
+        linkUrl = call.url
     )
 }

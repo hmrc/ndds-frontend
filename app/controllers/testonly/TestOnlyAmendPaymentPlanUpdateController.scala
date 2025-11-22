@@ -16,6 +16,7 @@
 
 package controllers.testonly
 
+import config.FrontendAppConfig
 import controllers.routes
 import controllers.actions.*
 import models.{PaymentPlanType, UserAnswers}
@@ -23,7 +24,7 @@ import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentPlanDetailsQuery
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -32,9 +33,12 @@ import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.checkAnswers.*
 import views.html.TestOnlyPaymentPlanUpdateView
 
+import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class TestOnlyAmendPaymentPlanUpdateController @Inject() (
   override val messagesApi: MessagesApi,
@@ -43,62 +47,51 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
   requireData: DataRequiredAction,
   nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
-  view: TestOnlyPaymentPlanUpdateView
-) extends FrontendBaseController
+  view: TestOnlyPaymentPlanUpdateView,
+  appConfig: FrontendAppConfig
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport
     with Logging {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
     if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-      val maybeResult = for {
-        paymentPlan   <- userAnswers.get(PaymentPlanDetailsQuery)
-        paymentAmount <- userAnswers.get(AmendPaymentAmountPage)
-        startDate     <- userAnswers.get(AmendPlanStartDatePage)
-      } yield {
-        val formattedRegPaymentAmount = formatAmount(paymentAmount)
-        val formattedStartDate =
-          startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val paymentReference = paymentPlan.paymentPlanDetails.paymentReference
-        val summaryRows: Seq[SummaryListRow] = buildSummaryRows(userAnswers, paymentReference)
+      val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+      val dateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
-        Ok(view(paymentReference, formattedRegPaymentAmount, formattedStartDate, summaryRows))
-      }
-      maybeResult match {
-        case Some(result) => Future.successful(result)
+      userAnswers.get(PaymentPlanDetailsQuery) match {
+        case Some(response) =>
+          val planDetail = response.paymentPlanDetails
+          val directDebitDetails = response.directDebitDetails
+          val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
+          val startDate = userAnswers.get(AmendPlanStartDatePage)
+          for {
+            directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
+            paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
+          } yield {
+            Ok(
+              view(
+                appConfig.hmrcHelplineUrl,
+                currencyFormat.format(paymentAmount),
+                startDate.map(dateFormat.format).getOrElse(""),
+                directDebitReference,
+                directDebitDetails.bankAccountName.getOrElse(""),
+                directDebitDetails.bankAccountNumber.getOrElse(""),
+                directDebitDetails.bankSortCode.getOrElse(""),
+                planDetail.paymentReference,
+                dateFormat.format(planDetail.submissionDateTime),
+                routes.PaymentPlanDetailsController.onPageLoad()
+              )
+            )
+          }
         case None =>
-          logger.warn("Missing required values in user answers for amend payment plan")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
       Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-    }
-  }
-
-  private def buildSummaryRows(userAnswers: UserAnswers, paymentPlanReference: String)(implicit messages: Messages): Seq[SummaryListRow] = {
-
-    val planTypeOpt = userAnswers.get(ManagePaymentPlanTypePage)
-    val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
-    val planStartDate = userAnswers.get(AmendPlanStartDatePage)
-    val planEndDate = userAnswers.get(AmendPlanEndDatePage)
-
-    planTypeOpt match {
-      case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
-        Seq(
-          PaymentReferenceSummary.row(paymentPlanReference),
-          AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount),
-          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)
-        )
-      case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
-        Seq(
-          PaymentReferenceSummary.row(paymentPlanReference),
-          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
-          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern),
-          AmendPlanEndDateSummary.row(planEndDate, Constants.longDateTimeFormatPattern)
-        )
-      case _ => throw new IllegalStateException("Plan type is missing or invalid")
     }
   }
 }
