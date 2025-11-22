@@ -25,11 +25,12 @@ import models.responses.DirectDebitDetails
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
 import viewmodels.checkAnswers
@@ -84,12 +85,13 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
     userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
         Seq(
-          AmendPaymentAmountSummary.row(
+          AmendPaymentAmountSummary.row( // TODO - replace with AP1a TestOnly AmendPaymentDate
             PaymentPlanType.SinglePaymentPlan.toString,
             userAnswers.get(AmendPaymentAmountPage),
             true
           ),
-          AmendPlanStartDateSummary.row( // TODO - replace with TestOnly AmendPaymentDate
+          AmendPaymentDateSummary.row(userAnswers).get,
+          AmendPlanStartDateSummary.row( // TODO - replace with AP1b TestOnly AmendPaymentDate
             PaymentPlanType.BudgetPaymentPlan.toString,
             userAnswers.get(AmendPlanStartDatePage),
             Constants.shortDateTimeFormatPattern,
@@ -102,13 +104,12 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
             PaymentPlanType.BudgetPaymentPlan.toString,
             userAnswers.get(AmendPaymentAmountPage),
             true
-          ),
-          AmendPlanStartDateSummary.row( // TODO - replace with TestOnly AmendPaymentDate
-            PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPlanStartDatePage),
+          ), // TODO - replace with AP1a TestOnly Amend RegularPaymentAmount
+          AmendPlanEndDateSummary.row(
+            userAnswers.get(AmendPlanEndDatePage),
             Constants.shortDateTimeFormatPattern,
             true
-          )
+          ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
         )
     }
 
@@ -118,44 +119,48 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
     (identify andThen getData andThen requireData).async { implicit request =>
       val ua = request.userAnswers
 
-      (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
-        case (Some(ddiReference), Some(paymentPlanReference)) =>
-          val chrisRequest = buildChrisSubmissionRequest(ua, ddiReference)
-          nddService.submitChrisData(chrisRequest).flatMap { success =>
-            if (success) {
-              logger.info(s"CHRIS submission successful for amend payment plan for DDI Ref [$ddiReference]")
-              for {
-                lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
-                updatedAnswers <- Future.fromTry(ua.set(AmendPaymentPlanConfirmationPage, true))
-                _              <- sessionRepository.set(updatedAnswers)
-
-              } yield {
-                if (lockResponse.lockSuccessful) {
-                  logger.debug(s"Amend payment plan lock returns: ${lockResponse.lockSuccessful}")
-                } else {
-                  logger.debug(s"Amend payment plan lock returns: ${lockResponse.lockSuccessful}")
-                }
-                Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()) // TODO - Update to TestOnly AmendPaymentPlanUpdateController
-              }
-            } else {
-              logger.error(s"CHRIS submission failed amend payment plan for DDI Ref [$ddiReference]")
-              Future.successful(
-                Redirect(routes.JourneyRecoveryController.onPageLoad())
-              )
-            }
-          }
-
-        case _ =>
-          logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to amend payment plan")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      // F26 duplicate check
+      nddService.isDuplicatePaymentPlan(ua).flatMap { duplicateResponse =>
+        if (duplicateResponse.isDuplicate) {
+          Future.successful(Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)) // TODO - Update to TestOnly DW1
+        } else {
+          submitToChris(ua)
+        }
       }
+
     }
+
+  private def submitToChris(ua: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] = {
+    (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
+      case (Some(ddiReference), Some(paymentPlanReference)) =>
+        val chrisRequest = buildChrisSubmissionRequest(ua, ddiReference)
+        nddService.submitChrisData(chrisRequest).flatMap { success =>
+          if (success) {
+            logger.info(s"CHRIS submission successful for amend payment plan for DDI Ref: [$ddiReference]")
+            for {
+              lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
+              updatedAnswers <- Future.fromTry(ua.set(AmendPaymentPlanConfirmationPage, true))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield {
+              logger.debug(s"Amend payment plan lock returns: ${lockResponse.lockSuccessful}")
+              Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()) // TODO - Update to AP3 TestOnly AmendPaymentPlanUpdateController
+            }
+          } else {
+            logger.error(s"CHRIS submission failed amend payment plan for DDI Ref [$ddiReference]")
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          }
+        }
+
+      case _ =>
+        logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to amend payment plan confirmation")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+    }
+  }
 
   private def buildChrisSubmissionRequest(
     userAnswers: UserAnswers,
     ddiReference: String
   ): ChrisSubmissionRequest = {
-
     userAnswers.get(PaymentPlanDetailsQuery) match {
       case Some(response) =>
         val planDetail = response.paymentPlanDetails
