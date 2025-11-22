@@ -94,7 +94,7 @@ class PaymentPlanDetailsController @Inject() (
                 val showAmendLink = isAmendLinkVisible(showAllActionsFlag, planDetail)
                 val showCancelLink = isCancelLinkVisible(showAllActionsFlag, planDetail)
                 val showSuspendLink = isSuspendLinkVisible(showAllActionsFlag, planDetail)
-                val summaryRows: Seq[SummaryListRow] = buildSummaryRows(planDetail)
+                val summaryRows: Seq[SummaryListRow] = buildSummaryRows(showAllActionsFlag, planDetail)
                 val isSuspensionActive = isSuspendPeriodActive(planDetail)
 
                 val formattedSuspensionStartDate = planDetail.suspensionStartDate
@@ -150,7 +150,7 @@ class PaymentPlanDetailsController @Inject() (
       } yield Redirect(routes.PaymentPlanDetailsController.onPageLoad())
     }
 
-  private def buildSummaryRows(planDetail: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {
+  private def buildSummaryRows(showAllActionsFlag: Boolean, planDetail: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {
     planDetail.planType match {
       case PaymentPlanType.SinglePaymentPlan.toString =>
         Seq(
@@ -174,7 +174,7 @@ class PaymentPlanDetailsController @Inject() (
           }
           ++
           (if (isSuspendPeriodActive(planDetail)) {
-             Seq(SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, showActions = true))
+             Seq(SuspensionPeriodRangeDateSummary.row(planDetail.suspensionStartDate, planDetail.suspensionEndDate, showActions = showAllActionsFlag))
            } else {
              Seq.empty
            })
@@ -250,9 +250,7 @@ class PaymentPlanDetailsController @Inject() (
   }
 
   private def isSuspendPeriodActive(planDetail: PaymentPlanDetails): Boolean = {
-    (for {
-      suspensionEndDate <- planDetail.suspensionEndDate
-    } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
+    planDetail.suspensionEndDate.nonEmpty
   }
 
   private def getAdvanceNoticeData(
