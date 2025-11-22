@@ -495,6 +495,12 @@ amendPlanStartDate.p1 = This is the earliest date that HM Revenue & Customs (HMR
 amendPlanStartDate.warning = If your payment is late you may be liable to pay interest and/or a surcharge.
 amendPlanStartDate.hint = e.g. 15 5 2025
 
+testOnly.amendPlanStartDate.title = When do you want to make this payment?
+testOnly.amendPlanStartDate.heading = When do you want to make this payment?
+testOnly.amendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
+testOnly.amendPlanStartDate.warning = If your payment is late, you may be liable to pay interest or a surcharge.
+testOnly.amendPlanStartDate.hint = For example, 27 3 2020
+
 amendPlanEndDate.title = What date are you ending this payment plan?
 amendPlanEndDate.heading = What date are you ending this payment plan?
 amendPlanEndDate.p1 = This is the final date that HM Revenue & Customs (HMRC) will collect payment from your account.

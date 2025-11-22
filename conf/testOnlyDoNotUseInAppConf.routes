@@ -12,3 +12,7 @@
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
 
+GET        /direct-debits/test-only/date-starting-payment-plan                          controllers.testonly.TestOnlyAmendPlanStartDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /direct-debits/test-only/date-starting-payment-plan                          controllers.testonly.TestOnlyAmendPlanStartDateController.onSubmit(mode: Mode = NormalMode)
+GET        /direct-debits/test-only/change-payment-plan/date-starting-payment-plan      controllers.testonly.TestOnlyAmendPlanStartDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /direct-debits/test-only/change-payment-plan/date-starting-payment-plan      controllers.testonly.TestOnlyAmendPlanStartDateController.onSubmit(mode: Mode = CheckMode)
