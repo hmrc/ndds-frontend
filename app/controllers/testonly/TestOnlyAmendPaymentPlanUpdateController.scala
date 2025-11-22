@@ -73,7 +73,7 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
             Ok(
               view(
                 appConfig.hmrcHelplineUrl,
-                currencyFormat.format(paymentAmount),
+                paymentAmount.map(currencyFormat.format).getOrElse(""),
                 startDate.map(dateFormat.format).getOrElse(""),
                 directDebitReference,
                 directDebitDetails.bankAccountName.getOrElse(""),
