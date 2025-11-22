@@ -29,7 +29,7 @@
 
 @(regularPaymentAmount: String, startDate: String, rows: Seq[SummaryListRow],call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForManageJourneyNoForm(messages("removeSuspensionConfirmation.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("removeSuspensionConfirmation.title")), showBackLink = false) {
 
 
     @confirmationPanel(
