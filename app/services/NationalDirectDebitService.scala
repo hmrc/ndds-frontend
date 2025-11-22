@@ -31,8 +31,8 @@ import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
 
-import java.time.temporal.ChronoUnit
 import java.time.{Clock, LocalDate}
+import java.time.temporal.ChronoUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -146,7 +146,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     config.paymentDelayFixed + dynamicDelay
   }
 
-  // PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
+  // PaymentPlanTypePage used for setup journey and ManagePaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers
       .get(ManagePaymentPlanTypePage)
