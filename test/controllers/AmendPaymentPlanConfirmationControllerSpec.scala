@@ -177,8 +177,8 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           )(request, messages(application)).toString
         }
       }
-      "must redirect to page not found if already value is submitted and click browser back from confirmation page" in {
 
+      "must redirect to page not found if already value is submitted and click browser back from confirmation page" in {
         val mockBudgetPaymentPlanDetailResponse =
           dummyPlanDetailResponse.copy(paymentPlanDetails =
             dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)

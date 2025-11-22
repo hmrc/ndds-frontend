@@ -18,6 +18,7 @@ package controllers.testonly
 
 import controllers.actions.*
 import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import models.*
 import models.audits.AmendPaymentPlanAudit
 import models.requests.ChrisSubmissionRequest
@@ -122,7 +123,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       // F26 duplicate check
       nddService.isDuplicatePaymentPlan(ua).flatMap { duplicateResponse =>
         if (duplicateResponse.isDuplicate) {
-          Future.successful(Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)) // TODO - Update to TestOnly DW1
+          Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)) // TODO - Update to TestOnly DW1
         } else {
           submitToChris(ua)
         }

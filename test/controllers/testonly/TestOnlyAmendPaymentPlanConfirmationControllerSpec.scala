@@ -18,24 +18,21 @@ package controllers.testonly
 
 import base.SpecBase
 import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import models.responses.*
-import models.{NormalMode, PaymentPlanType, UserAnswers}
+import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
-import play.api.Application
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{Constants, DirectDebitDetailsData}
-import viewmodels.checkAnswers.*
-import views.html.testonly.TestOnlyAmendPaymentPlanConfirmationView
+import utils.DirectDebitDetailsData
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -506,7 +503,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
