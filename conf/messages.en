@@ -1,7 +1,5 @@
 service.name = National Direct Debit System
-
 service.setup = Set up a direct debit
-
 service.manage = Manage a payment plan
 
 site.back = Back
@@ -712,3 +710,16 @@ addPaymentPlanEndDate.p1 = This is not mandatory. You will be able to add an end
 addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
+
+
+
+############### Test only Amend flow ################
+
+testOnlyAmendPaymentPlanConfirmation.title = Check your amendment details
+testOnlyAmendPaymentPlanConfirmation.heading = Check your amendment details
+testOnlyAmendPaymentPlanConfirmation.continueAndContinueButton = Confirm and continue
+testOnlyAmendPaymentPlanConfirmation.cancel.link = Cancel and return to payment plan
+amendPaymentAmount.change.hidden =  Amend payment amount
+amendPaymentDate.change.hidden =  Amend payment date
+
+#####################################################

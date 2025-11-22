@@ -18,24 +18,22 @@ package viewmodels.checkAnswers
 
 import controllers.routes
 import models.{CheckMode, UserAnswers}
-import pages.PaymentDatePage
-import play.api.i18n.{Lang, Messages}
+import pages.AmendPaymentDatePage
+import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.DateTimeFormats.dateTimeFormat
 import viewmodels.govuk.summarylist.*
-import utils.DateTimeFormats.formattedDateTimeShort
 import viewmodels.implicits.*
 
-object PaymentDateSummary {
+import java.time.format.DateTimeFormatter
+
+object AmendPaymentDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentDatePage).map { answer =>
-
-      implicit val lang: Lang = messages.lang
+    answers.get(AmendPaymentDatePage).map { answer =>
 
       SummaryListRowViewModel(
         key   = "paymentDate.checkYourAnswersLabel",
-        value = ValueViewModel(answer.enteredDate.format(dateTimeFormat())),
+        value = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
         actions = Seq(
           ActionItemViewModel("site.change", routes.PaymentDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("paymentDate.change.hidden"))
@@ -43,22 +41,4 @@ object PaymentDateSummary {
       )
     }
 
-  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PaymentDatePage).map { answer =>
-
-      val formattedValue =
-        s"${formattedDateTimeShort(answer.enteredDate.toString)}"
-      SummaryListRowViewModel(
-        key   = "paymentDate.checkYourAnswersLabel",
-        value = ValueViewModel(formattedValue),
-        actions = if (showChange) {
-          Seq(
-            ActionItemViewModel("site.change", routes.PaymentDateController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("paymentDate.change.hidden"))
-          )
-        } else {
-          Seq.empty
-        }
-      )
-    }
 }
