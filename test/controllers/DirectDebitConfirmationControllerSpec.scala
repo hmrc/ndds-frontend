@@ -20,12 +20,11 @@ import base.SpecBase
 import config.CurrencyFormatter.currencyFormat
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import models.responses.GenerateDdiRefResponse
-import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, TotalAmountDuePage, YourBankDetailsPage}
+import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PaymentReferencePage, YourBankDetailsPage}
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.Key
 import viewmodels.checkAnswers.{DirectDebitSourceSummary, PaymentDateSummary, PaymentPlanTypeSummary, PaymentReferenceSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
