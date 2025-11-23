@@ -113,49 +113,53 @@ class RemovingThisSuspensionController @Inject() (
             val suspensionStartDate = planDetail.suspensionStartDate
             val suspensionEndDate = planDetail.suspensionEndDate
 
-            for {
-              lockResponse <- nddsService.lockPaymentPlan(ddiReference, paymentPlanReference)
+            form
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  Future.successful(
+                    BadRequest(view(formWithErrors, mode, paymentReference, suspensionStartDate, suspensionEndDate))
+                  ),
+                value =>
+                  value match {
 
-              result <- form
-                          .bindFromRequest()
-                          .fold(
-                            formWithErrors =>
-                              Future.successful(
-                                BadRequest(view(formWithErrors, mode, paymentReference, suspensionStartDate, suspensionEndDate))
-                              ),
-                            value =>
-                              ua.get(queries.DirectDebitReferenceQuery) match {
-                                case Some(ddiReference) =>
-                                  val chrisRequest = removeSuspensionChrisSubmissionRequest(ua, ddiReference)
-                                  nddsService.submitChrisData(chrisRequest).flatMap { success =>
-                                    if (success) {
-                                      logger.info(s"CHRIS submission successful for removing suspension [DDI Ref: $ddiReference]")
+                    case false =>
+                      Future.successful(Redirect(routes.PaymentPlanDetailsController.onPageLoad()))
 
-                                      for {
-                                        updatedAnswers <- Future.fromTry(ua.set(RemovingThisSuspensionPage, value))
-                                        updatedAnswers <- Future.fromTry(updatedAnswers.set(RemovingThisSuspensionConfirmationPage, value))
-                                        _              <- sessionRepository.set(updatedAnswers)
-                                      } yield Redirect(navigator.nextPage(RemovingThisSuspensionPage, mode, updatedAnswers))
+                    case true =>
+                      ua.get(queries.DirectDebitReferenceQuery) match {
+                        case Some(ddiReference) =>
+                          val chrisRequest = removeSuspensionChrisSubmissionRequest(ua, ddiReference)
+                          nddsService.submitChrisData(chrisRequest).flatMap { success =>
+                            if (success) {
+                              logger.info(s"CHRIS submission successful for removing suspension [DDI Ref: $ddiReference]")
 
-                                    } else {
-                                      logger.error(s"CHRIS submission failed for removing suspension [DDI Ref: $ddiReference]")
-                                      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                                    }
-                                  }
+                              for {
+                                updatedAnswers <- Future.fromTry(ua.set(RemovingThisSuspensionPage, value))
+                                updatedAnswers <- Future.fromTry(updatedAnswers.set(RemovingThisSuspensionConfirmationPage, value))
+                                lockResponse   <- nddsService.lockPaymentPlan(ddiReference, paymentPlanReference)
+                                _              <- sessionRepository.set(updatedAnswers)
+                              } yield {
+                                if (lockResponse.lockSuccessful) {
+                                  logger.debug(s"Remove  payment plan lock returns: ${lockResponse.lockSuccessful}")
+                                } else {
+                                  logger.debug(s"Remove payment plan lock returns: ${lockResponse.lockSuccessful}")
+                                }
 
-                                case None =>
-                                  logger.error("Missing DirectDebitReference in UserAnswers when trying to remove suspension")
-                                  Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                                Redirect(navigator.nextPage(RemovingThisSuspensionPage, mode, updatedAnswers))
                               }
-                          )
-            } yield {
-              if (lockResponse.lockSuccessful) {
-                logger.debug(s"Remove  payment plan lock returns: ${lockResponse.lockSuccessful}")
-              } else {
-                logger.debug(s"Remove payment plan lock returns: ${lockResponse.lockSuccessful}")
-              }
-              result
-            }
+                            } else {
+                              logger.error(s"CHRIS submission failed for removing suspension [DDI Ref: $ddiReference]")
+                              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                            }
+                          }
+
+                        case None =>
+                          logger.error("Missing DirectDebitReference in UserAnswers when trying to remove suspension")
+                          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                      }
+                  }
+              )
 
           case (_, Some(_), Some(_)) =>
             Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
