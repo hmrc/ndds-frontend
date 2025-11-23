@@ -14,3 +14,5 @@
 
 GET        /direct-debits/test-only/amount-need-to-pay      controllers.testOnly.AmendPaymentAmountTestOnlyController.onPageLoad(mode: Mode = NormalMode)
 POST       /direct-debits/test-only/amount-need-to-pay      controllers.testOnly.AmendPaymentAmountTestOnlyController.onSubmit(mode: Mode = NormalMode)
+
+GET        /direct-debits/test-only/amending-payment-plan       controllers.testOnly.TestOnlyAmendingPaymentPlanController.onPageLoad()
