@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import models.CheckMode
 @import views.html.components.*
 
 @this(
@@ -29,7 +28,7 @@
 @(mode: Mode, rows: Seq[SummaryListRow], call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleForManageJourneyNoForm(messages("testOnlyAmendPaymentPlanConfirmation.title")), backLink = Some(call.url)) {
-    @formHelper(action = routes.AmendPaymentPlanConfirmationController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @formHelper(action = controllers.testonly.routes.TestOnlyAmendPaymentPlanConfirmationController.onSubmit(), Symbol("autoComplete") -> "off") {
         @header1("testOnlyAmendPaymentPlanConfirmation.heading")
 
         @govukSummaryList(SummaryList(rows = rows))

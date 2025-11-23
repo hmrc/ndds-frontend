@@ -130,7 +130,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       // F26 duplicate check
       nddService.isDuplicatePaymentPlan(ua).flatMap { duplicateResponse =>
         if (duplicateResponse.isDuplicate) {
-          Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)) // TODO - Update to TestOnly DW1
+          Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(mode).url))
         } else {
           submitToChris(ua)
         }
@@ -150,8 +150,8 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
               updatedAnswers <- Future.fromTry(ua.set(AmendPaymentPlanConfirmationPage, true))
               _              <- sessionRepository.set(updatedAnswers)
             } yield {
-              logger.debug(s"Amend payment plan lock returns: ${lockResponse.lockSuccessful}")
-              Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()) // TODO - Update to AP3 TestOnly AmendPaymentPlanUpdateController
+              logger.debug(s"Amend payment plan lock returned: ${lockResponse.lockSuccessful}")
+              Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad())
             }
           } else {
             logger.error(s"CHRIS submission failed amend payment plan for DDI Ref [$ddiReference]")

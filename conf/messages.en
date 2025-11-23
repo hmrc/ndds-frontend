@@ -711,15 +711,43 @@ addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
 
-
-
 ############### Test only Amend flow ################
-
+#AP2 messages
 testOnlyAmendPaymentPlanConfirmation.title = Check your amendment details
 testOnlyAmendPaymentPlanConfirmation.heading = Check your amendment details
 testOnlyAmendPaymentPlanConfirmation.continueAndContinueButton = Confirm and continue
 testOnlyAmendPaymentPlanConfirmation.cancel.link = Cancel and return to payment plan
 amendPaymentAmount.change.hidden =  Amend payment amount
 amendPaymentDate.change.hidden =  Amend payment date
+
+#AP3 messages
+newAmendPaymentPlanUpdate.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+newAmendPaymentPlanUpdate.p2 = Any existing suspension on this payment plan will be removed. It may take up to 36 hours for this amendment to appear in your account.
+newAmendPaymentPlanUpdate.p3 = You must have enough funds in your account for this payment to be collected. If any of the details are incorrect,
+newAmendPaymentPlanUpdate.p3.link = you must contact the HMRC Helpline
+newAmendPaymentPlanUpdate.summary.title = The Direct Debit Guarantee
+newAmendPaymentPlanUpdate.summary.p1 = This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.
+newAmendPaymentPlanUpdate.summary.p2 = If there are any changes to the amount, date or frequency of your Direct Debit, HMRC NDDS will notify you 10 working days in advance of your account being debited, or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request.
+newAmendPaymentPlanUpdate.summary.p3 = If an error is made in the payment of your Direct Debit by HMRC NDDS, or your bank or building society, you are entitled to a full and immediate refund of the amount paid from your bank or building society.
+newAmendPaymentPlanUpdate.summary.p4 = If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to.
+newAmendPaymentPlanUpdate.summary.p5 = You can cancel a Direct Debit at any time, by contacting your bank or building society. Written confirmation may be required.
+newAmendPaymentPlanUpdate.directDebitDetails = Direct Debit details
+newAmendPaymentPlanUpdate.directDebit.reference = Direct Debit reference
+newAmendPaymentPlanUpdate.directDebit.accountName = Name on the account
+newAmendPaymentPlanUpdate.directDebit.accountNumber = Account number
+newAmendPaymentPlanUpdate.directDebit.sortCode = Sort code
+newAmendPaymentPlanUpdate.amendedPlan = Your amended payment plan
+newAmendPaymentPlanUpdate.yourAmendedDetails.reference = Payment reference
+newAmendPaymentPlanUpdate.yourAmendedDetails.dateSetup = Date set up
+newAmendPaymentPlanUpdate.yourAmendedDetails.paymentAmount = Payment amount
+newAmendPaymentPlanUpdate.yourAmendedDetails.paymentDate = Payment date
+newAmendPaymentPlanUpdate.printInset = You can print this page for your records using the print function on your browser.
+newAmendPaymentPlanUpdate.returnLink = Return to payment plan
+
+#DW1 messages
+testOnlyDuplicateWarning.title = You already have a payment plan with these details
+testOnlyDuplicateWarning.h1 = You already have a payment plan with these details
+testOnlyDuplicateWarning.p1 = <br>You already have a payment plan set up with the same amount and dates.
+testOnlyDuplicateWarning.h2 = Do you want to continue with this amendment?
 
 #####################################################

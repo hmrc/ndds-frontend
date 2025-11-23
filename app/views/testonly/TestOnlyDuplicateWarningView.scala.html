@@ -29,7 +29,7 @@
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForManageJourney(form, messages("duplicateWarning.title")), backLink = Some(call.url)) {
+@layout(pageTitle = titleForManageJourney(form, messages("testOnlyDuplicateWarning.title")), backLink = Some(call.url)) {
 
     @formHelper(action = controllers.testonly.routes.TestOnlyDuplicateWarningController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
@@ -37,11 +37,11 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        @h1("duplicateWarning.h1")
+        @h1("testOnlyDuplicateWarning.h1")
 
-        @paragraph("duplicateWarning.p1")
+        @paragraph("testOnlyDuplicateWarning.p1")
 
-        @h2("duplicateWarning.h2")
+        @h2("testOnlyDuplicateWarning.h2")
 
         @govukRadios(
             RadiosViewModel(

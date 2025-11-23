@@ -50,20 +50,8 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
                                               paymentPlanDetails: PaymentPlanResponse,
                                               app: Application
                                              ): Seq[SummaryListRow] = {
-      val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
-//        AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse(""))(messages(app)),
-//        AmendPaymentPlanSourceSummary.row(paymentPlan.hodService)(messages(app)),
-//        TotalAmountDueSummary.row(paymentPlan.totalLiability)(messages(app)),
-//        MonthlyPaymentAmountSummary.row(paymentPlan.scheduledPaymentAmount, paymentPlan.totalLiability)(messages(app)),
-//        FinalPaymentAmountSummary.row(paymentPlan.balancingPaymentAmount, paymentPlan.totalLiability)(messages(app)),
-//        PaymentsFrequencySummary.row(paymentPlan.scheduledPaymentFrequency)(messages(app)),
-//        AmendPlanStartDateSummary.row(
-//          PaymentPlanType.BudgetPaymentPlan.toString,
-//          userAnswers.get(AmendPlanStartDatePage),
-//          Constants.shortDateTimeFormatPattern
-//        )(messages(app)),
         AmendPaymentAmountSummary.row(
           PaymentPlanType.BudgetPaymentPlan.toString,
           userAnswers.get(AmendPaymentAmountPage),
@@ -81,12 +69,8 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
                                                paymentPlanDetails: PaymentPlanResponse,
                                                app: Application
                                               ): Seq[SummaryListRow] = {
-      val paymentPlan = paymentPlanDetails.paymentPlanDetails
 
       Seq(
-//        AmendPaymentPlanTypeSummary.row(userAnswers.get(ManagePaymentPlanTypePage).getOrElse(""))(messages(app)),
-//        AmendPaymentPlanSourceSummary.row(paymentPlan.hodService)(messages(app)),
-//        DateSetupSummary.row(paymentPlan.submissionDateTime)(messages(app)),
         AmendPaymentAmountSummary.row(
           PaymentPlanType.SinglePaymentPlan.toString,
           userAnswers.get(AmendPaymentAmountPage),
@@ -353,7 +337,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual routes.AmendPaymentPlanUpdateController.onPageLoad().url
+          redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad().url
         }
       }
 
