@@ -28,14 +28,14 @@
 
 @(hmrcHelplineUrl: String, paymentAmountRow: SummaryListRow, paymentDateRow: SummaryListRow)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoFormManagePlan(messages("amendingPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
+@layout(pageTitle = titleNoFormManagePlan(messages("testOnlyAmendingPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
-  @h1("amendingPaymentPlan.heading")
+  @h1("testOnlyAmendingPaymentPlan.heading")
 
   @paragraphWithLink(
-    message1 = Some(messages("amendingPaymentPlan.p2.prefix")),
-    linkMessage = messages("amendingPaymentPlan.p2.link"),
-    message2 = Some(messages("amendingPaymentPlan.p2.suffix")),
+    message1 = Some(messages("testOnlyAmendingPaymentPlan.p2.prefix")),
+    linkMessage = messages("testOnlyAmendingPaymentPlan.p2.link"),
+    message2 = Some(messages("testOnlyAmendingPaymentPlan.p2.suffix")),
     linkUrl = hmrcHelplineUrl,
     linkRel = "noreferrer noopener",
     target = "_blank"
@@ -43,13 +43,13 @@
 
  @bulletList(
    items = Seq(
-     "amendingPaymentPlan.list.1",
-     "amendingPaymentPlan.list.2",
-     "amendingPaymentPlan.list.3"
+     "testOnlyAmendingPaymentPlan.list.1",
+     "testOnlyAmendingPaymentPlan.list.2",
+     "testOnlyAmendingPaymentPlan.list.3"
    )
  )
 
-  @paragraph("amendingPaymentPlan.p3")
+  @paragraph("testOnlyAmendingPaymentPlan.p3")
 
   @govukSummaryList(
     SummaryList(
@@ -59,7 +59,7 @@
 
 
   @paragraphWithLink(
-     linkMessage = messages("amendingPaymentPlan.cancel.link"),
+     linkMessage = messages("testOnlyAmendingPaymentPlan.cancel.link"),
      linkUrl = routes.PaymentPlanDetailsController.onPageLoad().url
   )
 }

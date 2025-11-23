@@ -713,6 +713,18 @@ addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
 
 ############### Test only Amend flow ################
 
+#AP0 messages
+testOnlyAmendingPaymentPlan.title = Amending this payment plan
+testOnlyAmendingPaymentPlan.heading = Amending this payment plan
+testOnlyAmendingPaymentPlan.p2.prefix = For security reasons,
+testOnlyAmendingPaymentPlan.p2.link = you must contact the HMRC Helpline
+testOnlyAmendingPaymentPlan.p2.suffix = to change the:
+testOnlyAmendingPaymentPlan.list.1 = Direct Debit reference
+testOnlyAmendingPaymentPlan.list.2 = bank account details
+testOnlyAmendingPaymentPlan.list.3 = payment reference
+testOnlyAmendingPaymentPlan.p3 = Payments due within the next 3 working days cannot be amended.
+testOnlyAmendingPaymentPlan.cancel.link = Cancel and return to payment plan
+
 #AP1a messages
 testOnlyAmendPaymentAmount.title = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.heading = How much do you want to pay, in pounds?
