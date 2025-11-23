@@ -74,7 +74,7 @@
     }
 
 
-@govukSummaryList(SummaryList(
+    @govukSummaryList(SummaryList(
         card = Some(Card(
             title = Some(CardTitle(
             content = messages("paymentPlanDetails.details.paymentReference", paymentReference)
@@ -83,7 +83,7 @@
                 Some(Actions(
                     items = Seq(
                         if (showAmendLink) ActionItem(
-                            href = routes.AmendingPaymentPlanController.onPageLoad().url,
+                            href = controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad().url,
                             content = messages("paymentPlanDetails.details.amend"),
                             visuallyHiddenText = Some(messages("Amend"))
                         ) else null,

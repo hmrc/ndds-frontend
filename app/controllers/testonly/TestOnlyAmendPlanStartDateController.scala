@@ -17,7 +17,8 @@
 package controllers.testonly
 
 import controllers.actions.*
-import controllers.{JourneyRecoveryController, routes}
+import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import forms.AmendPlanStartDateFormProvider
 import models.{Mode, UserAnswers}
 import navigation.Navigator
@@ -39,7 +40,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class TestOnlyAmendPlanStartDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
-  navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
@@ -63,7 +63,7 @@ class TestOnlyAmendPlanStartDateController @Inject() (
           .orElse(request.userAnswers.get(AmendPlanStartDatePage))
           .fold(form)(form.fill)
 
-        Ok(view(preparedForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))
+        Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))
       } else {
         val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
@@ -79,7 +79,8 @@ class TestOnlyAmendPlanStartDateController @Inject() (
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentAmountController.onPageLoad(mode)))),
+        formWithErrors =>
+          Future.successful(BadRequest(view(formWithErrors, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))),
         value =>
           if (nddsService.amendPaymentPlanGuard(userAnswers)) {
             (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
@@ -92,7 +93,7 @@ class TestOnlyAmendPlanStartDateController @Inject() (
                 if (isNoChange) {
                   val key = "amendment.noChange"
                   val errorForm = form.fill(value).withError("value", key)
-                  Future.successful(BadRequest(view(errorForm, mode, routes.AmendPaymentAmountController.onPageLoad(mode))))
+                  Future.successful(BadRequest(view(errorForm, mode, testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode))))
                 } else {
                   checkForDuplicate(mode, userAnswers, value)
                 }
@@ -121,9 +122,9 @@ class TestOnlyAmendPlanStartDateController @Inject() (
     } yield {
       logger.warn(s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}")
       if (duplicateCheckResponse.isDuplicate) {
-        Redirect(routes.DuplicateWarningController.onPageLoad(mode).url)
+        Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
       } else {
-        Redirect(controllers.testonly.routes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url)
+        Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url)
       }
     }
   }

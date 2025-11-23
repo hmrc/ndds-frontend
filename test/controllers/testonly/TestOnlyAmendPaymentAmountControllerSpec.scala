@@ -18,6 +18,7 @@ package controllers.testonly
 
 import base.SpecBase
 import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import forms.AmendPaymentAmountFormProvider
 import models.{CheckMode, NormalMode, PaymentPlanType}
 import navigation.{FakeNavigator, Navigator}
@@ -68,7 +69,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form,
           NormalMode,
-          routes.AmendingPaymentPlanController.onPageLoad()
+          testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -96,7 +97,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form,
           NormalMode,
-          routes.AmendingPaymentPlanController.onPageLoad()
+          testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -127,7 +128,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form.fill(validAnswer),
           NormalMode,
-          routes.AmendingPaymentPlanController.onPageLoad()
+          testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -213,7 +214,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           boundForm,
           NormalMode,
-          routes.AmendingPaymentPlanController.onPageLoad()
+          testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -257,7 +258,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form,
           CheckMode,
-          routes.AmendingPaymentPlanController.onPageLoad()
+          testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -285,7 +286,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form,
           CheckMode,
-          routes.AmendingPaymentPlanController.onPageLoad()
+          testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -316,7 +317,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           form.fill(validAnswer),
           CheckMode,
-          routes.AmendingPaymentPlanController.onPageLoad()
+          testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -402,7 +403,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         contentAsString(result) mustEqual view(
           boundForm,
           CheckMode,
-          routes.AmendingPaymentPlanController.onPageLoad()
+          testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
         )(request, messages(application)).toString
       }
     }

@@ -16,9 +16,9 @@
 
 package controllers.testonly
 
-import controllers.{JourneyRecoveryController, routes}
-import controllers.testonly.routes as testonlyRoutes
 import base.SpecBase
+import controllers.routes
+import controllers.testonly.routes as testonlyRoutes
 import forms.AmendPlanStartDateFormProvider
 import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NormalMode, PaymentPlanType, UserAnswers}
@@ -47,7 +47,7 @@ class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSuga
 
   lazy val amendPlanStartDateRoute: String = testonlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(NormalMode).url
   lazy val amendPlanStartDateRoutePost: String = testonlyRoutes.TestOnlyAmendPlanStartDateController.onSubmit(NormalMode).url
-  lazy val amendPaymentAmountRoute: String = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
+  lazy val amendingPaymentPlanRoute: String = testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad().url
   lazy val planConfirmationPage: String = testonlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
@@ -89,7 +89,9 @@ class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSuga
           val view = application.injector.instanceOf[TestOnlyAmendPlanStartDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendingPaymentPlanRoute))(getRequest(),
+                                                                                                          messages(application)
+                                                                                                         ).toString
         }
       }
 
@@ -112,9 +114,9 @@ class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSuga
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(),
-                                                                                                                           messages(application)
-                                                                                                                          ).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendingPaymentPlanRoute))(getRequest(),
+                                                                                                                            messages(application)
+                                                                                                                           ).toString
         }
       }
 
@@ -179,7 +181,9 @@ class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSuga
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendingPaymentPlanRoute))(request,
+                                                                                                               messages(application)
+                                                                                                              ).toString
         }
       }
 
@@ -213,7 +217,7 @@ class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSuga
 
           status(result) mustEqual BAD_REQUEST
           contentAsString(result) mustEqual
-            view(errorForm, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
+            view(errorForm, NormalMode, Call("GET", amendPlanStartDateRoute))(request, messages(application)).toString
         }
       }
 
@@ -245,7 +249,7 @@ class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSuga
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual testonlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -309,7 +313,7 @@ class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSuga
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual testonlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -373,7 +377,7 @@ class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSuga
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual testonlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 

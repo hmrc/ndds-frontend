@@ -16,8 +16,9 @@
 
 package controllers.testonly
 
-import controllers.routes
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
 import pages.{AmendPaymentAmountPage, ManagePaymentPlanTypePage}
@@ -59,7 +60,7 @@ class TestOnlyAmendPaymentAmountController @Inject() (
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode, routes.AmendingPaymentPlanController.onPageLoad()))
+      Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"[TestOnly] NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
@@ -71,7 +72,8 @@ class TestOnlyAmendPaymentAmountController @Inject() (
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendingPaymentPlanController.onPageLoad()))),
+        formWithErrors =>
+          Future.successful(BadRequest(view(formWithErrors, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
