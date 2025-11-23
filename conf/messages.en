@@ -712,3 +712,15 @@ addPaymentPlanEndDate.p1 = This is not mandatory. You will be able to add an end
 addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
+
+tellAboutThisPayment.title = Tell us about this payment
+tellAboutThisPayment.heading = Tell us about this payment
+tellAboutThisPayment.question = Do you need to add 4 extra numbers to your payment reference?
+tellAboutThisPayment.p1.1 = If
+tellAboutThisPayment.p1.link.1 = this payment is early, late
+tellAboutThisPayment.p1.2 = , or
+tellAboutThisPayment.p1.link.2 = a P11D payment
+tellAboutThisPayment.p1.3 =  , you need to add 4 extra numbers to your payment reference. We need this information to make sure your payment is allocated correctly.
+tellAboutThisPayment.checkYourAnswersLabel = Tell us about this payment
+tellAboutThisPayment.error.required = Select one option.
+tellAboutThisPayment.change.hidden = Tell us about this payment

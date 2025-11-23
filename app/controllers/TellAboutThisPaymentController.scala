@@ -16,74 +16,59 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
-import forms.PaymentAmountFormProvider
-import models.DirectDebitSource.PAYE
+import forms.TellAboutThisPaymentFormProvider
+
+import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.{DirectDebitSourcePage, PaymentAmountPage, TellAboutThisPaymentPage}
-import play.api.data.Form
+import pages.TellAboutThisPaymentPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.PaymentAmountView
+import views.html.TellAboutThisPaymentView
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PaymentAmountController @Inject() (
+class TellAboutThisPaymentController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: PaymentAmountFormProvider,
+  formProvider: TellAboutThisPaymentFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: PaymentAmountView
-)(implicit ec: ExecutionContext)
+  view: TellAboutThisPaymentView
+)(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
     extends FrontendBaseController
     with I18nSupport {
 
-  val form: Form[BigDecimal] = formProvider()
+  val form = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    val answers = request.userAnswers
-    val preparedForm = answers.get(PaymentAmountPage) match {
+
+    val preparedForm = request.userAnswers.get(TellAboutThisPaymentPage) match {
       case None        => form
       case Some(value) => form.fill(value)
     }
-    val selectedAnswers = answers.get(DirectDebitSourcePage)
-    val tellAboutPaymentSelected = answers.get(TellAboutThisPaymentPage)
-    if (selectedAnswers.contains(PAYE)) {
-      if (tellAboutPaymentSelected.contains(false)) {
-        Ok(view(preparedForm, mode, routes.TellAboutThisPaymentController.onPageLoad(mode)))
-      } else {
-        Ok(view(preparedForm, mode, routes.YearEndAndMonthController.onPageLoad(mode)))
-      }
-    } else {
-      Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
-    }
+
+    Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    val selectedSource = request.userAnswers.get(DirectDebitSourcePage)
 
     form
       .bindFromRequest()
       .fold(
-        formWithErrors =>
-          if (selectedSource.contains(PAYE)) {
-            Future.successful(BadRequest(view(formWithErrors, mode, routes.YearEndAndMonthController.onPageLoad(mode))))
-          } else {
-            Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentReferenceController.onPageLoad(mode))))
-          },
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentReferenceController.onPageLoad(mode)))),
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentAmountPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(TellAboutThisPaymentPage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(PaymentAmountPage, mode, updatedAnswers))
+          } yield Redirect(navigator.nextPage(TellAboutThisPaymentPage, mode, updatedAnswers))
       )
   }
 }
