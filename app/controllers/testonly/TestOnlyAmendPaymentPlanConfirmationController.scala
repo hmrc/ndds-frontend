@@ -84,21 +84,21 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
     userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
         (Seq(
-           AmendPaymentAmountSummary.row( // TODO - replace with AP1a TestOnly AmendPaymentDate
+           AmendPaymentAmountSummary.row(
              PaymentPlanType.SinglePaymentPlan.toString,
              userAnswers.get(AmendPaymentAmountPage),
              true
            ),
-           AmendPlanStartDateSummary.row( // TODO - replace with AP1b TestOnly AmendPaymentDate
+           AmendPlanStartDateSummary.row(
              PaymentPlanType.SinglePaymentPlan.toString,
              userAnswers.get(AmendPlanStartDatePage),
              Constants.shortDateTimeFormatPattern,
              true
            )
          ),
-         userAnswers.get(AmendPlanStartDatePage) match {
-           case Some(_) => routes.AmendPlanStartDateController.onPageLoad(mode) // TODO - replace with TestOnly AmendPaymentDate controller
-           case _       => routes.AmendPaymentAmountController.onPageLoad(mode) // TODO - replace with TestOnly AmendPaymentAmount controller
+         userAnswers.get(AmendPaymentAmountPage) match {
+           case Some(_) => testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode)
+           case _       => routes.AmendPlanStartDateController.onPageLoad(mode) // TODO - replace with AP1b TestOnly AmendPaymentDate controller
          }
         )
       case _ => // Budget Payment Plan
@@ -116,7 +116,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
          ),
          userAnswers.get(AmendPlanEndDatePage) match {
            case Some(_) => routes.AmendPlanEndDateController.onPageLoad(mode) // TODO - replace with TestOnly Amend plan end date controller
-           case _ => routes.AmendPaymentAmountController.onPageLoad(mode) // TODO - replace with TestOnly Amend regular payment amount controller
+           case _ => routes.RegularPaymentAmountController.onPageLoad(mode) // TODO - replace with TestOnly Amend regular payment amount controller
          }
         )
     }

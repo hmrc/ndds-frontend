@@ -31,7 +31,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
-import utils.MaskAndFormatUtils.formatAmount
 import views.html.testonly.TestOnlyPaymentPlanUpdateView
 
 import java.text.NumberFormat

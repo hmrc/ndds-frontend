@@ -260,7 +260,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           contentAsString(result) mustEqual view(
             NormalMode,
             summaryListRows,
-            routes.AmendPlanStartDateController.onPageLoad(NormalMode)
+            testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
 
         }

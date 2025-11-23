@@ -39,12 +39,12 @@
 
     @h2("amendPaymentPlanUpdate.h1")
 
-    @paragraph(messages("newAmendPaymentPlanUpdate.p1", paymentAmount, startDate))
-    @paragraph(messages("newAmendPaymentPlanUpdate.p2"))
+    @paragraph(messages("testOnlyAmendPaymentPlanUpdate.p1", paymentAmount, startDate))
+    @paragraph(messages("testOnlyAmendPaymentPlanUpdate.p2"))
 
     @paragraphWithLink(
-        Some(messages("newAmendPaymentPlanUpdate.p3")),
-        linkMessage   = messages("newAmendPaymentPlanUpdate.p3.link"),
+        Some(messages("testOnlyAmendPaymentPlanUpdate.p3")),
+        linkMessage   = messages("testOnlyAmendPaymentPlanUpdate.p3.link"),
         linkUrl       = hmrcHelplineUrl,
         linkFullStop  = true,
         linkRel       = "noreferrer noopener",
@@ -56,60 +56,60 @@
     <details class="govuk-details">
         <summary class = "govuk-details__summary">
                     <span class="govuk-details__summary-text">
-                        @messages("newAmendPaymentPlanUpdate.summary.title")
+                        @messages("testOnlyAmendPaymentPlanUpdate.summary.title")
                     </span>
         </summary>
 
         <div class="govuk-details__text">
-            @paragraph("newAmendPaymentPlanUpdate.summary.p1")
-            @paragraph("newAmendPaymentPlanUpdate.summary.p2")
-            @paragraph("newAmendPaymentPlanUpdate.summary.p3")
-            @paragraph("newAmendPaymentPlanUpdate.summary.p4")
-            @paragraph("newAmendPaymentPlanUpdate.summary.p5")
+            @paragraph("testOnlyAmendPaymentPlanUpdate.summary.p1")
+            @paragraph("testOnlyAmendPaymentPlanUpdate.summary.p2")
+            @paragraph("testOnlyAmendPaymentPlanUpdate.summary.p3")
+            @paragraph("testOnlyAmendPaymentPlanUpdate.summary.p4")
+            @paragraph("testOnlyAmendPaymentPlanUpdate.summary.p5")
         </div>
     </details>
 
-    @h2("newAmendPaymentPlanUpdate.directDebitDetails")
+    @h2("testOnlyAmendPaymentPlanUpdate.directDebitDetails")
 
     @govukSummaryList(SummaryList(
         rows = Seq(
         SummaryListRow(
-            key = Key(content = messages("newAmendPaymentPlanUpdate.directDebit.reference")),
+            key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.directDebit.reference")),
             value = Value(content = HtmlContent(directDebitReference))
             ),
         SummaryListRow(
-            key = Key(content = messages("newAmendPaymentPlanUpdate.directDebit.accountName")),
+            key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.directDebit.accountName")),
             value = Value(content = HtmlContent(bankAccountName))
             ),
         SummaryListRow(
-            key = Key(content = messages("newAmendPaymentPlanUpdate.directDebit.accountNumber")),
+            key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.directDebit.accountNumber")),
             value = Value(content = HtmlContent(accountNumber))
             ),
         SummaryListRow(
-            key = Key(content = messages("newAmendPaymentPlanUpdate.directDebit.sortCode")),
+            key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.directDebit.sortCode")),
             value = Value(content = HtmlContent(sortCode))
             )
         )
     ))
 
-    @h2("newAmendPaymentPlanUpdate.amendedPlan")
+    @h2("testOnlyAmendPaymentPlanUpdate.amendedPlan")
 
     @govukSummaryList(SummaryList(
         rows = Seq(
             SummaryListRow(
-                key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.reference")),
+                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.reference")),
                 value = Value(content = HtmlContent(paymentPlanReference))
             ),
             SummaryListRow(
-                key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.dateSetup")),
+                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.dateSetup")),
                 value = Value(content = HtmlContent(dateSetup))
             ),
             SummaryListRow(
-                key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.paymentAmount")),
+                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.paymentAmount")),
                 value = Value(content = HtmlContent(paymentAmount))
             ),
             SummaryListRow(
-                key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.paymentDate")),
+                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.paymentDate")),
                 value = Value(content = HtmlContent(paymentDate))
             )
         )
@@ -117,12 +117,12 @@
 
     @govukInsetText(
         InsetText(
-            content = Text(messages("newAmendPaymentPlanUpdate.printInset"))
+            content = Text(messages("testOnlyAmendPaymentPlanUpdate.printInset"))
         )
     )
 
     @paragraphWithLink(
-        linkMessage = messages("newAmendPaymentPlanUpdate.returnLink"),
+        linkMessage = messages("testOnlyAmendPaymentPlanUpdate.returnLink"),
         linkUrl = call.url
     )
 }
