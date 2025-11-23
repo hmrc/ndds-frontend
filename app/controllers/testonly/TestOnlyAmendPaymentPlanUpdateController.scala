@@ -28,7 +28,8 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Constants
+import utils.DateTimeFormats.dateTimeFormat
+import utils.{Constants, DateTimeFormats}
 import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.checkAnswers.*
 import views.html.TestOnlyPaymentPlanUpdateView
@@ -56,40 +57,53 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
-    if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-      val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
-      val dateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
-      userAnswers.get(PaymentPlanDetailsQuery) match {
-        case Some(response) =>
-          val planDetail = response.paymentPlanDetails
-          val directDebitDetails = response.directDebitDetails
-          val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
-          val startDate = userAnswers.get(AmendPlanStartDatePage)
-          for {
-            directDebitReference <- Future.fromTry(Try(userAnswers.get(DirectDebitReferenceQuery).get))
-            paymentPlanReference <- Future.fromTry(Try(userAnswers.get(PaymentPlanReferenceQuery).get))
-          } yield {
-            Ok(
-              view(
-                appConfig.hmrcHelplineUrl,
-                paymentAmount.map(currencyFormat.format).getOrElse(""),
-                startDate.map(dateFormat.format).getOrElse(""),
-                directDebitReference,
-                directDebitDetails.bankAccountName.getOrElse(""),
-                directDebitDetails.bankAccountNumber.getOrElse(""),
-                directDebitDetails.bankSortCode.getOrElse(""),
-                planDetail.paymentReference,
-                dateFormat.format(planDetail.submissionDateTime),
-                routes.PaymentPlanDetailsController.onPageLoad()
-              )
-            )
-          }
+    if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+
+      val maybeResult = for {
+        paymentPlan    <- userAnswers.get(PaymentPlanDetailsQuery)
+        paymentAmount  <- userAnswers.get(AmendPaymentAmountPage)
+        startDate      <- userAnswers.get(AmendPlanStartDatePage)
+        directDebitRef <- userAnswers.get(DirectDebitReferenceQuery)
+        paymentPlanRef <- userAnswers.get(PaymentPlanReferenceQuery)
+      } yield {
+        val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
+        val dateFormatShort = DateTimeFormatter.ofPattern("d MMM yyyy")
+
+        val formattedStartDateLong = startDate.format(dateFormatLong)
+        val formattedStartDateShort = startDate.format(dateFormatShort)
+        val formattedSubmissionDate = paymentPlan.paymentPlanDetails.submissionDateTime.format(dateFormatShort)
+        val directDebitDetails = paymentPlan.directDebitDetails
+        val formattedSortCode = directDebitDetails.bankSortCode
+          .map(sc => sc.grouped(2).mkString(" "))
+          .getOrElse("")
+
+        Ok(
+          view(
+            appConfig.hmrcHelplineUrl,
+            formatAmount(paymentAmount),
+            formattedStartDateLong,
+            directDebitRef,
+            directDebitDetails.bankAccountName.getOrElse(""),
+            directDebitDetails.bankAccountNumber.getOrElse(""),
+            formattedSortCode,
+            paymentPlan.paymentPlanDetails.paymentReference,
+            formattedStartDateShort,
+            formattedSubmissionDate,
+            controllers.routes.PaymentPlanDetailsController.onPageLoad()
+          )
+        )
+      }
+
+      maybeResult match {
+        case Some(result) => Future.successful(result)
         case None =>
+          logger.warn("Missing required values in user answers for amend payment plan")
           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
+
     } else {
-      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
       Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }

@@ -29,7 +29,7 @@
         paragraphWithLink: ParagraphMessageWithLink
 )
 
-@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String, dateSetup: String, call: Call)(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String, dateSetup: String, paymentDate: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
@@ -110,7 +110,7 @@
             ),
             SummaryListRow(
                 key = Key(content = messages("newAmendPaymentPlanUpdate.yourAmendedDetails.paymentDate")),
-                value = Value(content = HtmlContent(startDate))
+                value = Value(content = HtmlContent(paymentDate))
             )
         )
     ))

@@ -18,11 +18,10 @@ package controllers.testonly
 
 import base.SpecBase
 import forms.DuplicateWarningFormProvider
-import models.{NormalMode, PaymentPlanType}
+import models.NormalMode
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.ManagePaymentPlanTypePage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
