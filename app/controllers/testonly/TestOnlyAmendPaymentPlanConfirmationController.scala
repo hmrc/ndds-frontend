@@ -26,7 +26,7 @@ import models.responses.DirectDebitDetails
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
@@ -66,51 +66,58 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       Future.successful(Redirect(routes.BackSubmissionController.onPageLoad()))
     } else {
       if (nddService.amendPaymentPlanGuard(userAnswers)) {
-        val backLink = userAnswers.get(AmendPaymentAmountPage) match {
-          case Some(_) => routes.AmendPaymentAmountController.onPageLoad(mode)
-          case _       => routes.AmendPlanStartDateController.onPageLoad(mode) // TODO - replace with TestOnly AmendPaymentDate controller
-        }
+        val (rows, backLink) = buildRows(userAnswers, mode)
 
-        Future.successful(Ok(view(mode, buildRows(userAnswers), backLink)))
+        Future.successful(Ok(view(mode, rows, backLink)))
       } else {
         val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
+
     }
   }
 
-  private def buildRows(userAnswers: UserAnswers)(implicit
+  private def buildRows(userAnswers: UserAnswers, mode: Mode)(implicit
     messages: Messages
-  ): Seq[SummaryListRow] = {
+  ): (Seq[SummaryListRow], Call) = {
     userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
-        Seq(
-          AmendPaymentAmountSummary.row( // TODO - replace with AP1a TestOnly AmendPaymentDate
-            PaymentPlanType.SinglePaymentPlan.toString,
-            userAnswers.get(AmendPaymentAmountPage),
-            true
-          ),
-          AmendPaymentDateSummary.row(userAnswers).get,
-          AmendPlanStartDateSummary.row( // TODO - replace with AP1b TestOnly AmendPaymentDate
-            PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPlanStartDatePage),
-            Constants.shortDateTimeFormatPattern,
-            true
-          )
+        (Seq(
+           AmendPaymentAmountSummary.row( // TODO - replace with AP1a TestOnly AmendPaymentDate
+             PaymentPlanType.SinglePaymentPlan.toString,
+             userAnswers.get(AmendPaymentAmountPage),
+             true
+           ),
+           AmendPlanStartDateSummary.row( // TODO - replace with AP1b TestOnly AmendPaymentDate
+             PaymentPlanType.SinglePaymentPlan.toString,
+             userAnswers.get(AmendPlanStartDatePage),
+             Constants.shortDateTimeFormatPattern,
+             true
+           )
+         ),
+         userAnswers.get(AmendPlanStartDatePage) match {
+           case Some(_) => routes.AmendPlanStartDateController.onPageLoad(mode) // TODO - replace with TestOnly AmendPaymentDate controller
+           case _       => routes.AmendPaymentAmountController.onPageLoad(mode) // TODO - replace with TestOnly AmendPaymentAmount controller
+         }
         )
       case _ => // Budget Payment Plan
-        Seq(
-          AmendPaymentAmountSummary.row(
-            PaymentPlanType.BudgetPaymentPlan.toString,
-            userAnswers.get(AmendPaymentAmountPage),
-            true
-          ), // TODO - replace with AP1a TestOnly Amend RegularPaymentAmount
-          AmendPlanEndDateSummary.row(
-            userAnswers.get(AmendPlanEndDatePage),
-            Constants.shortDateTimeFormatPattern,
-            true
-          ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
+        (Seq(
+           AmendPaymentAmountSummary.row(
+             PaymentPlanType.BudgetPaymentPlan.toString,
+             userAnswers.get(AmendPaymentAmountPage),
+             true
+           ), // TODO - replace with AP1a TestOnly Amend RegularPaymentAmount
+           AmendPlanEndDateSummary.row(
+             userAnswers.get(AmendPlanEndDatePage),
+             Constants.shortDateTimeFormatPattern,
+             true
+           ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
+         ),
+         userAnswers.get(AmendPlanEndDatePage) match {
+           case Some(_) => routes.AmendPlanEndDateController.onPageLoad(mode) // TODO - replace with TestOnly Amend plan end date controller
+           case _ => routes.AmendPaymentAmountController.onPageLoad(mode) // TODO - replace with TestOnly Amend regular payment amount controller
+         }
         )
     }
 
