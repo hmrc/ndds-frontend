@@ -98,7 +98,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
          ),
          userAnswers.get(AmendPaymentAmountPage) match {
            case Some(_) => testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode)
-           case _       => routes.AmendPlanStartDateController.onPageLoad(mode) // TODO - replace with AP1b TestOnly AmendPaymentDate controller
+           case _       => testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode)
          }
         )
       case _ => // Budget Payment Plan

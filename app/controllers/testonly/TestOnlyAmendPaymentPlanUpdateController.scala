@@ -27,7 +27,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MaskAndFormatUtils.formatAmount
-import views.html.testonly.TestOnlyPaymentPlanUpdateView
+import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -40,7 +40,7 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
   requireData: DataRequiredAction,
   nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
-  view: TestOnlyPaymentPlanUpdateView,
+  view: TestOnlyAmendPaymentPlanUpdateView,
   appConfig: FrontendAppConfig
 ) extends FrontendBaseController
     with I18nSupport

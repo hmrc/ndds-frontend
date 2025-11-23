@@ -718,6 +718,13 @@ testOnlyAmendPaymentAmount.title = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.heading = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.hint = 	Amount must be in pounds and pence, like 967 or 967.82
 
+#AP1b messages
+testOnlyAmendPlanStartDate.title = When do you want to make this payment?
+testOnlyAmendPlanStartDate.heading = When do you want to make this payment?
+testOnlyAmendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
+testOnlyAmendPlanStartDate.warning = If your payment is late, you may be liable to pay interest or a surcharge.
+testOnlyAmendPlanStartDate.hint = For example, 27 3 2020
+
 #AP2 messages
 testOnlyAmendPaymentPlanConfirmation.title = Check your amendment details
 testOnlyAmendPaymentPlanConfirmation.heading = Check your amendment details

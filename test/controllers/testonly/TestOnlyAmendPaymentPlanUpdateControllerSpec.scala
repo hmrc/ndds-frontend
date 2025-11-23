@@ -31,7 +31,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
-import views.html.testonly.TestOnlyPaymentPlanUpdateView
+import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
@@ -87,7 +87,7 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
         val request = FakeRequest(GET, routes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad().url)
         val result = controller.onPageLoad()(request)
 
-        val view = application.injector.instanceOf[TestOnlyPaymentPlanUpdateView]
+        val view = application.injector.instanceOf[TestOnlyAmendPaymentPlanUpdateView]
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
