@@ -47,4 +47,14 @@ object PaymentReferenceSummary {
       actions = Seq.empty
     )
   }
+
+  def rowNoAction(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(PaymentReferencePage).map { answer =>
+
+      SummaryListRowViewModel(
+        key     = "paymentReference.checkYourAnswersLabel",
+        value   = ValueViewModel(HtmlFormat.escape(answer).toString),
+        actions = Seq.empty
+      )
+    }
 }

@@ -32,6 +32,7 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelPaymentPlanView
+import models.audits.CancelPaymentPlanAudit
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -192,7 +193,8 @@ class CancelPaymentPlanController @Inject() (
           amendPaymentAmount              = None,
           calculation                     = None,
           suspensionPeriodRangeDate       = None,
-          cancelPlan                      = true
+          cancelPlan                      = true,
+          auditType                       = Some(CancelPaymentPlanAudit)
         )
 
       case None =>

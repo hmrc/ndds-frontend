@@ -157,7 +157,7 @@ class DirectDebitCacheRepositorySpec
         repository.cacheResponse(rdsResponse)("id").futureValue
 
         val pp = NddPaymentPlan(
-          scheduledPaymentAmount = 100,
+          scheduledPaymentAmount = Some(100),
           planRefNumber          = "1234",
           planType               = "singlePaymentPlan",
           paymentReference       = "5678",

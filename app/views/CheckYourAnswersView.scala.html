@@ -18,42 +18,42 @@
 
 @this(
     h1: Header1,
-    h2:Header2,
-    h3:Header3,
+    h2: Header2,
+    h3: Header3,
     paragraph: Paragraph,
     layout: templates.Layout,
     govukSummaryList: GovukSummaryList,
     govukDetails: GovukDetails,
     govukButton: GovukButton,
-    formHelper: FormWithCSRF,
+    formHelper: FormWithCSRF
 )
 
-@(list: SummaryList, currentDate: String)(implicit request: Request[_], messages: Messages)
+@(list: SummaryList, currentDate: String, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("checkYourAnswers.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("checkYourAnswers.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.CheckYourAnswersController.onSubmit(), Symbol("autoComplete") -> "off") {
         @h1("checkYourAnswers.heading")
-        @h2("checkYourAnswers.ppDetails.h2")
         @govukSummaryList(list)
         @h2("checkYourAnswers.ddDeclaration.h2")
 
-        <img src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" alt="Direct Debit" class="direct-debit-logo"/>
         @paragraph("checkYourAnswers.ddDeclaration.p1")
-        @paragraph("checkYourAnswers.ddDeclaration.p2")
+        @paragraph(messages("checkYourAnswers.ddDeclaration.p2", currentDate))
+        <img alt="Direct Debit" src="@routes.Assets.versioned("images/direct-debit-logo.jpg")" class="direct-debit-logo"/>
 
         @defining(HtmlFormat.fill(Seq(
-        paragraph("checkYourAnswers.collapsable.p1"),
-        paragraph("checkYourAnswers.collapsable.p2"),
-        paragraph("checkYourAnswers.collapsable.p3"),
-        paragraph("checkYourAnswers.collapsable.p4"),
-        paragraph("checkYourAnswers.collapsable.p5")
+            paragraph("checkYourAnswers.collapsable.p1"),
+            paragraph("checkYourAnswers.collapsable.p2"),
+            paragraph("checkYourAnswers.collapsable.p3"),
+            paragraph("checkYourAnswers.collapsable.p4"),
+            paragraph("checkYourAnswers.collapsable.p5")
         ))) { content =>
                 @govukDetails(
                     Details(
                         summary = messages("checkYourAnswers.collapsable"),
                         content = HtmlContent(content)
-                ))
+                    )
+                )
         }
 
         @govukButton(

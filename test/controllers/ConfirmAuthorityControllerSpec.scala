@@ -21,7 +21,7 @@ import models.{ConfirmAuthority, Mode, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, verify, when}
+import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.ConfirmAuthorityPage
 import play.api.data.Form
@@ -29,14 +29,10 @@ import play.api.http.Status.{BAD_REQUEST, OK, SEE_OTHER}
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{GET, POST, redirectLocation, route, running, status}
+import play.api.test.Helpers.*
 import play.twirl.api.Html
 import repositories.SessionRepository
 import views.html.ConfirmAuthorityView
-import play.api.test.Helpers.writeableOf_AnyContentAsFormUrlEncoded
-import play.api.test.Helpers.defaultAwaitTimeout
-import play.api.test.Helpers.writeableOf_AnyContentAsEmpty
-import services.AuditService
 
 import scala.concurrent.Future
 
@@ -44,7 +40,6 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
 
   private val mode: Mode = NormalMode
   private val onwardRoute: Call = Call("GET", "/foo")
-  val mockAuditService: AuditService = mock[AuditService]
 
   "ConfirmAuthorityController onPageLoad" - {
 
@@ -57,8 +52,7 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
         applicationBuilder(userAnswers = None)
           .overrides(
             bind[ConfirmAuthorityView].toInstance(mockView),
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[AuditService].toInstance(mockAuditService)
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
           )
           .build()
 
@@ -78,7 +72,6 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
         formCaptor.getValue.value mustBe None
         modeCaptor.getValue mustBe mode
         callCaptor.getValue mustBe routes.BankDetailsCheckYourAnswerController.onPageLoad(mode)
-        verify(mockAuditService).sendEvent(any())(any(), any(), any())
       }
     }
 
@@ -94,8 +87,7 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
         applicationBuilder(userAnswers = Some(ua))
           .overrides(
             bind[ConfirmAuthorityView].toInstance(mockView),
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[AuditService].toInstance(mockAuditService)
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
           )
           .build()
 
@@ -123,8 +115,7 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[ConfirmAuthorityView].toInstance(mockView),
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[AuditService].toInstance(mockAuditService)
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
           )
           .build()
 
@@ -141,14 +132,12 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
     "save YES, persist to session, and redirect via Navigator" in {
       val mockSessionRepo = mock[SessionRepository]
       when(mockSessionRepo.set(any())).thenReturn(Future.successful(true))
-      doNothing().when(mockAuditService).sendEvent(any())(any(), any(), any())
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepo),
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[AuditService].toInstance(mockAuditService)
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
           )
           .build()
 
@@ -176,8 +165,7 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides(
             bind[SessionRepository].toInstance(mockSessionRepo),
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[AuditService].toInstance(mockAuditService)
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
           )
           .build()
 

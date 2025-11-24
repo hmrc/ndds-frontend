@@ -95,7 +95,7 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(mockPaymentReference,
-                                               Call("GET", routes.DirectDebitSummaryController.onPageLoad().url),
+                                               Call("GET", routes.YourDirectDebitInstructionsController.onPageLoad().url),
                                                summaryListRows
                                               )(
           request,
@@ -147,7 +147,7 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(mockPaymentReference,
-                                               Call("GET", routes.DirectDebitSummaryController.onPageLoad().url),
+                                               Call("GET", routes.YourDirectDebitInstructionsController.onPageLoad().url),
                                                summaryListRows
                                               )(
           request,
@@ -199,7 +199,7 @@ class PaymentPlanCancelledControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(mockPaymentReference,
-                                               Call("GET", routes.DirectDebitSummaryController.onPageLoad().url),
+                                               Call("GET", routes.YourDirectDebitInstructionsController.onPageLoad().url),
                                                summaryListRows
                                               )(
           request,

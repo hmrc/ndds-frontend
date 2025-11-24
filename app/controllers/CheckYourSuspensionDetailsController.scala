@@ -19,7 +19,7 @@ package controllers
 import controllers.actions.*
 import models.requests.ChrisSubmissionRequest
 import models.responses.{DirectDebitDetails, PaymentPlanDetails}
-import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
+import models.{CheckMode, DirectDebitSource, Mode, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
 import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.CheckYourSuspensionDetailsView
+import models.audits.*
 
 import java.time.LocalDate
 import javax.inject.Inject
@@ -85,7 +86,7 @@ class CheckYourSuspensionDetailsController @Inject() (
 
       (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
         case (Some(ddiReference), Some(paymentPlanReference)) =>
-          val chrisRequest = suspendChrisSubmissionRequest(ua, ddiReference)
+          val chrisRequest = suspendChrisSubmissionRequest(ua, ddiReference, mode)
 
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
@@ -118,7 +119,8 @@ class CheckYourSuspensionDetailsController @Inject() (
 
   private def suspendChrisSubmissionRequest(
     userAnswers: UserAnswers,
-    ddiReference: String
+    ddiReference: String,
+    mode: Mode
   ): ChrisSubmissionRequest = {
     userAnswers.get(PaymentPlanDetailsQuery) match {
       case Some(response) =>
@@ -136,6 +138,13 @@ class CheckYourSuspensionDetailsController @Inject() (
             .getOrElse(PaymentPlanType.BudgetPaymentPlan)
 
         val bankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus = buildBankDetailsWithAuddisStatus(directDebitDetails)
+
+        val auditType = mode match {
+          case NormalMode =>
+            SuspendPaymentPlanAudit
+          case CheckMode =>
+            AmendPaymentPlanSuspensionAudit
+        }
 
         ChrisSubmissionRequest(
           serviceType                     = serviceType,
@@ -155,7 +164,8 @@ class CheckYourSuspensionDetailsController @Inject() (
           amendPaymentAmount              = None,
           suspensionPeriodRangeDate       = userAnswers.get(SuspensionPeriodRangeDatePage),
           calculation                     = None,
-          suspendPlan                     = true
+          suspendPlan                     = true,
+          auditType                       = Some(auditType)
         )
       case None =>
         throw new IllegalStateException("Missing PaymentPlanDetails in userAnswers")

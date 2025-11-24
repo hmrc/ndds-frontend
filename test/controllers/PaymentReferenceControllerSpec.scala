@@ -109,7 +109,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         contentAsString(result) mustEqual view(form.fill("answer"), NormalMode, Some(TC), Call("GET", paymentPlanTypeRoute))(request,
                                                                                                                              messages(application)
                                                                                                                             ).toString
-        contentAsString(result) must include("Your Tax Credit (TC) payment reference is 16 digits long")
+        contentAsString(result) must include("Your tax credits (TC) payment reference is 16 digits long")
       }
     }
 

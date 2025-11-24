@@ -53,7 +53,7 @@ class PaymentPlanCancelledController @Inject() (
           val paymentPlanDetails = planDetails.paymentPlanDetails
           val rows = buildRows(paymentPlanDetails)
 
-          Ok(view(paymentPlanDetails.paymentReference, routes.DirectDebitSummaryController.onPageLoad(), rows))
+          Ok(view(paymentPlanDetails.paymentReference, routes.YourDirectDebitInstructionsController.onPageLoad(), rows))
         case _ =>
           Redirect(routes.JourneyRecoveryController.onPageLoad())
       }

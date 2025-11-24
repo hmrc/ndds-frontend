@@ -18,38 +18,47 @@ package viewmodels.checkAnswers
 
 import controllers.routes
 import models.{CheckMode, UserAnswers}
-import pages.PlanEndDatePage
-import play.api.i18n.{Lang, Messages}
+import pages.DirectDebitSourcePage
+import play.api.i18n.Messages
+import play.twirl.api.HtmlFormat
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.DateTimeFormats.dateTimeFormat
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object PlanEndDateSummary {
+object DirectDebitSourceSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PlanEndDatePage).map { answer =>
+    answers.get(DirectDebitSourcePage).map { answer =>
 
-      implicit val lang: Lang = messages.lang
+      val value = ValueViewModel(
+        HtmlContent(
+          HtmlFormat.escape(messages(s"directDebitSource.$answer"))
+        )
+      )
 
       SummaryListRowViewModel(
-        key   = "planEndDate.checkYourAnswersLabel",
-        value = ValueViewModel(answer.format(dateTimeFormat())),
+        key   = "checkYourAnswers.directDebitSource",
+        value = value,
         actions = Seq(
-          ActionItemViewModel("site.change", routes.PlanEndDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("planEndDate.change.hidden"))
+          ActionItemViewModel("site.change", routes.DirectDebitSourceController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("directDebitSource.change.hidden"))
         )
       )
     }
 
-  def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(PlanEndDatePage).map { answer =>
+  def rowNoAction(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+    answers.get(DirectDebitSourcePage).map { answer =>
 
-      implicit val lang: Lang = messages.lang
+      val value = ValueViewModel(
+        HtmlContent(
+          HtmlFormat.escape(messages(s"directDebitSource.$answer"))
+        )
+      )
 
       SummaryListRowViewModel(
-        key     = "planEndDate.checkYourAnswersLabel",
-        value   = ValueViewModel(answer.format(dateTimeFormat())),
+        key     = "checkYourAnswers.directDebitSource",
+        value   = value,
         actions = Seq.empty
       )
     }

@@ -17,13 +17,13 @@
 package controllers
 
 import controllers.actions.*
-import models.{PaymentPlanType, UserAnswers}
+import models.{NormalMode, PaymentPlanType, UserAnswers}
 import models.responses.NddPaymentPlan
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{NationalDirectDebitService, PaginationService}
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Actions, Card, CardTitle, SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -102,6 +102,14 @@ class DirectDebitSummaryController @Inject() (
     } yield Redirect(routes.DirectDebitSummaryController.onPageLoad())
   }
 
+  def onRedirectToDirectDebitSource(directDebitReference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+    for {
+      updatedAnswers <- Future.fromTry(userAnswers.set(ExistingDirectDebitIdentifierQuery, directDebitReference))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield Redirect(routes.DirectDebitSourceController.onPageLoad(NormalMode))
+  }
+
   private def buildCards(paymentPlanList: Seq[NddPaymentPlan])(implicit messages: Messages): Seq[SummaryList] = {
     paymentPlanList.map { plan =>
       SummaryList(
@@ -151,7 +159,7 @@ class DirectDebitSummaryController @Inject() (
             optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
             optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
             optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v)),
-            optionalRow(Option(plan.scheduledPaymentAmount))(amount => AmendPaymentAmountSummary.row(plan.planType, Some(amount)))
+            optionalRow(Option(plan.scheduledPaymentAmount))(amount => AmendPaymentAmountSummary.row(plan.planType, amount))
           ).flatten
       }
     }
@@ -166,6 +174,7 @@ class DirectDebitSummaryController @Inject() (
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanStartDatePage))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanEndDatePage))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(SuspensionPeriodRangeDatePage))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(ExistingDirectDebitIdentifierQuery))
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 }

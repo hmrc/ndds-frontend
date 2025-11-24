@@ -18,16 +18,19 @@ package controllers
 
 import base.SpecBase
 import models.responses.{BankAddress, Country, GenerateDdiRefResponse}
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
+import models.*
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, when}
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import services.{AuditService, NationalDirectDebitService}
+import queries.ExistingDirectDebitIdentifierQuery
+import repositories.DirectDebitCacheRepository
+import services.NationalDirectDebitService
 import utils.MacGenerator
+import viewmodels.checkAnswers.YourBankDetailsNameSummary.nddResponse
 import viewmodels.govuk.SummaryListFluency
 
 import java.time.LocalDate
@@ -40,12 +43,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(fixedDate, "2025-7-19")
   private val endDate = LocalDate.of(2027, 7, 25)
   private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
-  private val mockAuditService: AuditService = mock[AuditService]
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
+  private val mockDirectDebitCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
 
   "Check Your Answers Controller" - {
-
     val userAnswer = emptyUserAnswers
       .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
       .setOrException(PaymentReferencePage, "1234567")
@@ -60,8 +62,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -70,9 +71,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -103,8 +104,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -113,9 +113,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -131,8 +131,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -141,11 +140,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
         contentAsString(result) must include("Year end and month")
         contentAsString(result) must include("2025 04")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -162,8 +161,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -171,11 +169,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Frequency of payments")
         contentAsString(result) must include("Monthly")
-        contentAsString(result) must include("Regular Payment Amount")
-        contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must include("25 July 2027")
+        contentAsString(result) must include("Regular payment amount")
+        contentAsString(result) must include("19 Jul 2025")
+        contentAsString(result) must include("25 Jul 2027")
         contentAsString(result) must include("£120")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -190,8 +188,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("Payment Plan details")
+        contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("The Direct Debit Guarantee")
         contentAsString(result) must include(
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
@@ -200,15 +197,15 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("1234567")
         contentAsString(result) must include("Total amount due")
         contentAsString(result) must include("4,533")
-        contentAsString(result) must include("Plan Start Date")
-        contentAsString(result) must include("19 July 2025")
+        contentAsString(result) must include("Plan start date")
+        contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("Monthly payment amount")
         contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Final Payment Date")
-        contentAsString(result) must include("19 June 2026")
+        contentAsString(result) must include("Final payment date")
+        contentAsString(result) must include("19 Jun 2026")
         contentAsString(result) must include("Final payment amount")
         contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Accept and Continue")
+        contentAsString(result) must include("Accept and continue")
       }
     }
 
@@ -219,16 +216,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
         .setOrException(RegularPaymentAmountPage, 120)
         .setOrException(PlanStartDatePage, planStartDateDetails)
-        .setOrException(PlanEndDatePage, endDate)
         .setOrException(AddPaymentPlanEndDatePage, false)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must not include "25 July 2027"
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("19 Jul 2025")
+        contentAsString(result) must not include "25 Jul 2027"
+        contentAsString(result) must include("Add plan end date")
         contentAsString(result) must not include "Plan End Date"
       }
     }
@@ -247,9 +244,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must include("25 July 2027")
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("19 Jul 2025")
+        contentAsString(result) must include("25 Jul 2027")
+        contentAsString(result) must include("Plan end date")
+        contentAsString(result) must include("Add plan end date")
       }
     }
 
@@ -266,9 +265,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
-        contentAsString(result) must include("Check your answers")
-        contentAsString(result) must include("19 July 2025")
-        contentAsString(result) must include("25 July 2027")
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("19 Jul 2025")
+        contentAsString(result) must include("25 Jul 2027")
       }
     }
 
@@ -441,12 +440,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[MacGenerator].toInstance(mockMacGenerator),
-            bind[AuditService].toInstance(mockAuditService)
+            bind[MacGenerator].toInstance(mockMacGenerator)
           )
           .build()
-
-        doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
 
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
@@ -476,7 +472,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
-            bind[AuditService].toInstance(mockAuditService),
             bind[NationalDirectDebitService].toInstance(mockNddService)
           )
           .build()
@@ -528,7 +523,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
-            bind[AuditService].toInstance(mockAuditService),
             bind[NationalDirectDebitService].toInstance(mockNddService),
             bind[MacGenerator].toInstance(mockMacGenerator)
           )
@@ -617,7 +611,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
-      "must redirect to confirmation page if DirectDebitSource is 'TC' and send an audit event for a POST if all required data is provided" in {
+      "must redirect to confirmation page if DirectDebitSource is 'TC' and if all required data is provided" in {
         val totalDueAmount = 200
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
@@ -649,13 +643,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
-            bind[AuditService].toInstance(mockAuditService),
             bind[MacGenerator].toInstance(mockMacGenerator),
             bind[NationalDirectDebitService].toInstance(mockNddService)
           )
           .build()
-
-        doNothing().when(mockAuditService).sendSubmitDirectDebitPaymentPlan(any(), any())
 
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
@@ -667,6 +658,43 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
     }
 
-  }
+    "must set up a new payment plan for existing Direct Debit" - {
 
+      "when DirectDebitSource is 'CT' for a POST if all required data is provided" in {
+
+        val totalDueAmount = 200
+        val incompleteAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(TotalAmountDuePage, totalDueAmount)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(PaymentReferencePage, "testReference")
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+          .set(ExistingDirectDebitIdentifierQuery, "existingDdRef")
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[DirectDebitCacheRepository].toInstance(mockDirectDebitCache)
+          )
+          .build()
+
+        when(mockNddService.submitChrisData(any())(any()))
+          .thenReturn(Future.successful(true))
+        when(mockDirectDebitCache.getDirectDebit(any())(any()))
+          .thenReturn(Future.successful(nddResponse.directDebitList.head))
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        }
+      }
+    }
+  }
 }
