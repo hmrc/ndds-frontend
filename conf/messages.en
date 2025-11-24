@@ -1,9 +1,5 @@
 service.name = National Direct Debit System
 
-service.setup = Set up a direct debit
-
-service.manage = Manage a payment plan
-
 site.back = Back
 site.remove = Remove
 site.change = Change
