@@ -724,5 +724,3 @@ duplicateWarningForAddOrCreatePP.error.required = Select one option.
 duplicateWarningForAddOrCreatePP.change.hidden = DuplicateWarningForAddOrCreatePP
 duplicateWarningForAddOrCreatePP.p1 = You already have a payment plan set up with the same amount and dates.
 duplicateWarningForAddOrCreatePP.h2 = Do you want to continue setting up this plan?
-duplicateWarningForAddOrCreatePP.yes= Yes
-duplicateWarningForAddOrCreatePP.no= No
