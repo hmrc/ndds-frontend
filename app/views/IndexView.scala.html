@@ -23,7 +23,7 @@
 @()(implicit request: Request[_], messages: Messages)
 
 @layout(
-    pageTitle    = titleForSetupJourneyNoForm(messages("index.title")),
+    pageTitle    = titleNoForm(messages("index.title")),
     showBackLink = false
 ) {
     <h1 class="govuk-heading-xl">@messages("index.heading")</h1>
