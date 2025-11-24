@@ -20,10 +20,11 @@ import base.SpecBase
 import forms.DirectDebitSourceFormProvider
 import models.{DirectDebitSource, NddDetails, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.DirectDebitSourcePage
+import pages.{CreateConfirmationPage, DirectDebitSourcePage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -109,6 +110,86 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
+      }
+    }
+
+    "must clear CreateConfirmationPage when switching to a different source" in {
+
+      val mockSessionRepository = mock[SessionRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val userAnswersWithConfirmation = UserAnswers(userAnswersId)
+        .set(DirectDebitSourcePage, DirectDebitSource.CT)
+        .success
+        .value
+        .set(CreateConfirmationPage, true)
+        .success
+        .value
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswersWithConfirmation))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, directDebitSourceRoute)
+            .withFormUrlEncodedBody(("value", DirectDebitSource.SA.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+
+        val captor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockSessionRepository).set(captor.capture())
+
+        val savedAnswers = captor.getValue
+        savedAnswers.get(CreateConfirmationPage) mustBe None
+        savedAnswers.get(DirectDebitSourcePage) mustBe Some(DirectDebitSource.SA)
+      }
+    }
+
+    "must clear CreateConfirmationPage when selecting the same source again" in {
+
+      val mockSessionRepository = mock[SessionRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val userAnswersWithConfirmation = UserAnswers(userAnswersId)
+        .set(DirectDebitSourcePage, DirectDebitSource.SA)
+        .success
+        .value
+        .set(CreateConfirmationPage, true)
+        .success
+        .value
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswersWithConfirmation))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, directDebitSourceRoute)
+            .withFormUrlEncodedBody(("value", DirectDebitSource.SA.toString))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+
+        val captor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockSessionRepository).set(captor.capture())
+
+        val savedAnswers = captor.getValue
+        savedAnswers.get(CreateConfirmationPage) mustBe None
+        savedAnswers.get(DirectDebitSourcePage) mustBe Some(DirectDebitSource.SA)
       }
     }
 

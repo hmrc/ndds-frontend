@@ -21,7 +21,7 @@ import controllers.actions.*
 import models.UserAnswers
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{DirectDebitReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import services.{NationalDirectDebitService, PaginationService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -77,6 +77,7 @@ class YourDirectDebitInstructionsController @Inject() (
     for {
       updatedUserAnswers <- Future.fromTry(userAnswers.remove(DirectDebitReferenceQuery))
       updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(PaymentPlansCountQuery))
+      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(ExistingDirectDebitIdentifierQuery))
       _                  <- sessionRepository.set(updatedUserAnswers)
     } yield updatedUserAnswers
 }
