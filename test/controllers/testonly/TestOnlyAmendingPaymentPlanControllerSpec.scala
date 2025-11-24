@@ -72,7 +72,7 @@ class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
 
       running(application) {
         val request = FakeRequest(GET, routes.TestOnlyAmendingPaymentPlanController.onPageLoad().url)
-        val result  = route(application, request).value
+        val result = route(application, request).value
         status(result) mustEqual OK
 
         val page = contentAsString(result)
