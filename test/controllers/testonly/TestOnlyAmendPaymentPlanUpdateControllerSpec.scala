@@ -23,14 +23,13 @@ import models.PaymentPlanType
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{AmendPaymentAmountPage, AmendPaymentPlanUpdatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
+import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.inject
 
 import java.time.{LocalDate, LocalDateTime}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
-import repositories.SessionRepository
 import services.NationalDirectDebitService
 import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
@@ -39,14 +38,17 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import scala.concurrent.Future
 import play.api.inject.bind
+import utils.MaskAndFormatUtils.formatAmount
 
 class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
 
   "PaymentPlanConfirmation Controller" - {
-    val mockSessionRepository = mock[SessionRepository]
     val mockService = mock[NationalDirectDebitService]
     val regPaymentAmount: BigDecimal = BigDecimal("1000.00")
+    val formattedRegPaymentAmount: String = formatAmount(regPaymentAmount)
     val startDate: LocalDate = LocalDate.of(2025, 10, 2)
+    val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+    val endDate: LocalDate = LocalDate.of(2025, 10, 25)
 
     "must return OK and the correct view for a GET when plan type is Single Payment Plan" in {
 
@@ -128,48 +130,7 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to page not found if already value is submitted and click browser back from Updated page" in {
-      val userAnswers =
-        emptyUserAnswers
-          .set(
-            AmendPaymentPlanUpdatePage,
-            true
-          )
-          .success
-          .value
-          .set(
-            AmendPaymentAmountPage,
-            150.0
-          )
-          .success
-          .value
-          .set(
-            AmendPlanStartDatePage,
-            LocalDate.now()
-          )
-          .success
-          .value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          bind[SessionRepository].toInstance(mockSessionRepository)
-        )
-        .build()
-
-      running(application) {
-
-        when(mockSessionRepository.get(any()))
-          .thenReturn(Future.successful(Some(userAnswers)))
-        val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanUpdateController]
-        val request = FakeRequest(GET, routes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad().url)
-        val result = controller.onPageLoad()(request)
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.BackSubmissionController.onPageLoad().url
-
-      }
-    }
-
-    "must redirect to Journey Recovery page when AmendPlanStartDatePage is None" in {
+    "must redirect to Journey Recover page when AmendPlanStartDatePage is None" in {
 
       val mockSinglePaymentPlanDetailResponse =
         dummyPlanDetailResponse.copy(paymentPlanDetails =

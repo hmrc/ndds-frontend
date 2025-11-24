@@ -22,6 +22,7 @@ import forms.DuplicateWarningFormProvider
 import models.Mode
 import pages.DuplicateWarningPage
 import play.api.data.Form
+import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -47,14 +48,49 @@ class TestOnlyDuplicateWarningController @Inject() (
   val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
-    (identify andThen getData andThen requireData) { implicit request =>
+    (identify andThen getData andThen requireData).async { implicit request =>
+      val userAnswers = request.userAnswers
 
-      val preparedForm = request.userAnswers.get(DuplicateWarningPage) match {
-        case None        => form
-        case Some(value) => form.fill(value)
+      val alreadyConfirmed =
+        userAnswers.get(DuplicateWarningPage).contains(true)
+
+      if (alreadyConfirmed) {
+        logger.warn("Attempt to load this payment plan confirmation; redirecting to Page Not Found.")
+        Future.successful(
+          Redirect(controllers.routes.BackSubmissionController.onPageLoad())
+        )
+      } else {
+
+        val maybeResult = for {
+          updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
+        } yield {
+
+          val preparedForm = form
+
+          Ok(
+            view(
+              preparedForm,
+              mode,
+              testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
+            )
+          )
+        }
+
+        maybeResult match {
+          case Some(result) =>
+            sessionRepository
+              .set(
+                userAnswers.set(DuplicateWarningPage, true).get
+              )
+              .map(_ => result)
+
+          case None =>
+            logger.warn("Failed to set DuplicateWarningPage = true")
+            Future.successful(
+              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+            )
+        }
       }
-
-      Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()))
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] =

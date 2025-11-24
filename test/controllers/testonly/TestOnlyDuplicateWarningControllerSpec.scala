@@ -23,6 +23,7 @@ import models.NormalMode
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.DuplicateWarningPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -38,11 +39,22 @@ class TestOnlyDuplicateWarningControllerSpec extends SpecBase {
   private val mode = NormalMode
 
   "TestOnlyDuplicateWarningController" - {
+    val mockSessionRepository = mock[SessionRepository]
 
     "must return OK and view TestOnlyDuplicateWarningController onPageLoad" in {
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val ua = emptyUserAnswers
+
+      val application = applicationBuilder(userAnswers = Some(ua))
+        .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+        .build()
 
       running(application) {
+
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(ua)))
+
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
 
         val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
         val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
@@ -91,6 +103,33 @@ class TestOnlyDuplicateWarningControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url
+      }
+    }
+
+    "must redirect to page not found if already value is submitted and click browser back from Updated page" in {
+      val ua =
+        emptyUserAnswers
+          .set(DuplicateWarningPage, true)
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(ua))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.get(any()))
+          .thenReturn(Future.successful(Some(ua)))
+
+        val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
+        val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
+        val result = controller.onPageLoad(NormalMode)(request)
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.BackSubmissionController.onPageLoad().url
       }
     }
   }
