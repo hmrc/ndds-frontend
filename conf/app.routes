@@ -138,10 +138,10 @@ POST   /payment-plan/confirm-new-payment-plan-details   controllers.AmendPayment
 
 GET        /payment-plan-amended                        controllers.AmendPaymentPlanUpdateController.onPageLoad()
 
-GET        /already-have-payment-plan                   controllers.DuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
-POST       /already-have-payment-plan                   controllers.DuplicateWarningController.onSubmit(mode: Mode = NormalMode)
-GET        /change-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)
+GET        /amend-already-have-payment-plan                   controllers.DuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
+POST       /amend-already-have-payment-plan                   controllers.DuplicateWarningController.onSubmit(mode: Mode = NormalMode)
+GET        /change-amend-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-amend-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)
 
 GET        /cancelling-payment-plan                     controllers.CancelPaymentPlanController.onPageLoad()
 POST       /cancelling-payment-plan                     controllers.CancelPaymentPlanController.onSubmit()
@@ -184,9 +184,9 @@ POST       /add-payment-plan-end-date                   controllers.AddPaymentPl
 GET        /change-add-payment-plan-end-date            controllers.AddPaymentPlanEndDateController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-add-payment-plan-end-date            controllers.AddPaymentPlanEndDateController.onSubmit(mode: Mode = CheckMode)
 
-GET        /duplicateError                       controllers.DuplicateErrorController.onPageLoad()
+GET        /cannot-set-up-duplicate-plan                       controllers.DuplicateErrorController.onPageLoad()
 
-GET        /duplicateWarningForAddOrCreatePP                        controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = NormalMode)
-POST       /duplicateWarningForAddOrCreatePP                        controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = NormalMode)
-GET        /changeDuplicateWarningForAddOrCreatePP                  controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = CheckMode)
-POST       /changeDuplicateWarningForAddOrCreatePP                  controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = CheckMode)
+GET        /already-have-payment-plan                        controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = NormalMode)
+POST       /already-have-payment-plan                        controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = NormalMode)
+GET        /change-already-have-payment-plan                 controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-already-have-payment-plan                  controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = CheckMode)

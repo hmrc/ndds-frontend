@@ -712,11 +712,17 @@ addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
 
-duplicateError.title = duplicateError
-duplicateError.heading = duplicateError
+duplicateError.title = You cannot set up a duplicate payment plan
+duplicateError.heading = You cannot set up a duplicate payment plan
+duplicateError.p1 = You already have a payment plan set up with the same date.
+duplicateError.linkText = Return to plan start date
 
-duplicateWarningForAddOrCreatePP.title = duplicateWarningForAddOrCreatePP
-duplicateWarningForAddOrCreatePP.heading = duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.title = You already have a payment plan with these details
+duplicateWarningForAddOrCreatePP.heading = You already have a payment plan with these details
 duplicateWarningForAddOrCreatePP.checkYourAnswersLabel = duplicateWarningForAddOrCreatePP
-duplicateWarningForAddOrCreatePP.error.required = Select yes if duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.error.required = Select one option.
 duplicateWarningForAddOrCreatePP.change.hidden = DuplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.p1 = You already have a payment plan set up with the same amount and dates.
+duplicateWarningForAddOrCreatePP.h2 = Do you want to continue setting up this plan?
+duplicateWarningForAddOrCreatePP.yes= Yes
+duplicateWarningForAddOrCreatePP.no= No

@@ -14,9 +14,14 @@
  * limitations under the License.
  *@
 
+@import views.html.components.*
+@import models.NormalMode
+
 @this(
         layout: templates.Layout,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        paragraph: Paragraph,
+        link: Link,
 )
 
 @()(implicit request: Request[_], messages: Messages)
@@ -24,4 +29,8 @@
 @layout(pageTitle = titleNoForm(messages("duplicateError.title"))) {
 
     <h1 class="govuk-heading-xl">@messages("duplicateError.heading")</h1>
+
+    @paragraph("duplicateError.p1")
+
+    @link("duplicateError.linkText", routes.PaymentDateController.onPageLoad(NormalMode).url, linkFullStop = true)
 }
