@@ -79,10 +79,10 @@ POST       /plan-start-date                             controllers.PlanStartDat
 GET        /change-plan-start-date                      controllers.PlanStartDateController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-plan-start-date                      controllers.PlanStartDateController.onSubmit(mode: Mode = CheckMode)
 
-GET        /year-end-and-month                          controllers.YearEndAndMonthController.onPageLoad(mode: Mode = NormalMode)
-POST       /year-end-and-month                          controllers.YearEndAndMonthController.onSubmit(mode: Mode = NormalMode)
-GET        /change-year-end-and-month                   controllers.YearEndAndMonthController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-year-end-and-month                   controllers.YearEndAndMonthController.onSubmit(mode: Mode = CheckMode)
+GET        /add-extra-numbers-payment-reference         controllers.YearEndAndMonthController.onPageLoad(mode: Mode = NormalMode)
+POST       /add-extra-numbers-payment-reference         controllers.YearEndAndMonthController.onSubmit(mode: Mode = NormalMode)
+GET        /change-add-extra-numbers-payment-reference  controllers.YearEndAndMonthController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-add-extra-numbers-payment-reference  controllers.YearEndAndMonthController.onSubmit(mode: Mode = CheckMode)
 
 GET        /frequency-of-payments                       controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
 POST       /frequency-of-payments                       controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
