@@ -20,7 +20,7 @@
 
 @(pageTitle: String, heading: String, message: String)(implicit rh: RequestHeader, messages: Messages)
 
-@layout(pageTitle = titleForSetupJourneyNoForm(pageTitle)) {
+@layout(pageTitle = titleNoForm(pageTitle)) {
     <h1 class="govuk-heading-xl">@messages(heading)</h1>
 
     <p class="govuk-body">@messages(message)</p>

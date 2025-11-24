@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import models.{DirectDebitSource, PaymentPlanType}
-import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PlanStartDatePage, RegularPaymentAmountPage, TotalAmountDuePage}
+import pages.{AddPaymentPlanEndDatePage, CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PlanStartDatePage, RegularPaymentAmountPage, TotalAmountDuePage}
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -51,6 +51,8 @@ class DirectDebitConfirmationController @Inject() (
       .get(CheckYourAnswerPage)
       .getOrElse(throw new Exception("Missing generated DDI reference number"))
 
+    val hasEndDate = request.userAnswers.get(AddPaymentPlanEndDatePage)
+
     val paymentAmount =
       request.userAnswers
         .get(PaymentAmountPage)
@@ -72,6 +74,12 @@ class DirectDebitConfirmationController @Inject() (
         .getOrElse(throw new Exception("Missing date"))
 
     val paymentDateString: String = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+
+    val showPlanEndDate = if (hasEndDate.contains(false)) {
+      None
+    } else {
+      PlanEndDateSummary.rowData(request.userAnswers)
+    }
 
     val monthlyPaymentAmount = if (request.userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
       MonthlyPaymentAmountSummary.row(request.userAnswers)
@@ -128,7 +136,7 @@ class DirectDebitConfirmationController @Inject() (
         PaymentDateSummary.row(request.userAnswers, false),
         TotalAmountDueSummary.rowData(request.userAnswers),
         PlanStartDateSummary.row(request.userAnswers, false),
-        PlanEndDateSummary.rowData(request.userAnswers),
+        showPlanEndDate,
         monthlyPaymentAmount,
         finalPaymentDate,
         finalPaymentAmount
