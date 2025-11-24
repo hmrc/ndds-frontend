@@ -1,7 +1,5 @@
 service.name = National Direct Debit System
-
 service.setup = Set up a direct debit
-
 service.manage = Manage a payment plan
 
 site.back = Back
@@ -711,3 +709,69 @@ addPaymentPlanEndDate.p1 = This is not mandatory. You will be able to add an end
 addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
+
+############### Test only Amend flow ################
+
+#AP0 messages
+testOnlyAmendingPaymentPlan.title = Amending this payment plan
+testOnlyAmendingPaymentPlan.heading = Amending this payment plan
+testOnlyAmendingPaymentPlan.p2.prefix = For security reasons,
+testOnlyAmendingPaymentPlan.p2.link = you must contact the HMRC Helpline
+testOnlyAmendingPaymentPlan.p2.suffix = to change the:
+testOnlyAmendingPaymentPlan.list.1 = Direct Debit reference
+testOnlyAmendingPaymentPlan.list.2 = bank account details
+testOnlyAmendingPaymentPlan.list.3 = payment reference
+testOnlyAmendingPaymentPlan.p3 = Payments due within the next 3 working days cannot be amended.
+testOnlyAmendingPaymentPlan.cancel.link = Cancel and return to payment plan
+
+#AP1a messages
+testOnlyAmendPaymentAmount.title = How much do you want to pay, in pounds?
+testOnlyAmendPaymentAmount.heading = How much do you want to pay, in pounds?
+testOnlyAmendPaymentAmount.hint = 	Amount must be in pounds and pence, like 967 or 967.82
+
+#AP1b messages
+testOnlyAmendPlanStartDate.title = When do you want to make this payment?
+testOnlyAmendPlanStartDate.heading = When do you want to make this payment?
+testOnlyAmendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
+testOnlyAmendPlanStartDate.warning = If your payment is late, you may be liable to pay interest or a surcharge.
+testOnlyAmendPlanStartDate.hint = For example, 27 3 2020
+
+#AP2 messages
+testOnlyAmendPaymentPlanConfirmation.title = Check your amendment details
+testOnlyAmendPaymentPlanConfirmation.heading = Check your amendment details
+testOnlyAmendPaymentPlanConfirmation.continueAndContinueButton = Confirm and continue
+testOnlyAmendPaymentPlanConfirmation.cancel.link = Cancel and return to payment plan
+amendPaymentAmount.change.hidden =  Amend payment amount
+amendPaymentDate.change.hidden =  Amend payment date
+
+#AP3 messages
+testOnlyAmendPaymentPlanUpdate.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+testOnlyAmendPaymentPlanUpdate.p2 = Any existing suspension on this payment plan will be removed. It may take up to 36 hours for this amendment to appear in your account.
+testOnlyAmendPaymentPlanUpdate.p3 = You must have enough funds in your account for this payment to be collected. If any of the details are incorrect,
+testOnlyAmendPaymentPlanUpdate.p3.link = you must contact the HMRC Helpline
+testOnlyAmendPaymentPlanUpdate.summary.title = The Direct Debit Guarantee
+testOnlyAmendPaymentPlanUpdate.summary.p1 = This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.
+testOnlyAmendPaymentPlanUpdate.summary.p2 = If there are any changes to the amount, date or frequency of your Direct Debit, HMRC NDDS will notify you 10 working days in advance of your account being debited, or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request.
+testOnlyAmendPaymentPlanUpdate.summary.p3 = If an error is made in the payment of your Direct Debit by HMRC NDDS, or your bank or building society, you are entitled to a full and immediate refund of the amount paid from your bank or building society.
+testOnlyAmendPaymentPlanUpdate.summary.p4 = If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to.
+testOnlyAmendPaymentPlanUpdate.summary.p5 = You can cancel a Direct Debit at any time, by contacting your bank or building society. Written confirmation may be required.
+testOnlyAmendPaymentPlanUpdate.directDebitDetails = Direct Debit details
+testOnlyAmendPaymentPlanUpdate.directDebit.reference = Direct Debit reference
+testOnlyAmendPaymentPlanUpdate.directDebit.accountName = Name on the account
+testOnlyAmendPaymentPlanUpdate.directDebit.accountNumber = Account number
+testOnlyAmendPaymentPlanUpdate.directDebit.sortCode = Sort code
+testOnlyAmendPaymentPlanUpdate.amendedPlan = Your amended payment plan
+testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.reference = Payment reference
+testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.dateSetup = Date set up
+testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.paymentAmount = Payment amount
+testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.paymentDate = Payment date
+testOnlyAmendPaymentPlanUpdate.printInset = You can print this page for your records using the print function on your browser.
+testOnlyAmendPaymentPlanUpdate.returnLink = Return to payment plan
+
+#DW1 messages
+testOnlyDuplicateWarning.title = You already have a payment plan with these details
+testOnlyDuplicateWarning.h1 = You already have a payment plan with these details
+testOnlyDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
+testOnlyDuplicateWarning.h2 = Do you want to continue with this amendment?
+
+#####################################################

@@ -1,0 +1,116 @@
+/*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package controllers.testonly
+
+import config.FrontendAppConfig
+import controllers.actions.*
+import controllers.routes
+import pages.*
+import play.api.Logging
+import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import repositories.SessionRepository
+import services.NationalDirectDebitService
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.MaskAndFormatUtils.formatAmount
+import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
+
+import java.time.format.DateTimeFormatter
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+
+class TestOnlyAmendPaymentPlanUpdateController @Inject() (
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
+  val controllerComponents: MessagesControllerComponents,
+  view: TestOnlyAmendPaymentPlanUpdateView,
+  appConfig: FrontendAppConfig,
+  sessionRepository: SessionRepository
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with Logging {
+
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val userAnswers = request.userAnswers
+    val alreadyConfirmed: Boolean =
+      userAnswers.get(AmendPaymentPlanUpdatePage).contains(true)
+
+    if (alreadyConfirmed) {
+      logger.warn("Attempt to load this payment plan confirmation; redirecting to Page Not Found.")
+      Future.successful(Redirect(routes.BackSubmissionController.onPageLoad()))
+    } else {
+      if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+
+        val maybeResult = for {
+          paymentPlan    <- userAnswers.get(PaymentPlanDetailsQuery)
+          paymentAmount  <- userAnswers.get(AmendPaymentAmountPage)
+          startDate      <- userAnswers.get(AmendPlanStartDatePage)
+          directDebitRef <- userAnswers.get(DirectDebitReferenceQuery)
+          paymentPlanRef <- userAnswers.get(PaymentPlanReferenceQuery)
+        } yield (paymentPlan, paymentAmount, startDate, directDebitRef, paymentPlanRef)
+
+        maybeResult match {
+          case Some((paymentPlan, paymentAmount, startDate, directDebitRef, paymentPlanRef)) =>
+            Future.fromTry(userAnswers.set(AmendPaymentPlanUpdatePage, true)).flatMap { updatedAnswers =>
+              sessionRepository.set(updatedAnswers).map { _ =>
+                val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
+                val dateFormatShort = DateTimeFormatter.ofPattern("d MMM yyyy")
+                val formattedStartDateLong = startDate.format(dateFormatLong)
+                val formattedStartDateShort = startDate.format(dateFormatShort)
+                val formattedSubmissionDate = paymentPlan.paymentPlanDetails.submissionDateTime.format(dateFormatShort)
+                val directDebitDetails = paymentPlan.directDebitDetails
+                val formattedSortCode = directDebitDetails.bankSortCode
+                  .map(sc => sc.grouped(2).mkString(" "))
+                  .getOrElse("")
+
+                Ok(
+                  view(
+                    appConfig.hmrcHelplineUrl,
+                    formatAmount(paymentAmount),
+                    formattedStartDateLong,
+                    directDebitRef,
+                    directDebitDetails.bankAccountName.getOrElse(""),
+                    directDebitDetails.bankAccountNumber.getOrElse(""),
+                    formattedSortCode,
+                    paymentPlan.paymentPlanDetails.paymentReference,
+                    formattedSubmissionDate,
+                    formattedStartDateShort,
+                    controllers.routes.PaymentPlanDetailsController.onPageLoad()
+                  )
+                )
+              }
+            }
+
+          case None =>
+            logger.warn("Missing required values in user answers for amend payment plan")
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        }
+
+      } else {
+        val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    }
+  }
+
+}

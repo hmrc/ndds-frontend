@@ -56,7 +56,7 @@ object AmendPlanStartDateSummary {
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
-          ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
+          ActionItemViewModel("site.change", controllers.testonly.routes.TestOnlyAmendPlanStartDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
         )
       } else {

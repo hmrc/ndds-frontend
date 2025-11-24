@@ -60,7 +60,7 @@ object AmendPaymentAmountSummary {
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
-          ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
+          ActionItemViewModel("site.change", controllers.testonly.routes.TestOnlyAmendPaymentAmountController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("amendPaymentAmount.change.hidden"))
         )
       } else {

@@ -18,7 +18,7 @@ package viewmodels.checkAnswers
 
 import config.CurrencyFormatter.currencyFormat
 import controllers.routes
-import models.{CheckMode, PaymentPlanType, UserAnswers}
+import models.{CheckMode, UserAnswers}
 import pages.PaymentAmountPage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow

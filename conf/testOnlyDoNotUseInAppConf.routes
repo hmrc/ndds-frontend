@@ -10,5 +10,26 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                          prod.Routes
+->          /                                                                prod.Routes
 
+GET         /direct-debits/test-only/amending-payment-plan                   controllers.testonly.TestOnlyAmendingPaymentPlanController.onPageLoad()
+
+GET         /direct-debits/test-only/amount-need-to-pay                      controllers.testonly.TestOnlyAmendPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST        /direct-debits/test-only/amount-need-to-pay                      controllers.testonly.TestOnlyAmendPaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET         /direct-debits/test-only/change-amount-need-to-pay               controllers.testonly.TestOnlyAmendPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST        /direct-debits/test-only/change-amount-need-to-pay               controllers.testonly.TestOnlyAmendPaymentAmountController.onSubmit(mode: Mode = CheckMode)
+
+GET         /direct-debits/test-only/amend-plan-payment-date                 controllers.testonly.TestOnlyAmendPlanStartDateController.onPageLoad(mode: Mode = NormalMode)
+POST        /direct-debits/test-only/amend-plan-payment-date                 controllers.testonly.TestOnlyAmendPlanStartDateController.onSubmit(mode: Mode = NormalMode)
+GET         /direct-debits/test-only/change-amend-plan-payment-date          controllers.testonly.TestOnlyAmendPlanStartDateController.onPageLoad(mode: Mode = CheckMode)
+POST        /direct-debits/test-only/change-amend-plan-payment-date          controllers.testonly.TestOnlyAmendPlanStartDateController.onSubmit(mode: Mode = CheckMode)
+
+GET         /direct-debits/test-only/check-amendment-details                 controllers.testonly.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad(mode: Mode = NormalMode)
+POST        /direct-debits/test-only/check-amendment-details                 controllers.testonly.TestOnlyAmendPaymentPlanConfirmationController.onSubmit(mode: Mode = NormalMode)
+
+GET         /direct-debits/test-only/payment-plan-amended                    controllers.testonly.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()
+
+GET         /direct-debits/test-only/amend-already-have-payment-plan         controllers.testonly.TestOnlyDuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
+POST        /direct-debits/test-only/amend-already-have-payment-plan         controllers.testonly.TestOnlyDuplicateWarningController.onSubmit(mode: Mode = NormalMode)
+GET         /direct-debits/test-only/change-amend-already-have-payment-plan  controllers.testonly.TestOnlyDuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
+POST        /direct-debits/test-only/change-amend-already-have-payment-plan  controllers.testonly.TestOnlyDuplicateWarningController.onSubmit(mode: Mode = CheckMode)
