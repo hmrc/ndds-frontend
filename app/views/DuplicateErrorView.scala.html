@@ -26,11 +26,11 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("duplicateError.title"))) {
+@layout(pageTitle = titleNoForm(messages("duplicateError.title")), backLink = Some(routes.CheckYourAnswersController.onPageLoad().url)) {
 
     <h1 class="govuk-heading-xl">@messages("duplicateError.heading")</h1>
 
     @paragraph("duplicateError.p1")
 
-    @link("duplicateError.linkText", routes.PaymentDateController.onPageLoad(NormalMode).url, linkFullStop = true)
+    @link("duplicateError.linkText", routes.PlanStartDateController.onPageLoad(NormalMode).url, linkFullStop = true)
 }

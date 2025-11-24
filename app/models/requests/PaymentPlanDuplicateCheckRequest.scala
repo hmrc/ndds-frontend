@@ -46,7 +46,7 @@ object PaymentPlanDuplicateCheckRequest {
            ): PaymentPlanDuplicateCheckRequest = {
     // TODO Need to set according to payment plan
     if (isAmendPlan) {
-      // Dummy request
+      // Dummy request for now
       PaymentPlanDuplicateCheckRequest("ddRef", "planRef", "hod", "planType", "paymentRef", Some(100), Some(200), Some(1), LocalDate.now())
     } else { // Adding a new payment plan
       val existingDd =
@@ -58,7 +58,7 @@ object PaymentPlanDuplicateCheckRequest {
         userAnswers
           .get(PaymentPlanTypePage)
           .map(_.toString)
-          .getOrElse(throw new RuntimeException("Missing PaymentPlanType"))
+          .getOrElse(PaymentPlanType.SinglePaymentPlan.toString)
 
       val hodService =
         userAnswers
@@ -76,23 +76,38 @@ object PaymentPlanDuplicateCheckRequest {
         case _           => None
       }
 
-      val startDate =
-        userAnswers
-          .get(PlanStartDatePage)
-          .map(_.enteredDate)
-          .getOrElse(throw new RuntimeException("Missing PlanStartDatePage"))
+      val amount = planType match {
+        case PaymentPlanType.BudgetPaymentPlan.toString => userAnswers.get(RegularPaymentAmountPage)
+        case _                                          => userAnswers.get(PaymentAmountPage)
+      }
 
-      PaymentPlanDuplicateCheckRequest(
+      val startDate = planType match {
+        case PaymentPlanType.SinglePaymentPlan.toString =>
+          userAnswers
+            .get(PaymentDatePage)
+            .map(_.enteredDate)
+            .getOrElse(throw new RuntimeException("Missing PaymentDatePage"))
+        case _ =>
+          userAnswers
+            .get(PlanStartDatePage)
+            .map(_.enteredDate)
+            .getOrElse(throw new RuntimeException("Missing PlanStartDatePage"))
+      }
+
+      val request = PaymentPlanDuplicateCheckRequest(
         directDebitReference = existingDd.ddiRefNumber,
         paymentPlanReference = "",
         planType             = planType,
         paymentService       = hodService,
         paymentReference     = paymentReference,
-        paymentAmount        = userAnswers.get(PaymentAmountPage),
+        paymentAmount        = amount,
         totalLiability       = userAnswers.get(TotalAmountDuePage),
         paymentFrequency     = frequency,
         paymentStartDate     = startDate
       )
+
+      println(request)
+      request
     }
   }
 }

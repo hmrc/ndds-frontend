@@ -121,9 +121,11 @@ class CheckYourAnswersController @Inject() (
         .flatMap { duplicateResponse =>
           {
             if (duplicateResponse.isDuplicate) {
-              Future.successful(
-                Redirect(routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode))
-              )
+              val warningUrl = ua.get(PaymentPlanTypePage) match {
+                case Some(planType) if planType == PaymentPlanType.VariablePaymentPlan => routes.DuplicateErrorController.onPageLoad()
+                case _ => routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode)
+              }
+              Future.successful(Redirect(warningUrl))
             } else {
               val existingDirectDebitRefEitherFuture: Future[Either[Result, String]] = ua.get(ExistingDirectDebitIdentifierQuery) match {
                 // Existing direct debit: skip MAC and skip generateNewDdiReference

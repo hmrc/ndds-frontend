@@ -769,6 +769,47 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           redirectLocation(result).value mustEqual routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode).url
         }
       }
+
+      "must redirect to duplicate error page 'MGD' for a POST if all required data is provided" in {
+
+        val incompleteAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan)
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(PaymentReferencePage, "testReference")
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+          .set(
+            ExistingDirectDebitIdentifierQuery,
+            NddDetails("directDebitReference",
+                       LocalDateTime.now(),
+                       "bankSortCode",
+                       "bankAccountNumber",
+                       "bankAccountName",
+                       auDdisFlag       = true,
+                       numberOfPayPlans = 2
+                      )
+          )
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService)
+          )
+          .build()
+
+        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DuplicateErrorController.onPageLoad().url
+        }
+      }
     }
   }
 }
