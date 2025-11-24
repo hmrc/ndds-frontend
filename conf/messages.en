@@ -772,7 +772,7 @@ testOnlyAmendPaymentPlanUpdate.returnLink = Return to payment plan
 #DW1 messages
 testOnlyDuplicateWarning.title = You already have a payment plan with these details
 testOnlyDuplicateWarning.h1 = You already have a payment plan with these details
-testOnlyDuplicateWarning.p1 = <br>You already have a payment plan set up with the same amount and dates.
+testOnlyDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
 testOnlyDuplicateWarning.h2 = Do you want to continue with this amendment?
 
 #####################################################

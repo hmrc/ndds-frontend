@@ -17,7 +17,7 @@
 package controllers.testonly
 
 import controllers.actions.*
-import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import forms.DuplicateWarningFormProvider
 import models.Mode
 import pages.DuplicateWarningPage
@@ -54,7 +54,7 @@ class TestOnlyDuplicateWarningController @Inject() (
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad(mode)))
+      Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()))
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
@@ -63,16 +63,17 @@ class TestOnlyDuplicateWarningController @Inject() (
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad(mode)))),
+          formWithErrors =>
+            Future.successful(BadRequest(view(formWithErrors, mode, testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()))),
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningPage, value))
               _              <- sessionRepository.set(updatedAnswers)
             } yield {
               if (value) {
-                Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad())
+                Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad())
               } else {
-                Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad(mode))
+                Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
               }
             }
         )

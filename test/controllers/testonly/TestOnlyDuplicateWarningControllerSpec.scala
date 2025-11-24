@@ -16,6 +16,7 @@
 
 package controllers.testonly
 
+import controllers.testonly.routes as testOnlyRoutes
 import base.SpecBase
 import forms.DuplicateWarningFormProvider
 import models.NormalMode
@@ -44,7 +45,7 @@ class TestOnlyDuplicateWarningControllerSpec extends SpecBase {
       running(application) {
 
         val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
-        val request = FakeRequest(GET, "/test-only/amend-already-have-payment-plan")
+        val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
         val result = controller.onPageLoad(NormalMode)(request)
         val view = application.injector.instanceOf[TestOnlyDuplicateWarningView]
 
@@ -52,7 +53,7 @@ class TestOnlyDuplicateWarningControllerSpec extends SpecBase {
         contentAsString(result) mustEqual view(
           form,
           mode,
-          controllers.routes.AmendPaymentPlanConfirmationController.onPageLoad(mode)
+          testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
         )(request, messages(application)).toString
       }
     }
@@ -67,11 +68,11 @@ class TestOnlyDuplicateWarningControllerSpec extends SpecBase {
 
       running(application) {
         val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
-        val request = FakeRequest(POST, "/test-only/amend-already-have-payment-plan").withFormUrlEncodedBody(("value", "true"))
+        val request = FakeRequest(POST, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url).withFormUrlEncodedBody(("value", "true"))
         val result = controller.onSubmit(NormalMode)(request)
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.AmendPaymentPlanUpdateController.onPageLoad().url
+        redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad().url
       }
     }
 
@@ -85,11 +86,11 @@ class TestOnlyDuplicateWarningControllerSpec extends SpecBase {
 
       running(application) {
         val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
-        val request = FakeRequest(POST, "/test-only/amend-already-have-payment-plan").withFormUrlEncodedBody(("value", "false"))
+        val request = FakeRequest(POST, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url).withFormUrlEncodedBody(("value", "false"))
         val result = controller.onSubmit(NormalMode)(request)
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.AmendPaymentPlanConfirmationController.onPageLoad(mode).url
+        redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url
       }
     }
   }
