@@ -711,3 +711,12 @@ addPaymentPlanEndDate.p1 = This is not mandatory. You will be able to add an end
 addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
+
+duplicateError.title = duplicateError
+duplicateError.heading = duplicateError
+
+duplicateWarningForAddOrCreatePP.title = duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.heading = duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.checkYourAnswersLabel = duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.error.required = Select yes if duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.change.hidden = DuplicateWarningForAddOrCreatePP

@@ -183,3 +183,10 @@ GET        /add-payment-plan-end-date                   controllers.AddPaymentPl
 POST       /add-payment-plan-end-date                   controllers.AddPaymentPlanEndDateController.onSubmit(mode: Mode = NormalMode)
 GET        /change-add-payment-plan-end-date            controllers.AddPaymentPlanEndDateController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-add-payment-plan-end-date            controllers.AddPaymentPlanEndDateController.onSubmit(mode: Mode = CheckMode)
+
+GET        /duplicateError                       controllers.DuplicateErrorController.onPageLoad()
+
+GET        /duplicateWarningForAddOrCreatePP                        controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = NormalMode)
+POST       /duplicateWarningForAddOrCreatePP                        controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = NormalMode)
+GET        /changeDuplicateWarningForAddOrCreatePP                  controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeDuplicateWarningForAddOrCreatePP                  controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = CheckMode)
