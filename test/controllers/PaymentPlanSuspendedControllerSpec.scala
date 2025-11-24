@@ -116,7 +116,7 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
         contentAsString(result) mustEqual view(
           formattedStartDate,
           formattedEndDate,
-          Call("GET", routes.YourDirectDebitInstructionsController.onPageLoad().url),
+          Call("GET", routes.PaymentPlanDetailsController.onPageLoad().url),
           summaryListRows,
           suspensionIsActiveMode = false
         )(request, messages(application)).toString

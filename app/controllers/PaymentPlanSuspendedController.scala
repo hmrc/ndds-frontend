@@ -62,7 +62,7 @@ class PaymentPlanSuspendedController @Inject() (
         val suspensionIsActiveMode = isSuspendPeriodActive(planDetails.paymentPlanDetails)
 
         val rows = buildRows(paymentReference, userAnswers, planDetails.paymentPlanDetails)
-        Ok(view(formattedStartDate, formattedEndDate, routes.YourDirectDebitInstructionsController.onPageLoad(), rows, suspensionIsActiveMode))
+        Ok(view(formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows, suspensionIsActiveMode))
       }
 
       maybeResult match {
