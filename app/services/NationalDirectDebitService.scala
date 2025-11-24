@@ -592,9 +592,9 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   )(implicit hc: HeaderCarrier, request: Request[?]): Future[DuplicateCheckResponse] = {
 
     val directDebitRefOpt = userAnswers.get(DirectDebitReferenceQuery)
-    val existingIdentifier = userAnswers.get(DirectDebitReferenceQuery) // TODO changed to ExistingDirectDebitIdentifierQuery
+    val existingDdIdentifier = userAnswers.get(ExistingDirectDebitIdentifierQuery)
 
-    (directDebitRefOpt, existingIdentifier) match {
+    (directDebitRefOpt, existingDdIdentifier) match {
       // Add Payment Plan journey
       case (Some(directDebitRef), Some(_)) =>
         checkDuplicateForPaymentPlan(directDebitRef, userAnswers, userId, paymentAmount, paymentStartDate, isAmendPlan = false)
