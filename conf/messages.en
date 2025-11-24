@@ -565,7 +565,7 @@ paymentPlanCancelled.link = Return to Direct Debit Instructions
 
 duplicateWarning.title = You already have a payment plan with these details
 duplicateWarning.h1 = You already have a payment plan with these details
-duplicateWarning.p1 = <br>You already have a payment plan set up with the same amount and dates.
+duplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
 duplicateWarning.h2 = Do you want to continue with this amendment?
 duplicateWarning.error.required = Select one option
 duplicateWarning.change.hidden =  Duplicate Warning

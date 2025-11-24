@@ -24,7 +24,8 @@
         h1: Header1,
         h2: Header2,
         paragraph: Paragraph,
-        govukButton: GovukButton
+        govukButton: GovukButton,
+        govukLabel: GovukLabel
 )
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
@@ -37,10 +38,11 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        @h1("duplicateWarning.h1")
+        @govukLabel(HmrcPageHeadingLabel.apply(
+            content = Text(messages("duplicateWarning.h1"))
+        ).withCssClass("govuk-!-margin-bottom-0"))
 
-        @paragraph("duplicateWarning.p1")
-
+@paragraph("duplicateWarning.p1")
         @h2("duplicateWarning.h2")
 
         @govukRadios(
@@ -51,7 +53,7 @@
                         RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"))
                     ),
                 fieldset = Fieldset(legend = None)
-            ).withCssClass("govuk-radios--inline")
+            )
         )
 
        @govukButton(
