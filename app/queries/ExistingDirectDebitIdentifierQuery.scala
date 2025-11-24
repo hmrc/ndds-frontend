@@ -16,9 +16,10 @@
 
 package queries
 
+import models.NddDetails
 import play.api.libs.json.JsPath
 
-case object ExistingDirectDebitIdentifierQuery extends Gettable[String] with Settable[String] {
+case object ExistingDirectDebitIdentifierQuery extends Gettable[NddDetails] with Settable[NddDetails] {
 
   override def path: JsPath = JsPath \ "existingDirectDebitIdentifier"
 }

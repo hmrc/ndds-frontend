@@ -73,59 +73,42 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
   def calculateFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
 
-    val auddisStatusFuture = userAnswers.get(ExistingDirectDebitIdentifierQuery) match {
-      case Some(directDebitReferenceIdentifier) =>
-        directDebitCache
-          .getDirectDebit(directDebitReferenceIdentifier)(userId)
-          .map(_.auDdisFlag)
+    val auddisStatus = userAnswers.get(ExistingDirectDebitIdentifierQuery) match {
+      case Some(directDebit) => directDebit.auDdisFlag
       case _ =>
-        Future.successful(
-          userAnswers
-            .get(YourBankDetailsPage)
-            .map(_.auddisStatus)
-            .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
-        )
+        userAnswers
+          .get(YourBankDetailsPage)
+          .map(_.auddisStatus)
+          .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
     }
 
-    for {
-      auddisStatus <- auddisStatusFuture
-      offsetWorkingDays = calculateOffset(auddisStatus = auddisStatus)
-      currentDate = LocalDate.now().toString
-      result <- nddConnector.getFutureWorkingDays(
-                  WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays)
-                )
-    } yield result
+    val offsetWorkingDays = calculateOffset(auddisStatus)
+    val currentDate = LocalDate.now().toString
+
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
   }
 
   def getEarliestPlanStartDate(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
-    val auddisStatusFuture = userAnswers.get(ExistingDirectDebitIdentifierQuery) match {
-      case Some(directDebitReferenceIdentifier) =>
-        directDebitCache
-          .getDirectDebit(directDebitReferenceIdentifier)(userId)
-          .map(_.auDdisFlag)
+    val auddisStatus = userAnswers.get(ExistingDirectDebitIdentifierQuery) match {
+      case Some(directDebit) => directDebit.auDdisFlag
       case _ =>
-        Future.successful(
-          userAnswers
-            .get(YourBankDetailsPage)
-            .map(_.auddisStatus)
-            .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
-        )
+        userAnswers
+          .get(YourBankDetailsPage)
+          .map(_.auddisStatus)
+          .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
     }
 
-    for {
-      auddisStatus <- auddisStatusFuture
-      paymentPlanType <- userAnswers
-                           .get(PaymentPlanTypePage)
-                           .map(Future.successful)
-                           .getOrElse(Future.failed(new Exception("PaymentPlanTypePage details missing from user answers")))
-      directDebitSource <- userAnswers
-                             .get(DirectDebitSourcePage)
-                             .map(Future.successful)
-                             .getOrElse(Future.failed(new Exception("DirectDebitSourcePage details missing from user answers")))
-      offsetWorkingDays = calculateOffset(auddisStatus, paymentPlanType, directDebitSource)
-      currentDate = LocalDate.now().toString
-      result <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
-    } yield result
+    val paymentPlanType = userAnswers
+      .get(PaymentPlanTypePage)
+      .getOrElse(throw new Exception("PaymentPlanTypePage details missing from user answers"))
+    val directDebitSource = userAnswers
+      .get(DirectDebitSourcePage)
+      .getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers"))
+
+    val offsetWorkingDays = calculateOffset(auddisStatus, paymentPlanType, directDebitSource)
+    val currentDate = LocalDate.now().toString
+
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
   }
 
   private[services] def calculateOffset(auddisStatus: Boolean, paymentPlanType: PaymentPlanType, directDebitSource: DirectDebitSource): Int = {

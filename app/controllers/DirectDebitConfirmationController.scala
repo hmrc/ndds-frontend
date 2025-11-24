@@ -18,13 +18,13 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.{DirectDebitSource, PaymentPlanType}
-import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PlanStartDatePage, RegularPaymentAmountPage, TotalAmountDuePage}
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import models.PaymentPlanType
+import pages.*
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import config.CurrencyFormatter.currencyFormat
-import viewmodels.checkAnswers.{DirectDebitSourceSummary, FinalPaymentAmountSummary, FinalPaymentDateSummary, MonthlyPaymentAmountSummary, PaymentAmountSummary, PaymentDateSummary, PaymentPlanTypeSummary, PaymentReferenceSummary, PaymentsFrequencySummary, PlanEndDateSummary, PlanStartDateSummary, RegularPaymentAmountSummary, TotalAmountDueSummary, YearEndAndMonthSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
+import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*

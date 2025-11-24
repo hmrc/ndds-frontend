@@ -49,7 +49,7 @@ object PaymentPlanDuplicateCheckRequest {
       // Dummy request
       PaymentPlanDuplicateCheckRequest("ddRef", "planRef", "hod", "planType", "paymentRef", Some(100), Some(200), Some(1), LocalDate.now())
     } else { // Adding a new payment plan
-      val directDebitReference =
+      val existingDd =
         userAnswers
           .get(ExistingDirectDebitIdentifierQuery)
           .getOrElse(throw new RuntimeException("Missing ExistingDirectDebitIdentifierQuery"))
@@ -83,7 +83,7 @@ object PaymentPlanDuplicateCheckRequest {
           .getOrElse(throw new RuntimeException("Missing PlanStartDatePage"))
 
       PaymentPlanDuplicateCheckRequest(
-        directDebitReference = directDebitReference,
+        directDebitReference = existingDd.ddiRefNumber,
         paymentPlanReference = "",
         planType             = planType,
         paymentService       = hodService,

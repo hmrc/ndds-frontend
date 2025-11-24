@@ -33,7 +33,7 @@ import utils.MacGenerator
 import viewmodels.checkAnswers.YourBankDetailsNameSummary.nddResponse
 import viewmodels.govuk.SummaryListFluency
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
@@ -672,7 +672,17 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(PaymentReferencePage, "testReference")
           .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
           .setOrException(BankDetailsBankNamePage, "Barclays")
-          .set(ExistingDirectDebitIdentifierQuery, "existingDdRef")
+          .set(
+            ExistingDirectDebitIdentifierQuery,
+            NddDetails("directDebitReference",
+                       LocalDateTime.now(),
+                       "bankSortCode",
+                       "bankAccountNumber",
+                       "bankAccountName",
+                       auDdisFlag       = true,
+                       numberOfPayPlans = 2
+                      )
+          )
           .success
           .value
 

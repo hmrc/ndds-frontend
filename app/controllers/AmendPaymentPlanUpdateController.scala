@@ -54,6 +54,7 @@ class AmendPaymentPlanUpdateController @Inject() (
         paymentPlan   <- userAnswers.get(PaymentPlanDetailsQuery)
         paymentAmount <- userAnswers.get(AmendPaymentAmountPage)
         startDate     <- userAnswers.get(AmendPlanStartDatePage)
+
       } yield {
         val formattedRegPaymentAmount = formatAmount(paymentAmount)
         val formattedStartDate =
