@@ -18,8 +18,8 @@ package controllers
 
 import base.SpecBase
 import config.CurrencyFormatter.currencyFormat
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import models.responses.GenerateDdiRefResponse
+import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import pages.*
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.test.FakeRequest
