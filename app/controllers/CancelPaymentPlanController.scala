@@ -90,7 +90,7 @@ class CancelPaymentPlanController @Inject() (
       .bindFromRequest()
       .fold(
         formWithErrors => handleFormErrors(formWithErrors),
-        value => handleValidSubmission(value)
+        value => if (value) handleValidSubmission(value) else Future.successful(Redirect(routes.PaymentPlanDetailsController.onPageLoad()))
       )
   }
 
