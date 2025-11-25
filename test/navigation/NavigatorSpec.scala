@@ -313,6 +313,22 @@ class NavigatorSpec extends SpecBase {
           navigator.nextPage(RemovingThisSuspensionPage, NormalMode, ua) mustBe
             routes.JourneyRecoveryController.onPageLoad()
         }
+
+        "must go from DuplicateWarningForAddOrCreatePPPage to DirectDebitConfirmationController" in {
+          val ua = userAnswers
+            .set(DuplicateWarningForAddOrCreatePPPage, true)
+            .success
+            .value
+          navigator.nextPage(DuplicateWarningForAddOrCreatePPPage, CheckMode, ua) mustBe routes.DirectDebitConfirmationController.onPageLoad()
+        }
+
+        "must go from DuplicateWarningForAddOrCreatePPPage to CheckYourAnswersController" in {
+          val ua = userAnswers
+            .set(DuplicateWarningForAddOrCreatePPPage, false)
+            .success
+            .value
+          navigator.nextPage(YearEndAndMonthPage, CheckMode, ua) mustBe routes.CheckYourAnswersController.onPageLoad()
+        }
       }
     }
 
@@ -403,6 +419,22 @@ class NavigatorSpec extends SpecBase {
 
       "must go from YearEndAndMonthPage to CheckYourAnswersController in CheckMode" in {
         navigator.nextPage(YearEndAndMonthPage, CheckMode, userAnswers) mustBe routes.CheckYourAnswersController.onPageLoad()
+      }
+
+      "must go from DuplicateWarningForAddOrCreatePPPage to DirectDebitConfirmationController in CheckMode" in {
+        val ua = userAnswers
+          .set(DuplicateWarningForAddOrCreatePPPage, true)
+          .success
+          .value
+        navigator.nextPage(DuplicateWarningForAddOrCreatePPPage, CheckMode, ua) mustBe routes.DirectDebitConfirmationController.onPageLoad()
+      }
+
+      "must go from DuplicateWarningForAddOrCreatePPPage to CheckYourAnswersController in CheckMode" in {
+        val ua = userAnswers
+          .set(DuplicateWarningForAddOrCreatePPPage, false)
+          .success
+          .value
+        navigator.nextPage(YearEndAndMonthPage, CheckMode, ua) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
       "Amend Journey " - {
