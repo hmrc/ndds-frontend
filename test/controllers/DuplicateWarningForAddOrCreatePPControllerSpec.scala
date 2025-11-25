@@ -78,7 +78,7 @@ class DuplicateWarningForAddOrCreatePPControllerSpec extends SpecBase with Mocki
       }
     }
 
-    "must redirect to the next page when valid data is submitted" in {
+    "must redirect to the next page when valid data is submitted and answer is no" in {
 
       val mockSessionRepository = mock[SessionRepository]
 
@@ -95,12 +95,12 @@ class DuplicateWarningForAddOrCreatePPControllerSpec extends SpecBase with Mocki
       running(application) {
         val request =
           FakeRequest(POST, duplicateWarningForAddOrCreatePPRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+            .withFormUrlEncodedBody(("value", "false"))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad().url
       }
     }
 
