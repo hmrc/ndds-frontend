@@ -21,7 +21,6 @@ import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.AmendPlanStartDateFormProvider
 import models.{Mode, UserAnswers}
-import navigation.Navigator
 import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}

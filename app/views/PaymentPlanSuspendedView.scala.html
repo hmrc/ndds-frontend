@@ -28,7 +28,7 @@
 
 @(startDate: String, endDate: String, call: Call, rows:Seq[SummaryListRow], suspensionIsActiveMode: Boolean)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForManageJourneyNoForm(messages("paymentPlanSuspended.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("paymentPlanSuspended.title")), showBackLink = false) {
 
     @confirmationPanel(
         title = messages("paymentPlanSuspended.panel.title"),

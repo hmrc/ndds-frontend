@@ -29,7 +29,7 @@
 
 @(hmrcHelplineUrl: String, totalAmount: String, dueDate: String,  directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String, paymentPlanLink: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForManageJourneyNoForm(messages("advanceNotice.title")), backLink = Some(paymentPlanLink.url)) {
+@layout(pageTitle = titleNoForm(messages("advanceNotice.title")), backLink = Some(paymentPlanLink.url)) {
 
     @h1("advanceNotice.heading")
 

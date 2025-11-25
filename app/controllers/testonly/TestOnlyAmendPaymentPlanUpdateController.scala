@@ -26,7 +26,6 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
-import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -37,7 +36,7 @@ import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class TestOnlyAmendPaymentPlanUpdateController @Inject() (
   override val messagesApi: MessagesApi,
@@ -48,8 +47,7 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   view: TestOnlyAmendPaymentPlanUpdateView,
   appConfig: FrontendAppConfig
-)(implicit ec: ExecutionContext)
-    extends FrontendBaseController
+) extends FrontendBaseController
     with I18nSupport
     with Logging {
 

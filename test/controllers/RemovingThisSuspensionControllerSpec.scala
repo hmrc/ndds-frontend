@@ -239,6 +239,42 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to PaymentPlanDetails page when user answer No" in {
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, "PREF123")
+        .success
+        .value
+        .set(DirectDebitReferenceQuery, "DDI123")
+        .success
+        .value
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, removingThisSuspensionRoute)
+          .withFormUrlEncodedBody(("value", "false"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.PaymentPlanDetailsController.onPageLoad().url
+
+      }
+    }
+
     "must redirect to Journey Recovery for a POST with non-Budget Payment Plan" in {
 
       val userAnswers = emptyUserAnswers
