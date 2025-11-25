@@ -882,6 +882,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(pages.MacValuePage, "valid-mac")
 
+      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
       when(mockNddService.generateNewDdiReference(any())(any()))
         .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
       when(mockNddService.submitChrisData(any())(any()))
@@ -933,6 +935,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(pages.MacValuePage, "valid-mac")
 
+      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
       when(mockNddService.generateNewDdiReference(any())(any()))
         .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
       when(mockNddService.submitChrisData(any())(any()))
@@ -983,6 +987,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(BankDetailsBankNamePage, "Barclays")
         .setOrException(pages.MacValuePage, "valid-mac")
 
+      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
       when(mockNddService.generateNewDdiReference(any())(any()))
         .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
       when(mockNddService.submitChrisData(any())(any()))
