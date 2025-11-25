@@ -30,7 +30,7 @@
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForManageJourney(form, messages("testOnlyDuplicateWarning.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("testOnlyDuplicateWarning.title")), backLink = Some(call.url)) {
 
     @formHelper(action = controllers.testonly.routes.TestOnlyDuplicateWarningController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
