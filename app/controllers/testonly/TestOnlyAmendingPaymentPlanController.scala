@@ -18,17 +18,20 @@ package controllers.testonly
 
 import config.FrontendAppConfig
 import controllers.actions.*
+import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import models.{NormalMode, PaymentPlanType}
+import pages.ManagePaymentPlanTypePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanDetailsQuery
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import utils.Constants
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanStartDateSummary, SuspensionPeriodRangeDateSummary}
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanStartDateSummary}
 import viewmodels.testonly.TestOnlyPlanEndDateSummary
 import views.html.testonly.TestOnlyAmendingPaymentPlanView
 
@@ -39,6 +42,7 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: TestOnlyAmendingPaymentPlanView,
   appConfig: FrontendAppConfig
@@ -46,18 +50,20 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
     with I18nSupport
     with Logging {
 
-  def onPageLoad: Action[AnyContent] =
-    (identify andThen getData andThen requireData) { implicit request =>
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    if (!nddsService.amendPaymentPlanGuard(request.userAnswers)) {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    } else {
+      val planDetailsResponse = request.userAnswers
+        .get(PaymentPlanDetailsQuery)
+        .getOrElse(throw new RuntimeException("Missing plan details"))
 
-      val planDetails =
-        request.userAnswers
-          .get(PaymentPlanDetailsQuery)
-          .getOrElse(sys.error("Missing plan details"))
-          .paymentPlanDetails
-
+      val planDetail = planDetailsResponse.paymentPlanDetails
       val amountRow =
         AmendPaymentAmountSummary
-          .row(planDetails.planType, planDetails.scheduledPaymentAmount)
+          .row(planDetail.planType, planDetail.scheduledPaymentAmount)
           .copy(
             actions = Some(
               Actions(
@@ -75,14 +81,12 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
           )
 
       val dateRow: SummaryListRow =
-        planDetails.planType match {
-
-          // SINGLE PLAN
+        planDetail.planType match {
           case p if p == PaymentPlanType.SinglePaymentPlan.toString =>
             AmendPlanStartDateSummary
               .row(
                 p,
-                planDetails.scheduledPaymentStartDate,
+                planDetail.scheduledPaymentStartDate,
                 Constants.shortDateTimeFormatPattern
               )
               .copy(
@@ -101,26 +105,18 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
                 )
               )
 
-          // BUDGET PLAN
           case p if p == PaymentPlanType.BudgetPaymentPlan.toString =>
-            planDetails.scheduledPaymentEndDate match {
+            planDetail.scheduledPaymentEndDate match {
               case Some(endDate) =>
                 TestOnlyPlanEndDateSummary.row(endDate)
               case None =>
                 TestOnlyPlanEndDateSummary.addRow()
             }
-
           case _ =>
             SummaryListRow(key = Key(Text("")), value = Value(Text("")))
         }
 
-//      val summaryRows: Seq[SummaryListRow] = Seq(amountRow, dateRow)
-      Ok(
-        view(
-          appConfig.hmrcHelplineUrl,
-          amountRow,
-          dateRow
-        )
-      )
+      Ok(view(appConfig.hmrcHelplineUrl, amountRow, dateRow))
     }
+  }
 }

@@ -53,7 +53,7 @@ object TestOnlyPlanEndDateSummary {
       value = Value(
         HtmlContent(
           s"""<a class="govuk-link" href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
-              "testOnlyAmendingPaymentPlan.budgetPlanEndDate.planEndDate.add"
+              "testOnlyAmendingPaymentPlan.budgetPlanEndDate.addPlanEndDateLink"
             )}</a>"""
         )
       ),

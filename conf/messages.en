@@ -727,7 +727,7 @@ testOnlyAmendingPaymentPlan.cancel.link = Cancel and return to payment plan
 testOnlyAmendingPaymentPlan.budgetPlanEndDate = Plan end date
 testOnlyAmendingPaymentPlan.budgetPlanEndDate.change.hidden =  Plan end date
 testOnlyAmendingPaymentPlan.budgetPlanEndDate.remove.hidden =  Plan end date
-testOnlyAmendingPaymentPlan.budgetPlanEndDate.planEndDate.add = Add plan end date
+testOnlyAmendingPaymentPlan.budgetPlanEndDate.addPlanEndDateLink = Add plan end date
 
 
 #AP1a messages
