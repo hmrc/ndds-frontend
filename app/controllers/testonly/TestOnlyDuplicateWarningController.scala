@@ -20,12 +20,13 @@ import controllers.actions.*
 import controllers.testonly.routes as testOnlyRoutes
 import forms.DuplicateWarningFormProvider
 import models.Mode
-import pages.DuplicateWarningPage
+import pages.{DuplicateWarningPage, ManagePaymentPlanTypePage}
 import play.api.data.Form
 import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.testonly.TestOnlyDuplicateWarningView
 
@@ -40,6 +41,7 @@ class TestOnlyDuplicateWarningController @Inject() (
   requireData: DataRequiredAction,
   formProvider: DuplicateWarningFormProvider,
   val controllerComponents: MessagesControllerComponents,
+  nddsService: NationalDirectDebitService,
   view: TestOnlyDuplicateWarningView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -60,35 +62,40 @@ class TestOnlyDuplicateWarningController @Inject() (
           Redirect(controllers.routes.BackSubmissionController.onPageLoad())
         )
       } else {
+        if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+          val maybeResult = for {
+            updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
+          } yield {
 
-        val maybeResult = for {
-          updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
-        } yield {
+            val preparedForm = form
 
-          val preparedForm = form
-
-          Ok(
-            view(
-              preparedForm,
-              mode,
-              testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
-            )
-          )
-        }
-
-        maybeResult match {
-          case Some(result) =>
-            sessionRepository
-              .set(
-                userAnswers.set(DuplicateWarningPage, true).get
+            Ok(
+              view(
+                preparedForm,
+                mode,
+                testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
               )
-              .map(_ => result)
-
-          case None =>
-            logger.warn("Failed to set DuplicateWarningPage = true")
-            Future.successful(
-              Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
             )
+          }
+
+          maybeResult match {
+            case Some(result) =>
+              sessionRepository
+                .set(
+                  userAnswers.set(DuplicateWarningPage, true).get
+                )
+                .map(_ => result)
+
+            case None =>
+              logger.warn("Failed to set DuplicateWarningPage = true")
+              Future.successful(
+                Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+              )
+          }
+        } else {
+          val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+          logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+          Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
       }
     }
