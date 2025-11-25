@@ -51,7 +51,6 @@ class Navigator @Inject() () {
     case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
     case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
-    case DuplicateWarningForAddOrCreatePPPage => navigateFromDuplicateWarningForAddOrCreatePPPage
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
@@ -77,7 +76,6 @@ class Navigator @Inject() () {
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
-    case DuplicateWarningForAddOrCreatePPPage => navigateFromDuplicateWarningForAddOrCreatePPPage
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
@@ -162,15 +160,6 @@ class Navigator @Inject() () {
       .map {
         case true  => routes.RemoveSuspensionConfirmationController.onPageLoad()
         case false => routes.PaymentPlanDetailsController.onPageLoad()
-      }
-      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
-
-  private def navigateFromDuplicateWarningForAddOrCreatePPPage(answers: UserAnswers): Call =
-    answers
-      .get(DuplicateWarningForAddOrCreatePPPage)
-      .map {
-        case true  => routes.DirectDebitConfirmationController.onPageLoad()
-        case false => routes.CheckYourAnswersController.onPageLoad()
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
 }

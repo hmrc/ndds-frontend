@@ -16,15 +16,20 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
 import forms.DuplicateWarningForAddOrCreatePPFormProvider
+
 import javax.inject.Inject
-import models.Mode
+import models.{Mode, UserAnswers}
+import models.requests.ChrisSubmissionRequest
+import models.responses.GenerateDdiRefResponse
 import navigation.Navigator
-import pages.DuplicateWarningForAddOrCreatePPPage
+import pages.{CheckYourAnswerPage, CreateConfirmationPage, DuplicateWarningForAddOrCreatePPPage, PaymentReferencePage, QuestionPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DuplicateWarningForAddOrCreatePPView
 
@@ -33,13 +38,15 @@ import scala.concurrent.{ExecutionContext, Future}
 class DuplicateWarningForAddOrCreatePPController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
+  nddService: NationalDirectDebitService,
   navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   formProvider: DuplicateWarningForAddOrCreatePPFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: DuplicateWarningForAddOrCreatePPView
+  view: DuplicateWarningForAddOrCreatePPView,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -57,16 +64,39 @@ class DuplicateWarningForAddOrCreatePPController @Inject() (
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-
+    implicit val ua: UserAnswers = request.userAnswers
     form
       .bindFromRequest()
       .fold(
         formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
         value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningForAddOrCreatePPPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(DuplicateWarningForAddOrCreatePPPage, mode, updatedAnswers))
+          if (value) {
+            for {
+              generatedDdiRef <- nddService.generateNewDdiReference(required(PaymentReferencePage))
+              chrisRequest =
+                ChrisSubmissionRequest.buildChrisSubmissionRequest(ua, generatedDdiRef.ddiRefNumber, request.userId, appConfig)
+              chrisSuccess <- nddService.submitChrisData(chrisRequest)
+              result <- {
+                if (chrisSuccess) {
+                  for {
+                    updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(generatedDdiRef.ddiRefNumber)))
+                    updatedAnswers <- Future.fromTry(updatedAnswers.set(CreateConfirmationPage, value))
+                    _              <- sessionRepository.set(updatedAnswers)
+                  } yield Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+                } else {
+                  Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                }
+              }
+            } yield result
+          } else {
+            for {
+              updatedAnswers <- Future.fromTry(ua.set(CreateConfirmationPage, value))
+              _              <- sessionRepository.set(updatedAnswers)
+            } yield Redirect(routes.CheckYourAnswersController.onPageLoad())
+          }
       )
   }
+
+  private def required[A](page: QuestionPage[A])(implicit ua: UserAnswers, rds: play.api.libs.json.Reads[A]): A =
+    ua.get(page).getOrElse(throw new Exception(s"Missing details: ${page.toString}"))
 }
