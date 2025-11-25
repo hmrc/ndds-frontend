@@ -18,6 +18,7 @@ package controllers.testonly
 
 import config.FrontendAppConfig
 import controllers.actions.*
+import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import models.NormalMode
 import play.api.Logging
@@ -38,6 +39,7 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
+  nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: TestOnlyAmendingPaymentPlanView,
   appConfig: FrontendAppConfig
@@ -46,43 +48,47 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
     with Logging {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    val planDetailsResponse = request.userAnswers
-      .get(PaymentPlanDetailsQuery)
-      .getOrElse(throw new RuntimeException("Missing plan details"))
+    if (nddsService.amendPaymentPlanGuard(request.userAnswers)) {
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type(test-only)")
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
+    } else {
+      val planDetailsResponse = request.userAnswers
+        .get(PaymentPlanDetailsQuery)
+        .getOrElse(throw new RuntimeException("Missing plan details"))
 
-    val planDetail = planDetailsResponse.paymentPlanDetails
-    val amountRow = AmendPaymentAmountSummary
-      .row(planDetail.planType, planDetail.scheduledPaymentAmount)
-      .copy(actions =
-        Some(
-          Actions(items =
-            Seq(
-              ActionItem(
-                href               = testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode = NormalMode).url,
-                content            = Text("Change"),
-                visuallyHiddenText = Some("payment amount")
+      val planDetail = planDetailsResponse.paymentPlanDetails
+      val amountRow = AmendPaymentAmountSummary
+        .row(planDetail.planType, planDetail.scheduledPaymentAmount)
+        .copy(actions =
+          Some(
+            Actions(items =
+              Seq(
+                ActionItem(
+                  href               = testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode = NormalMode).url,
+                  content            = Text("Change"),
+                  visuallyHiddenText = Some("payment amount")
+                )
               )
             )
           )
         )
-      )
 
-    val dateRow = AmendPlanStartDateSummary
-      .row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
-      .copy(actions =
-        Some(
-          Actions(
-            items = Seq(
-              ActionItem(
-                href               = testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode = NormalMode).url,
-                content            = Text("Change"),
-                visuallyHiddenText = Some("payment date")
+      val dateRow = AmendPlanStartDateSummary
+        .row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
+        .copy(actions =
+          Some(
+            Actions(
+              items = Seq(
+                ActionItem(
+                  href               = testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode = NormalMode).url,
+                  content            = Text("Change"),
+                  visuallyHiddenText = Some("payment date")
+                )
               )
             )
           )
         )
-      )
-
-    Ok(view(appConfig.hmrcHelplineUrl, amountRow, dateRow))
+      Ok(view(appConfig.hmrcHelplineUrl, amountRow, dateRow))
+    }
   }
 }
