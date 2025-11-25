@@ -19,15 +19,20 @@ package controllers.testonly
 import config.FrontendAppConfig
 import controllers.actions.*
 import controllers.routes
-import pages.*
+import models.{PaymentPlanType, UserAnswers}
+import models.responses.PaymentPlanDetails
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Logging
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import utils.MaskAndFormatUtils.formatAmount
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, DateSetupSummary, PaymentReferenceSummary, PaymentsFrequencySummary}
 import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
 import java.time.format.DateTimeFormatter
@@ -100,5 +105,33 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
       Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
+  }
+
+  private def buildSummaryRows(showAllActionsFlag: Boolean, userAnswers: UserAnswers, planDetail: PaymentPlanDetails, paymentPlanReference: String)(
+    implicit messages: Messages
+  ): Seq[SummaryListRow] = {
+    val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
+    val planStartDate = userAnswers.get(AmendPlanStartDatePage)
+    val planEndDate = userAnswers.get(AmendPlanEndDatePage)
+
+    planDetail.planType match {
+      case PaymentPlanType.SinglePaymentPlan.toString =>
+        Seq(
+          PaymentReferenceSummary.row(paymentPlanReference),
+          DateSetupSummary.row(planDetail.submissionDateTime),
+          AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount),
+          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.shortDateTimeFormatPattern)
+        )
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        Seq(
+          PaymentReferenceSummary.row(paymentPlanReference),
+          DateSetupSummary.row(planDetail.submissionDateTime),
+          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
+          PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
+          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.shortDateTimeFormatPattern),
+          AmendPlanEndDateSummary.row(planEndDate, Constants.shortDateTimeFormatPattern, showAllActionsFlag)
+        )
+    }
+
   }
 }
