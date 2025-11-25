@@ -19,15 +19,21 @@ package controllers.testonly
 import base.SpecBase
 import models.PaymentPlanType
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.ManagePaymentPlanTypePage
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
+import services.NationalDirectDebitService
 
 import java.time.{LocalDate, LocalDateTime}
 
 class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
 
   "TestOnlyAmendingPaymentPlanController" - {
+    val mockService = mock[NationalDirectDebitService]
     "must return OK and render correct view for GET (Single Payment)" in {
       val planDetails = PaymentPlanDetails(
         hodService                = "HOD",
@@ -65,12 +71,16 @@ class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
         .set(PaymentPlanDetailsQuery, wrapped)
         .success
         .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .success
+        .value
 
       val application = applicationBuilder(Some(ua))
         .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
         .build()
 
       running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
         val request = FakeRequest(GET, routes.TestOnlyAmendingPaymentPlanController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual OK
@@ -81,6 +91,25 @@ class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
         page must include("£100.00")
         page must include("25 Nov 2025")
 
+      }
+    }
+
+    "must redirect to Journey Recovery page when amend payment plan guard returns false" in {
+      val userAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+
+        val controller = application.injector.instanceOf[TestOnlyAmendingPaymentPlanController]
+        val request = FakeRequest(GET, routes.TestOnlyAmendingPaymentPlanController.onPageLoad().url)
+        val result = controller.onPageLoad()(request)
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
       }
     }
   }

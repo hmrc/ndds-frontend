@@ -21,6 +21,7 @@ import controllers.actions.*
 import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import models.NormalMode
+import pages.ManagePaymentPlanTypePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -48,8 +49,9 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
     with Logging {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    if (nddsService.amendPaymentPlanGuard(request.userAnswers)) {
-      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type(test-only)")
+    if (!nddsService.amendPaymentPlanGuard(request.userAnswers)) {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
       Redirect(routes.JourneyRecoveryController.onPageLoad())
     } else {
       val planDetailsResponse = request.userAnswers
