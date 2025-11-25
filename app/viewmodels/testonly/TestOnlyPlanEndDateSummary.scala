@@ -36,28 +36,25 @@ object TestOnlyPlanEndDateSummary {
       endDate.format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern))
 
     SummaryListRowViewModel(
-      key = "planEndDate.checkYourAnswersLabel",
+      key   = "testOnlyAmendingPaymentPlan.budgetPlanEndDate",
       value = ValueViewModel(formatted),
       actions = Seq(
-        ActionItemViewModel("site.change",
-          routes.AmendPlanEndDateController.onPageLoad(NormalMode).url)
-          .withVisuallyHiddenText(messages("planEndDate.change.hidden"))
-        ,
+        ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(NormalMode).url)
+          .withVisuallyHiddenText(messages("testOnlyAmendingPaymentPlan.budgetPlanEndDate.change.hidden")),
         ActionItemViewModel("site.remove", routes.RemovingThisSuspensionController.onPageLoad(NormalMode).url)
-          .withVisuallyHiddenText(messages("planEndDate.remove.hidden"))
-
+          .withVisuallyHiddenText(messages("testOnlyAmendingPaymentPlan.budgetPlanEndDate.remove.hidden"))
       )
     )
   }
 
   def addRow()(implicit messages: Messages): SummaryListRow =
     SummaryListRow(
-      key = Key(Text(messages("planEndDate.checkYourAnswersLabel"))),
+      key = Key(Text(messages("testOnlyAmendingPaymentPlan.budgetPlanEndDate"))),
       value = Value(
         HtmlContent(
-          s"""<a class="govuk-link" href="${
-            routes.AmendPlanEndDateController.onPageLoad(NormalMode).url
-          }">${messages("planEndDate.add")}</a>"""
+          s"""<a class="govuk-link" href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
+              "testOnlyAmendingPaymentPlan.budgetPlanEndDate.planEndDate.add"
+            )}</a>"""
         )
       ),
       actions = None
