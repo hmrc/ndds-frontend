@@ -288,6 +288,28 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to PaymentPlanDetails page when user answer No" in {
+      val mockSessionRepository = mock[SessionRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository)
+        )
+        .build()
+
+      running(application) {
+        val request = FakeRequest(POST, cancelPaymentPlanRoute)
+          .withFormUrlEncodedBody("value" -> "false")
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.PaymentPlanDetailsController.onPageLoad().url
+      }
+    }
+
     "must redirect to JourneyRecoveryController when DirectDebitReference is missing" in {
 
       val mockBudgetPaymentPlanDetailResponse =

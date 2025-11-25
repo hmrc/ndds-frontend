@@ -34,7 +34,7 @@
 
 @(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], selfAssessmentUrl: Option[String], paymentProblemUrl: Option[String], call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourney(form, messages("paymentPlanType.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("paymentPlanType.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.PaymentPlanTypeController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
