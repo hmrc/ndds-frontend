@@ -17,39 +17,40 @@
 @import views.html.components.*
 
 @this(
-    layout: templates.Layout,
-    paragraph: Paragraph,
-    paragraphWithLink: ParagraphMessageWithLink,
-    govukButton: GovukButton,
-    h1: Header1,
-    bulletList: BulletList,
-    govukSummaryList: GovukSummaryList
+layout: templates.Layout,
+paragraph: Paragraph,
+paragraphWithLink: ParagraphMessageWithLink,
+govukButton: GovukButton,
+h1: Header1,
+bulletList: BulletList,
+govukSummaryList: GovukSummaryList
 )
 
 @(hmrcHelplineUrl: String, paymentAmountRow: SummaryListRow, paymentDateRow: SummaryListRow)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoFormManagePlan(messages("testOnlyAmendingPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
+@layout(pageTitle = titleNoFormManagePlan(messages("testOnlyAmendingPaymentPlan.title")),
+backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
-  @h1("testOnlyAmendingPaymentPlan.heading")
+    @h1("testOnlyAmendingPaymentPlan.heading")
 
-  @paragraphWithLink(
-    message1 = Some(messages("testOnlyAmendingPaymentPlan.p2.prefix")),
-    linkMessage = messages("testOnlyAmendingPaymentPlan.p2.link"),
-    message2 = Some(messages("testOnlyAmendingPaymentPlan.p2.suffix")),
-    linkUrl = hmrcHelplineUrl,
-    linkRel = "noreferrer noopener",
-    target = "_blank"
- )
+    @paragraphWithLink(
+        message1 = Some(messages("testOnlyAmendingPaymentPlan.p2.prefix")),
+        linkMessage = messages("testOnlyAmendingPaymentPlan.p2.link"),
+        message2 = Some(messages("testOnlyAmendingPaymentPlan.p2.suffix")),
+        linkUrl = hmrcHelplineUrl,
+        linkRel = "noreferrer noopener",
+        target = "_blank"
+    )
 
- @bulletList(
-   items = Seq(
-     "testOnlyAmendingPaymentPlan.list.1",
-     "testOnlyAmendingPaymentPlan.list.2",
-     "testOnlyAmendingPaymentPlan.list.3"
-   )
- )
+    @bulletList(
+        items = Seq(
+            "testOnlyAmendingPaymentPlan.list.1",
+            "testOnlyAmendingPaymentPlan.list.2",
+            "testOnlyAmendingPaymentPlan.list.3"
+        )
+    )
 
-  @paragraph("testOnlyAmendingPaymentPlan.p3")
+    @paragraph("testOnlyAmendingPaymentPlan.p3")
 
   @govukSummaryList(
     SummaryList(
@@ -58,8 +59,8 @@
   )
 
 
-  @paragraphWithLink(
-     linkMessage = messages("testOnlyAmendingPaymentPlan.cancel.link"),
-     linkUrl = routes.PaymentPlanDetailsController.onPageLoad().url
-  )
+    @paragraphWithLink(
+        linkMessage = messages("testOnlyAmendingPaymentPlan.cancel.link"),
+        linkUrl = routes.PaymentPlanDetailsController.onPageLoad().url
+    )
 }

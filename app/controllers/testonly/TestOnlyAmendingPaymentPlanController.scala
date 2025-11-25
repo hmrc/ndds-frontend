@@ -19,16 +19,17 @@ package controllers.testonly
 import config.FrontendAppConfig
 import controllers.actions.*
 import controllers.testonly.routes as testOnlyRoutes
-import models.NormalMode
+import models.{NormalMode, PaymentPlanType}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanDetailsQuery
-import services.NationalDirectDebitService
-import uk.gov.hmrc.govukfrontend.views.html.components.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import utils.Constants
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanStartDateSummary}
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanStartDateSummary, SuspensionPeriodRangeDateSummary}
+import viewmodels.testonly.TestOnlyPlanEndDateSummary
 import views.html.testonly.TestOnlyAmendingPaymentPlanView
 
 import javax.inject.Inject
@@ -45,44 +46,81 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
     with I18nSupport
     with Logging {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    val planDetailsResponse = request.userAnswers
-      .get(PaymentPlanDetailsQuery)
-      .getOrElse(throw new RuntimeException("Missing plan details"))
+  def onPageLoad: Action[AnyContent] =
+    (identify andThen getData andThen requireData) { implicit request =>
 
-    val planDetail = planDetailsResponse.paymentPlanDetails
-    val amountRow = AmendPaymentAmountSummary
-      .row(planDetail.planType, planDetail.scheduledPaymentAmount)
-      .copy(actions =
-        Some(
-          Actions(items =
-            Seq(
-              ActionItem(
-                href               = testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode = NormalMode).url,
-                content            = Text("Change"),
-                visuallyHiddenText = Some("payment amount")
+      val planDetails =
+        request.userAnswers
+          .get(PaymentPlanDetailsQuery)
+          .getOrElse(sys.error("Missing plan details"))
+          .paymentPlanDetails
+
+      val amountRow =
+        AmendPaymentAmountSummary
+          .row(planDetails.planType, planDetails.scheduledPaymentAmount)
+          .copy(
+            actions = Some(
+              Actions(
+                items = Seq(
+                  ActionItem(
+                    href = testOnlyRoutes.TestOnlyAmendPaymentAmountController
+                      .onPageLoad(NormalMode)
+                      .url,
+                    content            = Text("Change"),
+                    visuallyHiddenText = Some("payment amount")
+                  )
+                )
               )
             )
           )
-        )
-      )
 
-    val dateRow = AmendPlanStartDateSummary
-      .row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
-      .copy(actions =
-        Some(
-          Actions(
-            items = Seq(
-              ActionItem(
-                href               = testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode = NormalMode).url,
-                content            = Text("Change"),
-                visuallyHiddenText = Some("payment date")
+      val dateRow: SummaryListRow =
+        planDetails.planType match {
+
+          // SINGLE PLAN
+          case p if p == PaymentPlanType.SinglePaymentPlan.toString =>
+            AmendPlanStartDateSummary
+              .row(
+                p,
+                planDetails.scheduledPaymentStartDate,
+                Constants.shortDateTimeFormatPattern
               )
-            )
-          )
+              .copy(
+                actions = Some(
+                  Actions(
+                    items = Seq(
+                      ActionItem(
+                        href = testOnlyRoutes.TestOnlyAmendPlanStartDateController
+                          .onPageLoad(NormalMode)
+                          .url,
+                        content            = Text("Change"),
+                        visuallyHiddenText = Some("payment date")
+                      )
+                    )
+                  )
+                )
+              )
+
+          // BUDGET PLAN
+          case p if p == PaymentPlanType.BudgetPaymentPlan.toString =>
+            planDetails.scheduledPaymentEndDate match {
+              case Some(endDate) =>
+                TestOnlyPlanEndDateSummary.row(endDate)
+              case None =>
+                TestOnlyPlanEndDateSummary.addRow()
+            }
+
+          case _ =>
+            SummaryListRow(key = Key(Text("")), value = Value(Text("")))
+        }
+
+//      val summaryRows: Seq[SummaryListRow] = Seq(amountRow, dateRow)
+      Ok(
+        view(
+          appConfig.hmrcHelplineUrl,
+          amountRow,
+          dateRow
         )
       )
-
-    Ok(view(appConfig.hmrcHelplineUrl, amountRow, dateRow))
-  }
+    }
 }
