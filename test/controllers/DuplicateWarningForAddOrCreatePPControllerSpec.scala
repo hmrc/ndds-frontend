@@ -18,19 +18,22 @@ package controllers
 
 import base.SpecBase
 import forms.DuplicateWarningForAddOrCreatePPFormProvider
-import models.{NormalMode, UserAnswers}
+import models.responses.{BankAddress, Country, GenerateDdiRefResponse}
+import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetailsWithAuddisStatus}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.DuplicateWarningForAddOrCreatePPPage
+import pages.*
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import views.html.DuplicateWarningForAddOrCreatePPView
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class DuplicateWarningForAddOrCreatePPControllerSpec extends SpecBase with MockitoSugar {
@@ -101,6 +104,51 @@ class DuplicateWarningForAddOrCreatePPControllerSpec extends SpecBase with Mocki
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad().url
+      }
+    }
+
+    "must redirect to the next page when valid data is submitted and answer is yes" in {
+
+      val fixedDate = LocalDate.of(2025, 7, 19)
+      val totalDueAmount = 200
+      val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(fixedDate, "2025-7-19")
+
+      val incompleteAnswers = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+        .setOrException(TotalAmountDuePage, totalDueAmount)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(PaymentReferencePage, "testReference")
+        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+        .setOrException(BankDetailsBankNamePage, "Barclays")
+        .setOrException(pages.MacValuePage, "valid-mac")
+
+      val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
+      val mockSessionRepository = mock[SessionRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      when(mockNddService.generateNewDdiReference(any())(any()))
+        .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+      when(mockNddService.submitChrisData(any())(any()))
+        .thenReturn(Future.successful(true))
+
+      val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+        .overrides(
+          bind[NationalDirectDebitService].toInstance(mockNddService),
+          bind[SessionRepository].toInstance(mockSessionRepository)
+        )
+        .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, duplicateWarningForAddOrCreatePPRoute)
+            .withFormUrlEncodedBody(("value", "true"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
       }
     }
 

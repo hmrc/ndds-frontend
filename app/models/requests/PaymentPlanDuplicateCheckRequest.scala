@@ -44,9 +44,9 @@ object PaymentPlanDuplicateCheckRequest {
             paymentStartDate: Option[LocalDate],
             isAmendPlan: Boolean
            ): PaymentPlanDuplicateCheckRequest = {
-    // TODO Need to set according to payment plan
+
     if (isAmendPlan) {
-      // Dummy request for now
+      // TODO Need to set according to payment plan
       PaymentPlanDuplicateCheckRequest("ddRef", "planRef", "hod", "planType", "paymentRef", Some(100), Some(200), Some(1), LocalDate.now())
     } else { // Adding a new payment plan
       val existingDd =
@@ -94,7 +94,7 @@ object PaymentPlanDuplicateCheckRequest {
             .getOrElse(throw new RuntimeException("Missing PlanStartDatePage"))
       }
 
-      val request = PaymentPlanDuplicateCheckRequest(
+      PaymentPlanDuplicateCheckRequest(
         directDebitReference = existingDd.ddiRefNumber,
         paymentPlanReference = "",
         planType             = planType,
@@ -105,9 +105,6 @@ object PaymentPlanDuplicateCheckRequest {
         paymentFrequency     = frequency,
         paymentStartDate     = startDate
       )
-
-      println(request)
-      request
     }
   }
 }

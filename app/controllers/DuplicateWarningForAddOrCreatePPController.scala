@@ -39,7 +39,6 @@ class DuplicateWarningForAddOrCreatePPController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   nddService: NationalDirectDebitService,
-  navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
