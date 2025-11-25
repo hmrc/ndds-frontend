@@ -33,12 +33,20 @@ import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
 import views.html.AmendPlanStartDateView
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{Clock, LocalDate, LocalDateTime, ZoneId}
+
 import scala.concurrent.Future
 
 class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
-  private val formProvider = new AmendPlanStartDateFormProvider()
+
+  private val fixedDate = LocalDate.of(2025, 8, 6)
+  private val fixedClock = Clock.fixed(
+    fixedDate.atStartOfDay(ZoneId.systemDefault()).toInstant,
+    ZoneId.systemDefault()
+  )
+
+  private val formProvider = new AmendPlanStartDateFormProvider(fixedClock)
   private def form = formProvider()
   val validAnswer: LocalDate = LocalDate.now()
   val singlePlan: String = "Single Payment"

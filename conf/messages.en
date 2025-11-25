@@ -732,7 +732,9 @@ testOnlyAmendPlanStartDate.title = When do you want to make this payment?
 testOnlyAmendPlanStartDate.heading = When do you want to make this payment?
 testOnlyAmendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
 testOnlyAmendPlanStartDate.warning = If your payment is late, you may be liable to pay interest or a surcharge.
-testOnlyAmendPlanStartDate.hint = For example, 27 3 2020
+testOnlyAmendPlanStartDate.hint = For example, {0}
+testOnlyAmendPlanStartDate.error.beforeEarliest=The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
+testOnlyAmendPlanStartDate.error.tooFarInFuture=The date you have entered is not valid. It cannot be more than 12 months after the current date.
 
 #AP2 messages
 testOnlyAmendPaymentPlanConfirmation.title = Check your amendment details
