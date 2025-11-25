@@ -116,72 +116,99 @@ class CheckYourAnswersController @Inject() (
     (identify andThen getData andThen requireData).async { implicit request =>
       implicit val ua: UserAnswers = request.userAnswers
 
-      nddService
-        .isDuplicatePlanSetupAmendAndAddPaymenPlan(userAnswers = ua, userId = request.userId, None, None)
-        .flatMap { duplicateResponse =>
-          {
-            if (duplicateResponse.isDuplicate) {
-              val warningUrl = ua.get(PaymentPlanTypePage) match {
-                case Some(planType) if planType == PaymentPlanType.VariablePaymentPlan => routes.DuplicateErrorController.onPageLoad()
-                case _ => routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode)
-              }
-              Future.successful(Redirect(warningUrl))
-            } else {
-              val existingDirectDebitRefEitherFuture: Future[Either[Result, String]] = ua.get(ExistingDirectDebitIdentifierQuery) match {
-                // Existing direct debit: skip MAC and skip generateNewDdiReference
-                case Some(existingDirectDebit) =>
-                  logger.debug(s"Using existing DDI reference: ${existingDirectDebit.ddiRefNumber}")
-                  Future.successful(Right(existingDirectDebit.ddiRefNumber))
-
-                // New direct debit: validate MAC and generate new DDI
-                case None =>
-                  val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
-
-                  (ua.get(pages.MacValuePage), maybeMac2) match {
-                    case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-                      logger.debug("MAC validation successful")
-                      nddService
-                        .generateNewDdiReference(required(PaymentReferencePage))
-                        .map(ref => Right(ref.ddiRefNumber))
-
-                    case (Some(_), Some(_)) =>
-                      logger.error(s"MAC validation failed for user ${request.userId}")
-                      Future.successful(
-                        Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                      )
-
-                    case _ =>
-                      logger.error("MAC generation failed or MAC1 missing in UserAnswers")
-                      Future.successful(
-                        Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                      )
+      validateStartAndEndDates(ua) match {
+        case Some(redirect) =>
+          Future.successful(redirect)
+        case _ =>
+          nddService
+            .isDuplicatePlanSetupAmendAndAddPaymenPlan(userAnswers = ua, userId = request.userId, None, None)
+            .flatMap { duplicateResponse =>
+              {
+                if (duplicateResponse.isDuplicate) {
+                  val warningUrl = ua.get(PaymentPlanTypePage) match {
+                    case Some(planType) if planType == PaymentPlanType.VariablePaymentPlan => routes.DuplicateErrorController.onPageLoad()
+                    case _ => routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode)
                   }
-              }
+                  Future.successful(Redirect(warningUrl))
+                } else {
+                  val existingDirectDebitRefEitherFuture: Future[Either[Result, String]] = ua.get(ExistingDirectDebitIdentifierQuery) match {
+                    // Existing direct debit: skip MAC and skip generateNewDdiReference
+                    case Some(existingDirectDebit) =>
+                      logger.debug(s"Using existing DDI reference: ${existingDirectDebit.ddiRefNumber}")
+                      Future.successful(Right(existingDirectDebit.ddiRefNumber))
 
-              existingDirectDebitRefEitherFuture.flatMap {
-                case Left(redirect) =>
-                  Future.successful(redirect)
+                    // New direct debit: validate MAC and generate new DDI
+                    case None =>
+                      val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
 
-                case Right(ddiReference) =>
-                  val chrisRequest = ChrisSubmissionRequest.buildChrisSubmissionRequest(ua, ddiReference, request.userId, appConfig)
-                  nddService.submitChrisData(chrisRequest).flatMap { success =>
-                    if (success) {
-                      for {
-                        updated1 <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber = ddiReference)))
-                        updated2 <- Future.fromTry(updated1.set(CreateConfirmationPage, true))
-                        _        <- sessionRepository.set(updated2)
-                      } yield {
-                        Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+                      (ua.get(pages.MacValuePage), maybeMac2) match {
+                        case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
+                          logger.debug("MAC validation successful")
+                          nddService
+                            .generateNewDdiReference(required(PaymentReferencePage))
+                            .map(ref => Right(ref.ddiRefNumber))
+
+                        case (Some(_), Some(_)) =>
+                          logger.error(s"MAC validation failed for user ${request.userId}")
+                          Future.successful(
+                            Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                          )
+
+                        case _ =>
+                          logger.error("MAC generation failed or MAC1 missing in UserAnswers")
+                          Future.successful(
+                            Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                          )
                       }
-                    } else {
-                      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                    }
                   }
+
+                  existingDirectDebitRefEitherFuture.flatMap {
+                    case Left(redirect) =>
+                      Future.successful(redirect)
+
+                    case Right(ddiReference) =>
+                      val chrisRequest = ChrisSubmissionRequest.buildChrisSubmissionRequest(ua, ddiReference, request.userId, appConfig)
+                      nddService.submitChrisData(chrisRequest).flatMap { success =>
+                        if (success) {
+                          for {
+                            updated1 <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber = ddiReference)))
+                            updated2 <- Future.fromTry(updated1.set(CreateConfirmationPage, true))
+                            _        <- sessionRepository.set(updated2)
+                          } yield {
+                            Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+                          }
+                        } else {
+                          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                        }
+                      }
+                  }
+                }
               }
+
             }
-          }
-        }
+      }
     }
+
+  private def validateStartAndEndDates(userAnswers: UserAnswers): Option[Result] = {
+    val hasEndDate = userAnswers.get(AddPaymentPlanEndDatePage)
+    val shouldHaveEndDate = hasEndDate.contains(true) || (hasEndDate.isEmpty && userAnswers.get(PlanEndDatePage).isDefined)
+
+    if (shouldHaveEndDate) {
+      (userAnswers.get(PlanStartDatePage), userAnswers.get(PlanEndDatePage)) match {
+        case (Some(startDateDetails), Some(endDate)) =>
+          if (startDateDetails.enteredDate.isAfter(endDate)) {
+            logger.warn(s"Validation failed: start date ${startDateDetails.enteredDate} is after end date $endDate")
+            Some(Redirect(routes.PlanEndDateController.onPageLoad(NormalMode)))
+          } else {
+            None
+          }
+        case _ =>
+          None
+      }
+    } else {
+      None
+    }
+  }
 
   private def required[A](page: QuestionPage[A])(implicit ua: UserAnswers, rds: play.api.libs.json.Reads[A]): A =
     ua.get(page).getOrElse(throw new Exception(s"Missing details: ${page.toString}"))
