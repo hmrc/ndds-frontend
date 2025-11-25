@@ -27,7 +27,7 @@
 
 @(hmrcHelplineUrl: String, p1MessageKey: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoFormManagePlan(messages("amendingPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
+@layout(pageTitle = titleNoForm(messages("amendingPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
     @h1("amendingPaymentPlan.heading")
 

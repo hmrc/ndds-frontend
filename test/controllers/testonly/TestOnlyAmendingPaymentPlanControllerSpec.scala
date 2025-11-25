@@ -96,10 +96,9 @@ class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
         when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
         val request = FakeRequest(GET, routes.TestOnlyAmendingPaymentPlanController.onPageLoad().url)
         val result = route(application, request).value
-
         status(result) mustEqual OK
-        val page = contentAsString(result)
 
+        val page = contentAsString(result)
         page must include("Amending this payment plan")
         page must include("For security reasons")
         page must include("£100.00")

@@ -20,11 +20,13 @@ import controllers.actions.*
 import controllers.testonly.routes as testOnlyRoutes
 import forms.DuplicateWarningFormProvider
 import models.Mode
-import pages.DuplicateWarningPage
+import pages.{DuplicateWarningPage, ManagePaymentPlanTypePage}
 import play.api.data.Form
+import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.testonly.TestOnlyDuplicateWarningView
 
@@ -39,6 +41,7 @@ class TestOnlyDuplicateWarningController @Inject() (
   requireData: DataRequiredAction,
   formProvider: DuplicateWarningFormProvider,
   val controllerComponents: MessagesControllerComponents,
+  nddsService: NationalDirectDebitService,
   view: TestOnlyDuplicateWarningView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -47,14 +50,54 @@ class TestOnlyDuplicateWarningController @Inject() (
   val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
-    (identify andThen getData andThen requireData) { implicit request =>
+    (identify andThen getData andThen requireData).async { implicit request =>
+      val userAnswers = request.userAnswers
 
-      val preparedForm = request.userAnswers.get(DuplicateWarningPage) match {
-        case None        => form
-        case Some(value) => form.fill(value)
+      val alreadyConfirmed =
+        userAnswers.get(DuplicateWarningPage).contains(true)
+
+      if (alreadyConfirmed) {
+        logger.warn("Attempt to load this payment plan confirmation; redirecting to Page Not Found.")
+        Future.successful(
+          Redirect(controllers.routes.BackSubmissionController.onPageLoad())
+        )
+      } else {
+        if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+          val maybeResult = for {
+            updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
+          } yield {
+
+            val preparedForm = form
+
+            Ok(
+              view(
+                preparedForm,
+                mode,
+                testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
+              )
+            )
+          }
+
+          maybeResult match {
+            case Some(result) =>
+              sessionRepository
+                .set(
+                  userAnswers.set(DuplicateWarningPage, true).get
+                )
+                .map(_ => result)
+
+            case None =>
+              logger.warn("Failed to set DuplicateWarningPage = true")
+              Future.successful(
+                Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
+              )
+          }
+        } else {
+          val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+          logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+          Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        }
       }
-
-      Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()))
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] =

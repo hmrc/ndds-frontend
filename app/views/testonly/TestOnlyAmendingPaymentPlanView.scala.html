@@ -28,8 +28,7 @@ govukSummaryList: GovukSummaryList
 
 @(hmrcHelplineUrl: String, paymentAmountRow: SummaryListRow, paymentDateRow: SummaryListRow)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoFormManagePlan(messages("testOnlyAmendingPaymentPlan.title")),
-backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
+@layout(pageTitle = titleNoForm(messages("testOnlyAmendingPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
     @h1("testOnlyAmendingPaymentPlan.heading")
 

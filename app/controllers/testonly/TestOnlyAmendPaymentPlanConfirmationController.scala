@@ -59,7 +59,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
     val alreadyConfirmed: Boolean =
-      request.userAnswers.get(AmendPaymentPlanConfirmationPage).contains(true)
+      userAnswers.get(AmendPaymentPlanConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
       logger.warn("Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")

@@ -27,7 +27,7 @@
 
 @(payingHmrcUrl: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("bankApproval.title")), showSignOut = false, showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("bankApproval.title")), showSignOut = false, showBackLink = false) {
      @header1("bankApproval.heading")
      @paragraphMessageWithLink(
          Some(messages("bankApproval.p1")),
