@@ -567,7 +567,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     planDetail.paymentPlanEditable
   }
 
-  def isDuplicatePlan(
+  def isDuplicatePlanSetupAmendAndAddPaymenPlan(
     userAnswers: UserAnswers,
     userId: String,
     paymentAmount: Option[BigDecimal],

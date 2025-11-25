@@ -117,7 +117,7 @@ class CheckYourAnswersController @Inject() (
       implicit val ua: UserAnswers = request.userAnswers
 
       nddService
-        .isDuplicatePlan(userAnswers = ua, userId = request.userId, None, None)
+        .isDuplicatePlanSetupAmendAndAddPaymenPlan(userAnswers = ua, userId = request.userId, None, None)
         .flatMap { duplicateResponse =>
           {
             if (duplicateResponse.isDuplicate) {

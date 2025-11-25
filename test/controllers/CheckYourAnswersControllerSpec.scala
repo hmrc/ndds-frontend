@@ -290,7 +290,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(pages.MacValuePage, "valid-mac")
 
-      when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(DuplicateCheckResponse(false)))
 
       when(mockNddService.generateNewDdiReference(any())(any()))
@@ -332,7 +332,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentReferencePage, "testRef")
         .setOrException(pages.MacValuePage, "valid-mac")
 
-      when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(DuplicateCheckResponse(false)))
 
       when(
@@ -370,7 +370,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentReferencePage, "testReference")
         .setOrException(pages.MacValuePage, "valid-mac")
 
-      when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(DuplicateCheckResponse(false)))
 
       when(mockNddService.generateNewDdiReference(any())(any()))
@@ -431,7 +431,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -476,7 +476,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -516,7 +516,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -558,7 +558,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(PaymentReferencePage, "testReference")
           .setOrException(pages.MacValuePage, "stored-mac")
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -597,7 +597,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
           .setOrException(PaymentReferencePage, "testReference")
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -644,7 +644,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
@@ -714,7 +714,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
@@ -759,7 +759,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(true)))
 
         running(application) {
@@ -800,7 +800,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           )
           .build()
 
-        when(mockNddService.isDuplicatePlan(any(), any(), any(), any())(any(), any()))
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymenPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(true)))
 
         running(application) {
