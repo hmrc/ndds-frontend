@@ -707,3 +707,12 @@ addPaymentPlanEndDate.p1 = This is not mandatory. You will be able to add an end
 addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
+
+confirmRemovePlanEndDate.title = Removing this plan end date
+confirmRemovePlanEndDate.heading = Removing this plan end date
+confirmRemovePlanEndDate.q1 = Are you sure you want to remove this plan end date?
+confirmRemovePlanEndDate.checkYourAnswersLabel = Removing this plan end date
+confirmRemovePlanEndDate.error.required = Select one option.
+confirmRemovePlanEndDate.change.hidden = Removing this plan end date
+confirmRemovePlanEndDate.p1.line1 = Payment reference: <strong>{0}</strong>
+confirmRemovePlanEndDate.p1.line2 = The plan end date is <strong>{0}</strong>
