@@ -29,7 +29,7 @@ import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
-import services.NationalDirectDebitService
+import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -50,7 +50,8 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   view: TestOnlyAmendPaymentPlanConfirmationView,
   nddService: NationalDirectDebitService,
-  sessionRepository: SessionRepository
+  sessionRepository: SessionRepository,
+  chrisService: ChrisSubmissionForAmendService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -74,7 +75,6 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
         Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
       }
-
     }
   }
 
@@ -132,10 +132,13 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
         if (duplicateResponse.isDuplicate) {
           Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(mode).url))
         } else {
-          submitToChris(ua)
+          chrisService.submitToChris(
+            ua              = ua,
+            successRedirect = Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()),
+            errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
+          )
         }
       }
-
     }
 
   private def submitToChris(ua: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] = {
@@ -177,9 +180,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
           DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
 
         val planStartDateDetails: Option[PlanStartDateDetails] = userAnswers.get(AmendPlanStartDatePage).map { date =>
-          PlanStartDateDetails(enteredDate           = date,
-                               earliestPlanStartDate = date.toString // you can adjust this if you have a different logic
-                              )
+          PlanStartDateDetails(enteredDate = date, earliestPlanStartDate = date.toString)
         }
 
         val paymentPlanType: PaymentPlanType =
