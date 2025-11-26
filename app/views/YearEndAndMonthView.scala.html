@@ -66,6 +66,9 @@
             .withWidth(Fixed4)
             .withHint(Hint(content = Text(messages("yearEndAndMonth.hint"))))
             .asNumeric()
+            .withAttribute("maxlength", "4")
+            .withAttribute("pattern", "[0-9]*")
+            .withAttribute("inputmode", "numeric")
         )
 
         @govukButton(
