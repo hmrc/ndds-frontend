@@ -142,8 +142,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Year end and month")
-        contentAsString(result) must include("2025 04")
+        contentAsString(result) must include("4 extra numbers")
+        contentAsString(result) must include("2504")
         contentAsString(result) must include("Accept and continue")
       }
     }

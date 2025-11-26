@@ -96,14 +96,22 @@ trait Mappings extends Formatters with Constraints {
       )
     )
 
-  protected def yearEndMonthDate(invalidKey: String,
-                                 allRequiredKey: String,
-                                 twoRequiredKey: String,
-                                 requiredKey: String,
-                                 args: Seq[String] = Seq.empty,
-                                 dateFormats: Seq[DateFormat]
-                                ): FieldMapping[YearEndAndMonth] =
-    of(new YearEndAndMonthDateFormatter(invalidKey, args, dateFormats))
+  protected def yearEndMonthDate(
+    emptyKey: String,
+    invalidFormatKey: String,
+    invalidMonthKey: String,
+    args: Seq[String] = Seq.empty,
+    dateFormats: Seq[DateFormat]
+  ): FieldMapping[YearEndAndMonth] =
+    of(
+      new YearEndAndMonthDateFormatter(
+        emptyKey,
+        invalidFormatKey,
+        invalidMonthKey,
+        args,
+        dateFormats
+      )
+    )
 
   protected def suspensionPeriodRangeStartDate(invalidKey: String,
                                                allRequiredKey: String,

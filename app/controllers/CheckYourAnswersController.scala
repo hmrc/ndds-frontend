@@ -67,8 +67,6 @@ class CheckYourAnswersController @Inject() (
       logger.warn("Attempt to access Check Your Answers confirmation; redirecting.")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
-      val showStartDate = if (source.contains(DirectDebitSource.PAYE)) { YearEndAndMonthSummary.row(ua) }
-      else { PlanStartDateSummary.row(ua) }
       val showPlanEndDate = if (hasEndDate.contains(false)) { None }
       else { PlanEndDateSummary.row(ua) }
       val monthlyPaymentAmount = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
@@ -86,12 +84,14 @@ class CheckYourAnswersController @Inject() (
           DirectDebitSourceSummary.row(ua),
           PaymentPlanTypeSummary.row(ua),
           PaymentReferenceSummary.row(ua),
+          TellAboutThisPaymentSummary.row(ua),
+          YearEndAndMonthSummary.row(ua),
           TotalAmountDueSummary.row(ua),
           PaymentAmountSummary.row(ua),
           PaymentDateSummary.row(ua),
           PaymentsFrequencySummary.row(ua),
           RegularPaymentAmountSummary.row(ua),
-          showStartDate,
+          PlanStartDateSummary.row(ua),
           AddPaymentPlanEndDateSummary.row(ua),
           showPlanEndDate,
           monthlyPaymentAmount,
