@@ -28,9 +28,11 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats.formattedDateTimeShort
 import views.html.ConfirmRemovePlanEndDateView
+import pages.*
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,6 +45,7 @@ class ConfirmRemovePlanEndDateController @Inject() (
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   formProvider: ConfirmRemovePlanEndDateFormProvider,
+  nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: ConfirmRemovePlanEndDateView
 )(implicit ec: ExecutionContext)
@@ -53,32 +56,40 @@ class ConfirmRemovePlanEndDateController @Inject() (
   val form = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
-    (identify andThen getData andThen requireData) { implicit request =>
+    (identify andThen getData andThen requireData).async { implicit request =>
 
       val userAnswers = request.userAnswers
 
-      val maybeResult = for {
-        paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
-        planDetails          <- userAnswers.get(PaymentPlanDetailsQuery)
-        planEndDateValue     <- planDetails.paymentPlanDetails.scheduledPaymentEndDate
-      } yield {
+      if (!nddsService.amendPaymentPlanGuard(userAnswers)) {
+        val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      } else {
 
-        val planEndDate = formattedDateTimeShort(planEndDateValue.toString)
+        val maybeResult = for {
+          paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
+          planDetails          <- userAnswers.get(PaymentPlanDetailsQuery)
+          planEndDateValue     <- planDetails.paymentPlanDetails.scheduledPaymentEndDate
+        } yield {
+          val planEndDate = formattedDateTimeShort(planEndDateValue.toString)
 
-        val preparedForm =
-          userAnswers
-            .get(ConfirmRemovePlanEndDatePage)
-            .map(form.fill)
-            .getOrElse(form)
+          val preparedForm =
+            userAnswers
+              .get(ConfirmRemovePlanEndDatePage)
+              .map(form.fill)
+              .getOrElse(form)
 
-        Ok(view(preparedForm, mode, paymentPlanReference, planEndDate))
-      }
+          Ok(view(preparedForm, mode, paymentPlanReference, planEndDate))
+        }
 
-      maybeResult match {
-        case Some(result) => result
-        case None =>
-          logger.warn("Missing required values in user answers for ConfirmRemovePlanEndDatePage")
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
+        maybeResult match {
+          case Some(result) => Future.successful(result)
+          case None =>
+            logger.warn(
+              "Missing required values in user answers for ConfirmRemovePlanEndDatePage"
+            )
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        }
       }
     }
 
