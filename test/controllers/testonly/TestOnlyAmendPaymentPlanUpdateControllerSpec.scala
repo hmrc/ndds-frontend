@@ -139,6 +139,7 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
           dd.bankAccountNumber.getOrElse(""),
           formattedSortCode,
           paymentList,
+          PaymentPlanType.SinglePaymentPlan.toString,
           controllers.routes.PaymentPlanDetailsController.onPageLoad()
         )(request, messages(application)).toString
       }
@@ -245,6 +246,7 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
           dd.bankAccountNumber.getOrElse(""),
           formattedSortCode,
           paymentList,
+          PaymentPlanType.BudgetPaymentPlan.toString,
           controllers.routes.PaymentPlanDetailsController.onPageLoad()
         )(request, messages(application)).toString
       }
