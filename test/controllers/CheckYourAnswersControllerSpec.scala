@@ -42,8 +42,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val paymentDateDetails: PaymentDateDetails = PaymentDateDetails(fixedDate, "2025-7-19")
   private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(fixedDate, "2025-7-19")
   private val endDate = LocalDate.of(2027, 7, 25)
-  // private val yearEndAndMonthDate = YearEndAndMonth(2502)
-  private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
+  private val yearEndAndMonthDate = YearEndAndMonth(2502)
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
   private val mockDirectDebitCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
@@ -124,7 +123,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
         .setOrException(PaymentReferencePage, "1234567")
-        //        .setOrException(TellAboutThisPaymentPage, true)
+        .setOrException(TellAboutThisPaymentPage, true)
         .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
         .setOrException(PaymentAmountPage, 123.01)
         .setOrException(PaymentDatePage, paymentDateDetails)
@@ -279,7 +278,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
         .setOrException(PaymentReferencePage, "1234567")
-        //        .setOrException(TellAboutThisPaymentPage, false)
+        .setOrException(TellAboutThisPaymentPage, false)
         .setOrException(PaymentAmountPage, 123.01)
         .setOrException(PaymentDatePage, paymentDateDetails)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
@@ -299,7 +298,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
         .setOrException(PaymentReferencePage, "1234567")
-        //        .setOrException(TellAboutThisPaymentPage, true)
+        .setOrException(TellAboutThisPaymentPage, true)
         .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
         .setOrException(PaymentAmountPage, 123.01)
         .setOrException(PaymentDatePage, paymentDateDetails)

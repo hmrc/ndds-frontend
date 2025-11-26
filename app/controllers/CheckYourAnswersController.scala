@@ -62,13 +62,12 @@ class CheckYourAnswersController @Inject() (
     val confirmed = ua.get(CreateConfirmationPage).contains(true)
     val source = ua.get(DirectDebitSourcePage)
     val hasEndDate = ua.get(AddPaymentPlanEndDatePage)
-//    val hasFourExtraNumbers = ua.get(TellAboutThisPaymentPage)
+    val hasFourExtraNumbers = ua.get(TellAboutThisPaymentPage)
 
     if (confirmed) {
       logger.warn("Attempt to access Check Your Answers confirmation; redirecting.")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
-
       val showPlanEndDate = if (hasEndDate.contains(false)) { None }
       else { PlanEndDateSummary.row(ua) }
       val monthlyPaymentAmount = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
@@ -80,8 +79,7 @@ class CheckYourAnswersController @Inject() (
       val finalPaymentDate = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
         FinalPaymentDateSummary.row(ua, appConfig)
       } else { None }
-//      val fourExtraNumbers = if (hasFourExtraNumbers.contains(false)) { None }
-      val fourExtraNumbers = if (false) { None }
+      val fourExtraNumbers = if (hasFourExtraNumbers.contains(false)) { None }
       else { YearEndAndMonthSummary.row(ua) }
 
       val list = SummaryListViewModel(
