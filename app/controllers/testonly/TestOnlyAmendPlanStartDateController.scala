@@ -21,18 +21,19 @@ import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.AmendPlanStartDateFormProvider
 import models.{Mode, UserAnswers}
-import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
+import pages.{AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
-import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.DateTimeFormats
 import views.html.testonly.TestOnlyAmendPlanStartDateView
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -51,62 +52,68 @@ class TestOnlyAmendPlanStartDateController @Inject() (
     with I18nSupport
     with Logging {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    {
-      val answers = request.userAnswers
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val answers = request.userAnswers
 
-      if (nddsService.amendPaymentPlanGuard(answers)) {
-        val form = formProvider()
+    if (nddsService.amendPaymentPlanGuard(answers)) {
+      nddsService.calculateFutureWorkingDays(request.userAnswers, request.userId) map { earliestPlanStartDate =>
+        val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+        val form = formProvider(answers, earliestDate)
         val preparedForm = request.userAnswers
           .get(AmendPlanStartDatePage)
           .orElse(request.userAnswers.get(AmendPlanStartDatePage))
           .fold(form)(form.fill)
 
-        Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))
-      } else {
-        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+        Ok(
+          view(
+            preparedForm,
+            mode,
+            DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+            testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+          )
+        )
+      } recover { case e =>
+        logger.warn(s"Unexpected error: $e")
         Redirect(routes.JourneyRecoveryController.onPageLoad())
       }
-
+    } else {
+      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
     }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    val form = formProvider()
-    val userAnswers = request.userAnswers
-    form
-      .bindFromRequest()
-      .fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))),
-        value =>
-          if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-            (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
-              case (Some(planDetails), Some(amendedAmount)) =>
-                val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-                val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
 
-                val isNoChange = amendedAmount == dbAmount && value == dbStartDate
+    nddsService.calculateFutureWorkingDays(request.userAnswers, request.userId) flatMap { earliestPlanStartDate =>
+      val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+      val userAnswers = request.userAnswers
+      val form = formProvider(userAnswers, earliestDate)
 
-                if (isNoChange) {
-                  val key = "amendment.noChange"
-                  val errorForm = form.fill(value).withError("value", key)
-                  Future.successful(BadRequest(view(errorForm, mode, testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode))))
-                } else {
-                  checkForDuplicate(mode, userAnswers, value)
-                }
-
-              case _ =>
-                logger.warn("Missing Amend payment amount and/or amend plan start date")
-                Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            Future.successful(
+              BadRequest(
+                view(
+                  formWithErrors,
+                  mode,
+                  DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+                  testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+                )
+              )
+            ),
+          value =>
+            if (nddsService.amendPaymentPlanGuard(userAnswers))
+              checkForDuplicate(mode, userAnswers, value)
+            else {
+              val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+              throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
             }
-          } else {
-            val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-            throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-          }
-      )
+        )
+    }
   }
 
   private def checkForDuplicate(mode: Mode, userAnswers: UserAnswers, value: LocalDate)(implicit
