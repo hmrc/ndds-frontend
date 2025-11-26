@@ -54,7 +54,7 @@ object AmendRegularPaymentAmountSummary {
           .map(call =>
             Seq(
               ActionItemViewModel("site.change", call.url)
-                .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount"))
+                .withVisuallyHiddenText(messages("regularPaymentAmount.change.hidden"))
             )
           )
           .getOrElse(Seq.empty)
@@ -63,7 +63,7 @@ object AmendRegularPaymentAmountSummary {
       }
 
     SummaryListRowViewModel(
-      key     = "amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount",
+      key     = "regularPaymentAmount.checkYourAnswersLabel",
       value   = ValueViewModel(amount.map(currencyFormat).getOrElse("")),
       actions = actions
     )

@@ -110,10 +110,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
           ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
         )
 
-        val backLink = userAnswers.get(AmendPlanEndDatePage) match {
-          case Some(_) => routes.AmendPlanEndDateController.onPageLoad(mode) // TODO - replace with TestOnly Amend plan end date controller
-          case _       => testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode)
-        }
+        val backLink = testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
 
         (rows, backLink)
     }
