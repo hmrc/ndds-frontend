@@ -38,7 +38,7 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-@header(messages("tellAboutThisPayment.heading"), classes = "govuk-heading-xl")
+        @header(messages("tellAboutThisPayment.heading"), classes = "govuk-heading-xl govuk-!-margin-bottom-4")
 
         @ParagraphMessageWith2Links(
         parts = Seq(
@@ -50,10 +50,7 @@
         )
         )
 
-
-
-
-@govukRadios(
+        @govukRadios(
             RadiosViewModel.yesNo(
                 field = form("value"),
                 legend = LegendViewModel(messages("tellAboutThisPayment.question")).withCssClass("govuk-fieldset__legend--m")
