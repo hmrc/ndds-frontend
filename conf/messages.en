@@ -295,12 +295,12 @@ yearEndAndMonth.collapsable.examples.b3 = Q1 (Apr-Jun): Year 2025, Month 01
 yearEndAndMonth.collapsable.monthCodes.p1 = Month codes:
 yearEndAndMonth.collapsable.monthCodes.p2 = 01=Apr, 02=May, 03=Jun, 04=Jul, 05=Aug, 06=Sep, 07=Oct, 08=Nov, 09=Dec, 10=Jan, 11=Feb, 12=Mar
 yearEndAndMonth.collapsable.quarterCodes.p1 = <strong>Quarter codes:</strong> 01, 04, 07, 10
-yearEndAndMonth.checkYourAnswersLabel = Year end and month
 yearEndAndMonth.error.required.all = Enter the yearEndAndMonth
 yearEndAndMonth.error.required.two = The yearEndAndMonth must include {0} and {1}
 yearEndAndMonth.error.required = The yearEndAndMonth must include {0}
 yearEndAndMonth.error.invalid = Enter a real yearEndAndMonth
-yearEndAndMonth.change.hidden =  Year end and month
+yearEndAndMonth.checkYourAnswersLabel = 4 extra numbers
+yearEndAndMonth.change.hidden =  4 extra numbers
 
 paymentsFrequency.title = How often do you want to make payments?
 paymentsFrequency.heading = How often do you want to make payments?
