@@ -18,19 +18,23 @@ package controllers
 
 import base.SpecBase
 import forms.ConfirmRemovePlanEndDateFormProvider
-import models.{NormalMode, UserAnswers}
+import models.{NormalMode, PaymentPlanType, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.ConfirmRemovePlanEndDatePage
+import pages.*
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import views.html.ConfirmRemovePlanEndDateView
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 
+import java.time.{LocalDate, LocalDateTime}
+import utils.DateTimeFormats.formattedDateTimeShort
 import scala.concurrent.Future
 
 class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar {
@@ -40,52 +44,111 @@ class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar 
   val formProvider = new ConfirmRemovePlanEndDateFormProvider()
   val form = formProvider()
 
-  lazy val confirmRemovePlanEndDateRoute = routes.ConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url
+  lazy val confirmRemovePlanEndDateRoute =
+    routes.ConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url
+
+  private val testPlanReference = "PP123456"
+  private val testEndDate = LocalDate.now().plusMonths(3)
+  private val planType = "04"
+
+  private val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
+    hodService                = "HOD1",
+    planType                  = planType,
+    paymentReference          = testPlanReference,
+    submissionDateTime        = LocalDateTime.now(),
+    scheduledPaymentAmount    = Some(BigDecimal(100)),
+    scheduledPaymentStartDate = Some(LocalDate.now()),
+    initialPaymentStartDate   = Some(LocalDate.now()),
+    initialPaymentAmount      = Some(BigDecimal(50)),
+    scheduledPaymentEndDate   = Some(testEndDate),
+    scheduledPaymentFrequency = Some("Monthly"),
+    suspensionStartDate       = None,
+    suspensionEndDate         = None,
+    balancingPaymentAmount    = None,
+    balancingPaymentDate      = None,
+    totalLiability            = Some(BigDecimal(600)),
+    paymentPlanEditable       = true
+  )
+
+  private val paymentPlanResponse: PaymentPlanResponse =
+    PaymentPlanResponse(
+      directDebitDetails = DirectDebitDetails(None, None, None, true, LocalDateTime.now()),
+      paymentPlanDetails = paymentPlanDetails
+    )
 
   "ConfirmRemovePlanEndDate Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-
-      running(application) {
-        val request = FakeRequest(GET, confirmRemovePlanEndDateRoute)
-
-        val result = route(application, request).value
-
-        val view = application.injector.instanceOf[ConfirmRemovePlanEndDateView]
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode)(request, messages(application)).toString
-      }
-    }
-
-    "must populate the view correctly on a GET when the question has previously been answered" in {
-
-      val userAnswers = UserAnswers(userAnswersId).set(ConfirmRemovePlanEndDatePage, true).success.value
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .success
+        .value
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, confirmRemovePlanEndDateRoute)
-
+        val result = route(application, request).value
         val view = application.injector.instanceOf[ConfirmRemovePlanEndDateView]
 
-        val result = route(application, request).value
+        val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(true), NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual
+          view(form, NormalMode, testPlanReference, expectedPlanEndDate)(request, messages(application)).toString
+      }
+    }
+
+    "must populate the view correctly on a GET when the question has previously been answered" in {
+
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .success
+        .value
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .success
+        .value
+        .set(ConfirmRemovePlanEndDatePage, true)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, confirmRemovePlanEndDateRoute)
+        val view = application.injector.instanceOf[ConfirmRemovePlanEndDateView]
+        val result = route(application, request).value
+
+        val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
+
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual
+          view(form.fill(true), NormalMode, testPlanReference, expectedPlanEndDate)(request, messages(application)).toString
       }
     }
 
     "must redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[SessionRepository]
-
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .success
+        .value
+
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -93,34 +156,39 @@ class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar 
           .build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, confirmRemovePlanEndDateRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+        val request = FakeRequest(POST, confirmRemovePlanEndDateRoute)
+          .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
+        redirectLocation(result).value mustEqual onwardRoute.url  // can update once  all flow available
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, confirmRemovePlanEndDateRoute)
-            .withFormUrlEncodedBody(("value", ""))
+        val request = FakeRequest(POST, confirmRemovePlanEndDateRoute)
+          .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
 
         val view = application.injector.instanceOf[ConfirmRemovePlanEndDateView]
+        val expectedPlanEndDate = formattedDateTimeShort(LocalDate.now().toString)
 
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode)(request, messages(application)).toString
+        contentAsString(result) mustEqual
+          view(boundForm, NormalMode, testPlanReference, expectedPlanEndDate)(request, messages(application)).toString
       }
     }
 
@@ -130,7 +198,6 @@ class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar 
 
       running(application) {
         val request = FakeRequest(GET, confirmRemovePlanEndDateRoute)
-
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
@@ -143,9 +210,8 @@ class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar 
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
-        val request =
-          FakeRequest(POST, confirmRemovePlanEndDateRoute)
-            .withFormUrlEncodedBody(("value", "true"))
+        val request = FakeRequest(POST, confirmRemovePlanEndDateRoute)
+          .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
 
