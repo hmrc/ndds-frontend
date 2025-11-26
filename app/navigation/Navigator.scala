@@ -165,18 +165,12 @@ class Navigator @Inject() () {
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
 
-  private def navigateTellAboutThisPaymentPage(mode: Mode)(answers: UserAnswers): Call =
-    answers
-      .get(TellAboutThisPaymentPage)
-      .map { answer =>
-        if (answer) { routes.YearEndAndMonthController.onPageLoad(mode) }
-        else {
-          mode match {
-            case NormalMode => routes.PaymentAmountController.onPageLoad(mode)
-            case CheckMode  => routes.CheckYourAnswersController.onPageLoad()
-          }
-        }
-      }
-      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+  private def navigateTellAboutThisPaymentPage(mode: Mode)(userAnswers: UserAnswers): Call =
+    (userAnswers.get(TellAboutThisPaymentPage), mode) match {
+      case (Some(true), _)           => routes.YearEndAndMonthController.onPageLoad(mode)
+      case (Some(false), NormalMode) => routes.PaymentAmountController.onPageLoad(NormalMode)
+      case (Some(false), CheckMode)  => routes.CheckYourAnswersController.onPageLoad()
+      case (None, _)                 => routes.JourneyRecoveryController.onPageLoad()
+    }
 
 }
