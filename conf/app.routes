@@ -190,3 +190,8 @@ GET        /already-have-payment-plan                   controllers.DuplicateWar
 POST       /already-have-payment-plan                   controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = NormalMode)
 GET        /change-already-have-payment-plan            controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-already-have-payment-plan            controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = CheckMode)
+
+GET        /tell-us-about-this-payment                  controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = NormalMode)
+POST       /tell-us-about-this-payment                  controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = NormalMode)
+GET        /change-tell-us-about-this-payment           controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-tell-us-about-this-payment           controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = CheckMode)

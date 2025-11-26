@@ -51,6 +51,7 @@ class Navigator @Inject() () {
     case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
     case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
+    case TellAboutThisPaymentPage             => navigateTellAboutThisPaymentPage
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
@@ -99,7 +100,7 @@ class Navigator @Inject() () {
         routes.PaymentAmountController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.VariablePaymentPlan) =>
         routes.PlanStartDateController.onPageLoad(NormalMode)
-      case Some(DirectDebitSource.PAYE) => routes.YearEndAndMonthController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.PAYE) => routes.TellAboutThisPaymentController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.BudgetPaymentPlan) =>
         routes.PaymentsFrequencyController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPlan) =>
@@ -162,4 +163,14 @@ class Navigator @Inject() () {
         case false => routes.PaymentPlanDetailsController.onPageLoad()
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
+  private def navigateTellAboutThisPaymentPage(answers: UserAnswers): Call =
+    answers
+      .get(TellAboutThisPaymentPage)
+      .map {
+        case true  => routes.YearEndAndMonthController.onPageLoad(NormalMode) // change it when page ready
+        case false => routes.PaymentAmountController.onPageLoad(NormalMode)
+      }
+      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
 }

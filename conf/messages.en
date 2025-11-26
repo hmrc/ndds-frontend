@@ -720,3 +720,15 @@ duplicateWarningForAddOrCreatePP.error.required = Select one option.
 duplicateWarningForAddOrCreatePP.change.hidden = DuplicateWarningForAddOrCreatePP
 duplicateWarningForAddOrCreatePP.p1 = You already have a payment plan set up with the same amount and dates.
 duplicateWarningForAddOrCreatePP.h2 = Do you want to continue setting up this plan?
+
+tellAboutThisPayment.title = Tell us about this payment
+tellAboutThisPayment.heading = Tell us about this payment
+tellAboutThisPayment.question = Do you need to add 4 extra numbers to your payment reference?
+tellAboutThisPayment.p1.1 = If
+tellAboutThisPayment.p1.link.1 = this payment is early, late
+tellAboutThisPayment.p1.2 = , or
+tellAboutThisPayment.p1.link.2 = a P11D payment
+tellAboutThisPayment.p1.3 = , you need to add 4 extra numbers to your payment reference. We need this information to make sure your payment is allocated correctly.
+tellAboutThisPayment.checkYourAnswersLabel = Tell us about this payment
+tellAboutThisPayment.error.required = Select one option.
+tellAboutThisPayment.change.hidden = Tell us about this payment
