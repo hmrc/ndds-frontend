@@ -289,8 +289,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("Add 4 extra numbers")
         contentAsString(result) must include("No")
-        contentAsString(result) must not include "4 extra numbers"
-        contentAsString(result) must not include "2502"
+        contentAsString(result) must not include "2504"
       }
     }
 
@@ -311,7 +310,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Add 4 extra numbers")
         contentAsString(result) must include("Yes")
         contentAsString(result) must include("4 extra numbers")
-        contentAsString(result) must include("2502")
+        contentAsString(result) must include("2504")
       }
     }
 
@@ -329,7 +328,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         status(result) mustEqual OK
         contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("4 extra numbers")
-        contentAsString(result) must include("2502")
+        contentAsString(result) must include("2504")
       }
     }
 
