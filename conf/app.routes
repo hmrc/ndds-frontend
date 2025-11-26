@@ -184,6 +184,11 @@ POST       /add-payment-plan-end-date                   controllers.AddPaymentPl
 GET        /change-add-payment-plan-end-date            controllers.AddPaymentPlanEndDateController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-add-payment-plan-end-date            controllers.AddPaymentPlanEndDateController.onSubmit(mode: Mode = CheckMode)
 
+GET        /tell-us-about-this-payment                        controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = NormalMode)
+POST       /tell-us-about-this-payment                        controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = NormalMode)
+GET        /change-tell-us-about-this-payment                  controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-tell-us-about-this-payment                  controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = CheckMode)
+
 GET        /removing-plan-end-date                        controllers.ConfirmRemovePlanEndDateController.onPageLoad(mode: Mode = NormalMode)
 POST       /removing-plan-end-date                        controllers.ConfirmRemovePlanEndDateController.onSubmit(mode: Mode = NormalMode)
 GET        /change-removing-plan-end-date                  controllers.ConfirmRemovePlanEndDateController.onPageLoad(mode: Mode = CheckMode)
