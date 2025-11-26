@@ -19,13 +19,10 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import forms.DuplicateWarningForAddOrCreatePPFormProvider
-
-import javax.inject.Inject
-import models.{Mode, UserAnswers}
 import models.requests.ChrisSubmissionRequest
 import models.responses.GenerateDdiRefResponse
-import navigation.Navigator
-import pages.{CheckYourAnswerPage, CreateConfirmationPage, DuplicateWarningForAddOrCreatePPPage, PaymentReferencePage, QuestionPage}
+import models.{Mode, UserAnswers}
+import pages.*
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -33,6 +30,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DuplicateWarningForAddOrCreatePPView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DuplicateWarningForAddOrCreatePPController @Inject() (

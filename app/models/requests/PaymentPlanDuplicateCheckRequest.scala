@@ -22,7 +22,6 @@ import play.api.libs.json.{Json, OFormat}
 import queries.*
 
 import java.time.LocalDate
-import scala.concurrent.Future
 
 case class PaymentPlanDuplicateCheckRequest(
   directDebitReference: String,

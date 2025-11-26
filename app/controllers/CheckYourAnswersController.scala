@@ -121,7 +121,7 @@ class CheckYourAnswersController @Inject() (
           Future.successful(redirect)
         case _ =>
           nddService
-            .isDuplicatePlanSetupAmendAndAddPaymenPlan(userAnswers = ua, userId = request.userId, None, None)
+            .isDuplicatePlanSetupAmendAndAddPaymentPlan(userAnswers = ua, userId = request.userId, None, None)
             .flatMap { duplicateResponse =>
               {
                 if (duplicateResponse.isDuplicate) {

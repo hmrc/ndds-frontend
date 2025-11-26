@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import viewmodels.LegendSize._
+@import viewmodels.LegendSize.*
 @import views.html.components.*
 
 @this(
@@ -23,6 +23,7 @@
     govukErrorSummary: GovukErrorSummary,
     govukRadios: GovukRadios,
     govukButton: GovukButton,
+    govukLabel: GovukLabel,
     paragraph: Paragraph,
     h1: Header1
 )
@@ -37,7 +38,9 @@
             @govukErrorSummary(ErrorSummaryViewModel(form))
         }
 
-        @h1("duplicateWarningForAddOrCreatePP.heading")
+        @govukLabel(HmrcPageHeadingLabel.apply(
+            content = Text(messages("duplicateWarningForAddOrCreatePP.heading"))
+        ).withCssClass("govuk-!-margin-bottom-0"))
 
         @paragraph("duplicateWarningForAddOrCreatePP.p1")
 
