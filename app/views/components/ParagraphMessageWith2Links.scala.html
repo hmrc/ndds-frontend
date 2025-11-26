@@ -14,15 +14,20 @@
  * limitations under the License.
  *@
 
-@(parts: Seq[Either[String, (String, String, String)]] = Seq.empty,
-classes: String = "govuk-body"
+@this()
+
+@(text1: String,
+link1Text: String,
+link1Href: String,
+text2: String,
+link2Text: String,
+link2Href: String,
+text3: String,
+classes: String = "govuk-body",
+linkClass: String = "govuk-link",
+target: String = "_blank"
 )
 
 <p class="@classes">
-    @for(part <- parts) {
-    @part.fold(
-    text => Html(text), // Left => plain text
-    link => Html(s"""<a href="${link._2}" @if(link._3.nonEmpty){ target="${link._3}" } class="govuk-link">${link._1}</a>""")
-    )
-    }
+    @Html(text1)<a href="@link1Href" class="@linkClass" target="@target">@link1Text</a>@Html(text2)<a href="@link2Href" class="@linkClass" target="@target">@link2Text</a>@Html(text3)
 </p>
