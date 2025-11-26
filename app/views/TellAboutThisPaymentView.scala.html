@@ -25,7 +25,8 @@
     govukButton: GovukButton,
     header: Header1,
     paragraph: Paragraph,
-    link: Link
+    link: Link,
+paragraph2Links: ParagraphMessageWith2Links
 )
 
 @(form: Form[_], mode: Mode, call:Call )(implicit request: Request[_], appConfig: FrontendAppConfig, messages: Messages)
@@ -40,17 +41,20 @@
 
         @header(messages("tellAboutThisPayment.heading"), classes = "govuk-heading-xl govuk-!-margin-bottom-4")
 
-        @ParagraphMessageWith2Links(
-        parts = Seq(
-            Left(messages("tellAboutThisPayment.p1.1")),
-            Right((messages("tellAboutThisPayment.p1.link.1"), appConfig.paymentEarlyLateUrl, "_blank")),
-            Left(messages("tellAboutThisPayment.p1.2")),
-            Right((messages("tellAboutThisPayment.p1.link.2"), appConfig.p11DPaymentUrl, "_blank")),
-            Left(messages("tellAboutThisPayment.p1.3"))
-        )
+        @paragraph2Links(
+        messages("tellAboutThisPayment.p1.1"),
+        messages("tellAboutThisPayment.p1.link.1"),
+        "https://www.gov.uk/pay-paye-tax/direct-debit#before-you-start",
+        messages("tellAboutThisPayment.p1.2"),
+        messages("tellAboutThisPayment.p1.link.2"),
+        "https://www.gov.uk/pay-class-1a-national-insurance/debit-or-credit-card#reference-number",
+        messages("tellAboutThisPayment.p1.3")
         )
 
-        @govukRadios(
+
+
+
+@govukRadios(
             RadiosViewModel.yesNo(
                 field = form("value"),
                 legend = LegendViewModel(messages("tellAboutThisPayment.question")).withCssClass("govuk-fieldset__legend--m")
