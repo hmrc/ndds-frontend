@@ -35,7 +35,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Constants, DirectDebitDetailsData}
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary}
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, AmendRegularPaymentAmountSummary}
 import views.html.testonly.TestOnlyAmendPaymentPlanConfirmationView
 
 import java.time.LocalDate
@@ -52,10 +52,10 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
                                              ): Seq[SummaryListRow] = {
 
       Seq(
-        AmendPaymentAmountSummary.row(
-          PaymentPlanType.BudgetPaymentPlan.toString,
-          userAnswers.get(AmendPaymentAmountPage),
-          true
+        AmendRegularPaymentAmountSummary.row(
+          userAnswers.get(RegularPaymentAmountPage),
+          showChange = true,
+          changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode))
         )(messages(app)),
         AmendPlanEndDateSummary.row(
           userAnswers.get(AmendPlanEndDatePage),
@@ -108,7 +108,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .success
             .value
             .set(
-              AmendPaymentAmountPage,
+              RegularPaymentAmountPage,
               150.0
             )
             .success
@@ -169,7 +169,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .success
             .value
             .set(
-              AmendPaymentAmountPage,
+              RegularPaymentAmountPage,
               150.0
             )
             .success

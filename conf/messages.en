@@ -751,6 +751,9 @@ testOnlyAmendingPaymentPlan.cancel.link = Cancel and return to payment plan
 testOnlyAmendPaymentAmount.title = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.heading = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.hint = 	Amount must be in pounds and pence, like 967 or 967.82
+testOnlyAmendRegularPaymentAmount.title = What is the new regular payment amount, in pounds?
+testOnlyAmendRegularPaymentAmount.heading = What is the new regular payment amount, in pounds?
+testOnlyAmendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 150 or 150.73
 
 #AP1b messages
 testOnlyAmendPlanStartDate.title = When do you want to make this payment?

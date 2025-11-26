@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import controllers.actions.*
 import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
-import models.NormalMode
+import models.{NormalMode, PaymentPlanType}
 import pages.ManagePaymentPlanTypePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -59,6 +59,18 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
         .getOrElse(throw new RuntimeException("Missing plan details"))
 
       val planDetail = planDetailsResponse.paymentPlanDetails
+      val isBudgetPlan = planDetail.planType == PaymentPlanType.BudgetPaymentPlan.toString
+      val changeCall = if (isBudgetPlan) {
+        testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode = NormalMode)
+      } else {
+        testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode = NormalMode)
+      }
+      val hiddenChangeText = if (isBudgetPlan) {
+        "regular payment amount"
+      } else {
+        "payment amount"
+      }
+
       val amountRow = AmendPaymentAmountSummary
         .row(planDetail.planType, planDetail.scheduledPaymentAmount)
         .copy(actions =
@@ -66,9 +78,9 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
             Actions(items =
               Seq(
                 ActionItem(
-                  href               = testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode = NormalMode).url,
+                  href               = changeCall.url,
                   content            = Text("Change"),
-                  visuallyHiddenText = Some("payment amount")
+                  visuallyHiddenText = Some(hiddenChangeText)
                 )
               )
             )

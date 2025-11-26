@@ -21,21 +21,51 @@ import controllers.routes
 import models.{CheckMode, UserAnswers}
 import pages.RegularPaymentAmountPage
 import play.api.i18n.Messages
+import play.api.mvc.Call
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
 object AmendRegularPaymentAmountSummary {
 
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(
+    answers: UserAnswers,
+    changeCall: Option[Call] = Some(routes.RegularPaymentAmountController.onPageLoad(CheckMode))
+  )(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(RegularPaymentAmountPage).map { answer =>
-      SummaryListRowViewModel(
-        key   = "amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount",
-        value = ValueViewModel(currencyFormat(answer)),
-        actions = Seq(
-          ActionItemViewModel("site.change", routes.AmendPaymentAmountController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount"))
-        )
-      )
+      buildRow(Some(answer), showChange = true, changeCall)
     }
+
+  def row(
+    amount: Option[BigDecimal],
+    showChange: Boolean,
+    changeCall: Option[Call]
+  )(implicit messages: Messages): SummaryListRow =
+    buildRow(amount, showChange, changeCall)
+
+  private def buildRow(
+    amount: Option[BigDecimal],
+    showChange: Boolean,
+    changeCall: Option[Call]
+  )(implicit messages: Messages): SummaryListRow = {
+    val actions =
+      if (showChange) {
+        changeCall
+          .map(call =>
+            Seq(
+              ActionItemViewModel("site.change", call.url)
+                .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount"))
+            )
+          )
+          .getOrElse(Seq.empty)
+      } else {
+        Seq.empty
+      }
+
+    SummaryListRowViewModel(
+      key     = "amendPaymentPlanConfirmation.amendPaymentPlan.regularPaymentAmount",
+      value   = ValueViewModel(amount.map(currencyFormat).getOrElse("")),
+      actions = actions
+    )
+  }
 }
