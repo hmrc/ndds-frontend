@@ -74,7 +74,7 @@ class YearEndAndMonthSummarySpec extends SpecBase {
 
       result mustBe defined
       result.value.actions mustBe defined
-      result.value.actions.value.items.head.visuallyHiddenText mustBe Some("Year end and month")
+      result.value.actions.value.items.head.visuallyHiddenText mustBe Some("4 extra numbers")
     }
 
     "must format specific dates correctly" in new Setup {
