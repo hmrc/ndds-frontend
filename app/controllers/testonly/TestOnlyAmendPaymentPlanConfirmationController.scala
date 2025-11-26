@@ -20,18 +20,12 @@ import controllers.actions.*
 import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import models.*
-import models.audits.AmendPaymentPlanAudit
-import models.requests.ChrisSubmissionRequest
-import models.responses.DirectDebitDetails
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
-import repositories.SessionRepository
 import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
 import viewmodels.checkAnswers
@@ -50,7 +44,6 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   view: TestOnlyAmendPaymentPlanConfirmationView,
   nddService: NationalDirectDebitService,
-  sessionRepository: SessionRepository,
   chrisService: ChrisSubmissionForAmendService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -120,7 +113,6 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
          }
         )
     }
-
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
@@ -140,101 +132,5 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
         }
       }
     }
-
-  private def submitToChris(ua: UserAnswers)(implicit hc: HeaderCarrier): Future[Result] = {
-    (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
-      case (Some(ddiReference), Some(paymentPlanReference)) =>
-        val chrisRequest = buildChrisSubmissionRequest(ua, ddiReference)
-        nddService.submitChrisData(chrisRequest).flatMap { success =>
-          if (success) {
-            logger.info(s"CHRIS submission successful for amend payment plan for DDI Ref: [$ddiReference]")
-            for {
-              lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
-              updatedAnswers <- Future.fromTry(ua.set(AmendPaymentPlanConfirmationPage, true))
-              _              <- sessionRepository.set(updatedAnswers)
-            } yield {
-              logger.debug(s"Amend payment plan lock returned: ${lockResponse.lockSuccessful}")
-              Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad())
-            }
-          } else {
-            logger.error(s"CHRIS submission failed amend payment plan for DDI Ref [$ddiReference]")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-          }
-        }
-
-      case _ =>
-        logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to amend payment plan confirmation")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-    }
-  }
-
-  private def buildChrisSubmissionRequest(
-    userAnswers: UserAnswers,
-    ddiReference: String
-  ): ChrisSubmissionRequest = {
-    userAnswers.get(PaymentPlanDetailsQuery) match {
-      case Some(response) =>
-        val planDetail = response.paymentPlanDetails
-        val directDebitDetails = response.directDebitDetails
-        val serviceType: DirectDebitSource =
-          DirectDebitSource.objectMap.getOrElse(planDetail.planType, DirectDebitSource.SA)
-
-        val planStartDateDetails: Option[PlanStartDateDetails] = userAnswers.get(AmendPlanStartDatePage).map { date =>
-          PlanStartDateDetails(enteredDate = date, earliestPlanStartDate = date.toString)
-        }
-
-        val paymentPlanType: PaymentPlanType =
-          PaymentPlanType.values
-            .find(_.toString.equalsIgnoreCase(planDetail.planType))
-            .getOrElse(PaymentPlanType.BudgetPaymentPlan)
-
-        val bankDetailsWithAuddisStatus: YourBankDetailsWithAuddisStatus = buildBankDetailsWithAuddisStatus(directDebitDetails)
-
-        ChrisSubmissionRequest(
-          serviceType                     = serviceType,
-          paymentPlanType                 = paymentPlanType,
-          paymentFrequency                = planDetail.scheduledPaymentFrequency,
-          paymentPlanReferenceNumber      = userAnswers.get(PaymentPlanReferenceQuery),
-          yourBankDetailsWithAuddisStatus = bankDetailsWithAuddisStatus,
-          planStartDate                   = planStartDateDetails,
-          planEndDate                     = userAnswers.get(AmendPlanEndDatePage),
-          paymentDate                     = None,
-          yearEndAndMonth                 = None,
-          ddiReferenceNo                  = ddiReference,
-          paymentReference                = planDetail.paymentReference,
-          totalAmountDue                  = planDetail.totalLiability,
-          paymentAmount                   = None,
-          regularPaymentAmount            = None,
-          amendPaymentAmount              = userAnswers.get(AmendPaymentAmountPage),
-          calculation                     = None,
-          suspensionPeriodRangeDate       = None,
-          amendPlan                       = true,
-          auditType                       = Some(AmendPaymentPlanAudit)
-        )
-
-      case _ =>
-        throw new IllegalStateException("Missing PaymentPlanDetails in userAnswers")
-    }
-  }
-
-  private def buildBankDetailsWithAuddisStatus(
-    directDebitDetails: DirectDebitDetails
-  ): YourBankDetailsWithAuddisStatus = {
-    val bankDetails = YourBankDetails(
-      accountHolderName = directDebitDetails.bankAccountName.getOrElse(""),
-      sortCode = directDebitDetails.bankSortCode.getOrElse(
-        throw new IllegalStateException("Missing bank sort code")
-      ),
-      accountNumber = directDebitDetails.bankAccountNumber.getOrElse(
-        throw new IllegalStateException("Missing bank account number")
-      )
-    )
-
-    YourBankDetailsWithAuddisStatus.toModelWithAuddisStatus(
-      yourBankDetails = bankDetails,
-      auddisStatus    = directDebitDetails.auDdisFlag,
-      accountVerified = true
-    )
-  }
 
 }
