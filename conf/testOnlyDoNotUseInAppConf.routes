@@ -19,10 +19,10 @@ POST        /direct-debits/test-only/amount-need-to-pay                      con
 GET         /direct-debits/test-only/change-amount-need-to-pay               controllers.testonly.TestOnlyAmendPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
 POST        /direct-debits/test-only/change-amount-need-to-pay               controllers.testonly.TestOnlyAmendPaymentAmountController.onSubmit(mode: Mode = CheckMode)
 
-GET         /direct-debits/test-only/regular-payment-amount                  controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
-POST        /direct-debits/test-only/regular-payment-amount                  controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onSubmit(mode: Mode = NormalMode)
-GET         /direct-debits/test-only/change-regular-payment-amount           controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
-POST        /direct-debits/test-only/change-regular-payment-amount           controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onSubmit(mode: Mode = CheckMode)
+GET         /direct-debits/test-only/amend-plan-how-much-want-to-pay                  controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST        /direct-debits/test-only/amend-plan-how-much-want-to-pay                  controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET         /direct-debits/test-only/change-amend-plan-how-much-want-to-pay           controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST        /direct-debits/test-only/change-amend-plan-how-much-want-to-pay           controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onSubmit(mode: Mode = CheckMode)
 
 GET         /direct-debits/test-only/amend-plan-payment-date                 controllers.testonly.TestOnlyAmendPlanStartDateController.onPageLoad(mode: Mode = NormalMode)
 POST        /direct-debits/test-only/amend-plan-payment-date                 controllers.testonly.TestOnlyAmendPlanStartDateController.onSubmit(mode: Mode = NormalMode)
