@@ -46,8 +46,6 @@ object PaymentDateSummary {
   def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(PaymentDatePage).map { answer =>
 
-      implicit val lang: Lang = messages.lang
-
       val formattedValue =
         s"${formattedDateTimeShort(answer.enteredDate.toString)}"
       SummaryListRowViewModel(
