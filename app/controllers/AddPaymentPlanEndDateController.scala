@@ -22,7 +22,7 @@ import forms.AddPaymentPlanEndDateFormProvider
 import javax.inject.Inject
 import models.{DirectDebitSource, Mode}
 import navigation.Navigator
-import pages.{AddPaymentPlanEndDatePage, DirectDebitSourcePage}
+import pages.{AddPaymentPlanEndDatePage, DirectDebitSourcePage, PlanEndDatePage}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
@@ -72,7 +72,12 @@ class AddPaymentPlanEndDateController @Inject() (
             value =>
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(AddPaymentPlanEndDatePage, value))
-                _              <- sessionRepository.set(updatedAnswers)
+                updatedAnswers <- if (value) { // if value is No, then remove PLan end date from session and user answer
+                                    Future.successful(updatedAnswers)
+                                  } else {
+                                    Future.fromTry(updatedAnswers.remove(PlanEndDatePage))
+                                  }
+                _ <- sessionRepository.set(updatedAnswers)
               } yield Redirect(navigator.nextPage(AddPaymentPlanEndDatePage, mode, updatedAnswers))
           )
       case _ =>
