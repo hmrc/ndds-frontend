@@ -774,4 +774,14 @@ testOnlyDuplicateWarning.h1 = You already have a payment plan with these details
 testOnlyDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
 testOnlyDuplicateWarning.h2 = Do you want to continue with this amendment?
 
+
+testOnlyConfirmRemovePlanEndDate.title = Removing this plan end date
+testOnlyConfirmRemovePlanEndDate.heading = Removing this plan end date
+testOnlyConfirmRemovePlanEndDate.q1 = Are you sure you want to remove this plan end date?
+testOnlyConfirmRemovePlanEndDate.checkYourAnswersLabel = Removing this plan end date
+testOnlyConfirmRemovePlanEndDate.error.required = Select one option.
+testOnlyConfirmRemovePlanEndDate.change.hidden = Removing this plan end date
+testOnlyConfirmRemovePlanEndDate.p1.line1 = Payment reference: <strong>{0}</strong>
+testOnlyConfirmRemovePlanEndDate.p1.line2 = The plan end date is <strong>{0}</strong>
+
 #####################################################
