@@ -33,7 +33,7 @@
 
 @(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false, paginationViewModel: PaginationViewModel = PaginationViewModel(), hmrcHelplineUrl: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleForSetupJourneyNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false, useThreeQuartersGrid = true) {
+@layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false, useThreeQuartersGrid = true) {
 
     @if(maxLimitReached) {
         @govukErrorSummary(

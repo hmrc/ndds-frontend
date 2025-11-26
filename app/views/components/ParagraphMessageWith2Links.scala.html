@@ -14,23 +14,15 @@
  * limitations under the License.
  *@
 
-@this(
-    layout: templates.Layout,
-    govukButton: GovukButton
+@(parts: Seq[Either[String, (String, String, String)]] = Seq.empty,
+classes: String = "govuk-body"
 )
 
-@()(implicit request: Request[_], messages: Messages)
-
-@layout(pageTitle = titleNoForm(messages("journeyRecovery.startAgain.title"))) {
-
-    <h1 class="govuk-heading-xl">@messages("journeyRecovery.startAgain.heading")</h1>
-
-    <p class="govuk-body">@messages("journeyRecovery.startAgain.guidance")</p>
-
-    <p class="govuk-body">
-        @govukButton(
-            ButtonViewModel(messages("site.startAgain"))
-                .asLink(routes.LandingController.onPageLoad().url)
-        )
-    </p>
-}
+<p class="@classes">
+    @for(part <- parts) {
+    @part.fold(
+    text => Html(text), // Left => plain text
+    link => Html(s"""<a href="${link._2}" @if(link._3.nonEmpty){ target="${link._3}" } class="govuk-link">${link._1}</a>""")
+    )
+    }
+</p>

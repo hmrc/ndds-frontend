@@ -16,18 +16,18 @@
 
 package controllers
 
+import config.CurrencyFormatter.currencyFormat
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.{DirectDebitSource, PaymentPlanType}
-import pages.{CheckYourAnswerPage, DirectDebitSourcePage, PaymentAmountPage, PaymentDatePage, PaymentPlanTypePage, PlanStartDatePage, RegularPaymentAmountPage, TotalAmountDuePage}
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import models.PaymentPlanType
+import pages.*
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import config.CurrencyFormatter.currencyFormat
-import viewmodels.checkAnswers.{DirectDebitSourceSummary, FinalPaymentAmountSummary, FinalPaymentDateSummary, MonthlyPaymentAmountSummary, PaymentAmountSummary, PaymentDateSummary, PaymentPlanTypeSummary, PaymentReferenceSummary, PaymentsFrequencySummary, PlanEndDateSummary, PlanStartDateSummary, RegularPaymentAmountSummary, TotalAmountDueSummary, YearEndAndMonthSummary, YourBankDetailsAccountHolderNameSummary, YourBankDetailsAccountNumberSummary, YourBankDetailsSortCodeSummary}
-import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewmodels.checkAnswers.*
+import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import views.html.DirectDebitConfirmationView
 
 import java.time.LocalDate
@@ -51,6 +51,8 @@ class DirectDebitConfirmationController @Inject() (
       .get(CheckYourAnswerPage)
       .getOrElse(throw new Exception("Missing generated DDI reference number"))
 
+    val hasEndDate = request.userAnswers.get(AddPaymentPlanEndDatePage)
+
     val paymentAmount =
       request.userAnswers
         .get(PaymentAmountPage)
@@ -72,6 +74,12 @@ class DirectDebitConfirmationController @Inject() (
         .getOrElse(throw new Exception("Missing date"))
 
     val paymentDateString: String = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+
+    val showPlanEndDate = if (hasEndDate.contains(false)) {
+      None
+    } else {
+      PlanEndDateSummary.rowData(request.userAnswers)
+    }
 
     val monthlyPaymentAmount = if (request.userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
       MonthlyPaymentAmountSummary.row(request.userAnswers)
@@ -128,7 +136,7 @@ class DirectDebitConfirmationController @Inject() (
         PaymentDateSummary.row(request.userAnswers, false),
         TotalAmountDueSummary.rowData(request.userAnswers),
         PlanStartDateSummary.row(request.userAnswers, false),
-        PlanEndDateSummary.rowData(request.userAnswers),
+        showPlanEndDate,
         monthlyPaymentAmount,
         finalPaymentDate,
         finalPaymentAmount

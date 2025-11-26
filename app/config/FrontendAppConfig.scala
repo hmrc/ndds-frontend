@@ -47,6 +47,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val paymentProblemUrl: String = configuration.get[String]("urls.paymentProblem")
   lazy val hmrcOnlineServiceDeskUrl: String = configuration.get[String]("urls.hmrcOnlineServiceDesk")
   lazy val govUKUrl: String = configuration.get[String]("urls.govUK")
+  lazy val paymentEarlyLateUrl: String = configuration.get[String]("urls.paymentEarlyLate")
+  lazy val p11DPaymentUrl: String = configuration.get[String]("urls.p11DPayment")
 
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   lazy val exitSurveyUrl: String = s"$exitSurveyBaseUrl/feedback/ndds-frontend"
