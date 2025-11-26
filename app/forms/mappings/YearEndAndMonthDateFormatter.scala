@@ -29,66 +29,80 @@ private[mappings] class YearEndAndMonthDateFormatter(
 ) extends Formatter[YearEndAndMonth]
     with Formatters {
 
-  protected val fieldKeys: List[String] = List("year", "month")
+  private val yearKey = "year"
+  private val monthKey = "month"
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], YearEndAndMonth] = {
-    val fields = fieldKeys.map { field =>
-      field -> data.get(s"$key.$field").filter(_.nonEmpty)
-    }.toMap
 
-    lazy val missingFieldErrors = fields.collect { case (field, None) =>
-      FormError(s"$key.$field", s"date.error.$field")
-    }.toList
+    // 1. Fetch the raw value from "value"
+    val raw = data.get(key).map(_.trim).getOrElse("")
 
-    val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
-
-    if (regexErrors.nonEmpty) {
-      Left(regexErrors)
-    } else if (missingFieldErrors.nonEmpty) {
-      Left(missingFieldErrors)
-    } else {
-      formatDate(key, data).left.map {
-        _.map(_.copy(key = key, args = args))
-      }
+    // 2. Required check
+    if (raw.isEmpty) {
+      return Left(Seq(FormError(key, invalidKey)))
     }
-  }
 
-  private def checkInput(key: String, fields: Map[String, Option[String]], dateFormat: DateFormat): Option[FormError] = {
-    fields.get(dateFormat.dateType).flatten match {
-      case Some(dateType) if !dateType.matches(dateFormat.regex) =>
-        Some(FormError(s"$key.${dateFormat.dateType}", dateFormat.errorKey, args))
-      case _ =>
-        None
+    // 3. Must be exactly 4 digits
+    if (!raw.matches("""^\d{4}$""")) {
+      return Left(Seq(FormError(key, invalidKey)))
     }
-  }
 
-  private def formatDate(key: String, data: Map[String, String]): Either[Seq[FormError], YearEndAndMonth] = {
-    val int = intFormatter(
-      requiredKey    = invalidKey,
-      wholeNumberKey = invalidKey,
-      nonNumericKey  = invalidKey,
-      args
+    // 4. Split into year + month components
+    val yearPart = raw.substring(0, 2)
+    val monthPart = raw.substring(2, 4)
+
+    if (!monthPart.matches("""^(0[1-9]|1[0-3])$""")) {
+      return Left(Seq(FormError(key, invalidKey)))
+    }
+
+    // 5. Inject into the data map so the original logic can run
+    val expandedData = data ++ Map(
+      s"$key.$yearKey"  -> yearPart,
+      s"$key.$monthKey" -> monthPart
     )
 
-    val monthFormatter = stringFormatter(invalidKey, args)
+    // Run the existing validation pipeline (unchanged)
+    bindExpanded(key, expandedData)
+  }
 
-    for {
-      year     <- int.bind(s"$key.year", data)
-      monthStr <- monthFormatter.bind(s"$key.month", data)
-      month <-
-        Try(monthStr.replaceAll("^0+", "").toInt).toEither.left.map(_ => Seq(FormError(s"$key.month", invalidKey, args))).flatMap { monthValue =>
-          if (monthValue >= 1 && monthValue <= 13) {
-            Right(monthValue)
-          } else {
-            Left(Seq(FormError(s"$key.month", invalidKey, args)))
-          }
+  private def bindExpanded(key: String, data: Map[String, String]): Either[Seq[FormError], YearEndAndMonth] = {
+    val yearField = s"$key.$yearKey"
+    val monthField = s"$key.$monthKey"
+
+    val yearOpt = data.get(yearField)
+    val monthOpt = data.get(monthField)
+
+    if (yearOpt.isEmpty || monthOpt.isEmpty) {
+      return Left(Seq(FormError(key, invalidKey)))
+    }
+
+    // Regex validation (your original dateFormats)
+    val regexErrors =
+      dateFormats.flatMap { format =>
+        data.get(s"$key.${format.dateType}") match {
+          case Some(value) if !value.matches(format.regex) =>
+            Some(FormError(s"$key.${format.dateType}", format.errorKey, args))
+          case _ =>
+            None
         }
-    } yield YearEndAndMonth(year, month)
+      }
+
+    if (regexErrors.nonEmpty) {
+      return Left(regexErrors)
+    }
+
+    // Parse values
+    val year = yearOpt.get.toInt
+    val month = monthOpt.get.toInt
+
+    // Month range check
+    if (month < 1 || month > 13) {
+      return Left(Seq(FormError(key, invalidKey)))
+    }
+
+    Right(YearEndAndMonth(year, month))
   }
 
   override def unbind(key: String, value: YearEndAndMonth): Map[String, String] =
-    Map(
-      s"$key.year"  -> value.year.toString,
-      s"$key.month" -> value.month.toString
-    )
+    Map(key -> f"${value.year}%02d${value.month}%02d")
 }
