@@ -42,7 +42,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val paymentDateDetails: PaymentDateDetails = PaymentDateDetails(fixedDate, "2025-7-19")
   private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(fixedDate, "2025-7-19")
   private val endDate = LocalDate.of(2027, 7, 25)
-  private val yearEndAndMonthDate = YearEndAndMonth(2502)
+  private val yearEndAndMonthDate = YearEndAndMonth(2025, 4)
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
   private val mockDirectDebitCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
@@ -124,9 +124,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
         .setOrException(PaymentReferencePage, "1234567")
         .setOrException(TellAboutThisPaymentPage, true)
-        .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
         .setOrException(PaymentAmountPage, 123.01)
         .setOrException(PaymentDatePage, paymentDateDetails)
+        .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
@@ -140,13 +140,13 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment reference")
         contentAsString(result) must include("Add 4 extra numbers")
         contentAsString(result) must include("Yes")
-        contentAsString(result) must include("4 extra numbers")
-        contentAsString(result) must include("2502")
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
+        contentAsString(result) must include("4 extra numbers")
+        contentAsString(result) must include("2504")
         contentAsString(result) must include("Accept and continue")
       }
     }

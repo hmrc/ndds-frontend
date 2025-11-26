@@ -22,83 +22,39 @@ import play.api.data.format.Formatter
 
 import scala.util.Try
 
-private[mappings] class YearEndAndMonthDateFormatter(
-  invalidKey: String,
+class YearEndAndMonthDateFormatter(
+  emptyKey: String,
+  invalidFormatKey: String,
+  invalidMonthKey: String,
   args: Seq[String] = Seq.empty,
   dateFormats: Seq[DateFormat]
-) extends Formatter[YearEndAndMonth]
-    with Formatters {
-
-  private val yearKey = "year"
-  private val monthKey = "month"
+) extends Formatter[YearEndAndMonth] {
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], YearEndAndMonth] = {
 
-    // 1. Fetch the raw value from "value"
     val raw = data.get(key).map(_.trim).getOrElse("")
 
-    // 2. Required check
+    // 1. Empty input
     if (raw.isEmpty) {
-      return Left(Seq(FormError(key, invalidKey)))
+      return Left(Seq(FormError(key, emptyKey)))
     }
 
-    // 3. Must be exactly 4 digits
+    // 2. Must be exactly 4 digits
     if (!raw.matches("""^\d{4}$""")) {
-      return Left(Seq(FormError(key, invalidKey)))
+      return Left(Seq(FormError(key, invalidFormatKey)))
     }
 
-    // 4. Split into year + month components
+    // Extract parts
     val yearPart = raw.substring(0, 2)
     val monthPart = raw.substring(2, 4)
 
+    // 3. Month must be 01–13
     if (!monthPart.matches("""^(0[1-9]|1[0-3])$""")) {
-      return Left(Seq(FormError(key, invalidKey)))
+      return Left(Seq(FormError(key, invalidMonthKey)))
     }
 
-    // 5. Inject into the data map so the original logic can run
-    val expandedData = data ++ Map(
-      s"$key.$yearKey"  -> yearPart,
-      s"$key.$monthKey" -> monthPart
-    )
-
-    // Run the existing validation pipeline (unchanged)
-    bindExpanded(key, expandedData)
-  }
-
-  private def bindExpanded(key: String, data: Map[String, String]): Either[Seq[FormError], YearEndAndMonth] = {
-    val yearField = s"$key.$yearKey"
-    val monthField = s"$key.$monthKey"
-
-    val yearOpt = data.get(yearField)
-    val monthOpt = data.get(monthField)
-
-    if (yearOpt.isEmpty || monthOpt.isEmpty) {
-      return Left(Seq(FormError(key, invalidKey)))
-    }
-
-    // Regex validation (your original dateFormats)
-    val regexErrors =
-      dateFormats.flatMap { format =>
-        data.get(s"$key.${format.dateType}") match {
-          case Some(value) if !value.matches(format.regex) =>
-            Some(FormError(s"$key.${format.dateType}", format.errorKey, args))
-          case _ =>
-            None
-        }
-      }
-
-    if (regexErrors.nonEmpty) {
-      return Left(regexErrors)
-    }
-
-    // Parse values
-    val year = yearOpt.get.toInt
-    val month = monthOpt.get.toInt
-
-    // Month range check
-    if (month < 1 || month > 13) {
-      return Left(Seq(FormError(key, invalidKey)))
-    }
+    val year = yearPart.toInt
+    val month = monthPart.toInt
 
     Right(YearEndAndMonth(year, month))
   }

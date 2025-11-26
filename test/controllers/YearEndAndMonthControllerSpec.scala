@@ -44,7 +44,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute: Call = Call("GET", "/foo")
 
-  val validAnswer: YearEndAndMonth = YearEndAndMonth(2024, 5)
+  val validAnswer: YearEndAndMonth = YearEndAndMonth(24, 5)
 
   lazy val yearEndAndMonthRoute: String = routes.YearEndAndMonthController.onPageLoad(NormalMode).url
   lazy val tellAboutThisPaymentRoute: String = routes.TellAboutThisPaymentController.onPageLoad(NormalMode).url
@@ -57,8 +57,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, yearEndAndMonthRoute)
       .withFormUrlEncodedBody(
-        "value.month" -> f"${validAnswer.month}%02d",
-        "value.year"  -> validAnswer.year.toString
+        "value" -> f"${validAnswer.year}%02d${validAnswer.month}%02d"
       )
 
   "yearEndAndMonth Controller" - {
