@@ -20,20 +20,21 @@ import config.FrontendAppConfig
 import controllers.actions.*
 import controllers.routes
 import models.{PaymentPlanType, UserAnswers}
-import models.responses.PaymentPlanDetails
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
 import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, DateSetupSummary, PaymentReferenceSummary, PaymentsFrequencySummary}
+import viewmodels.govuk.all.SummaryListViewModel
 import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.Future
@@ -68,11 +69,15 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
 
         val formattedStartDateLong = startDate.format(dateFormatLong)
         val formattedStartDateShort = startDate.format(dateFormatShort)
-        val formattedSubmissionDate = paymentPlan.paymentPlanDetails.submissionDateTime.format(dateFormatShort)
         val directDebitDetails = paymentPlan.directDebitDetails
         val formattedSortCode = directDebitDetails.bankSortCode
           .map(sc => sc.grouped(2).mkString(" "))
           .getOrElse("")
+        val submissionDate = paymentPlan.paymentPlanDetails.submissionDateTime
+        val scheduledFrequency = paymentPlan.paymentPlanDetails.scheduledPaymentFrequency
+        val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentPlanRef)
+
+        val formattedSubmissionDate = paymentPlan.paymentPlanDetails.submissionDateTime.format(dateFormatShort)
 
         Ok(
           view(
@@ -83,9 +88,7 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
             directDebitDetails.bankAccountName.getOrElse(""),
             directDebitDetails.bankAccountNumber.getOrElse(""),
             formattedSortCode,
-            paymentPlan.paymentPlanDetails.paymentReference,
-            formattedSubmissionDate,
-            formattedStartDateShort,
+            paymentList,
             controllers.routes.PaymentPlanDetailsController.onPageLoad()
           )
         )
@@ -105,30 +108,42 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
     }
   }
 
-  private def buildSummaryRows(showAllActionsFlag: Boolean, userAnswers: UserAnswers, planDetail: PaymentPlanDetails, paymentPlanReference: String)(
-    implicit messages: Messages
-  ): Seq[SummaryListRow] = {
+  private def buildSummaryRows(showAllActionsFlag: Boolean,
+                               userAnswers: UserAnswers,
+                               dateSetup: LocalDateTime,
+                               scheduledFrequency: Option[String],
+                               paymentPlanReference: String
+                              )(implicit
+    messages: Messages
+  ): SummaryList = {
+    val planType: Option[String] = userAnswers.get(ManagePaymentPlanTypePage)
     val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
     val planStartDate = userAnswers.get(AmendPlanStartDatePage)
     val planEndDate = userAnswers.get(AmendPlanEndDatePage)
 
-    planDetail.planType match {
-      case PaymentPlanType.SinglePaymentPlan.toString =>
-        Seq(
-          PaymentReferenceSummary.row(paymentPlanReference),
-          DateSetupSummary.row(planDetail.submissionDateTime),
-          AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount),
-          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.shortDateTimeFormatPattern)
+    planType match {
+      case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
+        SummaryListViewModel(
+          Seq(
+            PaymentReferenceSummary.row(paymentPlanReference),
+            DateSetupSummary.row(dateSetup),
+            AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount),
+            AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.shortDateTimeFormatPattern)
+          )
         )
-      case PaymentPlanType.BudgetPaymentPlan.toString =>
-        Seq(
-          PaymentReferenceSummary.row(paymentPlanReference),
-          DateSetupSummary.row(planDetail.submissionDateTime),
-          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
-          PaymentsFrequencySummary.row(planDetail.scheduledPaymentFrequency),
-          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.shortDateTimeFormatPattern),
-          AmendPlanEndDateSummary.row(planEndDate, Constants.shortDateTimeFormatPattern, showAllActionsFlag)
+      case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
+        SummaryListViewModel(
+          Seq(
+            PaymentReferenceSummary.row(paymentPlanReference),
+            DateSetupSummary.row(dateSetup),
+            AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
+            PaymentsFrequencySummary.row(scheduledFrequency),
+            AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.shortDateTimeFormatPattern),
+            AmendPlanEndDateSummary.row(planEndDate, Constants.shortDateTimeFormatPattern, showAllActionsFlag)
+          )
         )
+      case _ =>
+        throw new RuntimeException("Invalid or missing planType in userAnswers")
     }
 
   }

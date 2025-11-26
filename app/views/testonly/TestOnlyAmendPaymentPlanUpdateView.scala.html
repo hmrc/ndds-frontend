@@ -29,7 +29,7 @@
         paragraphWithLink: ParagraphMessageWithLink
 )
 
-@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String, dateSetup: String, paymentDate: String, call: Call)(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentList: SummaryList, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
@@ -94,26 +94,7 @@
 
     @h2("testOnlyAmendPaymentPlanUpdate.amendedPlan")
 
-    @govukSummaryList(SummaryList(
-        rows = Seq(
-            SummaryListRow(
-                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.reference")),
-                value = Value(content = HtmlContent(paymentPlanReference))
-            ),
-            SummaryListRow(
-                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.dateSetup")),
-                value = Value(content = HtmlContent(dateSetup))
-            ),
-            SummaryListRow(
-                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.paymentAmount")),
-                value = Value(content = HtmlContent(paymentAmount))
-            ),
-            SummaryListRow(
-                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.paymentDate")),
-                value = Value(content = HtmlContent(paymentDate))
-            )
-        )
-    ))
+    @govukSummaryList(paymentList)
 
     @govukInsetText(
         InsetText(
