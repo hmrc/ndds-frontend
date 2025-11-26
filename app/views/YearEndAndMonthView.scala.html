@@ -16,6 +16,7 @@
 
 @import viewmodels.InputWidth.*
 @import views.html.components.*
+@import config.FrontendAppConfig
 
 @this(
     layout: templates.Layout,
@@ -34,7 +35,7 @@
     govukHint: GovukHint
 )
 
-@(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_],appConfig: FrontendAppConfig, messages: Messages)
 @layout(pageTitle = title(form, messages("yearEndAndMonth.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.YearEndAndMonthController.onSubmit(mode), Symbol("autoComplete") -> "off") {
@@ -52,9 +53,9 @@
         @paragraph("yearEndAndMonth.p2")
 
         <ul class="govuk-list govuk-list--bullet">
-            <li><a href="https://www.gov.uk/pay-paye-tax/reference-numbers-early-late-payments#if-you-pay-monthly" target="_blank" rel="noopener">@messages("yearEndAndMonth.bullet.link1")</a>, @messages("yearEndAndMonth.bullet.text1")</li>
-            <li><a href="https://www.gov.uk/pay-paye-tax/reference-numbers-early-late-payments#if-you-pay-quarterly" target="_blank" rel="noopener">@messages("yearEndAndMonth.bullet.link2")</a>, @messages("yearEndAndMonth.bullet.text2")</li>
-            <li><a href="https://www.gov.uk/pay-class-1a-national-insurance/debit-or-credit-card#reference-number" target="_blank" rel="noopener">@messages("yearEndAndMonth.bullet.link3")</a>, @messages("yearEndAndMonth.bullet.text3")</li>
+            <li><a href="@appConfig.payMonthlyUrl" target="_blank" rel="noopener">@messages("yearEndAndMonth.bullet.link1")</a>, @messages("yearEndAndMonth.bullet.text1")</li>
+            <li><a href="@appConfig.payQuarterlyUrl" target="_blank" rel="noopener">@messages("yearEndAndMonth.bullet.link2")</a>, @messages("yearEndAndMonth.bullet.text2")</li>
+            <li><a href= "@appConfig.p11DPaymentUrl" target="_blank" rel="noopener">@messages("yearEndAndMonth.bullet.link3")</a>, @messages("yearEndAndMonth.bullet.text3")</li>
         </ul>
 
         @govukInput(

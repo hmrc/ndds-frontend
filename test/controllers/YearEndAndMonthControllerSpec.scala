@@ -46,7 +46,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
   val validAnswer: YearEndAndMonth = YearEndAndMonth(2024, 5)
 
   lazy val yearEndAndMonthRoute: String = routes.YearEndAndMonthController.onPageLoad(NormalMode).url
-  lazy val paymentReferenceRoute: String = routes.PaymentReferenceController.onPageLoad(NormalMode).url
+  lazy val tellAboutThisPaymentRoute: String = routes.TellAboutThisPaymentController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
@@ -72,7 +72,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[YearEndAndMonthView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", tellAboutThisPaymentRoute))(getRequest(), messages(application)).toString
       }
     }
 
@@ -88,9 +88,9 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(getRequest(),
-                                                                                                                       messages(application)
-                                                                                                                      ).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", tellAboutThisPaymentRoute))(getRequest(),
+                                                                                                                           messages(application)
+                                                                                                                          ).toString
       }
     }
 
@@ -132,7 +132,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", tellAboutThisPaymentRoute))(request, messages(application)).toString
       }
     }
 
