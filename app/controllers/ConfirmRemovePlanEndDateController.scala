@@ -79,7 +79,9 @@ class ConfirmRemovePlanEndDateController @Inject() (
               .map(form.fill)
               .getOrElse(form)
 
-          Ok(view(preparedForm, mode, paymentPlanReference, planEndDate))
+          Ok(
+            view(preparedForm, mode, paymentPlanReference, planEndDate, routes.ConfirmRemovePlanEndDateController.onPageLoad(mode))
+          ) // change back link
         }
 
         maybeResult match {
@@ -100,7 +102,10 @@ class ConfirmRemovePlanEndDateController @Inject() (
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, paymentPlanReference, planEndDate))),
+        formWithErrors =>
+          Future.successful(
+            BadRequest(view(formWithErrors, mode, paymentPlanReference, planEndDate, routes.ConfirmRemovePlanEndDateController.onPageLoad(mode)))
+          ),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmRemovePlanEndDatePage, value))

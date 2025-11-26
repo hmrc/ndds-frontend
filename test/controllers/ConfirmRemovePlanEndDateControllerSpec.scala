@@ -102,7 +102,10 @@ class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar 
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, NormalMode, testPlanReference, expectedPlanEndDate)(request, messages(application)).toString
+          view(form, NormalMode, testPlanReference, expectedPlanEndDate, routes.ConfirmRemovePlanEndDateController.onPageLoad(NormalMode))(
+            request,
+            messages(application)
+          ).toString
       }
     }
 
@@ -133,7 +136,10 @@ class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar 
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form.fill(true), NormalMode, testPlanReference, expectedPlanEndDate)(request, messages(application)).toString
+          view(form.fill(true), NormalMode, testPlanReference, expectedPlanEndDate, routes.ConfirmRemovePlanEndDateController.onPageLoad(NormalMode))(
+            request,
+            messages(application)
+          ).toString
       }
     }
 
@@ -162,7 +168,7 @@ class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url  // can update once  all flow available
+        redirectLocation(result).value mustEqual onwardRoute.url // can update once  all flow available
       }
     }
 
@@ -188,7 +194,10 @@ class ConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar 
 
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual
-          view(boundForm, NormalMode, testPlanReference, expectedPlanEndDate)(request, messages(application)).toString
+          view(boundForm, NormalMode, testPlanReference, expectedPlanEndDate, routes.ConfirmRemovePlanEndDateController.onPageLoad(NormalMode))(
+            request,
+            messages(application)
+          ).toString
       }
     }
 
