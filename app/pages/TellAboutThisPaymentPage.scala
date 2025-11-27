@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package queries
+package pages
 
-import models.NddDetails
 import play.api.libs.json.JsPath
 
-case object ExistingDirectDebitIdentifierQuery extends Gettable[NddDetails] with Settable[NddDetails] {
+case object TellAboutThisPaymentPage extends QuestionPage[Boolean] {
 
-  override def path: JsPath = JsPath \ "existingDirectDebitIdentifier"
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "tellAboutThisPayment"
 }

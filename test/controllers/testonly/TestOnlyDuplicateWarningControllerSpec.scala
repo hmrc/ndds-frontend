@@ -16,9 +16,10 @@
 
 package controllers.testonly
 
-import controllers.testonly.routes as testOnlyRoutes
 import base.SpecBase
+import controllers.testonly.routes as testOnlyRoutes
 import forms.DuplicateWarningFormProvider
+import models.responses.AmendLockResponse
 import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -27,6 +28,7 @@ import pages.{DuplicateWarningPage, ManagePaymentPlanTypePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import views.html.testonly.TestOnlyDuplicateWarningView
@@ -43,132 +45,250 @@ class TestOnlyDuplicateWarningControllerSpec extends SpecBase {
     val mockService = mock[NationalDirectDebitService]
     val mockSessionRepository = mock[SessionRepository]
 
-    "must return OK and view TestOnlyDuplicateWarningController onPageLoad" in {
-      val ua = emptyUserAnswers
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
-        .success
-        .value
-
-      val application = applicationBuilder(userAnswers = Some(ua))
-        .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-        .build()
-
-      running(application) {
-        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-        when(mockSessionRepository.get(any()))
-          .thenReturn(Future.successful(Some(ua)))
-
-        when(mockSessionRepository.set(any()))
-          .thenReturn(Future.successful(true))
-
-        val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
-        val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
-        val result = controller.onPageLoad(NormalMode)(request)
-        val view = application.injector.instanceOf[TestOnlyDuplicateWarningView]
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(
-          form,
-          mode,
-          testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
-        )(request, messages(application)).toString
-      }
-    }
-
-    "must redirect to AmendPaymentPlanUpdateController when user selects Yes (true)" in {
-      val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val ua = emptyUserAnswers
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
-        .success
-        .value
-
-      val application = applicationBuilder(userAnswers = Some(ua))
-        .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-        .build()
-
-      running(application) {
-        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-
-        val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
-        val request = FakeRequest(POST, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url).withFormUrlEncodedBody(("value", "true"))
-        val result = controller.onSubmit(NormalMode)(request)
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad().url
-      }
-    }
-
-    "must redirect to AmendPaymentPlanConfirmationController when user selects No (false)" in {
-      val mockSessionRepository = mock[SessionRepository]
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val ua = emptyUserAnswers
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
-        .success
-        .value
-
-      val application = applicationBuilder(userAnswers = Some(ua))
-        .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
-        .build()
-
-      running(application) {
-        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-
-        val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
-        val request = FakeRequest(POST, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url).withFormUrlEncodedBody(("value", "false"))
-        val result = controller.onSubmit(NormalMode)(request)
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url
-      }
-    }
-
-    "must redirect to page not found if already value is submitted and click browser back from Updated page" in {
-      val ua =
-        emptyUserAnswers
-          .set(DuplicateWarningPage, true)
+    "onPageLoad" - {
+      "must return OK and view TestOnlyDuplicateWarningController onPageLoad" in {
+        val ua = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
           .value
 
-      val application = applicationBuilder(userAnswers = Some(ua))
-        .overrides(
-          bind[SessionRepository].toInstance(mockSessionRepository)
-        )
-        .build()
+        val application = applicationBuilder(userAnswers = Some(ua))
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .build()
 
-      running(application) {
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(ua)))
 
-        when(mockSessionRepository.get(any()))
-          .thenReturn(Future.successful(Some(ua)))
+          when(mockSessionRepository.set(any()))
+            .thenReturn(Future.successful(true))
 
-        val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
-        val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
-        val result = controller.onPageLoad(NormalMode)(request)
+          val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
+          val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
+          val result = controller.onPageLoad(NormalMode)(request)
+          val view = application.injector.instanceOf[TestOnlyDuplicateWarningView]
 
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.BackSubmissionController.onPageLoad().url
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(
+            form,
+            mode,
+            testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must redirect to page not found if already value is submitted and click browser back from Updated page" in {
+        val ua =
+          emptyUserAnswers
+            .set(DuplicateWarningPage, true)
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(ua))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(ua)))
+
+          val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
+          val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
+          val result = controller.onPageLoad(NormalMode)(request)
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.BackSubmissionController.onPageLoad().url
+        }
+      }
+
+      "must redirect to Journey Recovery page when amend payment plan guard returns false" in {
+        val userAnswers = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+
+          val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
+          val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
+          val result = controller.onPageLoad(mode)(request)
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+        }
       }
     }
 
-    "must redirect to Journey Recovery page when amend payment plan guard returns false" in {
-      val userAnswers = emptyUserAnswers
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
-        .success
-        .value
+    "onSubmit" - {
+      "must redirect to AmendPaymentPlanUpdateController when user selects Yes (true) and chRIS submission successful" in {
+        val directDebitReference = "DDI123456789"
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val paymentPlanDetails = models.responses.PaymentPlanResponse(
+          directDebitDetails = models.responses.DirectDebitDetails(
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
+            submissionDateTime = java.time.LocalDateTime.now()
+          ),
+          paymentPlanDetails = models.responses.PaymentPlanDetails(
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
+            scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
+          )
+        )
 
-      running(application) {
-        when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+        val ua = emptyUserAnswers
+          .set(DuplicateWarningPage, true)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "PPREF123")
+          .success
+          .value
 
-        val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
-        val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
-        val result = controller.onPageLoad(mode)(request)
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockService.submitChrisData(any())(any())) thenReturn Future.successful(true)
+        when(mockService.lockPaymentPlan(any(), any())(any())) thenReturn Future.successful(AmendLockResponse(true))
+
+        val application = applicationBuilder(userAnswers = Some(ua))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
+          val request = FakeRequest(POST, "/test-only/amend-already-have-payment-plan").withFormUrlEncodedBody("value" -> "true")
+          val result = controller.onSubmit(NormalMode)(request)
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad().url
+        }
       }
+
+      "must redirect to Journey recovery page when user selects Yes (true) but chRIS submission fails" in {
+        val directDebitReference = "DDI123456789"
+
+        val paymentPlanDetails = models.responses.PaymentPlanResponse(
+          directDebitDetails = models.responses.DirectDebitDetails(
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
+            submissionDateTime = java.time.LocalDateTime.now()
+          ),
+          paymentPlanDetails = models.responses.PaymentPlanDetails(
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
+            scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
+          )
+        )
+
+        val ua = emptyUserAnswers
+          .set(DuplicateWarningPage, true)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "PPREF123")
+          .success
+          .value
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+        when(mockService.submitChrisData(any())(any())) thenReturn Future.successful(false)
+        when(mockService.lockPaymentPlan(any(), any())(any())) thenReturn Future.successful(AmendLockResponse(true))
+
+        val application = applicationBuilder(userAnswers = Some(ua))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
+          val request = FakeRequest(POST, "/test-only/amend-already-have-payment-plan").withFormUrlEncodedBody("value" -> "true")
+          val result = controller.onSubmit(NormalMode)(request)
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "must redirect to AmendPaymentPlanConfirmationController when user selects No (false)" in {
+        val mockSessionRepository = mock[SessionRepository]
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        val ua = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(ua))
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+          val controller = application.injector.instanceOf[TestOnlyDuplicateWarningController]
+          val request = FakeRequest(POST, routes.TestOnlyDuplicateWarningController.onSubmit(mode).url).withFormUrlEncodedBody(("value", "false"))
+          val result = controller.onSubmit(NormalMode)(request)
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url
+        }
+      }
+
     }
   }
 }

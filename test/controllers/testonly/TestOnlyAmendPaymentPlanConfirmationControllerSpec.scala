@@ -397,9 +397,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
-          )
+          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
           .build()
 
         running(application) {
