@@ -1400,7 +1400,19 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
             val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
 
-            result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(3))
+            // When adding 3 months to late November (e.g., Nov 29), the result lands in late February.
+            // If February's day (e.g., 28) is less than the start day (e.g., 29), the service applies
+            // "short month adjustment" logic (in NationalDirectDebitService) and moves
+            // the date to the 1st of the following month (March 1st).
+            val expectedDate = startDate.plusMonths(3)
+            val adjustedExpectedDate =
+              if (expectedDate.getDayOfMonth < startDate.getDayOfMonth) {
+                expectedDate.plusMonths(1).withDayOfMonth(1)
+              } else {
+                expectedDate
+              }
+
+            result.potentialNextPaymentDate mustBe Some(adjustedExpectedDate)
             result.nextPaymentDateValid mustBe true
           }
 

@@ -37,8 +37,8 @@ object YourBankDetailsSortCodeSummary {
         key   = "bankDetailsCheckYourAnswer.account.sort.code",
         value = ValueViewModel(HtmlContent(value)),
         actions = Seq(
-          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#sortCode")
+            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.account.sort.code"))
         )
       )
     }
@@ -54,8 +54,8 @@ object YourBankDetailsSortCodeSummary {
         value = ValueViewModel(HtmlContent(value)),
         actions = if (showChange) {
           Seq(
-            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#sortCode")
+              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.account.sort.code"))
           )
         } else {
           Seq.empty
