@@ -125,15 +125,32 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      val ua = request.userAnswers
+      val userAnswers = request.userAnswers
+      val amendPaymentDate = userAnswers.get(AmendPaymentDatePage).get
+//      val amendPlanEndDate = userAnswers.get(AmendPlanEndDatePage).get
+      (userAnswers.get(PaymentPlanDetailsQuery), userAnswers.get(AmendPaymentAmountPage)) match {
+        case (Some(planDetails), Some(amendedAmount)) =>
+          val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+          val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
 
-      // F26 duplicate check
-      nddService.isDuplicatePaymentPlan(ua).flatMap { duplicateResponse =>
-        if (duplicateResponse.isDuplicate) {
-          Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(mode).url))
-        } else {
-          submitToChris(ua)
-        }
+//          val isNoChange = amendedAmount == dbAmount && value == dbStartDate
+//          if (isNoChange) {
+//            //No change, don't call chRIS submit
+//          } else {
+          // F26 duplicate check
+          nddService.isDuplicatePaymentPlan(userAnswers).flatMap { duplicateResponse =>
+            if (duplicateResponse.isDuplicate) {
+              Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(mode).url))
+            } else {
+              submitToChris(userAnswers)
+            }
+//            }
+
+          }
+
+        case _ =>
+          logger.warn("Missing Amend regular or payment amount and/or amend payment date or plan end date from session")
+          Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
       }
 
     }

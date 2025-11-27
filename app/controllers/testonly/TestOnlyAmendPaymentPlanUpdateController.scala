@@ -19,8 +19,8 @@ package controllers.testonly
 import config.FrontendAppConfig
 import controllers.actions.*
 import controllers.routes
-import models.{PaymentPlanType, UserAnswers}
 import models.responses.PaymentPlanDetails
+import models.{PaymentPlanType, UserAnswers}
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -31,7 +31,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
 import utils.MaskAndFormatUtils.formatAmount
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, DateSetupSummary, PaymentReferenceSummary, PaymentsFrequencySummary}
+import viewmodels.checkAnswers.*
 import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
 import java.time.format.DateTimeFormatter
@@ -55,7 +55,6 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
     val userAnswers = request.userAnswers
 
     if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-
       val maybeResult = for {
         paymentPlan    <- userAnswers.get(PaymentPlanDetailsQuery)
         paymentAmount  <- userAnswers.get(AmendPaymentAmountPage)
