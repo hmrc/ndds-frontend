@@ -65,10 +65,8 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
         paymentPlanRef <- userAnswers.get(PaymentPlanReferenceQuery)
       } yield {
         val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
-        val dateFormatShort = DateTimeFormatter.ofPattern("d MMM yyyy")
 
         val formattedStartDateLong = startDate.format(dateFormatLong)
-        val formattedStartDateShort = startDate.format(dateFormatShort)
         val directDebitDetails = paymentPlan.directDebitDetails
         val formattedSortCode = directDebitDetails.bankSortCode
           .map(sc => sc.grouped(2).mkString(" "))
@@ -76,8 +74,6 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
         val submissionDate = paymentPlan.paymentPlanDetails.submissionDateTime
         val scheduledFrequency = paymentPlan.paymentPlanDetails.scheduledPaymentFrequency
         val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentPlanRef)
-
-        val formattedSubmissionDate = paymentPlan.paymentPlanDetails.submissionDateTime.format(dateFormatShort)
 
         Ok(
           view(

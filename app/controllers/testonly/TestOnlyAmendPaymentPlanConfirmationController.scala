@@ -100,16 +100,24 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
              PaymentPlanType.BudgetPaymentPlan.toString,
              userAnswers.get(AmendPaymentAmountPage),
              true
-           ), // TODO - replace with AP1a TestOnly Amend RegularPaymentAmount
-           AmendPlanEndDateSummary.row(
-             userAnswers.get(AmendPlanEndDatePage),
-             Constants.shortDateTimeFormatPattern,
-             true
-           ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
+           ),
+           userAnswers.get(AmendPlanEndDatePage) match {
+             case Some(endDate) =>
+               AmendPlanEndDateSummary.row(
+                 Some(endDate),
+                 Constants.shortDateTimeFormatPattern,
+                 true
+               )
+             case None =>
+               AmendPlanEndDateSummary.addRow()
+           }
          ),
          userAnswers.get(AmendPlanEndDatePage) match {
            case Some(_) => routes.AmendPlanEndDateController.onPageLoad(mode) // TODO - replace with TestOnly Amend plan end date controller
-           case _ => routes.RegularPaymentAmountController.onPageLoad(mode) // TODO - replace with TestOnly Amend regular payment amount controller
+           case _ =>
+             testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(
+               mode
+             )
          }
         )
     }

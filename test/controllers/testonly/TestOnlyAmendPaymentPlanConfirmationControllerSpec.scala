@@ -26,6 +26,7 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
 import play.api.Application
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -50,18 +51,24 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
                                               paymentPlanDetails: PaymentPlanResponse,
                                               app: Application
                                              ): Seq[SummaryListRow] = {
+      implicit val msgs: Messages = messages(app)
 
       Seq(
         AmendPaymentAmountSummary.row(
           PaymentPlanType.BudgetPaymentPlan.toString,
           userAnswers.get(AmendPaymentAmountPage),
           true
-        )(messages(app)),
-        AmendPlanEndDateSummary.row(
-          userAnswers.get(AmendPlanEndDatePage),
-          Constants.shortDateTimeFormatPattern,
-          true
-        )(messages(app))
+        ),
+        userAnswers.get(AmendPlanEndDatePage) match {
+          case Some(endDate) =>
+            AmendPlanEndDateSummary.row(
+              Some(endDate),
+              Constants.shortDateTimeFormatPattern,
+              true
+            )
+          case None =>
+            AmendPlanEndDateSummary.addRow()
+        }
       )
     }
 
@@ -69,19 +76,20 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
                                                paymentPlanDetails: PaymentPlanResponse,
                                                app: Application
                                               ): Seq[SummaryListRow] = {
+      implicit val msgs: Messages = messages(app)
 
       Seq(
         AmendPaymentAmountSummary.row(
           PaymentPlanType.SinglePaymentPlan.toString,
           userAnswers.get(AmendPaymentAmountPage),
           true
-        )(messages(app)),
+        ),
         AmendPlanStartDateSummary.row(
           PaymentPlanType.SinglePaymentPlan.toString,
           userAnswers.get(AmendPlanStartDatePage),
           Constants.shortDateTimeFormatPattern,
           true
-        )(messages(app))
+        )
       )
     }
 
@@ -149,6 +157,65 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             NormalMode,
             summaryListRows,
             routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct view for a GET with a Budget Payment Plan and no end date" in {
+
+        val mockBudgetPaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(
+            paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+              planType = PaymentPlanType.BudgetPaymentPlan.toString
+            )
+          )
+
+        val userAnswers =
+          emptyUserAnswers
+            .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+            .success
+            .value
+            .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+            .success
+            .value
+            .set(AmendPaymentAmountPage, 150.0)
+            .success
+            .value
+            .set(AmendPlanStartDatePage, LocalDate.now())
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+
+          when(mockNddService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
+
+          val summaryListRows =
+            createSummaryListForBudgetPaymentPlan(
+              userAnswers,
+              mockBudgetPaymentPlanDetailResponse,
+              application
+            )
+
+          val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
+          val request = FakeRequest(GET, "/test-only/check-amendment-details")
+          val result = controller.onPageLoad(NormalMode)(request)
+
+          val view = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationView]
+
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(
+            NormalMode,
+            summaryListRows,
+            testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
