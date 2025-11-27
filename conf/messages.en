@@ -782,6 +782,6 @@ testOnlyConfirmRemovePlanEndDate.checkYourAnswersLabel = Removing this plan end 
 testOnlyConfirmRemovePlanEndDate.error.required = Select one option.
 testOnlyConfirmRemovePlanEndDate.change.hidden = Removing this plan end date
 testOnlyConfirmRemovePlanEndDate.p1.line1 = Payment reference: <strong>{0}</strong>
-testOnlyConfirmRemovePlanEndDate.p1.line2 = The plan end date is <strong>{0}</strong>
+testOnlyConfirmRemovePlanEndDate.p1.line2 = The plan end date is <strong>{0}</strong>.
 
 #####################################################
