@@ -770,7 +770,8 @@ amendPaymentAmount.change.hidden =  Amend payment amount
 amendPaymentDate.change.hidden =  Amend payment date
 
 #AP3 messages
-testOnlyAmendPaymentPlanUpdate.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+testOnlyAmendPaymentPlanUpdate.SinglePlan.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+testOnlyAmendPaymentPlanUpdate.BudgetPlan.p1 = This payment plan has now been amended. The next payment of {0} for this plan will be collected on {1}.
 testOnlyAmendPaymentPlanUpdate.p2 = Any existing suspension on this payment plan will be removed. It may take up to 36 hours for this amendment to appear in your account.
 testOnlyAmendPaymentPlanUpdate.p3 = You must have enough funds in your account for this payment to be collected. If any of the details are incorrect,
 testOnlyAmendPaymentPlanUpdate.p3.link = you must contact the HMRC Helpline

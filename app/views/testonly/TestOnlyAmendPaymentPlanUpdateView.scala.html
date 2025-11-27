@@ -29,7 +29,7 @@
         paragraphWithLink: ParagraphMessageWithLink
 )
 
-@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentPlanReference: String, dateSetup: String, paymentDate: String, call: Call)(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentList: SummaryList, planType: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
@@ -39,7 +39,12 @@
 
     @h2("amendPaymentPlanUpdate.h1")
 
-    @paragraph(messages("testOnlyAmendPaymentPlanUpdate.p1", paymentAmount, startDate))
+    @if(planType == PaymentPlanType.SinglePaymentPlan.toString) {
+        @paragraph(messages("testOnlyAmendPaymentPlanUpdate.SinglePlan.p1", paymentAmount, startDate))
+    } else {
+        @paragraph(messages("testOnlyAmendPaymentPlanUpdate.BudgetPlan.p1", paymentAmount, startDate))
+    }
+
     @paragraph(messages("testOnlyAmendPaymentPlanUpdate.p2"))
 
     @paragraphWithLink(
@@ -94,26 +99,7 @@
 
     @h2("testOnlyAmendPaymentPlanUpdate.amendedPlan")
 
-    @govukSummaryList(SummaryList(
-        rows = Seq(
-            SummaryListRow(
-                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.reference")),
-                value = Value(content = HtmlContent(paymentPlanReference))
-            ),
-            SummaryListRow(
-                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.dateSetup")),
-                value = Value(content = HtmlContent(dateSetup))
-            ),
-            SummaryListRow(
-                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.paymentAmount")),
-                value = Value(content = HtmlContent(paymentAmount))
-            ),
-            SummaryListRow(
-                key = Key(content = messages("testOnlyAmendPaymentPlanUpdate.yourAmendedDetails.paymentDate")),
-                value = Value(content = HtmlContent(paymentDate))
-            )
-        )
-    ))
+    @govukSummaryList(paymentList)
 
     @govukInsetText(
         InsetText(
