@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.DirectDebitSourceFormProvider
-import models.{DirectDebitSource, NormalMode, UserAnswers}
+import models.{DirectDebitSource, NddDetails, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -32,6 +32,7 @@ import queries.ExistingDirectDebitIdentifierQuery
 import repositories.SessionRepository
 import views.html.DirectDebitSourceView
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
@@ -169,7 +170,14 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
           emptyUserAnswers
             .set(
               ExistingDirectDebitIdentifierQuery,
-              "directDebitReference"
+              NddDetails("directDebitReference",
+                         LocalDateTime.now(),
+                         "bankSortCode",
+                         "bankAccountNumber",
+                         "bankAccountName",
+                         auDdisFlag       = true,
+                         numberOfPayPlans = 2
+                        )
             )
             .success
             .value
@@ -194,7 +202,14 @@ class DirectDebitSourceControllerSpec extends SpecBase with MockitoSugar {
           emptyUserAnswers
             .set(
               ExistingDirectDebitIdentifierQuery,
-              "directDebitReference"
+              NddDetails("directDebitReference",
+                         LocalDateTime.now(),
+                         "bankSortCode",
+                         "bankAccountNumber",
+                         "bankAccountName",
+                         auDdisFlag       = true,
+                         numberOfPayPlans = 2
+                        )
             )
             .success
             .value
