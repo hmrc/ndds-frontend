@@ -34,13 +34,13 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 import utils.Frequency.*
 
-import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.*
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -131,7 +131,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       }
 
       "must successfully return the Earliest Payment Date when direct debit is exists" in {
-        val expectedUserAnswers = emptyUserAnswers.set(ExistingDirectDebitIdentifierQuery, "ddRef").success.value
+        val expectedUserAnswers = emptyUserAnswers.set(DirectDebitReferenceQuery, "ddRef").success.value
 
         when(mockConfig.paymentDelayFixed).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
@@ -196,7 +196,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .set(DirectDebitSourcePage, testDirectDebitSource)
           .success
           .value
-          .set(ExistingDirectDebitIdentifierQuery, "ddRef")
+          .set(DirectDebitReferenceQuery, "ddRef")
           .success
           .value
 
