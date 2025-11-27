@@ -14,12 +14,32 @@
  * limitations under the License.
  */
 
-package queries
+package forms
 
-import models.NddDetails
-import play.api.libs.json.JsPath
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-case object ExistingDirectDebitIdentifierQuery extends Gettable[NddDetails] with Settable[NddDetails] {
+class TellAboutThisPaymentFormProviderSpec extends BooleanFieldBehaviours {
 
-  override def path: JsPath = JsPath \ "existingDirectDebitIdentifier"
+  val requiredKey = "tellAboutThisPayment.error.required"
+  val invalidKey = "error.boolean"
+
+  val form = new TellAboutThisPaymentFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
 }

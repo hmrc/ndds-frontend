@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package queries
+@this()
 
-import models.NddDetails
-import play.api.libs.json.JsPath
+@(text1: String,
+link1Text: String,
+link1Href: String,
+text2: String,
+link2Text: String,
+link2Href: String,
+text3: String,
+classes: String = "govuk-body",
+linkClass: String = "govuk-link",
+target: String = "_blank"
+)
 
-case object ExistingDirectDebitIdentifierQuery extends Gettable[NddDetails] with Settable[NddDetails] {
-
-  override def path: JsPath = JsPath \ "existingDirectDebitIdentifier"
-}
+<p class="@classes">
+    @Html(text1) <a href="@link1Href" class="@linkClass" target="@target">@link1Text</a>@Html(text2) <a href="@link2Href" class="@linkClass" target="@target">@link2Text</a>@Html(text3)
+</p>

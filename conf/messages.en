@@ -708,6 +708,31 @@ addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
 
+duplicateError.title = You cannot set up a duplicate payment plan
+duplicateError.heading = You cannot set up a duplicate payment plan
+duplicateError.p1 = You already have a payment plan set up with the same date.
+duplicateError.linkText = Return to plan start date
+
+duplicateWarningForAddOrCreatePP.title = You already have a payment plan with these details
+duplicateWarningForAddOrCreatePP.heading = You already have a payment plan with these details
+duplicateWarningForAddOrCreatePP.checkYourAnswersLabel = duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.error.required = Select one option.
+duplicateWarningForAddOrCreatePP.change.hidden = DuplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.p1 = You already have a payment plan set up with the same amount and dates.
+duplicateWarningForAddOrCreatePP.h2 = Do you want to continue setting up this plan?
+
+tellAboutThisPayment.title = Tell us about this payment
+tellAboutThisPayment.heading = Tell us about this payment
+tellAboutThisPayment.question = Do you need to add 4 extra numbers to your payment reference?
+tellAboutThisPayment.p1.1 = If
+tellAboutThisPayment.p1.link.1 = this payment is early, late
+tellAboutThisPayment.p1.2 = , or
+tellAboutThisPayment.p1.link.2 = a P11D payment
+tellAboutThisPayment.p1.3 = , you need to add 4 extra numbers to your payment reference. We need this information to make sure your payment is allocated correctly.
+tellAboutThisPayment.checkYourAnswersLabel = Tell us about this payment
+tellAboutThisPayment.error.required = Select one option.
+tellAboutThisPayment.change.hidden = Tell us about this payment
+
 ############### Test only Amend flow ################
 
 #AP0 messages
@@ -745,7 +770,8 @@ amendPaymentAmount.change.hidden =  Amend payment amount
 amendPaymentDate.change.hidden =  Amend payment date
 
 #AP3 messages
-testOnlyAmendPaymentPlanUpdate.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+testOnlyAmendPaymentPlanUpdate.SinglePlan.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+testOnlyAmendPaymentPlanUpdate.BudgetPlan.p1 = This payment plan has now been amended. The next payment of {0} for this plan will be collected on {1}.
 testOnlyAmendPaymentPlanUpdate.p2 = Any existing suspension on this payment plan will be removed. It may take up to 36 hours for this amendment to appear in your account.
 testOnlyAmendPaymentPlanUpdate.p3 = You must have enough funds in your account for this payment to be collected. If any of the details are incorrect,
 testOnlyAmendPaymentPlanUpdate.p3.link = you must contact the HMRC Helpline

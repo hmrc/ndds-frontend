@@ -34,13 +34,13 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
 import utils.Frequency.*
 
-import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId, ZoneOffset}
+import java.time.*
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -1392,7 +1392,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but potentialNextPaymentDate is not within 3 working days" in {
             val today = LocalDate.now()
-            val startDate = today.plusDays(2)
+            val startDate = today.plusDays(1)
             val planEndDate = today.plusMonths(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))

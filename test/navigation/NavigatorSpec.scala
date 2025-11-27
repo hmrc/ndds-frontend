@@ -483,6 +483,32 @@ class NavigatorSpec extends SpecBase {
             routes.JourneyRecoveryController.onPageLoad()
         }
 
+        "must go from TellAboutThisPaymentPage to PaymentAmountPage for PAYE if No Selected" in {
+          val ua = userAnswers
+            .set(DirectDebitSourcePage, PAYE)
+            .success
+            .value
+            .set(TellAboutThisPaymentPage, false)
+            .success
+            .value
+
+          navigator.nextPage(TellAboutThisPaymentPage, NormalMode, ua) mustBe
+            routes.PaymentAmountController.onPageLoad(NormalMode)
+        }
+
+        "must go from TellAboutThisPaymentPage to YearEndAndMonthPage for PAYE if No Selected" in {
+          val ua = userAnswers
+            .set(DirectDebitSourcePage, PAYE)
+            .success
+            .value
+            .set(TellAboutThisPaymentPage, true)
+            .success
+            .value
+
+          navigator.nextPage(TellAboutThisPaymentPage, NormalMode, ua) mustBe
+            routes.YearEndAndMonthController.onPageLoad(NormalMode)
+        }
+
       }
     }
   }
