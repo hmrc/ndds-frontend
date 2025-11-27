@@ -100,10 +100,13 @@ class DirectDebitSourceController @Inject() (
   private def setDirectDebitSource(userAnswers: UserAnswers, newValue: DirectDebitSource): Try[UserAnswers] = {
     val oldValue = userAnswers.get(DirectDebitSourcePage)
     if (oldValue.contains(newValue)) {
-      userAnswers.set(DirectDebitSourcePage, newValue)
+      userAnswers
+        .remove(CreateConfirmationPage)
+        .flatMap(_.set(DirectDebitSourcePage, newValue))
     } else {
       userAnswers
-        .remove(PaymentPlanTypePage)
+        .remove(CreateConfirmationPage)
+        .flatMap(_.remove(PaymentPlanTypePage))
         .flatMap(_.remove(PaymentReferencePage))
         .flatMap(_.remove(PaymentsFrequencyPage))
         .flatMap(_.remove(TotalAmountDuePage))
