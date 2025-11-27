@@ -17,10 +17,11 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, NormalMode, UserAnswers}
 import pages.AmendPlanEndDatePage
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import uk.gov.hmrc.govukfrontend.views.Aliases.{HtmlContent, Text, Value}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryListRow}
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
@@ -44,18 +45,33 @@ object AmendPlanEndDateSummary {
   def row(value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
     val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
     SummaryListRowViewModel(
-      key   = "paymentPlanDetails.details.planEndDate",
+      key   = "testOnlyAmendPaymentPlanConfirmation.endDate",
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
-        Seq(
+        Seq( // TODO: Change to Ap1c, Ap1d later after it is merged
           ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
+            .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.change.endDate")),
+          ActionItemViewModel("site.remove", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.remove.endDate"))
         )
       } else {
         Seq.empty
       }
     )
   }
+
+  def addRow()(implicit messages: Messages): SummaryListRow =
+    SummaryListRow(
+      key = Key(Text(messages("testOnlyAmendPaymentPlanConfirmation.endDate"))),
+      value = Value(
+        HtmlContent(
+          s"""<a class="govuk-link" href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
+              "testOnlyAmendPaymentPlanConfirmation.addPlanEndDateLink"
+            )}</a>"""
+        )
+      ),
+      actions = None
+    )
 
   def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
     val dateText = answers

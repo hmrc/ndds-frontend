@@ -768,6 +768,12 @@ testOnlyAmendPaymentPlanConfirmation.continueAndContinueButton = Confirm and con
 testOnlyAmendPaymentPlanConfirmation.cancel.link = Cancel and return to payment plan
 amendPaymentAmount.change.hidden =  Amend payment amount
 amendPaymentDate.change.hidden =  Amend payment date
+testOnlyAmendConfirmation.budget = Regular payment<br>amount
+testOnlyAmendConfirmation.single = Payment amount
+testOnlyAmendPaymentPlanConfirmation.endDate = Plan end date
+testOnlyAmendPaymentPlanConfirmation.change.endDate = change Plan end date
+testOnlyAmendPaymentPlanConfirmation.remove.endDate = remove Plan end date
+testOnlyAmendPaymentPlanConfirmation.addPlanEndDateLink = Add plan end date
 
 #AP3 messages
 testOnlyAmendPaymentPlanUpdate.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
