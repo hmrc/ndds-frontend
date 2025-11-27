@@ -26,6 +26,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -55,9 +56,13 @@ class TestOnlyAmendRegularPaymentAmountController @Inject() (
     val answers = request.userAnswers
 
     if (nddsService.amendPaymentPlanGuard(answers)) {
-      val preparedForm = answers.get(RegularPaymentAmountPage) match {
-        case None        => form
+      val existingAmount = answers
+        .get(RegularPaymentAmountPage)
+        .orElse(answers.get(PaymentPlanDetailsQuery).flatMap(_.paymentPlanDetails.scheduledPaymentAmount))
+
+      val preparedForm = existingAmount match {
         case Some(value) => form.fill(value)
+        case None        => form
       }
 
       Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))

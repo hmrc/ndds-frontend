@@ -21,10 +21,12 @@ import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.RegularPaymentAmountFormProvider
 import models.{CheckMode, NormalMode}
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import pages.RegularPaymentAmountPage
+import queries.PaymentPlanDetailsQuery
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -32,6 +34,7 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import views.html.testonly.TestOnlyAmendRegularPaymentAmountView
 
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 import scala.math.BigDecimal.RoundingMode
 
@@ -39,7 +42,7 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
 
   private val formProvider = new RegularPaymentAmountFormProvider()
   private val form = formProvider()
-  private val route = "/test-only/regular-payment-amount"
+  private val route = "/direct-debits/test-only/amend-plan-how-much-do-you-want-to-pay"
   private val validAnswer = BigDecimal(150.73).setScale(2, RoundingMode.HALF_UP)
 
   private def buildApplication(mockService: NationalDirectDebitService) =
@@ -65,6 +68,63 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(
             form,
+            mode,
+            testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must pre-populate using the scheduled plan amount when there is no stored answer" in {
+        val mockService = mock[NationalDirectDebitService]
+        val scheduledAmount = validAnswer
+        val paymentPlanResponse = PaymentPlanResponse(
+          directDebitDetails = DirectDebitDetails(
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Test"),
+            auDdisFlag         = true,
+            submissionDateTime = LocalDateTime.now()
+          ),
+          paymentPlanDetails = PaymentPlanDetails(
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(scheduledAmount),
+            scheduledPaymentStartDate = Some(LocalDate.now()),
+            initialPaymentStartDate   = Some(LocalDate.now()),
+            initialPaymentAmount      = Some(BigDecimal(100)),
+            scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(1)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = None,
+            suspensionEndDate         = None,
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = None,
+            totalLiability            = Some(BigDecimal(500)),
+            paymentPlanEditable       = true
+          )
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val request = FakeRequest(GET, route)
+          val result = controller.onPageLoad(mode)(request)
+          val view = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(
+            form.fill(scheduledAmount),
             mode,
             testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
           )(request, messages(application)).toString
