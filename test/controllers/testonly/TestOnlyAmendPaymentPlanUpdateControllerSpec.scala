@@ -17,16 +17,14 @@
 package controllers.testonly
 
 import base.SpecBase
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import config.FrontendAppConfig
 import models.PaymentPlanType
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.inject
-
-import java.time.{LocalDate, LocalDateTime}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
@@ -35,20 +33,15 @@ import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import java.util.Locale
-import scala.concurrent.Future
-import play.api.inject.bind
-import utils.MaskAndFormatUtils.formatAmount
 
 class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
 
   "PaymentPlanConfirmation Controller" - {
     val mockService = mock[NationalDirectDebitService]
     val regPaymentAmount: BigDecimal = BigDecimal("1000.00")
-    val formattedRegPaymentAmount: String = formatAmount(regPaymentAmount)
     val startDate: LocalDate = LocalDate.of(2025, 10, 2)
-    val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
-    val endDate: LocalDate = LocalDate.of(2025, 10, 25)
 
     "must return OK and the correct view for a GET when plan type is Single Payment Plan" in {
 

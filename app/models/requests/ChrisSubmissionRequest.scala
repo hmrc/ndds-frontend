@@ -16,7 +16,7 @@
 
 package models.requests
 
-import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanCalculation, PaymentPlanType, PersonalOrBusinessAccount, PlanStartDateDetails, SuspensionPeriodRange, YearEndAndMonth, YourBankDetailsWithAuddisStatus}
+import models.*
 import models.audits.AuditType
 import play.api.libs.json.{Json, OFormat}
 
