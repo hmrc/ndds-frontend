@@ -110,7 +110,19 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
           ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
         )
 
-        val backLink = testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
+        val backLink = userAnswers.get(AddPaymentPlanEndDatePage) match {
+          case Some(false) =>
+            routes.AddPaymentPlanEndDateController
+              .onPageLoad(mode) // TODO - swap to TestOnly AP1d remove-plan-end-date controller
+          case _ =>
+            userAnswers.get(AmendPlanEndDatePage) match {
+              case Some(_) =>
+                routes.AmendPlanEndDateController
+                  .onPageLoad(mode) // TODO - swap to TestOnly AP1c plan-end-date controller
+              case None =>
+                testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
+            }
+        }
 
         (rows, backLink)
     }

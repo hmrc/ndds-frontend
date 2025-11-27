@@ -148,7 +148,73 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           contentAsString(result) mustEqual view(
             NormalMode,
             summaryListRows,
-            testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
+            routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must use AddPaymentPlanEndDateController back link when removing plan end date" in {
+        val mockBudgetPaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+          )
+
+        val userAnswers =
+          emptyUserAnswers
+            .set(
+              ManagePaymentPlanTypePage,
+              PaymentPlanType.BudgetPaymentPlan.toString
+            )
+            .success
+            .value
+            .set(
+              PaymentPlanDetailsQuery,
+              mockBudgetPaymentPlanDetailResponse
+            )
+            .success
+            .value
+            .set(
+              RegularPaymentAmountPage,
+              150.0
+            )
+            .success
+            .value
+            .set(
+              AmendPlanEndDatePage,
+              LocalDate.now()
+            )
+            .success
+            .value
+            .set(
+              AddPaymentPlanEndDatePage,
+              false
+            )
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          when(mockNddService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+
+          val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, mockBudgetPaymentPlanDetailResponse, application)
+          val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
+          val request = FakeRequest(GET, "/test-only/check-amendment-details")
+          val result = controller.onPageLoad(NormalMode)(request)
+          val view = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationView]
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(
+            NormalMode,
+            summaryListRows,
+            routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
