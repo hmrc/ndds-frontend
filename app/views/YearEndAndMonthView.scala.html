@@ -67,7 +67,7 @@
             .withHint(Hint(content = Text(messages("yearEndAndMonth.hint"))))
             .asNumeric()
             .withAttribute("maxlength", "4")
-            .withAttribute("pattern", "[0-9]*")
+            .withAttribute("pattern", "[0-9]{4}")
             .withAttribute("inputmode", "numeric")
         )
 
