@@ -120,7 +120,7 @@ class TestOnlyDuplicateWarningControllerSpec extends SpecBase {
           val request = FakeRequest(GET, routes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
           val result = controller.onPageLoad(mode)(request)
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
         }
       }
     }

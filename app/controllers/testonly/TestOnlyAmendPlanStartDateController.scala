@@ -79,7 +79,7 @@ class TestOnlyAmendPlanStartDateController @Inject() (
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 
