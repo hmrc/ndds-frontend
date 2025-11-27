@@ -34,13 +34,16 @@ class YearEndAndMonthDateFormatter(
 
     val raw = data.get(key).map(_.trim).getOrElse("")
 
+    val fourDigitsRegex = """^\d{4}$"""
+    val monthRegex = """^(0[1-9]|1[0-3])$"""
+
     // 1. Empty input
     if (raw.isEmpty) {
       return Left(Seq(FormError(key, emptyKey)))
     }
 
     // 2. Must be exactly 4 digits
-    if (!raw.matches("""^\d{4}$""")) {
+    if (!raw.matches(fourDigitsRegex)) {
       return Left(Seq(FormError(key, invalidFormatKey)))
     }
 
@@ -49,7 +52,7 @@ class YearEndAndMonthDateFormatter(
     val monthPart = raw.substring(2, 4)
 
     // 3. Month must be 01–13
-    if (!monthPart.matches("""^(0[1-9]|1[0-3])$""")) {
+    if (!monthPart.matches(monthRegex)) {
       return Left(Seq(FormError(key, invalidMonthKey)))
     }
 
