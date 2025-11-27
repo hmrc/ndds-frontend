@@ -37,8 +37,8 @@ object YourBankDetailsAccountHolderNameSummary {
         key   = "bankDetailsCheckYourAnswer.account.holder.name",
         value = ValueViewModel(HtmlContent(value)),
         actions = Seq(
-          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountHolderName")
+            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.change.accountHolderName"))
         )
       )
     }
@@ -53,8 +53,8 @@ object YourBankDetailsAccountHolderNameSummary {
         value = ValueViewModel(HtmlContent(value)),
         actions = if (showChange) {
           Seq(
-            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountHolderName")
+              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.change.accountHolderName"))
           )
         } else {
           Seq.empty
