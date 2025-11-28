@@ -83,7 +83,7 @@ class TestOnlyAmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar 
           .build()
 
         running(application) {
-          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isBudgetPaymentPlan(any())).thenReturn(true)
 
           val result = route(application, getRequest()).value
           val view = application.injector.instanceOf[TestOnlyAmendPlanEndDateView]
@@ -110,7 +110,7 @@ class TestOnlyAmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar 
           .build()
 
         running(application) {
-          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.isBudgetPaymentPlan(any())).thenReturn(true)
           val view = application.injector.instanceOf[TestOnlyAmendPlanEndDateView]
           val result = route(application, getRequest()).value
 
@@ -136,7 +136,7 @@ class TestOnlyAmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar 
           .build()
 
         running(application) {
-          when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+          when(mockService.isBudgetPaymentPlan(any())).thenReturn(false)
           val view = application.injector.instanceOf[TestOnlyAmendPlanEndDateView]
           val result = route(application, getRequest()).value
 

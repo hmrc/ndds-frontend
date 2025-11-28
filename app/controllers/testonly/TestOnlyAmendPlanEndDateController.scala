@@ -57,7 +57,7 @@ class TestOnlyAmendPlanEndDateController @Inject() (
 
     val answers = request.userAnswers
 
-    if (nddsService.amendPaymentPlanGuard(answers)) {
+    if (nddsService.isBudgetPaymentPlan(answers)) {
       val form = formProvider()
       val preparedForm = request.userAnswers.get(AmendPlanEndDatePage) match {
         case None        => form

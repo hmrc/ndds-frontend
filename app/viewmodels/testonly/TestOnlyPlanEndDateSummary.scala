@@ -16,7 +16,7 @@
 
 package viewmodels.testonly
 
-import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import models.NormalMode
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.Aliases.{HtmlContent, Key, Text, Value}
@@ -34,9 +34,9 @@ object TestOnlyPlanEndDateSummary {
       key   = "testOnlyAmendingPaymentPlan.budgetPlanEndDate",
       value = ValueViewModel(formatted),
       actions = Seq(
-        ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(NormalMode).url)
+        ActionItemViewModel("site.change", testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode).url)
           .withVisuallyHiddenText(messages("testOnlyAmendingPaymentPlan.budgetPlanEndDate.change.hidden")),
-        ActionItemViewModel("site.remove", controllers.testonly.routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
+        ActionItemViewModel("site.remove", testOnlyRoutes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
           .withVisuallyHiddenText(messages("testOnlyAmendingPaymentPlan.budgetPlanEndDate.remove.hidden"))
       )
     )
@@ -46,7 +46,7 @@ object TestOnlyPlanEndDateSummary {
       key = Key(Text(messages("testOnlyAmendingPaymentPlan.budgetPlanEndDate"))),
       value = Value(
         HtmlContent(
-          s"""<a class="govuk-link" href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
+          s"""<a class="govuk-link" href="${testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
               "testOnlyAmendingPaymentPlan.budgetPlanEndDate.addPlanEndDateLink"
             )}</a>"""
         )
