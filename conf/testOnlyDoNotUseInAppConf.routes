@@ -14,15 +14,15 @@
 
 GET         /direct-debits/test-only/amending-payment-plan                   controllers.testonly.TestOnlyAmendingPaymentPlanController.onPageLoad()
 
-GET         /direct-debits/test-only/amount-need-to-pay                      controllers.testonly.TestOnlyAmendPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
-POST        /direct-debits/test-only/amount-need-to-pay                      controllers.testonly.TestOnlyAmendPaymentAmountController.onSubmit(mode: Mode = NormalMode)
-GET         /direct-debits/test-only/change-amount-need-to-pay               controllers.testonly.TestOnlyAmendPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
-POST        /direct-debits/test-only/change-amount-need-to-pay               controllers.testonly.TestOnlyAmendPaymentAmountController.onSubmit(mode: Mode = CheckMode)
+GET         /direct-debits/test-only/amend-plan-how-much-do-you-want-to-pay         controllers.testonly.TestOnlyAmendPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST        /direct-debits/test-only/amend-plan-how-much-do-you-want-to-pay         controllers.testonly.TestOnlyAmendPaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET         /direct-debits/test-only/change-amend-plan-how-much-do-you-want-to-pay  controllers.testonly.TestOnlyAmendPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST        /direct-debits/test-only/change-amend-plan-how-much-do-you-want-to-pay  controllers.testonly.TestOnlyAmendPaymentAmountController.onSubmit(mode: Mode = CheckMode)
 
-GET         /direct-debits/test-only/amend-plan-how-much-do-you-want-to-pay                  controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
-POST        /direct-debits/test-only/amend-plan-how-much-do-you-want-to-pay                  controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onSubmit(mode: Mode = NormalMode)
-GET         /direct-debits/test-only/change-amend-plan-how-much-do-you-want-to-pay           controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
-POST        /direct-debits/test-only/change-amend-plan-how-much-do-you-want-to-pay           controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onSubmit(mode: Mode = CheckMode)
+GET         /direct-debits/test-only/amend-regular-payment-amount                  controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
+POST        /direct-debits/test-only/amend-regular-payment-amount                  controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onSubmit(mode: Mode = NormalMode)
+GET         /direct-debits/test-only/change-amend-regular-payment-amount           controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode: Mode = CheckMode)
+POST        /direct-debits/test-only/change-amend-regular-payment-amount           controllers.testonly.TestOnlyAmendRegularPaymentAmountController.onSubmit(mode: Mode = CheckMode)
 
 GET         /direct-debits/test-only/amend-plan-payment-date                 controllers.testonly.TestOnlyAmendPlanStartDateController.onPageLoad(mode: Mode = NormalMode)
 POST        /direct-debits/test-only/amend-plan-payment-date                 controllers.testonly.TestOnlyAmendPlanStartDateController.onSubmit(mode: Mode = NormalMode)
