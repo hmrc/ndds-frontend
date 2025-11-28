@@ -146,6 +146,7 @@ bankDetailsCheckYourAnswer.account.account.number = Account number
 bankDetailsCheckYourAnswer.account.sort.code = Bank sort code
 bankDetailsCheckYourAnswer.account.bank.name = Bank name
 bankDetailsCheckYourAnswer.account.bank.address = Bank address
+bankDetailsCheckYourAnswer.change.accountHolderName = account holder's name
 
 bankApproval.title = There is a problem with your approval
 bankApproval.heading = There is a problem with your approval

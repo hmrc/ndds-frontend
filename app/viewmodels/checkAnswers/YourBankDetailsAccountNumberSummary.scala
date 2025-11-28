@@ -37,8 +37,8 @@ object YourBankDetailsAccountNumberSummary {
         key   = "bankDetailsCheckYourAnswer.account.account.number",
         value = ValueViewModel(HtmlContent(value)),
         actions = Seq(
-          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountNumber")
+            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.account.account.number"))
         )
       )
     }
@@ -53,8 +53,8 @@ object YourBankDetailsAccountNumberSummary {
         value = ValueViewModel(HtmlContent(value)),
         actions = if (showChange) {
           Seq(
-            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url)
-              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.h2"))
+            ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountNumber")
+              .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.account.account.number"))
           )
         } else {
           Seq.empty
