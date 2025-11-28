@@ -17,43 +17,38 @@
 package controllers.testonly
 
 import base.SpecBase
-import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import config.FrontendAppConfig
-import models.{PaymentPlanType, UserAnswers}
+import models.PaymentPlanType
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
 import play.api.inject
-
-import java.time.{LocalDate, LocalDateTime}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.Constants
+import viewmodels.checkAnswers.*
+import viewmodels.govuk.all.SummaryListViewModel
 import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import java.util.Locale
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.Constants
-import utils.MaskAndFormatUtils.formatAmount
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, DateSetupSummary, PaymentReferenceSummary, PaymentsFrequencySummary}
-import viewmodels.govuk.all.SummaryListViewModel
 
 class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
 
   "PaymentPlanConfirmation Controller" - {
     val mockService = mock[NationalDirectDebitService]
     val regPaymentAmount: BigDecimal = BigDecimal("1000.00")
-    val formattedRegPaymentAmount: String = formatAmount(regPaymentAmount)
     val startDate: LocalDate = LocalDate.of(2025, 10, 2)
-    val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
     val endDate: LocalDate = LocalDate.of(2025, 10, 25)
 
     "must return OK and the correct view for a GET when plan type is Single Payment Plan" in {
-
       val mockSinglePaymentPlanDetailResponse =
         dummyPlanDetailResponse.copy(
           paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -101,12 +96,9 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
 
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
         val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
-        val dateFormatShort = DateTimeFormatter.ofPattern("d MMM yyyy")
 
         val formattedRegPaymentAmount = currencyFormat.format(regPaymentAmount)
         val formattedStartDateLong = dateFormatLong.format(startDate)
-        val formattedStartDateShort = dateFormatShort.format(startDate)
-        val formattedSubmissionDate = dateFormatShort.format(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.submissionDateTime)
 
         val dd = mockSinglePaymentPlanDetailResponse.directDebitDetails
         val formattedSortCode = dd.bankSortCode.map(sc => sc.grouped(2).mkString(" ")).getOrElse("")
@@ -146,7 +138,6 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
     }
 
     "must return OK and the correct view for a GET when plan type is Budget Payment Plan" in {
-
       val frequency = "monthly"
 
       val mockBudgetPaymentPlanDetailResponse =
@@ -200,14 +191,9 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
 
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
         val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
-        val dateFormatShort = DateTimeFormatter.ofPattern("d MMM yyyy")
 
         val formattedRegPaymentAmount = currencyFormat.format(regPaymentAmount)
         val formattedStartDateLong = dateFormatLong.format(startDate)
-        val formattedStartDateShort = dateFormatShort.format(startDate)
-        val formattedSubmissionDate = dateFormatShort.format(
-          mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.submissionDateTime
-        )
 
         val dd = mockBudgetPaymentPlanDetailResponse.directDebitDetails
         val formattedSortCode = dd.bankSortCode.map(sc => sc.grouped(2).mkString(" ")).getOrElse("")
