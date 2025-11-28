@@ -20,7 +20,7 @@ import base.SpecBase
 import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import models.responses.*
-import models.{NormalMode, PaymentPlanType, UserAnswers}
+import models.{CheckMode, NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
@@ -51,7 +51,6 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
                                               paymentPlanDetails: PaymentPlanResponse,
                                               app: Application
                                              ): Seq[SummaryListRow] = {
-      implicit val msgs: Messages = messages(app)
 
       Seq(
         AmendRegularPaymentAmountSummary.row(
@@ -59,11 +58,16 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           showChange = true,
           changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode))
         )(messages(app)),
-        AmendPlanEndDateSummary.row(
-          userAnswers.get(AmendPlanEndDatePage),
-          Constants.shortDateTimeFormatPattern,
-          true
-        )(messages(app))
+        userAnswers.get(AmendPlanEndDatePage) match {
+          case Some(endDate) =>
+            AmendPlanEndDateSummary.row(
+              Some(endDate),
+              Constants.shortDateTimeFormatPattern,
+              true
+            )(messages(app))
+          case None =>
+            AmendPlanEndDateSummary.addRow()(messages(app))
+        }
       )
     }
 
@@ -116,12 +120,6 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .success
             .value
             .set(
-              AmendPlanStartDatePage,
-              LocalDate.now()
-            )
-            .success
-            .value
-            .set(
               AmendPlanEndDatePage,
               LocalDate.now()
             )
@@ -150,7 +148,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           contentAsString(result) mustEqual view(
             NormalMode,
             summaryListRows,
-            routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+            testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
@@ -209,7 +207,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           contentAsString(result) mustEqual view(
             NormalMode,
             summaryListRows,
-            testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(NormalMode)
+            testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
@@ -275,7 +273,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           contentAsString(result) mustEqual view(
             NormalMode,
             summaryListRows,
-            routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode)
+            testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }

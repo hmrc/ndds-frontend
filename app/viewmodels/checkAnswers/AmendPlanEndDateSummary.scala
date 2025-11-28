@@ -17,6 +17,7 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import models.{CheckMode, NormalMode, UserAnswers}
 import pages.AmendPlanEndDatePage
 import play.api.i18n.Messages
@@ -36,7 +37,7 @@ object AmendPlanEndDateSummary {
         key   = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
         value = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
         actions = Seq(
-          ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+          ActionItemViewModel("site.change", testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
         )
       )
@@ -48,10 +49,10 @@ object AmendPlanEndDateSummary {
       key   = "testOnlyAmendPaymentPlanConfirmation.endDate",
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
-        Seq( // TODO: Change to Ap1c, Ap1d later after it is merged
-          ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+        Seq(
+          ActionItemViewModel("site.change", testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.change.endDate")),
-          ActionItemViewModel("site.remove", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+          ActionItemViewModel("site.remove", testOnlyRoutes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.remove.endDate"))
         )
       } else {
@@ -65,7 +66,7 @@ object AmendPlanEndDateSummary {
       key = Key(Text(messages("testOnlyAmendPaymentPlanConfirmation.endDate"))),
       value = Value(
         HtmlContent(
-          s"""<a class="govuk-link" href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
+          s"""<a class="govuk-link" href="${testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
               "testOnlyAmendPaymentPlanConfirmation.addPlanEndDateLink"
             )}</a>"""
         )
