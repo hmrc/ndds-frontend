@@ -53,6 +53,7 @@ class Navigator @Inject() () {
     case (SuspensionDetailsCheckYourAnswerPage, _) => _ => routes.PaymentPlanSuspendedController.onPageLoad()
     case (CancelPaymentPlanPage, _)                => navigateFromCancelPaymentPlanPage
     case (RemovingThisSuspensionPage, _)           => navigateFromRemovingThisSuspensionPage
+    case (ConfirmRemovePlanEndDatePage, _)         => navigateFromConfirmRemovePlanEndDatePage
     case (TellAboutThisPaymentPage, _)             => navigateTellAboutThisPaymentPage
     case _                                         => _ => routes.LandingController.onPageLoad()
   }
