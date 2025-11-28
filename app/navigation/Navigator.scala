@@ -51,6 +51,7 @@ class Navigator @Inject() () {
     case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
     case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
+    case ConfirmRemovePlanEndDatePage         => navigateFromConfirmRemovePlanEndDatePage
     case TellAboutThisPaymentPage             => navigateTellAboutThisPaymentPage
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
@@ -152,6 +153,15 @@ class Navigator @Inject() () {
       .map {
         case true  => routes.PaymentPlanCancelledController.onPageLoad()
         case false => routes.PaymentPlanDetailsController.onPageLoad()
+      }
+      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+
+  private def navigateFromConfirmRemovePlanEndDatePage(answers: UserAnswers): Call =
+    answers
+      .get(ConfirmRemovePlanEndDatePage)
+      .map {
+        case true  => controllers.testonly.routes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
+        case false => controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
 

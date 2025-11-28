@@ -27,10 +27,12 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
-import uk.gov.hmrc.govukfrontend.views.html.components.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import utils.Constants
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanStartDateSummary}
+import viewmodels.testonly.TestOnlyPlanEndDateSummary
 import views.html.testonly.TestOnlyAmendingPaymentPlanView
 
 import javax.inject.Inject
@@ -52,7 +54,7 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
     if (!nddsService.amendPaymentPlanGuard(request.userAnswers)) {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      Redirect(routes.SystemErrorController.onPageLoad())
     } else {
       val planDetailsResponse = request.userAnswers
         .get(PaymentPlanDetailsQuery)
@@ -87,21 +89,42 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
           )
         )
 
-      val dateRow = AmendPlanStartDateSummary
-        .row(planDetail.planType, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
-        .copy(actions =
-          Some(
-            Actions(
-              items = Seq(
-                ActionItem(
-                  href               = testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode = NormalMode).url,
-                  content            = Text("Change"),
-                  visuallyHiddenText = Some("payment date")
+      val dateRow: SummaryListRow =
+        planDetail.planType match {
+          case p if p == PaymentPlanType.SinglePaymentPlan.toString =>
+            AmendPlanStartDateSummary
+              .row(
+                p,
+                planDetail.scheduledPaymentStartDate,
+                Constants.shortDateTimeFormatPattern
+              )
+              .copy(
+                actions = Some(
+                  Actions(
+                    items = Seq(
+                      ActionItem(
+                        href = testOnlyRoutes.TestOnlyAmendPlanStartDateController
+                          .onPageLoad(NormalMode)
+                          .url,
+                        content            = Text("Change"),
+                        visuallyHiddenText = Some("payment date")
+                      )
+                    )
+                  )
                 )
               )
-            )
-          )
-        )
+
+          case p if p == PaymentPlanType.BudgetPaymentPlan.toString =>
+            planDetail.scheduledPaymentEndDate match {
+              case Some(endDate) =>
+                TestOnlyPlanEndDateSummary.row(endDate)
+              case None =>
+                TestOnlyPlanEndDateSummary.addRow()
+            }
+          case _ =>
+            SummaryListRow(key = Key(Text("")), value = Value(Text("")))
+        }
+
       Ok(view(appConfig.hmrcHelplineUrl, amountRow, dateRow))
     }
   }

@@ -82,7 +82,9 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         html must include("RG1 8BW")
         html must include("UNITED KINGDOM")
         html must include("Your bank details")
-        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountHolderName\"")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountNumber\"")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#sortCode\"")
       }
     }
 
@@ -111,7 +113,9 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         html must include("Account Holder Name")
         html must include("123212")
         html must include("34211234")
-        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "\"")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountHolderName\"")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountNumber\"")
+        html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#sortCode\"")
       }
     }
 

@@ -30,7 +30,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, Summ
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
 import utils.MaskAndFormatUtils.formatAmount
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, DateSetupSummary, PaymentReferenceSummary, PaymentsFrequencySummary}
+import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
@@ -56,7 +56,6 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
     val userAnswers = request.userAnswers
 
     if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-
       val maybeResult = for {
         paymentPlan    <- userAnswers.get(PaymentPlanDetailsQuery)
         paymentAmount  <- userAnswers.get(AmendPaymentAmountPage)
@@ -65,10 +64,7 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
         paymentPlanRef <- userAnswers.get(PaymentPlanReferenceQuery)
       } yield {
         val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
-        val dateFormatShort = DateTimeFormatter.ofPattern("d MMM yyyy")
-
         val formattedStartDateLong = startDate.format(dateFormatLong)
-        val formattedStartDateShort = startDate.format(dateFormatShort)
         val directDebitDetails = paymentPlan.directDebitDetails
         val formattedSortCode = directDebitDetails.bankSortCode
           .map(sc => sc.grouped(2).mkString(" "))
@@ -76,8 +72,6 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
         val submissionDate = paymentPlan.paymentPlanDetails.submissionDateTime
         val scheduledFrequency = paymentPlan.paymentPlanDetails.scheduledPaymentFrequency
         val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentPlanRef)
-
-        val formattedSubmissionDate = paymentPlan.paymentPlanDetails.submissionDateTime.format(dateFormatShort)
 
         Ok(
           view(
@@ -105,7 +99,7 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
     } else {
       val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 
