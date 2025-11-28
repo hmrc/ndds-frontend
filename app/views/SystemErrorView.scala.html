@@ -21,6 +21,7 @@
     layout: templates.Layout,
     heading: Header1,
     paragraph: Paragraph,
+    paragraphWithLink: ParagraphMessageWithLink,
     link: Link
 )
 
@@ -33,9 +34,13 @@
 ) {
 
     @heading(messages("systemError.heading"), classes = "govuk-heading-xl")
-    @paragraph(messages("systemError.p1"))
-    @link(
-        "systemError.link",
-        appConfig.hmrcOnlineServiceDeskUrl
+    @paragraphWithLink(
+        Some(messages("systemError.p1")),
+        messages("systemError.link"),
+         None,
+        appConfig.hmrcOnlineServiceDeskUrl,
+        linkRel = "noreferrer noopener",
+        target = "_blank",
+        linkFullStop = true
     )
 }
