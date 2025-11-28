@@ -147,6 +147,7 @@ bankDetailsCheckYourAnswer.account.account.number = Account number
 bankDetailsCheckYourAnswer.account.sort.code = Bank sort code
 bankDetailsCheckYourAnswer.account.bank.name = Bank name
 bankDetailsCheckYourAnswer.account.bank.address = Bank address
+bankDetailsCheckYourAnswer.change.accountHolderName = account holder's name
 
 bankApproval.title = There is a problem with your approval
 bankApproval.heading = There is a problem with your approval
@@ -749,6 +750,11 @@ testOnlyAmendingPaymentPlan.list.3 = payment reference
 testOnlyAmendingPaymentPlan.p3 = Payments due within the next 3 working days cannot be amended.
 testOnlyAmendingPaymentPlan.cancel.link = Cancel and return to payment plan
 
+testOnlyAmendingPaymentPlan.budgetPlanEndDate = Plan end date
+testOnlyAmendingPaymentPlan.budgetPlanEndDate.change.hidden =  change Plan end date
+testOnlyAmendingPaymentPlan.budgetPlanEndDate.remove.hidden =  remove Plan end date
+testOnlyAmendingPaymentPlan.budgetPlanEndDate.addPlanEndDateLink = Add plan end date
+
 #AP1a messages
 testOnlyAmendPaymentAmount.title = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.heading = How much do you want to pay, in pounds?
@@ -772,7 +778,8 @@ amendPaymentAmount.change.hidden =  Amend payment amount
 amendPaymentDate.change.hidden =  Amend payment date
 
 #AP3 messages
-testOnlyAmendPaymentPlanUpdate.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+testOnlyAmendPaymentPlanUpdate.SinglePlan.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+testOnlyAmendPaymentPlanUpdate.BudgetPlan.p1 = This payment plan has now been amended. The next payment of {0} for this plan will be collected on {1}.
 testOnlyAmendPaymentPlanUpdate.p2 = Any existing suspension on this payment plan will be removed. It may take up to 36 hours for this amendment to appear in your account.
 testOnlyAmendPaymentPlanUpdate.p3 = You must have enough funds in your account for this payment to be collected. If any of the details are incorrect,
 testOnlyAmendPaymentPlanUpdate.p3.link = you must contact the HMRC Helpline

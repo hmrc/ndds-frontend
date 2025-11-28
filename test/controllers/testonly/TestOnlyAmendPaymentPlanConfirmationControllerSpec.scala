@@ -94,11 +94,21 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           )
 
         val userAnswers = emptyUserAnswers
-            .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
-            .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse).success.value
-            .set(AmendPaymentAmountPage, 150.0).success.value
-            .set(AmendPlanStartDatePage, LocalDate.now()).success.value
-            .set(AmendPlanEndDatePage, LocalDate.now()).success.value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, 150.0)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, LocalDate.now())
+          .success
+          .value
+          .set(AmendPlanEndDatePage, LocalDate.now())
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
@@ -126,11 +136,21 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
       "must redirect to page not found if already value is submitted and click browser back from confirmation page" in {
         val userAnswers = emptyUserAnswers
-            .set(AmendPaymentPlanConfirmationPage, true).success.value
-            .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
-            .set(AmendPaymentAmountPage, 150.0).success.value
-            .set(AmendPlanStartDatePage, LocalDate.now()).success.value
-            .set(AmendPlanEndDatePage, LocalDate.now()).success.value
+          .set(AmendPaymentPlanConfirmationPage, true)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, 150.0)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, LocalDate.now())
+          .success
+          .value
+          .set(AmendPlanEndDatePage, LocalDate.now())
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
@@ -154,10 +174,18 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           )
 
         val userAnswers = emptyUserAnswers
-            .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
-            .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse).success.value
-            .set(AmendPaymentAmountPage, 150.0).success.value
-            .set(AmendPlanStartDatePage, LocalDate.now()).success.value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, 150.0)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, LocalDate.now())
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
@@ -226,17 +254,30 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         )
 
         val userAnswers = emptyUserAnswers
-          .set(AmendPaymentPlanConfirmationPage, true).success.value
-          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
-          .set(DirectDebitReferenceQuery, directDebitReference).success.value
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPlanEndDatePage, java.time.LocalDate.now()).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
-          .set(PaymentPlanReferenceQuery, "paymentPlanReference").success.value
+          .set(AmendPaymentPlanConfirmationPage, true)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanEndDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[SessionRepository].toInstance(mockSessionRepository))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService), bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
         running(application) {
@@ -289,11 +330,21 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         )
 
         val userAnswers = emptyUserAnswers
-          .set(DirectDebitReferenceQuery, directDebitReference).success.value
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPlanStartDatePage, java.time.LocalDate.now()).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
-          .set(PaymentPlanReferenceQuery, "paymentPlanReference").success.value
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
@@ -346,15 +397,23 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         )
 
         val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPlanStartDatePage, java.time.LocalDate.now()).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
-          .set(PaymentPlanReferenceQuery, "paymentPlanReference").success.value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
-              bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 
@@ -407,10 +466,18 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         )
 
         val userAnswers = emptyUserAnswers
-          .set(DirectDebitReferenceQuery, directDebitReference).success.value
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPlanStartDatePage, java.time.LocalDate.now()).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -436,8 +503,12 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           .thenReturn(Future.successful(DuplicateCheckResponse(true)))
 
         val userAnswers = emptyUserAnswers
-          .set(AmendPlanStartDatePage, java.time.LocalDate.now()).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(

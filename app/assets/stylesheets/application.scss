@@ -22,9 +22,14 @@
 }
 
 @media (min-width: 40.0625em) {
-.govuk-summary-list__key {
-    width: 35%;
- }
+  .govuk-summary-list{
+    &__key {
+      width: 35%;
+    }
+    &__actions {
+      width: auto;
+    }
+  }
 }
 
 .govuk-summary-list__row {
