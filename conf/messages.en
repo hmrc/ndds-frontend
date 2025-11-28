@@ -771,6 +771,14 @@ testOnlyAmendPlanStartDate.hint = For example, {0}
 testOnlyAmendPlanStartDate.error.beforeEarliest=The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
 testOnlyAmendPlanStartDate.error.tooFarInFuture=The date you have entered is not valid. It cannot be more than 12 months after the current date.
 
+#AP1c messages
+testOnlyAmendPlanEndDate.title = When do you want this payment plan to end?
+testOnlyAmendPlanEndDate.heading = When do you want this payment plan to end?
+testOnlyAmendPlanEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
+testOnlyAmendPlanEndDate.hint = For example, 27 3 2020
+testOnlyAmendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change  to be processed. Extend or remove the plan end date if you wish to continue.
+testOnlyAmendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
+
 #AP2 messages
 testOnlyAmendPaymentPlanConfirmation.title = Check your amendment details
 testOnlyAmendPaymentPlanConfirmation.heading = Check your amendment details
