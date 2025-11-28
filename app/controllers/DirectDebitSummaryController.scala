@@ -24,7 +24,7 @@ import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{NationalDirectDebitService, PaginationService}
 import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
-import repositories.SessionRepository
+import repositories.{DirectDebitCacheRepository, SessionRepository}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Actions, Card, CardTitle, SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, DateSetupSummary}
@@ -42,6 +42,7 @@ class DirectDebitSummaryController @Inject() (
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
+  val directDebitCache: DirectDebitCacheRepository,
   view: DirectDebitSummaryView,
   nddService: NationalDirectDebitService,
   sessionRepository: SessionRepository,
@@ -103,9 +104,11 @@ class DirectDebitSummaryController @Inject() (
   }
 
   def onRedirectToDirectDebitSource(directDebitReference: String): Action[AnyContent] = (identify andThen getData).async { implicit request =>
-    val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
+    val userId = request.userId
+    val userAnswers = request.userAnswers.getOrElse(UserAnswers(userId))
     for {
-      updatedAnswers <- Future.fromTry(userAnswers.set(ExistingDirectDebitIdentifierQuery, directDebitReference))
+      directDebit    <- directDebitCache.getDirectDebit(directDebitReference)(userId)
+      updatedAnswers <- Future.fromTry(userAnswers.set(ExistingDirectDebitIdentifierQuery, directDebit))
       _              <- sessionRepository.set(updatedAnswers)
     } yield Redirect(routes.DirectDebitSourceController.onPageLoad(NormalMode))
   }

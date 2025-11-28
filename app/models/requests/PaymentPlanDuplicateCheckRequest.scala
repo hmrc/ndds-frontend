@@ -16,7 +16,10 @@
 
 package models.requests
 
+import models.{PaymentPlanType, PaymentsFrequency, UserAnswers}
+import pages.*
 import play.api.libs.json.{Json, OFormat}
+import queries.*
 
 import java.time.LocalDate
 
@@ -34,4 +37,73 @@ case class PaymentPlanDuplicateCheckRequest(
 
 object PaymentPlanDuplicateCheckRequest {
   implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format[PaymentPlanDuplicateCheckRequest]
+
+  def build(userAnswers: UserAnswers,
+            paymentAmount: Option[BigDecimal],
+            paymentStartDate: Option[LocalDate],
+            isAmendPlan: Boolean
+           ): PaymentPlanDuplicateCheckRequest = {
+
+    if (isAmendPlan) {
+      // TODO Need to set according to payment plan
+      PaymentPlanDuplicateCheckRequest("ddRef", "planRef", "hod", "planType", "paymentRef", Some(100), Some(200), Some(1), LocalDate.now())
+    } else { // Adding a new payment plan
+      val existingDd =
+        userAnswers
+          .get(ExistingDirectDebitIdentifierQuery)
+          .getOrElse(throw new RuntimeException("Missing ExistingDirectDebitIdentifierQuery"))
+
+      val planType =
+        userAnswers
+          .get(PaymentPlanTypePage)
+          .map(_.toString)
+          .getOrElse(PaymentPlanType.SinglePaymentPlan.toString)
+
+      val hodService =
+        userAnswers
+          .get(DirectDebitSourcePage)
+          .map(_.toString)
+          .getOrElse(throw new RuntimeException("Missing DirectDebitSourcePage"))
+
+      val paymentReference =
+        userAnswers
+          .get(PaymentReferencePage)
+          .getOrElse(throw new RuntimeException("Missing PaymentReferencePage"))
+
+      val frequency = userAnswers.get(PaymentsFrequencyPage) match {
+        case Some(value) => PaymentsFrequency.paymentFrequencyMapping.get(value.toString)
+        case _           => None
+      }
+
+      val amount = planType match {
+        case PaymentPlanType.BudgetPaymentPlan.toString => userAnswers.get(RegularPaymentAmountPage)
+        case _                                          => userAnswers.get(PaymentAmountPage)
+      }
+
+      val startDate = planType match {
+        case PaymentPlanType.SinglePaymentPlan.toString =>
+          userAnswers
+            .get(PaymentDatePage)
+            .map(_.enteredDate)
+            .getOrElse(throw new RuntimeException("Missing PaymentDatePage"))
+        case _ =>
+          userAnswers
+            .get(PlanStartDatePage)
+            .map(_.enteredDate)
+            .getOrElse(throw new RuntimeException("Missing PlanStartDatePage"))
+      }
+
+      PaymentPlanDuplicateCheckRequest(
+        directDebitReference = existingDd.ddiRefNumber,
+        paymentPlanReference = "",
+        planType             = planType,
+        paymentService       = hodService,
+        paymentReference     = paymentReference,
+        paymentAmount        = amount,
+        totalLiability       = userAnswers.get(TotalAmountDuePage),
+        paymentFrequency     = frequency,
+        paymentStartDate     = startDate
+      )
+    }
+  }
 }

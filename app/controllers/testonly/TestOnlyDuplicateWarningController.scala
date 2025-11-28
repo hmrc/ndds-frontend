@@ -17,6 +17,7 @@
 package controllers.testonly
 
 import controllers.actions.*
+import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.DuplicateWarningFormProvider
 import models.Mode
@@ -26,7 +27,7 @@ import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.NationalDirectDebitService
+import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.testonly.TestOnlyDuplicateWarningView
 
@@ -42,7 +43,8 @@ class TestOnlyDuplicateWarningController @Inject() (
   formProvider: DuplicateWarningFormProvider,
   val controllerComponents: MessagesControllerComponents,
   nddsService: NationalDirectDebitService,
-  view: TestOnlyDuplicateWarningView
+  view: TestOnlyDuplicateWarningView,
+  chrisService: ChrisSubmissionForAmendService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -67,11 +69,9 @@ class TestOnlyDuplicateWarningController @Inject() (
             updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
           } yield {
 
-            val preparedForm = form
-
             Ok(
               view(
-                preparedForm,
+                form,
                 mode,
                 testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
               )
@@ -81,16 +81,12 @@ class TestOnlyDuplicateWarningController @Inject() (
           maybeResult match {
             case Some(result) =>
               sessionRepository
-                .set(
-                  userAnswers.set(DuplicateWarningPage, true).get
-                )
+                .set(userAnswers.set(DuplicateWarningPage, true).get)
                 .map(_ => result)
 
             case None =>
               logger.warn("Failed to set DuplicateWarningPage = true")
-              Future.successful(
-                Redirect(controllers.routes.JourneyRecoveryController.onPageLoad())
-              )
+              Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
           }
         } else {
           val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
@@ -112,13 +108,19 @@ class TestOnlyDuplicateWarningController @Inject() (
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningPage, value))
               _              <- sessionRepository.set(updatedAnswers)
-            } yield {
-              if (value) {
-                Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad())
-              } else {
-                Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
-              }
-            }
+              result <-
+                if (value) {
+                  chrisService.submitToChris(
+                    ua              = updatedAnswers,
+                    successRedirect = Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()),
+                    errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
+                  )
+                } else {
+                  Future.successful(
+                    Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
+                  )
+                }
+            } yield result
         )
     }
 }
