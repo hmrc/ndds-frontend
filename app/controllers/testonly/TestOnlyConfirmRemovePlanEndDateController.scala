@@ -85,7 +85,7 @@ class TestOnlyConfirmRemovePlanEndDateController @Inject() (
                  mode,
                  paymentPlanReference,
                  planEndDate,
-                 controllers.testonly.routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(mode)
+                 controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
                 )
           ) // change back link
         }
