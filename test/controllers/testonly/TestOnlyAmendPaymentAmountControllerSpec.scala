@@ -152,7 +152,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         val result = controller.onPageLoad(NormalMode)(request)
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -341,7 +341,7 @@ class TestOnlyAmendPaymentAmountControllerSpec extends SpecBase with MockitoSuga
         val result = controller.onPageLoad(CheckMode)(request)
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 

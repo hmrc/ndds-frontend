@@ -33,3 +33,9 @@ GET         /direct-debits/test-only/amend-already-have-payment-plan         con
 POST        /direct-debits/test-only/amend-already-have-payment-plan         controllers.testonly.TestOnlyDuplicateWarningController.onSubmit(mode: Mode = NormalMode)
 GET         /direct-debits/test-only/change-amend-already-have-payment-plan  controllers.testonly.TestOnlyDuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
 POST        /direct-debits/test-only/change-amend-already-have-payment-plan  controllers.testonly.TestOnlyDuplicateWarningController.onSubmit(mode: Mode = CheckMode)
+
+GET        /direct-debits/test-only/removing-plan-end-date                        controllers.testonly.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /direct-debits/test-only/removing-plan-end-date                        controllers.testonly.TestOnlyConfirmRemovePlanEndDateController.onSubmit(mode: Mode = NormalMode)
+GET        /direct-debits/test-only/change-removing-plan-end-date                  controllers.testonly.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /direct-debits/test-only/change-removing-plan-end-date                  controllers.testonly.TestOnlyConfirmRemovePlanEndDateController.onSubmit(mode: Mode = CheckMode)
+
