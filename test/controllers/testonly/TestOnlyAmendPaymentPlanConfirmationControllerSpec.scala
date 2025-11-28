@@ -36,7 +36,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Constants, DirectDebitDetailsData}
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary}
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, AmendRegularPaymentAmountSummary}
 import views.html.testonly.TestOnlyAmendPaymentPlanConfirmationView
 
 import java.time.LocalDate
@@ -54,21 +54,16 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
       implicit val msgs: Messages = messages(app)
 
       Seq(
-        AmendPaymentAmountSummary.row(
-          PaymentPlanType.BudgetPaymentPlan.toString,
-          userAnswers.get(AmendPaymentAmountPage),
+        AmendRegularPaymentAmountSummary.row(
+          userAnswers.get(RegularPaymentAmountPage),
+          showChange = true,
+          changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode))
+        )(messages(app)),
+        AmendPlanEndDateSummary.row(
+          userAnswers.get(AmendPlanEndDatePage),
+          Constants.shortDateTimeFormatPattern,
           true
-        ),
-        userAnswers.get(AmendPlanEndDatePage) match {
-          case Some(endDate) =>
-            AmendPlanEndDateSummary.row(
-              Some(endDate),
-              Constants.shortDateTimeFormatPattern,
-              true
-            )
-          case None =>
-            AmendPlanEndDateSummary.addRow()
-        }
+        )(messages(app))
       )
     }
 
@@ -76,20 +71,19 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
                                                paymentPlanDetails: PaymentPlanResponse,
                                                app: Application
                                               ): Seq[SummaryListRow] = {
-      implicit val msgs: Messages = messages(app)
 
       Seq(
         AmendPaymentAmountSummary.row(
           PaymentPlanType.SinglePaymentPlan.toString,
           userAnswers.get(AmendPaymentAmountPage),
           true
-        ),
+        )(messages(app)),
         AmendPlanStartDateSummary.row(
           PaymentPlanType.SinglePaymentPlan.toString,
           userAnswers.get(AmendPlanStartDatePage),
           Constants.shortDateTimeFormatPattern,
           true
-        )
+        )(messages(app))
       )
     }
 
@@ -116,7 +110,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .success
             .value
             .set(
-              AmendPaymentAmountPage,
+              RegularPaymentAmountPage,
               150.0
             )
             .success
@@ -220,6 +214,72 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         }
       }
 
+      "must use AddPaymentPlanEndDateController back link when removing plan end date" in {
+        val mockBudgetPaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+          )
+
+        val userAnswers =
+          emptyUserAnswers
+            .set(
+              ManagePaymentPlanTypePage,
+              PaymentPlanType.BudgetPaymentPlan.toString
+            )
+            .success
+            .value
+            .set(
+              PaymentPlanDetailsQuery,
+              mockBudgetPaymentPlanDetailResponse
+            )
+            .success
+            .value
+            .set(
+              RegularPaymentAmountPage,
+              150.0
+            )
+            .success
+            .value
+            .set(
+              AmendPlanEndDatePage,
+              LocalDate.now()
+            )
+            .success
+            .value
+            .set(
+              AddPaymentPlanEndDatePage,
+              false
+            )
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          when(mockNddService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockSessionRepository.get(any()))
+            .thenReturn(Future.successful(Some(userAnswers)))
+
+          val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, mockBudgetPaymentPlanDetailResponse, application)
+          val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
+          val request = FakeRequest(GET, "/test-only/check-amendment-details")
+          val result = controller.onPageLoad(NormalMode)(request)
+          val view = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationView]
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(
+            NormalMode,
+            summaryListRows,
+            routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
+        }
+      }
+
       "must redirect to page not found if already value is submitted and click browser back from confirmation page" in {
         val userAnswers =
           emptyUserAnswers
@@ -236,7 +296,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .success
             .value
             .set(
-              AmendPaymentAmountPage,
+              RegularPaymentAmountPage,
               150.0
             )
             .success

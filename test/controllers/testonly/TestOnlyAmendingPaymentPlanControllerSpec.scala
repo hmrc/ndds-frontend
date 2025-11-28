@@ -193,7 +193,7 @@ class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
         val page = contentAsString(result)
         page must include("Amending this payment plan")
         page must include("Add plan end date")
-        page must include("/direct-debits/date-ending-payment-plan")
+        page must include("/direct-debits/test-only/amend-payment-plan-end-date")
       }
     }
   }
