@@ -81,13 +81,14 @@ class TestOnlyConfirmRemovePlanEndDateController @Inject() (
               .getOrElse(form)
 
           Ok(
-            view(preparedForm,
-                 mode,
-                 paymentPlanReference,
-                 planEndDate,
-                 controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
-                )
-          ) // change back link
+            view(
+              preparedForm,
+              mode,
+              planDetails.paymentPlanDetails.paymentReference,
+              planEndDate,
+              controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+            )
+          )
         }
 
         maybeResult match {
@@ -115,7 +116,7 @@ class TestOnlyConfirmRemovePlanEndDateController @Inject() (
                    mode,
                    paymentPlanReference,
                    planEndDate,
-                   controllers.testonly.routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(mode)
+                   controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
                   )
             )
           ),

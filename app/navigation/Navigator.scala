@@ -160,7 +160,7 @@ class Navigator @Inject() () {
     answers
       .get(ConfirmRemovePlanEndDatePage)
       .map {
-        case true  => controllers.testonly.routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
+        case true  => controllers.testonly.routes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
         case false => controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
