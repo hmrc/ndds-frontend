@@ -25,14 +25,14 @@ class YearEndAndMonthSummarySpec extends SpecBase {
 
   "YearEndAndMonthSummary" - {
 
-    "must display the date in YYYY MM format" in new Setup {
+    "must display the date in YYMM format" in new Setup {
       val date = YearEndAndMonth(2025, 1)
       val userAnswers = UserAnswers("id").set(YearEndAndMonthPage, date).success.value
 
       val result = YearEndAndMonthSummary.row(userAnswers)(messages)
 
       result mustBe defined
-      result.value.value.content.asHtml.toString must include("2025 01")
+      result.value.value.content.asHtml.toString must include("2501")
     }
 
     "must return None when no date is set" in new Setup {
@@ -50,7 +50,7 @@ class YearEndAndMonthSummarySpec extends SpecBase {
       val result = YearEndAndMonthSummary.row(userAnswers)(messages)
 
       result mustBe defined
-      result.value.key.content.asHtml.toString must include("Year end and month")
+      result.value.key.content.asHtml.toString must include("4 extra numbers")
     }
 
     "must have change action with correct URL" in new Setup {
@@ -74,14 +74,14 @@ class YearEndAndMonthSummarySpec extends SpecBase {
 
       result mustBe defined
       result.value.actions mustBe defined
-      result.value.actions.value.items.head.visuallyHiddenText mustBe Some("Year end and month")
+      result.value.actions.value.items.head.visuallyHiddenText mustBe Some("4 extra numbers")
     }
 
     "must format specific dates correctly" in new Setup {
       val testCases = Seq(
-        (YearEndAndMonth(2025, 1), "2025 01"),
-        (YearEndAndMonth(2023, 12), "2023 12"),
-        (YearEndAndMonth(2020, 6), "2020 06")
+        (YearEndAndMonth(2025, 1), "2501"),
+        (YearEndAndMonth(2023, 12), "2312"),
+        (YearEndAndMonth(2020, 6), "2006")
       )
 
       testCases.foreach { case (date, expectedFormat) =>

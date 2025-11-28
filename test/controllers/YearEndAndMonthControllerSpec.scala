@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
 import forms.YearEndAndMonthFormProvider
 import models.{NormalMode, UserAnswers, YearEndAndMonth}
 import navigation.{FakeNavigator, Navigator}
@@ -43,10 +44,10 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute: Call = Call("GET", "/foo")
 
-  val validAnswer: YearEndAndMonth = YearEndAndMonth(2024, 5)
+  val validAnswer: YearEndAndMonth = YearEndAndMonth(24, 5)
 
   lazy val yearEndAndMonthRoute: String = routes.YearEndAndMonthController.onPageLoad(NormalMode).url
-  lazy val paymentReferenceRoute: String = routes.PaymentReferenceController.onPageLoad(NormalMode).url
+  lazy val tellAboutThisPaymentRoute: String = routes.TellAboutThisPaymentController.onPageLoad(NormalMode).url
 
   override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId)
 
@@ -56,8 +57,7 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, yearEndAndMonthRoute)
       .withFormUrlEncodedBody(
-        "value.month" -> f"${validAnswer.month}%02d",
-        "value.year"  -> validAnswer.year.toString
+        "value" -> f"${validAnswer.year}%02d${validAnswer.month}%02d"
       )
 
   "yearEndAndMonth Controller" - {
@@ -65,6 +65,8 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      implicit val appConfig: FrontendAppConfig =
+        application.injector.instanceOf[FrontendAppConfig]
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -72,7 +74,10 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[YearEndAndMonthView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", paymentReferenceRoute))(getRequest(), messages(application)).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", tellAboutThisPaymentRoute))(getRequest(),
+                                                                                                         appConfig,
+                                                                                                         messages(application)
+                                                                                                        ).toString
       }
     }
 
@@ -81,6 +86,8 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
       val userAnswers = UserAnswers(userAnswersId).set(YearEndAndMonthPage, validAnswer).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      implicit val appConfig: FrontendAppConfig =
+        application.injector.instanceOf[FrontendAppConfig]
 
       running(application) {
         val view = application.injector.instanceOf[YearEndAndMonthView]
@@ -88,9 +95,10 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", paymentReferenceRoute))(getRequest(),
-                                                                                                                       messages(application)
-                                                                                                                      ).toString
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", tellAboutThisPaymentRoute))(getRequest(),
+                                                                                                                           appConfig,
+                                                                                                                           messages(application)
+                                                                                                                          ).toString
       }
     }
 
@@ -107,6 +115,8 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
             bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
+      implicit val appConfig: FrontendAppConfig =
+        application.injector.instanceOf[FrontendAppConfig]
 
       running(application) {
         val result = route(application, postRequest()).value
@@ -119,6 +129,8 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      implicit val appConfig: FrontendAppConfig =
+        application.injector.instanceOf[FrontendAppConfig]
 
       val request =
         FakeRequest(POST, yearEndAndMonthRoute)
@@ -132,7 +144,10 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", paymentReferenceRoute))(request, messages(application)).toString
+        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", tellAboutThisPaymentRoute))(request,
+                                                                                                              appConfig,
+                                                                                                              messages(application)
+                                                                                                             ).toString
       }
     }
 
