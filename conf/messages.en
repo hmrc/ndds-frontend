@@ -747,6 +747,11 @@ testOnlyAmendingPaymentPlan.list.3 = payment reference
 testOnlyAmendingPaymentPlan.p3 = Payments due within the next 3 working days cannot be amended.
 testOnlyAmendingPaymentPlan.cancel.link = Cancel and return to payment plan
 
+testOnlyAmendingPaymentPlan.budgetPlanEndDate = Plan end date
+testOnlyAmendingPaymentPlan.budgetPlanEndDate.change.hidden =  change Plan end date
+testOnlyAmendingPaymentPlan.budgetPlanEndDate.remove.hidden =  remove Plan end date
+testOnlyAmendingPaymentPlan.budgetPlanEndDate.addPlanEndDateLink = Add plan end date
+
 #AP1a messages
 testOnlyAmendPaymentAmount.title = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.heading = How much do you want to pay, in pounds?
