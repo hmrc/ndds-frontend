@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.testonly
 
 import base.SpecBase
+import controllers.routes
+import controllers.testonly.routes as testonlyRoutes
 import forms.AmendPlanStartDateFormProvider
-import models.responses.{DirectDebitDetails, DuplicateCheckResponse, PaymentPlanDetails, PaymentPlanResponse}
+import models.responses.{DirectDebitDetails, DuplicateCheckResponse, EarliestPaymentDate, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NormalMode, PaymentPlanType, UserAnswers}
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -31,13 +34,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
-import views.html.AmendPlanStartDateView
+import views.html.testonly.TestOnlyAmendPlanStartDateView
 
 import java.time.{Clock, LocalDate, LocalDateTime, ZoneId}
-
 import scala.concurrent.Future
 
-class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
+class TestOnlyAmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
 
   private val fixedDate = LocalDate.of(2025, 8, 6)
@@ -51,10 +53,10 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   val validAnswer: LocalDate = LocalDate.now()
   val singlePlan: String = "Single Payment"
 
-  lazy val amendPlanStartDateRoute: String = routes.AmendPlanStartDateController.onPageLoad(NormalMode).url
-  lazy val amendPlanStartDateRoutePost: String = routes.AmendPlanStartDateController.onSubmit(NormalMode).url
-  lazy val amendPaymentAmountRoute: String = routes.AmendPaymentAmountController.onPageLoad(NormalMode).url
-  lazy val planConfirmationPage: String = routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode).url
+  lazy val amendPlanStartDateRoute: String = testonlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(NormalMode).url
+  lazy val amendPlanStartDateRoutePost: String = testonlyRoutes.TestOnlyAmendPlanStartDateController.onSubmit(NormalMode).url
+  lazy val amendingPaymentPlanRoute: String = testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad().url
+  lazy val planConfirmationPage: String = testonlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, amendPlanStartDateRoute)
@@ -75,6 +77,12 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         "value.year"  -> date.getYear.toString
       )
 
+  val date: LocalDateTime = LocalDateTime.now(fixedClock)
+
+  private val earliestPaymentDate = EarliestPaymentDate("2025-02-06")
+
+  private val formattedDateNumeric = "06 02 2025"
+
   "AmendPlanStartDate Controller" - {
     val mockService = mock[NationalDirectDebitService]
     "onPageLoad" - {
@@ -84,15 +92,23 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
+
           val result = route(application, getRequest()).value
-          val view = application.injector.instanceOf[AmendPlanStartDateView]
+          val view = application.injector.instanceOf[TestOnlyAmendPlanStartDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(), messages(application)).toString
+          contentAsString(result) mustEqual view(form, NormalMode, formattedDateNumeric, Call("GET", amendingPaymentPlanRoute))(getRequest(),
+                                                                                                                                messages(application)
+                                                                                                                               ).toString
         }
       }
 
@@ -104,21 +120,30 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
 
         running(application) {
-          val view = application.injector.instanceOf[AmendPlanStartDateView]
+          val view = application.injector.instanceOf[TestOnlyAmendPlanStartDateView]
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendPaymentAmountRoute))(getRequest(),
-                                                                                                                           messages(application)
-                                                                                                                          ).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, formattedDateNumeric, Call("GET", amendingPaymentPlanRoute))(
+            getRequest(),
+            messages(application)
+          ).toString
         }
       }
 
       "must redirect to Journey Recovery for a GET if no existing data is found" in {
-        val application = applicationBuilder(userAnswers = None).build()
+
+        val application = applicationBuilder(userAnswers = None)
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
 
         running(application) {
           val result = route(application, getRequest()).value
@@ -159,6 +184,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must return a Bad Request and errors when invalid data is submitted" in {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
@@ -168,45 +194,17 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
           val boundForm = form.bind(Map("value" -> "invalid value"))
-          val view = application.injector.instanceOf[AmendPlanStartDateView]
+          val view = application.injector.instanceOf[TestOnlyAmendPlanStartDateView]
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
-        }
-      }
-
-      "must return a Bad Request when no amendment is made" in {
-        val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
-          .success
-          .value
-          .set(ManagePaymentPlanTypePage, "Budget payment")
-          .success
-          .value
-          .set(AmendPaymentAmountPage, BigDecimal(1500))
-          .success
-          .value
-          .set(AmendPlanStartDatePage, validAnswer)
-          .success
-          .value
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
-          .build()
-
-        running(application) {
-          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-          val view = application.injector.instanceOf[AmendPlanStartDateView]
-          val request = postRequestWithDate(validAnswer)
-          val result = route(application, request).value
-
-          val errorForm = form.fill(validAnswer).withError("value", "amendment.noChange")
-
-          status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual
-            view(errorForm, NormalMode, Call("GET", amendPaymentAmountRoute))(request, messages(application)).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDateNumeric, Call("GET", amendingPaymentPlanRoute))(
+            request,
+            messages(application)
+          ).toString
         }
       }
 
@@ -226,18 +224,21 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
           when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(true)))
           val request = postRequestWithDate(validAnswer)
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual testonlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -257,11 +258,14 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
           when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           val request = postRequestWithDate(validAnswer)
@@ -288,18 +292,21 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
           when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(true)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual testonlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -319,11 +326,14 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
           when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
@@ -350,18 +360,21 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
           when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(true)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual testonlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
@@ -381,11 +394,14 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
           when(mockService.isDuplicatePaymentPlan(any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
@@ -412,42 +428,19 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(earliestPaymentDate))
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = intercept[Exception](route(application, request).value.futureValue)
 
           val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
           result.getMessage must include(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-        }
-      }
-
-      "must redirect to Journey Recovery for a POST when no amend payment amount exist" in {
-        val userAnswers = emptyUserAnswers
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
-          .success
-          .value
-          .set(ManagePaymentPlanTypePage, singlePlan)
-          .success
-          .value
-          .set(AmendPlanStartDatePage, validAnswer.plusDays(3))
-          .success
-          .value
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
-          .build()
-
-        running(application) {
-          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-          val request = postRequestWithDate(validAnswer.plusDays(3))
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
         }
       }
 

@@ -17,14 +17,15 @@
 package forms
 
 import forms.mappings.Mappings
+import models.UserAnswers
 import play.api.data.Form
 import play.api.i18n.Messages
 import utils.DateFormats
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 
-class AmendPlanStartDateFormProvider @Inject() extends Mappings {
+class AmendPlanStartDateFormProvider @Inject() (clock: Clock) extends Mappings {
 
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
@@ -35,6 +36,28 @@ class AmendPlanStartDateFormProvider @Inject() extends Mappings {
         requiredKey    = "planStartDate.error.required",
         dateFormats    = DateFormats.defaultDateFormats
       )
+    )
+
+  def apply(userAnswers: UserAnswers, earliestPlanStartDate: LocalDate)(implicit messages: Messages): Form[LocalDate] =
+
+    val maxAllowedDate = LocalDate.now(clock).plusYears(1)
+
+    Form(
+      "value" -> customPaymentDate(
+        invalidKey     = "planStartDate.error.invalid",
+        allRequiredKey = "planStartDate.error.required.all",
+        twoRequiredKey = "planStartDate.error.required.two",
+        requiredKey    = "planStartDate.error.required",
+        dateFormats    = DateFormats.defaultDateFormats
+      )
+        .verifying(
+          "testOnlyAmendPlanStartDate.error.beforeEarliest",
+          date => !date.isBefore(earliestPlanStartDate)
+        )
+        .verifying(
+          "testOnlyAmendPlanStartDate.error.tooFarInFuture",
+          date => !date.isAfter(maxAllowedDate)
+        )
     )
 
 }
