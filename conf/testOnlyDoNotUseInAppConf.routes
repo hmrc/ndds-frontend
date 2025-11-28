@@ -29,6 +29,11 @@ POST        /direct-debits/test-only/amend-plan-payment-date                 con
 GET         /direct-debits/test-only/change-amend-plan-payment-date          controllers.testonly.TestOnlyAmendPlanStartDateController.onPageLoad(mode: Mode = CheckMode)
 POST        /direct-debits/test-only/change-amend-plan-payment-date          controllers.testonly.TestOnlyAmendPlanStartDateController.onSubmit(mode: Mode = CheckMode)
 
+GET        /direct-debits/test-only/amend-payment-plan-end-date              controllers.testonly.TestOnlyAmendPlanEndDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /direct-debits/test-only/amend-payment-plan-end-date              controllers.testonly.TestOnlyAmendPlanEndDateController.onSubmit(mode: Mode = NormalMode)
+GET        /direct-debits/test-only/change-amend-payment-plan-end-date       controllers.testonly.TestOnlyAmendPlanEndDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /direct-debits/test-only/change-amend-payment-plan-end-date       controllers.testonly.TestOnlyAmendPlanEndDateController.onSubmit(mode: Mode = CheckMode)
+
 GET         /direct-debits/test-only/check-amendment-details                 controllers.testonly.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad(mode: Mode = NormalMode)
 POST        /direct-debits/test-only/check-amendment-details                 controllers.testonly.TestOnlyAmendPaymentPlanConfirmationController.onSubmit(mode: Mode = NormalMode)
 
