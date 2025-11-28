@@ -754,9 +754,13 @@ testOnlyAmendingPaymentPlan.budgetPlanEndDate.remove.hidden =  remove Plan end d
 testOnlyAmendingPaymentPlan.budgetPlanEndDate.addPlanEndDateLink = Add plan end date
 
 #AP1a messages
+testOnlyAmendRegularPaymentAmount.title = How much is the regular payment amount, in pounds?
+testOnlyAmendRegularPaymentAmount.heading = How much is the regular payment amount, in pounds?
+testOnlyAmendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
 testOnlyAmendPaymentAmount.title = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.heading = How much do you want to pay, in pounds?
-testOnlyAmendPaymentAmount.hint = 	Amount must be in pounds and pence, like 967 or 967.82
+testOnlyAmendPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
+
 
 #AP1b messages
 testOnlyAmendPlanStartDate.title = When do you want to make this payment?

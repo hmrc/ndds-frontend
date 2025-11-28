@@ -95,23 +95,36 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
          }
         )
       case _ => // Budget Payment Plan
-        (Seq(
-           AmendPaymentAmountSummary.row(
-             PaymentPlanType.BudgetPaymentPlan.toString,
-             userAnswers.get(AmendPaymentAmountPage),
-             true
-           ), // TODO - replace with AP1a TestOnly Amend RegularPaymentAmount
-           AmendPlanEndDateSummary.row(
-             userAnswers.get(AmendPlanEndDatePage),
-             Constants.shortDateTimeFormatPattern,
-             true
-           ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
-         ),
-         userAnswers.get(AmendPlanEndDatePage) match {
-           case Some(_) => routes.AmendPlanEndDateController.onPageLoad(mode) // TODO - replace with TestOnly Amend plan end date controller
-           case _ => routes.RegularPaymentAmountController.onPageLoad(mode) // TODO - replace with TestOnly Amend regular payment amount controller
-         }
+        val regularAmountRow = AmendRegularPaymentAmountSummary.row(
+          userAnswers.get(RegularPaymentAmountPage),
+          showChange = true,
+          changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode))
         )
+
+        val rows = Seq(
+          regularAmountRow,
+          AmendPlanEndDateSummary.row(
+            userAnswers.get(AmendPlanEndDatePage),
+            Constants.shortDateTimeFormatPattern,
+            true
+          ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
+        )
+
+        val backLink = userAnswers.get(AddPaymentPlanEndDatePage) match {
+          case Some(false) =>
+            routes.AddPaymentPlanEndDateController
+              .onPageLoad(mode) // TODO - swap to TestOnly AP1d remove-plan-end-date controller
+          case _ =>
+            userAnswers.get(AmendPlanEndDatePage) match {
+              case Some(_) =>
+                routes.AmendPlanEndDateController
+                  .onPageLoad(mode) // TODO - swap to TestOnly AP1c plan-end-date controller
+              case None =>
+                testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
+            }
+        }
+
+        (rows, backLink)
     }
   }
 
