@@ -18,14 +18,17 @@ package controllers
 
 import base.SpecBase
 import models.{NddDetails, NddResponse}
+import org.mockito.ArgumentCaptor
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq as mockitoEq
 import org.mockito.Mockito.*
+import pages.CreateConfirmationPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import services.{NationalDirectDebitService, PaginationResult, PaginationService}
 import viewmodels.govuk.PaginationFluency.*
@@ -156,6 +159,68 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers w
 
           status(result) mustEqual OK
           verify(mockPaginationService).paginateDirectDebits(mockitoEq(Seq.empty), mockitoEq(1), any())
+        }
+      }
+
+      "must clear ExistingDirectDebitIdentifierQuery from session" in {
+        val testData = createTestNddResponse(1)
+        val mockNddService = mock[NationalDirectDebitService]
+        val mockPaginationService = mock[PaginationService]
+        val mockSessionRepository = mock[SessionRepository]
+
+        when(mockNddService.retrieveAllDirectDebits(any())(any(), any()))
+          .thenReturn(Future.successful(testData))
+        when(mockPaginationService.paginateDirectDebits(any(), any(), any()))
+          .thenReturn(createTestPaginationResult(1, 1, 1))
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+
+        val testNddDetails = NddDetails(
+          ddiRefNumber       = "700000040",
+          submissionDateTime = LocalDateTime.now(),
+          bankSortCode       = "123456",
+          bankAccountNumber  = "12345678",
+          bankAccountName    = "Test Account",
+          auDdisFlag         = false,
+          numberOfPayPlans   = 2
+        )
+
+        val userAnswersWithExistingDDI = emptyUserAnswers
+          .set(ExistingDirectDebitIdentifierQuery, testNddDetails)
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, "testDDRef")
+          .success
+          .value
+          .set(PaymentPlansCountQuery, 2)
+          .success
+          .value
+          .set(CreateConfirmationPage, true)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswersWithExistingDDI))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[PaginationService].toInstance(mockPaginationService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.YourDirectDebitInstructionsController.onPageLoad().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual OK
+
+          val captor: ArgumentCaptor[models.UserAnswers] = ArgumentCaptor.forClass(classOf[models.UserAnswers])
+          verify(mockSessionRepository, atLeastOnce()).set(captor.capture())
+
+          val savedAnswers = captor.getValue
+          savedAnswers.get(ExistingDirectDebitIdentifierQuery) mustBe None
+          savedAnswers.get(DirectDebitReferenceQuery) mustBe None
+          savedAnswers.get(PaymentPlansCountQuery) mustBe None
+          savedAnswers.get(CreateConfirmationPage) mustBe None
         }
       }
     }

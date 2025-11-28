@@ -30,7 +30,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, Summ
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
 import utils.MaskAndFormatUtils.formatAmount
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, DateSetupSummary, PaymentReferenceSummary, PaymentsFrequencySummary}
+import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.testonly.TestOnlyAmendPaymentPlanUpdateView
 
@@ -56,7 +56,6 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
     val userAnswers = request.userAnswers
 
     if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-
       val maybeResult = for {
         paymentPlan    <- userAnswers.get(PaymentPlanDetailsQuery)
         paymentAmount  <- userAnswers.get(AmendPaymentAmountPage)
