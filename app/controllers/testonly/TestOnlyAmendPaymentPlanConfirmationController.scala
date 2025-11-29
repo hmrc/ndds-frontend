@@ -141,10 +141,10 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       }
     }
 
-  private def handlePlanAmendment(userAnswers: UserAnswers,
-                                  amendedDateOption: Option[LocalDate],
-                                  planType: String
-                                 )(implicit request: Request[_], ec: ExecutionContext): Future[Result] = {
+  private def handlePlanAmendment(userAnswers: UserAnswers, amendedDateOption: Option[LocalDate], planType: String)(implicit
+    request: Request[?],
+    ec: ExecutionContext
+  ): Future[Result] = {
 
     val planDetailsQuery = userAnswers.get(PaymentPlanDetailsQuery)
     val amendedAmountOption = userAnswers.get(AmendPaymentAmountPage)
@@ -179,7 +179,6 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       if (duplicateResponse.isDuplicate) {
         Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url))
       } else {
-        println(s"************ userAnswers: ${userAnswers}")
         chrisService.submitToChris(
           ua              = userAnswers,
           successRedirect = Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()),

@@ -41,7 +41,6 @@ class ChrisSubmissionForAmendService @Inject() (
     (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
       case (Some(ddiRef), Some(ppRef)) =>
         val request = buildChrisSubmissionRequest(ua, ddiRef)
-        println(s"*************** chris request: ${request}")
 
         nddService.submitChrisData(request).flatMap { ok =>
           if (ok) {
@@ -86,7 +85,7 @@ class ChrisSubmissionForAmendService @Inject() (
           PlanStartDateDetails(enteredDate = d, earliestPlanStartDate = d.toString)
         }
 
-        val chrisReq = ChrisSubmissionRequest(
+        ChrisSubmissionRequest(
           serviceType                     = DirectDebitSource.objectMap.getOrElse(plan.planType, DirectDebitSource.SA),
           paymentPlanType                 = paymentPlanType,
           paymentFrequency                = plan.scheduledPaymentFrequency,
@@ -99,7 +98,7 @@ class ChrisSubmissionForAmendService @Inject() (
           ddiReferenceNo                  = ddiRef,
           paymentReference                = plan.paymentReference,
           totalAmountDue                  = plan.totalLiability,
-          paymentAmount                   = None,
+          paymentAmount                   = ua.get(AmendPaymentAmountPage),
           regularPaymentAmount            = None,
           amendPaymentAmount              = ua.get(AmendPaymentAmountPage),
           calculation                     = None,
@@ -107,9 +106,6 @@ class ChrisSubmissionForAmendService @Inject() (
           amendPlan                       = true,
           auditType                       = Some(AmendPaymentPlanAudit)
         )
-
-        println(s"******************* chrisReq: ${chrisReq}")
-        chrisReq
 
       case _ =>
         throw new IllegalStateException("Missing PaymentPlanDetails from UserAnswers")

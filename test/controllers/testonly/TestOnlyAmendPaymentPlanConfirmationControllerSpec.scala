@@ -283,13 +283,6 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
       "must redirect to AmendPaymentPlanUpdateController when CHRIS submission is successful" in {
         val mockNddService = mock[NationalDirectDebitService]
 
-        when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(true))
-        when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
-        when(mockNddService.isDuplicatePaymentPlan(any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-
         val directDebitReference = "DDI123456789"
         val paymentPlanDetails = models.responses.PaymentPlanResponse(
           directDebitDetails = models.responses.DirectDebitDetails(
@@ -301,7 +294,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           ),
           paymentPlanDetails = models.responses.PaymentPlanDetails(
             hodService                = "CESA",
-            planType                  = "budgetPaymentPlan",
+            planType                  = "SinglePaymentPlan",
             paymentReference          = "paymentReference",
             submissionDateTime        = java.time.LocalDateTime.now(),
             scheduledPaymentAmount    = Some(1000),
@@ -320,20 +313,41 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         )
 
         val userAnswers = emptyUserAnswers
-          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString).success.value
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPlanEndDatePage, java.time.LocalDate.now().plusDays(4)).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(1000)).success.value
-          .set(DirectDebitReferenceQuery, directDebitReference).success.value
-          .set(PaymentPlanReferenceQuery, "paymentPlanReference").success.value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now().plusDays(1))
+          .success
+          .value
+          .set(AmendPlanEndDatePage, java.time.LocalDate.now().plusDays(4))
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1000))
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, directDebitReference)
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, "paymentPlanReference")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[SessionRepository].toInstance(mockSessionRepository))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService), bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
         running(application) {
-          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
+          when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
+            .thenReturn(Future.successful(true))
+          when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+            .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+          when(mockNddService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
           val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
           val request = FakeRequest(POST, "/test-only/check-amendment-details")
           val result = controller.onSubmit(NormalMode)(request)
@@ -558,37 +572,45 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
         val paymentPlanDetails = models.responses.PaymentPlanResponse(
           directDebitDetails = models.responses.DirectDebitDetails(
-            bankSortCode = Some("123456"),
-            bankAccountNumber = Some("12345678"),
-            bankAccountName = Some("Bank Ltd"),
-            auDdisFlag = true,
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
             submissionDateTime = java.time.LocalDateTime.now()
           ),
           paymentPlanDetails = models.responses.PaymentPlanDetails(
-            hodService = "CESA",
-            planType = "BudgetPaymentPlan",
-            paymentReference = "paymentReference",
-            submissionDateTime = java.time.LocalDateTime.now(),
-            scheduledPaymentAmount = Some(1000),
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
             scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
-            initialPaymentStartDate = Some(java.time.LocalDate.now()),
-            initialPaymentAmount = Some(150),
-            scheduledPaymentEndDate = Some(java.time.LocalDate.now().plusMonths(10)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
             scheduledPaymentFrequency = Some("Monthly"),
-            suspensionStartDate = Some(java.time.LocalDate.now()),
-            suspensionEndDate = Some(java.time.LocalDate.now()),
-            balancingPaymentAmount = None,
-            balancingPaymentDate = Some(java.time.LocalDate.now()),
-            totalLiability = Some(300),
-            paymentPlanEditable = false
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
           )
         )
 
         val userAnswers = emptyUserAnswers
-          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPaymentDatePage, java.time.LocalDate.now().plusDays(4)).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(1000)).success.value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPaymentDatePage, java.time.LocalDate.now().plusDays(4))
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1000))
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
@@ -615,37 +637,45 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
         val paymentPlanDetails = models.responses.PaymentPlanResponse(
           directDebitDetails = models.responses.DirectDebitDetails(
-            bankSortCode = Some("123456"),
-            bankAccountNumber = Some("12345678"),
-            bankAccountName = Some("Bank Ltd"),
-            auDdisFlag = true,
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
             submissionDateTime = java.time.LocalDateTime.now()
           ),
           paymentPlanDetails = models.responses.PaymentPlanDetails(
-            hodService = "CESA",
-            planType = "BudgetPaymentPlan",
-            paymentReference = "paymentReference",
-            submissionDateTime = java.time.LocalDateTime.now(),
-            scheduledPaymentAmount = Some(1000),
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
             scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
-            initialPaymentStartDate = Some(java.time.LocalDate.now()),
-            initialPaymentAmount = Some(150),
-            scheduledPaymentEndDate = Some(java.time.LocalDate.now().plusMonths(10)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
             scheduledPaymentFrequency = Some("Monthly"),
-            suspensionStartDate = Some(java.time.LocalDate.now()),
-            suspensionEndDate = Some(java.time.LocalDate.now()),
-            balancingPaymentAmount = None,
-            balancingPaymentDate = Some(java.time.LocalDate.now()),
-            totalLiability = Some(300),
-            paymentPlanEditable = false
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
           )
         )
 
         val userAnswers = emptyUserAnswers
-          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString).success.value
-          .set(PaymentPlanDetailsQuery, paymentPlanDetails).success.value
-          .set(AmendPaymentDatePage, java.time.LocalDate.now().plusDays(4)).success.value
-          .set(AmendPaymentAmountPage, BigDecimal(100)).success.value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPaymentDatePage, java.time.LocalDate.now().plusDays(4))
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
