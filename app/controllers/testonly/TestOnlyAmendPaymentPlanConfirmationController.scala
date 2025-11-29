@@ -20,6 +20,7 @@ import controllers.actions.*
 import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import models.*
+import models.responses.PaymentPlanResponse
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -101,16 +102,21 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
              PaymentPlanType.BudgetPaymentPlan.toString,
              userAnswers.get(AmendPaymentAmountPage),
              true
-           ), // TODO - replace with AP1a TestOnly Amend RegularPaymentAmount
-           AmendPlanEndDateSummary.row(
-             userAnswers.get(AmendPlanEndDatePage),
-             Constants.shortDateTimeFormatPattern,
-             true
-           ) // TODO - replace with AP1c TestOnly AmendPlanEndDate
+           ),
+           userAnswers.get(AmendPlanEndDatePage) match {
+             case Some(endDate) =>
+               AmendPlanEndDateSummary.row(
+                 Some(endDate),
+                 Constants.shortDateTimeFormatPattern,
+                 true
+               )
+             case None =>
+               AmendPlanEndDateSummary.addRow()
+           }
          ),
          userAnswers.get(AmendPlanEndDatePage) match {
            case Some(_) => routes.AmendPlanEndDateController.onPageLoad(mode) // TODO - replace with TestOnly Amend plan end date controller
-           case _ => routes.RegularPaymentAmountController.onPageLoad(mode) // TODO - replace with TestOnly Amend regular payment amount controller
+           case _       => testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode)
          }
         )
     }
@@ -119,60 +125,61 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
       val userAnswers = request.userAnswers
-      val planDetailsQuery = userAnswers.get(PaymentPlanDetailsQuery)
 
       userAnswers.get(ManagePaymentPlanTypePage) match {
         case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
           val amendPaymentDate = userAnswers.get(AmendPaymentDatePage)
-          val amendPaymentAmount = userAnswers.get(AmendPaymentAmountPage)
-          (planDetailsQuery, amendPaymentAmount, amendPaymentDate) match {
-            case (Some(planDetails), Some(amendedAmount), Some(amendedDate)) =>
-              val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-              val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
-
-              val noChange = amendedAmount == dbAmount && amendedDate == dbStartDate
-              if (noChange) { // F27 amendment check
-                Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
-              } else {
-                // F26 duplicate check
-                checkDuplicatePlan(userAnswers)
-              }
-            case _ =>
-              logger.warn("Missing Amend payment amount and/or amend payment date")
-              Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
-          }
+          handlePlanAmendment(userAnswers, amendPaymentDate, PaymentPlanType.SinglePaymentPlan.toString)
 
         case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
           val amendPlanEndDate = userAnswers.get(AmendPlanEndDatePage)
-          val amendRegularPaymentAmount = userAnswers.get(AmendPaymentAmountPage)
-          (planDetailsQuery, amendRegularPaymentAmount, amendPlanEndDate) match {
-            case (Some(planDetails), Some(amendedRegAmount), Some(amendedEndDate)) =>
-              val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-              val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
-
-              val noChange = amendedRegAmount == dbAmount && amendedEndDate == dbEndDate
-              if (noChange) { // F27 amendment check
-                Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
-              } else {
-                // F26 duplicate check
-                checkDuplicatePlan(userAnswers)
-              }
-            case _ =>
-              logger.warn("Missing Amend payment amount and/or amend plan end date")
-              Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
-          }
+          handlePlanAmendment(userAnswers, amendPlanEndDate, PaymentPlanType.BudgetPaymentPlan.toString)
 
         case _ =>
-          logger.warn("Missing Amend regular or payment amount and/or amend payment date or plan end date from session")
+          logger.warn("Missing payment plan type from session")
           Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
       }
     }
+
+  private def handlePlanAmendment(userAnswers: UserAnswers,
+                                  amendedDateOption: Option[LocalDate],
+                                  planType: String
+                                 )(implicit request: Request[_], ec: ExecutionContext): Future[Result] = {
+
+    val planDetailsQuery = userAnswers.get(PaymentPlanDetailsQuery)
+    val amendedAmountOption = userAnswers.get(AmendPaymentAmountPage)
+    (planDetailsQuery, amendedAmountOption, amendedDateOption) match {
+      case (Some(planDetails), Some(amendedAmount), Some(amendedDate)) =>
+        val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
+        val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
+        val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
+
+        val noChange = planType match {
+          case PaymentPlanType.SinglePaymentPlan.toString => amendedAmount == dbAmount && amendedDate == dbStartDate
+          case PaymentPlanType.BudgetPaymentPlan.toString => amendedAmount == dbAmount && amendedDate == dbEndDate
+          case _                                          => false
+        }
+
+        if (noChange) {
+          // F27 amendment check - no change go to AP3
+          Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
+        } else {
+          // F26 duplicate check
+          checkDuplicatePlan(userAnswers)
+        }
+
+      case _ =>
+        logger.warn(s"Missing required fields for $planType amendment")
+        Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+    }
+  }
 
   private def checkDuplicatePlan(userAnswers: UserAnswers)(implicit ec: ExecutionContext, request: Request[?]): Future[Result] = {
     nddService.isDuplicatePaymentPlan(userAnswers).flatMap { duplicateResponse =>
       if (duplicateResponse.isDuplicate) {
         Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url))
       } else {
+        println(s"************ userAnswers: ${userAnswers}")
         chrisService.submitToChris(
           ua              = userAnswers,
           successRedirect = Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()),

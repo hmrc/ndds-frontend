@@ -63,6 +63,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     nddConnector
       .submitChrisData(submission)
       .map { success =>
+        println(s"chris submitted successfully: ${success}")
         success
       }
       .recover { case ex =>
