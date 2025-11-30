@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package navigation
+package pages
 
-import play.api.mvc.Call
-import pages.*
-import models.{Mode, UserAnswers}
+import play.api.libs.json.JsPath
 
-class FakeNavigator(desiredRoute: Call) extends Navigator {
+case object AmendPlanEndDateFlag extends QuestionPage[Boolean] {
 
-  override def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers, testOnly: Boolean = false): Call =
-    desiredRoute
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "amendPlanEndDateFlag"
 }

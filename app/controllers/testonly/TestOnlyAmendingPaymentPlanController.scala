@@ -54,31 +54,40 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
     if (!nddsService.amendPaymentPlanGuard(request.userAnswers)) {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      Redirect(routes.SystemErrorController.onPageLoad())
     } else {
       val planDetailsResponse = request.userAnswers
         .get(PaymentPlanDetailsQuery)
         .getOrElse(throw new RuntimeException("Missing plan details"))
 
       val planDetail = planDetailsResponse.paymentPlanDetails
-      val amountRow =
-        AmendPaymentAmountSummary
-          .row(planDetail.planType, planDetail.scheduledPaymentAmount)
-          .copy(
-            actions = Some(
-              Actions(
-                items = Seq(
-                  ActionItem(
-                    href = testOnlyRoutes.TestOnlyAmendPaymentAmountController
-                      .onPageLoad(NormalMode)
-                      .url,
-                    content            = Text("Change"),
-                    visuallyHiddenText = Some("payment amount")
-                  )
+      val isBudgetPlan = planDetail.planType == PaymentPlanType.BudgetPaymentPlan.toString
+      val changeCall = if (isBudgetPlan) {
+        testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode = NormalMode)
+      } else {
+        testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode = NormalMode)
+      }
+      val hiddenChangeText = if (isBudgetPlan) {
+        "regular payment amount"
+      } else {
+        "payment amount"
+      }
+
+      val amountRow = AmendPaymentAmountSummary
+        .row(planDetail.planType, planDetail.scheduledPaymentAmount)
+        .copy(actions =
+          Some(
+            Actions(items =
+              Seq(
+                ActionItem(
+                  href               = changeCall.url,
+                  content            = Text("Change"),
+                  visuallyHiddenText = Some(hiddenChangeText)
                 )
               )
             )
           )
+        )
 
       val dateRow: SummaryListRow =
         planDetail.planType match {

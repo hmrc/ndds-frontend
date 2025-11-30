@@ -48,10 +48,10 @@ object AmendPlanEndDateSummary {
       key   = "testOnlyAmendPaymentPlanConfirmation.endDate",
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
-        Seq( // TODO: Change to Ap1c, Ap1d later after it is merged
-          ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+        Seq(
+          ActionItemViewModel("site.change", controllers.testonly.routes.TestOnlyAmendPlanEndDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.change.endDate")),
-          ActionItemViewModel("site.remove", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+          ActionItemViewModel("site.remove", controllers.testonly.routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.remove.endDate"))
         )
       } else {

@@ -19,31 +19,32 @@ package controllers.testonly
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
-import forms.AmendPaymentAmountFormProvider
+import forms.RegularPaymentAmountFormProvider
 import models.Mode
-import pages.{AmendConfirmRemovePlanEndDateFlag, AmendPaymentAmountFlag, AmendPaymentAmountPage, AmendPaymentDateFlag, AmendPlanEndDateFlag, AmendRegularPaymentAmountFlag, ManagePaymentPlanTypePage}
+import pages.{AmendConfirmRemovePlanEndDateFlag, AmendPaymentAmountFlag, AmendPaymentDateFlag, AmendPlanEndDateFlag, AmendRegularPaymentAmountFlag, ManagePaymentPlanTypePage, RegularPaymentAmountPage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.testonly.TestOnlyAmendPaymentAmountView
+import views.html.testonly.TestOnlyAmendRegularPaymentAmountView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestOnlyAmendPaymentAmountController @Inject() (
+class TestOnlyAmendRegularPaymentAmountController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: AmendPaymentAmountFormProvider,
+  formProvider: RegularPaymentAmountFormProvider,
   nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
-  view: TestOnlyAmendPaymentAmountView
+  view: TestOnlyAmendRegularPaymentAmountView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -55,16 +56,20 @@ class TestOnlyAmendPaymentAmountController @Inject() (
     val answers = request.userAnswers
 
     if (nddsService.amendPaymentPlanGuard(answers)) {
-      val preparedForm = answers.get(AmendPaymentAmountPage) match {
-        case None        => form
+      val existingAmount = answers
+        .get(RegularPaymentAmountPage)
+        .orElse(answers.get(PaymentPlanDetailsQuery).flatMap(_.paymentPlanDetails.scheduledPaymentAmount))
+
+      val preparedForm = existingAmount match {
         case Some(value) => form.fill(value)
+        case None        => form
       }
 
       Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))
     } else {
-      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      val planType = answers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"[TestOnly] NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Redirect(routes.SystemErrorController.onPageLoad())
+      Redirect(routes.JourneyRecoveryController.onPageLoad())
     }
   }
 
@@ -76,14 +81,14 @@ class TestOnlyAmendPaymentAmountController @Inject() (
           Future.successful(BadRequest(view(formWithErrors, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))),
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, true))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(RegularPaymentAmountPage, value))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, true))
+            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, false))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, false))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(controllers.testonly.routes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
+          } yield Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
       )
   }
 }

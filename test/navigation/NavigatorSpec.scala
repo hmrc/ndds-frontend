@@ -287,6 +287,23 @@ class NavigatorSpec extends SpecBase {
             routes.JourneyRecoveryController.onPageLoad()
         }
 
+        "must go from a ConfirmRemovePlanEndDatePage to ap0  when No" in {
+          val ua = userAnswers
+            .set(ConfirmRemovePlanEndDatePage, false)
+            .success
+            .value
+
+          navigator.nextPage(ConfirmRemovePlanEndDatePage, NormalMode, ua) mustBe
+            controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+        }
+
+        "must go from a ConfirmRemovePlanEndDatePage to Journey Recovery Page when no answer" in {
+          val ua = userAnswers
+
+          navigator.nextPage(ConfirmRemovePlanEndDatePage, NormalMode, ua) mustBe
+            routes.JourneyRecoveryController.onPageLoad()
+        }
+
         "must go from a RemovingThisSuspensionPage to PaymentPlanDetailsController when No" in {
           val ua = userAnswers
             .set(RemovingThisSuspensionPage, false)

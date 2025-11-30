@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package navigation
+package forms
 
-import play.api.mvc.Call
-import pages.*
-import models.{Mode, UserAnswers}
+import javax.inject.Inject
 
-class FakeNavigator(desiredRoute: Call) extends Navigator {
+import forms.mappings.Mappings
+import play.api.data.Form
 
-  override def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers, testOnly: Boolean = false): Call =
-    desiredRoute
+class ConfirmRemovePlanEndDateFormProvider @Inject() extends Mappings {
+
+  def apply(): Form[Boolean] =
+    Form(
+      "value" -> boolean("testOnlyConfirmRemovePlanEndDate.error.required")
+    )
 }

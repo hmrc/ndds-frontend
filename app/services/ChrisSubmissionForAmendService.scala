@@ -98,7 +98,7 @@ class ChrisSubmissionForAmendService @Inject() (
           ddiReferenceNo                  = ddiRef,
           paymentReference                = plan.paymentReference,
           totalAmountDue                  = plan.totalLiability,
-          paymentAmount                   = ua.get(AmendPaymentAmountPage),
+          paymentAmount                   = None,
           regularPaymentAmount            = None,
           amendPaymentAmount              = ua.get(AmendPaymentAmountPage),
           calculation                     = None,

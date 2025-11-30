@@ -106,7 +106,7 @@ class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
       }
     }
 
-    "must redirect to Journey Recovery page when amend payment plan guard returns false" in {
+    "must redirect to System Error page when amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
         .success
@@ -121,7 +121,7 @@ class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
         val result = controller.onPageLoad()(request)
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -193,7 +193,7 @@ class TestOnlyAmendingPaymentPlanControllerSpec extends SpecBase {
         val page = contentAsString(result)
         page must include("Amending this payment plan")
         page must include("Add plan end date")
-        page must include("/direct-debits/date-ending-payment-plan")
+        page must include("/direct-debits/test-only/amend-payment-plan-end-date")
       }
     }
   }

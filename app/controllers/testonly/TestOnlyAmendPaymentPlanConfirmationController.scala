@@ -68,7 +68,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       } else {
         val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
   }
@@ -78,47 +78,49 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
   ): (Seq[SummaryListRow], Call) = {
     userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
-        (Seq(
-           AmendPaymentAmountSummary.row(
-             PaymentPlanType.SinglePaymentPlan.toString,
-             userAnswers.get(AmendPaymentAmountPage),
-             true
-           ),
-           AmendPlanStartDateSummary.row(
-             PaymentPlanType.SinglePaymentPlan.toString,
-             userAnswers.get(AmendPlanStartDatePage),
-             Constants.shortDateTimeFormatPattern,
-             true
-           )
-         ),
-         userAnswers.get(AmendPaymentAmountPage) match {
-           case Some(_) => testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode)
-           case _       => testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode)
-         }
+        val rows = Seq(
+          AmendPaymentAmountSummary.row(
+            PaymentPlanType.SinglePaymentPlan.toString,
+            userAnswers.get(AmendPaymentAmountPage),
+            true
+          ),
+          AmendPlanStartDateSummary.row(
+            PaymentPlanType.SinglePaymentPlan.toString,
+            userAnswers.get(AmendPlanStartDatePage),
+            Constants.shortDateTimeFormatPattern,
+            true
+          )
         )
+        val backLink = userAnswers.get(AmendPaymentAmountFlag) match {
+          case Some(true) => testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode)
+          case _          => testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode)
+        }
+
+        (rows, backLink)
       case _ => // Budget Payment Plan
-        (Seq(
-           AmendPaymentAmountSummary.row(
-             PaymentPlanType.BudgetPaymentPlan.toString,
-             userAnswers.get(AmendPaymentAmountPage),
-             true
-           ),
-           userAnswers.get(AmendPlanEndDatePage) match {
-             case Some(endDate) =>
-               AmendPlanEndDateSummary.row(
-                 Some(endDate),
-                 Constants.shortDateTimeFormatPattern,
-                 true
-               )
-             case None =>
-               AmendPlanEndDateSummary.addRow()
-           }
-         ),
-         userAnswers.get(AmendPlanEndDatePage) match {
-           case Some(_) => routes.AmendPlanEndDateController.onPageLoad(mode) // TODO - replace with TestOnly Amend plan end date controller
-           case _       => testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode)
-         }
+        val rows = Seq(
+          AmendRegularPaymentAmountSummary.row(
+            userAnswers.get(RegularPaymentAmountPage),
+            showChange = true,
+            changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode))
+          ),
+          AmendPlanEndDateSummary.row(
+            userAnswers.get(AmendPlanEndDatePage),
+            Constants.shortDateTimeFormatPattern,
+            true
+          )
         )
+
+        val backLink = userAnswers.get(AmendRegularPaymentAmountFlag) match {
+          case Some(true) => testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
+          case _ =>
+            userAnswers.get(AmendPlanEndDateFlag) match {
+              case Some(true) => testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode)
+              case _          => testOnlyRoutes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
+            }
+        }
+
+        (rows, backLink)
     }
   }
 

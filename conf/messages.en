@@ -756,9 +756,13 @@ testOnlyAmendingPaymentPlan.budgetPlanEndDate.remove.hidden =  remove Plan end d
 testOnlyAmendingPaymentPlan.budgetPlanEndDate.addPlanEndDateLink = Add plan end date
 
 #AP1a messages
+testOnlyAmendRegularPaymentAmount.title = How much is the regular payment amount, in pounds?
+testOnlyAmendRegularPaymentAmount.heading = How much is the regular payment amount, in pounds?
+testOnlyAmendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
 testOnlyAmendPaymentAmount.title = How much do you want to pay, in pounds?
 testOnlyAmendPaymentAmount.heading = How much do you want to pay, in pounds?
-testOnlyAmendPaymentAmount.hint = 	Amount must be in pounds and pence, like 967 or 967.82
+testOnlyAmendPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
+
 
 #AP1b messages
 testOnlyAmendPlanStartDate.title = When do you want to make this payment?
@@ -768,6 +772,14 @@ testOnlyAmendPlanStartDate.warning = If your payment is late, you may be liable 
 testOnlyAmendPlanStartDate.hint = For example, {0}
 testOnlyAmendPlanStartDate.error.beforeEarliest=The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
 testOnlyAmendPlanStartDate.error.tooFarInFuture=The date you have entered is not valid. It cannot be more than 12 months after the current date.
+
+#AP1c messages
+testOnlyAmendPlanEndDate.title = When do you want this payment plan to end?
+testOnlyAmendPlanEndDate.heading = When do you want this payment plan to end?
+testOnlyAmendPlanEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
+testOnlyAmendPlanEndDate.hint = For example, 27 3 2020
+testOnlyAmendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change  to be processed. Extend or remove the plan end date if you wish to continue.
+testOnlyAmendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
 
 #AP2 messages
 testOnlyAmendPaymentPlanConfirmation.title = Check your amendment details
@@ -813,5 +825,15 @@ testOnlyDuplicateWarning.title = You already have a payment plan with these deta
 testOnlyDuplicateWarning.h1 = You already have a payment plan with these details
 testOnlyDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
 testOnlyDuplicateWarning.h2 = Do you want to continue with this amendment?
+
+#AP1d messages
+testOnlyConfirmRemovePlanEndDate.title = Removing this plan end date
+testOnlyConfirmRemovePlanEndDate.heading = Removing this plan end date
+testOnlyConfirmRemovePlanEndDate.q1 = Are you sure you want to remove this plan end date?
+testOnlyConfirmRemovePlanEndDate.checkYourAnswersLabel = Removing this plan end date
+testOnlyConfirmRemovePlanEndDate.error.required = Select one option.
+testOnlyConfirmRemovePlanEndDate.change.hidden = Removing this plan end date
+testOnlyConfirmRemovePlanEndDate.p1.line1 = Payment reference: <strong>{0}</strong>
+testOnlyConfirmRemovePlanEndDate.p1.line2 = The plan end date is <strong>{0}</strong>.
 
 #####################################################
