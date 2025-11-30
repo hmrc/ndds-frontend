@@ -49,19 +49,16 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
       .onPageLoad(NormalMode)
       .url
 
-  // SIMAPLA plan reference is carried in PaymentPlanDetails.paymentReference
   private val simaplaPlanReference = "PP123456"
 
-  // Use a fixed end date for determinism in tests
   private val testEndDate = LocalDate.of(2025, 12, 31)
 
-  // Keep a consistent plan type value (string as stored in UA)
   private val planType = PaymentPlanType.BudgetPaymentPlan.toString
 
   private val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
     hodService                = "HOD1",
     planType                  = planType,
-    paymentReference          = simaplaPlanReference, // <- SIMAPLA ref comes from details
+    paymentReference          = simaplaPlanReference,
     submissionDateTime        = LocalDateTime.of(2025, 11, 29, 12, 0),
     scheduledPaymentAmount    = Some(BigDecimal(100)),
     scheduledPaymentStartDate = Some(LocalDate.of(2025, 11, 1)),
@@ -93,7 +90,6 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
         .set(PaymentPlanDetailsQuery, paymentPlanResponse)
         .success
         .value
-        // Controller reads the end date from AmendPlanEndDatePage
         .set(AmendPlanEndDatePage, testEndDate)
         .success
         .value
@@ -114,9 +110,9 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
           view(
             form,
             NormalMode,
-            simaplaPlanReference, // <- SIMAPLA ref from payment details
-            expectedPlanEndDate, // <- formatted from AmendPlanEndDatePage
-            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad() // <- matches controller's back-link
+            simaplaPlanReference,
+            expectedPlanEndDate,
+            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
           )(request, messages(application)).toString
       }
     }
