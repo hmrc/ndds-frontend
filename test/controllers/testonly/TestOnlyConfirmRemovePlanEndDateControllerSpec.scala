@@ -28,7 +28,7 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import java.time.{LocalDate, LocalDateTime}
@@ -39,28 +39,33 @@ import scala.concurrent.Future
 
 class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute = Call("GET", "/foo")
+  def onwardRoute: Call = Call("GET", "/foo")
 
-  val formProvider = new ConfirmRemovePlanEndDateFormProvider()
-  val form = formProvider()
+  private val formProvider = new ConfirmRemovePlanEndDateFormProvider()
+  private val form = formProvider()
 
-  lazy val testOnlyConfirmRemovePlanEndDateRoute =
+  private lazy val testOnlyConfirmRemovePlanEndDateRoute =
     testonlyRoutes.TestOnlyConfirmRemovePlanEndDateController
       .onPageLoad(NormalMode)
       .url
 
-  private val testPlanReference = "PP123456"
-  private val testEndDate = LocalDate.now().plusMonths(3)
-  private val planType = "04"
+  // SIMAPLA plan reference is carried in PaymentPlanDetails.paymentReference
+  private val simaplaPlanReference = "PP123456"
+
+  // Use a fixed end date for determinism in tests
+  private val testEndDate = LocalDate.of(2025, 12, 31)
+
+  // Keep a consistent plan type value (string as stored in UA)
+  private val planType = PaymentPlanType.BudgetPaymentPlan.toString
 
   private val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
     hodService                = "HOD1",
     planType                  = planType,
-    paymentReference          = testPlanReference,
-    submissionDateTime        = LocalDateTime.now(),
+    paymentReference          = simaplaPlanReference, // <- SIMAPLA ref comes from details
+    submissionDateTime        = LocalDateTime.of(2025, 11, 29, 12, 0),
     scheduledPaymentAmount    = Some(BigDecimal(100)),
-    scheduledPaymentStartDate = Some(LocalDate.now()),
-    initialPaymentStartDate   = Some(LocalDate.now()),
+    scheduledPaymentStartDate = Some(LocalDate.of(2025, 11, 1)),
+    initialPaymentStartDate   = Some(LocalDate.of(2025, 11, 1)),
     initialPaymentAmount      = Some(BigDecimal(50)),
     scheduledPaymentEndDate   = Some(testEndDate),
     scheduledPaymentFrequency = Some("Monthly"),
@@ -74,22 +79,22 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
 
   private val paymentPlanResponse: PaymentPlanResponse =
     PaymentPlanResponse(
-      directDebitDetails = DirectDebitDetails(None, None, None, true, LocalDateTime.now()),
+      directDebitDetails = DirectDebitDetails(None, None, None, auDdisFlag = true, submissionDateTime = LocalDateTime.of(2025, 11, 29, 12, 0)),
       paymentPlanDetails = paymentPlanDetails
     )
 
   "ConfirmRemovePlanEndDate Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
       val userAnswers = UserAnswers(userAnswersId)
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
-        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
         .success
         .value
-        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        // Controller reads the end date from AmendPlanEndDatePage
+        .set(AmendPlanEndDatePage, testEndDate)
         .success
         .value
 
@@ -106,23 +111,25 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, NormalMode, testPlanReference, expectedPlanEndDate, routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode))(
-            request,
-            messages(application)
-          ).toString
+          view(
+            form,
+            NormalMode,
+            simaplaPlanReference, // <- SIMAPLA ref from payment details
+            expectedPlanEndDate, // <- formatted from AmendPlanEndDatePage
+            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad() // <- matches controller's back-link
+          )(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
-
       val userAnswers = UserAnswers(userAnswersId)
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
-        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
         .success
         .value
-        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .set(AmendPlanEndDatePage, testEndDate)
         .success
         .value
         .set(ConfirmRemovePlanEndDatePage, true)
@@ -134,7 +141,6 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
         .build()
 
       running(application) {
-
         val request = FakeRequest(GET, testOnlyConfirmRemovePlanEndDateRoute)
         val view = application.injector.instanceOf[TestOnlyConfirmRemovePlanEndDateView]
         val result = route(application, request).value
@@ -146,23 +152,25 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
           view(
             form.fill(true),
             NormalMode,
-            testPlanReference,
+            simaplaPlanReference,
             expectedPlanEndDate,
-            routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
-          )(
-            request,
-            messages(application)
-          ).toString
+            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+          )(request, messages(application)).toString
       }
     }
 
     "must redirect to the next page when valid data is submitted" in {
-
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val userAnswers = UserAnswers(userAnswersId)
-        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .success
+        .value
+        .set(AmendPlanEndDatePage, testEndDate)
         .success
         .value
 
@@ -182,14 +190,19 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url // can update once  all flow available
+        redirectLocation(result).value mustEqual onwardRoute.url
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
-
       val userAnswers = UserAnswers(userAnswersId)
-        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .success
+        .value
+        .set(AmendPlanEndDatePage, testEndDate)
         .success
         .value
 
@@ -202,9 +215,8 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
           .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
-
         val view = application.injector.instanceOf[TestOnlyConfirmRemovePlanEndDateView]
-        val expectedPlanEndDate = formattedDateTimeShort(LocalDate.now().toString)
+        val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
         val result = route(application, request).value
 
@@ -213,18 +225,14 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
           view(
             boundForm,
             NormalMode,
-            testPlanReference,
+            simaplaPlanReference,
             expectedPlanEndDate,
-            routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
-          )(
-            request,
-            messages(application)
-          ).toString
+            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+          )(request, messages(application)).toString
       }
     }
 
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
-
       val application = applicationBuilder(userAnswers = None)
         .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
         .build()
@@ -239,7 +247,6 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
     }
 
     "must redirect to Journey Recovery for a POST if no existing data is found" in {
-
       val application = applicationBuilder(userAnswers = None)
         .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
         .build()

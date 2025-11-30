@@ -68,9 +68,8 @@ class TestOnlyConfirmRemovePlanEndDateController @Inject() (
       } else {
 
         val maybeResult = for {
-          paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
-          planDetails          <- userAnswers.get(PaymentPlanDetailsQuery)
-          planEndDateValue     <- planDetails.paymentPlanDetails.scheduledPaymentEndDate
+          planEndDateValue <- userAnswers.get(AmendPlanEndDatePage)
+          planDetails      <- userAnswers.get(PaymentPlanDetailsQuery)
         } yield {
           val planEndDate = formattedDateTimeShort(planEndDateValue.toString)
 
@@ -102,29 +101,47 @@ class TestOnlyConfirmRemovePlanEndDateController @Inject() (
       }
     }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    val paymentPlanReference =
-      request.userAnswers.get(PaymentPlanReferenceQuery).getOrElse(throw new RuntimeException("Missing PaymentPlanReferenceQuery"))
-    val planEndDate = formattedDateTimeShort(LocalDate.now().toString)
-    form
-      .bindFromRequest()
-      .fold(
-        formWithErrors =>
-          Future.successful(
-            BadRequest(
-              view(formWithErrors,
-                   mode,
-                   paymentPlanReference,
-                   planEndDate,
-                   controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+      val ua = request.userAnswers
+
+      val maybeRefs = for {
+        planDetails <- ua.get(PaymentPlanDetailsQuery)
+        endDate     <- ua.get(AmendPlanEndDatePage)
+      } yield {
+        val planReference = planDetails.paymentPlanDetails.paymentReference
+        val planEndDateStr = formattedDateTimeShort(endDate.toString)
+        (planReference, planEndDateStr)
+      }
+
+      maybeRefs match {
+        case Some((planReference, planEndDateStr)) =>
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                Future.successful(
+                  BadRequest(
+                    view(
+                      formWithErrors,
+                      mode,
+                      planReference,
+                      planEndDateStr,
+                      controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+                    )
                   )
+                ),
+              value =>
+                for {
+                  updatedAnswers <- Future.fromTry(ua.set(ConfirmRemovePlanEndDatePage, value))
+                  _              <- sessionRepository.set(updatedAnswers)
+                } yield Redirect(navigator.nextPage(ConfirmRemovePlanEndDatePage, mode, updatedAnswers))
             )
-          ),
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmRemovePlanEndDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(ConfirmRemovePlanEndDatePage, mode, updatedAnswers))
-      )
-  }
+
+        case None =>
+          logger.warn("Missing PaymentPlanDetails or AmendPlanEndDate in UserAnswers for ConfirmRemovePlanEndDate submission")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    }
+
 }
