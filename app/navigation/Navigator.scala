@@ -53,7 +53,7 @@ class Navigator @Inject() () {
     case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
     case AmendConfirmRemovePlanEndDatePage    => navigateFromConfirmRemovePlanEndDatePage
-    case TellAboutThisPaymentPage             => navigateTellAboutThisPaymentPage
+    case TellAboutThisPaymentPage             => userAnswers => navigateTellAboutThisPaymentPage(NormalMode)(userAnswers)
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
@@ -79,6 +79,7 @@ class Navigator @Inject() () {
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
+    case TellAboutThisPaymentPage             => userAnswers => navigateTellAboutThisPaymentPage(CheckMode)(userAnswers)
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
 
@@ -175,13 +176,12 @@ class Navigator @Inject() () {
       }
       .getOrElse(routes.JourneyRecoveryController.onPageLoad())
 
-  private def navigateTellAboutThisPaymentPage(answers: UserAnswers): Call =
-    answers
-      .get(TellAboutThisPaymentPage)
-      .map {
-        case true  => routes.YearEndAndMonthController.onPageLoad(NormalMode) // change it when page ready
-        case false => routes.PaymentAmountController.onPageLoad(NormalMode)
-      }
-      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+  private def navigateTellAboutThisPaymentPage(mode: Mode)(userAnswers: UserAnswers): Call =
+    (userAnswers.get(TellAboutThisPaymentPage), mode) match {
+      case (Some(true), _)           => routes.YearEndAndMonthController.onPageLoad(mode)
+      case (Some(false), NormalMode) => routes.PaymentAmountController.onPageLoad(NormalMode)
+      case (Some(false), CheckMode)  => routes.CheckYourAnswersController.onPageLoad()
+      case (None, _)                 => routes.JourneyRecoveryController.onPageLoad()
+    }
 
 }

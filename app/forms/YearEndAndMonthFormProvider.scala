@@ -29,11 +29,11 @@ class YearEndAndMonthFormProvider @Inject() extends Mappings {
   def apply()(implicit messages: Messages): Form[YearEndAndMonth] =
     Form(
       "value" -> yearEndMonthDate(
-        invalidKey     = "yearEndAndMonth.error.invalid",
-        allRequiredKey = "yearEndAndMonth.error.required.all",
-        twoRequiredKey = "yearEndAndMonth.error.required.two",
-        requiredKey    = "yearEndAndMonth.error.required",
-        dateFormats    = DateFormats.yearEndMonthFormats
+        emptyKey         = "yearEndAndMonth.error.empty",
+        invalidFormatKey = "yearEndAndMonth.error.invalid",
+        invalidMonthKey  = "yearEndAndMonth.error.invalidMonth",
+        dateFormats      = DateFormats.yearEndMonthFormats
       )
     )
+
 }

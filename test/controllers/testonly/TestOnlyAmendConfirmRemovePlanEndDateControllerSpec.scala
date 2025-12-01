@@ -191,7 +191,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url // can update once all flow available
+        redirectLocation(result).value mustEqual onwardRoute.url
       }
     }
 

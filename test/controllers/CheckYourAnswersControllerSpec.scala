@@ -120,6 +120,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       val userAnswer = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
         .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(TellAboutThisPaymentPage, true)
         .setOrException(PaymentAmountPage, 123.01)
         .setOrException(PaymentDatePage, paymentDateDetails)
         .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
@@ -134,13 +135,15 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
         )
         contentAsString(result) must include("Payment reference")
+        contentAsString(result) must include("Add 4 extra numbers")
+        contentAsString(result) must include("Yes")
         contentAsString(result) must include("Payment amount")
         contentAsString(result) must include("123.01")
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Year end and month")
-        contentAsString(result) must include("2025 04")
+        contentAsString(result) must include("4 extra numbers")
+        contentAsString(result) must include("2504")
         contentAsString(result) must include("Accept and continue")
       }
     }
@@ -265,6 +268,64 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Check your payment plan details")
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("25 Jul 2027")
+      }
+    }
+
+    "must not show 4 extra numbers when TellAboutThisPaymentPage is false (NO)" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(TellAboutThisPaymentPage, false)
+        .setOrException(PaymentAmountPage, 123.01)
+        .setOrException(PaymentDatePage, paymentDateDetails)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("Add 4 extra numbers")
+        contentAsString(result) must include("No")
+        contentAsString(result) must not include "2504"
+      }
+    }
+
+    "must show 4 extra numbers when TellAboutThisPaymentPage is true (YES) and YearEndAndMonthPage has a value" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(TellAboutThisPaymentPage, true)
+        .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
+        .setOrException(PaymentAmountPage, 123.01)
+        .setOrException(PaymentDatePage, paymentDateDetails)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("Add 4 extra numbers")
+        contentAsString(result) must include("Yes")
+        contentAsString(result) must include("4 extra numbers")
+        contentAsString(result) must include("2504")
+      }
+    }
+
+    "must show 4 extra numbers when TellAboutThisPaymentPage is not set and YearEndAndMonthPage has a value (backwards compatibility)" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
+        .setOrException(PaymentAmountPage, 123.01)
+        .setOrException(PaymentDatePage, paymentDateDetails)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val result = route(application, request).value
+        status(result) mustEqual OK
+        contentAsString(result) must include("Check your payment plan details")
+        contentAsString(result) must include("4 extra numbers")
+        contentAsString(result) must include("2504")
       }
     }
 
