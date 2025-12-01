@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.*
 import models.DirectDebitSource.*
-import models.requests.ChrisSubmissionRequest
+import models.requests.{ChrisSubmissionRequest, DataRequest}
 import models.responses.GenerateDdiRefResponse
 import pages.*
 import play.api.Logging
@@ -115,9 +115,16 @@ class CheckYourAnswersController @Inject() (
     }
   }
 
+  import uk.gov.hmrc.http.HeaderCarrier
+  import uk.gov.hmrc.play.http.HeaderCarrierConverter
+
   def onSubmit(): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
       implicit val ua: UserAnswers = request.userAnswers
+      // ---------------------------------------------------------------
+      // NEW: implicit HeaderCarrier from request/session
+      // ---------------------------------------------------------------
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
       validateStartAndEndDates(ua) match {
         case Some(redirect) =>
@@ -126,71 +133,118 @@ class CheckYourAnswersController @Inject() (
           nddService
             .isDuplicatePlanSetupAmendAndAddPaymentPlan(userAnswers = ua, userId = request.userId, None, None)
             .flatMap { duplicateResponse =>
-              {
-                if (duplicateResponse.isDuplicate) {
-                  val warningUrl = ua.get(PaymentPlanTypePage) match {
-                    case Some(planType) if planType == PaymentPlanType.VariablePaymentPlan => routes.DuplicateErrorController.onPageLoad()
-                    case _ => routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode)
-                  }
-                  Future.successful(Redirect(warningUrl))
-                } else {
-                  val existingDirectDebitRefEitherFuture: Future[Either[Result, String]] = ua.get(ExistingDirectDebitIdentifierQuery) match {
-                    // Existing direct debit: skip MAC and skip generateNewDdiReference
-                    case Some(existingDirectDebit) =>
-                      logger.debug(s"Using existing DDI reference: ${existingDirectDebit.ddiRefNumber}")
-                      Future.successful(Right(existingDirectDebit.ddiRefNumber))
+              if (duplicateResponse.isDuplicate) {
+                val warningUrl = ua.get(PaymentPlanTypePage) match {
+                  case Some(planType) if planType == PaymentPlanType.VariablePaymentPlan =>
+                    routes.DuplicateErrorController.onPageLoad()
+                  case _ =>
+                    routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode)
+                }
+                Future.successful(Redirect(warningUrl))
+              } else {
+                // NEW: earliest payment date check BEFORE MAC validation
+                if (requiresEarliestPaymentDateCheck(ua)) {
 
-                    // New direct debit: validate MAC and generate new DDI
-                    case None =>
-                      val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
+                  nddService.calculateFutureWorkingDays(request.userAnswers, request.userId).flatMap { earliestPaymentDate =>
 
-                      (ua.get(pages.MacValuePage), maybeMac2) match {
-                        case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-                          logger.debug("MAC validation successful")
-                          nddService
-                            .generateNewDdiReference(required(PaymentReferencePage))
-                            .map(ref => Right(ref.ddiRefNumber))
-
-                        case (Some(_), Some(_)) =>
-                          logger.error(s"MAC validation failed for user ${request.userId}")
-                          Future.successful(
-                            Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                          )
-
-                        case _ =>
-                          logger.error("MAC generation failed or MAC1 missing in UserAnswers")
-                          Future.successful(
-                            Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                          )
-                      }
-                  }
-
-                  existingDirectDebitRefEitherFuture.flatMap {
-                    case Left(redirect) =>
-                      Future.successful(redirect)
-
-                    case Right(ddiReference) =>
-                      val chrisRequest = ChrisSubmissionRequest.buildChrisSubmissionRequest(ua, ddiReference, request.userId, appConfig)
-                      nddService.submitChrisData(chrisRequest).flatMap { success =>
-                        if (success) {
-                          for {
-                            updated1 <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber = ddiReference)))
-                            updated2 <- Future.fromTry(updated1.set(CreateConfirmationPage, true))
-                            _        <- sessionRepository.set(updated2)
-                          } yield {
-                            Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-                          }
+                    ua.get(PaymentDatePage) match {
+                      case Some(paymentDate) =>
+                        val earliestDate: java.time.LocalDate = java.time.LocalDate.parse(earliestPaymentDate.date)
+                        if (!paymentDate.enteredDate.isBefore(earliestDate)) {
+                          // OK → proceed with existing MAC + DDI logic
+                          println("************************************************************")
+                          processDdiReferenceGeneration(ua, request)
                         } else {
+                          logger.warn(
+                            s"Payment date ${paymentDate.enteredDate} is before earliest allowed date $earliestDate"
+                          )
                           Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
                         }
-                      }
-                  }
-                }
-              }
 
+                      case None =>
+                        logger.error("PaymentDatePage missing in UserAnswers")
+                        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                    }
+                  }
+
+                } else {
+                  // Skip earliest date check → go straight to MAC logic
+                  processDdiReferenceGeneration(ua, request)
+                }
+
+              }
             }
       }
     }
+
+  private def requiresEarliestPaymentDateCheck(ua: UserAnswers): Boolean = {
+    val optSourceType = ua.get(DirectDebitSourcePage)
+    val optPaymentType = ua.get(PaymentPlanTypePage)
+
+    optSourceType.exists {
+      case OL | NIC | CT | SDLT | VAT                                                          => true
+      case DirectDebitSource.MGD if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan) => true
+      case DirectDebitSource.SA if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan)  => true
+      case DirectDebitSource.TC if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan)  => true
+      case _                                                                                   => false
+    }
+  }
+
+  private def processDdiReferenceGeneration(
+    ua: UserAnswers,
+    request: DataRequest[AnyContent]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
+
+    val existingDirectDebitRefEitherFuture: Future[Either[Result, String]] =
+      ua.get(ExistingDirectDebitIdentifierQuery) match {
+
+        // Existing direct debit: skip MAC and skip generateNewDdiReference
+        case Some(existingDirectDebit) =>
+          logger.debug(s"Using existing DDI reference: ${existingDirectDebit.ddiRefNumber}")
+          Future.successful(Right(existingDirectDebit.ddiRefNumber))
+
+        // New direct debit: validate MAC and generate new DDI
+        case None =>
+          val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
+
+          (ua.get(pages.MacValuePage), maybeMac2) match {
+            case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
+              logger.debug("MAC validation successful")
+              nddService
+                .generateNewDdiReference(required(PaymentReferencePage)(ua))
+                .map(ref => Right(ref.ddiRefNumber))
+
+            case (Some(_), Some(_)) =>
+              logger.error(s"MAC validation failed for user ${request.userId}")
+              Future.successful(Left(Redirect(routes.JourneyRecoveryController.onPageLoad())))
+
+            case _ =>
+              logger.error("MAC generation failed or MAC1 missing in UserAnswers")
+              Future.successful(Left(Redirect(routes.JourneyRecoveryController.onPageLoad())))
+          }
+      }
+
+    existingDirectDebitRefEitherFuture.flatMap {
+      case Right(ddiRefNumber) =>
+        val chrisRequest = ChrisSubmissionRequest.buildChrisSubmissionRequest(ua, ddiRefNumber, request.userId, appConfig)
+        nddService.submitChrisData(chrisRequest).flatMap { success =>
+          if (success) {
+            for {
+              updated1 <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber = ddiRefNumber)))
+              updated2 <- Future.fromTry(updated1.set(CreateConfirmationPage, true))
+              _        <- sessionRepository.set(updated2)
+            } yield {
+              Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+            }
+          } else {
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          }
+        }
+
+      case Left(result) =>
+        Future.successful(result)
+    }
+  }
 
   private def validateStartAndEndDates(userAnswers: UserAnswers): Option[Result] = {
     val hasEndDate = userAnswers.get(AddPaymentPlanEndDatePage)
