@@ -695,13 +695,13 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         )
 
         val userAnswers = emptyUserAnswers
-          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(PaymentPlanDetailsQuery, paymentPlanDetails)
           .success
           .value
-          .set(AmendPaymentDatePage, java.time.LocalDate.now().plusDays(4))
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now().plusDays(4))
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(1000))
@@ -741,7 +741,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           ),
           paymentPlanDetails = models.responses.PaymentPlanDetails(
             hodService                = "CESA",
-            planType                  = "BudgetPaymentPlan",
+            planType                  = "SinglePaymentPlan",
             paymentReference          = "paymentReference",
             submissionDateTime        = java.time.LocalDateTime.now(),
             scheduledPaymentAmount    = Some(1000),

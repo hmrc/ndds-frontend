@@ -21,21 +21,22 @@ import controllers.actions.*
 import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import models.{NormalMode, PaymentPlanType}
-import pages.ManagePaymentPlanTypePage
+import pages.{AmendPaymentAmountPage, ManagePaymentPlanTypePage, RegularPaymentAmountPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanDetailsQuery
+import repositories.SessionRepository
 import services.NationalDirectDebitService
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanStartDateSummary}
-import viewmodels.testonly.TestOnlyPlanEndDateSummary
+import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary}
 import views.html.testonly.TestOnlyAmendingPaymentPlanView
 
 import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestOnlyAmendingPaymentPlanController @Inject() (
   override val messagesApi: MessagesApi,
@@ -45,16 +46,18 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
   nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: TestOnlyAmendingPaymentPlanView,
+  sessionRepository: SessionRepository,
   appConfig: FrontendAppConfig
-) extends FrontendBaseController
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport
     with Logging {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     if (!nddsService.amendPaymentPlanGuard(request.userAnswers)) {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Redirect(routes.SystemErrorController.onPageLoad())
+      Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     } else {
       val planDetailsResponse = request.userAnswers
         .get(PaymentPlanDetailsQuery)
@@ -93,19 +96,13 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
         planDetail.planType match {
           case p if p == PaymentPlanType.SinglePaymentPlan.toString =>
             AmendPlanStartDateSummary
-              .row(
-                p,
-                planDetail.scheduledPaymentStartDate,
-                Constants.shortDateTimeFormatPattern
-              )
+              .row(p, planDetail.scheduledPaymentStartDate, Constants.shortDateTimeFormatPattern)
               .copy(
                 actions = Some(
                   Actions(
                     items = Seq(
                       ActionItem(
-                        href = testOnlyRoutes.TestOnlyAmendPlanStartDateController
-                          .onPageLoad(NormalMode)
-                          .url,
+                        href               = testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(NormalMode).url,
                         content            = Text("Change"),
                         visuallyHiddenText = Some("payment date")
                       )
@@ -117,15 +114,25 @@ class TestOnlyAmendingPaymentPlanController @Inject() (
           case p if p == PaymentPlanType.BudgetPaymentPlan.toString =>
             planDetail.scheduledPaymentEndDate match {
               case Some(endDate) =>
-                TestOnlyPlanEndDateSummary.row(endDate)
+                AmendPlanEndDateSummary.row(
+                  Some(endDate),
+                  Constants.shortDateTimeFormatPattern,
+                  true
+                )
               case None =>
-                TestOnlyPlanEndDateSummary.addRow()
+                AmendPlanEndDateSummary.addRow()
             }
           case _ =>
             SummaryListRow(key = Key(Text("")), value = Value(Text("")))
         }
-
-      Ok(view(appConfig.hmrcHelplineUrl, amountRow, dateRow))
+      val paymentAmount = planDetail.scheduledPaymentAmount.get
+      for {
+        updatedAnswers <- Future.fromTry(request.userAnswers.set(RegularPaymentAmountPage, paymentAmount))
+        updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, paymentAmount))
+        _              <- sessionRepository.set(updatedAnswers)
+      } yield {
+        Ok(view(appConfig.hmrcHelplineUrl, amountRow, dateRow))
+      }
     }
   }
 }

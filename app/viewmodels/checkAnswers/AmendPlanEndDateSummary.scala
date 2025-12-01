@@ -52,7 +52,7 @@ object AmendPlanEndDateSummary {
         Seq(
           ActionItemViewModel("site.change", testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.change.endDate")),
-          ActionItemViewModel("site.remove", testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(CheckMode).url)
+          ActionItemViewModel("site.remove", testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
             .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.remove.endDate"))
         )
       } else {

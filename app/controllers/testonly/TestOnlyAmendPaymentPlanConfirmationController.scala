@@ -135,7 +135,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
 
       userAnswers.get(ManagePaymentPlanTypePage) match {
         case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
-          val amendPaymentDate = userAnswers.get(AmendPaymentDatePage)
+          val amendPaymentDate = userAnswers.get(AmendPlanStartDatePage)
           handlePlanAmendment(userAnswers, amendPaymentDate, PaymentPlanType.SinglePaymentPlan.toString)
 
         case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
@@ -148,35 +148,48 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       }
     }
 
-  private def handlePlanAmendment(userAnswers: UserAnswers, amendedDateOption: Option[LocalDate], planType: String)(implicit
+  private def handlePlanAmendment(
+    userAnswers: UserAnswers,
+    amendedDateOption: Option[LocalDate],
+    planType: String
+  )(implicit
     request: Request[?],
     ec: ExecutionContext
   ): Future[Result] = {
 
-    val planDetailsQuery = userAnswers.get(PaymentPlanDetailsQuery)
-    val amendedAmountOption = userAnswers.get(AmendPaymentAmountPage)
-    (planDetailsQuery, amendedAmountOption, amendedDateOption) match {
-      case (Some(planDetails), Some(amendedAmount), Some(amendedDate)) =>
-        val dbAmount = planDetails.paymentPlanDetails.scheduledPaymentAmount.get
-        val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
-        val dbEndDate = planDetails.paymentPlanDetails.scheduledPaymentEndDate.get
+    val planDetailsOpt = userAnswers.get(PaymentPlanDetailsQuery)
+    val amendedAmountOpt = userAnswers.get(AmendPaymentAmountPage)
 
-        val noChange = planType match {
-          case PaymentPlanType.SinglePaymentPlan.toString => amendedAmount == dbAmount && amendedDate == dbStartDate
-          case PaymentPlanType.BudgetPaymentPlan.toString => amendedAmount == dbAmount && amendedDate == dbEndDate
-          case _                                          => false
-        }
+    (planDetailsOpt, amendedAmountOpt) match {
+      case (Some(planDetails), Some(amendedAmount)) =>
+        val paymentDetails = planDetails.paymentPlanDetails
 
-        if (noChange) {
-          // F27 amendment check - no change go to AP3
-          Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
-        } else {
-          // F26 duplicate check
-          checkDuplicatePlan(userAnswers)
+        (paymentDetails.scheduledPaymentAmount, paymentDetails.scheduledPaymentStartDate, paymentDetails.scheduledPaymentEndDate) match {
+
+          case (Some(dbAmount), Some(dbStartDate), Some(dbEndDate)) =>
+            val noChange = planType match {
+              case PaymentPlanType.SinglePaymentPlan.toString =>
+                amendedAmount == dbAmount && amendedDateOption == dbStartDate
+
+              case PaymentPlanType.BudgetPaymentPlan.toString =>
+                amendedAmount == dbAmount && amendedDateOption.fold(true)(_ == dbEndDate) // also covers if no end date
+
+              case _ => false
+            }
+
+            if (noChange) {
+              Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
+            } else {
+              checkDuplicatePlan(userAnswers)
+            }
+
+          case _ =>
+            logger.warn("[handlePlanAmendment] Missing payment plan DB fields")
+            Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
         }
 
       case _ =>
-        logger.warn(s"Missing required fields for $planType amendment")
+        logger.warn(s"[handlePlanAmendment] Missing required fields for planType=$planType amendment")
         Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
     }
   }

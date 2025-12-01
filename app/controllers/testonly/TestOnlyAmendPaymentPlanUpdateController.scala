@@ -83,7 +83,7 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
             directDebitDetails.bankAccountNumber.getOrElse(""),
             formattedSortCode,
             paymentList,
-            paymentPlan.paymentPlanDetails.planType.toString,
+            paymentPlan.paymentPlanDetails.planType,
             controllers.routes.PaymentPlanDetailsController.onPageLoad()
           )
         )
