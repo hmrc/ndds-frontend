@@ -117,7 +117,14 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-      implicit val ua: UserAnswers = request.userAnswers
+      implicit val ua: UserAnswers = {
+
+        val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
+        val fourExtraNumbers = request.userAnswers.get(YearEndAndMonthPage)
+
+        if (directDebitSource.contains(DirectDebitSource.PAYE) && fourExtraNumbers.isDefined) addFourExtraNoToPayRef(request.userAnswers)
+        else request.userAnswers
+      }
 
       validateStartAndEndDates(ua) match {
         case Some(redirect) =>
@@ -211,6 +218,15 @@ class CheckYourAnswersController @Inject() (
     } else {
       None
     }
+  }
+
+  private def addFourExtraNoToPayRef(ua: UserAnswers): UserAnswers = {
+    (for {
+      paymentRef       <- ua.get(PaymentReferencePage)
+      fourExtraNumbers <- ua.get(YearEndAndMonthPage)
+      updatedPaymentRef = paymentRef + fourExtraNumbers.displayFormat
+      updatedAnswers <- ua.set(PaymentReferencePage, updatedPaymentRef).toOption
+    } yield updatedAnswers).getOrElse(ua)
   }
 
   private def required[A](page: QuestionPage[A])(implicit ua: UserAnswers, rds: play.api.libs.json.Reads[A]): A =

@@ -19,14 +19,16 @@ package controllers
 import base.SpecBase
 import models.*
 import models.responses.{BankAddress, Country, DuplicateCheckResponse, GenerateDdiRefResponse}
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.ExistingDirectDebitIdentifierQuery
+import repositories.SessionRepository
 import services.NationalDirectDebitService
 import utils.MacGenerator
 import viewmodels.govuk.SummaryListFluency
@@ -1080,5 +1082,67 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
       }
     }
+
+    "must proceed normally and addFourExtra number to paymentReference when DirectDebitSource is 'PAYE', " +
+      "TellAboutThisPaymentPage is true (YES) and YearEndAndMonthPage has a value" in {
+        val mockSessionRepository = mock[SessionRepository]
+        val paymentReference = "1234567"
+
+        val userAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+          .setOrException(PaymentReferencePage, paymentReference)
+          .setOrException(TellAboutThisPaymentPage, true)
+          .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
+          .setOrException(PaymentAmountPage, 123.01)
+          .setOrException(PaymentDatePage, paymentDateDetails)
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(pages.MacValuePage, "valid-mac")
+
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+        when(mockNddService.generateNewDdiReference(any())(any()))
+          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+        when(mockNddService.submitChrisData(any())(any()))
+          .thenReturn(Future.successful(true))
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+        when(
+          mockMacGenerator.generateMac(
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[Option[String]],
+            any[Option[String]],
+            any[String],
+            any[String]
+          )
+        ).thenReturn("valid-mac")
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+
+          val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+          verify(mockSessionRepository).set(uaCaptor.capture())
+          val savedUa = uaCaptor.getValue
+
+          savedUa.get(PaymentReferencePage) must be(Some(s"$paymentReference${yearEndAndMonthDate.displayFormat}"))
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        }
+      }
+
   }
 }
