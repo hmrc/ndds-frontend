@@ -58,11 +58,16 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           showChange = true,
           changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode))
         )(messages(app)),
-        AmendPlanEndDateSummary.row(
-          userAnswers.get(AmendPlanEndDatePage),
-          Constants.shortDateTimeFormatPattern,
-          true
-        )(messages(app))
+        userAnswers.get(AmendPlanEndDatePage) match {
+          case Some(endDate) =>
+            AmendPlanEndDateSummary.row(
+              Some(endDate),
+              Constants.shortDateTimeFormatPattern,
+              true
+            )(messages(app))
+          case None =>
+            AmendPlanEndDateSummary.addRow()(messages(app))
+        }
       )
     }
 
@@ -236,7 +241,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           contentAsString(result) mustEqual view(
             NormalMode,
             summaryListRows,
-            testOnlyRoutes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
+            testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }

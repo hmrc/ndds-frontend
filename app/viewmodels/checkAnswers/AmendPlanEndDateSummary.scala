@@ -17,6 +17,7 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
+import controllers.testonly.routes as testOnlyRoutes
 import models.{CheckMode, NormalMode, UserAnswers}
 import pages.AmendPlanEndDatePage
 import play.api.i18n.Messages
@@ -49,9 +50,9 @@ object AmendPlanEndDateSummary {
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
-          ActionItemViewModel("site.change", controllers.testonly.routes.TestOnlyAmendPlanEndDateController.onPageLoad(CheckMode).url)
+          ActionItemViewModel("site.change", testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.change.endDate")),
-          ActionItemViewModel("site.remove", controllers.testonly.routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(CheckMode).url)
+          ActionItemViewModel("site.remove", testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(CheckMode).url)
             .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.remove.endDate"))
         )
       } else {
@@ -65,7 +66,7 @@ object AmendPlanEndDateSummary {
       key = Key(Text(messages("testOnlyAmendPaymentPlanConfirmation.endDate"))),
       value = Value(
         HtmlContent(
-          s"""<a class="govuk-link" href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
+          s"""<a class="govuk-link" href="${testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
               "testOnlyAmendPaymentPlanConfirmation.addPlanEndDateLink"
             )}</a>"""
         )

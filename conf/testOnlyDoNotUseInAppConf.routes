@@ -34,10 +34,10 @@ POST       /direct-debits/test-only/amend-payment-plan-end-date                 
 GET        /direct-debits/test-only/change-amend-payment-plan-end-date              controllers.testonly.TestOnlyAmendPlanEndDateController.onPageLoad(mode: Mode = CheckMode)
 POST       /direct-debits/test-only/change-amend-payment-plan-end-date              controllers.testonly.TestOnlyAmendPlanEndDateController.onSubmit(mode: Mode = CheckMode)
 
-GET        /direct-debits/test-only/removing-plan-end-date                          controllers.testonly.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(mode: Mode = NormalMode)
-POST       /direct-debits/test-only/removing-plan-end-date                          controllers.testonly.TestOnlyConfirmRemovePlanEndDateController.onSubmit(mode: Mode = NormalMode)
-GET        /direct-debits/test-only/change-removing-plan-end-date                   controllers.testonly.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(mode: Mode = CheckMode)
-POST       /direct-debits/test-only/change-removing-plan-end-date                   controllers.testonly.TestOnlyConfirmRemovePlanEndDateController.onSubmit(mode: Mode = CheckMode)
+GET        /direct-debits/test-only/removing-plan-end-date                          controllers.testonly.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(mode: Mode = NormalMode)
+POST       /direct-debits/test-only/removing-plan-end-date                          controllers.testonly.TestOnlyAmendConfirmRemovePlanEndDateController.onSubmit(mode: Mode = NormalMode)
+GET        /direct-debits/test-only/change-removing-plan-end-date                   controllers.testonly.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /direct-debits/test-only/change-removing-plan-end-date                   controllers.testonly.TestOnlyAmendConfirmRemovePlanEndDateController.onSubmit(mode: Mode = CheckMode)
 
 GET         /direct-debits/test-only/check-amendment-details                        controllers.testonly.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad(mode: Mode = NormalMode)
 POST        /direct-debits/test-only/check-amendment-details                        controllers.testonly.TestOnlyAmendPaymentPlanConfirmationController.onSubmit(mode: Mode = NormalMode)

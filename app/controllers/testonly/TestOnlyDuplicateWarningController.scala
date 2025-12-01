@@ -68,14 +68,7 @@ class TestOnlyDuplicateWarningController @Inject() (
           val maybeResult = for {
             updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
           } yield {
-
-            Ok(
-              view(
-                form,
-                mode,
-                testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
-              )
-            )
+            Ok(view(form, mode, testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()))
           }
 
           maybeResult match {

@@ -21,7 +21,7 @@ import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.RegularPaymentAmountFormProvider
 import models.Mode
-import pages.{AmendConfirmRemovePlanEndDateFlag, AmendPaymentAmountFlag, AmendPaymentDateFlag, AmendPlanEndDateFlag, AmendRegularPaymentAmountFlag, ManagePaymentPlanTypePage, RegularPaymentAmountPage}
+import pages.*
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -69,7 +69,7 @@ class TestOnlyAmendRegularPaymentAmountController @Inject() (
     } else {
       val planType = answers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"[TestOnly] NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      Redirect(routes.SystemErrorController.onPageLoad())
     }
   }
 

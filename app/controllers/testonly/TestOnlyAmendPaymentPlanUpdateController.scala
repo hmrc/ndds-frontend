@@ -133,9 +133,15 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
             DateSetupSummary.row(dateSetup),
             AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount),
             PaymentsFrequencySummary.row(scheduledFrequency),
-            AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.shortDateTimeFormatPattern),
-            AmendPlanEndDateSummary.row(planEndDate, Constants.shortDateTimeFormatPattern, showAllActionsFlag)
-          )
+            AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.shortDateTimeFormatPattern)
+          ) ++
+            planEndDate.map { date =>
+              AmendPlanEndDateSummary.row(
+                Some(date),
+                Constants.shortDateTimeFormatPattern,
+                showAllActionsFlag
+              )
+            }
         )
       case _ =>
         throw new RuntimeException("Invalid or missing planType in userAnswers")

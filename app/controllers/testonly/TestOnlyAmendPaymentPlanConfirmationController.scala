@@ -104,11 +104,16 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
             showChange = true,
             changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode))
           ),
-          AmendPlanEndDateSummary.row(
-            userAnswers.get(AmendPlanEndDatePage),
-            Constants.shortDateTimeFormatPattern,
-            true
-          )
+          userAnswers.get(AmendPlanEndDatePage) match {
+            case Some(endDate) =>
+              AmendPlanEndDateSummary.row(
+                Some(endDate),
+                Constants.shortDateTimeFormatPattern,
+                true
+              )
+            case None =>
+              AmendPlanEndDateSummary.addRow()
+          }
         )
 
         val backLink = userAnswers.get(AmendRegularPaymentAmountFlag) match {
@@ -116,7 +121,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
           case _ =>
             userAnswers.get(AmendPlanEndDateFlag) match {
               case Some(true) => testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode)
-              case _          => testOnlyRoutes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
+              case _          => testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
             }
         }
 

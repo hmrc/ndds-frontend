@@ -171,7 +171,7 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
           val result = controller.onPageLoad(mode)(request)
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 

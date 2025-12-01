@@ -21,8 +21,7 @@ import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.AmendPlanEndDateFormProvider
 import models.Mode
-import navigation.Navigator
-import pages.{AmendConfirmRemovePlanEndDateFlag, AmendPaymentAmountFlag, AmendPaymentDateFlag, AmendPlanEndDateFlag, AmendPlanEndDatePage, AmendRegularPaymentAmountFlag, ManagePaymentPlanTypePage}
+import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -40,7 +39,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class TestOnlyAmendPlanEndDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
-  navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
@@ -68,7 +66,7 @@ class TestOnlyAmendPlanEndDateController @Inject() (
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      Redirect(routes.SystemErrorController.onPageLoad())
     }
   }
 
@@ -119,7 +117,7 @@ class TestOnlyAmendPlanEndDateController @Inject() (
                       updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, false))
                       updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
                       _              <- sessionRepository.set(updatedAnswers)
-                    } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, updatedAnswers, true))
+                    } yield Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
                   }
                 }
               }

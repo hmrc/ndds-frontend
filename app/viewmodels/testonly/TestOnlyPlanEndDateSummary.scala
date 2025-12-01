@@ -36,7 +36,7 @@ object TestOnlyPlanEndDateSummary {
       actions = Seq(
         ActionItemViewModel("site.change", testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode).url)
           .withVisuallyHiddenText(messages("testOnlyAmendingPaymentPlan.budgetPlanEndDate.change.hidden")),
-        ActionItemViewModel("site.remove", testOnlyRoutes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
+        ActionItemViewModel("site.remove", testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
           .withVisuallyHiddenText(messages("testOnlyAmendingPaymentPlan.budgetPlanEndDate.remove.hidden"))
       )
     )

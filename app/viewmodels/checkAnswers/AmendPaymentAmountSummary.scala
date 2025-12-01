@@ -20,8 +20,7 @@ import controllers.routes
 import models.{CheckMode, PaymentPlanType, UserAnswers}
 import pages.AmendPaymentAmountPage
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryListRow}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.MaskAndFormatUtils.*
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
@@ -51,13 +50,13 @@ object AmendPaymentAmountSummary {
 
   def row(planType: String, amount: Option[BigDecimal], showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
     val label = if (PaymentPlanType.BudgetPaymentPlan.toString == planType) {
-      "testOnlyAmendConfirmation.budget"
+      "paymentPlanDetails.details.amount.budgetPaymentPlan"
     } else {
-      "testOnlyAmendConfirmation.single"
+      "paymentPlanDetails.details.amount.singlePaymentPlan"
     }
     val displayValue = amount.map(a => formatAmount(a)).getOrElse("")
     SummaryListRowViewModel(
-      key   = Key(HtmlContent(messages(label))),
+      key   = label,
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
