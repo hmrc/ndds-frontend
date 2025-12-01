@@ -19,26 +19,24 @@ package controllers.testonly
 import controllers.actions.*
 import controllers.routes
 import forms.ConfirmRemovePlanEndDateFormProvider
-
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.ConfirmRemovePlanEndDatePage
+import pages.*
 import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats.formattedDateTimeShort
-import pages.*
-import views.html.testonly.TestOnlyConfirmRemovePlanEndDateView
+import views.html.testonly.TestOnlyAmendConfirmRemovePlanEndDateView
 
-import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestOnlyConfirmRemovePlanEndDateController @Inject() (
+class TestOnlyAmendConfirmRemovePlanEndDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   navigator: Navigator,
@@ -48,13 +46,13 @@ class TestOnlyConfirmRemovePlanEndDateController @Inject() (
   formProvider: ConfirmRemovePlanEndDateFormProvider,
   nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
-  view: TestOnlyConfirmRemovePlanEndDateView
+  view: TestOnlyAmendConfirmRemovePlanEndDateView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
     with Logging {
 
-  val form = formProvider()
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
@@ -64,19 +62,18 @@ class TestOnlyConfirmRemovePlanEndDateController @Inject() (
       if (!nddsService.amendPaymentPlanGuard(userAnswers)) {
         val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-        Future.successful(Redirect(controllers.routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(controllers.routes.SystemErrorController.onPageLoad()))
       } else {
 
         val maybeResult = for {
-          paymentPlanReference <- userAnswers.get(PaymentPlanReferenceQuery)
-          planDetails          <- userAnswers.get(PaymentPlanDetailsQuery)
-          planEndDateValue     <- planDetails.paymentPlanDetails.scheduledPaymentEndDate
+          planEndDateValue <- userAnswers.get(AmendPlanEndDatePage)
+          planDetails      <- userAnswers.get(PaymentPlanDetailsQuery)
         } yield {
           val planEndDate = formattedDateTimeShort(planEndDateValue.toString)
 
           val preparedForm =
             userAnswers
-              .get(ConfirmRemovePlanEndDatePage)
+              .get(AmendConfirmRemovePlanEndDatePage)
               .map(form.fill)
               .getOrElse(form)
 
@@ -102,29 +99,51 @@ class TestOnlyConfirmRemovePlanEndDateController @Inject() (
       }
     }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    val paymentPlanReference =
-      request.userAnswers.get(PaymentPlanReferenceQuery).getOrElse(throw new RuntimeException("Missing PaymentPlanReferenceQuery"))
-    val planEndDate = formattedDateTimeShort(LocalDate.now().toString)
-    form
-      .bindFromRequest()
-      .fold(
-        formWithErrors =>
-          Future.successful(
-            BadRequest(
-              view(formWithErrors,
-                   mode,
-                   paymentPlanReference,
-                   planEndDate,
-                   controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+      val ua = request.userAnswers
+      val maybeRefs = for {
+        planDetails <- ua.get(PaymentPlanDetailsQuery)
+        endDate     <- ua.get(AmendPlanEndDatePage)
+      } yield {
+        val planReference = planDetails.paymentPlanDetails.paymentReference
+        val planEndDateStr = formattedDateTimeShort(endDate.toString)
+        (planReference, planEndDateStr)
+      }
+
+      maybeRefs match {
+        case Some((planReference, planEndDateStr)) =>
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                Future.successful(
+                  BadRequest(
+                    view(
+                      formWithErrors,
+                      mode,
+                      planReference,
+                      planEndDateStr,
+                      controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+                    )
                   )
+                ),
+              value =>
+                for {
+                  updatedAnswers <- Future.fromTry(ua.set(AmendConfirmRemovePlanEndDatePage, value))
+                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, true))
+                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
+                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
+                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, false))
+                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
+                  _              <- sessionRepository.set(updatedAnswers)
+                } yield Redirect(navigator.nextPage(AmendConfirmRemovePlanEndDatePage, mode, updatedAnswers))
             )
-          ),
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmRemovePlanEndDatePage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(ConfirmRemovePlanEndDatePage, mode, updatedAnswers))
-      )
-  }
+
+        case None =>
+          logger.warn("Missing PaymentPlanDetails or AmendPlanEndDate in UserAnswers for ConfirmRemovePlanEndDate submission")
+          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      }
+    }
+
 }

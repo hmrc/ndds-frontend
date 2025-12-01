@@ -38,7 +38,6 @@ class ChrisSubmissionForAmendService @Inject() (
     extends Logging {
 
   def submitToChris(ua: UserAnswers, successRedirect: => Result, errorRedirect: => Result)(implicit hc: HeaderCarrier): Future[Result] = {
-
     (ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
       case (Some(ddiRef), Some(ppRef)) =>
         val request = buildChrisSubmissionRequest(ua, ddiRef)

@@ -21,7 +21,7 @@ import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.AmendPlanStartDateFormProvider
 import models.{Mode, UserAnswers}
-import pages.{AmendPlanStartDatePage, ManagePaymentPlanTypePage}
+import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
@@ -110,7 +110,7 @@ class TestOnlyAmendPlanStartDateController @Inject() (
             else {
               val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
               throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+              Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
             }
         )
     }
@@ -123,6 +123,11 @@ class TestOnlyAmendPlanStartDateController @Inject() (
   ): Future[Result] = {
     for {
       updatedAnswers         <- Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
+      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, true))
+      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
+      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
+      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, false))
+      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
       _                      <- sessionRepository.set(updatedAnswers)
       duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(updatedAnswers)
     } yield {

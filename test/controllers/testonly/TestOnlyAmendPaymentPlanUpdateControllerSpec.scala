@@ -239,7 +239,6 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
     }
 
     "must redirect to Journey Recover page when AmendPlanStartDatePage is None" in {
-
       val mockSinglePaymentPlanDetailResponse =
         dummyPlanDetailResponse.copy(paymentPlanDetails =
           dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
@@ -270,7 +269,6 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
     }
 
     "must redirect to Journey Recover page when AmendPaymentAmountPage is None" in {
-
       val mockSinglePaymentPlanDetailResponse =
         dummyPlanDetailResponse.copy(paymentPlanDetails =
           dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)

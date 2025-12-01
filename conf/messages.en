@@ -115,6 +115,7 @@ yourBankDetails.error.sortCode.incorrectPaymentType = You have entered a sort co
 yourBankDetails.error.accountHolderName.default = Enter the name on the account as it appears on the bank statement. Do not copy and paste it.
 yourBankDetails.error.nameMismatch.invalid = Enter the name on the account as it appears on the bank statement. Do not copy and paste it.
 yourBankDetails.error.sortCodeNotSupported.invalid = You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details of a different account.
+yourBankDetails.error.sortCodeOnDenyList = You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account.
 
 reachedLimit.title = You’ve reached the limit for confirming your bank details
 reachedLimit.heading = You’ve reached the limit for confirming your bank details
@@ -696,7 +697,7 @@ paymentPlanLockedWarning.title = You cannot view or manage this payment plan
 paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
 paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.
 paymentPlanLockedWarning.returnLink = Return to payment plans
-yourBankDetails.error.sortCodeOnDenyList = You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account.
+
 addPaymentPlanEndDate.title = Do you want to add a payment plan end date?
 addPaymentPlanEndDate.heading = Do you want to add a payment plan end date?
 addPaymentPlanEndDate.p1 = This is not mandatory. You will be able to add an end date once the payment plan is set up.
@@ -728,6 +729,7 @@ tellAboutThisPayment.p1.3 =  , you need to add 4 extra numbers to your payment r
 tellAboutThisPayment.checkYourAnswersLabel = Add 4 extra numbers
 tellAboutThisPayment.error.required = Select one option.
 tellAboutThisPayment.change.hidden = Add 4 extra numbers
+
 
 
 ############### Test only Amend flow ################
@@ -782,6 +784,12 @@ testOnlyAmendPaymentPlanConfirmation.continueAndContinueButton = Confirm and con
 testOnlyAmendPaymentPlanConfirmation.cancel.link = Cancel and return to payment plan
 amendPaymentAmount.change.hidden =  Amend payment amount
 amendPaymentDate.change.hidden =  Amend payment date
+testOnlyAmendConfirmation.budget = Regular payment<br>amount
+testOnlyAmendConfirmation.single = Payment amount
+testOnlyAmendPaymentPlanConfirmation.endDate = Plan end date
+testOnlyAmendPaymentPlanConfirmation.change.endDate = change Plan end date
+testOnlyAmendPaymentPlanConfirmation.remove.endDate = remove Plan end date
+testOnlyAmendPaymentPlanConfirmation.addPlanEndDateLink = Add plan end date
 
 #AP3 messages
 testOnlyAmendPaymentPlanUpdate.SinglePlan.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
@@ -814,7 +822,7 @@ testOnlyDuplicateWarning.h1 = You already have a payment plan with these details
 testOnlyDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
 testOnlyDuplicateWarning.h2 = Do you want to continue with this amendment?
 
-
+#AP1d messages
 testOnlyConfirmRemovePlanEndDate.title = Removing this plan end date
 testOnlyConfirmRemovePlanEndDate.heading = Removing this plan end date
 testOnlyConfirmRemovePlanEndDate.q1 = Are you sure you want to remove this plan end date?

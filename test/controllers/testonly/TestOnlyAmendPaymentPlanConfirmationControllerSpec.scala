@@ -26,6 +26,7 @@ import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.*
 import play.api.Application
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -57,11 +58,16 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           showChange = true,
           changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode))
         )(messages(app)),
-        AmendPlanEndDateSummary.row(
-          userAnswers.get(AmendPlanEndDatePage),
-          Constants.shortDateTimeFormatPattern,
-          true
-        )(messages(app))
+        userAnswers.get(AmendPlanEndDatePage) match {
+          case Some(endDate) =>
+            AmendPlanEndDateSummary.row(
+              Some(endDate),
+              Constants.shortDateTimeFormatPattern,
+              true
+            )(messages(app))
+          case None =>
+            AmendPlanEndDateSummary.addRow()(messages(app))
+        }
       )
     }
 
@@ -69,74 +75,59 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
                                                paymentPlanDetails: PaymentPlanResponse,
                                                app: Application
                                               ): Seq[SummaryListRow] = {
+      implicit val msgs: Messages = messages(app)
 
       Seq(
         AmendPaymentAmountSummary.row(
           PaymentPlanType.SinglePaymentPlan.toString,
           userAnswers.get(AmendPaymentAmountPage),
           true
-        )(messages(app)),
+        ),
         AmendPlanStartDateSummary.row(
           PaymentPlanType.SinglePaymentPlan.toString,
           userAnswers.get(AmendPlanStartDatePage),
           Constants.shortDateTimeFormatPattern,
           true
-        )(messages(app))
+        )
       )
     }
 
     "onPageLoad" - {
       val mockNddService = mock[NationalDirectDebitService]
-      "must return OK and the correct view for a GET with a Budget Payment Plan" in {
-        val mockBudgetPaymentPlanDetailResponse =
-          dummyPlanDetailResponse.copy(paymentPlanDetails =
-            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
-          )
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(paymentPlanDetails =
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+        )
 
-        val userAnswers =
-          emptyUserAnswers
-            .set(
-              ManagePaymentPlanTypePage,
-              PaymentPlanType.BudgetPaymentPlan.toString
-            )
-            .success
-            .value
-            .set(
-              PaymentPlanDetailsQuery,
-              mockBudgetPaymentPlanDetailResponse
-            )
-            .success
-            .value
-            .set(
-              RegularPaymentAmountPage,
-              150.0
-            )
-            .success
-            .value
-            .set(
-              AmendPlanStartDatePage,
-              LocalDate.now()
-            )
-            .success
-            .value
-            .set(
-              AmendPlanEndDatePage,
-              LocalDate.now()
-            )
-            .success
-            .value
+      "must return OK and the correct view for a GET with a Budget Payment Plan when returned from AmendRegularPaymentAmount page" in {
+        val userAnswers = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+          .success
+          .value
+          .set(RegularPaymentAmountPage, 150.0)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, LocalDate.now())
+          .success
+          .value
+          .set(AmendPlanEndDatePage, LocalDate.now())
+          .success
+          .value
+          .set(AmendRegularPaymentAmountFlag, true)
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
         running(application) {
           when(mockNddService.amendPaymentPlanGuard(any())).thenReturn(true)
-          when(mockSessionRepository.get(any()))
-            .thenReturn(Future.successful(Some(userAnswers)))
+          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
 
           val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, mockBudgetPaymentPlanDetailResponse, application)
           val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
@@ -148,12 +139,12 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           contentAsString(result) mustEqual view(
             NormalMode,
             summaryListRows,
-            routes.AmendPlanEndDateController.onPageLoad(NormalMode)
+            testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
 
-      "must use AddPaymentPlanEndDateController back link when removing plan end date" in {
+      "must return OK and the correct view for a GET with a Budget Payment Plan when returned from AmendPlanEndDate page" in {
         val mockBudgetPaymentPlanDetailResponse =
           dummyPlanDetailResponse.copy(paymentPlanDetails =
             dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
@@ -161,42 +152,28 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
         val userAnswers =
           emptyUserAnswers
-            .set(
-              ManagePaymentPlanTypePage,
-              PaymentPlanType.BudgetPaymentPlan.toString
-            )
+            .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
             .success
             .value
-            .set(
-              PaymentPlanDetailsQuery,
-              mockBudgetPaymentPlanDetailResponse
-            )
+            .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
             .success
             .value
-            .set(
-              RegularPaymentAmountPage,
-              150.0
-            )
+            .set(RegularPaymentAmountPage, 150.0)
             .success
             .value
-            .set(
-              AmendPlanEndDatePage,
-              LocalDate.now()
-            )
+            .set(AmendPlanEndDatePage, LocalDate.now())
             .success
             .value
-            .set(
-              AddPaymentPlanEndDatePage,
-              false
-            )
+            .set(AddPaymentPlanEndDatePage, false)
+            .success
+            .value
+            .set(AmendPlanEndDateFlag, true)
             .success
             .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
         running(application) {
@@ -214,55 +191,85 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           contentAsString(result) mustEqual view(
             NormalMode,
             summaryListRows,
-            routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode)
+            testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must return OK and the correct view for a GET with a Budget Payment Plan when returned from ConfirmRemovePlanEndDate page" in {
+        val userAnswers =
+          emptyUserAnswers
+            .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+            .success
+            .value
+            .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+            .success
+            .value
+            .set(RegularPaymentAmountPage, 150.0)
+            .success
+            .value
+            .set(AmendPlanStartDatePage, LocalDate.now())
+            .success
+            .value
+            .set(AmendConfirmRemovePlanEndDateFlag, true)
+            .success
+            .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .build()
+
+        running(application) {
+          when(mockNddService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
+
+          val summaryListRows =
+            createSummaryListForBudgetPaymentPlan(
+              userAnswers,
+              mockBudgetPaymentPlanDetailResponse,
+              application
+            )
+
+          val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
+          val request = FakeRequest(GET, "/test-only/check-amendment-details")
+          val result = controller.onPageLoad(NormalMode)(request)
+          val view = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationView]
+
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(
+            NormalMode,
+            summaryListRows,
+            testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
 
       "must redirect to page not found if already value is submitted and click browser back from confirmation page" in {
-        val userAnswers =
-          emptyUserAnswers
-            .set(
-              AmendPaymentPlanConfirmationPage,
-              true
-            )
-            .success
-            .value
-            .set(
-              ManagePaymentPlanTypePage,
-              PaymentPlanType.BudgetPaymentPlan.toString
-            )
-            .success
-            .value
-            .set(
-              RegularPaymentAmountPage,
-              150.0
-            )
-            .success
-            .value
-            .set(
-              AmendPlanStartDatePage,
-              LocalDate.now()
-            )
-            .success
-            .value
-            .set(
-              AmendPlanEndDatePage,
-              LocalDate.now()
-            )
-            .success
-            .value
+        val userAnswers = emptyUserAnswers
+          .set(AmendPaymentPlanConfirmationPage, true)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, 150.0)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, LocalDate.now())
+          .success
+          .value
+          .set(AmendPlanEndDatePage, LocalDate.now())
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
         running(application) {
-
-          when(mockSessionRepository.get(any()))
-            .thenReturn(Future.successful(Some(userAnswers)))
+          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
           val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
           val request = FakeRequest(GET, "/test-only/check-amendment-details")
           val result = controller.onPageLoad(NormalMode)(request)
@@ -272,49 +279,36 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         }
       }
 
-      "must return OK and the correct view for a GET with a Single Payment Plan" in {
+      "must return OK and the correct view for a GET with a Single Payment Plan when returned from AmendPaymentAmount page" in {
         val mockSinglePaymentPlanDetailResponse =
           dummyPlanDetailResponse.copy(paymentPlanDetails =
             dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
           )
 
-        val userAnswers =
-          emptyUserAnswers
-            .set(
-              ManagePaymentPlanTypePage,
-              PaymentPlanType.SinglePaymentPlan.toString
-            )
-            .success
-            .value
-            .set(
-              PaymentPlanDetailsQuery,
-              mockSinglePaymentPlanDetailResponse
-            )
-            .success
-            .value
-            .set(
-              AmendPaymentAmountPage,
-              150.0
-            )
-            .success
-            .value
-            .set(
-              AmendPlanStartDatePage,
-              LocalDate.now()
-            )
-            .success
-            .value
+        val userAnswers = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, 150.0)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentAmountFlag, true)
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
         running(application) {
           when(mockNddService.amendPaymentPlanGuard(any())).thenReturn(true)
-          when(mockSessionRepository.get(any()))
-            .thenReturn(Future.successful(Some(userAnswers)))
+          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
 
           val summaryListRows = createSummaryListForSinglePaymentPlans(userAnswers, mockSinglePaymentPlanDetailResponse, application)
           val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
@@ -331,21 +325,61 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
         }
       }
+
+      "must return OK and the correct view for a GET with a Single Payment Plan when returned from AmendPaymentDate page" in {
+        val mockSinglePaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(paymentPlanDetails =
+            dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
+          )
+
+        val userAnswers = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, 150.0)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, LocalDate.now())
+          .success
+          .value
+          .set(AmendPaymentDateFlag, true)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
+          .build()
+
+        running(application) {
+          when(mockNddService.amendPaymentPlanGuard(any())).thenReturn(true)
+          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
+
+          val summaryListRows = createSummaryListForSinglePaymentPlans(userAnswers, mockSinglePaymentPlanDetailResponse, application)
+          val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
+          val request = FakeRequest(GET, "/test-only/check-amendment-details")
+          val result = controller.onPageLoad(NormalMode)(request)
+          val view = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationView]
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(
+            NormalMode,
+            summaryListRows,
+            testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
+
+        }
+      }
+
     }
 
     "onSubmit" - {
       "must redirect to AmendPaymentPlanUpdateController when CHRIS submission is successful" in {
         val mockNddService = mock[NationalDirectDebitService]
 
-        when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(true))
-        when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
-        when(mockNddService.isDuplicatePaymentPlan(any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-
         val directDebitReference = "DDI123456789"
-
         val paymentPlanDetails = models.responses.PaymentPlanResponse(
           directDebitDetails = models.responses.DirectDebitDetails(
             bankSortCode       = Some("123456"),
@@ -356,7 +390,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           ),
           paymentPlanDetails = models.responses.PaymentPlanDetails(
             hodService                = "CESA",
-            planType                  = "BudgetPaymentPlan",
+            planType                  = "SinglePaymentPlan",
             paymentReference          = "paymentReference",
             submissionDateTime        = java.time.LocalDateTime.now(),
             scheduledPaymentAmount    = Some(1000),
@@ -370,21 +404,27 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             balancingPaymentAmount    = None,
             balancingPaymentDate      = Some(java.time.LocalDate.now()),
             totalLiability            = Some(300),
-            paymentPlanEditable       = false
+            paymentPlanEditable       = true
           )
         )
 
         val userAnswers = emptyUserAnswers
-          .set(DirectDebitReferenceQuery, directDebitReference)
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
           .set(PaymentPlanDetailsQuery, paymentPlanDetails)
           .success
           .value
-          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .set(AmendPlanStartDatePage, java.time.LocalDate.now().plusDays(1))
           .success
           .value
-          .set(AmendPaymentAmountPage, BigDecimal(100))
+          .set(AmendPlanEndDatePage, java.time.LocalDate.now().plusDays(4))
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1000))
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, directDebitReference)
           .success
           .value
           .set(PaymentPlanReferenceQuery, "paymentPlanReference")
@@ -392,12 +432,18 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
-          )
+          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService), bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
         running(application) {
+          when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
+            .thenReturn(Future.successful(true))
+          when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+            .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
+          when(mockNddService.isDuplicatePaymentPlan(any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
           val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
           val request = FakeRequest(POST, "/test-only/check-amendment-details")
           val result = controller.onSubmit(NormalMode)(request)
@@ -414,6 +460,8 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           .thenReturn(Future.successful(false))
         when(mockNddService.isDuplicatePaymentPlan(any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+        when(mockNddService.lockPaymentPlan(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(AmendLockResponse(lockSuccessful = true)))
 
         val directDebitReference = "DDI123456789"
 
@@ -528,7 +576,8 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 
@@ -596,7 +645,8 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 
@@ -610,14 +660,113 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
         }
       }
 
+      "must redirect to Amend payment plan update controller (AP3) when there is no amendment made" in {
+        val mockNddService = mock[NationalDirectDebitService]
+
+        when(mockNddService.isDuplicatePaymentPlan(any())(any(), any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+
+        val paymentPlanDetails = models.responses.PaymentPlanResponse(
+          directDebitDetails = models.responses.DirectDebitDetails(
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
+            submissionDateTime = java.time.LocalDateTime.now()
+          ),
+          paymentPlanDetails = models.responses.PaymentPlanDetails(
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
+            scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
+          )
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPaymentDatePage, java.time.LocalDate.now().plusDays(4))
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1000))
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val controller = application.injector.instanceOf[TestOnlyAmendPaymentPlanConfirmationController]
+          val request = FakeRequest(POST, "/test-only/check-amendment-details")
+          val result = controller.onSubmit(NormalMode)(request)
+
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad().url
+        }
+      }
+
       "must redirect to Duplicate Warning controller when duplicate payment plan returns true" in {
         val mockNddService = mock[NationalDirectDebitService]
 
         when(mockNddService.isDuplicatePaymentPlan(any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(true)))
 
+        val paymentPlanDetails = models.responses.PaymentPlanResponse(
+          directDebitDetails = models.responses.DirectDebitDetails(
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Bank Ltd"),
+            auDdisFlag         = true,
+            submissionDateTime = java.time.LocalDateTime.now()
+          ),
+          paymentPlanDetails = models.responses.PaymentPlanDetails(
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = java.time.LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(1000),
+            scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
+            initialPaymentStartDate   = Some(java.time.LocalDate.now()),
+            initialPaymentAmount      = Some(150),
+            scheduledPaymentEndDate   = Some(java.time.LocalDate.now().plusMonths(10)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = Some(java.time.LocalDate.now()),
+            suspensionEndDate         = Some(java.time.LocalDate.now()),
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = Some(java.time.LocalDate.now()),
+            totalLiability            = Some(300),
+            paymentPlanEditable       = false
+          )
+        )
+
         val userAnswers = emptyUserAnswers
-          .set(AmendPlanStartDatePage, java.time.LocalDate.now())
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanDetails)
+          .success
+          .value
+          .set(AmendPaymentDatePage, java.time.LocalDate.now().plusDays(4))
           .success
           .value
           .set(AmendPaymentAmountPage, BigDecimal(100))
@@ -626,7 +775,8 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 

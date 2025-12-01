@@ -30,7 +30,7 @@ header1: Header1,
 
     @layout(pageTitle = title(form, messages("testOnlyConfirmRemovePlanEndDate.title"))) {
 
-        @formHelper(action = controllers.testonly.routes.TestOnlyConfirmRemovePlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+        @formHelper(action = controllers.testonly.routes.TestOnlyAmendConfirmRemovePlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
         @govukErrorSummary(ErrorSummaryViewModel(form))
