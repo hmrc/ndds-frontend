@@ -26,9 +26,7 @@ case class YearEndAndMonth(year: Int, month: Int) {
     LocalDate.of(year, actualMonth, YearEndAndMonth.FirstDayOfMonth)
   }
 
-  def displayFormat: String = {
-    f"$year%04d $month%02d"
-  }
+  def displayFormat: String = f"$year$month%02d"
 }
 
 object YearEndAndMonth {

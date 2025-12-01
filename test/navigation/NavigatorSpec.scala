@@ -500,7 +500,7 @@ class NavigatorSpec extends SpecBase {
             routes.JourneyRecoveryController.onPageLoad()
         }
 
-        "must go from TellAboutThisPaymentPage to PaymentAmountPage for PAYE if No Selected" in {
+        "must go from TellAboutThisPaymentPage to PaymentAmountPage for PAYE if No Selected in Normal mode" in {
           val ua = userAnswers
             .set(DirectDebitSourcePage, PAYE)
             .success
@@ -513,7 +513,7 @@ class NavigatorSpec extends SpecBase {
             routes.PaymentAmountController.onPageLoad(NormalMode)
         }
 
-        "must go from TellAboutThisPaymentPage to YearEndAndMonthPage for PAYE if No Selected" in {
+        "must go from TellAboutThisPaymentPage to YearEndAndMonthPage for PAYE if Yes Selected in Normal mode" in {
           val ua = userAnswers
             .set(DirectDebitSourcePage, PAYE)
             .success
@@ -524,6 +524,32 @@ class NavigatorSpec extends SpecBase {
 
           navigator.nextPage(TellAboutThisPaymentPage, NormalMode, ua) mustBe
             routes.YearEndAndMonthController.onPageLoad(NormalMode)
+        }
+
+        "must go from TellAboutThisPaymentPage to CheckYourAnswersPage for PAYE if No Selected in Check mode" in {
+          val ua = userAnswers
+            .set(DirectDebitSourcePage, PAYE)
+            .success
+            .value
+            .set(TellAboutThisPaymentPage, false)
+            .success
+            .value
+
+          navigator.nextPage(TellAboutThisPaymentPage, CheckMode, ua) mustBe
+            routes.CheckYourAnswersController.onPageLoad()
+        }
+
+        "must go from TellAboutThisPaymentPage to YearEndAndMonthPage for PAYE if Yes Selected in Check mode" in {
+          val ua = userAnswers
+            .set(DirectDebitSourcePage, PAYE)
+            .success
+            .value
+            .set(TellAboutThisPaymentPage, true)
+            .success
+            .value
+
+          navigator.nextPage(TellAboutThisPaymentPage, CheckMode, ua) mustBe
+            routes.YearEndAndMonthController.onPageLoad(CheckMode)
         }
 
       }

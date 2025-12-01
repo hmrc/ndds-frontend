@@ -23,7 +23,7 @@ import forms.TellAboutThisPaymentFormProvider
 import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
-import pages.TellAboutThisPaymentPage
+import pages.{TellAboutThisPaymentPage, YearEndAndMonthPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -67,7 +67,12 @@ class TellAboutThisPaymentController @Inject() (
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(TellAboutThisPaymentPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
+            updatedAnswers <- if (value) { // if value is No, then remove PLan end date from session and user answer
+                                Future.successful(updatedAnswers)
+                              } else {
+                                Future.fromTry(updatedAnswers.remove(YearEndAndMonthPage))
+                              }
+            _ <- sessionRepository.set(updatedAnswers)
           } yield Redirect(navigator.nextPage(TellAboutThisPaymentPage, mode, updatedAnswers))
       )
   }

@@ -114,7 +114,7 @@ class TestOnlyAmendPlanEndDateController @Inject() (
                     for {
                       updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
                       _              <- sessionRepository.set(updatedAnswers)
-                    } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers, true))
+                    } yield Redirect(navigator.nextPage(AmendPlanEndDatePage, mode, userAnswers))
                   }
                 }
               }

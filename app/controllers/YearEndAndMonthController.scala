@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
 import forms.YearEndAndMonthFormProvider
 import models.Mode
@@ -40,7 +41,7 @@ class YearEndAndMonthController @Inject() (
   formProvider: YearEndAndMonthFormProvider,
   val controllerComponents: MessagesControllerComponents,
   view: YearEndAndMonthView
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, appConfig: FrontendAppConfig)
     extends FrontendBaseController
     with I18nSupport {
 
@@ -51,7 +52,7 @@ class YearEndAndMonthController @Inject() (
       case Some(value) => formProvider().fill(value)
     }
 
-    Ok(view(preparedForm, mode, routes.PaymentReferenceController.onPageLoad(mode)))
+    Ok(view(preparedForm, mode, routes.TellAboutThisPaymentController.onPageLoad(mode)))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
@@ -60,7 +61,7 @@ class YearEndAndMonthController @Inject() (
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.PaymentReferenceController.onPageLoad(mode)))),
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.TellAboutThisPaymentController.onPageLoad(mode)))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(YearEndAndMonthPage, value))

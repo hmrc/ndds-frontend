@@ -276,28 +276,23 @@ planStartDate.error.budgetAfterMaxDate = The date you have entered is not valid.
 planStartDate.error.timeToPayAfterMaxDate = The plan start date you have entered is not valid. It must be within 30 days of the current date.
 planStartDate.change.hidden =  Plan start date
 
-yearEndAndMonth.title = What is the year end and month?
-yearEndAndMonth.heading = What payment period are you paying for?
-yearEndAndMonth.warning = Skip this page if you''re paying for the current period.
-yearEndAndMonth.p1 = We need your tax year, and month, to calculate how much tax you need to pay.
-yearEndAndMonth.deductionYearEnd = Deduction year end
-yearEndAndMonth.deductionYearEnd.hint = If tax year is 2024/25, enter 2025.
-yearEndAndMonth.monthOrQuarter = Month or quarter
-yearEndAndMonth.monthOrQuarter.hint = Month must be between 01 and 12. Enter 13 for previous year.
-yearEndAndMonth.collapsable = Help with payment periods
-yearEndAndMonth.collapsable.examples.p1 = Examples:
-yearEndAndMonth.collapsable.examples.b1 = July 2024/25: Year 2025, Month 04
-yearEndAndMonth.collapsable.examples.b2 = Previous year: Year 2025, Month 13
-yearEndAndMonth.collapsable.examples.b3 = Q1 (Apr-Jun): Year 2025, Month 01
-yearEndAndMonth.collapsable.monthCodes.p1 = Month codes:
-yearEndAndMonth.collapsable.monthCodes.p2 = 01=Apr, 02=May, 03=Jun, 04=Jul, 05=Aug, 06=Sep, 07=Oct, 08=Nov, 09=Dec, 10=Jan, 11=Feb, 12=Mar
-yearEndAndMonth.collapsable.quarterCodes.p1 = <strong>Quarter codes:</strong> 01, 04, 07, 10
-yearEndAndMonth.checkYourAnswersLabel = Year end and month
-yearEndAndMonth.error.required.all = Enter the yearEndAndMonth
-yearEndAndMonth.error.required.two = The yearEndAndMonth must include {0} and {1}
-yearEndAndMonth.error.required = The yearEndAndMonth must include {0}
-yearEndAndMonth.error.invalid = Enter a real yearEndAndMonth
-yearEndAndMonth.change.hidden =  Year end and month
+yearEndAndMonth.title = Add 4 extra numbers to your payment reference
+yearEndAndMonth.heading = Add 4 extra numbers to your payment reference
+yearEndAndMonth.p1 = The 4 extra numbers will always start with the last 2 digits of the tax year the payment is for. For example, if the tax year is 2024/25, it will be 25.
+yearEndAndMonth.p2 = The end of the 4 extra numbers depends on the type of payment you''re making:
+yearEndAndMonth.bullet.link1 = for monthly payments
+yearEndAndMonth.bullet.text1 = use between 01 and 12 (the tax month this payment is for)
+yearEndAndMonth.bullet.link2 = for quarterly payments
+yearEndAndMonth.bullet.text2 = use 03, 06, 09 or 12 (the last tax month of the quarter this payment is for)
+yearEndAndMonth.bullet.link3 = for P11D payments
+yearEndAndMonth.bullet.text3 = use 13
+yearEndAndMonth.heading2 = What are the 4 extra numbers?
+yearEndAndMonth.hint = Must be 4 numbers, for example 2504 or 2513
+yearEndAndMonth.error.empty = Enter a valid date
+yearEndAndMonth.error.invalid = Enter a valid date
+yearEndAndMonth.error.invalidMonth = The last 2 numbers must be between 01 and 13
+yearEndAndMonth.checkYourAnswersLabel = 4 extra numbers
+yearEndAndMonth.change.hidden =  4 extra numbers
 
 paymentsFrequency.title = How often do you want to make payments?
 paymentsFrequency.heading = How often do you want to make payments?
@@ -729,10 +724,11 @@ tellAboutThisPayment.p1.1 = If
 tellAboutThisPayment.p1.link.1 = this payment is early, late
 tellAboutThisPayment.p1.2 = , or
 tellAboutThisPayment.p1.link.2 = a P11D payment
-tellAboutThisPayment.p1.3 = , you need to add 4 extra numbers to your payment reference. We need this information to make sure your payment is allocated correctly.
-tellAboutThisPayment.checkYourAnswersLabel = Tell us about this payment
+tellAboutThisPayment.p1.3 =  , you need to add 4 extra numbers to your payment reference. We need this information to make sure your payment is allocated correctly.
+tellAboutThisPayment.checkYourAnswersLabel = Add 4 extra numbers
 tellAboutThisPayment.error.required = Select one option.
-tellAboutThisPayment.change.hidden = Tell us about this payment
+tellAboutThisPayment.change.hidden = Add 4 extra numbers
+
 
 ############### Test only Amend flow ################
 
