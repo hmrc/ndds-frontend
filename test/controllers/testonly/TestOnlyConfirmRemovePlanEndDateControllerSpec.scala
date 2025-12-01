@@ -28,7 +28,7 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import java.time.{LocalDate, LocalDateTime}
@@ -86,7 +86,7 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
-        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .set(AmendPlanEndDatePage, testEndDate)
         .success
         .value
         .set(PaymentPlanDetailsQuery, paymentPlanResponse)
@@ -106,7 +106,13 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, NormalMode, testPlanReference, expectedPlanEndDate, routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode))(
+          view(
+            form,
+            NormalMode,
+            testPlanReference,
+            expectedPlanEndDate,
+            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+          )(
             request,
             messages(application)
           ).toString
@@ -119,7 +125,7 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
-        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .set(AmendPlanEndDatePage, testEndDate)
         .success
         .value
         .set(PaymentPlanDetailsQuery, paymentPlanResponse)
@@ -148,7 +154,7 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
             NormalMode,
             testPlanReference,
             expectedPlanEndDate,
-            routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
+            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
           )(
             request,
             messages(application)
@@ -162,7 +168,10 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val userAnswers = UserAnswers(userAnswersId)
-        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .set(AmendPlanEndDatePage, testEndDate)
+        .success
+        .value
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
         .success
         .value
 
@@ -182,14 +191,17 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url // can update once  all flow available
+        redirectLocation(result).value mustEqual onwardRoute.url // can update once all flow available
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       val userAnswers = UserAnswers(userAnswersId)
-        .set(PaymentPlanReferenceQuery, testPlanReference)
+        .set(AmendPlanEndDatePage, testEndDate)
+        .success
+        .value
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
         .success
         .value
 
@@ -204,7 +216,7 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
         val boundForm = form.bind(Map("value" -> ""))
 
         val view = application.injector.instanceOf[TestOnlyConfirmRemovePlanEndDateView]
-        val expectedPlanEndDate = formattedDateTimeShort(LocalDate.now().toString)
+        val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
         val result = route(application, request).value
 
@@ -215,7 +227,7 @@ class TestOnlyConfirmRemovePlanEndDateControllerSpec extends SpecBase with Mocki
             NormalMode,
             testPlanReference,
             expectedPlanEndDate,
-            routes.TestOnlyConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
+            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
           )(
             request,
             messages(application)

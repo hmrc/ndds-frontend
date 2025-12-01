@@ -81,6 +81,7 @@ class Navigator @Inject() () {
     case (AmendPlanEndDatePage, true)              => _ => testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
     case (SuspensionPeriodRangeDatePage, _)        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
     case (RemovingThisSuspensionPage, _)           => navigateFromRemovingThisSuspensionPage
+    case (ConfirmRemovePlanEndDatePage, _)         => navigateFromConfirmRemovePlanEndDatePage
     case _                                         => _ => routes.LandingController.onPageLoad()
   }
 
