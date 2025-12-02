@@ -71,7 +71,8 @@ class TestOnlyAmendPaymentPlanUpdateController @Inject() (
           .getOrElse("")
         val submissionDate = paymentPlan.paymentPlanDetails.submissionDateTime
         val scheduledFrequency = paymentPlan.paymentPlanDetails.scheduledPaymentFrequency
-        val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentPlanRef)
+        val paymentRef = paymentPlan.paymentPlanDetails.paymentReference
+        val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentRef)
 
         Ok(
           view(
