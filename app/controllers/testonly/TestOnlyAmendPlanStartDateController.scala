@@ -105,38 +105,12 @@ class TestOnlyAmendPlanStartDateController @Inject() (
               )
             ),
           value =>
-            if (nddsService.amendPaymentPlanGuard(userAnswers))
-              checkForDuplicate(mode, userAnswers, value)
-            else {
-              val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-              throw new Exception(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-              Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-            }
+            Future.successful(
+              Redirect(
+                testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad()
+              )
+            )
         )
-    }
-  }
-
-  private def checkForDuplicate(mode: Mode, userAnswers: UserAnswers, value: LocalDate)(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext,
-    request: Request[?]
-  ): Future[Result] = {
-    for {
-      updatedAnswers         <- Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, true))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, false))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
-      _                      <- sessionRepository.set(updatedAnswers)
-      duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(updatedAnswers)
-    } yield {
-      logger.warn(s"Duplicate check response is ${duplicateCheckResponse.isDuplicate}")
-      if (duplicateCheckResponse.isDuplicate) {
-        Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(mode).url)
-      } else {
-        Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url)
-      }
     }
   }
 }
