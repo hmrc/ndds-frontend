@@ -129,11 +129,6 @@ class TestOnlyAmendConfirmRemovePlanEndDateController @Inject() (
               value =>
                 for {
                   updatedAnswers <- Future.fromTry(ua.set(AmendConfirmRemovePlanEndDatePage, value))
-                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, true))
-                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
-                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
-                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, false))
-                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
                   updatedAnswers <-
                     if (value) {
                       Future.fromTry(updatedAnswers.remove(AmendPlanEndDatePage))

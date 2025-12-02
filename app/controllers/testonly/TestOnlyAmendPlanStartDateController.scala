@@ -107,11 +107,6 @@ class TestOnlyAmendPlanStartDateController @Inject() (
           value =>
             for {
               updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
-              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, true))
-              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
-              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
-              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, false))
-              updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
               _              <- sessionRepository.set(updatedAnswers)
             } yield {
               Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())

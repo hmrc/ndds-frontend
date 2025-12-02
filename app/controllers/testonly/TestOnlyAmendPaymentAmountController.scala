@@ -21,7 +21,7 @@ import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
-import pages.{AmendConfirmRemovePlanEndDateFlag, AmendPaymentAmountFlag, AmendPaymentAmountPage, AmendPaymentDateFlag, AmendPlanEndDateFlag, AmendRegularPaymentAmountFlag, ManagePaymentPlanTypePage}
+import pages.{AmendPaymentAmountPage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -77,11 +77,6 @@ class TestOnlyAmendPaymentAmountController @Inject() (
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, true))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, false))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, false))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
-            updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
             _              <- sessionRepository.set(updatedAnswers)
           } yield Redirect(controllers.testonly.routes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
       )

@@ -116,9 +116,6 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           .set(AmendPlanEndDatePage, LocalDate.now())
           .success
           .value
-          .set(AmendRegularPaymentAmountFlag, true)
-          .success
-          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
@@ -166,9 +163,6 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .set(AddPaymentPlanEndDatePage, false)
             .success
             .value
-            .set(AmendPlanEndDateFlag, true)
-            .success
-            .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
@@ -207,9 +201,6 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .success
             .value
             .set(AmendPlanStartDatePage, LocalDate.now())
-            .success
-            .value
-            .set(AmendConfirmRemovePlanEndDateFlag, true)
             .success
             .value
 
@@ -295,9 +286,6 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           .set(AmendPlanStartDatePage, LocalDate.now())
           .success
           .value
-          .set(AmendPaymentAmountFlag, true)
-          .success
-          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
@@ -339,9 +327,6 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           .success
           .value
           .set(AmendPlanStartDatePage, LocalDate.now())
-          .success
-          .value
-          .set(AmendPaymentDateFlag, true)
           .success
           .value
 
