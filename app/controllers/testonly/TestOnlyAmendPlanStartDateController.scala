@@ -123,11 +123,6 @@ class TestOnlyAmendPlanStartDateController @Inject() (
   ): Future[Result] = {
     for {
       updatedAnswers         <- Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, true))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, false))
-      updatedAnswers         <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
       _                      <- sessionRepository.set(updatedAnswers)
       duplicateCheckResponse <- nddsService.isDuplicatePaymentPlan(updatedAnswers)
     } yield {

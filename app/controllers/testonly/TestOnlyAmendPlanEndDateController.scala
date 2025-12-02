@@ -111,11 +111,6 @@ class TestOnlyAmendPlanEndDateController @Inject() (
                   } else {
                     for {
                       updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                      updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, true))
-                      updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
-                      updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, false))
-                      updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, false))
-                      updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, false))
                       _              <- sessionRepository.set(updatedAnswers)
                     } yield Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
                   }
