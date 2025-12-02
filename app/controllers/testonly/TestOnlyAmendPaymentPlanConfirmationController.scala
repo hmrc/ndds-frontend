@@ -182,7 +182,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
             if (noChange) { // F27
               Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
             } else { // F26
-              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, dbStartDate)
             }
 
           case (Some(dbAmount), Some(dbStartDate), None) =>
@@ -198,7 +198,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
             if (noChange) {
               Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
             } else {
-              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, dbStartDate)
             }
 
           case _ =>
@@ -212,7 +212,12 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
     }
   }
 
-  private def checkDuplicatePlan(userAnswers: UserAnswers, updatedAmount: BigDecimal, updatedDate: Option[LocalDate], planType: String)(implicit
+  private def checkDuplicatePlan(userAnswers: UserAnswers,
+                                 updatedAmount: BigDecimal,
+                                 updatedDate: Option[LocalDate],
+                                 planType: String,
+                                 dbScheduledStartDate: LocalDate
+                                )(implicit
     ec: ExecutionContext,
     request: Request[?]
   ): Future[Result] = {
@@ -226,7 +231,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
           updatedUa <- if (planType == PaymentPlanType.SinglePaymentPlan.toString) {
                          Future.fromTry(updatedUa.set(AmendPlanStartDatePage, updatedDate.get))
                        } else {
-                         Future.fromTry(updatedUa.set(AmendPlanStartDatePage, updatedDate.get))
+                         Future.fromTry(updatedUa.set(AmendPlanStartDatePage, dbScheduledStartDate))
                        }
           updatedUa <- if (updatedDate.isDefined) {
                          Future.fromTry(updatedUa.set(AmendPlanEndDatePage, updatedDate.get))
