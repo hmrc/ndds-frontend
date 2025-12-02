@@ -106,7 +106,7 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
         val paymentList =
           SummaryListViewModel(
             Seq(
-              PaymentReferenceSummary.row(paymentPlanRef)(messages(application)),
+              PaymentReferenceSummary.row(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference)(messages(application)),
               DateSetupSummary.row(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.submissionDateTime)(messages(application)),
               AmendPaymentAmountSummary.row(
                 PaymentPlanType.SinglePaymentPlan.toString,
@@ -201,7 +201,7 @@ class TestOnlyAmendPaymentPlanUpdateControllerSpec extends SpecBase {
         val paymentList =
           SummaryListViewModel(
             Seq(
-              PaymentReferenceSummary.row(paymentPlanRef)(messages(application)),
+              PaymentReferenceSummary.row(mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference)(messages(application)),
               DateSetupSummary.row(mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.submissionDateTime)(messages(application)),
               AmendPaymentAmountSummary.row(
                 PaymentPlanType.BudgetPaymentPlan.toString,
