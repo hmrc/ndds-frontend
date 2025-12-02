@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import viewmodels.InputWidth._
+@import viewmodels.InputWidth.*
 
 @this(
  layout: templates.Layout,
@@ -38,7 +38,7 @@
      InputViewModel(
      field = form("value"),
      label = LabelViewModel(messages("amendPaymentAmount.heading"))
-            .asPageHeading().withCssClass("govuk-fieldset__legend--l"),
+            .asPageHeading().withCssClass("govuk-fieldset__legend--xl"),
      )
     .withPrefix(PrefixOrSuffix(content = "£"))
     .withWidth(Fixed10)
@@ -50,3 +50,4 @@
    )
  }
 }
+

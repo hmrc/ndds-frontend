@@ -28,27 +28,27 @@ header1: Header1,
 
 @(form: Form[_], mode: Mode, paymentPlanReference: String, planEndDate: String, call: Call)(implicit request: Request[_], messages: Messages)
 
-    @layout(pageTitle = title(form, messages("testOnlyConfirmRemovePlanEndDate.title"))) {
+    @layout(pageTitle = title(form, messages("amendConfirmRemovePlanEndDate.title"))) {
 
-        @formHelper(action = controllers.testonly.routes.TestOnlyAmendConfirmRemovePlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+        @formHelper(action = routes.AmendConfirmRemovePlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-        @govukErrorSummary(ErrorSummaryViewModel(form))
-        }
+            @if(form.errors.nonEmpty) {
+                @govukErrorSummary(ErrorSummaryViewModel(form))
+            }
 
-            @header1("testOnlyConfirmRemovePlanEndDate.heading")
+            @header1("amendConfirmRemovePlanEndDate.heading")
 
-            @paragraph((messages("testOnlyConfirmRemovePlanEndDate.p1.line1", paymentPlanReference)))
-            @paragraph((messages("testOnlyConfirmRemovePlanEndDate.p1.line2", planEndDate)))
+            @paragraph((messages("amendConfirmRemovePlanEndDate.p1.line1", paymentPlanReference)))
+            @paragraph((messages("amendConfirmRemovePlanEndDate.p1.line2", planEndDate)))
                 @govukRadios(
                     RadiosViewModel.yesNo(
                     field = form("value"),
-                    legend = LegendViewModel(messages("testOnlyConfirmRemovePlanEndDate.q1")).withCssClass("govuk-fieldset__legend--m")
+                    legend = LegendViewModel(messages("amendConfirmRemovePlanEndDate.q1")).withCssClass("govuk-fieldset__legend--m")
                 )
             )
 
-        @govukButton(
-        ButtonViewModel(messages("site.continue"))
-        )
+            @govukButton(
+                ButtonViewModel(messages("site.continue"))
+            )
         }
     }

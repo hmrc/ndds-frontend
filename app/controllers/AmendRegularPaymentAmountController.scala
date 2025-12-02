@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package controllers.testonly
+package controllers
 
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import controllers.routes
-import controllers.testonly.routes as testOnlyRoutes
 import forms.RegularPaymentAmountFormProvider
 import models.Mode
 import pages.*
@@ -30,12 +28,12 @@ import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.testonly.TestOnlyAmendRegularPaymentAmountView
+import views.html.AmendRegularPaymentAmountView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestOnlyAmendRegularPaymentAmountController @Inject() (
+class AmendRegularPaymentAmountController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   identify: IdentifierAction,
@@ -44,7 +42,7 @@ class TestOnlyAmendRegularPaymentAmountController @Inject() (
   formProvider: RegularPaymentAmountFormProvider,
   nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
-  view: TestOnlyAmendRegularPaymentAmountView
+  view: AmendRegularPaymentAmountView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -65,10 +63,10 @@ class TestOnlyAmendRegularPaymentAmountController @Inject() (
         case None        => form
       }
 
-      Ok(view(preparedForm, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))
+      Ok(view(preparedForm, mode, routes.AmendingPaymentPlanController.onPageLoad()))
     } else {
       val planType = answers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.error(s"[TestOnly] NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
       Redirect(routes.SystemErrorController.onPageLoad())
     }
   }
@@ -77,13 +75,12 @@ class TestOnlyAmendRegularPaymentAmountController @Inject() (
     form
       .bindFromRequest()
       .fold(
-        formWithErrors =>
-          Future.successful(BadRequest(view(formWithErrors, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))),
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendingPaymentPlanController.onPageLoad()))),
         value =>
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad())
+          } yield Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
       )
   }
 }

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package controllers.testonly
+package controllers
 
 import base.SpecBase
-import controllers.routes
-import controllers.testonly.routes as testOnlyRoutes
 import forms.RegularPaymentAmountFormProvider
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import models.{CheckMode, NormalMode}
@@ -32,17 +30,17 @@ import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import views.html.testonly.TestOnlyAmendRegularPaymentAmountView
+import views.html.AmendRegularPaymentAmountView
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 import scala.math.BigDecimal.RoundingMode
 
-class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
+class AmendRegularPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new RegularPaymentAmountFormProvider()
   private val form = formProvider()
-  private val route = "/direct-debits/test-only/amend-plan-how-much-do-you-want-to-pay"
+  private val route = "/direct-debits/amend-plan-how-much-do-you-want-to-pay"
   private val validAnswer = BigDecimal(150.73).setScale(2, RoundingMode.HALF_UP)
 
   private def buildApplication(mockService: NationalDirectDebitService) =
@@ -51,7 +49,7 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
       .build()
 
   Seq(NormalMode, CheckMode).foreach { mode =>
-    s"TestOnlyAmendRegularPaymentAmountController in $mode" - {
+    s"AmendRegularPaymentAmountController in $mode" - {
 
       "must return OK and the correct view for a GET" in {
         val mockService = mock[NationalDirectDebitService]
@@ -60,16 +58,16 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
-          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
           val request = FakeRequest(GET, route)
           val result = controller.onPageLoad(mode)(request)
-          val view = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountView]
+          val view = application.injector.instanceOf[AmendRegularPaymentAmountView]
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(
             form,
             mode,
-            testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+            routes.AmendingPaymentPlanController.onPageLoad()
           )(request, messages(application)).toString
         }
       }
@@ -117,16 +115,16 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
-          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
           val request = FakeRequest(GET, route)
           val result = controller.onPageLoad(mode)(request)
-          val view = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountView]
+          val view = application.injector.instanceOf[AmendRegularPaymentAmountView]
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(
             form.fill(scheduledAmount),
             mode,
-            testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+            routes.AmendingPaymentPlanController.onPageLoad()
           )(request, messages(application)).toString
         }
       }
@@ -145,16 +143,16 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
-          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
           val request = FakeRequest(GET, route)
           val result = controller.onPageLoad(mode)(request)
-          val view = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountView]
+          val view = application.injector.instanceOf[AmendRegularPaymentAmountView]
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(
             form.fill(validAnswer),
             mode,
-            testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+            routes.AmendingPaymentPlanController.onPageLoad()
           )(request, messages(application)).toString
         }
       }
@@ -166,7 +164,7 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
 
-          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
           val request = FakeRequest(GET, route)
           val result = controller.onPageLoad(mode)(request)
 
@@ -179,7 +177,7 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
           val request = FakeRequest(GET, route)
           val result = controller.onPageLoad(mode)(request)
 
@@ -204,12 +202,12 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
-          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
           val request = FakeRequest(POST, route).withFormUrlEncodedBody(("value", validAnswer.toString))
           val result = controller.onSubmit(mode)(request)
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual testOnlyRoutes.TestOnlyAmendPaymentPlanConfirmationController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.AmendPaymentPlanConfirmationController.onPageLoad().url
         }
       }
 
@@ -220,17 +218,17 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
-          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
           val request = FakeRequest(POST, route).withFormUrlEncodedBody(("value", "invalid value"))
           val boundForm = form.bind(Map("value" -> "invalid value"))
-          val view = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountView]
+          val view = application.injector.instanceOf[AmendRegularPaymentAmountView]
           val result = controller.onSubmit(mode)(request)
 
           status(result) mustEqual BAD_REQUEST
           contentAsString(result) mustEqual view(
             boundForm,
             mode,
-            testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+            routes.AmendingPaymentPlanController.onPageLoad()
           )(request, messages(application)).toString
         }
       }
@@ -239,7 +237,7 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
-          val controller = application.injector.instanceOf[TestOnlyAmendRegularPaymentAmountController]
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
           val request = FakeRequest(POST, route).withFormUrlEncodedBody(("value", validAnswer.toString))
           val result = controller.onSubmit(mode)(request)
 

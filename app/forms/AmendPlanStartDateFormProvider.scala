@@ -51,11 +51,11 @@ class AmendPlanStartDateFormProvider @Inject() (clock: Clock) extends Mappings {
         dateFormats    = DateFormats.defaultDateFormats
       )
         .verifying(
-          "testOnlyAmendPlanStartDate.error.beforeEarliest",
+          "amendPlanStartDate.error.beforeEarliest",
           date => !date.isBefore(earliestPlanStartDate)
         )
         .verifying(
-          "testOnlyAmendPlanStartDate.error.tooFarInFuture",
+          "amendPlanStartDate.error.tooFarInFuture",
           date => !date.isAfter(maxAllowedDate)
         )
     )

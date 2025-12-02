@@ -17,7 +17,6 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
-import controllers.testonly.routes as testOnlyRoutes
 import models.{CheckMode, NormalMode, UserAnswers}
 import pages.AmendPlanEndDatePage
 import play.api.i18n.Messages
@@ -34,11 +33,11 @@ object AmendPlanEndDateSummary {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPlanEndDatePage).map { answer =>
       SummaryListRowViewModel(
-        key   = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
+        key   = "amendPlanEndDate.endDate",
         value = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
         actions = Seq(
           ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
+            .withVisuallyHiddenText(messages("amendPlanEndDate.endDate"))
         )
       )
     }
@@ -46,14 +45,14 @@ object AmendPlanEndDateSummary {
   def row(value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
     val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
     SummaryListRowViewModel(
-      key   = "testOnlyAmendPaymentPlanConfirmation.endDate",
+      key   = "amendPlanEndDate.endDate",
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
-          ActionItemViewModel("site.change", testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.change.endDate")),
-          ActionItemViewModel("site.remove", testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
-            .withVisuallyHiddenText(messages("testOnlyAmendPaymentPlanConfirmation.remove.endDate"))
+          ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendPlanEndDate.change.endDate")),
+          ActionItemViewModel("site.remove", routes.AmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
+            .withVisuallyHiddenText(messages("amendPlanEndDate.remove.endDate"))
         )
       } else {
         Seq.empty
@@ -63,11 +62,11 @@ object AmendPlanEndDateSummary {
 
   def addRow()(implicit messages: Messages): SummaryListRow =
     SummaryListRow(
-      key = Key(Text(messages("testOnlyAmendPaymentPlanConfirmation.endDate"))),
+      key = Key(Text(messages("amendPlanEndDate.endDate"))),
       value = Value(
         HtmlContent(
-          s"""<a class="govuk-link" href="${testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
-              "testOnlyAmendPaymentPlanConfirmation.addPlanEndDateLink"
+          s"""<a class="govuk-link" href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
+              "amendPlanEndDate.addPlanEndDateLink"
             )}</a>"""
         )
       ),
@@ -82,7 +81,7 @@ object AmendPlanEndDateSummary {
 
     Some(
       SummaryListRowViewModel(
-        key = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
+        key = "amendPlanEndDate.endDate",
         ValueViewModel(dateText),
         actions = Seq.empty
       )

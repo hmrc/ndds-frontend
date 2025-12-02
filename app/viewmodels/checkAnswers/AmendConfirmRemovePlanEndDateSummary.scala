@@ -15,6 +15,8 @@
  */
 
 package viewmodels.checkAnswers
+
+import controllers.routes
 import models.{CheckMode, UserAnswers}
 import pages.AmendConfirmRemovePlanEndDatePage
 import play.api.i18n.Messages
@@ -22,7 +24,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
-object ConfirmRemovePlanEndDateSummary {
+object AmendConfirmRemovePlanEndDateSummary {
 
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendConfirmRemovePlanEndDatePage).map { answer =>
@@ -30,11 +32,11 @@ object ConfirmRemovePlanEndDateSummary {
       val value = if (answer) "site.yes" else "site.no"
 
       SummaryListRowViewModel(
-        key   = "testOnlyConfirmRemovePlanEndDate.checkYourAnswersLabel",
+        key   = "amendConfirmRemovePlanEndDate.checkYourAnswersLabel",
         value = ValueViewModel(value),
         actions = Seq(
-          ActionItemViewModel("site.change", controllers.testonly.routes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("testOnlyConfirmRemovePlanEndDate.change.hidden"))
+          ActionItemViewModel("site.change", routes.AmendConfirmRemovePlanEndDateController.onPageLoad(CheckMode).url)
+            .withVisuallyHiddenText(messages("amendConfirmRemovePlanEndDate.change.hidden"))
         )
       )
     }

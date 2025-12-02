@@ -18,16 +18,18 @@ package controllers
 
 import controllers.actions.*
 import forms.DuplicateWarningFormProvider
-
-import javax.inject.Inject
-import models.{Mode, PaymentPlanType}
+import models.Mode
 import pages.{DuplicateWarningPage, ManagePaymentPlanTypePage}
+import play.api.data.Form
+import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
+import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DuplicateWarningView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DuplicateWarningController @Inject() (
@@ -38,54 +40,77 @@ class DuplicateWarningController @Inject() (
   requireData: DataRequiredAction,
   formProvider: DuplicateWarningFormProvider,
   val controllerComponents: MessagesControllerComponents,
+  nddsService: NationalDirectDebitService,
+  chrisService: ChrisSubmissionForAmendService,
   view: DuplicateWarningView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  val form = formProvider()
-
-  private def backLink(planType: Option[String], mode: Mode): Call = {
-    planType match {
-      case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(mode)
-      case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(mode)
-      case _                                                => routes.PaymentPlanDetailsController.onPageLoad()
-    }
-  }
+  val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
-    (identify andThen getData andThen requireData) { implicit request =>
+    (identify andThen getData andThen requireData).async { implicit request =>
+      val userAnswers = request.userAnswers
 
-      val planType = request.userAnswers.get(ManagePaymentPlanTypePage)
+      val alreadyConfirmed =
+        userAnswers.get(DuplicateWarningPage).contains(true)
 
-      val preparedForm = request.userAnswers.get(DuplicateWarningPage) match {
-        case None        => form
-        case Some(value) => form.fill(value)
+      if (alreadyConfirmed) {
+        logger.warn("Attempt to load this payment plan confirmation; redirecting to Page Not Found.")
+        Future.successful(
+          Redirect(routes.BackSubmissionController.onPageLoad())
+        )
+      } else {
+        if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+          val maybeResult = for {
+            updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
+          } yield {
+            Ok(view(form, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad()))
+          }
+
+          maybeResult match {
+            case Some(result) =>
+              sessionRepository
+                .set(userAnswers.set(DuplicateWarningPage, true).get)
+                .map(_ => result)
+
+            case None =>
+              logger.warn("Failed to set DuplicateWarningPage = true")
+              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          }
+        } else {
+          val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+          logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
+        }
       }
-
-      Ok(view(preparedForm, mode, backLink(planType, mode)))
     }
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
 
-      val from: Option[String] = request.getQueryString("from")
-
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, backLink(from, mode)))),
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad()))),
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningPage, value))
               _              <- sessionRepository.set(updatedAnswers)
-            } yield {
-              if (value) {
-                Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad(mode))
-              } else {
-                Redirect(routes.PaymentPlanDetailsController.onPageLoad())
-              }
-            }
+              result <-
+                if (value) {
+                  chrisService.submitToChris(
+                    ua              = updatedAnswers,
+                    successRedirect = Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()),
+                    errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
+                  )
+                } else {
+                  Future.successful(
+                    Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
+                  )
+                }
+            } yield result
         )
     }
 }

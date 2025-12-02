@@ -18,8 +18,6 @@ package controllers
 
 import controllers.actions.*
 import forms.AddPaymentPlanEndDateFormProvider
-
-import javax.inject.Inject
 import models.{DirectDebitSource, Mode}
 import navigation.Navigator
 import pages.{AddPaymentPlanEndDatePage, DirectDebitSourcePage, PlanEndDatePage}
@@ -30,6 +28,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AddPaymentPlanEndDateView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddPaymentPlanEndDateController @Inject() (

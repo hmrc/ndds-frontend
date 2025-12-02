@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package controllers.testonly
+package controllers
 
 import base.SpecBase
-import controllers.testonly.routes as testonlyRoutes
-import forms.ConfirmRemovePlanEndDateFormProvider
+import forms.AmendConfirmRemovePlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
@@ -34,20 +33,20 @@ import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import utils.DateTimeFormats.formattedDateTimeShort
-import views.html.testonly.TestOnlyAmendConfirmRemovePlanEndDateView
+import views.html.AmendConfirmRemovePlanEndDateView
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
-class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar {
+class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute: Call = Call("GET", "/direct-debits/test-only/check-amendment-details")
+  def onwardRoute: Call = Call("GET", "/direct-debits/check-amendment-details")
 
-  val formProvider = new ConfirmRemovePlanEndDateFormProvider()
+  val formProvider = new AmendConfirmRemovePlanEndDateFormProvider()
   val form: Form[Boolean] = formProvider()
 
-  lazy val amendConfirmRemovePlanEndDate: String = testonlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url
-  lazy val amendConfirmRemovePlanEndDatePost: String = testonlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onSubmit(NormalMode).url
+  lazy val amendConfirmRemovePlanEndDate: String = routes.AmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url
+  lazy val amendConfirmRemovePlanEndDatePost: String = routes.AmendConfirmRemovePlanEndDateController.onSubmit(NormalMode).url
 
   private val testPlanReference = "PP123456"
   private val testEndDate = LocalDate.now().plusMonths(3)
@@ -94,13 +93,12 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
         .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
         .build()
 
       running(application) {
         val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val result = route(application, request).value
-        val view = application.injector.instanceOf[TestOnlyAmendConfirmRemovePlanEndDateView]
+        val view = application.injector.instanceOf[AmendConfirmRemovePlanEndDateView]
 
         val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
@@ -111,7 +109,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
             NormalMode,
             testPlanReference,
             expectedPlanEndDate,
-            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+            routes.AmendingPaymentPlanController.onPageLoad()
           )(
             request,
             messages(application)
@@ -136,13 +134,12 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
         .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
         .build()
 
       running(application) {
 
         val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
-        val view = application.injector.instanceOf[TestOnlyAmendConfirmRemovePlanEndDateView]
+        val view = application.injector.instanceOf[AmendConfirmRemovePlanEndDateView]
         val result = route(application, request).value
 
         val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
@@ -154,7 +151,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
             NormalMode,
             testPlanReference,
             expectedPlanEndDate,
-            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+            routes.AmendingPaymentPlanController.onPageLoad()
           )(
             request,
             messages(application)
@@ -177,10 +174,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
 
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
-          .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
       running(application) {
@@ -205,7 +199,6 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
         .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
         .build()
 
       running(application) {
@@ -214,7 +207,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
 
         val boundForm = form.bind(Map("value" -> ""))
 
-        val view = application.injector.instanceOf[TestOnlyAmendConfirmRemovePlanEndDateView]
+        val view = application.injector.instanceOf[AmendConfirmRemovePlanEndDateView]
         val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
         val result = route(application, request).value
@@ -226,7 +219,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
             NormalMode,
             testPlanReference,
             expectedPlanEndDate,
-            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+            routes.AmendingPaymentPlanController.onPageLoad()
           )(
             request,
             messages(application)
@@ -237,7 +230,6 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
     "must redirect to Journey Recovery for a GET if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None)
-        .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
         .build()
 
       running(application) {
@@ -252,7 +244,6 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
     "must redirect to Journey Recovery for a POST if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None)
-        .configure("play.http.router" -> "testOnlyDoNotUseInAppConf.Routes")
         .build()
 
       running(application) {

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package controllers.testonly
+package controllers
 
 import controllers.actions.*
-import controllers.routes
-import forms.ConfirmRemovePlanEndDateFormProvider
+import forms.AmendConfirmRemovePlanEndDateFormProvider
 import models.Mode
 import navigation.Navigator
 import pages.*
@@ -31,22 +30,22 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats.formattedDateTimeShort
-import views.html.testonly.TestOnlyAmendConfirmRemovePlanEndDateView
+import views.html.AmendConfirmRemovePlanEndDateView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestOnlyAmendConfirmRemovePlanEndDateController @Inject() (
+class AmendConfirmRemovePlanEndDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  formProvider: ConfirmRemovePlanEndDateFormProvider,
+  formProvider: AmendConfirmRemovePlanEndDateFormProvider,
   nddsService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
-  view: TestOnlyAmendConfirmRemovePlanEndDateView
+  view: AmendConfirmRemovePlanEndDateView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -62,7 +61,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateController @Inject() (
       if (!nddsService.amendPaymentPlanGuard(userAnswers)) {
         val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-        Future.successful(Redirect(controllers.routes.SystemErrorController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       } else {
 
         val maybeResult = for {
@@ -83,7 +82,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateController @Inject() (
               mode,
               planDetails.paymentPlanDetails.paymentReference,
               planEndDate,
-              controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+              routes.AmendingPaymentPlanController.onPageLoad()
             )
           )
         }
@@ -122,7 +121,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateController @Inject() (
                       mode,
                       planReference,
                       planEndDateStr,
-                      controllers.testonly.routes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+                      routes.AmendingPaymentPlanController.onPageLoad()
                     )
                   )
                 ),

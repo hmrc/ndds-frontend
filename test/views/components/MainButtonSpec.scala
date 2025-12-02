@@ -15,11 +15,11 @@
  */
 
 import base.SpecBase
-import org.scalatest.matchers.must.Matchers
-import views.html.components.MainButton
-import play.api.test.FakeRequest
-import play.api.i18n.Messages
 import org.jsoup.Jsoup
+import org.scalatest.matchers.must.Matchers
+import play.api.i18n.Messages
+import play.api.test.FakeRequest
+import views.html.components.MainButton
 
 class MainButtonSpec extends SpecBase with Matchers {
 

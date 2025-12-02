@@ -20,9 +20,9 @@ import forms.mappings.Mappings
 import models.YearEndAndMonth
 import play.api.data.Form
 import play.api.i18n.Messages
+import utils.DateFormats
 
 import javax.inject.Inject
-import utils.DateFormats
 
 class YearEndAndMonthFormProvider @Inject() extends Mappings {
 
