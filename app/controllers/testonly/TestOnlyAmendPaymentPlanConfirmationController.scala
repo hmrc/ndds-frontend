@@ -26,6 +26,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
 import queries.PaymentPlanDetailsQuery
+import repositories.SessionRepository
 import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -46,6 +47,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   view: TestOnlyAmendPaymentPlanConfirmationView,
   nddService: NationalDirectDebitService,
+  sessionRepository: SessionRepository,
   chrisService: ChrisSubmissionForAmendService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -100,7 +102,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       case _ => // Budget Payment Plan
         val rows = Seq(
           AmendRegularPaymentAmountSummary.row(
-            userAnswers.get(RegularPaymentAmountPage),
+            userAnswers.get(AmendPaymentAmountPage),
             showChange = true,
             changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(mode))
           ),
@@ -177,10 +179,26 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
               case _ => false
             }
 
+            if (noChange) { // F27
+              Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
+            } else { // F26
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType)
+            }
+
+          case (Some(dbAmount), Some(dbStartDate), None) =>
+            val noChange = planType match {
+              case PaymentPlanType.SinglePaymentPlan.toString =>
+                amendedAmount == dbAmount && amendedDateOption == dbStartDate
+
+              case PaymentPlanType.BudgetPaymentPlan.toString => amendedAmount == dbAmount
+
+              case _ => false
+            }
+
             if (noChange) {
               Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
             } else {
-              checkDuplicatePlan(userAnswers)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType)
             }
 
           case _ =>
@@ -194,16 +212,38 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
     }
   }
 
-  private def checkDuplicatePlan(userAnswers: UserAnswers)(implicit ec: ExecutionContext, request: Request[?]): Future[Result] = {
+  private def checkDuplicatePlan(userAnswers: UserAnswers, updatedAmount: BigDecimal, updatedDate: Option[LocalDate], planType: String)(implicit
+    ec: ExecutionContext,
+    request: Request[?]
+  ): Future[Result] = {
     nddService.isDuplicatePaymentPlan(userAnswers).flatMap { duplicateResponse =>
       if (duplicateResponse.isDuplicate) {
         Future.successful(Redirect(testOnlyRoutes.TestOnlyDuplicateWarningController.onPageLoad(NormalMode).url))
       } else {
-        chrisService.submitToChris(
-          ua              = userAnswers,
-          successRedirect = Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()),
-          errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
-        )
+        val updatedAnswers = for {
+          updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))
+          updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, updatedAmount))
+          updatedUa <- if (planType == PaymentPlanType.SinglePaymentPlan.toString) {
+                         Future.fromTry(updatedUa.set(AmendPlanStartDatePage, updatedDate.get))
+                       } else {
+                         Future.fromTry(updatedUa.set(AmendPlanStartDatePage, updatedDate.get))
+                       }
+          updatedUa <- if (updatedDate.isDefined) {
+                         Future.fromTry(updatedUa.set(AmendPlanEndDatePage, updatedDate.get))
+                       } else {
+                         Future.successful(updatedUa)
+                       }
+        } yield updatedUa
+
+        updatedAnswers.flatMap { finalUa =>
+          sessionRepository.set(finalUa).flatMap { _ =>
+            chrisService.submitToChris(
+              ua              = finalUa,
+              successRedirect = Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()),
+              errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
+            )
+          }
+        }
       }
     }
   }

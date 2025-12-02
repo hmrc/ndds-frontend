@@ -54,7 +54,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
       Seq(
         AmendRegularPaymentAmountSummary.row(
-          userAnswers.get(RegularPaymentAmountPage),
+          userAnswers.get(AmendPaymentAmountPage),
           showChange = true,
           changeCall = Some(testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode))
         )(messages(app)),
@@ -107,7 +107,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
           .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
           .success
           .value
-          .set(RegularPaymentAmountPage, 150.0)
+          .set(AmendPaymentAmountPage, 150.0)
           .success
           .value
           .set(AmendPlanStartDatePage, LocalDate.now())
@@ -158,7 +158,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
             .success
             .value
-            .set(RegularPaymentAmountPage, 150.0)
+            .set(AmendPaymentAmountPage, 150.0)
             .success
             .value
             .set(AmendPlanEndDatePage, LocalDate.now())
@@ -205,7 +205,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
             .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
             .success
             .value
-            .set(RegularPaymentAmountPage, 150.0)
+            .set(AmendPaymentAmountPage, 150.0)
             .success
             .value
             .set(AmendPlanStartDatePage, LocalDate.now())

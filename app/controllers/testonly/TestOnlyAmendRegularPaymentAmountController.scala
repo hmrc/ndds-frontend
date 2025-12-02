@@ -57,7 +57,7 @@ class TestOnlyAmendRegularPaymentAmountController @Inject() (
 
     if (nddsService.amendPaymentPlanGuard(answers)) {
       val existingAmount = answers
-        .get(RegularPaymentAmountPage)
+        .get(AmendPaymentAmountPage)
         .orElse(answers.get(PaymentPlanDetailsQuery).flatMap(_.paymentPlanDetails.scheduledPaymentAmount))
 
       val preparedForm = existingAmount match {
@@ -81,7 +81,7 @@ class TestOnlyAmendRegularPaymentAmountController @Inject() (
           Future.successful(BadRequest(view(formWithErrors, mode, testOnlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()))),
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(RegularPaymentAmountPage, value))
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendRegularPaymentAmountFlag, true))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
             updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDateFlag, false))

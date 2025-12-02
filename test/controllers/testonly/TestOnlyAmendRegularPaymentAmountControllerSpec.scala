@@ -25,7 +25,7 @@ import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResp
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.RegularPaymentAmountPage
+import pages.{AmendPaymentAmountPage, RegularPaymentAmountPage}
 import queries.PaymentPlanDetailsQuery
 import play.api.inject.bind
 import play.api.test.FakeRequest
@@ -133,7 +133,7 @@ class TestOnlyAmendRegularPaymentAmountControllerSpec extends SpecBase with Mock
 
       "must populate the view on a GET when the question has previously been answered" in {
         val userAnswers = emptyUserAnswers
-          .set(RegularPaymentAmountPage, validAnswer)
+          .set(AmendPaymentAmountPage, validAnswer)
           .success
           .value
 
