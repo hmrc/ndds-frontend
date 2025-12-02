@@ -37,6 +37,8 @@ import viewmodels.checkAnswers.*
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject() (
@@ -152,7 +154,6 @@ class CheckYourAnswersController @Inject() (
                         val earliestDate: java.time.LocalDate = java.time.LocalDate.parse(earliestPaymentDate.date)
                         if (!paymentDate.enteredDate.isBefore(earliestDate)) {
                           // OK → proceed with existing MAC + DDI logic
-                          println("************************************************************")
                           processDdiReferenceGeneration(ua, request)
                         } else {
                           logger.warn(
@@ -167,6 +168,30 @@ class CheckYourAnswersController @Inject() (
                     }
                   }
 
+                } else if (requireBudgetingPlanCheck(ua)) {
+                  nddService.getEarliestPlanStartDate(request.userAnswers, request.userId) map { earliestPlanStartDate =>
+                    // f4 check
+                    ua.get(PlanStartDatePage) match {
+                      case Some(planStartDate) =>
+                        val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+                        if (!planStartDate.enteredDate.isAfter(earliestDate)) {
+                          // OK → proceed with existing MAC + DDI logic
+                          processDdiReferenceGeneration(ua, request)
+                        } else {
+                          logger.warn(
+                            s"Payment date ${planStartDate.enteredDate} is before earliest allowed date $earliestDate"
+                          )
+                          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                        }
+
+                      case None =>
+                        logger.error("PaymentDatePage missing in UserAnswers")
+                        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                    }
+                  }
+                  // apply checks for budgting
+                  println("********************************budgtign check here ***")
+                  processDdiReferenceGeneration(ua, request)
                 } else {
                   // Skip earliest date check → go straight to MAC logic
                   processDdiReferenceGeneration(ua, request)
@@ -177,6 +202,13 @@ class CheckYourAnswersController @Inject() (
       }
     }
 
+  private def requireBudgetingPlanCheck(ua: UserAnswers): Boolean = {
+    val optPaymentType = ua.get(PaymentPlanTypePage)
+    optPaymentType.exists {
+      case PaymentPlanType.BudgetPaymentPlan => true
+      case _                                 => false
+    }
+  }
   private def requiresEarliestPaymentDateCheck(ua: UserAnswers): Boolean = {
     val optSourceType = ua.get(DirectDebitSourcePage)
     val optPaymentType = ua.get(PaymentPlanTypePage)
