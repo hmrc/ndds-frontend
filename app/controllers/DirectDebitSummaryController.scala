@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import models.responses.NddPaymentPlan
@@ -46,7 +47,8 @@ class DirectDebitSummaryController @Inject() (
   view: DirectDebitSummaryView,
   nddService: NationalDirectDebitService,
   sessionRepository: SessionRepository,
-  paginationService: PaginationService
+  paginationService: PaginationService,
+  config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -83,7 +85,8 @@ class DirectDebitSummaryController @Inject() (
                     buildCards(paginationResult.paginatedData),
                     paginationViewModel = paginationResult.paginationViewModel,
                     title,
-                    heading
+                    heading,
+                    config.maxNumberPPsAllowed
                   )
                 )
               }
