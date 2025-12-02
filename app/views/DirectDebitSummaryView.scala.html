@@ -33,7 +33,7 @@
     pageNavigator: PageNavigator
 )
 
-@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList], paginationViewModel: PaginationViewModel = PaginationViewModel(), title: String, heading: String)(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList], paginationViewModel: PaginationViewModel = PaginationViewModel(), title: String, heading: String, ppLimit: Int)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages(title)), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
@@ -61,7 +61,7 @@
     @if(paymentPlansList.size > 0) {
         @h2("directDebitPaymentSummary.activePayment.h1")
 
-        @if(paymentPlansList.size < 99){
+        @if(paymentPlansList.size < ppLimit){
             @paragraphWithLink(
                 Some(messages("directDebitPaymentSummary.activePayment.p1")),
                 linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
