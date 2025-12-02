@@ -64,9 +64,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       Future.successful(Redirect(routes.BackSubmissionController.onPageLoad()))
     } else {
       if (nddService.amendPaymentPlanGuard(userAnswers)) {
-        val (rows, backLink) = buildRows(userAnswers, mode)
-
-        Future.successful(Ok(view(mode, rows, backLink)))
+        Future.successful(Ok(view(mode, buildRows(userAnswers, mode))))
       } else {
         val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
@@ -77,10 +75,10 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
 
   private def buildRows(userAnswers: UserAnswers, mode: Mode)(implicit
     messages: Messages
-  ): (Seq[SummaryListRow], Call) = {
+  ): Seq[SummaryListRow] = {
     userAnswers.get(ManagePaymentPlanTypePage) match {
       case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
-        val rows = Seq(
+        Seq(
           AmendPaymentAmountSummary.row(
             PaymentPlanType.SinglePaymentPlan.toString,
             userAnswers.get(AmendPaymentAmountPage),
@@ -93,14 +91,9 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
             true
           )
         )
-        val backLink = userAnswers.get(AmendPaymentAmountFlag) match {
-          case Some(true) => testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(mode)
-          case _          => testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(mode)
-        }
 
-        (rows, backLink)
       case _ => // Budget Payment Plan
-        val rows = Seq(
+        Seq(
           AmendRegularPaymentAmountSummary.row(
             userAnswers.get(AmendPaymentAmountPage),
             showChange = true,
@@ -117,17 +110,6 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
               AmendPlanEndDateSummary.addRow()
           }
         )
-
-        val backLink = userAnswers.get(AmendRegularPaymentAmountFlag) match {
-          case Some(true) => testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
-          case _ =>
-            userAnswers.get(AmendPlanEndDateFlag) match {
-              case Some(true) => testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode)
-              case _          => testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
-            }
-        }
-
-        (rows, backLink)
     }
   }
 
@@ -166,36 +148,30 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
       case (Some(planDetails), Some(amendedAmount)) =>
         val paymentDetails = planDetails.paymentPlanDetails
 
+        // F27 check for any amendment
+        def isNoChange(dbAmount: BigDecimal, dbStartDate: LocalDate, dbEndDate: Option[LocalDate]): Boolean = {
+          planType match {
+            case PaymentPlanType.SinglePaymentPlan.toString =>
+              amendedAmount == dbAmount && amendedDateOption.contains(dbStartDate)
+
+            case PaymentPlanType.BudgetPaymentPlan.toString =>
+              amendedAmount == dbAmount && amendedDateOption.fold(true)(_ == dbEndDate) // also covers if no end date
+
+            case _ => false
+          }
+        }
+
         (paymentDetails.scheduledPaymentAmount, paymentDetails.scheduledPaymentStartDate, paymentDetails.scheduledPaymentEndDate) match {
 
           case (Some(dbAmount), Some(dbStartDate), Some(dbEndDate)) =>
-            val noChange = planType match {
-              case PaymentPlanType.SinglePaymentPlan.toString =>
-                amendedAmount == dbAmount && amendedDateOption == dbStartDate
-
-              case PaymentPlanType.BudgetPaymentPlan.toString =>
-                amendedAmount == dbAmount && amendedDateOption.fold(true)(_ == dbEndDate) // also covers if no end date
-
-              case _ => false
-            }
-
-            if (noChange) { // F27
+            if (isNoChange(dbAmount, dbStartDate, Some(dbEndDate))) {
               Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
-            } else { // F26
+            } else {
               checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, dbStartDate)
             }
 
           case (Some(dbAmount), Some(dbStartDate), None) =>
-            val noChange = planType match {
-              case PaymentPlanType.SinglePaymentPlan.toString =>
-                amendedAmount == dbAmount && amendedDateOption == dbStartDate
-
-              case PaymentPlanType.BudgetPaymentPlan.toString => amendedAmount == dbAmount
-
-              case _ => false
-            }
-
-            if (noChange) {
+            if (isNoChange(dbAmount, dbStartDate, None)) {
               Future.successful(Redirect(testOnlyRoutes.TestOnlyAmendPaymentPlanUpdateController.onPageLoad()))
             } else {
               checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, dbStartDate)
@@ -212,6 +188,7 @@ class TestOnlyAmendPaymentPlanConfirmationController @Inject() (
     }
   }
 
+  // F26 check for duplicate from RDS DB
   private def checkDuplicatePlan(userAnswers: UserAnswers,
                                  updatedAmount: BigDecimal,
                                  updatedDate: Option[LocalDate],

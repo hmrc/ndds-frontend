@@ -20,16 +20,16 @@ import base.SpecBase
 import controllers.routes
 import controllers.testonly.routes as testOnlyRoutes
 import forms.RegularPaymentAmountFormProvider
-import models.{CheckMode, NormalMode}
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.{CheckMode, NormalMode}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, RegularPaymentAmountPage}
-import queries.PaymentPlanDetailsQuery
+import pages.AmendPaymentAmountPage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import views.html.testonly.TestOnlyAmendRegularPaymentAmountView

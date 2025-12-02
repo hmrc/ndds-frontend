@@ -138,8 +138,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows,
-            testOnlyRoutes.TestOnlyAmendRegularPaymentAmountController.onPageLoad(NormalMode)
+            summaryListRows
           )(request, messages(application)).toString
         }
       }
@@ -190,8 +189,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows,
-            testOnlyRoutes.TestOnlyAmendPlanEndDateController.onPageLoad(NormalMode)
+            summaryListRows
           )(request, messages(application)).toString
         }
       }
@@ -240,8 +238,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows,
-            testOnlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
+            summaryListRows
           )(request, messages(application)).toString
         }
       }
@@ -319,8 +316,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows,
-            testOnlyRoutes.TestOnlyAmendPaymentAmountController.onPageLoad(NormalMode)
+            summaryListRows
           )(request, messages(application)).toString
 
         }
@@ -366,8 +362,7 @@ class TestOnlyAmendPaymentPlanConfirmationControllerSpec extends SpecBase with D
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows,
-            testOnlyRoutes.TestOnlyAmendPlanStartDateController.onPageLoad(NormalMode)
+            summaryListRows
           )(request, messages(application)).toString
 
         }
