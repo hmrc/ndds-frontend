@@ -25,9 +25,9 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(mode: Mode, rows: Seq[SummaryListRow], call: Call)(implicit request: Request[_], messages: Messages)
+@(mode: Mode, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("testOnlyAmendPaymentPlanConfirmation.title")), backLink = Some(call.url)) {
+@layout(pageTitle = titleNoForm(messages("testOnlyAmendPaymentPlanConfirmation.title")), showBackLink = false) {
     @formHelper(action = controllers.testonly.routes.TestOnlyAmendPaymentPlanConfirmationController.onSubmit(), Symbol("autoComplete") -> "off") {
         @header1("testOnlyAmendPaymentPlanConfirmation.heading")
 
