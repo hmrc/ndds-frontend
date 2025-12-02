@@ -134,7 +134,13 @@ class TestOnlyAmendConfirmRemovePlanEndDateController @Inject() (
                   updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountFlag, false))
                   updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentDateFlag, false))
                   updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPlanEndDateFlag, false))
-                  _              <- sessionRepository.set(updatedAnswers)
+                  updatedAnswers <-
+                    if (value) {
+                      Future.fromTry(updatedAnswers.remove(AmendPlanEndDatePage))
+                    } else {
+                      Future.successful(updatedAnswers)
+                    }
+                  _ <- sessionRepository.set(updatedAnswers)
                 } yield Redirect(navigator.nextPage(AmendConfirmRemovePlanEndDatePage, mode, updatedAnswers))
             )
 

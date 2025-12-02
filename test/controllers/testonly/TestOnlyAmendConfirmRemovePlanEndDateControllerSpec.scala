@@ -23,6 +23,7 @@ import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResp
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalactic.Prettifier.default
 import org.scalatestplus.mockito.MockitoSugar
 import pages.*
 import play.api.data.Form
@@ -45,10 +46,8 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
   val formProvider = new ConfirmRemovePlanEndDateFormProvider()
   val form: Form[Boolean] = formProvider()
 
-  lazy val testOnlyConfirmRemovePlanEndDateRoute: String =
-    testonlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController
-      .onPageLoad(NormalMode)
-      .url
+  lazy val amendConfirmRemovePlanEndDate: String = testonlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url
+  lazy val amendConfirmRemovePlanEndDatePost: String = testonlyRoutes.TestOnlyAmendConfirmRemovePlanEndDateController.onSubmit(NormalMode).url
 
   private val testPlanReference = "PP123456"
   private val testEndDate = LocalDate.now().plusMonths(3)
@@ -99,7 +98,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, testOnlyConfirmRemovePlanEndDateRoute)
+        val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val result = route(application, request).value
         val view = application.injector.instanceOf[TestOnlyAmendConfirmRemovePlanEndDateView]
 
@@ -142,24 +141,24 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
 
       running(application) {
 
-        val request = FakeRequest(GET, testOnlyConfirmRemovePlanEndDateRoute)
+        val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val view = application.injector.instanceOf[TestOnlyAmendConfirmRemovePlanEndDateView]
         val result = route(application, request).value
 
         val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
-        status(result) mustEqual SEE_OTHER
-//        contentAsString(result) mustEqual
-//          view(
-//            form.fill(true),
-//            NormalMode,
-//            testPlanReference,
-//            expectedPlanEndDate,
-//            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
-//          )(
-//            request,
-//            messages(application)
-//          ).toString
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual
+          view(
+            form.fill(true),
+            NormalMode,
+            testPlanReference,
+            expectedPlanEndDate,
+            testonlyRoutes.TestOnlyAmendingPaymentPlanController.onPageLoad()
+          )(
+            request,
+            messages(application)
+          ).toString
       }
     }
 
@@ -185,7 +184,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
           .build()
 
       running(application) {
-        val request = FakeRequest(POST, testOnlyConfirmRemovePlanEndDateRoute)
+        val request = FakeRequest(POST, amendConfirmRemovePlanEndDatePost)
           .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
@@ -210,7 +209,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
         .build()
 
       running(application) {
-        val request = FakeRequest(POST, testOnlyConfirmRemovePlanEndDateRoute)
+        val request = FakeRequest(POST, amendConfirmRemovePlanEndDate)
           .withFormUrlEncodedBody(("value", ""))
 
         val boundForm = form.bind(Map("value" -> ""))
@@ -242,7 +241,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
         .build()
 
       running(application) {
-        val request = FakeRequest(GET, testOnlyConfirmRemovePlanEndDateRoute)
+        val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
@@ -257,7 +256,7 @@ class TestOnlyAmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with 
         .build()
 
       running(application) {
-        val request = FakeRequest(POST, testOnlyConfirmRemovePlanEndDateRoute)
+        val request = FakeRequest(POST, amendConfirmRemovePlanEndDatePost)
           .withFormUrlEncodedBody(("value", "true"))
 
         val result = route(application, request).value
