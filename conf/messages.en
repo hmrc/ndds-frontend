@@ -728,3 +728,9 @@ tellAboutThisPayment.p1.3 =  , you need to add 4 extra numbers to your payment r
 tellAboutThisPayment.checkYourAnswersLabel = Add 4 extra numbers
 tellAboutThisPayment.error.required = Select one option.
 tellAboutThisPayment.change.hidden = Add 4 extra numbers
+
+errorWarning.title = This payment plan cannot be set up
+errorWarning.heading = This payment plan cannot be set up
+errorWarning.p1 = This payment plan cannot be set up because the details are invalid. You need to change the following details to continue:
+errorWarning.bulletList1 = plan end date must be on or after the plan start date
+errorWarning.link = Change your payment plan details

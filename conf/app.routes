@@ -195,3 +195,5 @@ GET        /tell-us-about-this-payment                  controllers.TellAboutThi
 POST       /tell-us-about-this-payment                  controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = NormalMode)
 GET        /change-tell-us-about-this-payment           controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-tell-us-about-this-payment           controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = CheckMode)
+
+GET        /payment-plan-cannot-be-set-up               controllers.ErrorWarningController.onPageLoad()
