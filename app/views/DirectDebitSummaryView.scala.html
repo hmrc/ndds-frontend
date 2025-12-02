@@ -61,12 +61,16 @@
     @if(paymentPlansList.size > 0) {
         @h2("directDebitPaymentSummary.activePayment.h1")
 
-        @paragraphWithLink(
-            Some(messages("directDebitPaymentSummary.activePayment.p1")),
-            linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
-            linkUrl = routes.DirectDebitSummaryController.onRedirectToDirectDebitSource(directDebitReference).url,
-            linkFullStop = true
-        )
+        @if(paymentPlansList.size < 99){
+            @paragraphWithLink(
+                Some(messages("directDebitPaymentSummary.activePayment.p1")),
+                linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
+                linkUrl = routes.DirectDebitSummaryController.onRedirectToDirectDebitSource(directDebitReference).url,
+                linkFullStop = true
+            )
+        } else {
+            @messages("directDebitPaymentSummary.activePayment.overPPLimit.p1")
+        }
 
         @paragraph("directDebitPaymentSummary.activePayment.p2")
 
