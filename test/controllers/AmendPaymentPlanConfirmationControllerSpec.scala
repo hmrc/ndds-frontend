@@ -757,7 +757,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual routes.AmendDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 
