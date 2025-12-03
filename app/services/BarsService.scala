@@ -20,12 +20,12 @@ import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import connectors.BarsConnector
 import models.YourBankDetails
-import models.errors.{BarsErrors, UpstreamBarsException}
 import models.errors.BarsErrors.*
-import models.requests.{BarsAccount, BarsBusiness, BarsBusinessRequest, BarsPersonalRequest, BarsSubject}
+import models.errors.{BarsErrors, UpstreamBarsException}
+import models.requests.*
 import models.responses.{Bank, BarsResponse, BarsVerificationResponse}
-import uk.gov.hmrc.http.HeaderCarrier
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 

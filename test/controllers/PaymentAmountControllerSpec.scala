@@ -18,20 +18,20 @@ package controllers
 
 import base.SpecBase
 import forms.PaymentAmountFormProvider
+import models.DirectDebitSource.PAYE
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.PaymentAmountPage
+import pages.{DirectDebitSourcePage, PaymentAmountPage}
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
 import views.html.PaymentAmountView
-import models.DirectDebitSource.PAYE
-import pages.DirectDebitSourcePage
+
 import scala.concurrent.Future
 import scala.math.BigDecimal.RoundingMode
 

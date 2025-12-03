@@ -18,6 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.RemovingThisSuspensionFormProvider
+import models.audits.RemovePaymentPlanSuspensionAudit
 import models.requests.ChrisSubmissionRequest
 import models.responses.{DirectDebitDetails, PaymentPlanResponse}
 import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
@@ -31,7 +32,6 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.RemovingThisSuspensionView
-import models.audits.RemovePaymentPlanSuspensionAudit
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

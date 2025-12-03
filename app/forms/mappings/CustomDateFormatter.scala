@@ -17,9 +17,9 @@
 package forms.mappings
 
 import play.api.data.FormError
+import play.api.i18n.Messages
 
 import java.time.LocalDate
-import play.api.i18n.Messages
 
 case class DateFormat(dateType: String, errorKey: String, regex: String)
 

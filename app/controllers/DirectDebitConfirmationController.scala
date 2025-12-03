@@ -21,8 +21,9 @@ import config.FrontendAppConfig
 import controllers.actions.*
 import models.PaymentPlanType
 import pages.*
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.ExistingDirectDebitIdentifierQuery
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -47,6 +48,7 @@ class DirectDebitConfirmationController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    implicit val messages: Messages = messagesApi.preferred(request)
     val referenceNumber = request.userAnswers
       .get(CheckYourAnswerPage)
       .getOrElse(throw new Exception("Missing generated DDI reference number"))
@@ -97,18 +99,57 @@ class DirectDebitConfirmationController @Inject() (
       None
     }
 
+    val directDebitQuery = request.userAnswers.get(ExistingDirectDebitIdentifierQuery)
+
+    val bankAccountName = directDebitQuery.map(_.bankAccountName)
+    val bankAccountNumber = directDebitQuery.map(_.bankAccountNumber)
+    val bankSortCode = directDebitQuery.map(_.bankSortCode)
+
+    val accountHolderNameRow =
+      bankAccountName
+        .map { v =>
+          SummaryListRowViewModel(
+            key     = Key(Text(messages("directDebitConfirmation.accountName"))),
+            value   = ValueViewModel(Text(v)),
+            actions = Seq.empty
+          )
+        }
+        .orElse(YourBankDetailsAccountHolderNameSummary.row(request.userAnswers, false))
+
+    val accountNumberRow =
+      bankAccountNumber
+        .map { v =>
+          SummaryListRowViewModel(
+            key     = Key(Text(messages("directDebitConfirmation.accountNumber"))),
+            value   = ValueViewModel(Text(v)),
+            actions = Seq.empty
+          )
+        }
+        .orElse(YourBankDetailsAccountNumberSummary.row(request.userAnswers, false))
+
+    val sortCodeRow =
+      bankSortCode
+        .map { v =>
+          SummaryListRowViewModel(
+            key     = Key(Text(messages("directDebitConfirmation.sortCode"))),
+            value   = ValueViewModel(Text(v)),
+            actions = Seq.empty
+          )
+        }
+        .orElse(YourBankDetailsSortCodeSummary.row(request.userAnswers, false))
+
     val directDebitDetails = SummaryListViewModel(
       rows = Seq(
-        Option(
+        Some(
           SummaryListRowViewModel(
             key     = Key(Text("Direct Debit reference")),
             value   = ValueViewModel(Text(referenceNumber.ddiRefNumber)),
             actions = Seq.empty
           )
         ),
-        YourBankDetailsAccountHolderNameSummary.row(request.userAnswers, false),
-        YourBankDetailsAccountNumberSummary.row(request.userAnswers, false),
-        YourBankDetailsSortCodeSummary.row(request.userAnswers, false)
+        accountHolderNameRow,
+        accountNumberRow,
+        sortCodeRow
       ).flatten
     )
 

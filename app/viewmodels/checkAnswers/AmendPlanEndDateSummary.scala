@@ -17,10 +17,11 @@
 package viewmodels.checkAnswers
 
 import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, NormalMode, UserAnswers}
 import pages.AmendPlanEndDatePage
 import play.api.i18n.Messages
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import uk.gov.hmrc.govukfrontend.views.Aliases.{HtmlContent, Text, Value}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{Key, SummaryListRow}
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
@@ -32,11 +33,11 @@ object AmendPlanEndDateSummary {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPlanEndDatePage).map { answer =>
       SummaryListRowViewModel(
-        key   = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
+        key   = "amendPlanEndDate.endDate",
         value = ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
         actions = Seq(
           ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
+            .withVisuallyHiddenText(messages("amendPlanEndDate.endDate"))
         )
       )
     }
@@ -44,18 +45,33 @@ object AmendPlanEndDateSummary {
   def row(value: Option[LocalDate], dateFormatter: String, showChange: Boolean = false)(implicit messages: Messages): SummaryListRow = {
     val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
     SummaryListRowViewModel(
-      key   = "paymentPlanDetails.details.planEndDate",
+      key   = "amendPlanEndDate.endDate",
       value = ValueViewModel(displayValue),
       actions = if (showChange) {
         Seq(
           ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.endDate"))
+            .withVisuallyHiddenText(messages("amendPlanEndDate.change.endDate")),
+          ActionItemViewModel("site.remove", routes.AmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
+            .withVisuallyHiddenText(messages("amendPlanEndDate.remove.endDate"))
         )
       } else {
         Seq.empty
       }
     )
   }
+
+  def addRow()(implicit messages: Messages): SummaryListRow =
+    SummaryListRow(
+      key = Key(Text(messages("amendPlanEndDate.endDate"))),
+      value = Value(
+        HtmlContent(
+          s"""<a class="govuk-link" href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}">${messages(
+              "amendPlanEndDate.addPlanEndDateLink"
+            )}</a>"""
+        )
+      ),
+      actions = None
+    )
 
   def rowData(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
     val dateText = answers
@@ -65,7 +81,7 @@ object AmendPlanEndDateSummary {
 
     Some(
       SummaryListRowViewModel(
-        key = "amendPaymentPlanConfirmation.amendPaymentPlan.endDate",
+        key = "amendPlanEndDate.endDate",
         ValueViewModel(dateText),
         actions = Seq.empty
       )

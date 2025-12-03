@@ -1,0 +1,250 @@
+/*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package controllers
+
+import base.SpecBase
+import forms.RegularPaymentAmountFormProvider
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import models.{CheckMode, NormalMode}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
+import pages.AmendPaymentAmountPage
+import play.api.inject.bind
+import play.api.test.FakeRequest
+import play.api.test.Helpers.*
+import queries.PaymentPlanDetailsQuery
+import repositories.SessionRepository
+import services.NationalDirectDebitService
+import views.html.AmendRegularPaymentAmountView
+
+import java.time.{LocalDate, LocalDateTime}
+import scala.concurrent.Future
+import scala.math.BigDecimal.RoundingMode
+
+class AmendRegularPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
+
+  private val formProvider = new RegularPaymentAmountFormProvider()
+  private val form = formProvider()
+  private val route = "/direct-debits/amend-plan-how-much-do-you-want-to-pay"
+  private val validAnswer = BigDecimal(150.73).setScale(2, RoundingMode.HALF_UP)
+
+  private def buildApplication(mockService: NationalDirectDebitService) =
+    applicationBuilder(userAnswers = Some(emptyUserAnswers))
+      .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+      .build()
+
+  Seq(NormalMode, CheckMode).foreach { mode =>
+    s"AmendRegularPaymentAmountController in $mode" - {
+
+      "must return OK and the correct view for a GET" in {
+        val mockService = mock[NationalDirectDebitService]
+        val application = buildApplication(mockService)
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
+          val request = FakeRequest(GET, route)
+          val result = controller.onPageLoad(mode)(request)
+          val view = application.injector.instanceOf[AmendRegularPaymentAmountView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(
+            form,
+            mode,
+            routes.AmendingPaymentPlanController.onPageLoad()
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must pre-populate using the scheduled plan amount when there is no stored answer" in {
+        val mockService = mock[NationalDirectDebitService]
+        val scheduledAmount = validAnswer
+        val paymentPlanResponse = PaymentPlanResponse(
+          directDebitDetails = DirectDebitDetails(
+            bankSortCode       = Some("123456"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("Test"),
+            auDdisFlag         = true,
+            submissionDateTime = LocalDateTime.now()
+          ),
+          paymentPlanDetails = PaymentPlanDetails(
+            hodService                = "CESA",
+            planType                  = "BudgetPaymentPlan",
+            paymentReference          = "paymentReference",
+            submissionDateTime        = LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(scheduledAmount),
+            scheduledPaymentStartDate = Some(LocalDate.now()),
+            initialPaymentStartDate   = Some(LocalDate.now()),
+            initialPaymentAmount      = Some(BigDecimal(100)),
+            scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(1)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = None,
+            suspensionEndDate         = None,
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = None,
+            totalLiability            = Some(BigDecimal(500)),
+            paymentPlanEditable       = true
+          )
+        )
+
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
+          val request = FakeRequest(GET, route)
+          val result = controller.onPageLoad(mode)(request)
+          val view = application.injector.instanceOf[AmendRegularPaymentAmountView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(
+            form.fill(scheduledAmount),
+            mode,
+            routes.AmendingPaymentPlanController.onPageLoad()
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must populate the view on a GET when the question has previously been answered" in {
+        val userAnswers = emptyUserAnswers
+          .set(AmendPaymentAmountPage, validAnswer)
+          .success
+          .value
+
+        val mockService = mock[NationalDirectDebitService]
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
+          val request = FakeRequest(GET, route)
+          val result = controller.onPageLoad(mode)(request)
+          val view = application.injector.instanceOf[AmendRegularPaymentAmountView]
+
+          status(result) mustEqual OK
+          contentAsString(result) mustEqual view(
+            form.fill(validAnswer),
+            mode,
+            routes.AmendingPaymentPlanController.onPageLoad()
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must redirect to journey recovery if amend payment plan guard returns false" in {
+        val mockService = mock[NationalDirectDebitService]
+        val application = buildApplication(mockService)
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
+          val request = FakeRequest(GET, route)
+          val result = controller.onPageLoad(mode)(request)
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+        }
+      }
+
+      "must redirect to Journey Recovery for a GET if no existing data is found" in {
+        val application = applicationBuilder(userAnswers = None).build()
+
+        running(application) {
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
+          val request = FakeRequest(GET, route)
+          val result = controller.onPageLoad(mode)(request)
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+
+      "must redirect to the confirmation page when valid data is submitted" in {
+        val mockSessionRepository = mock[SessionRepository]
+        val mockService = mock[NationalDirectDebitService]
+
+        when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockService)
+          )
+          .build()
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
+          val request = FakeRequest(POST, route).withFormUrlEncodedBody(("value", validAnswer.toString))
+          val result = controller.onSubmit(mode)(request)
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.AmendPaymentPlanConfirmationController.onPageLoad().url
+        }
+      }
+
+      "must return a Bad Request when invalid data is submitted" in {
+        val mockService = mock[NationalDirectDebitService]
+        val application = buildApplication(mockService)
+
+        running(application) {
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
+          val request = FakeRequest(POST, route).withFormUrlEncodedBody(("value", "invalid value"))
+          val boundForm = form.bind(Map("value" -> "invalid value"))
+          val view = application.injector.instanceOf[AmendRegularPaymentAmountView]
+          val result = controller.onSubmit(mode)(request)
+
+          status(result) mustEqual BAD_REQUEST
+          contentAsString(result) mustEqual view(
+            boundForm,
+            mode,
+            routes.AmendingPaymentPlanController.onPageLoad()
+          )(request, messages(application)).toString
+        }
+      }
+
+      "must redirect to Journey Recovery for a POST if no existing data is found" in {
+        val application = applicationBuilder(userAnswers = None).build()
+
+        running(application) {
+          val controller = application.injector.instanceOf[AmendRegularPaymentAmountController]
+          val request = FakeRequest(POST, route).withFormUrlEncodedBody(("value", validAnswer.toString))
+          val result = controller.onSubmit(mode)(request)
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        }
+      }
+    }
+  }
+}

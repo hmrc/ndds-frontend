@@ -16,9 +16,9 @@
 
 package validation
 
-import ReferenceTypeValidator.Validator
 import models.DirectDebitSource
 import models.DirectDebitSource.*
+import validation.ReferenceTypeValidator.Validator
 
 object ReferenceTypeValidatorMap {
   def validatorType(dds: DirectDebitSource): Option[String => Boolean] = {

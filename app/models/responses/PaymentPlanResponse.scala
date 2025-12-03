@@ -17,10 +17,10 @@
 package models.responses
 
 import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency}
-
-import java.time.{LocalDate, LocalDateTime}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
+
+import java.time.{LocalDate, LocalDateTime}
 
 case class DirectDebitDetails(bankSortCode: Option[String],
                               bankAccountNumber: Option[String],

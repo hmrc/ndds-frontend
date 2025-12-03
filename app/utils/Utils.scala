@@ -18,12 +18,11 @@ package utils
 
 import models.requests.PaymentPlanDuplicateCheckRequest
 import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
-import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, BankDetailsAddressPage, BankDetailsBankNamePage, YourBankDetailsPage}
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import pages.*
-import scala.concurrent.{ExecutionContext, Future}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 
 import java.time.LocalDate
+import scala.concurrent.{ExecutionContext, Future}
 
 object Utils {
   val emptyString = ""

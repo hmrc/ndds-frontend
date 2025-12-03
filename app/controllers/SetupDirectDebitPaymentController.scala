@@ -18,15 +18,13 @@ package controllers
 
 import controllers.actions.*
 import models.responses.{LockedAndUnverified, LockedAndVerified, NotLocked}
-
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.NationalDirectDebitService
-import services.LockService
+import services.{LockService, NationalDirectDebitService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SetupDirectDebitPaymentView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SetupDirectDebitPaymentController @Inject() (

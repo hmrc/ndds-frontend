@@ -17,17 +17,17 @@
 package controllers
 
 import base.SpecBase
-import models.{NddDetails, NddResponse}
 import models.responses.LockResponse
+import models.{NddDetails, NddResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.inject.bind
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.{LockService, NationalDirectDebitService}
 import views.html.SetupDirectDebitPaymentView
-import play.api.mvc.Call
 
 import java.time.Instant
 import scala.concurrent.Future

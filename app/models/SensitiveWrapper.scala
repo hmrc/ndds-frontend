@@ -16,9 +16,9 @@
 
 package models
 
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter, Sensitive}
 import play.api.libs.json.*
 import uk.gov.hmrc.crypto.json.JsonEncryption.{sensitiveDecrypter, sensitiveEncrypter}
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, Sensitive}
 
 case class SensitiveWrapper[T](override val decryptedValue: T) extends Sensitive[T]
 

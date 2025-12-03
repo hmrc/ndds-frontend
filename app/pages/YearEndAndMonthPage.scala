@@ -17,7 +17,6 @@
 package pages
 
 import models.YearEndAndMonth
-
 import play.api.libs.json.JsPath
 
 case object YearEndAndMonthPage extends QuestionPage[YearEndAndMonth] {

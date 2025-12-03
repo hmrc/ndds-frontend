@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions.*
+import models.audits.*
 import models.requests.ChrisSubmissionRequest
 import models.responses.{DirectDebitDetails, PaymentPlanDetails}
 import models.{CheckMode, DirectDebitSource, Mode, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
@@ -33,7 +34,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.CheckYourSuspensionDetailsView
-import models.audits.*
 
 import java.time.LocalDate
 import javax.inject.Inject

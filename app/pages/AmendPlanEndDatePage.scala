@@ -17,6 +17,7 @@
 package pages
 
 import play.api.libs.json.JsPath
+
 import java.time.LocalDate
 
 case object AmendPlanEndDatePage extends QuestionPage[LocalDate] {

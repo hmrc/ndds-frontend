@@ -22,10 +22,10 @@ import org.jsoup.nodes.Document
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.should
 import play.api.Application
-import views.html.SetupDirectDebitPaymentView
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Call, Request}
 import play.api.test.FakeRequest
+import views.html.SetupDirectDebitPaymentView
 
 class SetUpDirectDebitPaymentViewSpec extends SpecBase with Matchers {
 

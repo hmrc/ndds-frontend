@@ -15,14 +15,14 @@
  */
 
 import base.SpecBase
-import org.scalatest.matchers.must.Matchers
-import play.api.data.{Form, Forms}
-import play.api.data.Forms.*
-import play.api.test.FakeRequest
-import play.api.i18n.Messages
 import org.jsoup.Jsoup
-import views.html.components.MainErrorSummary
+import org.scalatest.matchers.must.Matchers
+import play.api.data.Forms.*
+import play.api.data.{Form, Forms}
+import play.api.i18n.Messages
+import play.api.test.FakeRequest
 import uk.gov.hmrc.govukfrontend.views.html.components.GovukErrorSummary
+import views.html.components.MainErrorSummary
 
 class MainErrorSummarySpec extends SpecBase with Matchers {
 

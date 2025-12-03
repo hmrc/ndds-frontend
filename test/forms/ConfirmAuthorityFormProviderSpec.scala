@@ -16,9 +16,9 @@
 
 package forms
 
+import forms.behaviours.OptionFieldBehaviours
 import models.ConfirmAuthority
 import play.api.data.FormError
-import forms.behaviours.OptionFieldBehaviours
 
 class ConfirmAuthorityFormProviderSpec extends OptionFieldBehaviours {
   val form = new ConfirmAuthorityFormProvider()()

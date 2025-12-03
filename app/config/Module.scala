@@ -16,8 +16,8 @@
 
 package config
 
-import play.api.inject.{Binding, Module as PlayModule}
 import controllers.actions.*
+import play.api.inject.{Binding, Module as PlayModule}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 

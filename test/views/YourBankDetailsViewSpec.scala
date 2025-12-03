@@ -19,6 +19,8 @@ package views
 import controllers.routes
 import forms.YourBankDetailsFormProvider
 import models.NormalMode
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.data.Form
 import play.api.i18n.Messages
@@ -26,8 +28,6 @@ import play.api.mvc.{Call, Request}
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import views.html.YourBankDetailsView
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 
 class YourBankDetailsViewSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 

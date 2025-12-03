@@ -24,18 +24,17 @@
     govukWarningText: GovukWarningText,
     govukButton: GovukButton,
     h1: Header1,
-    p: Paragraph
+    p: Paragraph,
+    mainErrorSummary: MainErrorSummary
 )
 
-@(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, earliestPlanStartDate: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("amendPlanStartDate.title")), backLink = Some(call.url)) {
 
     @formHelper(action = routes.AmendPlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
-        }
+        @mainErrorSummary(form)
 
         @govukDateInput(
             DateViewModel(
@@ -47,7 +46,7 @@
                       govukWarningText(
                         WarningText(content = HtmlContent(messages("amendPlanStartDate.warning")))
                       ),
-                      s"<p class='govuk-!-margin-top-7'>${messages("amendPlanStartDate.hint")}</p>"
+                      s"<p class='govuk-!-margin-top-7'>${messages("amendPlanStartDate.hint", earliestPlanStartDate)}</p>"
                     ).mkString
             )))
         )

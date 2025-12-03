@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import models.responses.NddPaymentPlan
 import models.{NddDAO, NddDetails, NddResponse}
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions, Indexes, ReplaceOptions, Updates}
+import org.mongodb.scala.model.*
 import play.api.libs.json.Format
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.mdc.Mdc

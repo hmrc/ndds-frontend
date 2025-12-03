@@ -16,9 +16,9 @@
 
 package utils
 
+import forms.mappings.DateFormat
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import forms.mappings.DateFormat
 
 class DateFormatSpec extends AnyFreeSpec with Matchers {
 

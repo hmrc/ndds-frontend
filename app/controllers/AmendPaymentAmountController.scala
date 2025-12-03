@@ -16,10 +16,9 @@
 
 package controllers
 
-import controllers.actions.*
+import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import forms.AmendPaymentAmountFormProvider
 import models.Mode
-import navigation.Navigator
 import pages.{AmendPaymentAmountPage, ManagePaymentPlanTypePage}
 import play.api.Logging
 import play.api.data.Form
@@ -36,7 +35,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class AmendPaymentAmountController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
-  navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
@@ -48,7 +46,8 @@ class AmendPaymentAmountController @Inject() (
     extends FrontendBaseController
     with I18nSupport
     with Logging {
-  val form: Form[BigDecimal] = formProvider()
+
+  private val form: Form[BigDecimal] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val answers = request.userAnswers
@@ -63,12 +62,11 @@ class AmendPaymentAmountController @Inject() (
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      Redirect(routes.SystemErrorController.onPageLoad())
     }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-
     form
       .bindFromRequest()
       .fold(
@@ -77,8 +75,7 @@ class AmendPaymentAmountController @Inject() (
           for {
             updatedAnswers <- Future.fromTry(request.userAnswers.set(AmendPaymentAmountPage, value))
             _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(AmendPaymentAmountPage, mode, updatedAnswers))
+          } yield Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
       )
   }
-
 }

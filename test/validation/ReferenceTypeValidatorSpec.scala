@@ -16,10 +16,9 @@
 
 package validation
 
+import models.DirectDebitSource.*
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-
-import models.DirectDebitSource.*
 
 class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
 

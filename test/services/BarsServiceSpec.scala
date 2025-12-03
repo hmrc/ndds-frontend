@@ -16,18 +16,18 @@
 
 package services
 
+import config.FrontendAppConfig
+import connectors.BarsConnector
 import models.YourBankDetails
 import models.errors.BarsErrors.*
-import models.responses.{Bank, BankAddress, BarsResponse, BarsVerificationResponse, Country}
+import models.errors.UpstreamBarsException
+import models.responses.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
-import connectors.BarsConnector
-import config.FrontendAppConfig
-import models.errors.UpstreamBarsException
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future

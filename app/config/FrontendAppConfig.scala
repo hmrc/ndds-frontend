@@ -61,6 +61,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val maxNumberDDIsAllowed: Int =
     configuration.get[Int]("features.maxNumberDDIsAllowed")
 
+  lazy val maxNumberPPsAllowed: Int =
+    configuration.get[Int]("features.maxNumberPPsAllowed")
+
   lazy val isLockServiceEnabled: Boolean =
     configuration.get[Boolean]("features.enableLockService")
 

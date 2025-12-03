@@ -28,16 +28,15 @@ import pages.*
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, RequestHeader, Result}
+import play.api.mvc.*
 import repositories.SessionRepository
 import services.{BarsService, LockService}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Utils.LockExpirySessionKey
 import views.html.YourBankDetailsView
 
 import java.time.Instant
-import utils.Utils.LockExpirySessionKey
-
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 

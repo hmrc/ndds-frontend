@@ -17,110 +17,47 @@
 package controllers
 
 import base.SpecBase
-import models.{PaymentPlanType, UserAnswers}
-import org.mockito.Mockito.when
+import config.FrontendAppConfig
+import models.PaymentPlanType
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import org.mockito.ArgumentMatchers.any
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
-import play.api.Application
-import play.api.inject.bind
+import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentPlanDetailsQuery
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.Constants
-import utils.MaskAndFormatUtils.formatAmount
-import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary, PaymentReferenceSummary}
+import viewmodels.checkAnswers.*
+import viewmodels.govuk.all.SummaryListViewModel
 import views.html.AmendPaymentPlanUpdateView
 
-import java.time.LocalDate
+import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
+import java.util.Locale
 
-class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
+class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
 
   "PaymentPlanConfirmation Controller" - {
     val mockService = mock[NationalDirectDebitService]
     val regPaymentAmount: BigDecimal = BigDecimal("1000.00")
-    val formattedRegPaymentAmount: String = formatAmount(regPaymentAmount)
     val startDate: LocalDate = LocalDate.of(2025, 10, 2)
-    val formattedStartDate = startDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
     val endDate: LocalDate = LocalDate.of(2025, 10, 25)
 
-    "must return OK and the correct view for a GET when plan type is Budget Payment Plan" in {
-
-      def summaryList(userAnswers: UserAnswers, paymentReference: String, app: Application): Seq[SummaryListRow] = {
-        val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
-        val planStartDate = userAnswers.get(AmendPlanStartDatePage)
-        val planEndDate = userAnswers.get(AmendPlanEndDatePage)
-
-        Seq(
-          PaymentReferenceSummary.row(paymentReference)(messages(app)),
-          AmendPaymentAmountSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, paymentAmount)(messages(app)),
-          AmendPlanStartDateSummary.row(PaymentPlanType.BudgetPaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(
-            messages(app)
-          ),
-          AmendPlanEndDateSummary.row(planEndDate, Constants.longDateTimeFormatPattern)(messages(app))
-        )
-      }
-
-      val mockBudgetPaymentPlanDetailResponse =
-        dummyPlanDetailResponse.copy(paymentPlanDetails =
-          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
-        )
-
-      val userAnswers = emptyUserAnswers
-        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
-        .success
-        .value
-        .set(AmendPaymentAmountPage, regPaymentAmount)
-        .success
-        .value
-        .set(AmendPlanStartDatePage, startDate)
-        .success
-        .value
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
-        .success
-        .value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
-        .build()
-
-      running(application) {
-        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-        val result = route(application, request).value
-        val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
-
-        val mockPaymentReference = mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference
-        val summaryListRows = summaryList(userAnswers, mockPaymentReference, application)
-
-        status(result) mustEqual OK
-        contentAsString(result) mustEqual view(mockPaymentReference, formattedRegPaymentAmount, formattedStartDate, summaryListRows)(
-          request,
-          messages(application)
-        ).toString
-      }
-    }
-
     "must return OK and the correct view for a GET when plan type is Single Payment Plan" in {
-
-      def summaryList(userAnswers: UserAnswers, paymentReference: String, app: Application): Seq[SummaryListRow] = {
-        val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
-        val planStartDate = userAnswers.get(AmendPlanStartDatePage)
-
-        Seq(
-          PaymentReferenceSummary.row(paymentReference)(messages(app)),
-          AmendPaymentAmountSummary.row(PaymentPlanType.SinglePaymentPlan.toString, paymentAmount)(messages(app)),
-          AmendPlanStartDateSummary.row(PaymentPlanType.SinglePaymentPlan.toString, planStartDate, Constants.longDateTimeFormatPattern)(messages(app))
-        )
-      }
-
       val mockSinglePaymentPlanDetailResponse =
-        dummyPlanDetailResponse.copy(paymentPlanDetails =
-          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
+        dummyPlanDetailResponse.copy(
+          paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+            planType = PaymentPlanType.SinglePaymentPlan.toString
+          )
         )
+
+      val directDebitRef = "DD-REF-123"
+      val paymentPlanRef = "PP-REF-987"
 
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
@@ -132,46 +69,186 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
         .set(AmendPlanStartDatePage, startDate)
         .success
         .value
-        .set(AmendPlanEndDatePage, endDate)
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .set(DirectDebitReferenceQuery, directDebitRef)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, paymentPlanRef)
         .success
         .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .overrides(inject.bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       running(application) {
-        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-        val result = route(application, request).value
-        val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
 
-        val mockPaymentReference = mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference
-        val summaryListRows = summaryList(userAnswers, mockPaymentReference, application)
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val controller = application.injector.instanceOf[AmendPaymentPlanUpdateController]
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+        val result = controller.onPageLoad()(request)
+
+        val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+
+        val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+        val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
+        val formattedRegPaymentAmount = currencyFormat.format(regPaymentAmount)
+        val formattedStartDateLong = dateFormatLong.format(startDate)
+
+        val dd = mockSinglePaymentPlanDetailResponse.directDebitDetails
+        val formattedSortCode = dd.bankSortCode.map(sc => sc.grouped(2).mkString(" ")).getOrElse("")
+
+        val paymentList =
+          SummaryListViewModel(
+            Seq(
+              PaymentReferenceSummary.row(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference)(messages(application)),
+              DateSetupSummary.row(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.submissionDateTime)(messages(application)),
+              AmendPaymentAmountSummary.row(
+                PaymentPlanType.SinglePaymentPlan.toString,
+                Some(regPaymentAmount)
+              )(messages(application)),
+              AmendPlanStartDateSummary.row(
+                PaymentPlanType.SinglePaymentPlan.toString,
+                Some(startDate),
+                Constants.shortDateTimeFormatPattern
+              )(messages(application))
+            )
+          )
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(mockPaymentReference, formattedRegPaymentAmount, formattedStartDate, summaryListRows)(
-          request,
-          messages(application)
-        ).toString
+
+        contentAsString(result) mustEqual view(
+          appConfig.hmrcHelplineUrl,
+          formattedRegPaymentAmount,
+          formattedStartDateLong,
+          directDebitRef,
+          dd.bankAccountName.getOrElse(""),
+          dd.bankAccountNumber.getOrElse(""),
+          formattedSortCode,
+          paymentList,
+          PaymentPlanType.SinglePaymentPlan.toString,
+          controllers.routes.PaymentPlanDetailsController.onPageLoad()
+        )(request, messages(application)).toString
+      }
+    }
+
+    "must return OK and the correct view for a GET when plan type is Budget Payment Plan" in {
+      val frequency = "monthly"
+
+      val mockBudgetPaymentPlanDetailResponse =
+        dummyPlanDetailResponse.copy(
+          paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+            planType                  = PaymentPlanType.BudgetPaymentPlan.toString,
+            scheduledPaymentFrequency = Some(frequency)
+          )
+        )
+
+      val directDebitRef = "DD-REF-123"
+      val paymentPlanRef = "PP-REF-987"
+
+      val userAnswers = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+        .success
+        .value
+        .set(AmendPaymentAmountPage, regPaymentAmount)
+        .success
+        .value
+        .set(AmendPlanStartDatePage, startDate)
+        .success
+        .value
+        .set(AmendPlanEndDatePage, endDate)
+        .success
+        .value
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+        .set(DirectDebitReferenceQuery, directDebitRef)
+        .success
+        .value
+        .set(PaymentPlanReferenceQuery, paymentPlanRef)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(inject.bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+        val controller = application.injector.instanceOf[AmendPaymentPlanUpdateController]
+        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+        val result = controller.onPageLoad()(request)
+
+        val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
+        val appConfig = application.injector.instanceOf[FrontendAppConfig]
+
+        val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+        val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
+        val formattedRegPaymentAmount = currencyFormat.format(regPaymentAmount)
+        val formattedStartDateLong = dateFormatLong.format(startDate)
+
+        val dd = mockBudgetPaymentPlanDetailResponse.directDebitDetails
+        val formattedSortCode = dd.bankSortCode.map(sc => sc.grouped(2).mkString(" ")).getOrElse("")
+
+        val paymentList =
+          SummaryListViewModel(
+            Seq(
+              PaymentReferenceSummary.row(mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.paymentReference)(messages(application)),
+              DateSetupSummary.row(mockBudgetPaymentPlanDetailResponse.paymentPlanDetails.submissionDateTime)(messages(application)),
+              AmendPaymentAmountSummary.row(
+                PaymentPlanType.BudgetPaymentPlan.toString,
+                Some(regPaymentAmount)
+              )(messages(application)),
+              PaymentsFrequencySummary.row(Some(frequency))(messages(application)),
+              AmendPlanStartDateSummary.row(
+                PaymentPlanType.BudgetPaymentPlan.toString,
+                Some(startDate),
+                Constants.shortDateTimeFormatPattern
+              )(messages(application)),
+              AmendPlanEndDateSummary.row(
+                Some(endDate),
+                Constants.shortDateTimeFormatPattern,
+                false
+              )(messages(application))
+            )
+          )
+
+        status(result) mustEqual OK
+
+        contentAsString(result) mustEqual view(
+          appConfig.hmrcHelplineUrl,
+          formattedRegPaymentAmount,
+          formattedStartDateLong,
+          directDebitRef,
+          dd.bankAccountName.getOrElse(""),
+          dd.bankAccountNumber.getOrElse(""),
+          formattedSortCode,
+          paymentList,
+          PaymentPlanType.BudgetPaymentPlan.toString,
+          controllers.routes.PaymentPlanDetailsController.onPageLoad()
+        )(request, messages(application)).toString
       }
     }
 
     "must redirect to Journey Recover page when AmendPlanStartDatePage is None" in {
-
-      val mockBudgetPaymentPlanDetailResponse =
+      val mockSinglePaymentPlanDetailResponse =
         dummyPlanDetailResponse.copy(paymentPlanDetails =
-          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
         )
 
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
-        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+        .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
         .success
         .value
         .set(AmendPaymentAmountPage, regPaymentAmount)
@@ -183,27 +260,25 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
+        val controller = application.injector.instanceOf[AmendPaymentPlanUpdateController]
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-
-        val result = route(application, request).value
-
+        val result = controller.onPageLoad()(request)
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
     "must redirect to Journey Recover page when AmendPaymentAmountPage is None" in {
-
-      val mockBudgetPaymentPlanDetailResponse =
+      val mockSinglePaymentPlanDetailResponse =
         dummyPlanDetailResponse.copy(paymentPlanDetails =
-          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.BudgetPaymentPlan.toString)
+          dummyPlanDetailResponse.paymentPlanDetails.copy(planType = PaymentPlanType.SinglePaymentPlan.toString)
         )
 
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
-        .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+        .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
         .success
         .value
         .set(AmendPlanStartDatePage, startDate)
@@ -215,16 +290,15 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
+        val controller = application.injector.instanceOf[AmendPaymentPlanUpdateController]
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-
-        val result = route(application, request).value
-
+        val result = controller.onPageLoad()(request)
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recover page when PaymentPlanDetailsQuery is None" in {
+    "must redirect to Journey Recovery page when PaymentPlanDetailsQuery is None" in {
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
@@ -241,16 +315,15 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
+        val controller = application.injector.instanceOf[AmendPaymentPlanUpdateController]
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-
-        val result = route(application, request).value
-
+        val result = controller.onPageLoad()(request)
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recover page when amend payment plan guard returns false" in {
+    "must redirect to Journey Recovery page when amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
         .success
@@ -261,14 +334,14 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase with MockitoSugar {
       running(application) {
         when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
 
+        val controller = application.injector.instanceOf[AmendPaymentPlanUpdateController]
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-
-        val result = route(application, request).value
-
+        val result = controller.onPageLoad()(request)
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
       }
     }
 
   }
+
 }

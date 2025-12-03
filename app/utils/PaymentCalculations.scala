@@ -16,8 +16,8 @@
 
 package utils
 
-import scala.math.BigDecimal.RoundingMode
 import java.time.LocalDate
+import scala.math.BigDecimal.RoundingMode
 
 object PaymentCalculations {
   private val ScaleTwo = 2

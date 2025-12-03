@@ -16,11 +16,12 @@
 
 package forms
 
-import java.time.LocalDate
 import forms.behaviours.DateBehaviours
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
+
+import java.time.LocalDate
 
 class PlanEndDateFormProviderSpec extends DateBehaviours {
   private implicit val messages: Messages = stubMessages()

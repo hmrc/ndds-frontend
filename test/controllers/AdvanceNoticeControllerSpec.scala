@@ -17,11 +17,9 @@
 package controllers
 
 import base.SpecBase
-import models.responses.{AdvanceNoticeResponse, DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import config.FrontendAppConfig
+import models.responses.{AdvanceNoticeResponse, DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import pages.ManagePaymentPlanTypePage
-
-import java.time.{LocalDate, LocalDateTime}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
@@ -29,6 +27,7 @@ import views.html.AdvanceNoticeView
 
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import java.util.Locale
 
 class AdvanceNoticeControllerSpec extends SpecBase {
