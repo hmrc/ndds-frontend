@@ -61,18 +61,19 @@
     @if(paymentPlansList.size > 0) {
         @h2("directDebitPaymentSummary.activePayment.h1")
 
-        @if(paymentPlansList.size < ppLimit){
+        @if(directDebitDetails.paymentPlanCount < ppLimit){
             @paragraphWithLink(
                 Some(messages("directDebitPaymentSummary.activePayment.p1")),
                 linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),
                 linkUrl = routes.DirectDebitSummaryController.onRedirectToDirectDebitSource(directDebitReference).url,
                 linkFullStop = true
             )
-        } else {
-            @messages("directDebitPaymentSummary.activePayment.overPPLimit.p1")
-        }
 
-        @paragraph("directDebitPaymentSummary.activePayment.p2")
+            @paragraph("directDebitPaymentSummary.activePayment.p2")
+
+        } else {
+            @paragraph("directDebitPaymentSummary.activePayment.overPPLimit.p1")
+        }
 
         @for(plan <- paymentPlansList) {
             @govukSummaryList(plan)
