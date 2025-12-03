@@ -16,16 +16,24 @@
 
 package forms
 
-import java.time.{LocalDate, ZoneOffset}
 import forms.behaviours.DateBehaviours
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
+import java.time.{Clock, LocalDate, ZoneId, ZoneOffset}
+
 class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
   private implicit val messages: Messages = stubMessages()
+
+  private val fixedDate = LocalDate.of(2025, 8, 6)
+  private val fixedClock = Clock.fixed(
+    fixedDate.atStartOfDay(ZoneId.systemDefault()).toInstant,
+    ZoneId.systemDefault()
+  )
+
   private val startDate = LocalDate.of(2024, 4, 6)
-  private val form = new AmendPlanStartDateFormProvider()()
+  private val form = new AmendPlanStartDateFormProvider(fixedClock)()
 
   "PlanEndDateFormProvider" - {
 

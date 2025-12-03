@@ -17,16 +17,16 @@
 package controllers
 
 import base.SpecBase
-import models.responses.PaymentPlanDetails
 import models.PaymentPlanType
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import queries.PaymentPlanDetailsQuery
+import models.responses.PaymentPlanDetails
 import org.scalatestplus.mockito.MockitoSugar
 import pages.ManagePaymentPlanTypePage
 import play.api.Application
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import queries.PaymentPlanDetailsQuery
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanCancelledView

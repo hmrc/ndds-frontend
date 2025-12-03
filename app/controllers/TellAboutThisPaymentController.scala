@@ -19,8 +19,6 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import forms.TellAboutThisPaymentFormProvider
-
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.{TellAboutThisPaymentPage, YearEndAndMonthPage}
@@ -30,6 +28,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.TellAboutThisPaymentView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TellAboutThisPaymentController @Inject() (

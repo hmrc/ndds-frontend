@@ -18,20 +18,20 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.{NormalMode, PaymentPlanType, UserAnswers}
 import models.responses.NddPaymentPlan
-import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
+import models.{NormalMode, PaymentPlanType, UserAnswers}
+import pages.*
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import services.{NationalDirectDebitService, PaginationService}
-import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.*
 import repositories.{DirectDebitCacheRepository, SessionRepository}
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{ActionItem, Actions, Card, CardTitle, SummaryList, SummaryListRow}
+import services.{NationalDirectDebitService, PaginationService}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Utils.cleanConfirmationFlags
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, DateSetupSummary}
 import views.html.DirectDebitSummaryView
-import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
-import utils.Utils.cleanConfirmationFlags
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

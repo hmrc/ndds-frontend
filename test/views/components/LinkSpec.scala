@@ -17,12 +17,12 @@
 package views.components
 
 import base.SpecBase
-import org.scalatest.matchers.must.Matchers
-import views.html.components.Link
-import play.api.test.FakeRequest
-import play.api.i18n.Messages
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
+import org.scalatest.matchers.must.Matchers
+import play.api.i18n.Messages
+import play.api.test.FakeRequest
+import views.html.components.Link
 
 class LinkSpec extends SpecBase with Matchers {
 

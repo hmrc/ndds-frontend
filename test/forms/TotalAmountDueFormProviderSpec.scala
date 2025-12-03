@@ -16,8 +16,8 @@
 
 package forms
 
-import config.FrontendAppConfig
 import config.CurrencyFormatter.currencyFormat
+import config.FrontendAppConfig
 import forms.behaviours.CurrencyFieldBehaviours
 import org.mockito.Mockito.when
 import org.scalacheck.Gen

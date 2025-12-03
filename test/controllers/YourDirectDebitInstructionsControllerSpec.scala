@@ -19,11 +19,10 @@ package controllers
 import base.SpecBase
 import models.{NddDetails, NddResponse}
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.{any, eq as mockitoEq}
+import org.mockito.Mockito.*
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.eq as mockitoEq
-import org.mockito.Mockito.*
 import pages.CreateConfirmationPage
 import play.api.inject.bind
 import play.api.test.FakeRequest

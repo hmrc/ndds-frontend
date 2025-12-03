@@ -21,9 +21,8 @@ import models.{CheckMode, UserAnswers}
 import pages.PaymentDatePage
 import play.api.i18n.{Lang, Messages}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.DateTimeFormats.dateTimeFormat
+import utils.DateTimeFormats.{dateTimeFormat, formattedDateTimeShort}
 import viewmodels.govuk.summarylist.*
-import utils.DateTimeFormats.formattedDateTimeShort
 import viewmodels.implicits.*
 
 object PaymentDateSummary {

@@ -18,9 +18,9 @@ package navigation
 
 import base.SpecBase
 import controllers.routes
-import pages.*
 import models.*
 import models.DirectDebitSource.*
+import pages.*
 
 class NavigatorSpec extends SpecBase {
 
@@ -238,7 +238,7 @@ class NavigatorSpec extends SpecBase {
 
         "must go from a AmendPlanStartDatePage to AmendPaymentPlanConfirmationController" in {
           navigator.nextPage(AmendPlanStartDatePage, NormalMode, userAnswers) mustBe
-            routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+            routes.AmendPaymentPlanConfirmationController.onPageLoad()
         }
 
         "must go from a AddPaymentPlanEndDatePage to PlanEndDatePage when Yes" in {
@@ -257,7 +257,7 @@ class NavigatorSpec extends SpecBase {
 
         "must go from a AmendPlanEndDatePage to CheckYourAnswersPage" in {
           navigator.nextPage(AmendPlanEndDatePage, NormalMode, userAnswers) mustBe
-            routes.AmendPaymentPlanConfirmationController.onPageLoad(NormalMode)
+            routes.AmendPaymentPlanConfirmationController.onPageLoad()
         }
 
         "must go from a CancelPaymentPlanPage to PaymentPlanDetailsController" in {
@@ -284,6 +284,23 @@ class NavigatorSpec extends SpecBase {
           val ua = userAnswers
 
           navigator.nextPage(CancelPaymentPlanPage, NormalMode, ua) mustBe
+            routes.JourneyRecoveryController.onPageLoad()
+        }
+
+        "must go from a AmendConfirmRemovePlanEndDatePage to ap0  when No" in {
+          val ua = userAnswers
+            .set(AmendConfirmRemovePlanEndDatePage, false)
+            .success
+            .value
+
+          navigator.nextPage(AmendConfirmRemovePlanEndDatePage, NormalMode, ua) mustBe
+            routes.AmendingPaymentPlanController.onPageLoad()
+        }
+
+        "must go from a AmendConfirmRemovePlanEndDatePage to Journey Recovery Page when no answer" in {
+          val ua = userAnswers
+
+          navigator.nextPage(AmendConfirmRemovePlanEndDatePage, NormalMode, ua) mustBe
             routes.JourneyRecoveryController.onPageLoad()
         }
 
@@ -434,7 +451,7 @@ class NavigatorSpec extends SpecBase {
 
         "must go from a AmendPlanStartDatePage to AmendPaymentPlanConfirmationController" in {
           navigator.nextPage(AmendPlanStartDatePage, CheckMode, userAnswers) mustBe
-            routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+            routes.AmendPaymentPlanConfirmationController.onPageLoad()
         }
 
         "must go from a AddPaymentPlanEndDatePage to PlanEndDatePage when Yes" in {
@@ -453,7 +470,7 @@ class NavigatorSpec extends SpecBase {
 
         "must go from a AmendPlanEndDatePage to CheckYourAnswersPage" in {
           navigator.nextPage(AmendPlanEndDatePage, CheckMode, userAnswers) mustBe
-            routes.AmendPaymentPlanConfirmationController.onPageLoad(CheckMode)
+            routes.AmendPaymentPlanConfirmationController.onPageLoad()
         }
 
         "must go from a RemovingThisSuspensionPage to PaymentPlanDetailsController when No in Check mode" in {

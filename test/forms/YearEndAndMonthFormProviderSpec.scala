@@ -17,9 +17,9 @@
 package forms
 
 import models.YearEndAndMonth
+import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
-import play.api.data.FormError
 
 class YearEndAndMonthFormProviderSpec extends forms.behaviours.FieldBehaviours {
 

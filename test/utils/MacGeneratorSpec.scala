@@ -16,10 +16,10 @@
 
 package utils
 
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.matchers.must.Matchers
 import config.FrontendAppConfig
 import org.mockito.Mockito.when
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 
 class MacGeneratorSpec extends AnyWordSpec with Matchers with MockitoSugar {

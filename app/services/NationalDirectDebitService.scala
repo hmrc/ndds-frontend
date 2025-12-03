@@ -149,7 +149,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     config.paymentDelayFixed + dynamicDelay
   }
 
-  // PaymentPlanTypePage used for setup journey and AmendPaymentPlanTypePage used for Amend journey
+  // PaymentPlanTypePage used for setup journey and ManagePaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =
     userAnswers.get(PaymentPlanTypePage).contains(PaymentPlanType.SinglePaymentPlan) || userAnswers
       .get(ManagePaymentPlanTypePage)

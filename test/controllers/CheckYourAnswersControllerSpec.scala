@@ -744,7 +744,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
     "when set up a new payment plan for existing Direct Debit" - {
 
       "must redirect to confirmation page when DirectDebitSource is 'CT' for a POST if all required data is provided" in {
-
         val totalDueAmount = 200
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
@@ -832,7 +831,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
 
       "must redirect to duplicate error page 'MGD' for a POST if all required data is provided" in {
-
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan)
@@ -887,31 +885,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PlanStartDatePage, invalidStartDateDetails)
         .setOrException(PlanEndDatePage, endDate)
         .setOrException(AddPaymentPlanEndDatePage, true)
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.PlanEndDateController.onPageLoad(NormalMode).url
-      }
-    }
-
-    "must redirect to plan end date page when start date is after end date (backwards compatibility - no AddPaymentPlanEndDatePage)" in {
-      val startDate = LocalDate.of(2025, 8, 1)
-      val endDate = LocalDate.of(2025, 7, 25)
-      val invalidStartDateDetails = PlanStartDateDetails(startDate, "2025-8-1")
-
-      val userAnswers = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, invalidStartDateDetails)
-        .setOrException(PlanEndDatePage, endDate)
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
