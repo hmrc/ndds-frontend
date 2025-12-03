@@ -147,13 +147,20 @@ class AmendPaymentPlanConfirmationController @Inject() (
         val paymentDetails = planDetails.paymentPlanDetails
 
         // F27 check for any amendment
-        def isNoChange(dbAmount: BigDecimal, dbStartDate: LocalDate, dbEndDate: Option[LocalDate]): Boolean = {
+        def isNoChange(
+          dbAmount: BigDecimal,
+          dbStartDate: LocalDate,
+          dbEndDate: Option[LocalDate]
+        ): Boolean = {
+
           planType match {
             case PaymentPlanType.SinglePaymentPlan.toString =>
-              amendedAmount == dbAmount && amendedDateOption.contains(dbStartDate)
+              amendedAmount == dbAmount &&
+              amendedDateOption.contains(dbStartDate)
 
             case PaymentPlanType.BudgetPaymentPlan.toString =>
-              amendedAmount == dbAmount && amendedDateOption.fold(true)(_ == dbEndDate) // also covers if no end date
+              amendedAmount == dbAmount &&
+              amendedDateOption == dbEndDate
 
             case _ => false
           }

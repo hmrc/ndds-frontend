@@ -654,7 +654,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             planType                  = "BudgetPaymentPlan",
             paymentReference          = "paymentReference",
             submissionDateTime        = java.time.LocalDateTime.now(),
-            scheduledPaymentAmount    = Some(1000),
+            scheduledPaymentAmount    = Some(1200),
             scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
             initialPaymentStartDate   = Some(java.time.LocalDate.now()),
             initialPaymentAmount      = Some(150),
