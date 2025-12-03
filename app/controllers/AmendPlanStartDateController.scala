@@ -18,14 +18,13 @@ package controllers
 
 import controllers.actions.*
 import forms.AmendPlanStartDateFormProvider
-import models.{Mode, UserAnswers}
+import models.Mode
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.DateTimeFormats
 import views.html.AmendPlanStartDateView
