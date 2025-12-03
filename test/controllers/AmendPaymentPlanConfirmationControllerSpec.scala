@@ -636,10 +636,6 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
       }
 
       "must redirect to Amend payment plan update controller (AP3) when there is no amendment made" in {
-        val mockNddService = mock[NationalDirectDebitService]
-
-        when(mockNddService.isDuplicatePaymentPlan(any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(true)))
 
         val paymentPlanDetails = models.responses.PaymentPlanResponse(
           directDebitDetails = models.responses.DirectDebitDetails(
@@ -654,7 +650,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             planType                  = "BudgetPaymentPlan",
             paymentReference          = "paymentReference",
             submissionDateTime        = java.time.LocalDateTime.now(),
-            scheduledPaymentAmount    = Some(1000),
+            scheduledPaymentAmount    = Some(1200),
             scheduledPaymentStartDate = Some(java.time.LocalDate.now().plusDays(4)),
             initialPaymentStartDate   = Some(java.time.LocalDate.now()),
             initialPaymentAmount      = Some(150),
@@ -679,15 +675,15 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPlanStartDatePage, java.time.LocalDate.now().plusDays(4))
           .success
           .value
-          .set(AmendPaymentAmountPage, BigDecimal(1000))
+          .set(AmendPlanEndDatePage, java.time.LocalDate.now().plusMonths(10))
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1200))
           .success
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
+          .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
           .build()
 
         running(application) {
