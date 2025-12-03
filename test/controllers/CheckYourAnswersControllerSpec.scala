@@ -252,6 +252,24 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
+    "must redirect to error warning page when AddPaymentPlanEndDatePage is true (YES) and PlanEndDatePage has no value" in {
+      val userAnswer = emptyUserAnswers
+        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+        .setOrException(PaymentReferencePage, "1234567")
+        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+        .setOrException(RegularPaymentAmountPage, 120)
+        .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(AddPaymentPlanEndDatePage, true)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      running(application) {
+        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.ErrorWarningController.onPageLoad().url
+      }
+    }
+
     "must show Plan End Date when AddPaymentPlanEndDatePage is not set and PlanEndDatePage has a value (backwards compatibility)" in {
       val userAnswer = emptyUserAnswers
         .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
