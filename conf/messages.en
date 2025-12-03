@@ -739,3 +739,50 @@ amendDuplicateWarning.title = You already have a payment plan with these details
 amendDuplicateWarning.h1 = You already have a payment plan with these details
 amendDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
 amendDuplicateWarning.h2 = Do you want to continue with this amendment?
+
+
+############### OLD AMEND MESSAGES #################
+
+amendPaymentPlanConfirmation.p1 = This amendment will remove any suspension that you have in place. Check that the details below are correct, then click ''Continue'' to proceed. For security reasons, you may be asked to re-authenticate your details.
+amendPaymentPlanConfirmation.directDebit.h2 = Direct Debit details
+amendPaymentPlanConfirmation.directDebit.reference = Direct Debit reference
+amendPaymentPlanConfirmation.directDebit.accountNumber = Account number
+amendPaymentPlanConfirmation.directDebit.sortCode = Bank sort code
+amendPaymentPlanConfirmation.amendPaymentPlan.h2 = Amended Payment plan details
+amendPaymentPlanConfirmation.amendPaymentPlan.planType = Plan type
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor = Payment for
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Payment reference: {0}
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentAmount = Regular payment amount
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentAmount.change = Change
+amendPaymentPlanConfirmation.amendPaymentPlan.startDate = Plan start date
+amendPaymentPlanConfirmation.amendPaymentPlan.startDate.change = Change
+amendPaymentPlanConfirmation.amendPaymentPlan.endDate = Plan end date
+amendPaymentPlanConfirmation.amendPaymentPlan.endDate.change = Change
+amendPaymentPlanConfirmation.amendPaymentPlan.continueButton = Continue
+amendPaymentPlanConfirmation.summary.link = Why can't I edit all information?
+amendPaymentPlanConfirmation.summary.content = You can change payment amounts and dates online, but you''ll need to contact us to change details that were set when your plan was created. This is for verification and security reasons. Call our customer service team on 0845 366 1208.
+
+amendPaymentPlanUpdate.panel.body1 = Your payment reference
+amendPaymentPlanUpdate.panel.strong = <br><strong>{0}</strong>
+amendPaymentPlanUpdate.panel.body2 = <br>has been successfully updated
+amendPaymentPlanUpdate.confirm = We''ve sent a confirmation email to your registered email address.
+amendPaymentPlanUpdate.h1 = What happens next
+amendPaymentPlanUpdate.p1 = Your updated payment plan will take effect from your next scheduled payment date.
+amendPaymentPlanUpdate.l1 = Your new payment amount of {0} will be collected monthly starting {1}
+amendPaymentPlanUpdate.l2 = Any existing suspension on your account has been removed
+amendPaymentPlanUpdate.l3 = You can view or change your payment plan at any time
+amendPaymentPlanUpdate.pleaseNote = It may take up to 24 hours for changes to appear in your online account.
+amendPaymentPlanUpdate.h2 = Your updated payment plan
+amendPaymentPlanUpdate.reference = Payment reference
+amendPaymentPlanUpdate.amount = Regular payment amount
+amendPaymentPlanUpdate.startDate = Plan start date
+amendPaymentPlanUpdate.endDate = Plan end date
+amendPaymentPlanUpdate.print = Print this confirmation
+amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
+amendPaymentPlanUpdate.close = Close
+
+duplicateWarning.error.required = Select one option
+duplicateWarning.change.hidden =  Duplicate Warning
+duplicateWarning.yes= Yes
+duplicateWarning.no= No
+###########################################
