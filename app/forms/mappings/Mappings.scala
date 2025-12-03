@@ -17,10 +17,10 @@
 package forms.mappings
 
 import models.{Enumerable, YearEndAndMonth}
-import play.api.data.{FieldMapping, Mapping}
 import play.api.data.Forms.{of, optional}
-import play.api.i18n.Messages
 import play.api.data.validation.{Constraint, Invalid, Valid}
+import play.api.data.{FieldMapping, Mapping}
+import play.api.i18n.Messages
 
 import java.time.LocalDate
 
@@ -107,9 +107,7 @@ trait Mappings extends Formatters with Constraints {
       new YearEndAndMonthDateFormatter(
         emptyKey,
         invalidFormatKey,
-        invalidMonthKey,
-        args,
-        dateFormats
+        invalidMonthKey
       )
     )
 

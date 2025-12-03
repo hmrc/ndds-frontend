@@ -18,8 +18,7 @@ package models.requests
 
 import config.FrontendAppConfig
 import models.*
-import models.audits.{AddPaymentPlanAudit, NewDirectDebitAudit}
-import models.audits.AuditType
+import models.audits.{AddPaymentPlanAudit, AuditType, NewDirectDebitAudit}
 import pages.*
 import play.api.libs.json.{Json, OFormat}
 import queries.ExistingDirectDebitIdentifierQuery

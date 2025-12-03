@@ -14,34 +14,37 @@
  * limitations under the License.
  *@
 
-@import views.html.components._
+@import views.html.components.*
 
 @this(
-layout: templates.Layout,
-formHelper: FormWithCSRF,
-govukErrorSummary: GovukErrorSummary,
-govukRadios: GovukRadios,
-h1: Header1,
-h2: Header2,
-paragraph: Paragraph,
-govukButton: GovukButton
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukRadios: GovukRadios,
+        h1: Header1,
+        h2: Header2,
+        paragraph: Paragraph,
+        govukButton: GovukButton,
+        govukLabel: GovukLabel
 )
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("duplicateWarning.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("amendDuplicateWarning.title")), backLink = Some(call.url)) {
 
 @formHelper(action = routes.DuplicateWarningController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
-        @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
+            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
 
-        @h1("duplicateWarning.h1")
+        @govukLabel(HmrcPageHeadingLabel.apply(
+            content = Text(messages("amendDuplicateWarning.h1"))
+        ).withCssClass("govuk-!-margin-bottom-0"))
 
-        @paragraph("duplicateWarning.p1")
+        @paragraph("amendDuplicateWarning.p1")
 
-        @h2("duplicateWarning.h2")
+        @h2("amendDuplicateWarning.h2")
 
         @govukRadios(
             RadiosViewModel(
@@ -49,13 +52,13 @@ govukButton: GovukButton
                 items = Seq(
                         RadioItem(content = Text(messages("site.yes")), value = Some("true"), id = Some("value_0")),
                         RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"))
-                ),
+                    ),
                 fieldset = Fieldset(legend = None)
             ).withCssClass("govuk-radios--inline")
         )
 
-        @govukButton(
+       @govukButton(
             ButtonViewModel(messages("site.continue"))
-        )
+       )
     }
 }

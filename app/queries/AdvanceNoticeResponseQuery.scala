@@ -17,8 +17,8 @@
 package queries
 
 import models.responses.AdvanceNoticeResponse
-import play.api.libs.json.{Format, JsPath, Json}
 import pages.QuestionPage
+import play.api.libs.json.{Format, JsPath, Json}
 
 case object AdvanceNoticeResponseQuery extends QuestionPage[AdvanceNoticeResponse] {
 

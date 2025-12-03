@@ -1392,7 +1392,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but potentialNextPaymentDate is not within 3 working days" in {
             val today = LocalDate.now()
-            val startDate = today.plusDays(2)
+            val startDate = today.plusDays(1)
             val planEndDate = today.plusMonths(6)
 
             when(mockConnector.getFutureWorkingDays(any())(any()))

@@ -17,98 +17,180 @@
 package controllers
 
 import base.SpecBase
+import models.PaymentPlanType
+import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
+import pages.ManagePaymentPlanTypePage
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import views.html.AmendingPaymentPlanView
-import pages.ManagePaymentPlanTypePage
-import models.PaymentPlanType
+import queries.PaymentPlanDetailsQuery
+import services.NationalDirectDebitService
+
+import java.time.{LocalDate, LocalDateTime}
 
 class AmendingPaymentPlanControllerSpec extends SpecBase {
 
-  "AmendingPaymentPlan Controller" - {
+  val mockService: NationalDirectDebitService = mock[NationalDirectDebitService]
 
-    "must return OK and the correct view for a GET" in {
+  def makePlanDetails(
+    planType: PaymentPlanType,
+    amount: BigDecimal,
+    startDate: LocalDate,
+    endDate: Option[LocalDate]
+  ): PaymentPlanDetails =
+    PaymentPlanDetails(
+      hodService                = "HOD",
+      planType                  = planType.toString,
+      paymentReference          = "REF123",
+      submissionDateTime        = LocalDateTime.now(),
+      scheduledPaymentAmount    = Some(amount),
+      scheduledPaymentStartDate = Some(startDate),
+      initialPaymentStartDate   = None,
+      initialPaymentAmount      = None,
+      scheduledPaymentEndDate   = endDate,
+      scheduledPaymentFrequency = None,
+      suspensionStartDate       = None,
+      suspensionEndDate         = None,
+      balancingPaymentAmount    = None,
+      balancingPaymentDate      = None,
+      totalLiability            = None,
+      paymentPlanEditable       = true
+    )
 
+  def commonDdDetails: DirectDebitDetails =
+    DirectDebitDetails(
+      bankSortCode       = None,
+      bankAccountNumber  = None,
+      bankAccountName    = None,
+      auDdisFlag         = false,
+      submissionDateTime = LocalDateTime.now()
+    )
+
+  "AmendingPaymentPlanController" - {
+    "must return OK and render correct view for GET (Single Payment)" in {
+      val planDetails =
+        makePlanDetails(
+          planType  = PaymentPlanType.SinglePaymentPlan,
+          amount    = 100,
+          startDate = LocalDate.of(2025, 11, 25),
+          endDate   = None
+        )
+
+      val wrapped = PaymentPlanResponse(commonDdDetails, planDetails)
       val ua = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, wrapped)
+        .success
+        .value
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
         .value
-
-      val application = applicationBuilder(userAnswers = Some(ua)).build()
+      val application = applicationBuilder(Some(ua))
+        .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
+        val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[AmendingPaymentPlanView]
-        val appConfig = application.injector.instanceOf[config.FrontendAppConfig]
-
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(appConfig.hmrcHelplineUrl, "amendingPaymentPlan.p1.single")(request, messages(application)).toString
+
+        val page = contentAsString(result)
+        page must include("Amending this payment plan")
+        page must include("For security reasons")
+        page must include("£100.00")
+        page must include("25 Nov 2025")
       }
     }
 
-    "must show budget-specific paragraph when plan type is BudgetPaymentPlan" in {
+    "must redirect to System Error page when amend payment plan guard returns false" in {
+      val userAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
+        .success
+        .value
 
+      val application = applicationBuilder(Some(userAnswers)).build()
+      running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
+
+        val controller = application.injector.instanceOf[AmendingPaymentPlanController]
+        val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
+        val result = controller.onPageLoad()(request)
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
+      }
+    }
+
+    "must show end-date row when BudgetPaymentPlan HAS an end date" in {
+      val end = LocalDate.of(2026, 3, 15)
+      val planDetails =
+        makePlanDetails(
+          planType  = PaymentPlanType.BudgetPaymentPlan,
+          amount    = 50,
+          startDate = LocalDate.of(2025, 1, 1),
+          endDate   = Some(end)
+        )
+
+      val wrapped = PaymentPlanResponse(commonDdDetails, planDetails)
       val ua = emptyUserAnswers
+        .set(PaymentPlanDetailsQuery, wrapped)
+        .success
+        .value
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
         .success
         .value
-
-      val application = applicationBuilder(userAnswers = Some(ua)).build()
+      val application = applicationBuilder(Some(ua))
+        .build()
 
       running(application) {
-        val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
+        val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
         val result = route(application, request).value
 
-        val view = application.injector.instanceOf[AmendingPaymentPlanView]
-        val appConfig = application.injector.instanceOf[config.FrontendAppConfig]
-
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(appConfig.hmrcHelplineUrl, "amendingPaymentPlan.p1.budget")(request, messages(application)).toString
+
+        val page = contentAsString(result)
+        page must include("Amending this payment plan")
+        page must include("15 Mar 2026")
       }
     }
 
-    "must show single-specific paragraph when plan type is SinglePaymentPlan" in {
+    "must show 'Add end date' link when BudgetPaymentPlan has NO end date" in {
+      val planDetails =
+        makePlanDetails(
+          planType  = PaymentPlanType.BudgetPaymentPlan,
+          amount    = 50,
+          startDate = LocalDate.of(2025, 1, 1),
+          endDate   = None
+        )
 
+      val wrapped = PaymentPlanResponse(commonDdDetails, planDetails)
       val ua = emptyUserAnswers
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+        .set(PaymentPlanDetailsQuery, wrapped)
         .success
         .value
-
-      val application = applicationBuilder(userAnswers = Some(ua)).build()
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+      val application = applicationBuilder(Some(ua))
+        .build()
 
       running(application) {
+        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
         val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
-
         val result = route(application, request).value
-
-        val view = application.injector.instanceOf[AmendingPaymentPlanView]
-        val appConfig = application.injector.instanceOf[config.FrontendAppConfig]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(appConfig.hmrcHelplineUrl, "amendingPaymentPlan.p1.single")(request, messages(application)).toString
-      }
-    }
 
-    "must redirect to JourneyRecovery when guard fails" in {
-
-      val ua = emptyUserAnswers
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan.toString)
-        .success
-        .value
-
-      val application = applicationBuilder(userAnswers = Some(ua)).build()
-
-      running(application) {
-        val request = FakeRequest(GET, routes.AmendingPaymentPlanController.onPageLoad().url)
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        val page = contentAsString(result)
+        page must include("Amending this payment plan")
+        page must include("Add plan end date")
+        page must include("/direct-debits/amend-payment-plan-end-date")
       }
     }
   }

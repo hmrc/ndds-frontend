@@ -115,8 +115,6 @@ class YearEndAndMonthControllerSpec extends SpecBase with MockitoSugar {
             bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
-      implicit val appConfig: FrontendAppConfig =
-        application.injector.instanceOf[FrontendAppConfig]
 
       running(application) {
         val result = route(application, postRequest()).value

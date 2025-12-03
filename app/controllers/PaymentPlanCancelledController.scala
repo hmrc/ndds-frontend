@@ -30,8 +30,9 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Constants
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanCancelledView
-import javax.inject.Inject
+
 import java.time.LocalDate
+import javax.inject.Inject
 
 class PaymentPlanCancelledController @Inject() (
   override val messagesApi: MessagesApi,

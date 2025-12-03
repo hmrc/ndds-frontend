@@ -33,12 +33,12 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.Constants
-import viewmodels.checkAnswers.{SuspensionPeriodRangeDateSummary, *}
+import viewmodels.checkAnswers.*
 import views.html.PaymentPlanDetailsView
 
 import java.text.NumberFormat
-import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import java.util.Locale
 import scala.concurrent.Future
 

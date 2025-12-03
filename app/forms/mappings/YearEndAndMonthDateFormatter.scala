@@ -20,14 +20,10 @@ import models.YearEndAndMonth
 import play.api.data.FormError
 import play.api.data.format.Formatter
 
-import scala.util.Try
-
 class YearEndAndMonthDateFormatter(
   emptyKey: String,
   invalidFormatKey: String,
-  invalidMonthKey: String,
-  args: Seq[String] = Seq.empty,
-  dateFormats: Seq[DateFormat]
+  invalidMonthKey: String
 ) extends Formatter[YearEndAndMonth] {
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], YearEndAndMonth] = {

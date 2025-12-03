@@ -18,6 +18,7 @@ package controllers
 
 import controllers.actions.*
 import forms.CancelPaymentPlanFormProvider
+import models.audits.CancelPaymentPlanAudit
 import models.requests.{ChrisSubmissionRequest, DataRequest}
 import models.responses.DirectDebitDetails
 import models.{DirectDebitSource, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
@@ -32,7 +33,6 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.CancelPaymentPlanView
-import models.audits.CancelPaymentPlanAudit
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

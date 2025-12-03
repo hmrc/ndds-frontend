@@ -15,12 +15,12 @@
  */
 
 import base.SpecBase
-import org.scalatest.matchers.must.Matchers
-import views.html.components.FieldSet
-import play.api.test.FakeRequest
-import play.api.i18n.Messages
 import org.jsoup.Jsoup
+import org.scalatest.matchers.must.Matchers
+import play.api.i18n.Messages
+import play.api.test.FakeRequest
 import play.twirl.api.Html
+import views.html.components.FieldSet
 
 class FieldSetSpec extends SpecBase with Matchers {
 

@@ -32,11 +32,11 @@ object AmendPlanStartDateSummary {
   def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(AmendPlanStartDatePage).map { answer =>
       SummaryListRowViewModel(
-        key = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
+        key = "amendPlanStartDate.startDate",
         ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
         actions = Seq(
           ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
+            .withVisuallyHiddenText(messages("amendPlanStartDate.startDate"))
         )
       )
     }
@@ -57,7 +57,7 @@ object AmendPlanStartDateSummary {
       actions = if (showChange) {
         Seq(
           ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPaymentPlanConfirmation.amendPaymentPlan.startDate"))
+            .withVisuallyHiddenText(messages("amendPlanStartDate.startDate"))
         )
       } else {
         Seq.empty
@@ -72,7 +72,7 @@ object AmendPlanStartDateSummary {
 
     Some(
       SummaryListRowViewModel(
-        key = "amendPaymentPlanConfirmation.amendPaymentPlan.startDate",
+        key = "amendPlanStartDate.startDate",
         ValueViewModel(dateText),
         actions = Seq.empty
       )

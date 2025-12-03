@@ -16,18 +16,17 @@
 
 package controllers
 
-import models.Mode
-
 import controllers.actions.*
-import javax.inject.Inject
+import models.Mode
+import pages.ManagePaymentPlanTypePage
 import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import pages.ManagePaymentPlanTypePage
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.SuspendPaymentPlanView
 
+import javax.inject.Inject
 import scala.concurrent.Future
 
 class SuspendPaymentPlanController @Inject() (
