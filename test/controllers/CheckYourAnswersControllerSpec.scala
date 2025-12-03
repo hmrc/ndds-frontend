@@ -72,7 +72,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -114,7 +114,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -146,7 +146,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("£123.01")
         contentAsString(result) must include("4 extra numbers")
         contentAsString(result) must include("2504")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -175,7 +175,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("25 Jul 2027")
         contentAsString(result) must include("£120")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -207,7 +207,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("19 Jun 2026")
         contentAsString(result) must include("Final payment amount")
         contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
