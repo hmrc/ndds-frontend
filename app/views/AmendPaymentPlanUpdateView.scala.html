@@ -21,21 +21,21 @@
         govukButton: GovukButton,
         paragraph: Paragraph,
         h2: Header2,
-        confirmationPanel: ConfirmationPanel,
         mainButton: MainButton,
         govukSummaryList: GovukSummaryList,
         govukDetails: GovukDetails,
         govukInsetText: GovukInsetText,
-        paragraphWithLink: ParagraphMessageWithLink
+        paragraphWithLink: ParagraphMessageWithLink,
+        govukPanel: GovukPanel,
 )
 
 @(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentList: SummaryList, planType: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
-    @confirmationPanel(
-        title = messages("amendPaymentPlanUpdate.panel.title")
-    )
+    @govukPanel(Panel(
+    title = messages("amendPaymentPlanUpdate.panel.title")
+    ))
 
     @h2("amendPaymentPlanUpdate.h1")
 
