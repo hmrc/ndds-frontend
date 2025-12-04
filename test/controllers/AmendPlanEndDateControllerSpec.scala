@@ -42,7 +42,6 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private val formProvider = new AmendPlanEndDateFormProvider()
   private def form = formProvider()
   val validAnswer: LocalDate = LocalDate.now()
-  val mockSessionRepository = mock[SessionRepository]
 
   lazy val amendPlanEndDateRoute: String = routes.AmendPlanEndDateController.onPageLoad(NormalMode).url
   lazy val amendPlanEndDateRoutePost: String = routes.AmendPlanEndDateController.onSubmit(NormalMode).url
@@ -227,19 +226,18 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(bind[NationalDirectDebitService].toInstance(mockService), bind[SessionRepository].toInstance(mockSessionRepository))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
-          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
           when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
             .thenReturn(Future.successful(NextPaymentValidationResult(Some(validAnswer), nextPaymentDateValid = true)))
 
           val request = postRequestWithDate(validAnswer.plusDays(7))
           val result = route(application, request).value
 
-//          status(result) mustEqual SEE_OTHER
-//          redirectLocation(result).value mustEqual planConfirmationPage
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual planConfirmationPage
         }
       }
 

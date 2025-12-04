@@ -38,19 +38,4 @@ class AmendPlanEndDateFormProvider @Inject() extends Mappings {
       )
     )
 
-  def apply(userAnswers: UserAnswers, dbStartDate: LocalDate)(implicit messages: Messages): Form[LocalDate] =
-    Form(
-      "value" -> customPaymentDate(
-        invalidKey     = "planStartDate.error.invalid",
-        allRequiredKey = "planStartDate.error.required.all",
-        twoRequiredKey = "planStartDate.error.required.two",
-        requiredKey    = "planStartDate.error.required",
-        dateFormats    = DateFormats.defaultDateFormats
-      )
-        .verifying(
-          "amendPlanEndDate.error.planEndDateBeforeStartDate",
-          date => date.isBefore(dbStartDate)
-        )
-    )
-
 }

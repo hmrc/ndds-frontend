@@ -68,44 +68,56 @@ class AmendPlanEndDateController @Inject() (
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    val form = formProvider()
     val userAnswers = request.userAnswers
 
-    userAnswers.get(PaymentPlanDetailsQuery) match {
-      case Some(planDetails) =>
-        val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
-        val frequencyStr = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
-        val frequency = Frequency.fromString(frequencyStr)
+    form
+      .bindFromRequest()
+      .fold(
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendingPaymentPlanController.onPageLoad()))),
+        value =>
+          userAnswers.get(PaymentPlanDetailsQuery) match {
+            case Some(planDetails) =>
+              val dbStartDate = planDetails.paymentPlanDetails.scheduledPaymentStartDate.get
+              val frequencyStr = planDetails.paymentPlanDetails.scheduledPaymentFrequency.getOrElse("MONTHLY")
+              val frequency = Frequency.fromString(frequencyStr)
 
-        val form = formProvider(userAnswers, dbStartDate)
-
-        form
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendingPaymentPlanController.onPageLoad()))),
-            value =>
-              // F20 check
-              nddsService.calculateNextPaymentDate(dbStartDate, Some(value), frequency).flatMap { paymentValidationResult =>
-                if (!paymentValidationResult.nextPaymentDateValid) {
-                  val errorForm = form
-                    .fill(value)
-                    .withError(
-                      key     = "value",
-                      message = "amendPlanEndDate.error.nextPaymentDateValid"
-                    )
-                  Future.successful(BadRequest(view(errorForm, mode, routes.AmendingPaymentPlanController.onPageLoad())))
-                } else {
-                  for {
-                    updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
+              // F9 check
+              if (value.isBefore(dbStartDate)) {
+                val errorForm = form
+                  .fill(value)
+                  .withError(
+                    key     = "value",
+                    message = "amendPlanEndDate.error.planEndDateBeforeStartDate"
+                  )
+                Future.successful(
+                  BadRequest(view(errorForm, mode, routes.AmendingPaymentPlanController.onPageLoad()))
+                )
+              } else {
+                // F20 check
+                nddsService.calculateNextPaymentDate(dbStartDate, Some(value), frequency).flatMap { paymentValidationResult =>
+                  if (!paymentValidationResult.nextPaymentDateValid) {
+                    val errorForm = form
+                      .fill(value)
+                      .withError(
+                        key     = "value",
+                        message = "amendPlanEndDate.error.nextPaymentDateValid"
+                      )
+                    Future.successful(BadRequest(view(errorForm, mode, routes.AmendingPaymentPlanController.onPageLoad())))
+                  } else {
+                    for {
+                      updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
+                      _              <- sessionRepository.set(updatedAnswers)
+                    } yield Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
+                  }
                 }
               }
-          )
 
-      case _ =>
-        logger.warn("Missing Amend payment amount and/or amend plan end date")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-    }
+            case _ =>
+              logger.warn("Missing Amend payment amount and/or amend plan end date")
+              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          }
+      )
   }
 
 }
