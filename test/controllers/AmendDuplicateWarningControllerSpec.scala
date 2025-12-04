@@ -30,22 +30,22 @@ import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
-import views.html.DuplicateWarningView
+import views.html.AmendDuplicateWarningView
 
 import scala.concurrent.Future
 
-class DuplicateWarningControllerSpec extends SpecBase {
+class AmendDuplicateWarningControllerSpec extends SpecBase {
 
   private val formProvider = new DuplicateWarningFormProvider()
   private val form = formProvider()
   private val mode = NormalMode
 
-  "DuplicateWarningController" - {
+  "AmendDuplicateWarningController" - {
     val mockService = mock[NationalDirectDebitService]
     val mockSessionRepository = mock[SessionRepository]
 
     "onPageLoad" - {
-      "must return OK and view DuplicateWarningController onPageLoad" in {
+      "must return OK and view AmendDuplicateWarningController onPageLoad" in {
         val ua = emptyUserAnswers
           .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
@@ -63,16 +63,15 @@ class DuplicateWarningControllerSpec extends SpecBase {
           when(mockSessionRepository.set(any()))
             .thenReturn(Future.successful(true))
 
-          val controller = application.injector.instanceOf[DuplicateWarningController]
-          val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoad(mode).url)
+          val controller = application.injector.instanceOf[AmendDuplicateWarningController]
+          val request = FakeRequest(GET, routes.AmendDuplicateWarningController.onPageLoad(mode).url)
           val result = controller.onPageLoad(NormalMode)(request)
-          val view = application.injector.instanceOf[DuplicateWarningView]
+          val view = application.injector.instanceOf[AmendDuplicateWarningView]
 
           status(result) mustEqual OK
           contentAsString(result) mustEqual view(
             form,
-            mode,
-            routes.AmendPaymentPlanConfirmationController.onPageLoad()
+            mode
           )(request, messages(application)).toString
         }
       }
@@ -88,8 +87,8 @@ class DuplicateWarningControllerSpec extends SpecBase {
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(false)
 
-          val controller = application.injector.instanceOf[DuplicateWarningController]
-          val request = FakeRequest(GET, routes.DuplicateWarningController.onPageLoad(mode).url)
+          val controller = application.injector.instanceOf[AmendDuplicateWarningController]
+          val request = FakeRequest(GET, routes.AmendDuplicateWarningController.onPageLoad(mode).url)
           val result = controller.onPageLoad(mode)(request)
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
@@ -155,7 +154,7 @@ class DuplicateWarningControllerSpec extends SpecBase {
           .build()
 
         running(application) {
-          val controller = application.injector.instanceOf[DuplicateWarningController]
+          val controller = application.injector.instanceOf[AmendDuplicateWarningController]
           val request = FakeRequest(POST, "/amend-already-have-payment-plan").withFormUrlEncodedBody("value" -> "true")
           val result = controller.onSubmit(NormalMode)(request)
 
@@ -221,7 +220,7 @@ class DuplicateWarningControllerSpec extends SpecBase {
           .build()
 
         running(application) {
-          val controller = application.injector.instanceOf[DuplicateWarningController]
+          val controller = application.injector.instanceOf[AmendDuplicateWarningController]
           val request = FakeRequest(POST, "/amend-already-have-payment-plan").withFormUrlEncodedBody("value" -> "true")
           val result = controller.onSubmit(NormalMode)(request)
 
@@ -246,8 +245,8 @@ class DuplicateWarningControllerSpec extends SpecBase {
         running(application) {
           when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
 
-          val controller = application.injector.instanceOf[DuplicateWarningController]
-          val request = FakeRequest(POST, routes.DuplicateWarningController.onSubmit(mode).url).withFormUrlEncodedBody(("value", "false"))
+          val controller = application.injector.instanceOf[AmendDuplicateWarningController]
+          val request = FakeRequest(POST, routes.AmendDuplicateWarningController.onSubmit(mode).url).withFormUrlEncodedBody(("value", "false"))
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustEqual SEE_OTHER

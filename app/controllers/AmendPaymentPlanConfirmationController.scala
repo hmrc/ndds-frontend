@@ -209,7 +209,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
   ): Future[Result] = {
     nddService.isDuplicatePaymentPlan(userAnswers).flatMap { duplicateResponse =>
       if (duplicateResponse.isDuplicate) {
-        Future.successful(Redirect(routes.DuplicateWarningController.onPageLoad(NormalMode).url))
+        Future.successful(Redirect(routes.AmendDuplicateWarningController.onPageLoad(NormalMode).url))
       } else {
         val updatedAnswers = for {
           updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))

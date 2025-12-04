@@ -50,7 +50,6 @@ class AmendPlanEndDateController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-
     val answers = request.userAnswers
 
     if (nddsService.isBudgetPaymentPlan(answers)) {
