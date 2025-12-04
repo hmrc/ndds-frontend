@@ -53,37 +53,27 @@ class DuplicateWarningController @Inject() (
     (identify andThen getData andThen requireData).async { implicit request =>
       val userAnswers = request.userAnswers
 
-      val alreadyConfirmed =
-        userAnswers.get(DuplicateWarningPage).contains(true)
-
-      if (alreadyConfirmed) {
-        logger.warn("Attempt to load this payment plan confirmation; redirecting to Page Not Found.")
-        Future.successful(
-          Redirect(routes.BackSubmissionController.onPageLoad())
-        )
-      } else {
-        if (nddsService.amendPaymentPlanGuard(userAnswers)) {
-          val maybeResult = for {
-            updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
-          } yield {
-            Ok(view(form, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad()))
-          }
-
-          maybeResult match {
-            case Some(result) =>
-              sessionRepository
-                .set(userAnswers.set(DuplicateWarningPage, true).get)
-                .map(_ => result)
-
-            case None =>
-              logger.warn("Failed to set DuplicateWarningPage = true")
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-          }
-        } else {
-          val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-          logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
-          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
+      if (nddsService.amendPaymentPlanGuard(userAnswers)) {
+        val maybeResult = for {
+          updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
+        } yield {
+          Ok(view(form, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad()))
         }
+
+        maybeResult match {
+          case Some(result) =>
+            sessionRepository
+              .set(userAnswers.set(DuplicateWarningPage, true).get)
+              .map(_ => result)
+
+          case None =>
+            logger.warn("Failed to set DuplicateWarningPage = true")
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        }
+      } else {
+        val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 

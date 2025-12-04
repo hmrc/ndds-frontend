@@ -19,11 +19,12 @@
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    mainErrorSummary: MainErrorSummary,
+    govukErrorSummary: GovukErrorSummary,
     govukDateInput: GovukDateInput,
     govukButton: GovukButton,
     h1: Header1,
-    p: Paragraph
+    p: Paragraph,
+    govukLabel: GovukLabel
 )
 
 @(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
@@ -32,9 +33,14 @@
 
     @formHelper(action = routes.AmendPlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @mainErrorSummary(form)
+        @if(form.errors.nonEmpty) {
+            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value")))
+        }
 
-        @h1(messages("amendPlanEndDate.heading"))
+        @govukLabel(HmrcPageHeadingLabel.apply(
+            content = Text(messages("amendPlanEndDate.heading"))
+        ).withCssClass("govuk-!-margin-bottom-0"))
+
         @p(messages("amendPlanEndDate.p1"))
 
         @govukDateInput(
@@ -45,7 +51,7 @@
                 HintViewModel(
                     HtmlContent(
                         Seq(
-                            s"<p class='govuk-!-margin-top-7'>${messages("amendPlanEndDate.hint")}</p>",
+                            s"<p class='govuk-!-margin-top-0'>${messages("amendPlanEndDate.hint")}</p>",
                         ).mkString
                     )
                 )
