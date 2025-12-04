@@ -23,7 +23,7 @@ import models.{NormalMode, PaymentPlanType}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{DuplicateWarningPage, ManagePaymentPlanTypePage}
+import pages.ManagePaymentPlanTypePage
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -73,33 +73,6 @@ class AmendDuplicateWarningControllerSpec extends SpecBase {
             form,
             mode
           )(request, messages(application)).toString
-        }
-      }
-
-      "must redirect to page not found if already value is submitted and click browser back from Updated page" in {
-        val ua =
-          emptyUserAnswers
-            .set(DuplicateWarningPage, true)
-            .success
-            .value
-
-        val application = applicationBuilder(userAnswers = Some(ua))
-          .overrides(
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
-
-        running(application) {
-
-          when(mockSessionRepository.get(any()))
-            .thenReturn(Future.successful(Some(ua)))
-
-          val controller = application.injector.instanceOf[AmendDuplicateWarningController]
-          val request = FakeRequest(GET, routes.AmendDuplicateWarningController.onPageLoad(mode).url)
-          val result = controller.onPageLoad(NormalMode)(request)
-
-          status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.BackSubmissionController.onPageLoad().url
         }
       }
 
@@ -156,9 +129,6 @@ class AmendDuplicateWarningControllerSpec extends SpecBase {
         )
 
         val ua = emptyUserAnswers
-          .set(DuplicateWarningPage, true)
-          .success
-          .value
           .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
           .value
@@ -225,9 +195,6 @@ class AmendDuplicateWarningControllerSpec extends SpecBase {
         )
 
         val ua = emptyUserAnswers
-          .set(DuplicateWarningPage, true)
-          .success
-          .value
           .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
           .success
           .value

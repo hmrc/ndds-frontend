@@ -200,9 +200,6 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .withFormUrlEncodedBody(("value", "invalid value"))
 
         running(application) {
-//          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
-//            .thenReturn(Future.successful(NextPaymentValidationResult(Some(validAnswer), nextPaymentDateValid = true)))
-
           val boundForm = form.bind(Map("value" -> "invalid value"))
           val view = application.injector.instanceOf[AmendPlanEndDateView]
           val result = route(application, request).value
