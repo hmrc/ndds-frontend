@@ -21,8 +21,8 @@ import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.*
 import models.DirectDebitSource.*
-import models.requests.ChrisSubmissionRequest
-import models.responses.GenerateDdiRefResponse
+import models.requests.{ChrisSubmissionRequest, DataRequest}
+import models.responses.{EarliestPaymentDate, GenerateDdiRefResponse}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -30,6 +30,7 @@ import play.api.mvc.*
 import queries.ExistingDirectDebitIdentifierQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils.generateMacFromAnswers
 import utils.{DateTimeFormats, MacGenerator}
@@ -37,6 +38,7 @@ import viewmodels.checkAnswers.*
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject() (
@@ -141,56 +143,32 @@ class CheckYourAnswersController @Inject() (
                   }
                   Future.successful(Redirect(warningUrl))
                 } else {
-                  val existingDirectDebitRefEitherFuture: Future[Either[Result, String]] = ua.get(ExistingDirectDebitIdentifierQuery) match {
-                    // Existing direct debit: skip MAC and skip generateNewDdiReference
-                    case Some(existingDirectDebit) =>
-                      logger.debug(s"Using existing DDI reference: ${existingDirectDebit.ddiRefNumber}")
-                      Future.successful(Right(existingDirectDebit.ddiRefNumber))
+                  // NEW: earliest payment date check BEFORE MAC validation
+                  val validationResultF: Future[Either[String, Unit]] =
+                    if (requiresEarliestPaymentDateCheckForSinglePlan(ua)) {
+                      nddService
+                        .calculateFutureWorkingDays(request.userAnswers, request.userId)
+                        .map(earliest => validateSinglePlanDate(ua, earliest))
+                    } else if (requireBudgetingPlanCheck(ua)) {
+                      nddService
+                        .getEarliestPlanStartDate(request.userAnswers, request.userId)
+                        .map(earliest => validateBudgetingPlanDates(ua, earliest))
+                    } else if (requireVariableAndTcPlanCheck(ua)) {
+                      nddService
+                        .getEarliestPlanStartDate(request.userAnswers, request.userId)
+                        .map(earliest => validateVariableAndTcPlanDates(ua, earliest))
+                    } else {
+                      // No date checks required → automatically valid
+                      Future.successful(Left("No applicable validation rule found for this plan type at check answer  page "))
+                    }
 
-                    // New direct debit: validate MAC and generate new DDI
-                    case None =>
-                      val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
+                  validationResultF.flatMap {
+                    case Right(_) =>
+                      processDdiReferenceGeneration(ua, request)
 
-                      (ua.get(pages.MacValuePage), maybeMac2) match {
-                        case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-                          logger.debug("MAC validation successful")
-                          nddService
-                            .generateNewDdiReference(required(PaymentReferencePage))
-                            .map(ref => Right(ref.ddiRefNumber))
-
-                        case (Some(_), Some(_)) =>
-                          logger.error(s"MAC validation failed for user ${request.userId}")
-                          Future.successful(
-                            Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                          )
-
-                        case _ =>
-                          logger.error("MAC generation failed or MAC1 missing in UserAnswers")
-                          Future.successful(
-                            Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                          )
-                      }
-                  }
-
-                  existingDirectDebitRefEitherFuture.flatMap {
-                    case Left(redirect) =>
-                      Future.successful(redirect)
-
-                    case Right(ddiReference) =>
-                      val chrisRequest = ChrisSubmissionRequest.buildChrisSubmissionRequest(ua, ddiReference, request.userId, appConfig)
-                      nddService.submitChrisData(chrisRequest).flatMap { success =>
-                        if (success) {
-                          for {
-                            updated1 <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber = ddiReference)))
-                            updated2 <- Future.fromTry(updated1.set(CreateConfirmationPage, true))
-                            _        <- sessionRepository.set(updated2)
-                          } yield {
-                            Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-                          }
-                        } else {
-                          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
-                        }
-                      }
+                    case Left(errorMessage) =>
+                      logger.warn(errorMessage)
+                      Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
                   }
                 }
               }
@@ -198,6 +176,147 @@ class CheckYourAnswersController @Inject() (
             }
       }
     }
+
+  private def validateSinglePlanDate(
+    ua: UserAnswers,
+    earliest: EarliestPaymentDate
+  ): Either[String, Unit] = {
+    ua.get(PaymentDatePage) match {
+      case None =>
+        logger.debug("You are not having correct data that needed for Single plan")
+        Left("PaymentDatePage missing in UserAnswers")
+      case Some(paymentDate) =>
+        val earliestDate = LocalDate.parse(earliest.date)
+
+        if (paymentDate.enteredDate.isBefore(earliestDate)) {
+          logger.debug("You are not having correct data that needed for Single plan and final validation failed")
+          Left(s"Payment date ${paymentDate.enteredDate} is before earliest allowed date $earliestDate")
+        } else {
+          Right(())
+        }
+    }
+  }
+
+  private def validateBudgetingPlanDates(
+    ua: UserAnswers,
+    earliestPlanStartDate: EarliestPaymentDate
+  ): Either[String, Unit] = {
+
+    val maybeStart = ua.get(PlanStartDatePage).map(_.enteredDate)
+    val maybeEnd = ua.get(PlanEndDatePage)
+    val earliest = LocalDate.parse(earliestPlanStartDate.date)
+
+    maybeStart match {
+      case None =>
+        logger.debug("You are not having correct data that needed for budgeting plan")
+        Left("PlanStartDatePage missing in UserAnswers")
+      case Some(start) if start.isBefore(earliest) =>
+        logger.debug("You are not having correct data that needed for budgeting plan and final validation failed")
+        Left(s"Start date $start is before earliest allowed date $earliest")
+
+      case Some(start) =>
+        maybeEnd match {
+          case Some(end) if end.isBefore(start) =>
+            logger.debug("You are not having correct data that needed for budgeting plan and final validation failed with end date before start date")
+            Left(s"End date $end is before start date $start")
+
+          case _ =>
+            Right(())
+        }
+    }
+  }
+
+  private def validateVariableAndTcPlanDates(
+    ua: UserAnswers,
+    earliest: EarliestPaymentDate
+  ): Either[String, Unit] = {
+
+    ua.get(PlanStartDatePage).map(_.enteredDate) match {
+
+      case None =>
+        logger.debug("You are not have correct data that needed for variable/TC plan")
+        Left("PlanStartDatePage missing in UserAnswers")
+      case Some(start) =>
+        val earliestDate = LocalDate.parse(earliest.date)
+
+        if (start.isBefore(earliestDate))
+          logger.debug("You are not have correct data that needed for variable plan and final validation failed")
+          Left(s"Start date $start is before earliest allowed date for variable/TC plan $earliestDate")
+        else Right(())
+    }
+  }
+
+  private def requireBudgetingPlanCheck(ua: UserAnswers): Boolean =
+    ua.get(PaymentPlanTypePage).contains(PaymentPlanType.BudgetPaymentPlan)
+
+  private def requireVariableAndTcPlanCheck(ua: UserAnswers): Boolean =
+    ua.get(PaymentPlanTypePage).exists {
+      case PaymentPlanType.VariablePaymentPlan | PaymentPlanType.TaxCreditRepaymentPlan => true
+      case _                                                                            => false
+    }
+
+  private def requiresEarliestPaymentDateCheckForSinglePlan(ua: UserAnswers): Boolean = {
+    val optSourceType = ua.get(DirectDebitSourcePage)
+    val optPaymentType = ua.get(PaymentPlanTypePage)
+    optSourceType.exists {
+      case OL | NIC | CT | SDLT | VAT | PAYE                                                   => true
+      case DirectDebitSource.MGD if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan) => true
+      case DirectDebitSource.SA if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan)  => true
+      case DirectDebitSource.TC if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan)  => true
+      case _                                                                                   => false
+    }
+  }
+
+  private def processDdiReferenceGeneration(
+    ua: UserAnswers,
+    request: DataRequest[AnyContent]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Result] = {
+    val existingDirectDebitRefEitherFuture: Future[Either[Result, String]] =
+      ua.get(ExistingDirectDebitIdentifierQuery) match {
+        // Existing direct debit: skip MAC and skip generateNewDdiReference
+        case Some(existingDirectDebit) =>
+          logger.debug(s"Using existing DDI reference: ${existingDirectDebit.ddiRefNumber}")
+          Future.successful(Right(existingDirectDebit.ddiRefNumber))
+        // New direct debit: validate MAC and generate new DDI
+        case None =>
+          val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
+          (ua.get(pages.MacValuePage), maybeMac2) match {
+            case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
+              logger.debug("MAC validation successful")
+              nddService
+                .generateNewDdiReference(required(PaymentReferencePage)(ua))
+                .map(ref => Right(ref.ddiRefNumber))
+
+            case (Some(_), Some(_)) =>
+              logger.error(s"MAC validation failed for user ${request.userId}")
+              Future.successful(Left(Redirect(routes.JourneyRecoveryController.onPageLoad())))
+            case _ =>
+              logger.error("MAC generation failed or MAC1 missing in UserAnswers")
+              Future.successful(Left(Redirect(routes.JourneyRecoveryController.onPageLoad())))
+          }
+      }
+
+    existingDirectDebitRefEitherFuture.flatMap {
+      case Right(ddiRefNumber) =>
+        val chrisRequest = ChrisSubmissionRequest.buildChrisSubmissionRequest(ua, ddiRefNumber, request.userId, appConfig)
+        nddService.submitChrisData(chrisRequest).flatMap { success =>
+          if (success) {
+            for {
+              updated1 <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber = ddiRefNumber)))
+              updated2 <- Future.fromTry(updated1.set(CreateConfirmationPage, true))
+              _        <- sessionRepository.set(updated2)
+            } yield {
+              Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+            }
+          } else {
+            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          }
+        }
+
+      case Left(result) =>
+        Future.successful(result)
+    }
+  }
 
   private def validateStartAndEndDates(userAnswers: UserAnswers): Option[Result] = {
     val hasEndDate = userAnswers.get(AddPaymentPlanEndDatePage)
