@@ -149,17 +149,20 @@ class CheckYourAnswersController @Inject() (
                       nddService
                         .calculateFutureWorkingDays(request.userAnswers, request.userId)
                         .map(earliest => validateSinglePlanDate(ua, earliest))
+
                     } else if (requireBudgetingPlanCheck(ua)) {
                       nddService
                         .getEarliestPlanStartDate(request.userAnswers, request.userId)
                         .map(earliest => validateBudgetingPlanDates(ua, earliest))
+
                     } else if (requireVariableAndTcPlanCheck(ua)) {
                       nddService
                         .getEarliestPlanStartDate(request.userAnswers, request.userId)
                         .map(earliest => validateVariableAndTcPlanDates(ua, earliest))
+
                     } else {
-                      // No date checks required → automatically valid
-                      Future.successful(Left("No applicable validation rule found for this plan type at check answer  page "))
+                      // No rule means proceed normally (not an error)
+                      Future.successful(Right(()))
                     }
 
                   validationResultF.flatMap {
@@ -167,10 +170,25 @@ class CheckYourAnswersController @Inject() (
                       processDdiReferenceGeneration(ua, request)
 
                     case Left(errorMessage) =>
-                      logger.warn(errorMessage)
-                      Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
+                      logger.warn(s"Date validation failed: $errorMessage")
+
+                      // 🔥 NEW: redirect only for date validation failure
+                      if (
+                        errorMessage.contains("before earliest allowed date")
+                        || errorMessage.contains("End date")
+                        || errorMessage.contains("Start date")
+                        || errorMessage.contains("Payment date")
+                        || errorMessage.contains("missing in UserAnswers")
+                      ) {
+                        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
+                      } else {
+                        // All other errors → system page
+                        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+
+                      }
                   }
                 }
+
               }
 
             }
