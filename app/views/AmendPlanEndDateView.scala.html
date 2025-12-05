@@ -19,7 +19,7 @@
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
+    mainErrorSummary: components.MainErrorSummary,
     govukDateInput: GovukDateInput,
     govukButton: GovukButton,
     h1: Header1,
@@ -33,9 +33,7 @@
 
     @formHelper(action = routes.AmendPlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
-        }
+        @mainErrorSummary(form)
 
         @govukLabel(HmrcPageHeadingLabel.apply(
             content = Text(messages("amendPlanEndDate.heading"))
