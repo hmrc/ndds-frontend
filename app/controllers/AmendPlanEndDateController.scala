@@ -107,7 +107,9 @@ class AmendPlanEndDateController @Inject() (
                   } else {
                     for {
                       updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                      _              <- sessionRepository.set(updatedAnswers)
+                      updatedAnswers <-
+                        Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentValidationResult.potentialNextPaymentDate.get))
+                      _ <- sessionRepository.set(updatedAnswers)
                     } yield Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
                   }
                 }
