@@ -209,7 +209,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
         val updatedAnswers = for {
           updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))
           updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, updatedAmount))
-          updatedUa <- Future.fromTry(updatedUa.set(AmendPlanStartDatePage, updatedDate.get))
+          updatedUa <- Future.fromTry(updatedUa.set(AmendPlanStartDatePage, userAnswers.get(AmendPlanStartDatePage).get))
           updatedUa <- if (updatedDate.isDefined) {
                          Future.fromTry(updatedUa.set(AmendPlanEndDatePage, updatedDate.get))
                        } else {
