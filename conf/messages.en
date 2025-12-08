@@ -600,7 +600,7 @@ pageNotFound.heading    = Page not found
 pageNotFound.p1         = If you typed the web address, check it is correct.
 pageNotFound.p2         = If you pasted the web address, check you copied the entire address.
 pageNotFound.p3         = If the web address is correct or you selected a link or button, contact the
-pageNotFound.link       = HMRC Online Services Helpdesk
+pageNotFound.link       = HMRC Online Services Helpdesk (opens in a new tab)
 pageNotFound.p4         = if you need to speak to someone.
 
 accessDenied.title      = Sorry, there is a problem with the service
@@ -611,7 +611,7 @@ accessDenied.link       = Continue to your account.
 systemError.title       = Sorry, there is a problem with this service
 systemError.heading     = Sorry, there is a problem with this service
 systemError.p1          = Try again later or contact the
-systemError.link        = HMRC Online Services Helpdesk
+systemError.link        = HMRC Online Services Helpdesk (opens in a new tab)
 
 paymentPlanLockedWarning.title = You cannot view or manage this payment plan
 paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
