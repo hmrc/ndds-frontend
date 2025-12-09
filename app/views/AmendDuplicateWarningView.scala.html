@@ -28,11 +28,11 @@
         govukLabel: GovukLabel
 )
 
-@(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("amendDuplicateWarning.title")), backLink = Some(call.url)) {
+@layout(pageTitle = title(form, messages("amendDuplicateWarning.title")), showBackLink = false) {
 
-@formHelper(action = routes.DuplicateWarningController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+@formHelper(action = routes.AmendDuplicateWarningController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
@@ -54,7 +54,7 @@
                         RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"))
                     ),
                 fieldset = Fieldset(legend = None)
-            ).withCssClass("govuk-radios--inline")
+            )
         )
 
        @govukButton(

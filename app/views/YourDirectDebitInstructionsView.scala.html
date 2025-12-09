@@ -35,30 +35,21 @@
 
 @layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false, useThreeQuartersGrid = true) {
 
-    @if(maxLimitReached) {
-        @govukErrorSummary(
-            ErrorSummary(
-                errorList = Seq(
-                    ErrorLink(
-                        href = None,
-                        content = Text(messages("yourDirectDebitInstructions.error.count"))
-                    )
-                )
-            )
-        )
-    }
-
     @header1("yourDirectDebitInstructions.heading")
     @paragraph("yourDirectDebitInstructions.p1")
 
-    @paragraphMessageWithLink(
-        Some(messages("yourDirectDebitInstructions.p2.beforeLink")),
-        linkMessage = messages("yourDirectDebitInstructions.p2.link"),
-        linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
-        linkFullStop = false,
-        message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
-        maxLimit = maxLimitReached
-    )
+    @if(maxLimitReached) {
+        @paragraph("yourDirectDebitInstructions.error.count")
+    } else {
+        @paragraphMessageWithLink(
+            Some(messages("yourDirectDebitInstructions.p2.beforeLink")),
+            linkMessage = messages("yourDirectDebitInstructions.p2.link"),
+            linkUrl = routes.SetupDirectDebitPaymentController.onPageLoad().url,
+            linkFullStop = false,
+            message2 = Some(messages("yourDirectDebitInstructions.p2.afterLink")),
+            maxLimit = maxLimitReached
+        )
+    }
 
     @govukInsetText(
         InsetText(

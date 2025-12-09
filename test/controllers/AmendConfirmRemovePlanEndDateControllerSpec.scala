@@ -32,6 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
+import services.NationalDirectDebitService
 import utils.DateTimeFormats.formattedDateTimeShort
 import views.html.AmendConfirmRemovePlanEndDateView
 
@@ -78,6 +79,7 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
     )
 
   "ConfirmRemovePlanEndDate Controller" - {
+    val mockService = mock[NationalDirectDebitService]
 
     "must return OK and the correct view for a GET" in {
 
@@ -96,6 +98,8 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
         .build()
 
       running(application) {
+        when(mockService.isBudgetPaymentPlan(any())).thenReturn(true)
+
         val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val result = route(application, request).value
         val view = application.injector.instanceOf[AmendConfirmRemovePlanEndDateView]
@@ -137,7 +141,7 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
         .build()
 
       running(application) {
-
+        when(mockService.isBudgetPaymentPlan(any())).thenReturn(true)
         val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val view = application.injector.instanceOf[AmendConfirmRemovePlanEndDateView]
         val result = route(application, request).value
@@ -178,6 +182,7 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
           .build()
 
       running(application) {
+        when(mockService.isBudgetPaymentPlan(any())).thenReturn(true)
         val request = FakeRequest(POST, amendConfirmRemovePlanEndDatePost)
           .withFormUrlEncodedBody(("value", "true"))
 
@@ -228,7 +233,6 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
     }
 
     "must redirect to System Error for a GET if no existing data is found" in {
-
       val application = applicationBuilder(userAnswers = None)
         .build()
 

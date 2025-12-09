@@ -197,9 +197,9 @@ POST       /check-amendment-details                           controllers.AmendP
 
 GET        /payment-plan-amended                              controllers.AmendPaymentPlanUpdateController.onPageLoad()
 
-GET        /amend-already-have-payment-plan                   controllers.DuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
-POST       /amend-already-have-payment-plan                   controllers.DuplicateWarningController.onSubmit(mode: Mode = NormalMode)
-GET        /change-amend-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-amend-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)
+GET        /amend-already-have-payment-plan                   controllers.AmendDuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
+POST       /amend-already-have-payment-plan                   controllers.AmendDuplicateWarningController.onSubmit(mode: Mode = NormalMode)
+GET        /change-amend-already-have-payment-plan            controllers.AmendDuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-amend-already-have-payment-plan            controllers.AmendDuplicateWarningController.onSubmit(mode: Mode = CheckMode)
 
-GET        /payment-plan-cannot-be-set-up               controllers.ErrorWarningController.onPageLoad()
+GET        /payment-plan-cannot-be-set-up                     controllers.ErrorWarningController.onPageLoad()
