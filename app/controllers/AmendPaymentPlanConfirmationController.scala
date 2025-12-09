@@ -176,14 +176,14 @@ class AmendPaymentPlanConfirmationController @Inject() (
             if (isNoChange(dbAmount, dbStartDate, Some(dbEndDate))) {
               Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
             } else {
-              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, dbStartDate)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption)
             }
 
           case (Some(dbAmount), Some(dbStartDate), None) =>
             if (isNoChange(dbAmount, dbStartDate, None)) {
               Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
             } else {
-              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, dbStartDate)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption)
             }
 
           case _ =>
@@ -198,12 +198,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
   }
 
   // F26 check for duplicate from RDS DB
-  private def checkDuplicatePlan(userAnswers: UserAnswers,
-                                 updatedAmount: BigDecimal,
-                                 updatedDate: Option[LocalDate],
-                                 planType: String,
-                                 dbScheduledStartDate: LocalDate
-                                )(implicit
+  private def checkDuplicatePlan(userAnswers: UserAnswers, updatedAmount: BigDecimal, updatedDate: Option[LocalDate])(implicit
     ec: ExecutionContext,
     request: Request[?]
   ): Future[Result] = {
@@ -214,11 +209,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
         val updatedAnswers = for {
           updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))
           updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, updatedAmount))
-          updatedUa <- if (planType == PaymentPlanType.SinglePaymentPlan.toString) {
-                         Future.fromTry(updatedUa.set(AmendPlanStartDatePage, updatedDate.get))
-                       } else {
-                         Future.fromTry(updatedUa.set(AmendPlanStartDatePage, dbScheduledStartDate))
-                       }
+          updatedUa <- Future.fromTry(updatedUa.set(AmendPlanStartDatePage, userAnswers.get(AmendPlanStartDatePage).get))
           updatedUa <- if (updatedDate.isDefined) {
                          Future.fromTry(updatedUa.set(AmendPlanEndDatePage, updatedDate.get))
                        } else {
