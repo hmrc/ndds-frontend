@@ -148,7 +148,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must redirect to Journey Recovery for a GET if no existing data is found" in {
+      "must redirect to System Error for a GET if no existing data is found" in {
 
         val application = applicationBuilder(userAnswers = None).build()
 
@@ -156,11 +156,11 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to Journey Recovery for a GET if the earliest payment date cannot be obtained" in {
+      "must redirect to System Error for a GET if the earliest payment date cannot be obtained" in {
 
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
@@ -173,7 +173,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
     }
@@ -240,18 +240,18 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must redirect to Journey Recovery for a POST if no existing data is found" in {
+      "must redirect to System Error for a POST if no existing data is found" in {
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
           val result = route(application, postRequest()).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
+      "must redirect to System Error for a POST if the earliest payment date cannot be obtained and the data is valid" in {
         val mockSessionRepository = mock[SessionRepository]
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
         when(mockService.calculateFutureWorkingDays(ArgumentMatchers.any(), any())(any()))
@@ -278,7 +278,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, postRequest).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
       "must return Bad Request with earliest date error if date is before earliest payment date" in {
@@ -308,7 +308,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
+      "must redirect to System Error for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
@@ -323,7 +323,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
     }

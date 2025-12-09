@@ -15,12 +15,13 @@
  *@
 
 @import config.FrontendAppConfig
-@import views.html.components._
+@import views.html.components.*
 
 @this(
     layout: templates.Layout,
     heading: Header1,
     paragraph: Paragraph,
+    paragraphWithLink: ParagraphMessageWithLink,
     link: Link
 )
 
@@ -35,10 +36,14 @@
     @heading(messages("pageNotFound.heading"), classes = "govuk-heading-xl")
     @paragraph(messages("pageNotFound.p1"))
     @paragraph(messages("pageNotFound.p2"))
-    @link(
-        "pageNotFound.link",
-        appConfig.hmrcOnlineServiceDeskUrl,
-        prefixTextKey = "pageNotFound.p3",
-        suffixTextKey = "pageNotFound.p4"
+
+    @paragraphWithLink(
+        Some(messages("pageNotFound.p3")),
+        linkMessage   = messages("pageNotFound.link"),
+        linkUrl       = appConfig.hmrcOnlineServiceDeskUrl,
+        linkFullStop  = false,
+        linkRel       = "noreferrer noopener",
+        target        = "_blank",
+        message2      = Some(messages("pageNotFound.p4"))
     )
 }

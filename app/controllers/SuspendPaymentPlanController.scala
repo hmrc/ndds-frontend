@@ -46,11 +46,9 @@ class SuspendPaymentPlanController @Inject() (
     if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
       Future.successful(Ok(view(mode)))
     } else {
-      val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.error(
-        s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
-      )
-      Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+      val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+      logger.error(s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType")
+      Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 

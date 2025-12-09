@@ -56,12 +56,12 @@ class PaymentPlanCancelledController @Inject() (
 
           Ok(view(paymentPlanDetails.paymentReference, routes.YourDirectDebitInstructionsController.onPageLoad(), rows))
         case _ =>
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
+          Redirect(routes.SystemErrorController.onPageLoad())
       }
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      Redirect(routes.SystemErrorController.onPageLoad())
     }
 
   }

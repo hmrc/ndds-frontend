@@ -96,13 +96,13 @@ class RemoveSuspensionConfirmationController @Inject() (
           case Some(result) => Future.successful(result)
           case None =>
             logger.warn("Missing data in userAnswers for Payment Plan summary")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
 
       } else {
         val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 

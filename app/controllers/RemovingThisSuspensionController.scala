@@ -83,7 +83,7 @@ class RemovingThisSuspensionController @Inject() (
 
         maybeResult match {
           case Some(result) => result
-          case _            => Redirect(routes.JourneyRecoveryController.onPageLoad())
+          case _            => Redirect(routes.SystemErrorController.onPageLoad())
         }
       } else {
         request.userAnswers.get(PaymentPlanDetailsQuery) match {
@@ -91,9 +91,9 @@ class RemovingThisSuspensionController @Inject() (
             val errorMessage =
               s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${planDetails.paymentPlanDetails.planType}"
             logger.error(errorMessage)
-            Redirect(routes.JourneyRecoveryController.onPageLoad())
+            Redirect(routes.SystemErrorController.onPageLoad())
           case _ =>
-            Redirect(routes.JourneyRecoveryController.onPageLoad())
+            Redirect(routes.SystemErrorController.onPageLoad())
         }
       }
     }
@@ -150,34 +150,34 @@ class RemovingThisSuspensionController @Inject() (
                               }
                             } else {
                               logger.error(s"CHRIS submission failed for removing suspension [DDI Ref: $ddiReference]")
-                              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                              Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
                             }
                           }
 
                         case None =>
                           logger.error("Missing DirectDebitReference in UserAnswers when trying to remove suspension")
-                          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
                       }
                   }
               )
 
           case (_, Some(_), Some(_)) =>
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
           case (_, Some(_), None) =>
             logger.error("Missing PaymentPlanReference in UserAnswers when trying to remove suspension payment plan")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
           case (_, None, Some(_)) =>
             logger.error("Missing DirectDebitReference in UserAnswers when trying to remove suspension payment plan")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
           case (Some(_), None, None) =>
             logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to remove suspension payment plan")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
           case _ =>
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
       } else {
         ua.get(PaymentPlanDetailsQuery) match {
@@ -185,10 +185,10 @@ class RemovingThisSuspensionController @Inject() (
             val errorMessage =
               s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: ${planDetails.paymentPlanDetails.planType}"
             logger.error(errorMessage)
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
           case _ =>
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
       }
     }

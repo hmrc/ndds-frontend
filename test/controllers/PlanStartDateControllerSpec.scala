@@ -199,7 +199,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+    "must redirect to System Error for a GET if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -207,11 +207,11 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a GET if the earliest payment date cannot be obtained" in {
+    "must redirect to System Error for a GET if the earliest payment date cannot be obtained" in {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -224,11 +224,11 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a GET if the directDebitSource is not MGD, SA or TC" in {
+    "must redirect to System Error for a GET if the directDebitSource is not MGD, SA or TC" in {
       val userAnswers: UserAnswers = UserAnswers(userAnswersId)
         .set(DirectDebitSourcePage, PAYE)
         .success
@@ -248,11 +248,11 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a GET if the directDebitSource is empty" in {
+    "must redirect to System Error for a GET if the directDebitSource is empty" in {
       val userAnswers: UserAnswers = UserAnswers(userAnswersId)
         .set(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("testName", "123456", "123456", true, false))
         .success
@@ -269,7 +269,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -329,14 +329,14 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+    "must redirect to System Error for a POST if no existing data is found" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
         val result = route(application, postRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -352,7 +352,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is valid" in {
+    "must redirect to System Error for a POST if the earliest payment date cannot be obtained and the data is valid" in {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -365,11 +365,11 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, postRequest()).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
+    "must redirect to System Error for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
 
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -386,7 +386,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
   }

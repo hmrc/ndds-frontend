@@ -75,10 +75,10 @@ directDebitMoreInfo.collapsable = More information about Direct Debit payments
 directDebitMoreInfo.p1 = You can use Direct Debit for single payments, budget payment plans, repaying a tax credits overpayment, or setting up a variable payment plan for Machine Games Duty (MGD).
 directDebitMoreInfo.p2 = You''ll need your bank details and payment reference from HMRC correspondence.
 directDebitMoreInfo.p3 = Find out more (links will open in new tabs):
-directDebitMoreInfo.bullet.l1 = What you can pay by Direct Debit
-directDebitMoreInfo.bullet.l2 = How Direct Debit works
-directDebitMoreInfo.bullet.l3 = Managing your Direct Debit payments
-directDebitMoreInfo.bullet.l4 = The Direct Debit Guarantee
+directDebitMoreInfo.bullet.l1 = what you can pay by Direct Debit
+directDebitMoreInfo.bullet.l2 = how Direct Debit works
+directDebitMoreInfo.bullet.l3 = managing your Direct Debit payments
+directDebitMoreInfo.bullet.l4 = the Direct Debit Guarantee
 setupDirectDebitPayment.startNow = Start now
 
 personalOrBusinessAccount.title = Is this a personal or business account?

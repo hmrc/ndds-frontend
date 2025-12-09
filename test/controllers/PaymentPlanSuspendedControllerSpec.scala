@@ -123,7 +123,7 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery when PaymentPlanDetails missing" in {
+    "must redirect to System Error when PaymentPlanDetails missing" in {
 
       val userAnswersWithData: UserAnswers =
         emptyUserAnswers
@@ -139,11 +139,11 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual
-          routes.JourneyRecoveryController.onPageLoad().url
+          routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery when SuspensionPeriodRangeDate missing" in {
+    "must redirect to System Error when SuspensionPeriodRangeDate missing" in {
 
       val userAnswersWithData: UserAnswers =
         emptyUserAnswers
@@ -159,7 +159,7 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual
-          routes.JourneyRecoveryController.onPageLoad().url
+          routes.SystemErrorController.onPageLoad().url
       }
     }
   }

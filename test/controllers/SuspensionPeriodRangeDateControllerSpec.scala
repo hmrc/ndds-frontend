@@ -151,7 +151,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must redirect to Journey Recovery for GET with non-Budget plan" in {
+    "must redirect to System Error for GET with non-Budget plan" in {
       val mockNddsService = mock[NationalDirectDebitService]
       val application = applicationBuilder(userAnswers = Some(userAnswersWithSinglePlan))
         .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
@@ -161,7 +161,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
         when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(false)
         val result = route(application, getRequest()).value
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -231,7 +231,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must redirect to Journey Recovery for POST with non-Budget plan" in {
+    "must redirect to System Error for POST with non-Budget plan" in {
       val mockSessionRepository = mock[SessionRepository]
       val mockNddsService = mock[NationalDirectDebitService]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
@@ -250,7 +250,7 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       running(application) {
         val result = route(application, postRequest()).value
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -286,23 +286,23 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
       }
     }
 
-    "must redirect to Journey Recovery for GET if no data exists" in {
+    "must redirect to System Error for GET if no data exists" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
         val result = route(application, getRequest()).value
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for POST if no data exists" in {
+    "must redirect to System Error for POST if no data exists" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
         val result = route(application, postRequest()).value
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
   }

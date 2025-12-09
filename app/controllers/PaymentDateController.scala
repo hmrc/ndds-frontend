@@ -71,7 +71,7 @@ class PaymentDateController @Inject() (
         )
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Redirect(routes.SystemErrorController.onPageLoad())
       }
     }
   }
@@ -106,7 +106,7 @@ class PaymentDateController @Inject() (
       }
       .recoverWith { case e =>
         logger.warn(s"Unexpected error: $e")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
   }
 }

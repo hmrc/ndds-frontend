@@ -76,7 +76,7 @@ class AdvanceNoticeController @Inject() (
           )
         }
       case None =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 }

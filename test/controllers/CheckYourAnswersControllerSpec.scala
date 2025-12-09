@@ -349,18 +349,18 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+    "must redirect to System Error for a GET if no existing data is found" in {
       val application = applicationBuilder(userAnswers = None).build()
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
     // POST tests for missing fields, failed submissions, and successful submissions
-    "must redirect to Journey Recovery for a POST if PaymentReferencePage data is missing" in {
+    "must redirect to System Error for a POST if PaymentReferencePage data is missing" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
@@ -402,7 +402,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if DirectDebitSource data is missing" in {
+    "must redirect to System Error for a POST if DirectDebitSource data is missing" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
         .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
@@ -444,7 +444,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if Ddi reference number is not obtained successfully" in {
+    "must redirect to System Error for a POST if Ddi reference number is not obtained successfully" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(PaymentReferencePage, "testReference")
         .setOrException(pages.MacValuePage, "valid-mac")
@@ -482,7 +482,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -543,7 +543,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
-      "must redirect to Journey Recovery for a POST if CHRIS submission fails" in {
+      "must redirect to System Error for a POST if CHRIS submission fails" in {
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
@@ -573,11 +573,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to Journey Recovery for a POST if CHRIS submission returns false" in {
+      "must redirect to System Error for a POST if CHRIS submission returns false" in {
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
@@ -627,11 +627,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to Journey Recovery for a POST if the generated MAC does not match the stored MAC" in {
+      "must redirect to System Error for a POST if the generated MAC does not match the stored MAC" in {
         val userAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
           .setOrException(PaymentReferencePage, "testReference")
@@ -667,11 +667,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to Journey Recovery for a POST if the generated MAC1 is not generated" in {
+      "must redirect to System Error for a POST if the generated MAC1 is not generated" in {
         val userAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
           .setOrException(PaymentReferencePage, "testReference")
@@ -706,7 +706,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
