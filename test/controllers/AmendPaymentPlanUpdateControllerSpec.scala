@@ -264,7 +264,7 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
         val result = controller.onPageLoad()(request)
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -294,11 +294,11 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
         val result = controller.onPageLoad()(request)
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery page when PaymentPlanDetailsQuery is None" in {
+    "must redirect to System Error page when PaymentPlanDetailsQuery is None" in {
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
         .success
@@ -319,11 +319,11 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
         val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
         val result = controller.onPageLoad()(request)
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery page when amend payment plan guard returns false" in {
+    "must redirect to System Error page when amend payment plan guard returns false" in {
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
         .success

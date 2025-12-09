@@ -108,7 +108,7 @@ class Navigator @Inject() () {
         routes.PaymentsFrequencyController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPlan) =>
         routes.TotalAmountDueController.onPageLoad(NormalMode)
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case _ => routes.SystemErrorController.onPageLoad()
     }
   }
 
@@ -116,7 +116,7 @@ class Navigator @Inject() () {
     ua.get(ConfirmAuthorityPage) match {
       case Some(ConfirmAuthority.Yes) => routes.DirectDebitSourceController.onPageLoad(mode)
       case Some(ConfirmAuthority.No)  => routes.BankApprovalController.onPageLoad()
-      case None                       => routes.JourneyRecoveryController.onPageLoad()
+      case None                       => routes.SystemErrorController.onPageLoad()
     }
 
   private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
@@ -131,7 +131,7 @@ class Navigator @Inject() () {
     paymentPlanType match {
       case Some(PaymentPlanType.BudgetPaymentPlan.toString) => routes.AmendPlanEndDateController.onPageLoad(mode)
       case Some(PaymentPlanType.SinglePaymentPlan.toString) => routes.AmendPlanStartDateController.onPageLoad(mode)
-      case _                                                => routes.JourneyRecoveryController.onPageLoad()
+      case _                                                => routes.SystemErrorController.onPageLoad()
     }
   }
 
@@ -139,14 +139,14 @@ class Navigator @Inject() () {
     userAnswers.get(AddPaymentPlanEndDatePage) match {
       case Some(true)  => routes.PlanEndDateController.onPageLoad(mode)
       case Some(false) => routes.CheckYourAnswersController.onPageLoad()
-      case None        => routes.JourneyRecoveryController.onPageLoad()
+      case None        => routes.SystemErrorController.onPageLoad()
     }
 
   private def navigateFromPlanStartDatePage(mode: Mode)(userAnswers: UserAnswers): Call =
     userAnswers.get(DirectDebitSourcePage) match {
       case Some(DirectDebitSource.SA) => routes.AddPaymentPlanEndDateController.onPageLoad(mode)
       case Some(_)                    => routes.CheckYourAnswersController.onPageLoad()
-      case None                       => routes.JourneyRecoveryController.onPageLoad()
+      case None                       => routes.SystemErrorController.onPageLoad()
     }
 
   private def navigateFromCancelPaymentPlanPage(answers: UserAnswers): Call =
@@ -156,7 +156,7 @@ class Navigator @Inject() () {
         case true  => routes.PaymentPlanCancelledController.onPageLoad()
         case false => routes.PaymentPlanDetailsController.onPageLoad()
       }
-      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+      .getOrElse(routes.SystemErrorController.onPageLoad())
 
   private def navigateFromConfirmRemovePlanEndDatePage(answers: UserAnswers): Call =
     answers
@@ -165,7 +165,7 @@ class Navigator @Inject() () {
         case true  => routes.AmendPaymentPlanConfirmationController.onPageLoad()
         case false => routes.AmendingPaymentPlanController.onPageLoad()
       }
-      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+      .getOrElse(routes.SystemErrorController.onPageLoad())
 
   private def navigateFromRemovingThisSuspensionPage(answers: UserAnswers): Call =
     answers
@@ -174,14 +174,14 @@ class Navigator @Inject() () {
         case true  => routes.RemoveSuspensionConfirmationController.onPageLoad()
         case false => routes.PaymentPlanDetailsController.onPageLoad()
       }
-      .getOrElse(routes.JourneyRecoveryController.onPageLoad())
+      .getOrElse(routes.SystemErrorController.onPageLoad())
 
   private def navigateTellAboutThisPaymentPage(mode: Mode)(userAnswers: UserAnswers): Call =
     (userAnswers.get(TellAboutThisPaymentPage), mode) match {
       case (Some(true), _)           => routes.YearEndAndMonthController.onPageLoad(mode)
       case (Some(false), NormalMode) => routes.PaymentAmountController.onPageLoad(NormalMode)
       case (Some(false), CheckMode)  => routes.CheckYourAnswersController.onPageLoad()
-      case (None, _)                 => routes.JourneyRecoveryController.onPageLoad()
+      case (None, _)                 => routes.SystemErrorController.onPageLoad()
     }
 
 }

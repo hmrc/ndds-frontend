@@ -138,7 +138,7 @@ class PaymentPlanDetailsController @Inject() (
         }
 
       case _ =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 

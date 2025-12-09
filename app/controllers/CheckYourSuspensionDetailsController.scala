@@ -75,7 +75,7 @@ class CheckYourSuspensionDetailsController @Inject() (
           logger.error(
             s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
           )
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
+          Redirect(routes.SystemErrorController.onPageLoad())
         }
       }
     }
@@ -106,14 +106,14 @@ class CheckYourSuspensionDetailsController @Inject() (
             } else {
               logger.error(s"CHRIS submission for suspend budgeting payment plan failed with DDI Ref [$ddiReference]")
               Future.successful(
-                Redirect(routes.JourneyRecoveryController.onPageLoad())
+                Redirect(routes.SystemErrorController.onPageLoad())
               )
             }
           }
 
         case _ =>
           logger.error("Missing DirectDebitReference and/or PaymentPlanReference  in UserAnswers when trying to suspend payment plan")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 

@@ -57,7 +57,7 @@ class AddPaymentPlanEndDateController @Inject() (
           }
           Ok(view(preparedForm, mode, backLink(mode)))
         case _ =>
-          Redirect(routes.JourneyRecoveryController.onPageLoad())
+          Redirect(routes.SystemErrorController.onPageLoad())
       }
     }
 
@@ -80,7 +80,7 @@ class AddPaymentPlanEndDateController @Inject() (
               } yield Redirect(navigator.nextPage(AddPaymentPlanEndDatePage, mode, updatedAnswers))
           )
       case _ =>
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
   private def backLink(mode: Mode): Call =

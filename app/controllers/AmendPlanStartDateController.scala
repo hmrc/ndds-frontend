@@ -71,7 +71,7 @@ class AmendPlanStartDateController @Inject() (
         )
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Redirect(routes.SystemErrorController.onPageLoad())
       }
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")

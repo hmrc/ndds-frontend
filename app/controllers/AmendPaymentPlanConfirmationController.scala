@@ -126,7 +126,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
 
         case _ =>
           logger.warn("Missing payment plan type from session")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 
@@ -188,12 +188,12 @@ class AmendPaymentPlanConfirmationController @Inject() (
 
           case _ =>
             logger.warn("[handlePlanAmendment] Missing payment plan DB fields")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
 
       case _ =>
         logger.warn(s"[handlePlanAmendment] Missing required fields for planType=$planType amendment")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 
@@ -222,7 +222,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
             chrisService.submitToChris(
               ua              = finalUa,
               successRedirect = Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()),
-              errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
+              errorRedirect   = Redirect(routes.SystemErrorController.onPageLoad())
             )
           }
         }

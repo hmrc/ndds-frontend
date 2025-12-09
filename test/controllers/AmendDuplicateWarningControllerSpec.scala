@@ -76,7 +76,7 @@ class AmendDuplicateWarningControllerSpec extends SpecBase {
         }
       }
 
-      "must redirect to Journey Recovery page when amend payment plan guard returns false" in {
+      "must redirect to System Error page when amend payment plan guard returns false" in {
         val userAnswers = emptyUserAnswers
           .set(ManagePaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan.toString)
           .success
@@ -163,7 +163,7 @@ class AmendDuplicateWarningControllerSpec extends SpecBase {
         }
       }
 
-      "must redirect to Journey recovery page when user selects Yes (true) but chRIS submission fails" in {
+      "must redirect to System Error page when user selects Yes (true) but chRIS submission fails" in {
         val directDebitReference = "DDI123456789"
 
         val paymentPlanDetails = models.responses.PaymentPlanResponse(
@@ -225,7 +225,7 @@ class AmendDuplicateWarningControllerSpec extends SpecBase {
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual controllers.routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
         }
       }
 

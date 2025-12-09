@@ -78,15 +78,15 @@ class PlanStartDateController @Inject() (
             )
           } recover { case e =>
             logger.warn(s"Unexpected error: $e")
-            Redirect(routes.JourneyRecoveryController.onPageLoad())
+            Redirect(routes.SystemErrorController.onPageLoad())
           }
         }
         case None =>
           logger.warn(s"DirectDebitSourcePage details missing from user answers")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         case _ =>
           logger.warn(s"DirectDebitSource is not mgd or sa or tc")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
   }
@@ -101,7 +101,7 @@ class PlanStartDateController @Inject() (
         routes.RegularPaymentAmountController.onPageLoad(mode)
       case (Some(TC), Some(TaxCreditRepaymentPlan)) =>
         routes.TotalAmountDueController.onPageLoad(mode)
-      case _ => routes.JourneyRecoveryController.onPageLoad()
+      case _ => routes.SystemErrorController.onPageLoad()
     }
   }
 
@@ -138,7 +138,7 @@ class PlanStartDateController @Inject() (
                   )
     } yield result).recover { case e =>
       logger.warn(s"Unexpected error: $e")
-      Redirect(routes.JourneyRecoveryController.onPageLoad())
+      Redirect(routes.SystemErrorController.onPageLoad())
     }
   }
 }

@@ -117,7 +117,7 @@ class AmendPlanEndDateController @Inject() (
 
             case _ =>
               logger.warn("Missing Amend payment amount and/or amend plan end date")
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+              Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
           }
       )
   }

@@ -68,7 +68,7 @@ class AmendDuplicateWarningController @Inject() (
 
           case None =>
             logger.warn("Failed to set DuplicateWarningPage = true")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
       } else {
         val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
@@ -93,7 +93,7 @@ class AmendDuplicateWarningController @Inject() (
                   chrisService.submitToChris(
                     ua              = updatedAnswers,
                     successRedirect = Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()),
-                    errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
+                    errorRedirect   = Redirect(routes.SystemErrorController.onPageLoad())
                   )
                 } else {
                   Future.successful(

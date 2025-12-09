@@ -36,11 +36,10 @@
     @heading(messages("systemError.heading"), classes = "govuk-heading-xl")
     @paragraphWithLink(
         Some(messages("systemError.p1")),
-        messages("systemError.link"),
-         None,
-        appConfig.hmrcOnlineServiceDeskUrl,
-        linkRel = "noreferrer noopener",
-        target = "_blank",
-        linkFullStop = true
+        linkMessage   = messages("systemError.link"),
+        linkUrl       = appConfig.hmrcOnlineServiceDeskUrl,
+        linkFullStop  = true,
+        linkRel       = "noreferrer noopener",
+        target        = "_blank"
     )
 }

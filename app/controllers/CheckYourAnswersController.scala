@@ -161,13 +161,13 @@ class CheckYourAnswersController @Inject() (
                         case (Some(_), Some(_)) =>
                           logger.error(s"MAC validation failed for user ${request.userId}")
                           Future.successful(
-                            Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                            Left(Redirect(routes.SystemErrorController.onPageLoad()))
                           )
 
                         case _ =>
                           logger.error("MAC generation failed or MAC1 missing in UserAnswers")
                           Future.successful(
-                            Left(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                            Left(Redirect(routes.SystemErrorController.onPageLoad()))
                           )
                       }
                   }
@@ -188,7 +188,7 @@ class CheckYourAnswersController @Inject() (
                             Redirect(routes.DirectDebitConfirmationController.onPageLoad())
                           }
                         } else {
-                          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
                         }
                       }
                   }

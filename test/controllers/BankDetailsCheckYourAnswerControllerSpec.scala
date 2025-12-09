@@ -145,7 +145,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data" in {
+    "must redirect to System Error for a GET if no existing data" in {
       val application = applicationBuilder(userAnswers = None)
         .overrides(bind[MacGenerator].toInstance(new FakeMacGenerator))
         .build()
@@ -155,11 +155,11 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a POST if no existing data" in {
+    "must redirect to System Error for a POST if no existing data" in {
       val application = applicationBuilder(userAnswers = None)
         .overrides(bind[MacGenerator].toInstance(new FakeMacGenerator))
         .build()
@@ -169,7 +169,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
   }

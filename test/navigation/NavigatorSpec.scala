@@ -71,7 +71,7 @@ class NavigatorSpec extends SpecBase {
       }
 
       "must throw error from ConfirmAuthorityPage if no option selected" in {
-        navigator.nextPage(ConfirmAuthorityPage, NormalMode, userAnswers) mustBe routes.JourneyRecoveryController.onPageLoad()
+        navigator.nextPage(ConfirmAuthorityPage, NormalMode, userAnswers) mustBe routes.SystemErrorController.onPageLoad()
       }
 
       "must go from DirectDebitSourcePage to PaymentPlanTypePage if source is MGD, SA, TC" in {
@@ -133,7 +133,7 @@ class NavigatorSpec extends SpecBase {
 
       "must throw error from PaymentReferencePage if DirectDebitSource is missing" in {
         navigator.nextPage(PaymentReferencePage, NormalMode, userAnswers) mustBe
-          routes.JourneyRecoveryController.onPageLoad()
+          routes.SystemErrorController.onPageLoad()
       }
 
       "go from PaymentAmountPage to PaymentDatePage" in {
@@ -231,9 +231,9 @@ class NavigatorSpec extends SpecBase {
             routes.AmendPlanEndDateController.onPageLoad(NormalMode)
         }
 
-        "must go from a AmendPaymentAmountPage to Journey Recovery Page" in {
+        "must go from a AmendPaymentAmountPage to System Error Page" in {
           navigator.nextPage(AmendPaymentAmountPage, NormalMode, userAnswers) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.SystemErrorController.onPageLoad()
         }
 
         "must go from a AmendPlanStartDatePage to AmendPaymentPlanConfirmationController" in {
@@ -280,11 +280,11 @@ class NavigatorSpec extends SpecBase {
             routes.PaymentPlanCancelledController.onPageLoad()
         }
 
-        "must go from a CancelPaymentPlanPage to Journey Recovery Page" in {
+        "must go from a CancelPaymentPlanPage to System Error Page" in {
           val ua = userAnswers
 
           navigator.nextPage(CancelPaymentPlanPage, NormalMode, ua) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.SystemErrorController.onPageLoad()
         }
 
         "must go from a AmendConfirmRemovePlanEndDatePage to ap0  when No" in {
@@ -297,11 +297,11 @@ class NavigatorSpec extends SpecBase {
             routes.AmendingPaymentPlanController.onPageLoad()
         }
 
-        "must go from a AmendConfirmRemovePlanEndDatePage to Journey Recovery Page when no answer" in {
+        "must go from a AmendConfirmRemovePlanEndDatePage to System Error Page when no answer" in {
           val ua = userAnswers
 
           navigator.nextPage(AmendConfirmRemovePlanEndDatePage, NormalMode, ua) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.SystemErrorController.onPageLoad()
         }
 
         "must go from a RemovingThisSuspensionPage to PaymentPlanDetailsController when No" in {
@@ -324,11 +324,11 @@ class NavigatorSpec extends SpecBase {
             routes.RemoveSuspensionConfirmationController.onPageLoad()
         }
 
-        "must go from a RemovingThisSuspensionPage to Journey Recovery Page when no answer" in {
+        "must go from a RemovingThisSuspensionPage to System Error Page when no answer" in {
           val ua = userAnswers
 
           navigator.nextPage(RemovingThisSuspensionPage, NormalMode, ua) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.SystemErrorController.onPageLoad()
         }
       }
     }
@@ -444,9 +444,9 @@ class NavigatorSpec extends SpecBase {
             routes.AmendPlanEndDateController.onPageLoad(CheckMode)
         }
 
-        "must go from a AmendPaymentAmountPage to Journey Recovery Page" in {
+        "must go from a AmendPaymentAmountPage to System Error Page" in {
           navigator.nextPage(AmendPaymentAmountPage, CheckMode, userAnswers) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.SystemErrorController.onPageLoad()
         }
 
         "must go from a AmendPlanStartDatePage to AmendPaymentPlanConfirmationController" in {
@@ -493,11 +493,11 @@ class NavigatorSpec extends SpecBase {
             routes.RemoveSuspensionConfirmationController.onPageLoad()
         }
 
-        "must go from a RemovingThisSuspensionPage to Journey Recovery Page when no answer in Check mode" in {
+        "must go from a RemovingThisSuspensionPage to System Error Page when no answer in Check mode" in {
           val ua = userAnswers
 
           navigator.nextPage(RemovingThisSuspensionPage, CheckMode, ua) mustBe
-            routes.JourneyRecoveryController.onPageLoad()
+            routes.SystemErrorController.onPageLoad()
         }
 
         "must go from TellAboutThisPaymentPage to PaymentAmountPage for PAYE if No Selected in Normal mode" in {

@@ -1539,7 +1539,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
         }
       }
 
-      "must redirect to Journey Recovery page when DirectDebitReferenceQuery is not set" in {
+      "must redirect to System Error page when DirectDebitReferenceQuery is not set" in {
         val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
           .overrides()
           .build()
@@ -1549,7 +1549,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 

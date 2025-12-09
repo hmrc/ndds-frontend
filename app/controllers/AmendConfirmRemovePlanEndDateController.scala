@@ -91,7 +91,7 @@ class AmendConfirmRemovePlanEndDateController @Inject() (
           case Some(result) => Future.successful(result)
           case None =>
             logger.warn("Missing required values in user answers for ConfirmRemovePlanEndDatePage")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
       }
     }
@@ -140,7 +140,7 @@ class AmendConfirmRemovePlanEndDateController @Inject() (
 
         case None =>
           logger.warn("Missing PaymentPlanDetails or AmendPlanEndDate in UserAnswers for ConfirmRemovePlanEndDate submission")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 

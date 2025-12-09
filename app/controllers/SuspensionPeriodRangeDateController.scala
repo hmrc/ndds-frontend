@@ -102,7 +102,7 @@ class SuspensionPeriodRangeDateController @Inject() (
         logger.error(
           s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
         )
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 
@@ -112,7 +112,7 @@ class SuspensionPeriodRangeDateController @Inject() (
         case Some(response) =>
           val planDetail = response.paymentPlanDetails
           if (planDetail.planType != PaymentPlanType.BudgetPaymentPlan.toString) {
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
           } else {
             val (planReference, paymentAmount) = extractPlanData
             val planStart = planDetail.scheduledPaymentStartDate
@@ -148,7 +148,7 @@ class SuspensionPeriodRangeDateController @Inject() (
           }
 
         case None =>
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 

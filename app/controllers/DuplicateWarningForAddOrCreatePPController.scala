@@ -81,7 +81,7 @@ class DuplicateWarningForAddOrCreatePPController @Inject() (
                     _              <- sessionRepository.set(updatedAnswers)
                   } yield Redirect(routes.DirectDebitConfirmationController.onPageLoad())
                 } else {
-                  Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+                  Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
                 }
               }
             } yield result
