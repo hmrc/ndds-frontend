@@ -50,7 +50,6 @@ class AmendPlanEndDateController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-
     val answers = request.userAnswers
 
     if (nddsService.isBudgetPaymentPlan(answers)) {
@@ -108,7 +107,9 @@ class AmendPlanEndDateController @Inject() (
                   } else {
                     for {
                       updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
-                      _              <- sessionRepository.set(updatedAnswers)
+                      updatedAnswers <-
+                        Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentValidationResult.potentialNextPaymentDate.get))
+                      _ <- sessionRepository.set(updatedAnswers)
                     } yield Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
                   }
                 }
@@ -116,7 +117,7 @@ class AmendPlanEndDateController @Inject() (
 
             case _ =>
               logger.warn("Missing Amend payment amount and/or amend plan end date")
-              Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+              Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
           }
       )
   }

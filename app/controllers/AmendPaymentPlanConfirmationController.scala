@@ -126,7 +126,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
 
         case _ =>
           logger.warn("Missing payment plan type from session")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 
@@ -176,49 +176,40 @@ class AmendPaymentPlanConfirmationController @Inject() (
             if (isNoChange(dbAmount, dbStartDate, Some(dbEndDate))) {
               Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
             } else {
-              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, dbStartDate)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption)
             }
 
           case (Some(dbAmount), Some(dbStartDate), None) =>
             if (isNoChange(dbAmount, dbStartDate, None)) {
               Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
             } else {
-              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, dbStartDate)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption)
             }
 
           case _ =>
             logger.warn("[handlePlanAmendment] Missing payment plan DB fields")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
 
       case _ =>
         logger.warn(s"[handlePlanAmendment] Missing required fields for planType=$planType amendment")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 
   // F26 check for duplicate from RDS DB
-  private def checkDuplicatePlan(userAnswers: UserAnswers,
-                                 updatedAmount: BigDecimal,
-                                 updatedDate: Option[LocalDate],
-                                 planType: String,
-                                 dbScheduledStartDate: LocalDate
-                                )(implicit
+  private def checkDuplicatePlan(userAnswers: UserAnswers, updatedAmount: BigDecimal, updatedDate: Option[LocalDate])(implicit
     ec: ExecutionContext,
     request: Request[?]
   ): Future[Result] = {
     nddService.isDuplicatePaymentPlan(userAnswers).flatMap { duplicateResponse =>
       if (duplicateResponse.isDuplicate) {
-        Future.successful(Redirect(routes.DuplicateWarningController.onPageLoad(NormalMode).url))
+        Future.successful(Redirect(routes.AmendDuplicateWarningController.onPageLoad(NormalMode).url))
       } else {
         val updatedAnswers = for {
           updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))
           updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, updatedAmount))
-          updatedUa <- if (planType == PaymentPlanType.SinglePaymentPlan.toString) {
-                         Future.fromTry(updatedUa.set(AmendPlanStartDatePage, updatedDate.get))
-                       } else {
-                         Future.fromTry(updatedUa.set(AmendPlanStartDatePage, dbScheduledStartDate))
-                       }
+          updatedUa <- Future.fromTry(updatedUa.set(AmendPlanStartDatePage, userAnswers.get(AmendPlanStartDatePage).get))
           updatedUa <- if (updatedDate.isDefined) {
                          Future.fromTry(updatedUa.set(AmendPlanEndDatePage, updatedDate.get))
                        } else {
@@ -231,7 +222,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
             chrisService.submitToChris(
               ua              = finalUa,
               successRedirect = Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()),
-              errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
+              errorRedirect   = Redirect(routes.SystemErrorController.onPageLoad())
             )
           }
         }

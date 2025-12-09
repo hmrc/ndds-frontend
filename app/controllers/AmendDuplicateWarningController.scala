@@ -27,12 +27,12 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.DuplicateWarningView
+import views.html.AmendDuplicateWarningView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DuplicateWarningController @Inject() (
+class AmendDuplicateWarningController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   identify: IdentifierAction,
@@ -42,7 +42,7 @@ class DuplicateWarningController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   nddsService: NationalDirectDebitService,
   chrisService: ChrisSubmissionForAmendService,
-  view: DuplicateWarningView
+  view: AmendDuplicateWarningView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -57,7 +57,7 @@ class DuplicateWarningController @Inject() (
         val maybeResult = for {
           updatedAnswers <- userAnswers.set(DuplicateWarningPage, true).toOption
         } yield {
-          Ok(view(form, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad()))
+          Ok(view(form, mode))
         }
 
         maybeResult match {
@@ -68,7 +68,7 @@ class DuplicateWarningController @Inject() (
 
           case None =>
             logger.warn("Failed to set DuplicateWarningPage = true")
-            Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
       } else {
         val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
@@ -83,7 +83,7 @@ class DuplicateWarningController @Inject() (
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendPaymentPlanConfirmationController.onPageLoad()))),
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(DuplicateWarningPage, value))
@@ -93,7 +93,7 @@ class DuplicateWarningController @Inject() (
                   chrisService.submitToChris(
                     ua              = updatedAnswers,
                     successRedirect = Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()),
-                    errorRedirect   = Redirect(routes.JourneyRecoveryController.onPageLoad())
+                    errorRedirect   = Redirect(routes.SystemErrorController.onPageLoad())
                   )
                 } else {
                   Future.successful(

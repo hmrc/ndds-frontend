@@ -16,7 +16,7 @@
 
 package models.requests
 
-import models.{PaymentPlanType, PaymentsFrequency, UserAnswers}
+import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.*
 import play.api.libs.json.{Json, OFormat}
 import queries.*
@@ -59,10 +59,23 @@ object PaymentPlanDuplicateCheckRequest {
           .map(_.toString)
           .getOrElse(PaymentPlanType.SinglePaymentPlan.toString)
 
+      val hodServiceMapping: Map[String, String] = Map(
+        DirectDebitSource.CT.toString   -> "COTA",
+        DirectDebitSource.NIC.toString  -> "NIDN",
+        DirectDebitSource.OL.toString   -> "SAFE",
+        DirectDebitSource.PAYE.toString -> "PAYE",
+        DirectDebitSource.SA.toString   -> "CESA",
+        DirectDebitSource.SDLT.toString -> "SDLT",
+        DirectDebitSource.TC.toString   -> "NTC",
+        DirectDebitSource.VAT.toString  -> "VAT",
+        DirectDebitSource.MGD.toString  -> "MGD"
+      )
+
       val hodService =
         userAnswers
           .get(DirectDebitSourcePage)
           .map(_.toString)
+          .flatMap(hodServiceMapping.get)
           .getOrElse(throw new RuntimeException("Missing DirectDebitSourcePage"))
 
       val paymentReference =
@@ -93,16 +106,27 @@ object PaymentPlanDuplicateCheckRequest {
             .getOrElse(throw new RuntimeException("Missing PlanStartDatePage"))
       }
 
+      val planTypeMapping: Map[String, String] = Map(
+        PaymentPlanType.SinglePaymentPlan.toString      -> "01",
+        PaymentPlanType.BudgetPaymentPlan.toString      -> "02",
+        PaymentPlanType.TaxCreditRepaymentPlan.toString -> "03",
+        PaymentPlanType.VariablePaymentPlan.toString    -> "04"
+      )
+
       PaymentPlanDuplicateCheckRequest(
         directDebitReference = existingDd.ddiRefNumber,
         paymentPlanReference = "",
-        planType             = planType,
-        paymentService       = hodService,
-        paymentReference     = paymentReference,
-        paymentAmount        = amount,
-        totalLiability       = userAnswers.get(TotalAmountDuePage),
-        paymentFrequency     = frequency,
-        paymentStartDate     = startDate
+        planType = userAnswers
+          .get(PaymentPlanTypePage)
+          .map(_.toString)
+          .flatMap(planTypeMapping.get)
+          .getOrElse(PaymentPlanType.SinglePaymentPlan.toString),
+        paymentService   = hodService,
+        paymentReference = paymentReference,
+        paymentAmount    = amount,
+        totalLiability   = userAnswers.get(TotalAmountDuePage),
+        paymentFrequency = frequency,
+        paymentStartDate = startDate
       )
     }
   }

@@ -36,4 +36,5 @@ class AmendPlanEndDateFormProvider @Inject() extends Mappings {
         dateFormats    = DateFormats.defaultDateFormats
       )
     )
+
 }

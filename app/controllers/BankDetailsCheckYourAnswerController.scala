@@ -86,7 +86,7 @@ class BankDetailsCheckYourAnswerController @Inject() (
 
         case None =>
           logger.warn("Could not generate MAC – missing bank details")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 

@@ -10,8 +10,6 @@ GET        /language/:lang                                    controllers.Langua
 
 GET        /refresh-session                                   controllers.KeepAliveController.keepAlive()
 
-GET        /there-is-a-problem                                controllers.JourneyRecoveryController.onPageLoad(continueUrl: Option[RedirectUrl] ?= None)
-
 GET        /account/sign-out-survey                           controllers.auth.AuthController.signOut()
 GET        /account/sign-out                                  controllers.auth.AuthController.signOutNoSurvey()
 GET        /account/signed-out                                controllers.auth.SignedOutController.onPageLoad()
@@ -146,7 +144,7 @@ GET        /advance-notice-direct-debit-payment               controllers.Advanc
 
 GET        /page-not-found                                    controllers.PageNotFoundController.onPageLoad()
 GET        /access-denied                                     controllers.AccessDeniedController.onPageLoad()
-GET        /system-error/there-is-a-problem                   controllers.SystemErrorController.onPageLoad()
+GET        /there-is-a-problem                                controllers.SystemErrorController.onPageLoad()
 
 GET        /payment-plan-update-processing                    controllers.PaymentPlanLockedWarningController.onPageLoad()
 
@@ -199,9 +197,9 @@ POST       /check-amendment-details                           controllers.AmendP
 
 GET        /payment-plan-amended                              controllers.AmendPaymentPlanUpdateController.onPageLoad()
 
-GET        /amend-already-have-payment-plan                   controllers.DuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
-POST       /amend-already-have-payment-plan                   controllers.DuplicateWarningController.onSubmit(mode: Mode = NormalMode)
-GET        /change-amend-already-have-payment-plan            controllers.DuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-amend-already-have-payment-plan            controllers.DuplicateWarningController.onSubmit(mode: Mode = CheckMode)
+GET        /amend-already-have-payment-plan                   controllers.AmendDuplicateWarningController.onPageLoad(mode: Mode = NormalMode)
+POST       /amend-already-have-payment-plan                   controllers.AmendDuplicateWarningController.onSubmit(mode: Mode = NormalMode)
+GET        /change-amend-already-have-payment-plan            controllers.AmendDuplicateWarningController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-amend-already-have-payment-plan            controllers.AmendDuplicateWarningController.onSubmit(mode: Mode = CheckMode)
 
-GET        /payment-plan-cannot-be-set-up               controllers.ErrorWarningController.onPageLoad()
+GET        /payment-plan-cannot-be-set-up                     controllers.ErrorWarningController.onPageLoad()

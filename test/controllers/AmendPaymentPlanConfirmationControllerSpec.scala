@@ -428,7 +428,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         }
       }
 
-      "must redirect to JourneyRecoveryController when CHRIS submission fails" in {
+      "must redirect to SystemErrorController when CHRIS submission fails" in {
         val mockNddService = mock[NationalDirectDebitService]
 
         when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
@@ -495,11 +495,11 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to JourneyRecoveryController when DirectDebitReference is missing" in {
+      "must redirect to SystemErrorController when DirectDebitReference is missing" in {
         val mockNddService = mock[NationalDirectDebitService]
 
         when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
@@ -562,11 +562,11 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to JourneyRecoveryController when PaymentPlanReference is missing" in {
+      "must redirect to SystemErrorController when PaymentPlanReference is missing" in {
         val mockNddService = mock[NationalDirectDebitService]
 
         when(mockNddService.submitChrisData(any())(any[HeaderCarrier]))
@@ -631,7 +631,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
@@ -757,7 +757,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val result = controller.onSubmit(NormalMode)(request)
 
           status(result) mustBe SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual routes.AmendDuplicateWarningController.onPageLoad(NormalMode).url
         }
       }
 

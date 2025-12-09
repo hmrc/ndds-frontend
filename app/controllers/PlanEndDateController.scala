@@ -54,7 +54,7 @@ class PlanEndDateController @Inject() (
         Ok(view(preparedForm, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode)))
 
       case None =>
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Redirect(routes.SystemErrorController.onPageLoad())
     }
   }
 
@@ -87,7 +87,7 @@ class PlanEndDateController @Inject() (
             )
 
         case None =>
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }
 

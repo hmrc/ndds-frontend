@@ -47,6 +47,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
   implicit val hc: HeaderCarrier = HeaderCarrier()
+
   "Check Your Answers Controller" - {
     val userAnswer = emptyUserAnswers
       .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
@@ -73,7 +74,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -115,7 +116,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("Payment date")
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -147,7 +148,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("£123.01")
         contentAsString(result) must include("4 extra numbers")
         contentAsString(result) must include("2504")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -176,7 +177,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("19 Jul 2025")
         contentAsString(result) must include("25 Jul 2027")
         contentAsString(result) must include("£120")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -208,7 +209,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         contentAsString(result) must include("19 Jun 2026")
         contentAsString(result) must include("Final payment amount")
         contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Accept and continue")
+        contentAsString(result) must include("Accept and submit")
       }
     }
 
@@ -350,18 +351,18 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+    "must redirect to System Error for a GET if no existing data is found" in {
       val application = applicationBuilder(userAnswers = None).build()
       running(application) {
         val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
         val result = route(application, request).value
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
     // POST tests for missing fields, failed submissions, and successful submissions
-    "must redirect to Journey Recovery for a POST if PaymentReferencePage data is missing" in {
+    "must redirect to System Error for a POST if PaymentReferencePage data is missing" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
@@ -408,7 +409,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if DirectDebitSource data is missing" in {
+    "must redirect to System Error for a POST if DirectDebitSource data is missing" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
         .setOrException(TotalAmountDuePage, 900)
@@ -457,7 +458,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       }
     }
 
-    "must redirect to Journey Recovery for a POST if Ddi reference number is not obtained successfully" in {
+    "must redirect to System Error for a POST if Ddi reference number is not obtained successfully" in {
       val incompleteAnswers = emptyUserAnswers
         .setOrException(PaymentReferencePage, "testReference")
         .setOrException(pages.MacValuePage, "valid-mac")
@@ -495,7 +496,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -561,7 +562,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         }
       }
 
-      "must redirect to Journey Recovery for a POST if CHRIS submission fails" in {
+      "must redirect to System Error for a POST if CHRIS submission fails" in {
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
@@ -591,11 +592,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to Journey Recovery for a POST if CHRIS submission returns false" in {
+      "must redirect to System Error for a POST if CHRIS submission returns false" in {
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
@@ -645,11 +646,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to Journey Recovery for a POST if the generated MAC does not match the stored MAC" in {
+      "must redirect to System Error for a POST if the generated MAC does not match the stored MAC" in {
         val paymentAmount = 200
         val userAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
@@ -692,11 +693,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to Journey Recovery for a POST if the generated MAC1 is not generated" in {
+      "must redirect to System Error for a POST if the generated MAC1 is not generated" in {
         val paymentAmount = 200
         val userAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
@@ -737,7 +738,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 

@@ -185,7 +185,7 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
       }
     }
 
-    "redirect to Journey Recovery on POST when no existing data is found" in {
+    "redirect to System Error on POST when no existing data is found" in {
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
@@ -196,7 +196,7 @@ class ConfirmAuthorityControllerSpec extends SpecBase {
         val result = route(application, request).value
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustBe routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustBe routes.SystemErrorController.onPageLoad().url
       }
     }
   }

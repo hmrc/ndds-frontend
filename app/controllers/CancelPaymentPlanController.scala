@@ -56,11 +56,10 @@ class CancelPaymentPlanController @Inject() (
   private val form = formProvider()
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    val alreadyConfirmed: Boolean =
-      request.userAnswers.get(CancelPaymentPlanConfirmationPage).contains(true)
+    val alreadyConfirmed: Boolean = request.userAnswers.get(CancelPaymentPlanConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
-      logger.warn("Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")
+      logger.warn("********* Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
       if (nddService.isPaymentPlanCancellable(request.userAnswers)) {
@@ -75,12 +74,12 @@ class CancelPaymentPlanController @Inject() (
 
           case _ =>
             logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery")
-            Redirect(routes.JourneyRecoveryController.onPageLoad())
+            Redirect(routes.SystemErrorController.onPageLoad())
         }
       } else {
         val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot cancel this plan type: $planType")
-        Redirect(routes.JourneyRecoveryController.onPageLoad())
+        Redirect(routes.SystemErrorController.onPageLoad())
       }
     }
   }
@@ -110,7 +109,7 @@ class CancelPaymentPlanController @Inject() (
         )
       case _ =>
         logger.warn(s"Unable to submit CancelPaymentPlanController missing PaymentPlanDetailsQuery")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 
@@ -141,13 +140,13 @@ class CancelPaymentPlanController @Inject() (
           case false =>
             logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
             Future.successful(
-              Redirect(routes.JourneyRecoveryController.onPageLoad())
+              Redirect(routes.SystemErrorController.onPageLoad())
             )
         }
 
       case _ =>
         logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to cancel payment plan")
-        Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 

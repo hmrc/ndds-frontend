@@ -132,7 +132,7 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET with non-Budget Payment Plan" in {
+    "must redirect to System Error for a GET with non-Budget Payment Plan" in {
 
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanDetailsQuery, singlePaymentPlanResponse)
@@ -150,7 +150,7 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -178,7 +178,7 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET when Budget plan but missing PaymentPlanDetails" in {
+    "must redirect to System Error for a GET when Budget plan but missing PaymentPlanDetails" in {
 
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
@@ -193,7 +193,7 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -275,7 +275,7 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a POST with non-Budget Payment Plan" in {
+    "must redirect to System Error for a POST with non-Budget Payment Plan" in {
 
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanDetailsQuery, singlePaymentPlanResponse)
@@ -303,7 +303,7 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
@@ -370,7 +370,7 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to Journey Recovery for a GET if no existing data is found" in {
+    "must redirect to System Error for a GET if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -380,11 +380,11 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a POST if no existing data is found" in {
+    "must redirect to System Error for a POST if no existing data is found" in {
 
       val application = applicationBuilder(userAnswers = None).build()
 
@@ -396,11 +396,11 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a GET when non-Budget plan and missing PaymentPlanDetails" in {
+    "must redirect to System Error for a GET when non-Budget plan and missing PaymentPlanDetails" in {
 
       val userAnswers = emptyUserAnswers
         .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
@@ -415,11 +415,11 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a GET when missing DirectDebitReference" in {
+    "must redirect to System Error for a GET when missing DirectDebitReference" in {
 
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
@@ -453,11 +453,11 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
 
-    "must redirect to Journey Recovery for a GET when missing PaymentPlanReference" in {
+    "must redirect to System Error for a GET when missing PaymentPlanReference" in {
 
       val userAnswers = emptyUserAnswers
         .set(PaymentPlanDetailsQuery, budgetPaymentPlanResponse)
@@ -491,7 +491,7 @@ class RemovingThisSuspensionControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
       }
     }
   }

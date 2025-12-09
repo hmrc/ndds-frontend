@@ -117,7 +117,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must redirect to Journey Recovery for a GET if PaymentPlanType is other than SinglePaymentPlan and BudgetPaymentPlan" in {
+      "must redirect to System Error for a GET if PaymentPlanType is other than SinglePaymentPlan and BudgetPaymentPlan" in {
         val userAnswers = emptyUserAnswers
           .set(AmendPlanEndDatePage, validAnswer)
           .success
@@ -139,7 +139,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must redirect to Journey Recovery for a GET if no existing data is found" in {
+      "must redirect to System Error for a GET if no existing data is found" in {
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
@@ -148,7 +148,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
     }
@@ -182,18 +182,22 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       val paymentPlanResponse = PaymentPlanResponse(directDebitDetails, planDetails)
 
       "must return a Bad Request and errors when invalid data is submitted" in {
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
-        val request =
-          FakeRequest(POST, amendPlanEndDateRoute)
-            .withFormUrlEncodedBody(("value", "invalid value"))
+        val request = FakeRequest(POST, amendPlanEndDateRoute)
+          .withFormUrlEncodedBody(("value", "invalid value"))
 
         running(application) {
-          when(mockService.calculateNextPaymentDate(any(), any(), any())(any))
-            .thenReturn(Future.successful(NextPaymentValidationResult(Some(validAnswer), nextPaymentDateValid = true)))
-
           val boundForm = form.bind(Map("value" -> "invalid value"))
           val view = application.injector.instanceOf[AmendPlanEndDateView]
           val result = route(application, request).value
@@ -216,7 +220,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           .set(AmendPaymentAmountPage, BigDecimal(1500))
           .success
           .value
-          .set(AmendPlanEndDatePage, paymentPlanResponse.paymentPlanDetails.scheduledPaymentEndDate.get)
+          .set(AmendPlanEndDatePage, LocalDate.now().plusDays(7))
           .success
           .value
 
@@ -236,7 +240,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
 
-      "must redirect to Journey Recovery for a POST when no PaymentPlanResponse exists" in {
+      "must redirect to System Error for a POST when no PaymentPlanResponse exists" in {
         val userAnswers = emptyUserAnswers
           .set(ManagePaymentPlanTypePage, "Single payment")
           .success
@@ -254,7 +258,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.JourneyRecoveryController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
     }

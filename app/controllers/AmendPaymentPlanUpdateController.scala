@@ -93,7 +93,7 @@ class AmendPaymentPlanUpdateController @Inject() (
         case Some(result) => Future.successful(result)
         case None =>
           logger.warn("Missing required values in user answers for amend payment plan")
-          Future.successful(Redirect(routes.JourneyRecoveryController.onPageLoad()))
+          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
 
     } else {
