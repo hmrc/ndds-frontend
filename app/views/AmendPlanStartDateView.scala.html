@@ -34,7 +34,7 @@
 
     @formHelper(action = routes.AmendPlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @mainErrorSummary(form)
+        @mainErrorSummary(form, errorLinkOverrides = Map("value" -> "value.day"))
 
         @govukDateInput(
             DateViewModel(
