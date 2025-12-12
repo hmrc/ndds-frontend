@@ -33,7 +33,7 @@
 
     @formHelper(action = routes.AmendPlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @mainErrorSummary(form)
+        @mainErrorSummary(form, errorLinkOverrides = Map("value" -> "value.day"))
 
         @govukLabel(HmrcPageHeadingLabel.apply(
             content = Text(messages("amendPlanEndDate.heading"))
