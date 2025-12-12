@@ -199,6 +199,7 @@ class CheckYourAnswersController @Inject() (
     ua: UserAnswers,
     earliest: EarliestPaymentDate
   ): Either[String, Unit] = {
+    val maxDateForSinglePlan = LocalDate.now().plusYears(1)
     ua.get(PaymentDatePage) match {
       case None =>
         logger.debug("You are not having correct data that needed for Single plan")
@@ -209,6 +210,8 @@ class CheckYourAnswersController @Inject() (
         if (paymentDate.enteredDate.isBefore(earliestDate)) {
           logger.debug("You are not having correct data that needed for Single plan and final validation failed")
           Left(s"Payment date ${paymentDate.enteredDate} is before earliest allowed date $earliestDate")
+        } else if (paymentDate.enteredDate.isAfter(maxDateForSinglePlan)) {
+          Left(s"Payment date ${paymentDate.enteredDate} is after maximum allowed date $maxDateForSinglePlan")
         } else {
           Right(())
         }
@@ -223,6 +226,8 @@ class CheckYourAnswersController @Inject() (
     val maybeStart = ua.get(PlanStartDatePage).map(_.enteredDate)
     val maybeEnd = ua.get(PlanEndDatePage)
     val earliest = LocalDate.parse(earliestPlanStartDate.date)
+    val today = LocalDate.now()
+    val maxDate = today.plusYears(1)
 
     maybeStart match {
       case None =>
@@ -231,7 +236,9 @@ class CheckYourAnswersController @Inject() (
       case Some(start) if start.isBefore(earliest) =>
         logger.debug("You are not having correct data that needed for budgeting plan and final validation failed")
         Left(s"Start date $start is before earliest allowed date $earliest")
-
+      case Some(start) if start.isAfter(maxDate) =>
+        logger.debug("You are not having correct data that needed for budgeting plan and start date is after the max allowed date")
+        Left(s"Start date $start is after maximum allowed date $maxDate")
       case Some(start) =>
         maybeEnd match {
           case Some(end) if end.isBefore(start) =>
@@ -248,6 +255,7 @@ class CheckYourAnswersController @Inject() (
     ua: UserAnswers,
     earliest: EarliestPaymentDate
   ): Either[String, Unit] = {
+    val TimeToPayMaxDays = 30
 
     ua.get(PlanStartDatePage).map(_.enteredDate) match {
 
@@ -256,11 +264,17 @@ class CheckYourAnswersController @Inject() (
         Left("PlanStartDatePage missing in UserAnswers")
       case Some(start) =>
         val earliestDate = LocalDate.parse(earliest.date)
+        val today = LocalDate.now()
+        val maxDate = today.plusDays(TimeToPayMaxDays)
 
-        if (start.isBefore(earliestDate))
+        if (start.isBefore(earliestDate)) {
           logger.debug("You are not have correct data that needed for variable plan and final validation failed")
           Left(s"Start date $start is before earliest allowed date for variable/TC plan $earliestDate")
-        else Right(())
+        } else if (start.isAfter(maxDate)) {
+          logger.debug("You are not have correct data that needed for variable plan and final validation failed")
+          Left(s"Start date $start is after maximum allowed date $maxDate")
+
+        } else Right(())
     }
   }
 
