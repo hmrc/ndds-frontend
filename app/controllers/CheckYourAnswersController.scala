@@ -355,23 +355,7 @@ class CheckYourAnswersController @Inject() (
     if (hasEndDate.contains(true) && userAnswers.get(PlanEndDatePage).isEmpty) {
       Some(Redirect(routes.ErrorWarningController.onPageLoad()))
     } else {
-      val shouldHaveEndDate = hasEndDate.contains(true) || (hasEndDate.isEmpty && userAnswers.get(PlanEndDatePage).isDefined)
-
-      if (shouldHaveEndDate) {
-        (userAnswers.get(PlanStartDatePage), userAnswers.get(PlanEndDatePage)) match {
-          case (Some(startDateDetails), Some(endDate)) =>
-            if (startDateDetails.enteredDate.isAfter(endDate)) {
-              logger.warn(s"Validation failed: start date ${startDateDetails.enteredDate} is after end date $endDate")
-              Some(Redirect(routes.PlanEndDateController.onPageLoad(NormalMode)))
-            } else {
-              None
-            }
-          case _ =>
-            None
-        }
-      } else {
-        None
-      }
+      None
     }
   }
 
