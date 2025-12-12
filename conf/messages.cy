@@ -529,8 +529,8 @@ suspensionPeriodRangeDate.to = to
 suspensionPeriodRangeDate.checkYourAnswersLabel = Suspension period
 suspensionPeriodRangeDate.error.invalid.startDate.base = Enter a real start date.
 suspensionPeriodRangeDate.error.invalid.endDate.base = Enter a real end date.
-suspensionPeriodRangeDate.error.startDate = Suspension period start date must be between {0} and {1}
-suspensionPeriodRangeDate.error.endDate = Suspension period end date must be between {0} and {1}
+suspensionPeriodRangeDate.error.startDate = Mae’n i ddyddiad decrhau’r cyfnod gohirio fod rhwng {0} a {1}
+suspensionPeriodRangeDate.error.endDate = Mae’n rhaid i ddyddiad diwedd y cyfnod gohirio fod rhwng {0} a {1}
 
 checkYourSuspensionDetails.title = Check your suspension details
 checkYourSuspensionDetails.heading = Check your suspension details
