@@ -15,12 +15,12 @@ site.pagination.landmark = Pagination
 site.pagination.previous = Previous
 site.pagination.next = Next
 
-date.day = Day
-date.month = Month
-date.year = Year
-date.error.day = Enter a valid date
-date.error.month = Enter a valid date
-date.error.year = Enter a valid date
+date.day = Diwrnod
+date.month = Mis
+date.year = Blwyddyn
+date.error.day = Nodwch ddyddiad dilys
+date.error.month = Nodwch ddyddiad dilys
+date.error.year = Nodwch ddyddiad dilys
 
 timeout.title = You’re about to be signed out
 timeout.message = For security reasons, you will be signed out of this service in
