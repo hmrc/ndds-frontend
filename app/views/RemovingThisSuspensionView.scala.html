@@ -57,20 +57,23 @@
 
             @header2("removingThisSuspension.question")
 
-            @govukRadios(
-                Radios(
-                    fieldset = None,
-                    name = form("value").name,
-                    items = Seq(
-                        RadioItem(content = Text(messages("site.yes")), value = Some("true"), id = Some("value_0"), checked = form("value").value.exists(_ == "true")),
-                        RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"), checked = form("value").value.exists(_ == "false"))
-                    ),
-                    errorMessage = if(form("value").hasErrors) Some(ErrorMessage(
-                        content = Text(messages(form("value").error.get.message, form("value").error.get.args: _*)),
-                        visuallyHiddenText = Some(messages("error.prefix"))
-                    )) else None
-                ).copy(classes = "govuk-radios--inline")
-            )
+        @govukRadios(
+            Radios(
+                fieldset = None,
+                name = form("value").name,
+                items = Seq(
+                RadioItem(content = Text(messages("site.yes")), value = Some("true"), id = Some("value_0"), checked = form("value").value.exists(_ == "true")),
+                RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"), checked = form("value").value.exists(_ == "false"))
+            ),
+        errorMessage =
+        if (form("value").hasErrors)
+        Some(ErrorMessage(
+        content = Text(messages(form("value").error.get.message, form("value").error.get.args: _*)),
+        visuallyHiddenText = Some(messages("error.prefix"))
+        ))
+        else None
+        ).copy(classes = "govuk-radios--inline")
+        )
         }
 
         @govukButton(
