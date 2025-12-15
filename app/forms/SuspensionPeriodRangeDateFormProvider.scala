@@ -24,7 +24,6 @@ import play.api.data.{Form, FormError}
 import play.api.i18n.Messages
 import utils.DateFormats
 
-import play.api.i18n.Messages.implicitMessagesProviderToMessages
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject

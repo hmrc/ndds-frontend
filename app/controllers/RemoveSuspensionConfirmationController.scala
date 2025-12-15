@@ -71,12 +71,15 @@ class RemoveSuspensionConfirmationController @Inject() (
                          )
         } yield {
 
-          val formattedRegPaymentAmount =
-            formatAmount(paymentAmount)
+          val formattedRegPaymentAmount = formatAmount(paymentAmount)
+          implicit val messages: Messages = messagesApi.preferred(request)
 
           val formattedStartDate =
             startDate.format(
-              DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)
+              DateTimeFormatter.ofPattern(
+                Constants.longDateTimeFormatPattern,
+                messages.lang.locale
+              )
             )
 
           val summaryRows: Seq[SummaryListRow] =
