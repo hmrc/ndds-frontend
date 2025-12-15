@@ -26,6 +26,7 @@ import org.scalactic.Prettifier.default
 import org.scalatestplus.mockito.MockitoSugar
 import pages.*
 import play.api.data.Form
+import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -103,7 +104,7 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
         val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val result = route(application, request).value
         val view = application.injector.instanceOf[AmendConfirmRemovePlanEndDateView]
-
+        implicit val msgs: Messages = messages(application)
         val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
         status(result) mustEqual OK
@@ -145,7 +146,7 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
         val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val view = application.injector.instanceOf[AmendConfirmRemovePlanEndDateView]
         val result = route(application, request).value
-
+        implicit val msgs: Messages = messages(application)
         val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
         status(result) mustEqual OK
@@ -213,6 +214,7 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
         val boundForm = form.bind(Map("value" -> ""))
 
         val view = application.injector.instanceOf[AmendConfirmRemovePlanEndDateView]
+        implicit val msgs: Messages = messages(application)
         val expectedPlanEndDate = formattedDateTimeShort(testEndDate.toString)
 
         val result = route(application, request).value

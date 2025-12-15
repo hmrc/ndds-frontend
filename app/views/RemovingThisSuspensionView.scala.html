@@ -14,70 +14,79 @@
  * limitations under the License.
  *@
 
-@import views.html.components.*
+@*
+* Copyright 2025 HM Revenue & Customs
+* Licensed under the Apache License, Version 2.0
+*@
+
+@import views.html.components._
 @import java.time.LocalDate
 @import java.time.format.DateTimeFormatter
-@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
-@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.Radios
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.{RadioItem, Radios}
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.errormessage.ErrorMessage
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
 @this(
-    layout: templates.Layout,
-    formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
-    govukRadios: GovukRadios,
-    govukButton: GovukButton,
-    fieldSet: FieldSet,
-    paragraph: Paragraph,
-    header2: Header2,
-    mainErrorSummary: MainErrorSummary
+layout: templates.Layout,
+formHelper: FormWithCSRF,
+govukErrorSummary: GovukErrorSummary,
+govukRadios: GovukRadios,
+govukButton: GovukButton,
+fieldSet: FieldSet,
+paragraph: Paragraph,
+header2: Header2,
+mainErrorSummary: MainErrorSummary
 )
 
 @(form: Form[_], mode: Mode, paymentReference: String, suspensionStartDate: Option[LocalDate], suspensionEndDate: Option[LocalDate])(implicit request: Request[_], messages: Messages)
 
+@defining(new java.util.Locale(messages.lang.code)) { locale =>
+@defining(DateTimeFormatter.ofPattern("d MMMM yyyy", locale)) { dateFormatter =>
+@defining(suspensionStartDate.map(_.format(dateFormatter)).getOrElse("")) { formattedStartDate =>
+@defining(suspensionEndDate.map(_.format(dateFormatter)).getOrElse("")) { formattedEndDate =>
+
 @layout(pageTitle = title(form, messages("removingThisSuspension.title"))) {
+            @formHelper(action = routes.RemovingThisSuspensionController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-    @formHelper(action = routes.RemovingThisSuspensionController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+            @mainErrorSummary(form)
 
-        @mainErrorSummary(form)
-
-        @fieldSet(
+            @fieldSet(
             legend = "removingThisSuspension.heading",
             asHeading = true,
             describedBy = None,
             extraClasses = "govuk-!-margin-bottom-8"
-        ) {
-            @defining(suspensionStartDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedStartDate =>
-                @defining(suspensionEndDate.map(_.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))).getOrElse("")) { formattedEndDate =>
-                    @paragraph(messages("removingThisSuspension.paymentDetails", paymentReference))
-                    @paragraph(messages("removingThisSuspension.suspensionInfo", formattedStartDate, formattedEndDate))
-                }
-            }
+            ) {
+
+            @paragraph(messages("removingThisSuspension.paymentDetails", paymentReference))
+            @paragraph(messages("removingThisSuspension.suspensionInfo", formattedStartDate, formattedEndDate))
 
             @header2("removingThisSuspension.question")
 
-        @govukRadios(
-            Radios(
-                fieldset = None,
-                name = form("value").name,
-                items = Seq(
-                RadioItem(content = Text(messages("site.yes")), value = Some("true"), id = Some("value_0"), checked = form("value").value.exists(_ == "true")),
-                RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"), checked = form("value").value.exists(_ == "false"))
-            ),
-        errorMessage =
-        if (form("value").hasErrors)
-        Some(ErrorMessage(
-        content = Text(messages(form("value").error.get.message, form("value").error.get.args: _*)),
-        visuallyHiddenText = Some(messages("error.prefix"))
-        ))
-        else None
-        ).copy(classes = "govuk-radios--inline")
-        )
-        }
+            @govukRadios(
+                Radios(
+                    fieldset = None,
+                    name = form("value").name,
+                    items = Seq(
+                    RadioItem(content = Text(messages("site.yes")), value = Some("true"), id = Some("value_0"), checked = form("value").value.exists(_ == "true")),
+                    RadioItem(content = Text(messages("site.no")), value = Some("false"), id = Some("value_1"), checked = form("value").value.exists(_ == "false"))
+                ),
+            errorMessage =
+                if (form("value").hasErrors)
+                Some(ErrorMessage(
+                  content = Text(messages(form("value").error.get.message, form("value").error.get.args: _*)),
+                  visuallyHiddenText = Some(messages("error.prefix"))
+                ))
+                else None
+                ).copy(classes = "govuk-radios--inline")
+                )
+                }
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+            @govukButton(ButtonViewModel(messages("site.continue")))
+
+            }
+            }
+
+        }
+        }
     }
 }
