@@ -24,6 +24,7 @@ import play.api.data.{Form, FormError}
 import play.api.i18n.Messages
 import utils.DateFormats
 
+import play.api.i18n.Messages.implicitMessagesProviderToMessages
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -31,13 +32,14 @@ import javax.inject.Inject
 class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
 
   private val MaxMonthsAhead = 6
-  private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def apply(
     planStartDateOpt: Option[LocalDate],
     planEndDateOpt: Option[LocalDate],
     earliestStartDate: LocalDate // 3 working days from today
   )(implicit messages: Messages): Form[SuspensionPeriodRange] = {
+    val dateFormatter: DateTimeFormatter =
+      DateTimeFormatter.ofPattern("d MMMM yyyy", messages.lang.locale)
 
     Form(
       mapping(
@@ -59,7 +61,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
           dateFormats    = DateFormats.defaultDateFormats
         )
       )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
-        .verifying(endDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate))
+        .verifying(endDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate, dateFormatter))
     )
   }
 
@@ -108,7 +110,8 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
   private def endDateConstraint(
     planStartDateOpt: Option[LocalDate],
     planEndDateOpt: Option[LocalDate],
-    earlyStartDate: LocalDate
+    earlyStartDate: LocalDate,
+    dateFormatter: DateTimeFormatter
   ): Constraint[SuspensionPeriodRange] =
     Constraint[SuspensionPeriodRange]("suspensionPeriodRangeDate.error.endDate") { range =>
 
