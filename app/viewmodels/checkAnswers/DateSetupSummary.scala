@@ -27,9 +27,12 @@ import java.time.format.DateTimeFormatter
 object DateSetupSummary {
 
   def row(value: LocalDateTime)(implicit messages: Messages): SummaryListRow =
+    val formatter =
+      DateTimeFormatter.ofPattern("d MMM yyyy", messages.lang.locale)
+    val displayValue: String = value.format(formatter)
     SummaryListRowViewModel(
       key     = "paymentPlanDetails.details.dateSetUp",
-      value   = ValueViewModel(value.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
+      value   = ValueViewModel(displayValue),
       actions = Seq.empty
     )
 }
