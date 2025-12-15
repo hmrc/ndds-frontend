@@ -29,7 +29,7 @@ timeout.signOut = Sign out
 
 error.title.prefix = Error:
 error.prefix = Error
-error.summary.title = There is a problem
+error.summary.title = Mae problem wedi codi
 
 index.title = Set up a direct debit
 index.heading = Set up a direct debit
