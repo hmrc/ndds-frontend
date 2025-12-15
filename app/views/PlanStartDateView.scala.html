@@ -20,7 +20,7 @@
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    mainErrorSummary: components.MainErrorSummary,
+    mainErrorSummary: MainErrorSummary,
     govukDateInput: GovukDateInput,
     govukButton: GovukButton,
     govukDetails: GovukDetails,
@@ -33,7 +33,7 @@
 
     @formHelper(action = routes.PlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @mainErrorSummary(form)
+        @mainErrorSummary(form, errorLinkOverrides = Map("value" -> "value.day"))
 
         @govukDateInput(
             DateViewModel(
