@@ -564,7 +564,7 @@ removingThisSuspension.paymentDetails = Cyfeirnod talu: <strong>{0}</strong>
 removingThisSuspension.suspensionInfo = Mae’r cyfnod gohirio hwn o <strong>{0}</strong> i <strong>{1}</strong>
 removingThisSuspension.question = A ydych yn siŵr eich bod am dynnu’r gohiriad hwn?
 removingThisSuspension.checkYourAnswersLabel = Dileu’r gohiriad hwn
-removingThisSuspension.error.required = Dewiswch un opsiwn..
+removingThisSuspension.error.required = Dewiswch un opsiwn.
 removingThisSuspension.change.hidden =  Dileu’r gohiriad hwn
 
 backSubmission.title = Page not found
