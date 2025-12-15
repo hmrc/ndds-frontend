@@ -172,7 +172,6 @@ class CheckYourAnswersController @Inject() (
                     case Left(errorMessage) =>
                       logger.warn(s"Date validation failed: $errorMessage")
 
-                      // 🔥 NEW: redirect only for date validation failure
                       if (
                         errorMessage.contains("before earliest allowed date")
                         || errorMessage.contains("End date")

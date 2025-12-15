@@ -1105,7 +1105,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         when(
           mockNddService.calculateFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier])
-        ).thenReturn(Future.successful(EarliestPaymentDate("2025-07-01"))) // earliest <= 2025-07-19 -> validation passes
+        ).thenReturn(Future.successful(EarliestPaymentDate("2025-07-01")))
 
         when(
           mockMacGenerator.generateMac(
