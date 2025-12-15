@@ -545,7 +545,7 @@ removeSuspensionConfirmation.h2 = Manylion cynllun talu
 removeSuspensionConfirmation.print = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion, gan ddefnyddio’r teclyn argraffu ar eich porwr.
 removeSuspensionConfirmation.link = Yn ôl i’r cynllun talu
 
-paymentPlanSuspended.title = Cynllun gohirio taliadau
+paymentPlanSuspended.title = Cynllun talu wedi’i ohirio
 paymentPlanSuspended.panel.title = Cynllun gohirio taliadau
 paymentPlanSuspended.panel.p = O <strong>{0}</strong> i <strong>{1}</strong>
 paymentPlanSuspended.pleaseNote = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion, gan ddefnyddio’r teclyn argraffu ar eich porwr.
