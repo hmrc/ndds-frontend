@@ -14,10 +14,12 @@
  * limitations under the License.
  *@
 
+@import views.html.components.*
+
 @this(
     layout: templates.Layout,
     formHelper: FormWithCSRF,
-    govukErrorSummary: GovukErrorSummary,
+    mainErrorSummary: MainErrorSummary,
     govukDateInput: GovukDateInput,
     govukButton: GovukButton
 )
@@ -28,9 +30,7 @@
 
     @formHelper(action = routes.PlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value.day")))
-        }
+        @mainErrorSummary(form, errorLinkOverrides = Map("value" -> "value.day"))
 
         @govukDateInput(
                 DateViewModel(
