@@ -18,7 +18,8 @@ package utils
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.i18n.Lang
+import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.test.Helpers.stubMessagesApi
 import utils.DateTimeFormats.dateTimeFormat
 
 import java.time.LocalDate
@@ -54,6 +55,9 @@ class DateTimeFormatsSpec extends AnyFreeSpec with Matchers {
         DateTimeFormats.formattedCurrentDate mustEqual expected
       }
     }
+
+    val messagesApi: MessagesApi = stubMessagesApi()
+    implicit val messages: Messages = messagesApi.preferred(Seq(Lang.defaultLang))
 
     "formattedDateTimeShort" - {
       "should return today's date in 'dd MMM yyyy' format" in {

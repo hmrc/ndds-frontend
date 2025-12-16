@@ -50,7 +50,9 @@ object AmendPlanStartDateSummary {
       "paymentPlanDetails.details.startDate"
     }
 
-    val displayValue = value.map(a => a.format(DateTimeFormatter.ofPattern(dateFormatter))).getOrElse("")
+    val formatter = DateTimeFormatter.ofPattern(dateFormatter, messages.lang.locale)
+    val displayValue = value.map(_.format(formatter)).getOrElse("")
+
     SummaryListRowViewModel(
       key   = label,
       value = ValueViewModel(displayValue),

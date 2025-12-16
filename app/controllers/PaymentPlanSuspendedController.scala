@@ -55,8 +55,18 @@ class PaymentPlanSuspendedController @Inject() (
         planDetails           <- userAnswers.get(PaymentPlanDetailsQuery)
         suspensionPeriodRange <- userAnswers.get(SuspensionPeriodRangeDatePage)
       } yield {
-        val formattedStartDate = suspensionPeriodRange.startDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
-        val formattedEndDate = suspensionPeriodRange.endDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern))
+
+        val messages = messagesApi.preferred(request)
+        val dateFormatter = DateTimeFormatter.ofPattern(
+          Constants.longDateTimeFormatPattern,
+          messages.lang.locale
+        )
+
+        val formattedStartDate =
+          suspensionPeriodRange.startDate.format(dateFormatter)
+
+        val formattedEndDate =
+          suspensionPeriodRange.endDate.format(dateFormatter)
         val paymentReference = planDetails.paymentPlanDetails.paymentReference
 
         val suspensionIsActiveMode = isSuspendPeriodActive(planDetails.paymentPlanDetails)

@@ -16,7 +16,7 @@
 
 package utils
 
-import play.api.i18n.Lang
+import play.api.i18n.{Lang, Messages}
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZonedDateTime}
@@ -49,10 +49,9 @@ object DateTimeFormats {
     }
   }
 
-  def formattedDateTimeShort(dateTime: String): String = { // example: 14 Aug 2025
+  def formattedDateTimeShort(dateTime: String)(implicit messages: Messages): String = {
     val date = LocalDate.parse(dateTime)
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.UK)
-
+    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", messages.lang.locale)
     date.format(formatter)
   }
 

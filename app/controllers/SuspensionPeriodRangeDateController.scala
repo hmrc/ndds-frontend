@@ -23,7 +23,7 @@ import models.{Mode, PaymentPlanType}
 import navigation.Navigator
 import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
@@ -53,12 +53,15 @@ class SuspensionPeriodRangeDateController @Inject() (
     with I18nSupport
     with Logging {
 
-  private val dateFormatter: DateTimeFormatter =
-    DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)
-
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
+      implicit val messages: Messages = messagesApi.preferred(request)
 
+      val dateFormatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern(
+          Constants.longDateTimeFormatPattern,
+          messages.lang.locale
+        )
       val userAnswers = request.userAnswers
       if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
         val planDates = userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails)
@@ -117,14 +120,23 @@ class SuspensionPeriodRangeDateController @Inject() (
             val (planReference, paymentAmount) = extractPlanData
             val planStart = planDetail.scheduledPaymentStartDate
             val planEnd = planDetail.scheduledPaymentEndDate
+            implicit val messages: Messages = messagesApi.preferred(request)
 
-            val formattedSuspensionStartDate = planDetail.suspensionStartDate
-              .map(_.format(dateFormatter))
-              .getOrElse("")
+            val dateFormatter: DateTimeFormatter =
+              DateTimeFormatter.ofPattern(
+                Constants.longDateTimeFormatPattern,
+                messages.lang.locale
+              )
 
-            val formattedSuspensionEndDate = planDetail.suspensionEndDate
-              .map(_.format(dateFormatter))
-              .getOrElse("")
+            val formattedSuspensionStartDate =
+              planDetail.suspensionStartDate
+                .map(_.format(dateFormatter))
+                .getOrElse("")
+
+            val formattedSuspensionEndDate =
+              planDetail.suspensionEndDate
+                .map(_.format(dateFormatter))
+                .getOrElse("")
 
             nddsService.earliestSuspendStartDate().flatMap { earliestStartDate =>
               val form = formProvider(planStart, planEnd, earliestStartDate)

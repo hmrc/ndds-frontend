@@ -36,7 +36,8 @@ class SuspensionPeriodRangeStartDateFormatter(
     extends CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats) {
 
   private val MaxMonthsAhead = 6
-  private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  private val dateFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("d MMMM yyyy", messages.lang.locale)
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
     super.bind(key, data).flatMap { date =>
