@@ -497,7 +497,7 @@ paymentPlanCancelled.pleaseNote = You can print this page for your records using
 paymentPlanCancelled.link = Return to Direct Debit Instructions
 
 suspendPaymentPlan.title = Gohirio’r cynllun talu hwn
-suspendPaymentPlan.heading = Gohirio’r cynllun talu hwn
+suspendPaymentPlan.heading = Gohirio’r cynllun talu
 suspendPaymentPlan.p1 = Gallwch ohirio’r cynllun talu hwn os oes angen i chi oedi’r taliadau.
 suspendPaymentPlan.p2 = Pan fyddwch yn gohirio cynllun talu:
 suspendPaymentPlan.l1 = ni chaiff taliadau eu cymryd yn ystod y cyfnod gohirio
