@@ -219,11 +219,11 @@ paymentPlan.collapsable.tc.p6.link = you must contact the HMRC Helpline (opens i
 
 paymentReference.title = What is your payment reference?
 paymentReference.heading = What is your payment reference?
-paymentReference.checkYourAnswersLabel = Payment reference
+paymentReference.checkYourAnswersLabel = Cyfeirnod talu
 paymentReference.error.required = Enter a payment reference.
 paymentReference.error.length = Payment reference must be 100 characters or less
 paymentReference.error.invalid = Enter a valid payment reference
-paymentReference.change.hidden =  Payment reference
+paymentReference.change.hidden = Cyfeirnod talu
 paymentReference.ct.hint = You can find this on your notice to deliver your tax return or on any reminders from HMRC.
 paymentReference.mgd.hint = You can find this on the MGD Registration Certificate from HMRC, it begins with an X and is 14 characters long.
 paymentReference.nic.hint = You can find this on letters from HMRC, it is 18 characters long.
