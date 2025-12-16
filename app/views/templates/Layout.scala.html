@@ -33,7 +33,8 @@
     hmrcStandardPage: HmrcStandardPage,
     govukBackLink: GovukBackLink,
     threeQuartersMainContent: ThreeQuartersMainContent,
-    twoThirdsMainContent: TwoThirdsMainContent
+    twoThirdsMainContent: TwoThirdsMainContent,
+    hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
 )
 
 @(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false, backLink: Option[String] = None, templateOverrides: TemplateOverrides = TemplateOverrides(), useThreeQuartersGrid: Boolean = false)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
