@@ -55,6 +55,15 @@ object DirectDebitSource extends Enumerable.Implicits {
     OL
   )
 
+  val singlePlanDirectSources: Seq[DirectDebitSource] = Seq(
+    CT,
+    NIC,
+    PAYE,
+    SDLT,
+    VAT,
+    OL
+  )
+
   val hodServiceMapping: Map[String, String] = Map(
     "COTA" -> CT.toString,
     "NIDN" -> NIC.toString,

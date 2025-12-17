@@ -53,8 +53,7 @@ class PaymentDateController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     {
       nddService.calculateFutureWorkingDays(request.userAnswers, request.userId) map { earliestPaymentDate =>
-        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers)
-
+        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectSource(request.userAnswers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
         val preparedForm = request.userAnswers.get(PaymentDatePage) match {
@@ -80,7 +79,7 @@ class PaymentDateController @Inject() (
     nddService
       .calculateFutureWorkingDays(request.userAnswers, request.userId)
       .flatMap { earliestPaymentDate =>
-        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers)
+        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectSource(request.userAnswers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
         form
