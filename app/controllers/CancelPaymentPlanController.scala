@@ -59,7 +59,7 @@ class CancelPaymentPlanController @Inject() (
     val alreadyConfirmed: Boolean = request.userAnswers.get(CancelPaymentPlanConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
-      logger.warn("********* Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")
+      logger.warn("********* Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
       if (nddService.isPaymentPlanCancellable(request.userAnswers)) {
@@ -122,30 +122,19 @@ class CancelPaymentPlanController @Inject() (
 
         nddService.submitChrisData(chrisRequest).flatMap {
           case true =>
-            logger.info(s"CHRIS Cancel payment plan payload submission successful for DDI Ref [$ddiReference]")
-
             for {
               updatedAnswers <- Future.fromTry(ua.set(CancelPaymentPlanPage, value))
               updatedAnswers <- Future.fromTry(updatedAnswers.set(CancelPaymentPlanConfirmationPage, true))
               lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
               _              <- sessionRepository.set(updatedAnswers)
-            } yield {
-              if (lockResponse.lockSuccessful) {
-                logger.info(s"Cancel payment plan lock returns: ${lockResponse.lockSuccessful}")
-              } else {
-                logger.error(s"Cancel payment plan lock returns: ${lockResponse.lockSuccessful}")
-              }
-              Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
-            }
+            } yield Redirect(navigator.nextPage(CancelPaymentPlanPage, NormalMode, updatedAnswers))
           case false =>
             logger.error(s"CHRIS Cancel plan submission failed for DDI Ref [$ddiReference]")
-            Future.successful(
-              Redirect(routes.SystemErrorController.onPageLoad())
-            )
+            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
 
       case _ =>
-        logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to cancel payment plan")
+        logger.error("Missing DDI ref and/or PaymentPlanReference from session when trying to cancel payment plan")
         Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }

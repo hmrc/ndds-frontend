@@ -44,16 +44,11 @@ class ChrisSubmissionForAmendService @Inject() (
 
         nddService.submitChrisData(request).flatMap { ok =>
           if (ok) {
-            logger.info(s"CHRIS submission successful for amend payment plan for DDI Ref: $ddiRef")
-
             for {
               lockResponse <- nddService.lockPaymentPlan(ddiRef, ppRef)
               updatedUa    <- Future.fromTry(ua.set(AmendPaymentPlanConfirmationPage, true))
               _            <- sessionRepository.set(updatedUa)
-            } yield {
-              logger.debug(s"Amend payment plan lock result: ${lockResponse.lockSuccessful}")
-              successRedirect
-            }
+            } yield successRedirect
           } else {
             logger.error(s"CHRIS submission failed amend payment plan for DDI Ref: $ddiRef")
             Future.successful(errorRedirect)

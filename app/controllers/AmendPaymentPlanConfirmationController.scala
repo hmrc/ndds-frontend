@@ -187,7 +187,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
             }
 
           case _ =>
-            logger.warn("[handlePlanAmendment] Missing payment plan DB fields")
+            logger.warn("[handlePlanAmendment] Missing payment plan from database")
             Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
 

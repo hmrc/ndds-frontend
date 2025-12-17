@@ -76,7 +76,7 @@ class YourBankDetailsController @Inject() (
 
       personalOrBusinessOpt match {
         case None =>
-          logger.warn(s"[YourBankDetailsController][onSubmit] Missing PersonalOrBusinessAccountPage for user $credId")
+          logger.warn(s"Missing PersonalOrBusinessAccountPage for user: $credId")
           Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
         case Some(accountType) =>
@@ -117,8 +117,7 @@ class YourBankDetailsController @Inject() (
 
       case Left(barsError) =>
         logger.warn(
-          s"[YourBankDetailsController][startVerification] " +
-            s"BARS verification failed for userId=$credId, accountType=$accountType. " +
+          s"BARS verification failed for userId=$credId, accountType=$accountType. " +
             s"Reason: ${barsError.toString}"
         )
         onFailedVerification(credId, bankDetails, mode, barsError)
@@ -144,10 +143,7 @@ class YourBankDetailsController @Inject() (
     for {
       updatedAnswers <- Future.fromTry(updatedAnswersTry)
       _              <- sessionRepository.set(updatedAnswers)
-    } yield {
-      logger.debug(s"[YourBankDetailsController][onSuccessfulVerification] Session repository updated successfully")
-      updatedAnswers
-    }
+    } yield updatedAnswers
   }
 
   private def onFailedVerification(
