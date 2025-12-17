@@ -21,6 +21,7 @@ import forms.PlanEndDateFormProvider
 import models.{Mode, PlanStartDateDetails}
 import navigation.Navigator
 import pages.{PlanEndDatePage, PlanStartDatePage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
 import repositories.SessionRepository
@@ -43,7 +44,8 @@ class PlanEndDateController @Inject() (
   view: PlanEndDateView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     request.userAnswers.get(PlanStartDatePage) match {
@@ -86,7 +88,8 @@ class PlanEndDateController @Inject() (
               }
             )
 
-        case None =>
+        case _ =>
+          logger.warn(s"Missing start date from session")
           Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }

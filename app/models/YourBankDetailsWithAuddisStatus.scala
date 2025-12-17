@@ -32,7 +32,6 @@ object YourBankDetailsWithAuddisStatus extends Logging {
   implicit val format: OFormat[YourBankDetailsWithAuddisStatus] = Json.format
 
   def toModelWithAuddisStatus(yourBankDetails: YourBankDetails, auddisStatus: Boolean, accountVerified: Boolean): YourBankDetailsWithAuddisStatus = {
-    logger.debug(s"***** Auddis Flag: $auddisStatus")
     YourBankDetailsWithAuddisStatus(
       accountHolderName = yourBankDetails.accountHolderName,
       sortCode          = yourBankDetails.sortCode,

@@ -58,7 +58,6 @@ class BankDetailsCheckYourAnswerController @Inject() (
   val form: Form[Boolean] = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    logger.debug("Display bank details confirmation page")
     val preparedForm = request.userAnswers.get(BankDetailsCheckYourAnswerPage) match {
       case None        => form
       case Some(value) => form.fill(value)
@@ -73,7 +72,7 @@ class BankDetailsCheckYourAnswerController @Inject() (
 
       generateMacFromAnswers(request.userAnswers, macGenerator, appConfig.bacsNumber) match {
         case Some(mac) =>
-          logger.debug(s"Generated MAC successfully")
+          logger.debug(s"MAC Generation successful")
 
           for {
             updatedAnswers <- Future.fromTry(

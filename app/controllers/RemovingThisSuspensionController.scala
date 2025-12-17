@@ -60,7 +60,7 @@ class RemovingThisSuspensionController @Inject() (
       request.userAnswers.get(RemovingThisSuspensionConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
-      logger.warn("Attempt to load  Removing this suspension confirmation; redirecting to Page Not Found.")
+      logger.warn("Attempt to load  Removing this suspension confirmation; redirecting to Page Not Found")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
       if (nddsService.suspendPaymentPlanGuard(request.userAnswers)) {
@@ -101,11 +101,9 @@ class RemovingThisSuspensionController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
-
       val ua = request.userAnswers
 
       if (nddsService.suspendPaymentPlanGuard(ua)) {
-
         (ua.get(PaymentPlanDetailsQuery), ua.get(DirectDebitReferenceQuery), ua.get(PaymentPlanReferenceQuery)) match {
           case (Some(planDetails), Some(ddiReference), Some(paymentPlanReference)) =>
             val planDetail = planDetails.paymentPlanDetails
@@ -122,38 +120,25 @@ class RemovingThisSuspensionController @Inject() (
                   ),
                 value =>
                   value match {
-
                     case false =>
                       Future.successful(Redirect(routes.PaymentPlanDetailsController.onPageLoad()))
-
                     case true =>
                       ua.get(queries.DirectDebitReferenceQuery) match {
                         case Some(ddiReference) =>
                           val chrisRequest = removeSuspensionChrisSubmissionRequest(ua, ddiReference)
                           nddsService.submitChrisData(chrisRequest).flatMap { success =>
                             if (success) {
-                              logger.info(s"CHRIS submission successful for removing suspension [DDI Ref: $ddiReference]")
-
                               for {
                                 updatedAnswers <- Future.fromTry(ua.set(RemovingThisSuspensionPage, value))
                                 updatedAnswers <- Future.fromTry(updatedAnswers.set(RemovingThisSuspensionConfirmationPage, value))
                                 lockResponse   <- nddsService.lockPaymentPlan(ddiReference, paymentPlanReference)
                                 _              <- sessionRepository.set(updatedAnswers)
-                              } yield {
-                                if (lockResponse.lockSuccessful) {
-                                  logger.debug(s"Remove  payment plan lock returns: ${lockResponse.lockSuccessful}")
-                                } else {
-                                  logger.debug(s"Remove payment plan lock returns: ${lockResponse.lockSuccessful}")
-                                }
-
-                                Redirect(navigator.nextPage(RemovingThisSuspensionPage, mode, updatedAnswers))
-                              }
+                              } yield Redirect(navigator.nextPage(RemovingThisSuspensionPage, mode, updatedAnswers))
                             } else {
                               logger.error(s"CHRIS submission failed for removing suspension [DDI Ref: $ddiReference]")
                               Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
                             }
                           }
-
                         case None =>
                           logger.error("Missing DirectDebitReference in UserAnswers when trying to remove suspension")
                           Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
@@ -161,22 +146,8 @@ class RemovingThisSuspensionController @Inject() (
                   }
               )
 
-          case (_, Some(_), Some(_)) =>
-            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-
-          case (_, Some(_), None) =>
-            logger.error("Missing PaymentPlanReference in UserAnswers when trying to remove suspension payment plan")
-            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-
-          case (_, None, Some(_)) =>
-            logger.error("Missing DirectDebitReference in UserAnswers when trying to remove suspension payment plan")
-            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-
-          case (Some(_), None, None) =>
-            logger.error("Missing DirectDebitReference and/or PaymentPlanReference in UserAnswers when trying to remove suspension payment plan")
-            Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-
-          case _ =>
+          case (_, Some(_), Some(_)) | (_, Some(_), None) | (_, None, Some(_)) | (Some(_), None, None) | _ =>
+            logger.error("Missing required data from session when trying to remove suspension payment plan")
             Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         }
       } else {
