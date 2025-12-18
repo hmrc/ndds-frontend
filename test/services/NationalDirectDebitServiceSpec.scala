@@ -35,7 +35,7 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
@@ -2173,12 +2173,26 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
     "should return DuplicateCheckResponse = false when adding a plan with a existing plan" in {
 
+      val expectedUserAnswers = emptyUserAnswers
+        .set(DirectDebitReferenceQuery, "ddref")
+        .success
+        .value
+        .set(
+          ExistingDirectDebitIdentifierQuery,
+          NddDetails("ddref", LocalDateTime.now(), "bankSortCode", "bankAccountNumber", "bankAccountName", auDdisFlag = true, numberOfPayPlans = 1)
+        )
+        .success
+        .value
+
       when(mockCache.getDirectDebit(any())(any()))
         .thenReturn(Future.successful(nddResponse.directDebitList.head))
 
-      val result = service.isDuplicatePlanSetupAmendAndAddPaymentPlan(emptyUserAnswers, "userId", None, None).futureValue
+      val result = service.isDuplicatePlanSetupAmendAndAddPaymentPlan(expectedUserAnswers, "userId", None, None).futureValue
 
       result mustBe DuplicateCheckResponse(false)
+
+      verify(mockCache, atLeastOnce())
+        .getDirectDebit(any())(any())
     }
   }
 }
