@@ -1996,4 +1996,84 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       result mustBe false
     }
   }
+
+  "isSuspendStartDateValid" - {
+    "return true when start date is within all valid bounds" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.plusDays(1),
+        planStartDateOpt  = Some(today),
+        planEndDateOpt    = Some(today.plusMonths(2)),
+        earliestStartDate = today
+      )
+
+      result mustBe true
+    }
+
+    "return false when start date is before plan start date" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.minusDays(1),
+        planStartDateOpt  = Some(today),
+        planEndDateOpt    = None,
+        earliestStartDate = today.minusDays(5)
+      )
+
+      result mustBe false
+    }
+
+    "return false when start date is after plan end date" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.plusMonths(3),
+        planStartDateOpt  = Some(today),
+        planEndDateOpt    = Some(today.plusMonths(2)),
+        earliestStartDate = today
+      )
+
+      result mustBe false
+    }
+
+    "return false when start date is before earliest allowed date" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.minusDays(1),
+        planStartDateOpt  = None,
+        planEndDateOpt    = None,
+        earliestStartDate = today
+      )
+
+      result mustBe false
+    }
+
+    "return false when start date is after latest allowed date" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.plusMonths(6).plusDays(1),
+        planStartDateOpt  = None,
+        planEndDateOpt    = None,
+        earliestStartDate = today
+      )
+
+      result mustBe false
+    }
+
+    "return true when plan start and end dates are not provided" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.plusDays(1),
+        planStartDateOpt  = None,
+        planEndDateOpt    = None,
+        earliestStartDate = today
+      )
+
+      result mustBe true
+    }
+  }
 }
