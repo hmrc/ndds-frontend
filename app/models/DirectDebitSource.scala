@@ -55,7 +55,7 @@ object DirectDebitSource extends Enumerable.Implicits {
     OL
   )
 
-  val singlePlanDirectSources: Seq[DirectDebitSource] = Seq(
+  val singlePlanDirectDebitSources: Seq[DirectDebitSource] = Seq(
     CT,
     NIC,
     PAYE,
