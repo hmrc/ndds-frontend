@@ -56,13 +56,11 @@ class CheckYourSuspensionDetailsController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData) { implicit request =>
-      logger.debug("Display suspension details confirmation page")
-
       val alreadyConfirmed: Boolean =
         request.userAnswers.get(SuspensionDetailsCheckYourAnswerPage).contains(true)
 
       if (alreadyConfirmed) {
-        logger.warn("Attempt to load Suspension Details CYA after confirmation; redirecting to Page Not Found.")
+        logger.warn("Attempt to load Suspension Details CYA after confirmation; redirecting to Page Not Found")
         Redirect(routes.BackSubmissionController.onPageLoad())
       } else {
         val userAnswers = request.userAnswers
@@ -72,9 +70,7 @@ class CheckYourSuspensionDetailsController @Inject() (
           Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
         } else {
           val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-          logger.error(
-            s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType"
-          )
+          logger.error(s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType")
           Redirect(routes.SystemErrorController.onPageLoad())
         }
       }
@@ -90,29 +86,19 @@ class CheckYourSuspensionDetailsController @Inject() (
 
           nddService.submitChrisData(chrisRequest).flatMap { success =>
             if (success) {
-              logger.debug(s"CHRIS submission successful for suspend budgeting payment plan for DDI Ref [$ddiReference]")
               for {
                 lockResponse   <- nddService.lockPaymentPlan(ddiReference, paymentPlanReference)
                 updatedAnswers <- Future.fromTry(ua.set(SuspensionDetailsCheckYourAnswerPage, true))
                 _              <- sessionRepository.set(updatedAnswers)
-              } yield {
-                if (lockResponse.lockSuccessful) {
-                  logger.debug(s"Suspend payment plan lock returns: ${lockResponse.lockSuccessful}")
-                } else {
-                  logger.debug(s"Suspend payment plan lock returns: ${lockResponse.lockSuccessful}")
-                }
-                Redirect(navigator.nextPage(SuspensionDetailsCheckYourAnswerPage, mode, updatedAnswers))
-              }
+              } yield Redirect(navigator.nextPage(SuspensionDetailsCheckYourAnswerPage, mode, updatedAnswers))
             } else {
-              logger.error(s"CHRIS submission for suspend budgeting payment plan failed with DDI Ref [$ddiReference]")
-              Future.successful(
-                Redirect(routes.SystemErrorController.onPageLoad())
-              )
+              logger.error(s"CHRIS submission for suspend budgeting payment plan failed for DDI Ref [$ddiReference]")
+              Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
             }
           }
 
         case _ =>
-          logger.error("Missing DirectDebitReference and/or PaymentPlanReference  in UserAnswers when trying to suspend payment plan")
+          logger.error("Missing DirectDebitReference and/or PaymentPlanReference from UserAnswers when trying to suspend a payment plan")
           Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }

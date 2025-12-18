@@ -59,7 +59,7 @@ class PlanStartDateController @Inject() (
 
       answers.get(DirectDebitSourcePage) match {
         case Some(value)
-            if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) => {
+            if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) =>
           nddService.getEarliestPlanStartDate(request.userAnswers, request.userId) map { earliestPlanStartDate =>
             val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
             val form = formProvider(answers, earliestDate)
@@ -80,12 +80,8 @@ class PlanStartDateController @Inject() (
             logger.warn(s"Unexpected error: $e")
             Redirect(routes.SystemErrorController.onPageLoad())
           }
-        }
-        case None =>
-          logger.warn(s"DirectDebitSourcePage details missing from user answers")
-          Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
         case _ =>
-          logger.warn(s"DirectDebitSource is not mgd or sa or tc")
+          logger.warn(s"DirectDebitSource is missing or not MGD or SA or TC")
           Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
     }

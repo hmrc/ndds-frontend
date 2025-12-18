@@ -65,7 +65,7 @@ class CheckYourAnswersController @Inject() (
     val hasFourExtraNumbers = ua.get(TellAboutThisPaymentPage)
 
     if (confirmed) {
-      logger.warn("Attempt to access Check Your Answers confirmation; redirecting.")
+      logger.warn("Attempt to access Check Your Answers confirmation; redirecting to Page Not Found")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
       val showPlanEndDate = if (hasEndDate.contains(false)) { None }
@@ -201,13 +201,13 @@ class CheckYourAnswersController @Inject() (
     val maxDateForSinglePlan = LocalDate.now().plusYears(1)
     ua.get(PaymentDatePage) match {
       case None =>
-        logger.debug("You are not having correct data that needed for Single plan")
+        logger.warn("No valid data available for single payment plan")
         Left("PaymentDatePage missing in UserAnswers")
       case Some(paymentDate) =>
         val earliestDate = LocalDate.parse(earliest.date)
 
         if (paymentDate.enteredDate.isBefore(earliestDate)) {
-          logger.debug("You are not having correct data that needed for Single plan and final validation failed")
+          logger.warn("Payment date entered is before the earliest date")
           Left(s"Payment date ${paymentDate.enteredDate} is before earliest allowed date $earliestDate")
         } else if (paymentDate.enteredDate.isAfter(maxDateForSinglePlan)) {
           Left(s"Payment date ${paymentDate.enteredDate} is after maximum allowed date $maxDateForSinglePlan")
@@ -230,18 +230,18 @@ class CheckYourAnswersController @Inject() (
 
     maybeStart match {
       case None =>
-        logger.debug("You are not having correct data that needed for budgeting plan")
+        logger.debug("No valid data available for budget payment plan")
         Left("PlanStartDatePage missing in UserAnswers")
       case Some(start) if start.isBefore(earliest) =>
-        logger.debug("You are not having correct data that needed for budgeting plan and final validation failed")
+        logger.warn("Start date entered is before the earliest date")
         Left(s"Start date $start is before earliest allowed date $earliest")
       case Some(start) if start.isAfter(maxDate) =>
-        logger.debug("You are not having correct data that needed for budgeting plan and start date is after the max allowed date")
+        logger.warn("Start date entered is after the maximum allowed date")
         Left(s"Start date $start is after maximum allowed date $maxDate")
       case Some(start) =>
         maybeEnd match {
           case Some(end) if end.isBefore(start) =>
-            logger.debug("You are not having correct data that needed for budgeting plan and final validation failed with end date before start date")
+            logger.warn("End date is before the start date")
             Left(s"End date $end is before start date $start")
 
           case _ =>
@@ -259,7 +259,7 @@ class CheckYourAnswersController @Inject() (
     ua.get(PlanStartDatePage).map(_.enteredDate) match {
 
       case None =>
-        logger.debug("You are not have correct data that needed for variable/TC plan")
+        logger.warn("No valid date available for variable/TC plan")
         Left("PlanStartDatePage missing in UserAnswers")
       case Some(start) =>
         val earliestDate = LocalDate.parse(earliest.date)
@@ -267,13 +267,14 @@ class CheckYourAnswersController @Inject() (
         val maxDate = today.plusDays(TimeToPayMaxDays)
 
         if (start.isBefore(earliestDate)) {
-          logger.debug("You are not have correct data that needed for variable plan and final validation failed")
+          logger.warn("Start date entered is before the earliest date")
           Left(s"Start date $start is before earliest allowed date for variable/TC plan $earliestDate")
         } else if (start.isAfter(maxDate)) {
-          logger.debug("You are not have correct data that needed for variable plan and final validation failed")
+          logger.warn("Start date entered is after the maximum allowed date")
           Left(s"Start date $start is after maximum allowed date $maxDate")
-
-        } else Right(())
+        } else {
+          Right(())
+        }
     }
   }
 
@@ -313,7 +314,6 @@ class CheckYourAnswersController @Inject() (
           val maybeMac2 = generateMacFromAnswers(ua, macGenerator, appConfig.bacsNumber)
           (ua.get(pages.MacValuePage), maybeMac2) match {
             case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
-              logger.debug("MAC validation successful")
               nddService
                 .generateNewDdiReference(required(PaymentReferencePage)(ua))
                 .map(ref => Right(ref.ddiRefNumber))

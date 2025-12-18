@@ -53,7 +53,6 @@ case class BarsConnector @Inject() (
 
   def verify(endpoint: String, requestJson: JsValue)(implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
     val url = s"$barsBaseUrl/verify/$endpoint"
-    logger.debug(s"Account validation called with $url")
     logger.debug(
       s"""|
         |Account Validation Request:

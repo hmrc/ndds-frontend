@@ -140,7 +140,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   }
 
   private[services] def calculateOffset(auddisStatus: Boolean): Int = {
-    logger.debug(s"Calculate offset Auddis flag: $auddisStatus")
     val dynamicDelay = if (auddisStatus) {
       config.paymentDelayDynamicAuddisEnabled
     } else {
@@ -232,22 +231,14 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   def isTwoDaysPriorPaymentDate(planStarDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now(clock).toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2)).map { futureWorkingDays =>
-      {
-        val twoDaysPrior = planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
-        logger.debug(s"twoDaysPrior flag is set to: $twoDaysPrior")
-        twoDaysPrior
-      }
+      planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
     }
   }
 
   def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now(clock).toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map { futureWorkingDays =>
-      {
-        val isThreeDaysPrior = planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
-        logger.debug(s"planEndWithinThreeDays flag is set to: $isThreeDaysPrior")
-        isThreeDaysPrior
-      }
+      planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
     }
   }
 
@@ -306,7 +297,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     today: LocalDate,
     frequency: Frequency
   )(implicit hc: HeaderCarrier): Future[LocalDate] = {
-
     val daysInWeek = 7
 
     // map enum to days per payment cycle
@@ -314,8 +304,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       case Frequency.Weekly      => 7
       case Frequency.Fortnightly => 14
       case Frequency.FourWeekly  => 28
-      case other =>
-        throw new IllegalArgumentException(s"Invalid weekly frequency: $other")
+      case other                 => throw new IllegalArgumentException(s"Invalid weekly frequency: $other")
     }
 
     // Step 1 – find days difference
@@ -507,7 +496,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
           nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
         } else {
-          logger.debug("There is only 1 payment plan so not checking duplicate as in no RDS Call")
+          logger.debug("There is only 1 payment plan so no duplicate check and DB call")
           Future.successful(DuplicateCheckResponse(false))
         }
       case None =>

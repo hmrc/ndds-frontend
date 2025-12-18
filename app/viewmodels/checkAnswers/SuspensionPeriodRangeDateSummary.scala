@@ -37,7 +37,6 @@ import models.{CheckMode, NormalMode, SuspensionPeriodRange, UserAnswers}
 import pages.SuspensionPeriodRangeDatePage
 import play.api.i18n.Messages
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
-import utils.Constants
 import utils.DateTimeFormats.formattedDateTimeShort
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
