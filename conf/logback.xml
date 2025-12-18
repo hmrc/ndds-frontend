@@ -24,7 +24,7 @@
     <logger name="com.google.inject" level="INFO"/>
     <logger name="uk.gov" level="INFO"/>
     <logger name="application" level="INFO"/>
-    <logger name="connector" level="TRACE">
+    <logger name="connectors" level="INFO">
         <appender-ref ref="STDOUT"/>
     </logger>
     <logger name="org.asynchttpclient.netty.channel" level="WARN"/>
@@ -32,7 +32,7 @@
     <logger name="play.core.netty.utils.ServerCookieDecoder" level="WARN"/>
     <logger name="org.asynchttpclient.netty.handler.HttpHandler" level="WARN"/>
 
-    <root level="ERROR">
+    <root level="DEBUG">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>

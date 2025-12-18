@@ -72,8 +72,6 @@ class BankDetailsCheckYourAnswerController @Inject() (
 
       generateMacFromAnswers(request.userAnswers, macGenerator, appConfig.bacsNumber) match {
         case Some(mac) =>
-          logger.debug(s"MAC Generation successful")
-
           for {
             updatedAnswers <- Future.fromTry(
                                 request.userAnswers

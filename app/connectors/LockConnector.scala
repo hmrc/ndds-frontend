@@ -51,19 +51,7 @@ class LockConnector @Inject() (config: ServicesConfig, http: HttpClientV2)(impli
            |""".stripMargin))
       .execute[Either[UpstreamErrorResponse, LockResponse]]
       .flatMap {
-        case Right(resp) =>
-          logger.debug(
-            s"""LockService Results:
-               |  . identifier             = $credId
-               |  • isLocked               = ${resp.isLocked}
-               |  • unverifiable           = ${resp.unverifiable.getOrElse(false)}
-               |  • verifyCalls            = ${resp.verifyCalls}
-               |  . createdAt              = ${resp.createdAt}
-               |  . lastUpdated            = ${resp.lastUpdated}
-               |  • lockoutExpiryDateTime  = ${resp.lockoutExpiryDateTime.map(_.toString).getOrElse("n/a")}
-               |""".stripMargin
-          )
-          Future.successful(resp)
+        case Right(resp) => Future.successful(resp)
         case Left(errorResponse) =>
           logger.error(s"Error connecting to Lock service - Status: ${errorResponse.statusCode} Error: ${errorResponse.message}")
           Future.failed(errorResponse)
