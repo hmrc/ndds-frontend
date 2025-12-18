@@ -2162,4 +2162,23 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       result mustBe true
     }
   }
+
+  "isDuplicatePlanSetupAmendAndAddPaymentPlan" - {
+    "should return DuplicateCheckResponse = false when during setup journey" in {
+
+      val result = service.isDuplicatePlanSetupAmendAndAddPaymentPlan(emptyUserAnswers, "userId", None, None).futureValue
+
+      result mustBe DuplicateCheckResponse(false)
+    }
+
+    "should return DuplicateCheckResponse = false when adding a plan with a existing plan" in {
+
+      when(mockCache.getDirectDebit(any())(any()))
+        .thenReturn(Future.successful(nddResponse.directDebitList.head))
+
+      val result = service.isDuplicatePlanSetupAmendAndAddPaymentPlan(emptyUserAnswers, "userId", None, None).futureValue
+
+      result mustBe DuplicateCheckResponse(false)
+    }
+  }
 }

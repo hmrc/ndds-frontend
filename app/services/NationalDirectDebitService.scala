@@ -589,12 +589,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     (directDebitRefOpt, existingDdIdentifier) match {
       // Add Payment Plan journey
       case (Some(directDebitRef), Some(_)) =>
-        checkDuplicateForPaymentPlan(directDebitRef, userAnswers, userId, paymentAmount, paymentStartDate, isAmendPlan = false)
-
-      // Amend Payment Plan journey
-      case (Some(directDebitRef), None) =>
-        checkDuplicateForPaymentPlan(directDebitRef, userAnswers, userId, paymentAmount, paymentStartDate, isAmendPlan = true)
-
+        checkDuplicateForPaymentPlan(directDebitRef, userAnswers, userId, paymentAmount, paymentStartDate)
       // Setup journey and duplicate check skipped
       case _ =>
         Future.successful(DuplicateCheckResponse(false))
@@ -606,8 +601,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     userAnswers: UserAnswers,
     userId: String,
     paymentAmount: Option[BigDecimal],
-    paymentStartDate: Option[LocalDate],
-    isAmendPlan: Boolean
+    paymentStartDate: Option[LocalDate]
   )(implicit hc: HeaderCarrier): Future[DuplicateCheckResponse] = {
     directDebitCache
       .getDirectDebit(directDebitRef)(userId)
@@ -615,7 +609,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
         if (debit.numberOfPayPlans <= 1) {
           Future.successful(DuplicateCheckResponse(false))
         } else {
-          val request = PaymentPlanDuplicateCheckRequest.build(userAnswers, paymentAmount, paymentStartDate, isAmendPlan)
+          val request = PaymentPlanDuplicateCheckRequest.build(userAnswers, paymentAmount, paymentStartDate)
           nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
         }
       }
