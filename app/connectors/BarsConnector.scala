@@ -53,35 +53,13 @@ case class BarsConnector @Inject() (
 
   def verify(endpoint: String, requestJson: JsValue)(implicit hc: HeaderCarrier): Future[BarsVerificationResponse] = {
     val url = s"$barsBaseUrl/verify/$endpoint"
-    logger.debug(
-      s"""|
-        |Account Validation Request:
-          |${Json.prettyPrint(requestJson)}
-          |""".stripMargin
-    )
 
     http
       .post(url"$url")
       .withBody(requestJson)
       .execute[Either[UpstreamErrorResponse, BarsVerificationResponse]]
       .flatMap {
-        case Right(verificationData) =>
-          logger.debug(
-            s"""|
-              |Account Validation Results:
-                |  • accountNumberIsWellFormatted = ${verificationData.accountNumberIsWellFormatted}
-                |  • sortCodeIsPresentOnEISCD     = ${verificationData.sortCodeIsPresentOnEISCD}
-                |  • sortCodeBankName             = ${verificationData.sortCodeBankName.getOrElse("N/A")}
-                |  • accountExists                = ${verificationData.accountExists}
-                |  • nameMatches                  = ${verificationData.nameMatches}
-                |  • sortCodeSupportsDirectDebit  = ${verificationData.sortCodeSupportsDirectDebit}
-                |  • sortCodeSupportsDirectCredit = ${verificationData.sortCodeSupportsDirectCredit}
-                |  • nonStandardAccountDetailsReq = ${verificationData.nonStandardAccountDetailsRequiredForBacs.getOrElse("N/A")}
-                |  • iban                         = ${verificationData.iban.getOrElse("N/A")}
-                |  • accountName                  = ${verificationData.accountName.getOrElse("N/A")}
-                |""".stripMargin
-          )
-          Future.successful(verificationData)
+        case Right(verificationData) => Future.successful(verificationData)
 
         case Left(errorResponse) =>
           logger.warn(s"BARS verification failed with UpstreamErrorResponse: $errorResponse")

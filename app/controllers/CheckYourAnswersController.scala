@@ -230,7 +230,7 @@ class CheckYourAnswersController @Inject() (
 
     maybeStart match {
       case None =>
-        logger.debug("No valid data available for budget payment plan")
+        logger.warn("No valid data available for budget payment plan")
         Left("PlanStartDatePage missing in UserAnswers")
       case Some(start) if start.isBefore(earliest) =>
         logger.warn("Start date entered is before the earliest date")
@@ -307,7 +307,7 @@ class CheckYourAnswersController @Inject() (
       ua.get(ExistingDirectDebitIdentifierQuery) match {
         // Existing direct debit: skip MAC and skip generateNewDdiReference
         case Some(existingDirectDebit) =>
-          logger.debug(s"Using existing DDI reference: ${existingDirectDebit.ddiRefNumber}")
+          logger.info(s"Using existing DDI reference: ${existingDirectDebit.ddiRefNumber}")
           Future.successful(Right(existingDirectDebit.ddiRefNumber))
         // New direct debit: validate MAC and generate new DDI
         case None =>
