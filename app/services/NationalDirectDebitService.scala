@@ -496,7 +496,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
           nddConnector.isDuplicatePaymentPlan(request.directDebitReference, request)
         } else {
-          logger.debug("There is only 1 payment plan so no duplicate check and DB call")
+          logger.warn("There is only 1 payment plan so no duplicate check and DB call needed")
           Future.successful(DuplicateCheckResponse(false))
         }
       case None =>
