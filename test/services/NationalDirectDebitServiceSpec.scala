@@ -23,7 +23,7 @@ import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.*
-import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, NddDetails, NddResponse, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatest.RecoverMethods.recoverToExceptionIf
@@ -2193,6 +2193,53 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       verify(mockCache, atLeastOnce())
         .getDirectDebit(any())(any())
+    }
+
+    "should return DuplicateCheckResponse = true when adding a plan with more than one plan" in {
+
+      val expectedUserAnswers = emptyUserAnswers
+        .set(DirectDebitReferenceQuery, "ddref")
+        .success
+        .value
+        .set(
+          ExistingDirectDebitIdentifierQuery,
+          NddDetails("ddref", LocalDateTime.now(), "bankSortCode", "bankAccountNumber", "bankAccountName", auDdisFlag = true, numberOfPayPlans = 2)
+        )
+        .success
+        .value
+        .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
+        .success
+        .value
+        .set(DirectDebitSourcePage, DirectDebitSource.TC)
+        .success
+        .value
+        .set(PaymentReferencePage, "paymentReference")
+        .success
+        .value
+        .set(PaymentReferencePage, "paymentReference")
+        .success
+        .value
+        .set(PaymentAmountPage, 123)
+        .success
+        .value
+        .set(PaymentDatePage, PaymentDateDetails(LocalDate.now(), "2025-12-18"))
+        .success
+        .value
+
+      when(mockCache.getDirectDebit(any())(any()))
+        .thenReturn(Future.successful(nddResponse.directDebitList.head.copy(numberOfPayPlans = 2)))
+      when(mockConnector.isDuplicatePaymentPlan(any(), any())(any()))
+        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+
+      val result = service.isDuplicatePlanSetupAmendAndAddPaymentPlan(expectedUserAnswers, "userId", None, None).futureValue
+
+      result mustBe DuplicateCheckResponse(false)
+
+      verify(mockCache, atLeastOnce())
+        .getDirectDebit(any())(any())
+
+      verify(mockConnector, atLeastOnce())
+        .isDuplicatePaymentPlan(any(), any())(any())
     }
   }
 }
