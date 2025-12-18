@@ -359,6 +359,50 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       }
     }
 
+    "isSinglePaymentPlanDirectDebitSource" - {
+      "must return true when DirectDebitSource is CT" in {
+        val userAnswers =
+          emptyUserAnswers.set(DirectDebitSourcePage, DirectDebitSource.CT).success.value
+
+        service.isSinglePaymentPlanDirectDebitSource(userAnswers) mustBe true
+      }
+
+      "must return true when DirectDebitSource is NIC" in {
+        val userAnswers =
+          emptyUserAnswers.set(DirectDebitSourcePage, DirectDebitSource.NIC).success.value
+
+        service.isSinglePaymentPlanDirectDebitSource(userAnswers) mustBe true
+      }
+
+      "must return true when DirectDebitSource is PAYE" in {
+        val userAnswers =
+          emptyUserAnswers.set(DirectDebitSourcePage, DirectDebitSource.PAYE).success.value
+
+        service.isSinglePaymentPlanDirectDebitSource(userAnswers) mustBe true
+      }
+
+      "must return true when DirectDebitSource is SDLT" in {
+        val userAnswers =
+          emptyUserAnswers.set(DirectDebitSourcePage, DirectDebitSource.SDLT).success.value
+
+        service.isSinglePaymentPlanDirectDebitSource(userAnswers) mustBe true
+      }
+
+      "must return true when DirectDebitSource is VAT" in {
+        val userAnswers =
+          emptyUserAnswers.set(DirectDebitSourcePage, DirectDebitSource.VAT).success.value
+
+        service.isSinglePaymentPlanDirectDebitSource(userAnswers) mustBe true
+      }
+
+      "must return true when DirectDebitSource is OL" in {
+        val userAnswers =
+          emptyUserAnswers.set(DirectDebitSourcePage, DirectDebitSource.OL).success.value
+
+        service.isSinglePaymentPlanDirectDebitSource(userAnswers) mustBe true
+      }
+    }
+
     "generateNewDdiReference" - {
       "must successfully return the DDI Reference Number" in {
         when(mockConnector.generateNewDdiReference(any())(any()))
