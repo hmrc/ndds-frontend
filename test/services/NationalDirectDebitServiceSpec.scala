@@ -26,6 +26,7 @@ import models.responses.*
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
+import org.scalatest.RecoverMethods.recoverToExceptionIf
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.{should, shouldBe}
 import org.scalatestplus.mockito.MockitoSugar
@@ -359,6 +360,13 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       }
     }
 
+    "isVariablePaymentPlan" - {
+      "must return true for VariablePaymentPlan" in {
+        val result = service.isVariablePaymentPlan(PaymentPlanType.VariablePaymentPlan.toString)
+        result mustBe true
+      }
+    }
+
     "isSinglePaymentPlanDirectDebitSource" - {
       "must return true when DirectDebitSource is CT" in {
         val userAnswers =
@@ -597,6 +605,17 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           paymentPlanCount  = 0,
           paymentPlanList   = Seq.empty
         )
+      }
+
+      "throw NoSuchElementException when no data in cache" in {
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(Seq.empty))
+
+        recoverToExceptionIf[NoSuchElementException] {
+          service.retrieveDirectDebitPaymentPlans("userId", "ddReference")
+        }.map { ex =>
+          ex.getMessage mustBe "No direct debit cache found for Id userId"
+        }
       }
     }
 
