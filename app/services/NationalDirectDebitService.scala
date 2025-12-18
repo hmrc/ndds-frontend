@@ -18,7 +18,7 @@ package services
 
 import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
-import models.DirectDebitSource.{MGD, SA, TC}
+import models.DirectDebitSource.{MGD, SA, TC, singlePlanDirectDebitSources}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.requests.*
 import models.responses.*
@@ -162,6 +162,9 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   def isVariablePaymentPlan(planType: String): Boolean =
     planType == PaymentPlanType.VariablePaymentPlan.toString
 
+  def isSinglePaymentPlanDirectDebitSource(userAnswers: UserAnswers): Boolean = {
+    userAnswers.get(DirectDebitSourcePage).exists(singlePlanDirectDebitSources.contains)
+  }
   def generateNewDdiReference(paymentReference: String)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
     nddConnector.generateNewDdiReference(GenerateDdiRefRequest(paymentReference = paymentReference))
   }
