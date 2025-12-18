@@ -2076,4 +2076,90 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       result mustBe true
     }
   }
+
+  "isSuspendEndDateValid" - {
+    "return true when end date is on or after start date and within max months and before plan end date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(2),
+        startDate      = startDate,
+        planEndDateOpt = Some(startDate.plusMonths(3))
+      )
+
+      result mustBe true
+    }
+
+    "return true when end date equals start date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate,
+        startDate      = startDate,
+        planEndDateOpt = None
+      )
+
+      result mustBe true
+    }
+
+    "return false when end date is before start date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.minusDays(1),
+        startDate      = startDate,
+        planEndDateOpt = None
+      )
+
+      result mustBe false
+    }
+
+    "return false when end date is after the max allowed months from start date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(6).plusDays(1),
+        startDate      = startDate,
+        planEndDateOpt = None
+      )
+
+      result mustBe false
+    }
+
+    "return false when end date is after plan end date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(2),
+        startDate      = startDate,
+        planEndDateOpt = Some(startDate.plusMonths(1))
+      )
+
+      result mustBe false
+    }
+
+    "return true when plan end date is not provided and other conditions are satisfied" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(1),
+        startDate      = startDate,
+        planEndDateOpt = None
+      )
+
+      result mustBe true
+    }
+
+    "return true when end date equals plan end date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(3),
+        startDate      = startDate,
+        planEndDateOpt = Some(startDate.plusMonths(3))
+      )
+
+      result mustBe true
+    }
+  }
 }
