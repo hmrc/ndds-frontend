@@ -617,6 +617,49 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           ex.getMessage mustBe "No direct debit cache found for Id userId"
         }
       }
+
+      "throw NoSuchElementException when direct debit reference is does not exist" in {
+        val bankAccountNumber = "12345678"
+        val bankAccountName = "MyBankAcc"
+        val bankSortCode = "123456"
+        val ddReference = "122222"
+
+        val ddListResponse: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 1,
+              paymentPlansList = Some(
+                Seq(
+                  NddPaymentPlan(
+                    scheduledPaymentAmount = Some(100.0),
+                    planRefNumber          = "planRefNumber",
+                    planType               = "budgetPaymentPlan",
+                    paymentReference       = "1400256374K",
+                    hodService             = "sdlt",
+                    submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+                  )
+                )
+              )
+            )
+          )
+        )
+
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(ddListResponse.directDebitList))
+
+        recoverToExceptionIf[NoSuchElementException] {
+          service.retrieveDirectDebitPaymentPlans("userId", "ddReference")
+        }.map { ex =>
+          ex.getMessage mustBe "No direct debit found for directDebitReference ddReference in Id userId"
+        }
+      }
     }
 
     "amendPaymentPlanGuard" - {
