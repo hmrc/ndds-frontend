@@ -348,6 +348,30 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         }
       }
 
+      "must redirect to System Error for a GET when amend guard failed" in {
+        val userAnswers = UserAnswers(userAnswersId)
+          .set(AmendPaymentPlanConfirmationPage, false)
+          .success
+          .value
+
+        val application =
+          applicationBuilder(userAnswers = Some(userAnswers))
+            .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
+            .build()
+
+        running(application) {
+
+          when(mockNddService.amendPaymentPlanGuard(any()))
+            .thenReturn(false)
+          val controller = application.injector.instanceOf[AmendPaymentPlanConfirmationController]
+          val request = FakeRequest(GET, "/check-amendment-details")
+          val result = controller.onPageLoad(NormalMode)(request)
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
+        }
+      }
+
     }
 
     "onSubmit" - {

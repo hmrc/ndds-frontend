@@ -23,9 +23,10 @@ import controllers.routes
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.responses.*
-import models.{DirectDebitSource, NddDetails, NddResponse, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
+import models.{DirectDebitSource, NddDetails, NddResponse, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
+import org.scalatest.RecoverMethods.recoverToExceptionIf
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers.{should, shouldBe}
 import org.scalatestplus.mockito.MockitoSugar
@@ -34,7 +35,7 @@ import pages.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.DirectDebitDetailsData
@@ -359,6 +360,13 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       }
     }
 
+    "isVariablePaymentPlan" - {
+      "must return true for VariablePaymentPlan" in {
+        val result = service.isVariablePaymentPlan(PaymentPlanType.VariablePaymentPlan.toString)
+        result mustBe true
+      }
+    }
+
     "isSinglePaymentPlanDirectDebitSource" - {
       "must return true when DirectDebitSource is CT" in {
         val userAnswers =
@@ -597,6 +605,60 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           paymentPlanCount  = 0,
           paymentPlanList   = Seq.empty
         )
+      }
+
+      "throw NoSuchElementException when no data in cache" in {
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(Seq.empty))
+
+        recoverToExceptionIf[NoSuchElementException] {
+          service.retrieveDirectDebitPaymentPlans("userId", "ddReference")
+        }.map { ex =>
+          ex.getMessage mustBe "No direct debit cache found for Id userId"
+        }
+      }
+
+      "throw NoSuchElementException when direct debit reference is does not exist" in {
+        val bankAccountNumber = "12345678"
+        val bankAccountName = "MyBankAcc"
+        val bankSortCode = "123456"
+        val ddReference = "122222"
+
+        val ddListResponse: NddResponse = NddResponse(
+          directDebitCount = 1,
+          directDebitList = Seq(
+            NddDetails(
+              ddiRefNumber       = ddReference,
+              submissionDateTime = LocalDateTime.parse("2024-02-01T00:00:00"),
+              bankSortCode       = bankSortCode,
+              bankAccountNumber  = bankAccountNumber,
+              bankAccountName    = bankAccountName,
+              auDdisFlag         = false,
+              numberOfPayPlans   = 1,
+              paymentPlansList = Some(
+                Seq(
+                  NddPaymentPlan(
+                    scheduledPaymentAmount = Some(100.0),
+                    planRefNumber          = "planRefNumber",
+                    planType               = "budgetPaymentPlan",
+                    paymentReference       = "1400256374K",
+                    hodService             = "sdlt",
+                    submissionDateTime     = LocalDateTime.parse("2024-02-01T00:00:00")
+                  )
+                )
+              )
+            )
+          )
+        )
+
+        when(mockCache.retrieveCache(any()))
+          .thenReturn(Future.successful(ddListResponse.directDebitList))
+
+        recoverToExceptionIf[NoSuchElementException] {
+          service.retrieveDirectDebitPaymentPlans("userId", "ddReference")
+        }.map { ex =>
+          ex.getMessage mustBe "No direct debit found for directDebitReference ddReference in Id userId"
+        }
       }
     }
 
@@ -1975,6 +2037,252 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     "must return false if payment plan is not set" in {
       val result = service.suspendPaymentPlanGuard(emptyUserAnswers)
       result mustBe false
+    }
+  }
+
+  "isSuspendStartDateValid" - {
+    "return true when start date is within all valid bounds" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.plusDays(1),
+        planStartDateOpt  = Some(today),
+        planEndDateOpt    = Some(today.plusMonths(2)),
+        earliestStartDate = today
+      )
+
+      result mustBe true
+    }
+
+    "return false when start date is before plan start date" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.minusDays(1),
+        planStartDateOpt  = Some(today),
+        planEndDateOpt    = None,
+        earliestStartDate = today.minusDays(5)
+      )
+
+      result mustBe false
+    }
+
+    "return false when start date is after plan end date" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.plusMonths(3),
+        planStartDateOpt  = Some(today),
+        planEndDateOpt    = Some(today.plusMonths(2)),
+        earliestStartDate = today
+      )
+
+      result mustBe false
+    }
+
+    "return false when start date is before earliest allowed date" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.minusDays(1),
+        planStartDateOpt  = None,
+        planEndDateOpt    = None,
+        earliestStartDate = today
+      )
+
+      result mustBe false
+    }
+
+    "return false when start date is after latest allowed date" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.plusMonths(6).plusDays(1),
+        planStartDateOpt  = None,
+        planEndDateOpt    = None,
+        earliestStartDate = today
+      )
+
+      result mustBe false
+    }
+
+    "return true when plan start and end dates are not provided" in {
+      val today = LocalDate.now()
+
+      val result = service.isSuspendStartDateValid(
+        startDate         = today.plusDays(1),
+        planStartDateOpt  = None,
+        planEndDateOpt    = None,
+        earliestStartDate = today
+      )
+
+      result mustBe true
+    }
+  }
+
+  "isSuspendEndDateValid" - {
+    "return true when end date is on or after start date and within max months and before plan end date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(2),
+        startDate      = startDate,
+        planEndDateOpt = Some(startDate.plusMonths(3))
+      )
+
+      result mustBe true
+    }
+
+    "return true when end date equals start date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate,
+        startDate      = startDate,
+        planEndDateOpt = None
+      )
+
+      result mustBe true
+    }
+
+    "return false when end date is before start date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.minusDays(1),
+        startDate      = startDate,
+        planEndDateOpt = None
+      )
+
+      result mustBe false
+    }
+
+    "return false when end date is after the max allowed months from start date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(6).plusDays(1),
+        startDate      = startDate,
+        planEndDateOpt = None
+      )
+
+      result mustBe false
+    }
+
+    "return false when end date is after plan end date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(2),
+        startDate      = startDate,
+        planEndDateOpt = Some(startDate.plusMonths(1))
+      )
+
+      result mustBe false
+    }
+
+    "return true when plan end date is not provided and other conditions are satisfied" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(1),
+        startDate      = startDate,
+        planEndDateOpt = None
+      )
+
+      result mustBe true
+    }
+
+    "return true when end date equals plan end date" in {
+      val startDate = LocalDate.of(2025, 7, 1)
+
+      val result = service.isSuspendEndDateValid(
+        endDate        = startDate.plusMonths(3),
+        startDate      = startDate,
+        planEndDateOpt = Some(startDate.plusMonths(3))
+      )
+
+      result mustBe true
+    }
+  }
+
+  "isDuplicatePlanSetupAmendAndAddPaymentPlan" - {
+    "should return DuplicateCheckResponse = false when during setup journey" in {
+
+      val result = service.isDuplicatePlanSetupAmendAndAddPaymentPlan(emptyUserAnswers, "userId", None, None).futureValue
+
+      result mustBe DuplicateCheckResponse(false)
+    }
+
+    "should return DuplicateCheckResponse = false when adding a plan with a existing plan" in {
+
+      val expectedUserAnswers = emptyUserAnswers
+        .set(DirectDebitReferenceQuery, "ddref")
+        .success
+        .value
+        .set(
+          ExistingDirectDebitIdentifierQuery,
+          NddDetails("ddref", LocalDateTime.now(), "bankSortCode", "bankAccountNumber", "bankAccountName", auDdisFlag = true, numberOfPayPlans = 1)
+        )
+        .success
+        .value
+
+      when(mockCache.getDirectDebit(any())(any()))
+        .thenReturn(Future.successful(nddResponse.directDebitList.head))
+
+      val result = service.isDuplicatePlanSetupAmendAndAddPaymentPlan(expectedUserAnswers, "userId", None, None).futureValue
+
+      result mustBe DuplicateCheckResponse(false)
+
+      verify(mockCache, atLeastOnce())
+        .getDirectDebit(any())(any())
+    }
+
+    "should return DuplicateCheckResponse = true when adding a plan with more than one plan" in {
+
+      val expectedUserAnswers = emptyUserAnswers
+        .set(DirectDebitReferenceQuery, "ddref")
+        .success
+        .value
+        .set(
+          ExistingDirectDebitIdentifierQuery,
+          NddDetails("ddref", LocalDateTime.now(), "bankSortCode", "bankAccountNumber", "bankAccountName", auDdisFlag = true, numberOfPayPlans = 2)
+        )
+        .success
+        .value
+        .set(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
+        .success
+        .value
+        .set(DirectDebitSourcePage, DirectDebitSource.TC)
+        .success
+        .value
+        .set(PaymentReferencePage, "paymentReference")
+        .success
+        .value
+        .set(PaymentReferencePage, "paymentReference")
+        .success
+        .value
+        .set(PaymentAmountPage, 123)
+        .success
+        .value
+        .set(PaymentDatePage, PaymentDateDetails(LocalDate.now(), "2025-12-18"))
+        .success
+        .value
+
+      when(mockCache.getDirectDebit(any())(any()))
+        .thenReturn(Future.successful(nddResponse.directDebitList.head.copy(numberOfPayPlans = 2)))
+      when(mockConnector.isDuplicatePaymentPlan(any(), any())(any()))
+        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+
+      val result = service.isDuplicatePlanSetupAmendAndAddPaymentPlan(expectedUserAnswers, "userId", None, None).futureValue
+
+      result mustBe DuplicateCheckResponse(false)
+
+      verify(mockCache, atLeastOnce())
+        .getDirectDebit(any())(any())
+
+      verify(mockConnector, atLeastOnce())
+        .isDuplicatePaymentPlan(any(), any())(any())
     }
   }
 }

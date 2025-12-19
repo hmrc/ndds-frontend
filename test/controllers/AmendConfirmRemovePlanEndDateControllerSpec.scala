@@ -235,10 +235,42 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
     }
 
     "must redirect to System Error for a GET if no existing data is found" in {
-      val application = applicationBuilder(userAnswers = None)
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       running(application) {
+        when(mockService.isBudgetPaymentPlan(any()))
+          .thenReturn(true)
+        val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
+      }
+    }
+
+    "must redirect to System Error for a GET when payment plan is not a budget payment plan" in {
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(AmendPlanEndDatePage, testEndDate)
+        .success
+        .value
+        .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+        .build()
+
+      running(application) {
+        when(mockService.isBudgetPaymentPlan(any()))
+          .thenReturn(false)
         val request = FakeRequest(GET, amendConfirmRemovePlanEndDate)
         val result = route(application, request).value
 

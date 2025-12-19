@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import models.{NddDetails, NormalMode}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito
 import org.mockito.Mockito.{verify, when}
@@ -25,10 +26,11 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.*
-import repositories.SessionRepository
+import repositories.{DirectDebitCacheRepository, SessionRepository}
 import services.NationalDirectDebitService
 import utils.DirectDebitDetailsData
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsData {
@@ -37,6 +39,7 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
     val mockService = mock[NationalDirectDebitService]
     val mockSessionRepository = mock[SessionRepository]
+    val mockDirectDebitCache = mock[DirectDebitCacheRepository]
 
     "must return OK and the correct view for a GET with a valid direct debit reference" in {
       val directDebitReference = "ref number 1"
@@ -208,6 +211,42 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.DirectDebitSummaryController.onPageLoad().url
+      }
+    }
+
+    "must redirect to direct debit source page when a directDebitReference is provided" in {
+      val directDebitReference = "ref number 1"
+      val userAnswersWithDirectDebitReference =
+        emptyUserAnswers
+          .set(
+            DirectDebitReferenceQuery,
+            directDebitReference
+          )
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithDirectDebitReference))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[DirectDebitCacheRepository].toInstance(mockDirectDebitCache)
+        )
+        .build()
+
+      running(application) {
+
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockDirectDebitCache.getDirectDebit(any())(any())).thenReturn(
+          Future.successful(
+            NddDetails("ddref", LocalDateTime.now(), "bankSortCode", "bankAccountNumber", "bankAccountName", auDdisFlag = true, numberOfPayPlans = 1)
+          )
+        )
+
+        val request = FakeRequest(GET, routes.DirectDebitSummaryController.onRedirectToDirectDebitSource(directDebitReference).url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.DirectDebitSourceController.onPageLoad(NormalMode).url
       }
     }
   }
