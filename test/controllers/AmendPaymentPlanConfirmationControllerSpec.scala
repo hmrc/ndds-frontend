@@ -348,7 +348,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         }
       }
 
-      "must redirect to System Error for a GET when amend guard is fails" in {
+      "must redirect to System Error for a GET when amend guard failed" in {
         val userAnswers = UserAnswers(userAnswersId)
           .set(AmendPaymentPlanConfirmationPage, false)
           .success

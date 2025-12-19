@@ -22,6 +22,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.ManagePaymentPlanTypePage
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.NationalDirectDebitService
@@ -51,6 +52,26 @@ class SuspendPaymentPlanControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(NormalMode)(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to System Error for a GET when suspend guard failed" in {
+      val userAnswers: UserAnswers = emptyUserAnswers
+        .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+        .success
+        .value
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswers)).overrides(bind[NationalDirectDebitService].toInstance(mockNddService)).build()
+
+      running(application) {
+        when(mockNddService.suspendPaymentPlanGuard(any())).thenReturn(false)
+        val request = FakeRequest(GET, routes.SuspendPaymentPlanController.onPageLoad().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
       }
     }
   }
