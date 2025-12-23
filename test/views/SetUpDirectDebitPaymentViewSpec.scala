@@ -63,24 +63,24 @@ class SetUpDirectDebitPaymentViewSpec extends SpecBase with Matchers {
   }
 
   private def shouldDisplayCorrectDropDownTitle(view: Document)(implicit msgs: Messages) = {
-    view.select("#dd-more-info summary").text() mustBe msgs("directDebitMoreInfo.collapsable")
+    view.select("#dd-more-info summary").text() mustBe msgs("setUpDirectDebitPayment.collapsable")
   }
 
   private def shouldDisplayCorrectDropDownParapgraphs(view: Document)(implicit msgs: Messages) = {
     val text = view.select("#dd-more-info p").text()
 
-    text must include(msgs("directDebitMoreInfo.p1"))
-    text must include(msgs("directDebitMoreInfo.p2"))
-    text must include(msgs("directDebitMoreInfo.p3"))
+    text must include(msgs("setUpDirectDebitPayment.more.p1"))
+    text must include(msgs("setUpDirectDebitPayment.more.p2"))
+    text must include(msgs("setUpDirectDebitPayment.more.p3"))
   }
 
   private def shouldDisplayCorrectDropDownLinkTitles(view: Document)(implicit msgs: Messages) = {
     val anchors = view.select("#dd-more-info a").text()
 
-    anchors must include(msgs("directDebitMoreInfo.bullet.l1"))
-    anchors must include(msgs("directDebitMoreInfo.bullet.l2"))
-    anchors must include(msgs("directDebitMoreInfo.bullet.l3"))
-    anchors must include(msgs("directDebitMoreInfo.bullet.l4"))
+    anchors must include(msgs("setUpDirectDebitPayment.more.bullet.l1"))
+    anchors must include(msgs("setUpDirectDebitPayment.more.bullet.l2"))
+    anchors must include(msgs("setUpDirectDebitPayment.more.bullet.l3"))
+    anchors must include(msgs("setUpDirectDebitPayment.more.bullet.l4"))
   }
 
   private def shouldDisplayStartButton(view: Document)(implicit msgs: Messages) = {

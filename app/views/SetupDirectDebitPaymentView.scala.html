@@ -44,15 +44,15 @@
     @paragraph("setUpDirectDebitPayment.p3")
 
     @defining(HtmlFormat.fill(Seq(
-            paragraph("directDebitMoreInfo.p1"),
-            paragraph("directDebitMoreInfo.p2"),
-            paragraph("directDebitMoreInfo.p3"),
+            paragraph("setUpDirectDebitPayment.more.p1"),
+            paragraph("setUpDirectDebitPayment.more.p2"),
+            paragraph("setUpDirectDebitPayment.more.p3"),
         bulletList(
           items = Seq(
-            "directDebitMoreInfo.bullet.l1" -> Some(Call("GET", "https://www.gov.uk/pay-tax-direct-debit")),
-            "directDebitMoreInfo.bullet.l2" -> Some(Call("GET", "https://www.gov.uk/pay-self-assessment-tax-bill/direct-debit")),
-            "directDebitMoreInfo.bullet.l3" -> Some(Call("GET", "https://www.gov.uk/pay-self-assessment-tax-bill/approve-payment-through-online-bank-account")),
-            "directDebitMoreInfo.bullet.l4" -> Some(Call("GET", "https://www.directdebit.co.uk/direct-debit-guarantee/"))
+            "setUpDirectDebitPayment.more.bullet.l1" -> Some(Call("GET", "https://www.gov.uk/pay-tax-direct-debit")),
+            "setUpDirectDebitPayment.more.bullet.l2" -> Some(Call("GET", "https://www.gov.uk/pay-self-assessment-tax-bill/direct-debit")),
+            "setUpDirectDebitPayment.more.bullet.l3" -> Some(Call("GET", "https://www.gov.uk/pay-self-assessment-tax-bill/approve-payment-through-online-bank-account")),
+            "setUpDirectDebitPayment.more.bullet.l4" -> Some(Call("GET", "https://www.directdebit.co.uk/direct-debit-guarantee/"))
           )
         )
         ))) { ddMoreInfoContent =>
@@ -60,7 +60,7 @@
         @govukDetails(
             Details(
                 id = Some("dd-more-info"),
-                summary = messages("directDebitMoreInfo.collapsable"),
+                summary = messages("setUpDirectDebitPayment.collapsable"),
                 content = HtmlContent(ddMoreInfoContent)
             )
         )
