@@ -60,7 +60,7 @@ class PlanStartDateController @Inject() (
       answers.get(DirectDebitSourcePage) match {
         case Some(value)
             if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) =>
-          nddService.getEarliestPlanStartDate(request.userAnswers, request.userId) map { earliestPlanStartDate =>
+          nddService.getEarliestPlanStartDate(answers, request.userId) map { earliestPlanStartDate =>
             val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
             val form = formProvider(answers, earliestDate)
             val preparedForm = answers.get(PlanStartDatePage) match {
@@ -91,13 +91,10 @@ class PlanStartDateController @Inject() (
     val optPaymentType = answers.get(PaymentPlanTypePage)
     val optSourceType = answers.get(DirectDebitSourcePage)
     (optSourceType, optPaymentType) match {
-      case (Some(MGD), Some(VariablePaymentPlan)) =>
-        routes.PaymentReferenceController.onPageLoad(mode)
-      case (Some(SA), Some(BudgetPaymentPlan)) =>
-        routes.RegularPaymentAmountController.onPageLoad(mode)
-      case (Some(TC), Some(TaxCreditRepaymentPlan)) =>
-        routes.TotalAmountDueController.onPageLoad(mode)
-      case _ => routes.SystemErrorController.onPageLoad()
+      case (Some(MGD), Some(VariablePaymentPlan))   => routes.PaymentReferenceController.onPageLoad(mode)
+      case (Some(SA), Some(BudgetPaymentPlan))      => routes.RegularPaymentAmountController.onPageLoad(mode)
+      case (Some(TC), Some(TaxCreditRepaymentPlan)) => routes.TotalAmountDueController.onPageLoad(mode)
+      case _                                        => routes.SystemErrorController.onPageLoad()
     }
   }
 

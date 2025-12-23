@@ -63,7 +63,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         contentAsString(result) mustEqual view(form, NormalMode, Some(MGD), Call("GET", paymentPlanTypeRoute))(request,
                                                                                                                messages(application)
                                                                                                               ).toString
-        contentAsString(result) must include("it begins with an X and is 14 characters long.")
+        contentAsString(result) must include("You can find this on letters from HMRC, for example, 15AZMGD123456789")
       }
     }
 
@@ -109,7 +109,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         contentAsString(result) mustEqual view(form.fill("answer"), NormalMode, Some(TC), Call("GET", paymentPlanTypeRoute))(request,
                                                                                                                              messages(application)
                                                                                                                             ).toString
-        contentAsString(result) must include("it is 16 characters long")
+        contentAsString(result) must include("You can find this on letters from HMRC, for example, TC1234567")
       }
     }
 
