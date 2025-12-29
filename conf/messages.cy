@@ -316,7 +316,7 @@ regularPaymentAmount.change.hidden = Swm y taliad rheolaidd
 addPaymentPlanEndDate.title = A ydych am ychwanegu dyddiad dod i ben y cynllun talu?
 addPaymentPlanEndDate.heading = A ydych am ychwanegu dyddiad dod i ben y cynllun talu?
 addPaymentPlanEndDate.p1 = Nid yw hyn yn orfodol. Byddwch yn gallu ychwanegu dyddiad dod i ben unwaith y bydd y cynllun talu wedi’i sefydlu.
-addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
+addPaymentPlanEndDate.checkYourAnswersLabel = Ychwanegu dyddiad dod i ben y cynllun
 addPaymentPlanEndDate.error.required = Select one option.
 addPaymentPlanEndDate.change.hidden =  Add Payment plan end date
 
@@ -364,7 +364,7 @@ checkYourAnswers.paymentPlanType = Math o gynllun
 checkYourAnswers.paymentPlanType.singlePaymentPlan = Taliad unigol
 checkYourAnswers.paymentPlanType.variablePaymentPlan = Variable payment
 checkYourAnswers.paymentPlanType.budgetPaymentPlan = Budget payment
-checkYourAnswers.paymentPlanType.taxCreditRepaymentPlan = Tax credits repayment plan
+checkYourAnswers.paymentPlanType.taxCreditRepaymentPlan = Cynllun ad-dalu credydau treth
 checkYourAnswers.acceptAndSubmit = Accept and submit
 
 duplicateError.title = Ni allwch sefydlu cynllun talu dyblyg
@@ -438,21 +438,21 @@ directDebitPaymentSummary.noActivePaymentPlans.p1 = Does dim cynlluniau talu ar 
 
 paymentPlanDetails.title = Manylion eich cynllun talu
 paymentPlanDetails.heading = Manylion eich cynllun talu
-paymentPlanDetails.budgetCanChange.p1 = If a payment is due within the next 3 working days, it will not be affected by any changes you make.
-paymentPlanDetails.budgetCanNotChange.p1 = You cannot make changes to this plan because the end date is within the next 3 working days.
-paymentPlanDetails.singleCanNotChange.p1 = You cannot make changes to this plan because the next payment is due within 2 working days.
-paymentPlanDetails.variableCanNotChange.p1 = You cannot make changes to this plan because the next payment is due within 2 working days.
-paymentPlanDetails.inset.text = This payment plan is suspended from {0} to {1}.
+paymentPlanDetails.budgetCanChange.p1 = Os yw taliad yn ddyledus o fewn y 3 diwrnod gwaith nesaf, ni fydd unrhyw newidiadau a wnewch yn effeithio arno.
+paymentPlanDetails.budgetCanNotChange.p1 = Ni allwch wneud newidiadau i’r cynllun hwn oherwydd bod y dyddiad dod i ben o fewn y 3 diwrnod gwaith nesaf.
+paymentPlanDetails.singleCanNotChange.p1 = Ni allwch wneud newidiadau i’r cynllun hwn oherwydd bod y taliad nesaf yn ddyledus o fewn 2 ddiwrnod gwaith.
+paymentPlanDetails.variableCanNotChange.p1 = Ni allwch wneud newidiadau i’r cynllun hwn oherwydd bod y taliad nesaf yn ddyledus o fewn 2 ddiwrnod gwaith.
+paymentPlanDetails.inset.text = Mae’r cynllun talu hwn wedi ei ohirio o {0} i {1}.
 paymentPlanDetails.inset.advanceNotice.text = Mae gennych hysbysiad ymlaen llaw ar gyfer y cynllun talu hwn: bydd {0} yn cael ei chasglu ar {1}.
 paymentPlanDetails.inset.noAdvanceNotice.text = Ar hyn o bryd, nid oes gennych hysbysiad ymlaen llaw ar gyfer y cynllun talu hwn.
 paymentPlanDetails.advanceNotice.link = Bwrw golwg dros yr hysbysiad ymlaen llaw.
 paymentPlanDetails.details.paymentReference = Cyfeirnod talu: {0}
-paymentPlanDetails.details.amend = Amend
+paymentPlanDetails.details.amend = Diwygio
 paymentPlanDetails.details.cancel = Canslo
-paymentPlanDetails.details.suspend = Suspend
+paymentPlanDetails.details.suspend = Gohirio
 paymentPlanDetails.details.planType.label = Math o gynllun
 paymentPlanDetails.details.planType.budgetPaymentPlan  = Budget payment
-paymentPlanDetails.details.planType.singlePaymentPlan = Single payment
+paymentPlanDetails.details.planType.singlePaymentPlan = Taliad unigol
 paymentPlanDetails.details.planType.variablePaymentPlan = Variable payment
 paymentPlanDetails.details.planType.taxCreditRepaymentPlan = Tax credits repayment
 paymentPlanDetails.details.paymentFor = Taliad ar gyfer
@@ -484,6 +484,11 @@ paymentPlanDetails.details.hodService.sdlt = Stamp Duty Land Tax (SDLT)
 paymentPlanDetails.details.hodService.tc = Tax credits (TC)
 paymentPlanDetails.details.hodService.vat = Value Added Tax (VAT)
 paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
+
+paymentPlanLockedWarning.title = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
+paymentPlanLockedWarning.heading = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
+paymentPlanLockedWarning.paragraph = Mae’ch diweddariad blaenorol yn cael ei brosesu. Byddwch yn gallu bwrw golwg dros neu reoli’r cynllun talu hwn o fewn 36 awr.
+paymentPlanLockedWarning.returnLink = Yn ôl i’r cynllun talus
 
 cancelPaymentPlan.title = Canslo’r cynllun talu hwn
 cancelPaymentPlan.heading = Canslo’r cynllun talu hwn
@@ -622,22 +627,17 @@ systemError.heading     = Sorry, there is a problem with this service
 systemError.p1          = Try again later or contact the
 systemError.link        = HMRC Online Services Helpdesk (opens in a new tab)
 
-paymentPlanLockedWarning.title = You cannot view or manage this payment plan
-paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
-paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.
-paymentPlanLockedWarning.returnLink = Yn ôl i’r cynllun talus
-
 #AP0 messages
-amendingPaymentPlan.title = Amending this payment plan
-amendingPaymentPlan.heading = Amending this payment plan
-amendingPaymentPlan.p2.prefix = For security reasons,
-amendingPaymentPlan.p2.link = you must contact the HMRC Helpline (opens in a new tab)
-amendingPaymentPlan.p2.suffix = to change the:
-amendingPaymentPlan.list.1 = Direct Debit reference
-amendingPaymentPlan.list.2 = bank account details
-amendingPaymentPlan.list.3 = payment reference
-amendingPaymentPlan.p3 = Payments due within the next 3 working days cannot be amended.
-amendingPaymentPlan.cancel.link = Cancel and return to payment plan
+amendingPaymentPlan.title = Diwygio’r cynllun talu hwn
+amendingPaymentPlan.heading = Diwygio’r cynllun talu hwn
+amendingPaymentPlan.p2.prefix = Am resymau diogelwch,
+amendingPaymentPlan.p2.link = mae’n rhaid i chi gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF (opens in a new tab)
+amendingPaymentPlan.p2.suffix = er mwyn newid y canlynol:
+amendingPaymentPlan.list.1 = Cyfeirnod Debyd Uniongyrchol
+amendingPaymentPlan.list.2 = manylion cyfrif banc
+amendingPaymentPlan.list.3 = cyfeirnod talu
+amendingPaymentPlan.p3 = Ni ellir diwygio taliadau sy’n ddyledus o fewn y 3 diwrnod gwaith nesaf.
+amendingPaymentPlan.cancel.link = Canslo a mynd yn ôl i’r cynllun talu
 
 #AP1a messages
 amendPaymentAmount.title = How much do you want to pay, in pounds?
@@ -669,52 +669,52 @@ amendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have e
 amendPlanEndDate.endDate = Dyddiad dod i ben y cynllun
 amendPlanEndDate.change.endDate = change Plan end date
 amendPlanEndDate.remove.endDate = remove Plan end date
-amendPlanEndDate.addPlanEndDateLink = Add plan end date
+amendPlanEndDate.addPlanEndDateLink = Ychwanegu dyddiad dod i ben y cynllun
 
 #AP1d messages
-amendConfirmRemovePlanEndDate.title = Removing this plan end date
-amendConfirmRemovePlanEndDate.heading = Removing this plan end date
-amendConfirmRemovePlanEndDate.p1.line1 = Payment reference: <strong>{0}</strong>
-amendConfirmRemovePlanEndDate.p1.line2 = The plan end date is <strong>{0}</strong>.
-amendConfirmRemovePlanEndDate.q1 = Are you sure you want to remove this plan end date?
+amendConfirmRemovePlanEndDate.title = Tynnu dyddiad dod i ben y cynllun hwn
+amendConfirmRemovePlanEndDate.heading = Tynnu dyddiad dod i ben y cynllun hwn
+amendConfirmRemovePlanEndDate.p1.line1 = Cyfeirnod talu: <strong>{0}</strong>
+amendConfirmRemovePlanEndDate.p1.line2 = Dyddiad dod i ben y cynllun yw <strong>{0}</strong>.
+amendConfirmRemovePlanEndDate.q1 = A ydych yn siŵr eich bod am dynnu dyddiad dod i ben y cynllun hwn?
+amendConfirmRemovePlanEndDate.checkYourAnswersLabel = Tynnu dyddiad dod i ben y cynllun hwn
+amendConfirmRemovePlanEndDate.change.hidden = Tynnu dyddiad dod i ben y cynllun hwn
 amendConfirmRemovePlanEndDate.error.required = Select one option.
-amendConfirmRemovePlanEndDate.checkYourAnswersLabel = Removing this plan end date
-amendConfirmRemovePlanEndDate.change.hidden = Removing this plan end date
 
 #AP2 messages
-amendPaymentPlanConfirmation.title = Check your amendment details
-amendPaymentPlanConfirmation.heading = Check your amendment details
-amendPaymentPlanConfirmation.confirmAndContinue.button = Confirm and continue
-amendPaymentPlanConfirmation.cancel.link = Cancel and return to payment plan
+amendPaymentPlanConfirmation.title = Gwirio manylion eich diwygiad
+amendPaymentPlanConfirmation.heading = Gwirio manylion eich diwygiad
+amendPaymentPlanConfirmation.confirmAndContinue.button = Cadarnhau a pharhau
+amendPaymentPlanConfirmation.cancel.link = Canslo a mynd yn ôl i’r cynllun talu
 
 #AP3 messages
-amendPaymentPlanUpdate.title = Payment plan amended
-amendPaymentPlanUpdate.panel.title = Payment plan amended
-amendPaymentPlanUpdate.SinglePlan.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
+amendPaymentPlanUpdate.title = Cynllun talu wedi’i ddiwygio
+amendPaymentPlanUpdate.panel.title = Cynllun talu wedi’i ddiwygio
+amendPaymentPlanUpdate.SinglePlan.p1 = Mae’r cynllun talu hwn bellach wedi’i ddiwygio. Bydd taliad o {0} yn cael ei gasglu ar {1}.
 amendPaymentPlanUpdate.BudgetPlan.p1 = This payment plan has now been amended. The next payment of {0} for this plan will be collected on {1}.
-amendPaymentPlanUpdate.p2 = Any existing suspension on this payment plan will be removed. It may take up to 36 hours for this amendment to appear in your account.
-amendPaymentPlanUpdate.p3 = You must have enough funds in your account for this payment to be collected. If any of the details are incorrect,
-amendPaymentPlanUpdate.p3.link = you must contact the HMRC Helpline (opens in a new tab)
-amendPaymentPlanUpdate.summary.title = The Direct Debit Guarantee
-amendPaymentPlanUpdate.summary.p1 = This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.
-amendPaymentPlanUpdate.summary.p2 = If there are any changes to the amount, date or frequency of your Direct Debit, HMRC NDDS will notify you 10 working days in advance of your account being debited, or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request.
-amendPaymentPlanUpdate.summary.p3 = If an error is made in the payment of your Direct Debit by HMRC NDDS, or your bank or building society, you are entitled to a full and immediate refund of the amount paid from your bank or building society.
-amendPaymentPlanUpdate.summary.p4 = If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to.
-amendPaymentPlanUpdate.summary.p5 = You can cancel a Direct Debit at any time, by contacting your bank or building society. Written confirmation may be required.
-amendPaymentPlanUpdate.directDebitDetails = Direct Debit details
-amendPaymentPlanUpdate.directDebit.reference = Direct Debit reference
-amendPaymentPlanUpdate.directDebit.accountName = Name on the account
-amendPaymentPlanUpdate.directDebit.accountNumber = Account number
-amendPaymentPlanUpdate.directDebit.sortCode = Sort code
-amendPaymentPlanUpdate.amendedPlan = Your amended payment plan
-amendPaymentPlanUpdate.printInset = You can print this page for your records using the print function on your browser.
+amendPaymentPlanUpdate.p2 = Bydd unrhyw ohiriad sy’n bodoli ar y cynllun talu hwn yn cael ei dynnu. Gall gymryd hyd at 36 awr i’r diwygiad hwn ymddangos yn eich cyfrif.
+amendPaymentPlanUpdate.p3 = Mae’n rhaid i chi fod â digon o arian yn eich cyfrif er mwyn i’r taliad hwn allu cael ei gasglu. Os oes unrhyw fanylion yn anghywir,
+amendPaymentPlanUpdate.p3.link = mae’n rhaid i chi gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF. (opens in a new tab)
+amendPaymentPlanUpdate.summary.title = Y Warant Debyd Uniongyrchol
+amendPaymentPlanUpdate.summary.p1 = Cynigir y Warant hon gan bob banc a chymdeithas adeiladu sy’n derbyn cyfarwyddiadau i dalu Debydau Uniongyrchol.
+amendPaymentPlanUpdate.summary.p2 = Os bydd unrhyw newidiadau i swm, dyddiad neu amlder eich Debyd Uniongyrchol, bydd CThEF yn rhoi gwybod i chi 10 diwrnod gwaith cyn i’ch cyfrif gael ei ddebydu, neu fel y cytunwyd fel arall. Os byddwch yn gofyn i CThEF gasglu taliad, cewch gadarnhad o’r swm a’r dyddiad ar adeg eich cais.
+amendPaymentPlanUpdate.summary.p3 = Os gwneir camgymeriad gan CThEF neu eich banc neu gymdeithas adeiladu wrth dalu’ch Debyd Uniongyrchol, mae gennych hawl i ad-daliad llawn, ar unwaith, o’r swm a dalwyd gan eich banc neu’ch cymdeithas adeiladu.
+amendPaymentPlanUpdate.summary.p4 = Os byddwch yn cael ad-daliad nad oes hawl gennych iddo, bydd yn rhaid i chi ei dalu’n ôl pan fydd CThEF yn gofyn i chi wneud hynny.
+amendPaymentPlanUpdate.summary.p5 = Gallwch ganslo Debyd Uniongyrchol ar unrhyw adeg drwy gysylltu â’ch banc neu’ch cymdeithas adeiladu. Efallai y bydd angen cadarnhad ysgrifenedig.
+amendPaymentPlanUpdate.directDebitDetails = Manylion Debyd Uniongyrchol
+amendPaymentPlanUpdate.directDebit.reference = Cyfeirnod Debyd Uniongyrchol
+amendPaymentPlanUpdate.directDebit.accountName = Yr enw sydd ar y cyfrif
+amendPaymentPlanUpdate.directDebit.accountNumber = Rhif y cyfrif
+amendPaymentPlanUpdate.directDebit.sortCode = Cod didoli
+amendPaymentPlanUpdate.amendedPlan = Eich cynllun talu sydd wedi’i ddiwygio
+amendPaymentPlanUpdate.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
 amendPaymentPlanUpdate.returnLink = Yn ôl i’r cynllun talu
 
 #DW1 messages
-amendDuplicateWarning.title = You already have a payment plan with these details
-amendDuplicateWarning.h1 = You already have a payment plan with these details
-amendDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
-amendDuplicateWarning.h2 = Do you want to continue with this amendment?
+amendDuplicateWarning.title = Mae gennych gynllun talu eisoes gyda’r manylion hyn
+amendDuplicateWarning.h1 = Mae gennych gynllun talu eisoes gyda’r manylion hyn
+amendDuplicateWarning.p1 = Mae gennych gynllun talu wedi’i sefydlu eisoes sydd â’r un symiau a dyddiadau.
+amendDuplicateWarning.h2 = A hoffech fynd yn eich blaen â’r diwygiad hwn?
 
 
 ############### OLD AMEND MESSAGES #################

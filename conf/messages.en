@@ -485,6 +485,11 @@ paymentPlanDetails.details.hodService.tc = Tax credits (TC)
 paymentPlanDetails.details.hodService.vat = Value Added Tax (VAT)
 paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
 
+paymentPlanLockedWarning.title = You cannot view or manage this payment plan
+paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
+paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.
+paymentPlanLockedWarning.returnLink = Return to payment plans
+
 cancelPaymentPlan.title = Cancelling this payment plan
 cancelPaymentPlan.heading = Cancelling this payment plan
 cancelPaymentPlan.paymentReference = Payment reference:
@@ -622,11 +627,6 @@ systemError.heading     = Sorry, there is a problem with this service
 systemError.p1          = Try again later or contact the
 systemError.link        = HMRC Online Services Helpdesk (opens in a new tab)
 
-paymentPlanLockedWarning.title = You cannot view or manage this payment plan
-paymentPlanLockedWarning.heading = You cannot view or manage this payment plan
-paymentPlanLockedWarning.paragraph = Your previous update is being processed. You will be able to view or manage this payment plan within 36 hours.
-paymentPlanLockedWarning.returnLink = Return to payment plans
-
 #AP0 messages
 amendingPaymentPlan.title = Amending this payment plan
 amendingPaymentPlan.heading = Amending this payment plan
@@ -677,9 +677,9 @@ amendConfirmRemovePlanEndDate.heading = Removing this plan end date
 amendConfirmRemovePlanEndDate.p1.line1 = Payment reference: <strong>{0}</strong>
 amendConfirmRemovePlanEndDate.p1.line2 = The plan end date is <strong>{0}</strong>.
 amendConfirmRemovePlanEndDate.q1 = Are you sure you want to remove this plan end date?
-amendConfirmRemovePlanEndDate.error.required = Select one option.
 amendConfirmRemovePlanEndDate.checkYourAnswersLabel = Removing this plan end date
 amendConfirmRemovePlanEndDate.change.hidden = Removing this plan end date
+amendConfirmRemovePlanEndDate.error.required = Select one option.
 
 #AP2 messages
 amendPaymentPlanConfirmation.title = Check your amendment details
