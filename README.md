@@ -1,12 +1,28 @@
 
 # ndds-frontend
 
-This is the new NDDS frontend repository
+The NDDS Replatform Portal is the frontend service used to create links to a user's bank account so that they then create payment plans for specific tax services to pay amounts due.
 
+National Direct Debit System (NDDS), is a service that allows users to pay taxes via direct debits. Users can either opt for recurring payments or one of direct debit payments. The service currently supports setting up direct debits for multiple services.
 
-## Running the service
+The services supported are:
 
-Service Manager: `sm2 --start NDDS_ALL`
+VAT
+SA
+MGD
+NIC
+CT
+PAYE
+SDLT
+TC
+Other Liability
+
+## Developer setup
+[Developer setup](https://confluence.tools.tax.service.gov.uk/display/RBD/Local+Machine+Setup+to+run+and+connect+to+Oracle+database)
+
+## Running the service locally
+
+Service Manager for NDDS: `sm2 --start NDDS_ALL`
 
 To check libraries update, run all tests and coverage: `./run_all_tests.sh`
 
