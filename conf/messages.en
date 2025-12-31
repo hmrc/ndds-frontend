@@ -767,5 +767,5 @@ errorWarning.title = This payment plan cannot be set up
 errorWarning.heading = This payment plan cannot be set up
 errorWarning.p1 = This payment plan cannot be set up because the details are invalid. You need to change the following details to continue:
 errorWarning.bulletList1 = plan end date must be on or after the plan start date
-errorWarning.link = Change your payment plan details
+errorWarning.link = Change your payment plan details.
 
