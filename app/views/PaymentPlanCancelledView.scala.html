@@ -43,7 +43,8 @@
     @govukSummaryList(SummaryList(
         card = Some(Card(
             title = Some(CardTitle(
-                content = messages("paymentPlanCancelled.paymentReference", paymentReference)
+                content = messages("paymentPlanCancelled.paymentReference", paymentReference),
+                headingLevel = Some(3)
             ))
         )),
         rows = rows
