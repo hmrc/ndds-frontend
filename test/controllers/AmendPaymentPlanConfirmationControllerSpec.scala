@@ -28,7 +28,7 @@ import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.{CurrentPageQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -114,6 +114,9 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPlanEndDatePage, LocalDate.now())
           .success
           .value
+          .set(CurrentPageQuery, "/direct-debits/amend-regular-payment-amount")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
@@ -130,9 +133,13 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
+          contentAsString(result) must include(
+            s"""href="${routes.AmendRegularPaymentAmountController.onPageLoad(NormalMode).url}""""
+          )
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows
+            summaryListRows,
+            routes.AmendRegularPaymentAmountController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
@@ -160,6 +167,9 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(AddPaymentPlanEndDatePage, false)
             .success
             .value
+            .set(CurrentPageQuery, "/direct-debits/amend-payment-plan-end-date")
+            .success
+            .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
@@ -167,8 +177,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
 
         running(application) {
           when(mockNddService.amendPaymentPlanGuard(any())).thenReturn(true)
-          when(mockSessionRepository.get(any()))
-            .thenReturn(Future.successful(Some(userAnswers)))
+          when(mockSessionRepository.get(any())).thenReturn(Future.successful(Some(userAnswers)))
 
           val summaryListRows = createSummaryListForBudgetPaymentPlan(userAnswers, mockBudgetPaymentPlanDetailResponse, application)
           val controller = application.injector.instanceOf[AmendPaymentPlanConfirmationController]
@@ -177,9 +186,14 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
+          contentAsString(result) must include(
+            s"""href="${routes.AmendPlanEndDateController.onPageLoad(NormalMode).url}""""
+          )
+
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows
+            summaryListRows,
+            routes.AmendPlanEndDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
@@ -197,6 +211,9 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .success
             .value
             .set(AmendPlanStartDatePage, LocalDate.now())
+            .success
+            .value
+            .set(CurrentPageQuery, "/direct-debits/removing-plan-end-date")
             .success
             .value
 
@@ -221,10 +238,14 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
 
           status(result) mustEqual OK
+          contentAsString(result) must include(
+            s"""href="${routes.AmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url}""""
+          )
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows
+            summaryListRows,
+            routes.AmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
         }
       }
@@ -281,6 +302,9 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPlanStartDatePage, LocalDate.now())
           .success
           .value
+          .set(CurrentPageQuery, "/direct-debits/amend-plan-how-much-do-you-want-to-pay")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
@@ -297,9 +321,14 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
 
+          contentAsString(result) must include(
+            s"""href="${routes.AmendPaymentAmountController.onPageLoad(NormalMode).url}""""
+          )
+
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows
+            summaryListRows,
+            routes.AmendPaymentAmountController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
 
         }
@@ -324,6 +353,9 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPlanStartDatePage, LocalDate.now())
           .success
           .value
+          .set(CurrentPageQuery, "/direct-debits/amend-plan-payment-date")
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
@@ -339,10 +371,14 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           val result = controller.onPageLoad(NormalMode)(request)
           val view = application.injector.instanceOf[AmendPaymentPlanConfirmationView]
           status(result) mustEqual OK
+          contentAsString(result) must include(
+            s"""href="${routes.AmendPlanStartDateController.onPageLoad(NormalMode).url}""""
+          )
 
           contentAsString(result) mustEqual view(
             NormalMode,
-            summaryListRows
+            summaryListRows,
+            routes.AmendPlanStartDateController.onPageLoad(NormalMode)
           )(request, messages(application)).toString
 
         }

@@ -23,7 +23,7 @@ import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
-import queries.PaymentPlanDetailsQuery
+import queries.{CurrentPageQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -54,17 +54,17 @@ class AmendPaymentPlanConfirmationController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
-    val alreadyConfirmed: Boolean =
-      userAnswers.get(AmendPaymentPlanConfirmationPage).contains(true)
+    val alreadyConfirmed: Boolean = userAnswers.get(AmendPaymentPlanConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
       logger.warn("Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")
       Future.successful(Redirect(routes.BackSubmissionController.onPageLoad()))
     } else {
       if (nddService.amendPaymentPlanGuard(userAnswers)) {
-        Future.successful(Ok(view(mode, buildRows(userAnswers, mode))))
+        val currentPage = Call("GET", userAnswers.get(CurrentPageQuery).getOrElse(""))
+        Future.successful(Ok(view(mode, buildRows(userAnswers, mode), currentPage)))
       } else {
-        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
         Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
