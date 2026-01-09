@@ -532,6 +532,7 @@ suspensionPeriodRangeDate.error.invalid.startDate.base = Enter a valid date
 suspensionPeriodRangeDate.error.invalid.endDate.base = Enter a valid date
 suspensionPeriodRangeDate.error.startDate = Suspension period start date must be between {0} and {1}
 suspensionPeriodRangeDate.error.endDate = Suspension period end date must be between {0} and {1}
+suspensionPeriodRangeDate.change.hidden = suspension period
 
 checkYourSuspensionDetails.title = Check your suspension details
 checkYourSuspensionDetails.heading = Check your suspension details
@@ -692,8 +693,8 @@ amendPlanEndDate.hint = For example, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change to be processed. Extend or remove the plan end date if you wish to continue.
 amendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
 amendPlanEndDate.endDate = Plan end date
-amendPlanEndDate.change.endDate = change Plan end date
-amendPlanEndDate.remove.endDate = remove Plan end date
+amendPlanEndDate.change.endDate = Plan end date
+amendPlanEndDate.remove.endDate = Plan end date
 amendPlanEndDate.addPlanEndDateLink = Add plan end date
 
 #AP1d messages

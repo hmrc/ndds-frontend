@@ -85,17 +85,17 @@
                         if (showAmendLink) ActionItem(
                             href = routes.AmendingPaymentPlanController.onPageLoad().url,
                             content = messages("paymentPlanDetails.details.amend"),
-                            visuallyHiddenText = Some(messages("Amend"))
+                            visuallyHiddenText = Some(messages("payment plan"))
                         ) else null,
                         if (showCancelLink) ActionItem(
                             href = routes.CancelPaymentPlanController.onPageLoad().url,
                             content = messages("paymentPlanDetails.details.cancel"),
-                            visuallyHiddenText = Some(messages("Cancel"))
+                            visuallyHiddenText = Some(messages("payment plan"))
                         ) else null,
                         if (showSuspendLink) ActionItem(
                             href = routes.SuspendPaymentPlanController.onPageLoad().url,
                             content = messages("paymentPlanDetails.details.suspend"),
-                            visuallyHiddenText = Some(messages("Suspend"))
+                            visuallyHiddenText = Some(messages("payment plan"))
                         ) else null
                     ).filter(_ != null) // remove the nulls
                 ))
