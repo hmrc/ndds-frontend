@@ -19,7 +19,7 @@
 * Licensed under the Apache License, Version 2.0
 *@
 
-@import views.html.components._
+@import views.html.components.*
 @import java.time.LocalDate
 @import java.time.format.DateTimeFormatter
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.{RadioItem, Radios}
@@ -27,49 +27,48 @@
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 
 @this(
-layout: templates.Layout,
-formHelper: FormWithCSRF,
-govukErrorSummary: GovukErrorSummary,
-govukRadios: GovukRadios,
-govukButton: GovukButton,
-fieldSet: FieldSet,
-paragraph: Paragraph,
-header1: Header1,
-header2: Header2,
-mainErrorSummary: MainErrorSummary
+        layout: templates.Layout,
+        formHelper: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukRadios: GovukRadios,
+        govukButton: GovukButton,
+        fieldSet: FieldSet,
+        paragraph: Paragraph,
+        header1: Header1,
+        header2: Header2,
+        mainErrorSummary: MainErrorSummary
 )
 
 @(form: Form[_], mode: Mode, paymentReference: String, suspensionStartDate: Option[LocalDate], suspensionEndDate: Option[LocalDate])(implicit request: Request[_], messages: Messages)
 
 @defining(new java.util.Locale(messages.lang.code)) { locale =>
-@defining(DateTimeFormatter.ofPattern("d MMMM yyyy", locale)) { dateFormatter =>
-@defining(suspensionStartDate.map(_.format(dateFormatter)).getOrElse("")) { formattedStartDate =>
-@defining(suspensionEndDate.map(_.format(dateFormatter)).getOrElse("")) { formattedEndDate =>
+    @defining(DateTimeFormatter.ofPattern("d MMMM yyyy", locale)) { dateFormatter =>
+        @defining(suspensionStartDate.map(_.format(dateFormatter)).getOrElse("")) { formattedStartDate =>
+            @defining(suspensionEndDate.map(_.format(dateFormatter)).getOrElse("")) { formattedEndDate =>
 
-@layout(pageTitle = title(form, messages("removingThisSuspension.title"))) {
-    @formHelper(action = routes.RemovingThisSuspensionController.onSubmit(mode), Symbol("autoComplete") -> "off") {
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
-        }
+                @layout(pageTitle = title(form, messages("removingThisSuspension.title"))) {
+                    @formHelper(action = routes.RemovingThisSuspensionController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+                        @if(form.errors.nonEmpty) {
+                            @govukErrorSummary(ErrorSummaryViewModel(form))
+                        }
 
-        @header1("removingThisSuspension.heading")
+                        @header1("removingThisSuspension.heading")
 
-        @paragraph(messages("removingThisSuspension.paymentDetails", paymentReference))
-        @paragraph(messages("removingThisSuspension.suspensionInfo", formattedStartDate, formattedEndDate))
+                        @paragraph(messages("removingThisSuspension.paymentDetails", paymentReference))
+                        @paragraph(messages("removingThisSuspension.suspensionInfo", formattedStartDate, formattedEndDate))
 
-        @govukRadios(
-            RadiosViewModel.yesNo(
-                field = form("value"),
-                legend = LegendViewModel(messages("removingThisSuspension.question")).withCssClass("govuk-fieldset__legend--m")
-            ).copy(classes = "govuk-radios--inline")
-        )
+                        @govukRadios(
+                            RadiosViewModel.yesNo(
+                                field = form("value"),
+                                legend = LegendViewModel(messages("removingThisSuspension.question")).withCssClass("govuk-fieldset__legend--m")
+                            ).copy(classes = "govuk-radios--inline")
+                        )
 
-        @govukButton(ButtonViewModel(messages("site.continue")))
+                        @govukButton(ButtonViewModel(messages("site.continue")))
 
+                    }
+                }
             }
-            }
-
-        }
         }
     }
 }
