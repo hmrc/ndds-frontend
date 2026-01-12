@@ -51,9 +51,9 @@ object AmendPlanEndDateSummary {
       actions = if (showChange) {
         Seq(
           ActionItemViewModel("site.change", routes.AmendPlanEndDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPlanEndDate.change.endDate")),
+            .withVisuallyHiddenText(messages("amendPlanEndDate.change.endDate.hidden")),
           ActionItemViewModel("site.remove", routes.AmendConfirmRemovePlanEndDateController.onPageLoad(NormalMode).url)
-            .withVisuallyHiddenText(messages("amendPlanEndDate.remove.endDate"))
+            .withVisuallyHiddenText(messages("amendPlanEndDate.remove.endDate.hidden"))
         )
       } else {
         Seq.empty
