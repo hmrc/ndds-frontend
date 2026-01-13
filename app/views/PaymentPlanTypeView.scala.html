@@ -38,6 +38,17 @@
 
     @formHelper(action = routes.PaymentPlanTypeController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
+    @defining(
+            (if(selectedAnswer.contains(MGD)) {
+                PaymentPlanType.options1
+            } else if(selectedAnswer.contains(SA)) {
+                PaymentPlanType.options2
+            } else {
+                PaymentPlanType.options3
+            }).zipWithIndex.map { case (item, idx) =>
+                item.copy(id = Some(s"value_$idx"))
+            }
+    ){ radioItems =>
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value_0")))
         }
@@ -153,20 +164,15 @@
         @govukRadios(
             RadiosViewModel(
                 field = form("value"),
-                legend = LegendViewModel(messages("")).asPageHeading(),
-                items = if(selectedAnswer.contains(MGD)) {
-                    PaymentPlanType.options1
-                } else if(selectedAnswer.contains(SA)) {
-                    PaymentPlanType.options2
-                } else {
-                    PaymentPlanType.options3
-                }
+                legend = LegendViewModel(messages("paymentPlanType.heading.legend")).withCssClass("govuk-fieldset__legend--m"),
+                items = radioItems
             )
         )
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))
         )
+    }
     }
 }
 

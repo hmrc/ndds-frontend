@@ -168,8 +168,9 @@ directDebitSource.otherLiability = Other liability
 directDebitSource.error.required = Select one option.
 directDebitSource.change.hidden =  Payment for
 
-paymentPlanType.title = What type of payment plan are you selecting?
-paymentPlanType.heading = What type of payment plan are you selecting?
+paymentPlanType.title = Tell us about this payment plan
+paymentPlanType.heading = Tell us about this payment plan
+paymentPlanType.heading.legend = Which payment plan do you need?
 paymentPlanType.singlePaymentPlan = A single payment
 paymentPlanType.variablePaymentPlan = A variable payment plan
 paymentPlanType.budgetPaymentPlan = A budget payment plan
