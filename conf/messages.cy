@@ -691,8 +691,8 @@ amendPlanEndDate.hint = For example, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change to be processed. Extend or remove the plan end date if you wish to continue.
 amendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
 amendPlanEndDate.endDate = Dyddiad dod i ben y cynllun
-amendPlanEndDate.change.endDate = change Plan end date
-amendPlanEndDate.remove.endDate = remove Plan end date
+amendPlanEndDate.change.endDate.hidden = Plan end date
+amendPlanEndDate.remove.endDate.hidden = Plan end date
 amendPlanEndDate.addPlanEndDateLink = Add plan end date
 
 #AP1d messages
