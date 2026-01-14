@@ -168,8 +168,9 @@ directDebitSource.otherLiability = Other liability
 directDebitSource.error.required = Select one option.
 directDebitSource.change.hidden =  Payment for
 
-paymentPlanType.title = What type of payment plan are you selecting?
-paymentPlanType.heading = What type of payment plan are you selecting?
+paymentPlanType.title = Tell us about this payment plan
+paymentPlanType.heading = Tell us about this payment plan
+paymentPlanType.heading.legend = Which payment plan do you need?
 paymentPlanType.singlePaymentPlan = A single payment
 paymentPlanType.variablePaymentPlan = A variable payment plan
 paymentPlanType.budgetPaymentPlan = A budget payment plan
@@ -439,8 +440,11 @@ paymentPlanDetails.inset.noAdvanceNotice.text = You do not currently have an adv
 paymentPlanDetails.advanceNotice.link = View advance notice.
 paymentPlanDetails.details.paymentReference = Payment reference: {0}
 paymentPlanDetails.details.amend = Amend
+paymentPlanDetails.details.amend.hidden = payment plan
 paymentPlanDetails.details.cancel = Cancel
+paymentPlanDetails.details.cancel.hidden = payment plan
 paymentPlanDetails.details.suspend = Suspend
+paymentPlanDetails.details.suspend.hidden = payment plan
 paymentPlanDetails.details.planType.label = Plan type
 paymentPlanDetails.details.planType.budgetPaymentPlan  = Budget payment
 paymentPlanDetails.details.planType.singlePaymentPlan = Single payment
@@ -531,6 +535,7 @@ suspensionPeriodRangeDate.error.invalid.startDate.base = Enter a valid date
 suspensionPeriodRangeDate.error.invalid.endDate.base = Enter a valid date
 suspensionPeriodRangeDate.error.startDate = Suspension period start date must be between {0} and {1}
 suspensionPeriodRangeDate.error.endDate = Suspension period end date must be between {0} and {1}
+suspensionPeriodRangeDate.change.hidden = suspension period
 
 checkYourSuspensionDetails.title = Check your suspension details
 checkYourSuspensionDetails.heading = Check your suspension details
@@ -691,8 +696,8 @@ amendPlanEndDate.hint = For example, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change to be processed. Extend or remove the plan end date if you wish to continue.
 amendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
 amendPlanEndDate.endDate = Plan end date
-amendPlanEndDate.change.endDate = change Plan end date
-amendPlanEndDate.remove.endDate = remove Plan end date
+amendPlanEndDate.change.endDate.hidden = Plan end date
+amendPlanEndDate.remove.endDate.hidden = Plan end date
 amendPlanEndDate.addPlanEndDateLink = Add plan end date
 
 #AP1d messages
