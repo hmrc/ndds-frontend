@@ -28,7 +28,7 @@
 
 @layout(pageTitle = title(form, messages("yourBankDetails.title")), backLink = Some(call.url)) {
 
-    @formHelper(action = routes.YourBankDetailsController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.YourBankDetailsController.onSubmit(mode)) {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
@@ -42,6 +42,8 @@
                 label = LabelViewModel(messages("yourBankDetails.accountHolderName"))
             )
             .withWidth(Full)
+            .withAttribute("spellcheck" -> "false")
+            .withAttribute("autocomplete" -> "accountHolderName")
         )
 
         @govukInput(
@@ -50,8 +52,8 @@
                 label = LabelViewModel(messages("yourBankDetails.sortCode"))
             )
             .withWidth(Fixed5)
-            .withInputType("number")
-            .withPattern("[0-9]*")
+            .withInputType("text")
+            .withAttribute("inputMode" -> "numeric")
             .withHint(Hint(content = Text(messages("yourBankDetails.sortCode.hint"))))
         )
 
@@ -61,8 +63,8 @@
                 label = LabelViewModel(messages("yourBankDetails.accountNumber"))
             )
             .withWidth(Fixed10)
-            .withInputType("number")
-            .withPattern("[0-9]*")
+            .withInputType("text")
+            .withAttribute("inputMode" -> "numeric")
             .withHint(Hint(content = Text(messages("yourBankDetails.accountNumber.hint"))))
         )
 
