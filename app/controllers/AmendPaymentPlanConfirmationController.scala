@@ -99,11 +99,16 @@ class AmendPaymentPlanConfirmationController @Inject() (
           ),
           userAnswers.get(AmendPlanEndDatePage) match {
             case Some(endDate) =>
-              AmendPlanEndDateSummary.row(
-                Some(endDate),
-                Constants.shortDateTimeFormatPattern,
-                true
-              )
+              if (userAnswers.get(AmendConfirmRemovePlanEndDatePage).contains(true)) {
+                AmendPlanEndDateSummary.addRow()
+              } else {
+                AmendPlanEndDateSummary.row(
+                  Some(endDate),
+                  Constants.shortDateTimeFormatPattern,
+                  true
+                )
+              }
+
             case None =>
               AmendPlanEndDateSummary.addRow()
           }
