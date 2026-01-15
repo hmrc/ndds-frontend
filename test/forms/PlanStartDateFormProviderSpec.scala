@@ -19,7 +19,7 @@ package forms
 import forms.behaviours.DateBehaviours
 import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
 import org.scalatest.TryValues
-import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
+import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PlanEndDatePage}
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
@@ -123,5 +123,24 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
       val result = formWithRules.bind(data)
       result.errors must contain(FormError("value", "planStartDate.error.timeToPayAfterMaxDate"))
     }
+
+    "fail binding when start date is after end date" in {
+      val userAnswers =
+        UserAnswers("id")
+          .set(PlanEndDatePage, LocalDate.of(2025, 1, 10))
+          .success
+          .value
+
+      val form = new PlanStartDateFormProvider().apply(userAnswers, LocalDate.of(2024, 1, 1))
+
+      val boundForm = form.bind(
+        Map("value.day" -> "15", "value.month" -> "1", "value.year" -> "2025")
+      )
+
+      boundForm.errors                must contain(FormError("value", "planStartDate.error.AfterOrEqualEndDate"))
+      boundForm.errors.map(_.message) must contain("planStartDate.error.AfterOrEqualEndDate")
+    }
+
   }
+
 }

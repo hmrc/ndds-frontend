@@ -18,7 +18,9 @@ package forms
 
 import forms.mappings.Mappings
 import models.UserAnswers
+import pages.PlanEndDatePage
 import play.api.data.Form
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.Messages
 import utils.DateFormats
 
@@ -27,7 +29,7 @@ import javax.inject.Inject
 
 class PlanStartDateFormProvider @Inject() extends Mappings {
 
-  def apply()(implicit messages: Messages): Form[LocalDate] =
+  def apply()(implicit messages: Messages): Form[LocalDate] = {
     Form(
       "value" -> customPaymentDate(
         invalidKey     = "planStartDate.error.invalid",
@@ -37,8 +39,9 @@ class PlanStartDateFormProvider @Inject() extends Mappings {
         dateFormats    = DateFormats.defaultDateFormats
       )
     )
+  }
 
-  def apply(userAnswers: UserAnswers, earliestPlanStartDate: LocalDate)(implicit messages: Messages): Form[LocalDate] =
+  def apply(userAnswers: UserAnswers, earliestPlanStartDate: LocalDate)(implicit messages: Messages): Form[LocalDate] = {
     Form(
       "value" -> planStartDate(
         invalidKey               = "planStartDate.error.invalid",
@@ -51,6 +54,18 @@ class PlanStartDateFormProvider @Inject() extends Mappings {
         dateFormats              = DateFormats.defaultDateFormats,
         userAnswers              = userAnswers,
         earliestPlanStartDate    = earliestPlanStartDate
+      ).verifying(
+        checkIfDateAfter(userAnswers.get(PlanEndDatePage), "planStartDate.error.AfterOrEqualEndDate")
       )
     )
+  }
+
+  private def checkIfDateAfter(endDateOpt: Option[LocalDate], errorKey: String): Constraint[LocalDate] =
+    Constraint { startDate =>
+      endDateOpt match {
+        case Some(endDate) if startDate.isAfter(endDate) => Invalid(ValidationError(errorKey))
+        case _                                           => Valid
+      }
+    }
+
 }
