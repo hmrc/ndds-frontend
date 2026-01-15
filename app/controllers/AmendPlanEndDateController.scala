@@ -110,7 +110,8 @@ class AmendPlanEndDateController @Inject() (
                       updatedAnswers <- Future.fromTry(updatedAnswers.set(CurrentPageQuery, request.uri))
                       updatedAnswers <-
                         Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentValidationResult.potentialNextPaymentDate.get))
-                      _ <- sessionRepository.set(updatedAnswers)
+                      updatedAnswers <- Future.fromTry(updatedAnswers.remove(AmendConfirmRemovePlanEndDatePage))
+                      _              <- sessionRepository.set(updatedAnswers)
                     } yield Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
                   }
                 }
