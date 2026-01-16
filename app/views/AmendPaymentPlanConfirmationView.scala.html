@@ -25,9 +25,9 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(mode: Mode, rows: Seq[SummaryListRow])(implicit request: Request[_], messages: Messages)
+@(mode: Mode, rows: Seq[SummaryListRow], call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("amendPaymentPlanConfirmation.title")), showBackLink = false) {
+@layout(pageTitle = titleNoForm(messages("amendPaymentPlanConfirmation.title")), backLink = Some(call.url)) {
     @formHelper(action = routes.AmendPaymentPlanConfirmationController.onSubmit(), Symbol("autoComplete") -> "off") {
         @header1("amendPaymentPlanConfirmation.heading")
 

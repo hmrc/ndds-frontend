@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import models.{PaymentPlanType, UserAnswers}
-import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
+import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -114,7 +114,11 @@ class AmendPaymentPlanUpdateController @Inject() (
     val planType: Option[String] = userAnswers.get(ManagePaymentPlanTypePage)
     val paymentAmount = userAnswers.get(AmendPaymentAmountPage)
     val planStartDate = userAnswers.get(AmendPlanStartDatePage)
-    val planEndDate = userAnswers.get(AmendPlanEndDatePage)
+    val planEndDate = if (userAnswers.get(AmendConfirmRemovePlanEndDatePage).contains(true)) {
+      None
+    } else {
+      userAnswers.get(AmendPlanEndDatePage)
+    }
 
     planType match {
       case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
