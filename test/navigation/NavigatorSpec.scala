@@ -390,7 +390,7 @@ class NavigatorSpec extends SpecBase {
           .success
           .value
 
-        navigator.nextPage(PlanStartDatePage, CheckMode, ua) mustBe routes.AddPaymentPlanEndDateController.onPageLoad(CheckMode)
+        navigator.nextPage(PlanStartDatePage, CheckMode, ua) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
       "must go from PlanStartDatePage to CheckYourAnswersController in CheckMode when DirectDebitSource is not SA" in {

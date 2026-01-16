@@ -145,9 +145,9 @@ class Navigator @Inject() () {
 
   private def navigateFromPlanStartDatePage(mode: Mode)(userAnswers: UserAnswers): Call =
     userAnswers.get(DirectDebitSourcePage) match {
-      case Some(DirectDebitSource.SA) => routes.AddPaymentPlanEndDateController.onPageLoad(mode)
-      case Some(_)                    => routes.CheckYourAnswersController.onPageLoad()
-      case None                       => routes.SystemErrorController.onPageLoad()
+      case Some(DirectDebitSource.SA) if mode == NormalMode => routes.AddPaymentPlanEndDateController.onPageLoad(mode)
+      case Some(_)                                          => routes.CheckYourAnswersController.onPageLoad()
+      case None                                             => routes.SystemErrorController.onPageLoad()
     }
 
   private def navigateFromCancelPaymentPlanPage(answers: UserAnswers): Call =
