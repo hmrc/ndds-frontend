@@ -48,11 +48,11 @@ class Navigator @Inject() () {
     case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad()
     case AddPaymentPlanEndDatePage            => userAnswers => navigateFromAddPaymentPlanEndDatePage(NormalMode)(userAnswers)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad()
+    case AmendConfirmRemovePlanEndDatePage    => userAnswers => navigateFromConfirmRemovePlanEndDatePage(NormalMode)(userAnswers)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
     case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
     case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
-    case AmendConfirmRemovePlanEndDatePage    => userAnswers => navigateFromConfirmRemovePlanEndDatePage(NormalMode)(userAnswers)
     case TellAboutThisPaymentPage             => userAnswers => navigateTellAboutThisPaymentPage(NormalMode)(userAnswers)
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
@@ -77,9 +77,9 @@ class Navigator @Inject() () {
     case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad()
     case AddPaymentPlanEndDatePage            => userAnswers => navigateFromAddPaymentPlanEndDatePage(CheckMode)(userAnswers)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad()
+    case AmendConfirmRemovePlanEndDatePage    => userAnswers => navigateFromConfirmRemovePlanEndDatePage(CheckMode)(userAnswers)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
-    case AmendConfirmRemovePlanEndDatePage    => userAnswers => navigateFromConfirmRemovePlanEndDatePage(CheckMode)(userAnswers)
     case TellAboutThisPaymentPage             => userAnswers => navigateTellAboutThisPaymentPage(CheckMode)(userAnswers)
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
@@ -161,10 +161,8 @@ class Navigator @Inject() () {
 
   private def navigateFromConfirmRemovePlanEndDatePage(mode: Mode)(userAnswers: UserAnswers): Call =
     (userAnswers.get(AmendConfirmRemovePlanEndDatePage), mode) match {
-      case (Some(true), _)           => routes.AmendPaymentPlanConfirmationController.onPageLoad()
-      case (Some(false), NormalMode) => routes.AmendingPaymentPlanController.onPageLoad()
-      case (Some(false), CheckMode)  => routes.AmendPaymentPlanConfirmationController.onPageLoad()
-      case (None, _)                 => routes.SystemErrorController.onPageLoad()
+      case (Some(_), _) => routes.AmendPaymentPlanConfirmationController.onPageLoad()
+      case (None, _)    => routes.SystemErrorController.onPageLoad()
     }
 
   private def navigateFromRemovingThisSuspensionPage(answers: UserAnswers): Call =

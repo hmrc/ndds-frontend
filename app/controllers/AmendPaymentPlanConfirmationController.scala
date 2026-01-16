@@ -203,7 +203,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
   }
 
   // F26 check for duplicate from RDS DB
-  private def checkDuplicatePlan(userAnswers: UserAnswers, updatedAmount: BigDecimal, updatedDate: Option[LocalDate])(implicit
+  private def checkDuplicatePlan(userAnswers: UserAnswers, amendedAmount: BigDecimal, amendedDate: Option[LocalDate])(implicit
     ec: ExecutionContext,
     request: Request[?]
   ): Future[Result] = {
@@ -213,10 +213,10 @@ class AmendPaymentPlanConfirmationController @Inject() (
       } else {
         val updatedAnswers = for {
           updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))
-          updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, updatedAmount))
+          updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, amendedAmount))
           updatedUa <- Future.fromTry(updatedUa.set(AmendPlanStartDatePage, userAnswers.get(AmendPlanStartDatePage).get))
-          updatedUa <- if (updatedDate.isDefined) {
-                         Future.fromTry(updatedUa.set(AmendPlanEndDatePage, updatedDate.get))
+          updatedUa <- if (amendedDate.isDefined) {
+                         Future.fromTry(updatedUa.set(AmendPlanEndDatePage, amendedDate.get))
                        } else {
                          Future.successful(updatedUa)
                        }
