@@ -28,7 +28,7 @@
 
 @layout(pageTitle = title(form, messages("yourBankDetails.title")), backLink = Some(call.url)) {
 
-    @formHelper(action = routes.YourBankDetailsController.onSubmit(mode)) {
+    @formHelper(action = routes.YourBankDetailsController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @if(form.errors.nonEmpty) {
             @govukErrorSummary(ErrorSummaryViewModel(form))
