@@ -276,7 +276,7 @@ planStartDate.error.invalid = Enter a valid date
 planStartDate.error.beforeEarliestDate = The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
 planStartDate.error.budgetAfterMaxDate = The date you have entered is not valid. It cannot be more than 12 months after the current date.
 planStartDate.error.timeToPayAfterMaxDate = The plan start date you have entered is not valid. It must be within 30 days of the current date.
-planStartDate.error.AfterOrEqualEndDate = The plan start date you have entered is not valid. It must be either the same or less than the plan end date.
+planStartDate.error.AfterOrEqualEndDate = Payment plan start date must be the same as or before the plan end date, which is {0}
 planStartDate.change.hidden =  Plan start date
 
 yearEndAndMonth.title = Add 4 extra numbers to your payment reference

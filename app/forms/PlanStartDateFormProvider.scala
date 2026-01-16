@@ -25,6 +25,7 @@ import play.api.i18n.Messages
 import utils.DateFormats
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class PlanStartDateFormProvider @Inject() extends Mappings {
@@ -55,17 +56,20 @@ class PlanStartDateFormProvider @Inject() extends Mappings {
         userAnswers              = userAnswers,
         earliestPlanStartDate    = earliestPlanStartDate
       ).verifying(
-        checkIfDateAfter(userAnswers.get(PlanEndDatePage), "planStartDate.error.AfterOrEqualEndDate")
+        checkIfDateAfter(userAnswers.get(PlanEndDatePage))
       )
     )
   }
 
-  private def checkIfDateAfter(endDateOpt: Option[LocalDate], errorKey: String): Constraint[LocalDate] =
+  private def checkIfDateAfter(endDateOpt: Option[LocalDate]): Constraint[LocalDate] = {
+    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
     Constraint { startDate =>
       endDateOpt match {
-        case Some(endDate) if startDate.isAfter(endDate) => Invalid(ValidationError(errorKey))
-        case _                                           => Valid
+        case Some(endDate) if startDate.isAfter(endDate) =>
+          Invalid(ValidationError("planStartDate.error.AfterOrEqualEndDate", endDate.format(formatter)))
+        case _ => Valid
       }
     }
+  }
 
 }
