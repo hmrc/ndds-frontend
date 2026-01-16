@@ -143,9 +143,8 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanEndDateView]
         val result = route(application, request).value
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", addPaymentPlanEndDateRoute))(request,
-                                                                                                               messages(application)
-                                                                                                              ).toString
+        contentAsString(result) mustEqual
+          view(boundForm, NormalMode, Call("GET", addPaymentPlanEndDateRoute))(request, messages(application)).toString
       }
     }
 
