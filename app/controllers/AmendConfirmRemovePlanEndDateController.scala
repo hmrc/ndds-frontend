@@ -25,7 +25,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentPlanDetailsQuery
+import queries.{CurrentPageQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -128,13 +128,8 @@ class AmendConfirmRemovePlanEndDateController @Inject() (
               value =>
                 for {
                   updatedAnswers <- Future.fromTry(ua.set(AmendConfirmRemovePlanEndDatePage, value))
-                  updatedAnswers <-
-                    if (value) {
-                      Future.fromTry(updatedAnswers.remove(AmendPlanEndDatePage))
-                    } else {
-                      Future.successful(updatedAnswers)
-                    }
-                  _ <- sessionRepository.set(updatedAnswers)
+                  updatedAnswers <- Future.fromTry(updatedAnswers.set(CurrentPageQuery, request.uri))
+                  _              <- sessionRepository.set(updatedAnswers)
                 } yield Redirect(navigator.nextPage(AmendConfirmRemovePlanEndDatePage, mode, updatedAnswers))
             )
 

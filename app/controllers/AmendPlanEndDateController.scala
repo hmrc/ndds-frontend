@@ -23,7 +23,7 @@ import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.PaymentPlanDetailsQuery
+import queries.{CurrentPageQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -107,9 +107,11 @@ class AmendPlanEndDateController @Inject() (
                   } else {
                     for {
                       updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))
+                      updatedAnswers <- Future.fromTry(updatedAnswers.set(CurrentPageQuery, request.uri))
                       updatedAnswers <-
                         Future.fromTry(updatedAnswers.set(AmendPlanStartDatePage, paymentValidationResult.potentialNextPaymentDate.get))
-                      _ <- sessionRepository.set(updatedAnswers)
+                      updatedAnswers <- Future.fromTry(updatedAnswers.remove(AmendConfirmRemovePlanEndDatePage))
+                      _              <- sessionRepository.set(updatedAnswers)
                     } yield Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
                   }
                 }

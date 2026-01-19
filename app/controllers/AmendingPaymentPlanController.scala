@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import models.{NormalMode, PaymentPlanType}
-import pages.{AmendPaymentAmountPage, ManagePaymentPlanTypePage, RegularPaymentAmountPage}
+import pages.{AmendConfirmRemovePlanEndDatePage, AmendPaymentAmountPage, ManagePaymentPlanTypePage, RegularPaymentAmountPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -127,6 +127,7 @@ class AmendingPaymentPlanController @Inject() (
       for {
         updatedAnswers <- Future.fromTry(request.userAnswers.set(RegularPaymentAmountPage, paymentAmount))
         updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, paymentAmount))
+        updatedAnswers <- Future.fromTry(updatedAnswers.remove(AmendConfirmRemovePlanEndDatePage))
         _              <- sessionRepository.set(updatedAnswers)
       } yield {
         Ok(view(appConfig.hmrcHelplineUrl, amountRow, dateRow))

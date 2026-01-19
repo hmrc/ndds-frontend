@@ -23,7 +23,7 @@ import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
-import queries.PaymentPlanDetailsQuery
+import queries.{CurrentPageQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
@@ -54,17 +54,17 @@ class AmendPaymentPlanConfirmationController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
-    val alreadyConfirmed: Boolean =
-      userAnswers.get(AmendPaymentPlanConfirmationPage).contains(true)
+    val alreadyConfirmed: Boolean = userAnswers.get(AmendPaymentPlanConfirmationPage).contains(true)
 
     if (alreadyConfirmed) {
       logger.warn("Attempt to load Cancel this payment plan confirmation; redirecting to Page Not Found.")
       Future.successful(Redirect(routes.BackSubmissionController.onPageLoad()))
     } else {
       if (nddService.amendPaymentPlanGuard(userAnswers)) {
-        Future.successful(Ok(view(mode, buildRows(userAnswers, mode))))
+        val currentPage = Call("GET", userAnswers.get(CurrentPageQuery).getOrElse(""))
+        Future.successful(Ok(view(mode, buildRows(userAnswers, mode), currentPage)))
       } else {
-        val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
+        val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
         logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
         Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
@@ -99,11 +99,16 @@ class AmendPaymentPlanConfirmationController @Inject() (
           ),
           userAnswers.get(AmendPlanEndDatePage) match {
             case Some(endDate) =>
-              AmendPlanEndDateSummary.row(
-                Some(endDate),
-                Constants.shortDateTimeFormatPattern,
-                true
-              )
+              if (userAnswers.get(AmendConfirmRemovePlanEndDatePage).contains(true)) {
+                AmendPlanEndDateSummary.addRow()
+              } else {
+                AmendPlanEndDateSummary.row(
+                  Some(endDate),
+                  Constants.shortDateTimeFormatPattern,
+                  true
+                )
+              }
+
             case None =>
               AmendPlanEndDateSummary.addRow()
           }
@@ -198,7 +203,7 @@ class AmendPaymentPlanConfirmationController @Inject() (
   }
 
   // F26 check for duplicate from RDS DB
-  private def checkDuplicatePlan(userAnswers: UserAnswers, updatedAmount: BigDecimal, updatedDate: Option[LocalDate])(implicit
+  private def checkDuplicatePlan(userAnswers: UserAnswers, amendedAmount: BigDecimal, amendedDate: Option[LocalDate])(implicit
     ec: ExecutionContext,
     request: Request[?]
   ): Future[Result] = {
@@ -208,10 +213,15 @@ class AmendPaymentPlanConfirmationController @Inject() (
       } else {
         val updatedAnswers = for {
           updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))
-          updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, updatedAmount))
+          updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, amendedAmount))
           updatedUa <- Future.fromTry(updatedUa.set(AmendPlanStartDatePage, userAnswers.get(AmendPlanStartDatePage).get))
-          updatedUa <- if (updatedDate.isDefined) {
-                         Future.fromTry(updatedUa.set(AmendPlanEndDatePage, updatedDate.get))
+          updatedUa <- if (userAnswers.get(AmendConfirmRemovePlanEndDatePage).contains(true)) {
+                         Future.fromTry(updatedUa.remove(AmendPlanEndDatePage))
+                       } else {
+                         Future.successful(updatedUa)
+                       }
+          updatedUa <- if (amendedDate.isDefined) {
+                         Future.fromTry(updatedUa.set(AmendPlanEndDatePage, amendedDate.get))
                        } else {
                          Future.successful(updatedUa)
                        }
