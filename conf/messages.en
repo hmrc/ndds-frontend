@@ -161,8 +161,9 @@ directDebitSource.otherLiability = Other liability
 directDebitSource.change.hidden = Payment for
 directDebitSource.error.required = Select one option.
 
-paymentPlanType.title = What type of payment plan are you selecting?
-paymentPlanType.heading = What type of payment plan are you selecting?
+paymentPlanType.title = Tell us about this payment plan
+paymentPlanType.heading = Tell us about this payment plan
+paymentPlanType.heading.legend = Which payment plan do you need?
 paymentPlanType.singlePaymentPlan = A single payment
 paymentPlanType.variablePaymentPlan = A variable payment plan
 paymentPlanType.budgetPaymentPlan = A budget payment plan
@@ -262,6 +263,7 @@ planStartDate.error.invalid = Enter a valid date
 planStartDate.error.beforeEarliestDate = The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
 planStartDate.error.budgetAfterMaxDate = The date you have entered is not valid. It cannot be more than 12 months after the current date.
 planStartDate.error.timeToPayAfterMaxDate = The plan start date you have entered is not valid. It must be within 30 days of the current date.
+planStartDate.error.AfterOrEqualEndDate = Payment plan start date must be the same as or before the plan end date, which is {0}
 planStartDate.change.hidden = Plan start date
 
 tellAboutThisPayment.title = Tell us about this payment
@@ -339,7 +341,7 @@ totalAmountDue.heading = How much is the total amount due, in pounds?
 totalAmountDue.p1 = This is the total amount due to HMRC.
 totalAmountDue.hint = Amount must be in pounds and pence, like 967 or 967.82
 totalAmountDue.checkYourAnswersLabel = Total amount due
-totalAmountDue.change.hidden =  Total amount due
+totalAmountDue.change.hidden = Total amount due
 totalAmountDue.monthly.checkYourAnswersLabel = Monthly payment amount
 totalAmountDue.final.checkYourAnswersLabel = Final payment amount
 totalAmountDue.error.nonNumeric = Enter a valid amount
@@ -448,8 +450,11 @@ paymentPlanDetails.inset.noAdvanceNotice.text = You do not currently have an adv
 paymentPlanDetails.advanceNotice.link = View advance notice.
 paymentPlanDetails.details.paymentReference = Payment reference: {0}
 paymentPlanDetails.details.amend = Amend
+paymentPlanDetails.details.amend.hidden = payment plan
 paymentPlanDetails.details.cancel = Cancel
+paymentPlanDetails.details.cancel.hidden = payment plan
 paymentPlanDetails.details.suspend = Suspend
+paymentPlanDetails.details.suspend.hidden = payment plan
 paymentPlanDetails.details.planType.label = Plan type
 paymentPlanDetails.details.planType.budgetPaymentPlan  = Budget payment
 paymentPlanDetails.details.planType.singlePaymentPlan = Single payment
@@ -545,6 +550,7 @@ suspensionPeriodRangeDate.error.invalid.startDate.base = Enter a valid date
 suspensionPeriodRangeDate.error.invalid.endDate.base = Enter a valid date
 suspensionPeriodRangeDate.error.startDate = Suspension period start date must be between {0} and {1}
 suspensionPeriodRangeDate.error.endDate = Suspension period end date must be between {0} and {1}
+suspensionPeriodRangeDate.change.hidden = suspension period
 
 checkYourSuspensionDetails.title = Check your suspension details
 checkYourSuspensionDetails.heading = Check your suspension details
@@ -627,7 +633,6 @@ systemError.heading     = Sorry, there is a problem with this service
 systemError.p1          = Try again later or contact the
 systemError.link        = HMRC Online Services Helpdesk (opens in a new tab)
 
-#AP0 messages
 amendingPaymentPlan.title = Amending this payment plan
 amendingPaymentPlan.heading = Amending this payment plan
 amendingPaymentPlan.p2.prefix = For security reasons,
@@ -639,7 +644,6 @@ amendingPaymentPlan.list.3 = payment reference
 amendingPaymentPlan.p3 = Payments due within the next 3 working days cannot be amended.
 amendingPaymentPlan.cancel.link = Cancel and return to payment plan
 
-#AP1a messages
 amendPaymentAmount.title = How much do you want to pay, in pounds?
 amendPaymentAmount.heading = How much do you want to pay, in pounds?
 amendPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
@@ -649,7 +653,6 @@ amendRegularPaymentAmount.title = How much is the regular payment amount, in pou
 amendRegularPaymentAmount.heading = How much is the regular payment amount, in pounds?
 amendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
 
-#AP1b messages
 amendPlanStartDate.title = When do you want to make this payment?
 amendPlanStartDate.heading = When do you want to make this payment?
 amendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
@@ -659,7 +662,6 @@ amendPlanStartDate.error.beforeEarliest=The date you have entered is not valid. 
 amendPlanStartDate.error.tooFarInFuture=The date you have entered is not valid. It cannot be more than 12 months after the current date.
 amendPlanStartDate.startDate = Plan start date
 
-#AP1c messages
 amendPlanEndDate.title = When do you want this payment plan to end?
 amendPlanEndDate.heading = When do you want this payment plan to end?
 amendPlanEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
@@ -667,11 +669,10 @@ amendPlanEndDate.hint = For example, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change to be processed. Extend or remove the plan end date if you wish to continue.
 amendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
 amendPlanEndDate.endDate = Plan end date
-amendPlanEndDate.change.endDate = change Plan end date
-amendPlanEndDate.remove.endDate = remove Plan end date
+amendPlanEndDate.change.endDate.hidden = Plan end date
+amendPlanEndDate.remove.endDate.hidden = Plan end date
 amendPlanEndDate.addPlanEndDateLink = Add plan end date
 
-#AP1d messages
 amendConfirmRemovePlanEndDate.title = Removing this plan end date
 amendConfirmRemovePlanEndDate.heading = Removing this plan end date
 amendConfirmRemovePlanEndDate.p1.line1 = Payment reference: <strong>{0}</strong>
@@ -681,15 +682,16 @@ amendConfirmRemovePlanEndDate.checkYourAnswersLabel = Removing this plan end dat
 amendConfirmRemovePlanEndDate.change.hidden = Removing this plan end date
 amendConfirmRemovePlanEndDate.error.required = Select one option.
 
-#AP2 messages
 amendPaymentPlanConfirmation.title = Check your amendment details
 amendPaymentPlanConfirmation.heading = Check your amendment details
 amendPaymentPlanConfirmation.confirmAndContinue.button = Confirm and continue
 amendPaymentPlanConfirmation.cancel.link = Cancel and return to payment plan
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor = Payment for
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Payment reference: {0}
 
-#AP3 messages
 amendPaymentPlanUpdate.title = Payment plan amended
 amendPaymentPlanUpdate.panel.title = Payment plan amended
+amendPaymentPlanUpdate.h1 = What happens next
 amendPaymentPlanUpdate.SinglePlan.p1 = This payment plan has now been amended. The payment of {0} will be collected on {1}.
 amendPaymentPlanUpdate.BudgetPlan.p1 = This payment plan has now been amended. The next payment of {0} for this plan will be collected on {1}.
 amendPaymentPlanUpdate.p2 = Any existing suspension on this payment plan will be removed. It may take up to 36 hours for this amendment to appear in your account.
@@ -710,62 +712,14 @@ amendPaymentPlanUpdate.amendedPlan = Your amended payment plan
 amendPaymentPlanUpdate.printInset = You can print this page for your records using the print function on your browser.
 amendPaymentPlanUpdate.returnLink = Return to payment plan
 
-#DW1 messages
 amendDuplicateWarning.title = You already have a payment plan with these details
 amendDuplicateWarning.h1 = You already have a payment plan with these details
-amendDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
 amendDuplicateWarning.h2 = Do you want to continue with this amendment?
-
-
-############### OLD AMEND MESSAGES #################
-
-amendPaymentPlanConfirmation.p1 = This amendment will remove any suspension that you have in place. Check that the details below are correct, then click ''Continue'' to proceed. For security reasons, you may be asked to re-authenticate your details.
-amendPaymentPlanConfirmation.directDebit.h2 = Direct Debit details
-amendPaymentPlanConfirmation.directDebit.reference = Direct Debit reference
-amendPaymentPlanConfirmation.directDebit.accountNumber = Account number
-amendPaymentPlanConfirmation.directDebit.sortCode = Bank sort code
-amendPaymentPlanConfirmation.amendPaymentPlan.h2 = Amended Payment plan details
-amendPaymentPlanConfirmation.amendPaymentPlan.planType = Plan type
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor = Payment for
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Payment reference: {0}
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentAmount = Regular payment amount
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentAmount.change = Change
-amendPaymentPlanConfirmation.amendPaymentPlan.startDate = Plan start date
-amendPaymentPlanConfirmation.amendPaymentPlan.startDate.change = Change
-amendPaymentPlanConfirmation.amendPaymentPlan.endDate = Plan end date
-amendPaymentPlanConfirmation.amendPaymentPlan.endDate.change = Change
-amendPaymentPlanConfirmation.amendPaymentPlan.continueButton = Continue
-amendPaymentPlanConfirmation.summary.link = Why can't I edit all information?
-amendPaymentPlanConfirmation.summary.content = You can change payment amounts and dates online, but you''ll need to contact us to change details that were set when your plan was created. This is for verification and security reasons. Call our customer service team on 0845 366 1208.
-
-amendPaymentPlanUpdate.panel.body1 = Your payment reference
-amendPaymentPlanUpdate.panel.strong = <br><strong>{0}</strong>
-amendPaymentPlanUpdate.panel.body2 = <br>has been successfully updated
-amendPaymentPlanUpdate.confirm = We''ve sent a confirmation email to your registered email address.
-amendPaymentPlanUpdate.h1 = What happens next
-amendPaymentPlanUpdate.p1 = Your updated payment plan will take effect from your next scheduled payment date.
-amendPaymentPlanUpdate.l1 = Your new payment amount of {0} will be collected monthly starting {1}
-amendPaymentPlanUpdate.l2 = Any existing suspension on your account has been removed
-amendPaymentPlanUpdate.l3 = You can view or change your payment plan at any time
-amendPaymentPlanUpdate.pleaseNote = It may take up to 24 hours for changes to appear in your online account.
-amendPaymentPlanUpdate.h2 = Your updated payment plan
-amendPaymentPlanUpdate.reference = Payment reference
-amendPaymentPlanUpdate.amount = Regular payment amount
-amendPaymentPlanUpdate.startDate = Plan start date
-amendPaymentPlanUpdate.endDate = Plan end date
-amendPaymentPlanUpdate.print = Print this confirmation
-amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
-amendPaymentPlanUpdate.close = Close
-
-duplicateWarning.error.required = Select one option
-duplicateWarning.change.hidden =  Duplicate Warning
-duplicateWarning.yes= Yes
-duplicateWarning.no= No
-###########################################
+amendDuplicateWarning.p1 = You already have a payment plan set up with the same amount and dates.
+amendDuplicateWarning.error.required = Select one option
 
 errorWarning.title = This payment plan cannot be set up
 errorWarning.heading = This payment plan cannot be set up
 errorWarning.p1 = This payment plan cannot be set up because the details are invalid. You need to change the following details to continue:
 errorWarning.bulletList1 = plan end date must be on or after the plan start date
 errorWarning.link = Change your payment plan details.
-

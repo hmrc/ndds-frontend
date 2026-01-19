@@ -287,14 +287,24 @@ class NavigatorSpec extends SpecBase {
             routes.SystemErrorController.onPageLoad()
         }
 
-        "must go from a AmendConfirmRemovePlanEndDatePage to ap0  when No" in {
+        "must go from a AmendConfirmRemovePlanEndDatePage to AP2 when Yes selected" in {
+          val ua = userAnswers
+            .set(AmendConfirmRemovePlanEndDatePage, true)
+            .success
+            .value
+
+          navigator.nextPage(AmendConfirmRemovePlanEndDatePage, NormalMode, ua) mustBe
+            routes.AmendPaymentPlanConfirmationController.onPageLoad()
+        }
+
+        "must go from a AmendConfirmRemovePlanEndDatePage to AP2 when No selected" in {
           val ua = userAnswers
             .set(AmendConfirmRemovePlanEndDatePage, false)
             .success
             .value
 
           navigator.nextPage(AmendConfirmRemovePlanEndDatePage, NormalMode, ua) mustBe
-            routes.AmendingPaymentPlanController.onPageLoad()
+            routes.AmendPaymentPlanConfirmationController.onPageLoad()
         }
 
         "must go from a AmendConfirmRemovePlanEndDatePage to System Error Page when no answer" in {
@@ -390,7 +400,7 @@ class NavigatorSpec extends SpecBase {
           .success
           .value
 
-        navigator.nextPage(PlanStartDatePage, CheckMode, ua) mustBe routes.AddPaymentPlanEndDateController.onPageLoad(CheckMode)
+        navigator.nextPage(PlanStartDatePage, CheckMode, ua) mustBe routes.CheckYourAnswersController.onPageLoad()
       }
 
       "must go from PlanStartDatePage to CheckYourAnswersController in CheckMode when DirectDebitSource is not SA" in {

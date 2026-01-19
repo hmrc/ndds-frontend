@@ -21,7 +21,7 @@ import play.api.data.FormError
 
 class DuplicateWarningFormProviderSpec extends BooleanFieldBehaviours {
 
-  private val requiredKey = "duplicateWarning.error.required"
+  private val requiredKey = "amendDuplicateWarning.error.required"
   private val invalidKey = "error.boolean"
 
   val form = new DuplicateWarningFormProvider()()

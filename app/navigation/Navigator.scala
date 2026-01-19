@@ -48,11 +48,11 @@ class Navigator @Inject() () {
     case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad()
     case AddPaymentPlanEndDatePage            => userAnswers => navigateFromAddPaymentPlanEndDatePage(NormalMode)(userAnswers)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad()
+    case AmendConfirmRemovePlanEndDatePage    => userAnswers => navigateFromConfirmRemovePlanEndDatePage(NormalMode)(userAnswers)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode)
     case SuspensionDetailsCheckYourAnswerPage => _ => routes.PaymentPlanSuspendedController.onPageLoad()
     case CancelPaymentPlanPage                => navigateFromCancelPaymentPlanPage
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
-    case AmendConfirmRemovePlanEndDatePage    => navigateFromConfirmRemovePlanEndDatePage
     case TellAboutThisPaymentPage             => userAnswers => navigateTellAboutThisPaymentPage(NormalMode)(userAnswers)
     case _                                    => _ => routes.LandingController.onPageLoad()
   }
@@ -77,6 +77,7 @@ class Navigator @Inject() () {
     case AmendPlanStartDatePage               => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad()
     case AddPaymentPlanEndDatePage            => userAnswers => navigateFromAddPaymentPlanEndDatePage(CheckMode)(userAnswers)
     case AmendPlanEndDatePage                 => _ => routes.AmendPaymentPlanConfirmationController.onPageLoad()
+    case AmendConfirmRemovePlanEndDatePage    => userAnswers => navigateFromConfirmRemovePlanEndDatePage(CheckMode)(userAnswers)
     case SuspensionPeriodRangeDatePage        => _ => routes.CheckYourSuspensionDetailsController.onPageLoad(CheckMode)
     case RemovingThisSuspensionPage           => navigateFromRemovingThisSuspensionPage
     case TellAboutThisPaymentPage             => userAnswers => navigateTellAboutThisPaymentPage(CheckMode)(userAnswers)
@@ -144,9 +145,9 @@ class Navigator @Inject() () {
 
   private def navigateFromPlanStartDatePage(mode: Mode)(userAnswers: UserAnswers): Call =
     userAnswers.get(DirectDebitSourcePage) match {
-      case Some(DirectDebitSource.SA) => routes.AddPaymentPlanEndDateController.onPageLoad(mode)
-      case Some(_)                    => routes.CheckYourAnswersController.onPageLoad()
-      case None                       => routes.SystemErrorController.onPageLoad()
+      case Some(DirectDebitSource.SA) if mode == NormalMode => routes.AddPaymentPlanEndDateController.onPageLoad(mode)
+      case Some(_)                                          => routes.CheckYourAnswersController.onPageLoad()
+      case None                                             => routes.SystemErrorController.onPageLoad()
     }
 
   private def navigateFromCancelPaymentPlanPage(answers: UserAnswers): Call =
@@ -158,14 +159,11 @@ class Navigator @Inject() () {
       }
       .getOrElse(routes.SystemErrorController.onPageLoad())
 
-  private def navigateFromConfirmRemovePlanEndDatePage(answers: UserAnswers): Call =
-    answers
-      .get(AmendConfirmRemovePlanEndDatePage)
-      .map {
-        case true  => routes.AmendPaymentPlanConfirmationController.onPageLoad()
-        case false => routes.AmendingPaymentPlanController.onPageLoad()
-      }
-      .getOrElse(routes.SystemErrorController.onPageLoad())
+  private def navigateFromConfirmRemovePlanEndDatePage(mode: Mode)(userAnswers: UserAnswers): Call =
+    (userAnswers.get(AmendConfirmRemovePlanEndDatePage), mode) match {
+      case (Some(_), _) => routes.AmendPaymentPlanConfirmationController.onPageLoad()
+      case (None, _)    => routes.SystemErrorController.onPageLoad()
+    }
 
   private def navigateFromRemovingThisSuspensionPage(answers: UserAnswers): Call =
     answers

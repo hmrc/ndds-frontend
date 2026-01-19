@@ -23,6 +23,7 @@ import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.*
+import queries.CurrentPageQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -104,6 +105,7 @@ class AmendPlanStartDateController @Inject() (
           value =>
             for {
               updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(CurrentPageQuery, request.uri))
               _              <- sessionRepository.set(updatedAnswers)
             } yield {
               Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())

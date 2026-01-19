@@ -163,6 +163,7 @@ directDebitSource.error.required = Dewiswch un opsiwn.
 
 paymentPlanType.title = Pa fath o gynllun talu rydych chi’n ei ddewis?
 paymentPlanType.heading = Pa fath o gynllun talu rydych chi’n ei ddewis?
+paymentPlanType.heading.legend = Which payment plan do you need?
 paymentPlanType.singlePaymentPlan = Taliad unigol
 paymentPlanType.variablePaymentPlan = Cynllun taliadau newidiol
 paymentPlanType.budgetPaymentPlan = Cynllun talu cyllidebol
@@ -262,6 +263,7 @@ planStartDate.error.invalid = Nodwch ddyddiad dilys
 planStartDate.error.beforeEarliestDate = Nid yw’r dyddiad a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â’r dyddiad cynharaf a ddangosir neu’n fwy na hynny.
 planStartDate.error.budgetAfterMaxDate = Nid yw’r dyddiad a nodwyd gennych yn ddilys. Ni all fod yn fwy na 12 mis ar ôl y dyddiad cyfredol.
 planStartDate.error.timeToPayAfterMaxDate = Nid yw dyddiad dechrau’r cynllun a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod o fewn 30 diwrnod i’r dyddiad cyfredol.
+planStartDate.error.AfterOrEqualEndDate = Payment plan start date must be the same as or before the plan end date, which is {0}
 planStartDate.change.hidden = Plan start date
 
 tellAboutThisPayment.title = Rhowch wybod i ni am y taliad hwn
@@ -339,7 +341,7 @@ totalAmountDue.heading = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
 totalAmountDue.p1 = Dyma’r cyfanswm sy’n ddyledus i CThEF.
 totalAmountDue.hint = Mae’n rhaid i’r swm fod mewn punnoedd a cheiniogau, fel 967 neu 967.82
 totalAmountDue.checkYourAnswersLabel = Total amount due
-totalAmountDue.change.hidden =  Total amount due
+totalAmountDue.change.hidden = Total amount due
 totalAmountDue.monthly.checkYourAnswersLabel = Monthly payment amount
 totalAmountDue.final.checkYourAnswersLabel = Final payment amount
 totalAmountDue.error.nonNumeric = Nodwch swm dilys
@@ -359,12 +361,12 @@ checkYourAnswers.collapsable.p2 = Os bydd unrhyw newidiadau i swm, dyddiad neu a
 checkYourAnswers.collapsable.p3 = Os gwneir camgymeriad gan CThEF neu eich banc neu gymdeithas adeiladu wrth dalu’ch Debyd Uniongyrchol, mae gennych hawl i ad-daliad llawn, ar unwaith, o’r swm a dalwyd gan eich banc neu’ch cymdeithas adeiladu.
 checkYourAnswers.collapsable.p4 = Os byddwch yn cael ad-daliad nad oes hawl gennych iddo, bydd yn rhaid i chi ei dalu’n ôl pan fydd CThEF yn gofyn i chi wneud hynny.
 checkYourAnswers.collapsable.p5 = Gallwch ganslo Debyd Uniongyrchol ar unrhyw adeg drwy gysylltu â’ch banc neu’ch cymdeithas adeiladu. Efallai y bydd angen cadarnhad ysgrifenedig.
-checkYourAnswers.directDebitSource = Taliad ar gyfer
 checkYourAnswers.paymentPlanType = Math o gynllun
 checkYourAnswers.paymentPlanType.singlePaymentPlan = Taliad unigol
 checkYourAnswers.paymentPlanType.variablePaymentPlan = Variable payment
 checkYourAnswers.paymentPlanType.budgetPaymentPlan = Budget payment
 checkYourAnswers.paymentPlanType.taxCreditRepaymentPlan = Cynllun ad-dalu credydau treth
+checkYourAnswers.directDebitSource = Taliad ar gyfer
 checkYourAnswers.acceptAndSubmit = Accept and submit
 
 duplicateError.title = Ni allwch sefydlu cynllun talu dyblyg
@@ -448,8 +450,11 @@ paymentPlanDetails.inset.noAdvanceNotice.text = Ar hyn o bryd, nid oes gennych h
 paymentPlanDetails.advanceNotice.link = Bwrw golwg dros yr hysbysiad ymlaen llaw.
 paymentPlanDetails.details.paymentReference = Cyfeirnod talu: {0}
 paymentPlanDetails.details.amend = Diwygio
+paymentPlanDetails.details.amend.hidden = payment plan
 paymentPlanDetails.details.cancel = Canslo
+paymentPlanDetails.details.cancel.hidden = payment plan
 paymentPlanDetails.details.suspend = Gohirio
+paymentPlanDetails.details.suspend.hidden = payment plan
 paymentPlanDetails.details.planType.label = Math o gynllun
 paymentPlanDetails.details.planType.budgetPaymentPlan  = Budget payment
 paymentPlanDetails.details.planType.singlePaymentPlan = Taliad unigol
@@ -545,6 +550,7 @@ suspensionPeriodRangeDate.error.invalid.startDate.base = Enter a real start date
 suspensionPeriodRangeDate.error.invalid.endDate.base = Enter a real end date.
 suspensionPeriodRangeDate.error.startDate = Mae’n i ddyddiad decrhau’r cyfnod gohirio fod rhwng {0} a {1}
 suspensionPeriodRangeDate.error.endDate = Mae’n rhaid i ddyddiad diwedd y cyfnod gohirio fod rhwng {0} a {1}
+suspensionPeriodRangeDate.change.hidden = suspension period
 
 checkYourSuspensionDetails.title = Gwirio manylion eich gohiriad
 checkYourSuspensionDetails.heading = Gwirio manylion eich gohiriad
@@ -627,7 +633,6 @@ systemError.heading     = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth 
 systemError.p1          = Try again later or contact the
 systemError.link        = Desg Gymorth Gwasanaethau Ar-lein CThEF (opens in a new tab)
 
-#AP0 messages
 amendingPaymentPlan.title = Diwygio’r cynllun talu hwn
 amendingPaymentPlan.heading = Diwygio’r cynllun talu hwn
 amendingPaymentPlan.p2.prefix = Am resymau diogelwch,
@@ -639,7 +644,6 @@ amendingPaymentPlan.list.3 = cyfeirnod talu
 amendingPaymentPlan.p3 = Ni ellir diwygio taliadau sy’n ddyledus o fewn y 3 diwrnod gwaith nesaf.
 amendingPaymentPlan.cancel.link = Canslo a mynd yn ôl i’r cynllun talu
 
-#AP1a messages
 amendPaymentAmount.title = How much do you want to pay, in pounds?
 amendPaymentAmount.heading = How much do you want to pay, in pounds?
 amendPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
@@ -649,7 +653,6 @@ amendRegularPaymentAmount.title = How much is the regular payment amount, in pou
 amendRegularPaymentAmount.heading = How much is the regular payment amount, in pounds?
 amendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
 
-#AP1b messages
 amendPlanStartDate.title = When do you want to make this payment?
 amendPlanStartDate.heading = When do you want to make this payment?
 amendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
@@ -659,7 +662,6 @@ amendPlanStartDate.error.beforeEarliest = Nid yw’r dyddiad a nodwyd gennych yn
 amendPlanStartDate.error.tooFarInFuture = Nid yw’r dyddiad a nodwyd gennych yn ddilys. Ni all fod yn fwy na 12 mis ar ôl y dyddiad cyfredol.
 amendPlanStartDate.startDate = Dyddiad dechrau’r cynllun
 
-#AP1c messages
 amendPlanEndDate.title = When do you want this payment plan to end?
 amendPlanEndDate.heading = When do you want this payment plan to end?
 amendPlanEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
@@ -667,11 +669,10 @@ amendPlanEndDate.hint = For example, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = Nid oes digon o amser cyn dyddiad dod i ben y cynllun i brosesu’r newid rydych wedi gofyn amdano. Estyn neu ddileu dyddiad dod i ben y cynllun os ydych am barhau.
 amendPlanEndDate.error.planEndDateBeforeStartDate = Nid yw dyddiad dod i ben y cynllun a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â dyddiad dechrau’r cynllun neu’n fwy na hynny.
 amendPlanEndDate.endDate = Dyddiad dod i ben y cynllun
-amendPlanEndDate.change.endDate = change Plan end date
-amendPlanEndDate.remove.endDate = remove Plan end date
-amendPlanEndDate.addPlanEndDateLink = Ychwanegu dyddiad dod i ben y cynllun
+amendPlanEndDate.change.endDate.hidden = Plan end date
+amendPlanEndDate.remove.endDate.hidden = Plan end date
+amendPlanEndDate.addPlanEndDateLink = Add plan end date
 
-#AP1d messages
 amendConfirmRemovePlanEndDate.title = Tynnu dyddiad dod i ben y cynllun hwn
 amendConfirmRemovePlanEndDate.heading = Tynnu dyddiad dod i ben y cynllun hwn
 amendConfirmRemovePlanEndDate.p1.line1 = Cyfeirnod talu: <strong>{0}</strong>
@@ -681,15 +682,16 @@ amendConfirmRemovePlanEndDate.checkYourAnswersLabel = Tynnu dyddiad dod i ben y 
 amendConfirmRemovePlanEndDate.change.hidden = Tynnu dyddiad dod i ben y cynllun hwn
 amendConfirmRemovePlanEndDate.error.required = Dewiswch un opsiwn.
 
-#AP2 messages
 amendPaymentPlanConfirmation.title = Gwirio manylion eich diwygiad
 amendPaymentPlanConfirmation.heading = Gwirio manylion eich diwygiad
 amendPaymentPlanConfirmation.confirmAndContinue.button = Cadarnhau a pharhau
 amendPaymentPlanConfirmation.cancel.link = Canslo a mynd yn ôl i’r cynllun talu
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor = Payment for
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Payment reference: {0}
 
-#AP3 messages
 amendPaymentPlanUpdate.title = Cynllun talu wedi’i ddiwygio
 amendPaymentPlanUpdate.panel.title = Cynllun talu wedi’i ddiwygio
+amendPaymentPlanUpdate.h1 = What happens next
 amendPaymentPlanUpdate.SinglePlan.p1 = Mae’r cynllun talu hwn bellach wedi’i ddiwygio. Bydd taliad o {0} yn cael ei gasglu ar {1}.
 amendPaymentPlanUpdate.BudgetPlan.p1 = This payment plan has now been amended. The next payment of {0} for this plan will be collected on {1}.
 amendPaymentPlanUpdate.p2 = Bydd unrhyw ohiriad sy’n bodoli ar y cynllun talu hwn yn cael ei dynnu. Gall gymryd hyd at 36 awr i’r diwygiad hwn ymddangos yn eich cyfrif.
@@ -710,62 +712,14 @@ amendPaymentPlanUpdate.amendedPlan = Eich cynllun talu sydd wedi’i ddiwygio
 amendPaymentPlanUpdate.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
 amendPaymentPlanUpdate.returnLink = Yn ôl i’r cynllun talu
 
-#DW1 messages
 amendDuplicateWarning.title = Mae gennych gynllun talu eisoes gyda’r manylion hyn
 amendDuplicateWarning.h1 = Mae gennych gynllun talu eisoes gyda’r manylion hyn
-amendDuplicateWarning.p1 = Mae gennych gynllun talu wedi’i sefydlu eisoes sydd â’r un symiau a dyddiadau.
 amendDuplicateWarning.h2 = A hoffech fynd yn eich blaen â’r diwygiad hwn?
-
-
-############### OLD AMEND MESSAGES #################
-
-amendPaymentPlanConfirmation.p1 = This amendment will remove any suspension that you have in place. Check that the details below are correct, then click ''Continue'' to proceed. For security reasons, you may be asked to re-authenticate your details.
-amendPaymentPlanConfirmation.directDebit.h2 = Direct Debit details
-amendPaymentPlanConfirmation.directDebit.reference = Direct Debit reference
-amendPaymentPlanConfirmation.directDebit.accountNumber = Account number
-amendPaymentPlanConfirmation.directDebit.sortCode = Bank sort code
-amendPaymentPlanConfirmation.amendPaymentPlan.h2 = Amended Payment plan details
-amendPaymentPlanConfirmation.amendPaymentPlan.planType = Math o gynllun
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor = Taliad ar gyfer
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Payment reference: {0}
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentAmount = Swm y taliad rheolaidd
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentAmount.change = Newid
-amendPaymentPlanConfirmation.amendPaymentPlan.startDate = Dyddiad dechrau’r cynllun
-amendPaymentPlanConfirmation.amendPaymentPlan.startDate.change = Newid
-amendPaymentPlanConfirmation.amendPaymentPlan.endDate = Dyddiad dod i ben y cynllun
-amendPaymentPlanConfirmation.amendPaymentPlan.endDate.change = Newid
-amendPaymentPlanConfirmation.amendPaymentPlan.continueButton = Continue
-amendPaymentPlanConfirmation.summary.link = Why can't I edit all information?
-amendPaymentPlanConfirmation.summary.content = You can change payment amounts and dates online, but you''ll need to contact us to change details that were set when your plan was created. This is for verification and security reasons. Call our customer service team on 0845 366 1208.
-
-amendPaymentPlanUpdate.panel.body1 = Your payment reference
-amendPaymentPlanUpdate.panel.strong = <br><strong>{0}</strong>
-amendPaymentPlanUpdate.panel.body2 = <br>has been successfully updated
-amendPaymentPlanUpdate.confirm = We''ve sent a confirmation email to your registered email address.
-amendPaymentPlanUpdate.h1 = What happens next
-amendPaymentPlanUpdate.p1 = Your updated payment plan will take effect from your next scheduled payment date.
-amendPaymentPlanUpdate.l1 = Your new payment amount of {0} will be collected monthly starting {1}
-amendPaymentPlanUpdate.l2 = Any existing suspension on your account has been removed
-amendPaymentPlanUpdate.l3 = You can view or change your payment plan at any time
-amendPaymentPlanUpdate.pleaseNote = It may take up to 24 hours for changes to appear in your online account.
-amendPaymentPlanUpdate.h2 = Your updated payment plan
-amendPaymentPlanUpdate.reference = Payment reference
-amendPaymentPlanUpdate.amount = Swm y taliad rheolaidd
-amendPaymentPlanUpdate.startDate = Dyddiad dechrau’r cynllun
-amendPaymentPlanUpdate.endDate = Dyddiad dod i ben y cynllun
-amendPaymentPlanUpdate.print = Print this confirmation
-amendPaymentPlanUpdate.printDetails = You can print this page for your records using your browser''s print function. We recommend keeping a copy of this confirmation.
-amendPaymentPlanUpdate.close = Close
-
-duplicateWarning.error.required = Dewiswch un opsiwn
-duplicateWarning.change.hidden =  Duplicate Warning
-duplicateWarning.yes= Yes
-duplicateWarning.no= No
-###########################################
+amendDuplicateWarning.p1 = Mae gennych gynllun talu wedi’i sefydlu eisoes sydd â’r un symiau a dyddiadau.
+amendDuplicateWarning.error.required = Select one option
 
 errorWarning.title = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.heading = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.p1 = Ni ellir sefydlu’r cynllun talu hwn oherwydd bod y manylion yn annilys. Mae’n rhaid i chi newid y manylion canlynol i barhau:
 errorWarning.bulletList1 = mae’n rhaid i ddyddiad dod i ben y cynllun fod ar neu ar ôl dyddiad dechrau’r cynllun
 errorWarning.link = Newid manylion eich cynllun talu.
-

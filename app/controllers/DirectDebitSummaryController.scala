@@ -123,7 +123,8 @@ class DirectDebitSummaryController @Inject() (
           Card(
             title = Some(
               CardTitle(
-                content = Text(messages("directDebitPaymentSummary.activePayment.summary.title", plan.paymentReference))
+                content      = Text(messages("directDebitPaymentSummary.activePayment.summary.title", plan.paymentReference)),
+                headingLevel = Some(3)
               )
             ),
             actions = Some(
@@ -132,7 +133,7 @@ class DirectDebitSummaryController @Inject() (
                   ActionItem(
                     href               = routes.PaymentPlanDetailsController.onRedirect(plan.planRefNumber).url,
                     content            = Text(messages("directDebitPaymentSummary.activePayment.summary.action")),
-                    visuallyHiddenText = Some(messages(plan.paymentReference))
+                    visuallyHiddenText = None
                   )
                 )
               )

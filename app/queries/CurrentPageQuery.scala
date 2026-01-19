@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package forms
+package queries
 
-import forms.mappings.Mappings
-import play.api.data.Form
+import play.api.libs.json.JsPath
 
-import javax.inject.Inject
+case object CurrentPageQuery extends Gettable[String] with Settable[String] {
 
-class DuplicateWarningFormProvider @Inject() extends Mappings {
-
-  def apply(): Form[Boolean] =
-    Form(
-      "value" -> boolean("amendDuplicateWarning.error.required")
-    )
+  override def path: JsPath = JsPath \ "currentPage"
 }
