@@ -215,6 +215,11 @@ class AmendPaymentPlanConfirmationController @Inject() (
           updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))
           updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, amendedAmount))
           updatedUa <- Future.fromTry(updatedUa.set(AmendPlanStartDatePage, userAnswers.get(AmendPlanStartDatePage).get))
+          updatedUa <- if (userAnswers.get(AmendConfirmRemovePlanEndDatePage).contains(true)) {
+                         Future.fromTry(updatedUa.remove(AmendPlanEndDatePage))
+                       } else {
+                         Future.successful(updatedUa)
+                       }
           updatedUa <- if (amendedDate.isDefined) {
                          Future.fromTry(updatedUa.set(AmendPlanEndDatePage, amendedDate.get))
                        } else {
