@@ -159,6 +159,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
         .setOrException(RegularPaymentAmountPage, 120)
         .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(AddPaymentPlanEndDatePage, true)
         .setOrException(PlanEndDatePage, endDate)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
       running(application) {
@@ -270,7 +271,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.ErrorWarningController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.ConfirmAnswersErrorController.onPageLoad().url
       }
     }
 
@@ -281,6 +282,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
         .setOrException(RegularPaymentAmountPage, 120)
         .setOrException(PlanStartDatePage, planStartDateDetails)
+        .setOrException(AddPaymentPlanEndDatePage, true)
         .setOrException(PlanEndDatePage, endDate)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
       running(application) {

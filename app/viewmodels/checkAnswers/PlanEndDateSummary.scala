@@ -20,6 +20,7 @@ import controllers.routes
 import models.{CheckMode, UserAnswers}
 import pages.PlanEndDatePage
 import play.api.i18n.{Lang, Messages}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.DateTimeFormats.dateTimeFormat
 import viewmodels.govuk.summarylist.*
@@ -53,4 +54,37 @@ object PlanEndDateSummary {
         actions = Seq.empty
       )
     }
+
+  def rowOrPlaceholder(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] = {
+
+    implicit val lang: Lang = messages.lang
+
+    answers.get(PlanEndDatePage) match {
+      case Some(date) =>
+        Some(
+          SummaryListRowViewModel(
+            key   = "planEndDate.checkYourAnswersLabel",
+            value = ValueViewModel(date.format(dateTimeFormat()(lang))),
+            actions = Seq(
+              ActionItemViewModel("site.change", routes.PlanEndDateController.onPageLoad(CheckMode).url)
+                .withVisuallyHiddenText(messages("planEndDate.change.hidden"))
+            )
+          )
+        )
+
+      case None =>
+        Some(
+          SummaryListRowViewModel(
+            key = "planEndDate.checkYourAnswersLabel",
+            value = ValueViewModel(
+              HtmlContent(
+                s"""<a href="${routes.PlanEndDateController.onPageLoad(CheckMode).url}">
+                 |${messages("planEndDate.enter")}</a>""".stripMargin
+              )
+            )
+          )
+        )
+    }
+  }
+
 }

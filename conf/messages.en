@@ -329,6 +329,7 @@ planEndDate.p1 = This must be on or after the payment plan start date. HMRC will
 planEndDate.error.incomplete = Enter a valid date
 planEndDate.error.beforeOrEqualStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
 planEndDate.final.checkYourAnswersLabel = Final payment date
+planEndDate.enter = Enter plan end date
 
 totalAmountDue.title = How much is the total amount due, in pounds?
 totalAmountDue.heading = How much is the total amount due, in pounds?
@@ -799,3 +800,7 @@ errorWarning.p1 = This payment plan cannot be set up because the details are inv
 errorWarning.bulletList1 = plan end date must be on or after the plan start date
 errorWarning.link = Change your payment plan details
 
+confirmAnswersError.title = You need to confirm some answers
+confirmAnswersError.heading = You need to confirm some answers
+confirmAnswersError.paragraph = You chose to add a plan end date to this payment plan, but did not enter a date. You need to enter a date or confirm that you do not want to add a plan end date.
+confirmAnswersError.returnLink = Return to check your payment plan
