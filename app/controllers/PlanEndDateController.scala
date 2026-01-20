@@ -50,7 +50,8 @@ class PlanEndDateController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     request.userAnswers.get(PlanStartDatePage) match {
       case Some(startDate) =>
-        val form = formProvider(startDate.enteredDate)
+        val earliestPlanStartDate = startDate.enteredDate
+        val form = formProvider(startDate.enteredDate, earliestPlanStartDate)
         val preparedForm = request.userAnswers.get(PlanEndDatePage).map(Some(_)).fold(form)(form.fill)
 
         Ok(view(preparedForm, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode)))
@@ -64,7 +65,8 @@ class PlanEndDateController @Inject() (
     (identify andThen getData andThen requireData).async { implicit request =>
       request.userAnswers.get(PlanStartDatePage) match {
         case Some(startDate) =>
-          val form = formProvider(startDate.enteredDate)
+          val earliestPlanStartDate = startDate.enteredDate
+          val form = formProvider(startDate.enteredDate, earliestPlanStartDate)
 
           form
             .bindFromRequest()

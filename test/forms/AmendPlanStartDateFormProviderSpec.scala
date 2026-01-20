@@ -35,9 +35,9 @@ class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
   private val startDate = LocalDate.of(2024, 4, 6)
   private val form = new AmendPlanStartDateFormProvider(fixedClock)()
 
-  "PlanEndDateFormProvider" - {
+  "AmendPlanStartDateFormProvider" - {
 
-    "must bind valid dates after or equal to the plan start date" in {
+    "must bind valid dates" in {
       val validDate = startDate
       val result = form.bind(
         Map(
@@ -59,13 +59,53 @@ class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
 
       "fail to bind an empty date" in {
         val result = form.bind(Map.empty[String, String])
+
         result.errors must contain theSameElementsAs Seq(
-          FormError("value.day", "date.error.day"),
-          FormError("value.month", "date.error.month"),
-          FormError("value.year", "date.error.year")
+          FormError("value", "planStartDate.error.required.all")
+        )
+      }
+
+      "fail to bind when day is missing" in {
+        val result = form.bind(
+          Map(
+            "value.day"   -> "",
+            "value.month" -> "8",
+            "value.year"  -> "2025"
+          )
+        )
+
+        result.errors must contain theSameElementsAs Seq(
+          FormError("value.day", "planStartDate.error.required")
+        )
+      }
+
+      "fail to bind when month is missing" in {
+        val result = form.bind(
+          Map(
+            "value.day"   -> "6",
+            "value.month" -> "",
+            "value.year"  -> "2025"
+          )
+        )
+
+        result.errors must contain theSameElementsAs Seq(
+          FormError("value.month", "planStartDate.error.required")
+        )
+      }
+
+      "fail to bind when year is missing" in {
+        val result = form.bind(
+          Map(
+            "value.day"   -> "6",
+            "value.month" -> "8",
+            "value.year"  -> ""
+          )
+        )
+
+        result.errors must contain theSameElementsAs Seq(
+          FormError("value.year", "planStartDate.error.required")
         )
       }
     }
-
   }
 }

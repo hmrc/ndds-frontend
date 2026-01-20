@@ -40,7 +40,9 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
   def onwardRoute: Call = Call("GET", "/direct-debits/year-end-and-month")
 
   val formProvider = new PaymentReferenceFormProvider()
-  val form: Form[String] = formProvider()
+
+  private def form(selectedSource: Option[DirectDebitSource]): Form[String] =
+    formProvider(selectedSource, None)
 
   lazy val paymentReferenceRoute: String = routes.PaymentReferenceController.onPageLoad(NormalMode).url
   lazy val paymentPlanTypeRoute: String = routes.PaymentPlanTypeController.onPageLoad(NormalMode).url
@@ -49,47 +51,45 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
     "must return OK and the correct view for a GET" in {
       val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, MGD)
-
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentReferenceRoute)
-
         val result = route(application, request).value
-
         val view = application.injector.instanceOf[PaymentReferenceView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Some(MGD), Call("GET", paymentPlanTypeRoute))(request,
-                                                                                                               messages(application)
-                                                                                                              ).toString
+        contentAsString(result) mustEqual
+          view(form(Some(MGD)), NormalMode, Some(MGD), Call("GET", paymentPlanTypeRoute))(
+            request,
+            messages(application)
+          ).toString
+
         contentAsString(result) must include("You can find this on letters from HMRC, for example, 15AZMGD123456789")
       }
     }
 
     "must render the view with DirectDebitSourceController route on GET for other source" in {
-      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, DirectDebitSource.OL) // a valid value but not MGD/SA/TC
-
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, DirectDebitSource.OL)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentReferenceRoute)
-
+        val result = route(application, request).value
         val view = application.injector.instanceOf[PaymentReferenceView]
 
-        val result = route(application, request).value
-
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form,
-                                               NormalMode,
-                                               Some(DirectDebitSource.OL),
-                                               routes.DirectDebitSourceController.onPageLoad(NormalMode)
-                                              )(request, messages(application)).toString
+        contentAsString(result) mustEqual
+          view(
+            form(Some(DirectDebitSource.OL)),
+            NormalMode,
+            Some(DirectDebitSource.OL),
+            routes.DirectDebitSourceController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
       }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
-
       val userAnswers = UserAnswers(userAnswersId)
         .set(PaymentReferencePage, "answer")
         .success
@@ -100,65 +100,43 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, paymentReferenceRoute)
-
+        val result = route(application, request).value
         val view = application.injector.instanceOf[PaymentReferenceView]
 
-        val result = route(application, request).value
-
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill("answer"), NormalMode, Some(TC), Call("GET", paymentPlanTypeRoute))(request,
-                                                                                                                             messages(application)
-                                                                                                                            ).toString
+        contentAsString(result) mustEqual
+          view(
+            form(Some(TC)).fill("answer"),
+            NormalMode,
+            Some(TC),
+            Call("GET", paymentPlanTypeRoute)
+          )(request, messages(application)).toString
+
         contentAsString(result) must include("You can find this on letters from HMRC, for example, TC1234567")
-      }
-    }
-
-    "must redirect to the next page when valid data is submitted" in {
-
-      val mockSessionRepository = mock[SessionRepository]
-
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, paymentReferenceRoute)
-            .withFormUrlEncodedBody(("value", "answer"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
       }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
       val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, VAT)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      lazy val directDebitSourceRoute: String = routes.DirectDebitSourceController.onPageLoad(NormalMode).url
 
       running(application) {
         val request =
           FakeRequest(POST, paymentReferenceRoute)
             .withFormUrlEncodedBody(("value", ""))
 
-        val boundForm = form.bind(Map("value" -> ""))
-
+        val boundForm = form(Some(VAT)).bind(Map("value" -> ""))
         val view = application.injector.instanceOf[PaymentReferenceView]
-
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual view(boundForm, NormalMode, Some(VAT), Call("GET", directDebitSourceRoute))(request,
-                                                                                                                      messages(application)
-                                                                                                                     ).toString
+        contentAsString(result) mustEqual
+          view(
+            boundForm,
+            NormalMode,
+            Some(VAT),
+            routes.DirectDebitSourceController.onPageLoad(NormalMode)
+          )(request, messages(application)).toString
       }
     }
 

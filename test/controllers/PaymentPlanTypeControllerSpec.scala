@@ -20,7 +20,7 @@ import base.SpecBase
 import config.FrontendAppConfig
 import forms.PaymentPlanTypeFormProvider
 import models.DirectDebitSource.*
-import models.{NormalMode, PaymentPlanType, UserAnswers}
+import models.{DirectDebitSource, NormalMode, PaymentPlanType, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -40,11 +40,16 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val paymentPlanTypeRoute: String = routes.PaymentPlanTypeController.onPageLoad(NormalMode).url
-  lazy val directDebitSourceRoute: String = routes.DirectDebitSourceController.onPageLoad(NormalMode).url
+  lazy val paymentPlanTypeRoute: String =
+    routes.PaymentPlanTypeController.onPageLoad(NormalMode).url
+
+  lazy val directDebitSourceRoute: String =
+    routes.DirectDebitSourceController.onPageLoad(NormalMode).url
 
   val formProvider = new PaymentPlanTypeFormProvider()
-  val form: Form[PaymentPlanType] = formProvider()
+
+  private def form(selectedAnswer: Option[DirectDebitSource]): Form[PaymentPlanType] =
+    formProvider(selectedAnswer)
 
   "PaymentPlanType Controller" - {
 
@@ -54,17 +59,15 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
-
         val result = route(application, request).value
 
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
-
         val view = application.injector.instanceOf[PaymentPlanTypeView]
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
           view(
-            form,
+            form(Some(TC)),
             NormalMode,
             Some(TC),
             Some(appConfig.selfAssessmentUrl),
@@ -76,13 +79,16 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered for values1 header" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(PaymentPlanTypePage, PaymentPlanType.values1.head).success.value
+      val userAnswers = UserAnswers(userAnswersId)
+        .setOrException(DirectDebitSourcePage, TC)
+        .set(PaymentPlanTypePage, PaymentPlanType.values1.head)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
-
         val result = route(application, request).value
 
         status(result) mustEqual OK
@@ -92,13 +98,16 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
     "must populate the view correctly on a GET when the question has previously been answered for values2 header" in {
 
-      val userAnswers = UserAnswers(userAnswersId).set(PaymentPlanTypePage, PaymentPlanType.values2.head).success.value
+      val userAnswers = UserAnswers(userAnswersId)
+        .setOrException(DirectDebitSourcePage, TC)
+        .set(PaymentPlanTypePage, PaymentPlanType.values2.head)
+        .success
+        .value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
-
         val result = route(application, request).value
 
         status(result) mustEqual OK
@@ -109,11 +118,11 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to the next page when valid data is submitted" in {
 
       val mockSessionRepository = mock[SessionRepository]
-
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, TC)
 
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(userAnswer))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -134,15 +143,15 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, TC)
+      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
 
       running(application) {
         val request =
           FakeRequest(POST, paymentPlanTypeRoute)
             .withFormUrlEncodedBody(("value", "invalid value"))
 
-        val boundForm = form.bind(Map("value" -> "invalid value"))
-
+        val boundForm = form(Some(TC)).bind(Map("value" -> "invalid value"))
         val view = application.injector.instanceOf[PaymentPlanTypeView]
 
         val result = route(application, request).value
@@ -152,7 +161,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
           view(
             boundForm,
             NormalMode,
-            None,
+            Some(TC),
             None,
             None,
             Call("GET", directDebitSourceRoute)
@@ -166,7 +175,6 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request = FakeRequest(GET, paymentPlanTypeRoute)
-
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER

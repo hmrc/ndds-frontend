@@ -33,23 +33,29 @@ class CustomDateFormatter(invalidKey: String,
     extends LocalDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args) {
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
-    val fields = fieldKeys.map { field =>
-      field -> data.get(s"$key.$field").filter(_.nonEmpty)
-    }.toMap
 
-    lazy val missingFieldErrors = fields.collect { case (field, None) =>
-      FormError(s"$key.$field", s"date.error.$field")
-    }.toList
+    val fields: Map[String, Option[String]] =
+      fieldKeys.map { field =>
+        field -> data.get(s"$key.$field").map(_.trim).filter(_.nonEmpty)
+      }.toMap
 
-    val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
+    val missing: List[String] =
+      fields.collect { case (field, None) => field }.toList
+    val missingCount = missing.size
 
-    if (regexErrors.nonEmpty) {
-      Left(regexErrors)
-    } else if (missingFieldErrors.nonEmpty) {
-      Left(missingFieldErrors)
+    if (missingCount == fieldKeys.size) {
+      Left(Seq(FormError(key, allRequiredKey, args)))
+    } else if (missingCount > 0) {
+      val messageKey = if (missingCount == 1) requiredKey else twoRequiredKey
+      Left(missing.map(field => FormError(s"$key.$field", messageKey, args)))
     } else {
-      formatDate(key, data).left.map {
-        _.map(_.copy(key = key, args = args))
+      val regexErrors: Seq[FormError] =
+        dateFormats.flatMap(df => checkInput(key, fields, df))
+
+      if (regexErrors.nonEmpty) {
+        Left(regexErrors)
+      } else {
+        formatDate(key, data).left.map(_.map(_.copy(key = key, args = args)))
       }
     }
   }
@@ -62,5 +68,4 @@ class CustomDateFormatter(invalidKey: String,
         None
     }
   }
-
 }

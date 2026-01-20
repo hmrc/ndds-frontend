@@ -40,10 +40,11 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
 
   private val startDate: LocalDate = LocalDate.of(2024, 1, 1)
+  private val earliestPlanStartDate: LocalDate = startDate.minusDays(1)
   private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(startDate, "2024-1-11")
   private val formProvider = new PlanEndDateFormProvider()
 
-  private def form = formProvider(startDate)
+  private def form = formProvider(startDate, earliestPlanStartDate)
 
   lazy val addPaymentPlanEndDateRoute: String = routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode).url
 

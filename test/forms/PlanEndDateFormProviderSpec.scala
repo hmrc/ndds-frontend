@@ -22,16 +22,20 @@ import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class PlanEndDateFormProviderSpec extends DateBehaviours {
   private implicit val messages: Messages = stubMessages()
-  private val endDate = LocalDate.of(2024, 4, 6)
-  private val form = new PlanEndDateFormProvider()(endDate)
+
+  private val startDate = LocalDate.of(2024, 4, 6)
+  private val earliestPlanStartDate = startDate.minusDays(30)
+
+  private val form = new PlanEndDateFormProvider()(startDate, earliestPlanStartDate)
 
   "PlanEndDateFormProvider" - {
 
     "must bind valid dates after or equal to the plan start date" in {
-      val validDate = endDate
+      val validDate = startDate
       val result = form.bind(
         Map(
           "value.day"   -> validDate.getDayOfMonth.toString,
@@ -43,7 +47,7 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
     }
 
     "must fail to bind dates before the plan start date" in {
-      val invalidDate = endDate.minusDays(1)
+      val invalidDate = startDate.minusDays(1)
       val result = form.bind(
         Map(
           "value.day"   -> invalidDate.getDayOfMonth.toString,
@@ -51,7 +55,9 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
           "value.year"  -> invalidDate.getYear.toString
         )
       )
-      result.errors must contain(FormError("value", "planEndDate.error.beforeOrEqualStartDate"))
+      result.errors must contain(
+        FormError("value", "planEndDate.error.beforeOrEqualStartDate", Seq(startDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))))
+      )
     }
 
     "must bind successfully when date is left blank (optional)" in {

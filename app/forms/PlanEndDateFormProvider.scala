@@ -18,29 +18,35 @@ package forms
 
 import forms.mappings.Mappings
 import play.api.data.Form
-import play.api.data.validation.*
+import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.i18n.Messages
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class PlanEndDateFormProvider @Inject() extends Mappings {
 
-  def apply(startDate: LocalDate)(implicit messages: Messages): Form[Option[LocalDate]] =
+  private val dateTimeFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("dd MMMM yyyy")
+
+  def apply(startDate: LocalDate, earliestPlanStartDate: LocalDate)(implicit messages: Messages): Form[Option[LocalDate]] =
     Form(
       "value" -> optionalLocalDate(
         invalidKey     = "planEndDate.error.invalid",
         allRequiredKey = "planEndDate.error.incomplete",
         twoRequiredKey = "planEndDate.error.incomplete",
         requiredKey    = "planEndDate.error.incomplete"
-      ).verifying(optionalDateAfter(startDate, "planEndDate.error.beforeOrEqualStartDate"))
+      ).verifying(optionalDateOnOrAfter(startDate, dateTimeFormatter))
     )
 
-  private def optionalDateAfter(start: LocalDate, errorKey: String): Constraint[Option[LocalDate]] =
-    Constraint {
-      case Some(endDate) if endDate.isBefore(start) =>
-        Invalid(ValidationError(errorKey))
-      case _ =>
-        Valid
+  private def optionalDateOnOrAfter(start: LocalDate, formatter: DateTimeFormatter): Constraint[Option[LocalDate]] =
+    Constraint { optEnd =>
+      optEnd match {
+        case Some(endDate) if endDate.isBefore(start) =>
+          Invalid("planEndDate.error.beforeOrEqualStartDate", start.format(formatter))
+        case _ =>
+          Valid
+      }
     }
 }

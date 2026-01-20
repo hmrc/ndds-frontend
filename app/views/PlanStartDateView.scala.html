@@ -31,32 +31,58 @@
 
 @layout(pageTitle = title(form, messages("planStartDate.title")), backLink = Some(call.url)) {
 
-    @formHelper(action = routes.PlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @defining({
+        val baseKey = "value"
+        val hasBaseError = form.errors.exists(_.key == baseKey)
+        val firstPartErrorOpt = form.errors.find(e => e.key.startsWith(baseKey + "."))
+        val extraBaseError = if (!hasBaseError) {
+            firstPartErrorOpt.map(e => FormError(baseKey, e.message, e.args)).toSeq
+        } else {
+            Seq. empty
+        }
 
-        @mainErrorSummary(form, errorLinkOverrides = Map("value" -> "value.day"))
+        form.copy(errors = (form.errors ++ extraBaseError).distinct)
+    }) { adjustedForm =>
+
+        @formHelper(action = routes.PlanStartDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+
+    @defining({
+        val baseKey = "value"
+        val firstPartKey = Seq("day", "month", "year")
+        .find(p => adjustedForm.errors.exists(_.key == s"$baseKey.$p"))
+        .map(p => s"$baseKey.$p")
+        .getOrElse(s"$baseKey.day")
+        Map(baseKey -> firstPartKey)
+    }) { linkOverrides =>
+
+        @mainErrorSummary(adjustedForm, errorLinkOverrides = linkOverrides)
 
         @govukDateInput(
             DateViewModel(
-                field  = form("value"),
+            field  = adjustedForm("value"),
                 legend = LegendViewModel(messages("planStartDate.heading")).asPageHeading()
-            )
-            .withHint(HintViewModel(HtmlContent(
+            ).withHint(
+        HintViewModel(
+            HtmlContent(
                 Seq(
                     paragraph("planStartDate.p1"),
-
                     govukDetails(
                         Details(
                             summary = messages("planStartDate.collapsable"),
                             content = messages(s"planStartDate.collapsable.${source}.p1")
                         )
                     ),
-                    messages("planStartDate.fixedHint", dateTimeNumeric),
+                    messages("planStartDate.fixedHint", dateTimeNumeric)
                 ).mkString
-            )))
+            )
         )
+    )
+)
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+    @govukButton(
+        ButtonViewModel(messages("site.continue"))
+    )
+        }
     }
+}
 }

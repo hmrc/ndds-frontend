@@ -64,7 +64,7 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
       val result = formatter.bind("date", data)
 
       result match {
-        case Left(errors) => errors must contain(FormError("date.day", "date.error.day"))
+        case Left(errors) => errors must contain(FormError("date.day", "error.required"))
         case Right(_)     => fail("Expected Left with errors but got Right")
       }
     }

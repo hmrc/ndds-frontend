@@ -143,11 +143,22 @@ class SuspensionPeriodRangeDateController @Inject() (
                 .bindFromRequest()
                 .fold(
                   formWithErrors =>
+                    logger.error("[SUSPEND-DATE] HIT ERROR BRANCH")
+                    formWithErrors.errors.foreach { e =>
+                      logger.error(s"[SUSPEND-DATE] key=${e.key} msg=${e.message} args=${e.args}")
+                    }
                     Future.successful(
                       BadRequest(
-                        view(formWithErrors, mode, planReference, paymentAmount, formattedSuspensionStartDate, formattedSuspensionEndDate)
+                        view(formProvider.withMappedErrors(formWithErrors),
+                             mode,
+                             planReference,
+                             paymentAmount,
+                             formattedSuspensionStartDate,
+                             formattedSuspensionEndDate
+                            )
                       )
-                    ),
+                    )
+                  ,
                   value =>
                     for {
                       updatedAnswers <- Future.fromTry(request.userAnswers.set(SuspensionPeriodRangeDatePage, value))

@@ -157,8 +157,7 @@ class SuspensionPeriodRangeDateFormProviderSpec extends AnyWordSpec with Matcher
       )
 
       val result = form.bind(data)
-      val errors = result.errors.map(_.message)
-      errors must contain atLeastOneOf ("date.error.day", "date.error.month")
+      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.invalid.startDate.base")
     }
 
     "should fail when end date format is invalid" in {
@@ -172,8 +171,7 @@ class SuspensionPeriodRangeDateFormProviderSpec extends AnyWordSpec with Matcher
       )
 
       val result = form.bind(data)
-      val errors = result.errors.map(_.message)
-      errors must contain atLeastOneOf ("date.error.day", "date.error.month")
+      result.errors.map(_.message) must contain("suspensionPeriodRangeDate.error.invalid.endDate.base")
     }
 
     "withMappedErrors" should {

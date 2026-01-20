@@ -49,11 +49,11 @@ class PaymentPlanTypeController @Inject() (
     with I18nSupport
     with Logging {
 
-  val form: Form[PaymentPlanType] = formProvider()
-
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val answers = request.userAnswers
     val selectedAnswers = answers.get(DirectDebitSourcePage)
+
+    val form: Form[PaymentPlanType] = formProvider(selectedAnswers)
 
     val preparedForm = answers.get(PaymentPlanTypePage) match {
       case None        => form
@@ -73,7 +73,7 @@ class PaymentPlanTypeController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val selectedSource = request.userAnswers.get(DirectDebitSourcePage)
-
+    val form: Form[PaymentPlanType] = formProvider(selectedSource)
     form
       .bindFromRequest()
       .fold(

@@ -21,13 +21,25 @@ import play.api.data.Form
 import play.api.i18n.Messages
 import utils.DateFormats
 
+import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate}
 import javax.inject.Inject
 
 class PaymentDateFormProvider @Inject() (clock: Clock) extends Mappings {
 
+  private val DayRegex: String = "^([1-9]|0[1-9]|1[0-9]|2[0-9]|3[0-1])$"
+  private val MonthRegex: String = "^(0?[1-9]|1[0-2])$"
+  private val YearRegex: String = "^\\d{4}$"
+
+  private val paymentDateFormats: Seq[DateFormat] = Seq(
+    DateFormat("day", "paymentDate.error.invalid", DayRegex),
+    DateFormat("month", "paymentDate.error.invalid", MonthRegex),
+    DateFormat("year", "paymentDate.error.invalid", YearRegex)
+  )
+
   def apply(earliestDate: LocalDate, isSinglePlan: Boolean)(implicit messages: Messages): Form[LocalDate] = {
 
+    val dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
     val today = LocalDate.now(clock)
     val maxDateForSinglePlan = today.plusYears(1)
 
@@ -37,14 +49,14 @@ class PaymentDateFormProvider @Inject() (clock: Clock) extends Mappings {
         allRequiredKey = "paymentDate.error.required.all",
         twoRequiredKey = "paymentDate.error.required.two",
         requiredKey    = "paymentDate.error.required",
-        dateFormats    = DateFormats.defaultDateFormats
+        dateFormats    = paymentDateFormats
       )
         .verifying(
-          "paymentDate.error.beforeEarliest",
+          messages("paymentDate.error.beforeEarliest", earliestDate.format(dateTimeFormatter)),
           date => !date.isBefore(earliestDate)
         )
         .verifying(
-          "paymentDate.error.tooFarInFuture",
+          messages("paymentDate.error.tooFarInFuture", maxDateForSinglePlan.format(dateTimeFormatter)),
           date => !isSinglePlan || !date.isAfter(maxDateForSinglePlan)
         )
     )

@@ -16,16 +16,29 @@
 
 package forms
 
-import forms.mappings.Mappings
+import forms.mappings.{DateFormat, Mappings}
 import models.UserAnswers
 import play.api.data.Form
 import play.api.i18n.Messages
 import utils.DateFormats
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class PlanStartDateFormProvider @Inject() extends Mappings {
+
+  private val DayRegex: String = "^([1-9]|0[1-9]|1[0-9]|2[0-9]|3[0-1])$"
+  private val MonthRegex: String = "^(0?[1-9]|1[0-2])$"
+  private val YearRegex: String = "^\\d{4}$"
+
+  private val paymentStartDateFormats: Seq[DateFormat] = Seq(
+    DateFormat("day", "planStartDate.error.invalid", DayRegex),
+    DateFormat("month", "planStartDate.error.invalid", MonthRegex),
+    DateFormat("year", "planStartDate.error.invalid", YearRegex)
+  )
+
+  val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
@@ -45,9 +58,9 @@ class PlanStartDateFormProvider @Inject() extends Mappings {
         allRequiredKey           = "planStartDate.error.required.all",
         twoRequiredKey           = "planStartDate.error.required.two",
         requiredKey              = "planStartDate.error.required",
-        beforeEarliestDateKey    = "planStartDate.error.beforeEarliestDate",
-        budgetAfterMaxDateKey    = "planStartDate.error.budgetAfterMaxDate",
-        timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
+        beforeEarliestDateKey    = messages("planStartDate.error.beforeEarliestDate", earliestPlanStartDate.format(dateTimeFormatter)),
+        budgetAfterMaxDateKey    = messages("planStartDate.error.budgetAfterMaxDate", earliestPlanStartDate.format(dateTimeFormatter)),
+        timeToPayAfterMaxDateKey = messages("planStartDate.error.timeToPayAfterMaxDate", earliestPlanStartDate.format(dateTimeFormatter)),
         dateFormats              = DateFormats.defaultDateFormats,
         userAnswers              = userAnswers,
         earliestPlanStartDate    = earliestPlanStartDate

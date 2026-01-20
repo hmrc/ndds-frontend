@@ -53,9 +53,7 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
       val form = formProvider(fixedDate.minusDays(30), isSinglePlan = false)
       val result = form.bind(Map.empty[String, String])
       result.errors must contain theSameElementsAs Seq(
-        FormError("value.day", "date.error.day"),
-        FormError("value.month", "date.error.month"),
-        FormError("value.year", "date.error.year")
+        FormError("value", "paymentDate.error.required.all")
       )
     }
 

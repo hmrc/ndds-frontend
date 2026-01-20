@@ -36,6 +36,7 @@ import services.NationalDirectDebitService
 import views.html.PaymentDateView
 
 import java.time.*
+import java.time.format.DateTimeFormatter
 import scala.concurrent.Future
 
 class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
@@ -285,7 +286,8 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         when(mockService.calculateFutureWorkingDays(any(), any())(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
-        val invalidDate = LocalDate.parse(expectedEarliestPaymentDate.date).minusDays(1)
+        val earliest = LocalDate.parse(expectedEarliestPaymentDate.date)
+        val invalidDate = earliest.minusDays(1)
 
         val request = FakeRequest(POST, paymentDateRoute)
           .withFormUrlEncodedBody(
@@ -302,9 +304,9 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) must include(
-            "The date you have entered is not valid. It must be either the same or greater than the earliest date displayed."
-          )
+
+          val displayDate = earliest.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
+          contentAsString(result) must include(s"Payment date must be the same as or after $displayDate")
         }
       }
 

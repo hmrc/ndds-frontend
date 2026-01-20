@@ -1133,7 +1133,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
 
     "when planStartDate is within three working days then potentialNextPaymentDate is after planEndDate nextPaymentDateValid must be false" in {
-      val today = LocalDate.now()
+      val today = LocalDate.of(2026, 2, 1)
       val startDate = today.plusDays(10)
       val planEndDate = today.plusDays(20)
 
@@ -1406,7 +1406,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
             val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-            val expectedDate = LocalDate.of(2025, 12, 15)
+            val expectedDate = LocalDate.of(2026, 4, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }
@@ -1569,7 +1569,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
             val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), Quarterly).futureValue
 
-            val expectedDate = LocalDate.of(2025, 12, 15)
+            val expectedDate = LocalDate.of(2026, 6, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }
@@ -1738,7 +1738,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
             val result = nddService.calculateNextPaymentDate(startDate, Some(planEndDate), SixMonthly).futureValue
 
-            val expectedDate = LocalDate.of(2026, 3, 15)
+            val expectedDate = LocalDate.of(2026, 9, 15)
             result.potentialNextPaymentDate mustBe Some(expectedDate)
             result.nextPaymentDateValid mustBe true
           }

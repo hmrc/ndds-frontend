@@ -16,13 +16,12 @@
 
 package forms
 
-import forms.mappings.Mappings
+import forms.mappings.{DateFormat, Mappings}
 import models.SuspensionPeriodRange
 import play.api.data.Forms.mapping
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.data.{Form, FormError}
 import play.api.i18n.Messages
-import utils.DateFormats
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -31,6 +30,22 @@ import javax.inject.Inject
 class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
 
   private val MaxMonthsAhead = 6
+
+  private val DayRegex: String = "^([1-9]|0[1-9]|1[0-9]|2[0-9]|3[0-1])$"
+  private val MonthRegex: String = "^(0?[1-9]|1[0-2])$"
+  private val YearRegex: String = "^\\d{4}$"
+
+  private val suspensionStartDateFormats: Seq[DateFormat] = Seq(
+    DateFormat("day", "suspensionPeriodRangeDate.error.invalid.startDate.base", DayRegex),
+    DateFormat("month", "suspensionPeriodRangeDate.error.invalid.startDate.base", MonthRegex),
+    DateFormat("year", "suspensionPeriodRangeDate.error.invalid.startDate.base", YearRegex)
+  )
+
+  private val suspensionEndDateFormats: Seq[DateFormat] = Seq(
+    DateFormat("day", "suspensionPeriodRangeDate.error.invalid.endDate.base", DayRegex),
+    DateFormat("month", "suspensionPeriodRangeDate.error.invalid.endDate.base", MonthRegex),
+    DateFormat("year", "suspensionPeriodRangeDate.error.invalid.endDate.base", YearRegex)
+  )
 
   def apply(
     planStartDateOpt: Option[LocalDate],
@@ -47,7 +62,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
           allRequiredKey    = "suspensionPeriodRangeStartDate.error.required.all",
           twoRequiredKey    = "suspensionPeriodRangeStartDate.error.required.two",
           requiredKey       = "suspensionPeriodRangeStartDate.error.required",
-          dateFormats       = DateFormats.defaultDateFormats,
+          dateFormats       = suspensionStartDateFormats,
           planStartDateOpt  = planStartDateOpt,
           planEndDateOpt    = planEndDateOpt,
           earliestStartDate = earliestStartDate
@@ -57,7 +72,7 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
           allRequiredKey = "suspensionPeriodRangeEndDate.error.required.all",
           twoRequiredKey = "suspensionPeriodRangeEndDate.error.required.two",
           requiredKey    = "suspensionPeriodRangeEndDate.error.required",
-          dateFormats    = DateFormats.defaultDateFormats
+          dateFormats    = suspensionEndDateFormats
         )
       )(SuspensionPeriodRange.apply)(range => Some((range.startDate, range.endDate)))
         .verifying(endDateConstraint(planStartDateOpt, planEndDateOpt, earliestStartDate, dateFormatter))

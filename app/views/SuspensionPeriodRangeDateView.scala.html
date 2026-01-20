@@ -16,6 +16,7 @@
 
 @import forms.SuspensionPeriodRangeDateFormProvider
 @import models.SuspensionPeriodRange
+@import play.api.data.FormError
 @import views.html.components.*
 @import viewmodels.govuk.errorsummary.ErrorSummaryViewModel
 
@@ -48,38 +49,73 @@
                 )
             ) {
 
-    @defining(formProvider.withMappedErrors(form.asInstanceOf[Form[SuspensionPeriodRange]])) { adjustedForm =>
+@defining(formProvider.withMappedErrors(form.asInstanceOf[Form[SuspensionPeriodRange]])) { adjustedForm0 =>
 
-        @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @defining({
+        val baseFields = Seq("suspensionPeriodRangeStartDate", "suspensionPeriodRangeEndDate")
+        val extraBaseErrors = baseFields.flatMap { base =>
+        adjustedForm0.errors.find(_.key == base).orElse {
+        adjustedForm0.errors.find(e => e.key.startsWith(base + "."))
+            .map(e => FormError(base, e.message, e.args))
+    }.toSeq
+}
 
-        @if(adjustedForm.errors.nonEmpty) {
-            @defining({
-                val baseFields = Seq("suspensionPeriodRangeStartDate", "suspensionPeriodRangeEndDate")
-                val filteredErrors = baseFields.flatMap { baseField =>
-                    adjustedForm.errors.find(_.key == baseField).orElse {
-                        adjustedForm.errors.find(e => e.key.startsWith(baseField + "."))
-                    }
-                }
-                adjustedForm.copy(errors = filteredErrors)
-            }) { filteredForm =>
-                @govukErrorSummary(ErrorSummaryViewModel(filteredForm, errorLinkOverrides = Map(
-                    "suspensionPeriodRangeStartDate" -> "suspensionPeriodRangeStartDate.day",
-                    "suspensionPeriodRangeEndDate" -> "suspensionPeriodRangeEndDate.day"
-                )))
-            }
-        }
+    adjustedForm0.copy(errors = (adjustedForm0.errors ++ extraBaseErrors).distinct)
+}) { adjustedForm =>
 
-            @if(mode == NormalMode) {
-                @header1("suspensionPeriodRangeDate.heading.normal")
+    @formHelper(
+        action = routes.SuspensionPeriodRangeDateController.onSubmit(mode),
+        Symbol("autoComplete") -> "off"
+    ) {
 
-                @paragraph((messages("suspensionPeriodRangeDate.p1.line1", planReference)), extraClasses = "govuk-!-margin-bottom-0")
-                @paragraph((messages("suspensionPeriodRangeDate.p1.line2", paymentAmount)))
+@if(adjustedForm.errors.nonEmpty) {
 
-            } else {
-                @header1("suspensionPeriodRangeDate.heading.change")
+@defining({
+    val baseFields = Seq("suspensionPeriodRangeStartDate", "suspensionPeriodRangeEndDate")
 
-                        @paragraph((messages("suspensionPeriodRangeDate.p1.line1", planReference)), extraClasses = "govuk-!-margin-bottom-0")
-                        @paragraph((messages("suspensionPeriodRangeDate.p1.line2", paymentAmount)))
+    val filteredErrors = baseFields.flatMap { baseField =>
+        adjustedForm.errors.find(_.key == baseField).orElse {
+            adjustedForm.errors.find(e => e.key.startsWith(baseField + "."))
+    }
+}
+
+adjustedForm.copy(errors = filteredErrors)
+}) { filteredForm =>
+
+@defining({
+    def firstPart(base: String): String =
+    Seq("day", "month", "year")
+    .find(p => adjustedForm.errors.exists(_.key == s"$base.$p"))
+    .map(p => s"$base.$p")
+    .getOrElse(s"$base.day")
+        Map(
+            "suspensionPeriodRangeStartDate" -> firstPart("suspensionPeriodRangeStartDate"),
+            "suspensionPeriodRangeEndDate"   -> firstPart("suspensionPeriodRangeEndDate")
+        )
+}) { linkOverrides =>
+
+    @govukErrorSummary(
+        ErrorSummaryViewModel(
+            filteredForm,
+            errorLinkOverrides = linkOverrides
+        )
+    )
+
+}
+}
+}
+
+    @if(mode == NormalMode) {
+        @header1("suspensionPeriodRangeDate.heading.normal")
+
+                @paragraph(messages("suspensionPeriodRangeDate.p1.line1", planReference), extraClasses = "govuk-!-margin-bottom-0")
+                @paragraph(messages("suspensionPeriodRangeDate.p1.line2", paymentAmount))
+
+        } else {
+            @header1("suspensionPeriodRangeDate.heading.change")
+
+            @paragraph(messages("suspensionPeriodRangeDate.p1.line1", planReference), extraClasses = "govuk-!-margin-bottom-0")
+                @paragraph(messages("suspensionPeriodRangeDate.p1.line2", paymentAmount))
 
                         @govukInsetText(
                             InsetText(
@@ -89,7 +125,7 @@
 
                 @paragraph("suspensionPeriodRangeDate.change.paragraph")
 
-            }
+        }
 
 
         @govukDateInput(
@@ -114,5 +150,6 @@
         )
     }
     }
+}
 }
 }
