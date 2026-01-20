@@ -68,8 +68,9 @@ class CheckYourAnswersController @Inject() (
       logger.warn("Attempt to access Check Your Answers confirmation; redirecting to Page Not Found")
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
-      val showPlanEndDate = if (hasEndDate.contains(false)) { None }
-      else { PlanEndDateSummary.row(ua) }
+      val showPlanEndDate =
+        if (hasEndDate.contains(true)) PlanEndDateSummary.rowOrPlaceholder(ua)
+        else None
       val monthlyPaymentAmount = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
         MonthlyPaymentAmountSummary.row(ua)
       } else { None }
@@ -352,7 +353,7 @@ class CheckYourAnswersController @Inject() (
   private def validateStartAndEndDates(userAnswers: UserAnswers): Option[Result] = {
     val hasEndDate = userAnswers.get(AddPaymentPlanEndDatePage)
     if (hasEndDate.contains(true) && userAnswers.get(PlanEndDatePage).isEmpty) {
-      Some(Redirect(routes.ErrorWarningController.onPageLoad()))
+      Some(Redirect(routes.ConfirmAnswersErrorController.onPageLoad()))
     } else {
       None
     }

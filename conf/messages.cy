@@ -335,6 +335,8 @@ planEndDate.error.required = The plan end date must include {0}
 planEndDate.error.invalid = Nodwch ddyddiad dilys.
 planEndDate.error.incomplete = Nodwch ddyddiad dilys.
 planEndDate.error.beforeOrEqualStartDate = Nid yw dyddiad dod i ben y cynllun a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â dyddiad dechrau’r cynllun neu’n fwy na hynny.
+planEndDate.final.checkYourAnswersLabel = Final payment date
+planEndDate.enter = Enter plan end date
 
 totalAmountDue.title = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
 totalAmountDue.heading = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
@@ -721,3 +723,8 @@ errorWarning.heading = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.p1 = Ni ellir sefydlu’r cynllun talu hwn oherwydd bod y manylion yn annilys. Mae’n rhaid i chi newid y manylion canlynol i barhau:
 errorWarning.bulletList1 = mae’n rhaid i ddyddiad dod i ben y cynllun fod ar neu ar ôl dyddiad dechrau’r cynllun
 errorWarning.link = Newid manylion eich cynllun talu.
+
+confirmAnswersError.title = You need to confirm some answers
+confirmAnswersError.heading = You need to confirm some answers
+confirmAnswersError.paragraph = You chose to add a plan end date to this payment plan, but did not enter a date. You need to enter a date or confirm that you do not want to add a plan end date.
+confirmAnswersError.returnLink = Return to check your payment plan
