@@ -27,8 +27,6 @@ import javax.inject.Inject
 
 class PlanEndDateFormProvider @Inject() extends Mappings {
 
-  private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
-
   def apply(startDate: LocalDate)(implicit messages: Messages): Form[Option[LocalDate]] =
     Form(
       "value" -> optionalLocalDate(
@@ -40,9 +38,10 @@ class PlanEndDateFormProvider @Inject() extends Mappings {
     )
 
   private def optionalDateAfter(start: LocalDate, errorKey: String): Constraint[Option[LocalDate]] =
+    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
     Constraint {
       case Some(endDate) if endDate.isBefore(start) =>
-        Invalid(ValidationError(errorKey, start.format(dateTimeFormatter)))
+        Invalid(ValidationError(errorKey, start.format(formatter)))
       case _ =>
         Valid
     }
