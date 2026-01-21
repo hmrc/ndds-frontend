@@ -425,7 +425,7 @@ directDebitPaymentSummary.directDebit.accountNumber = Rhif y cyfrif
 directDebitPaymentSummary.directDebit.sortCode = Cod didoli’r banc
 directDebitPaymentSummary.activePayment.h1 = Cynlluniau talu sydd ar waith
 directDebitPaymentSummary.activePayment.p1 = Gallwch reoli cynllun talu sydd ar waith, neu
-directDebitPaymentSummary.activePayment.p1.linkText = sefydlu cynllun talu newydd
+directDebitPaymentSummary.activePayment.p1.linkText = sefydlu cynllun talu newydd.
 directDebitPaymentSummary.activePayment.overPPLimit.p1 = Ni allwch ychwanegu cynllun talu newydd oherwydd mai’r nifer uchaf ar gyfer Debyd Uniongyrchol yw 99.
 directDebitPaymentSummary.activePayment.p2 = Pan fyddwch yn sefydlu taliad Debyd Uniongyrchol newydd, mae’n bosibl y bydd yn cymryd hyd at 36 awr i ymddangos yn eich cyfrif.
 directDebitPaymentSummary.activePayment.summary.title = Cyfeirnod talu: {0}
@@ -503,7 +503,6 @@ cancelPaymentPlan.paymentAmount.single = Swm y taliad:
 cancelPaymentPlan.paymentAmount.budget = Swm y taliad rheolaidd:
 cancelPaymentPlan.p1 = Ni ellir canslo taliadau sy’n ddyledus cyn pen y 3 diwrnod gwaith nesaf.
 cancelPaymentPlan.h2 = A ydych yn siŵr eich bod am ganslo’r cynllun talu hwn?
-cancelPaymentPlan.checkYourAnswersLabel = cancelPaymentPlan
 cancelPaymentPlan.error.required = Dewiswch un opsiwn.
 cancelPaymentPlan.change.hidden =  cynllun talu
 
