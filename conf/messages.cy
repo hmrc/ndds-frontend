@@ -1,7 +1,7 @@
 service.name = System Debyd Uniongyrchol Cenedlaethol
 
 site.back = Yn ôl
-site.remove = Remove
+site.remove = Tynnu
 site.change = Newid
 site.no = Na
 site.yes = Iawn
