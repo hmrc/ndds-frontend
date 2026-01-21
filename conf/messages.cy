@@ -551,7 +551,7 @@ suspensionPeriodRangeDate.error.invalid.startDate.base = Enter a real start date
 suspensionPeriodRangeDate.error.invalid.endDate.base = Enter a real end date.
 suspensionPeriodRangeDate.error.startDate = Mae’n i ddyddiad decrhau’r cyfnod gohirio fod rhwng {0} a {1}
 suspensionPeriodRangeDate.error.endDate = Mae’n rhaid i ddyddiad diwedd y cyfnod gohirio fod rhwng {0} a {1}
-suspensionPeriodRangeDate.change.hidden = Newid cyfnod gohirio
+suspensionPeriodRangeDate.change.hidden = cyfnod gohirio
 
 checkYourSuspensionDetails.title = Gwirio manylion eich gohiriad
 checkYourSuspensionDetails.heading = Gwirio manylion eich gohiriad
