@@ -54,6 +54,7 @@ class PaymentPlanDetailsController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
     (request.userAnswers.get(DirectDebitReferenceQuery), request.userAnswers.get(PaymentPlanReferenceQuery)) match {
       case (Some(directDebitReference), Some(paymentPlanReference)) =>
         cleanConfirmationFlags(request.userAnswers).flatMap { cleanedAnswers =>
@@ -97,12 +98,15 @@ class PaymentPlanDetailsController @Inject() (
                 val summaryRows: Seq[SummaryListRow] = buildSummaryRows(showAllActionsFlag, planDetail)
                 val isSuspensionActive = isSuspendPeriodActive(planDetail)
 
-                val formattedSuspensionStartDate = planDetail.suspensionStartDate
-                  .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                val formatterLocale: DateTimeFormatter =
+                  DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
+
+                val formattedSuspensionStartDate: String = planDetail.suspensionStartDate
+                  .map(_.format(formatterLocale))
                   .getOrElse("")
 
-                val formattedSuspensionEndDate = planDetail.suspensionEndDate
-                  .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                val formattedSuspensionEndDate: String = planDetail.suspensionEndDate
+                  .map(_.format(formatterLocale))
                   .getOrElse("")
 
                 val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
@@ -111,7 +115,7 @@ class PaymentPlanDetailsController @Inject() (
                   .getOrElse("")
 
                 val formattedDueDate = advanceNoticeResponse.dueDate
-                  .map(_.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)))
+                  .map(_.format(formatterLocale))
                   .getOrElse("")
 
                 Ok(
