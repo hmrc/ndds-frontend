@@ -62,7 +62,7 @@ yourDirectDebitInstructions.dl.direct.debit.reference = Direct Debit reference
 yourDirectDebitInstructions.dl.date.setup = Date set up
 yourDirectDebitInstructions.dl.account.number = Account Number
 yourDirectDebitInstructions.dl.payment.plans = Payment plans
-yourDirectDebitInstructions.error.count = You cannot add a new Direct Debit Instruction because the maximum number is 99
+yourDirectDebitInstructions.error.count = You cannot add a new Direct Debit Instruction because the maximum number is 99.
 
 setupDirectDebitPayment.title = Set up a Direct Debit payment
 setupDirectDebitPayment.heading = Set up a Direct Debit payment
@@ -335,7 +335,6 @@ planEndDate.error.required = The plan end date must include {0}
 planEndDate.error.invalid = Enter a valid date
 planEndDate.error.incomplete = Enter a valid date
 planEndDate.error.beforeOrEqualStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
-planEndDate.final.checkYourAnswersLabel = Final payment date
 planEndDate.enter = Enter plan end date
 
 totalAmountDue.title = How much is the total amount due, in pounds?
