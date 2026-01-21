@@ -82,7 +82,7 @@ class AmendingPaymentPlanController @Inject() (
               Seq(
                 ActionItem(
                   href               = changeCall.url,
-                  content            = Text("Change"),
+                  content            = Text("site.change"),
                   visuallyHiddenText = Some(hiddenChangeText)
                 )
               )
@@ -101,7 +101,7 @@ class AmendingPaymentPlanController @Inject() (
                     items = Seq(
                       ActionItem(
                         href               = routes.AmendPlanStartDateController.onPageLoad(NormalMode).url,
-                        content            = Text("Change"),
+                        content            = Text("site.change"),
                         visuallyHiddenText = Some("payment date")
                       )
                     )

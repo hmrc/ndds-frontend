@@ -36,7 +36,7 @@ object AmendPlanStartDateSummary {
         ValueViewModel(answer.format(DateTimeFormatter.ofPattern("d MMM yyyy"))),
         actions = Seq(
           ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPlanStartDate.startDate"))
+            .withVisuallyHiddenText(messages("amendPlanStartDate.startDate.hidden"))
         )
       )
     }
@@ -59,7 +59,7 @@ object AmendPlanStartDateSummary {
       actions = if (showChange) {
         Seq(
           ActionItemViewModel("site.change", routes.AmendPlanStartDateController.onPageLoad(CheckMode).url)
-            .withVisuallyHiddenText(messages("amendPlanStartDate.startDate"))
+            .withVisuallyHiddenText(messages("amendPlanStartDate.startDate.hidden"))
         )
       } else {
         Seq.empty

@@ -69,8 +69,9 @@ class CheckYourAnswersController @Inject() (
       Redirect(routes.BackSubmissionController.onPageLoad())
     } else {
       val showPlanEndDate =
-        if (hasEndDate.contains(true)) PlanEndDateSummary.rowOrPlaceholder(ua)
-        else None
+        if (hasEndDate.contains(true)) {
+          PlanEndDateSummary.rowOrPlaceholder(ua)
+        } else { None }
       val monthlyPaymentAmount = if (ua.get(PaymentPlanTypePage).contains(PaymentPlanType.TaxCreditRepaymentPlan)) {
         MonthlyPaymentAmountSummary.row(ua)
       } else { None }
@@ -121,10 +122,8 @@ class CheckYourAnswersController @Inject() (
   def onSubmit(): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
       implicit val ua: UserAnswers = {
-
         val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
         val fourExtraNumbers = request.userAnswers.get(YearEndAndMonthPage)
-
         if (directDebitSource.contains(DirectDebitSource.PAYE) && fourExtraNumbers.isDefined) addFourExtraNoToPayRef(request.userAnswers)
         else request.userAnswers
       }
@@ -150,17 +149,14 @@ class CheckYourAnswersController @Inject() (
                       nddService
                         .calculateFutureWorkingDays(request.userAnswers, request.userId)
                         .map(earliest => validateSinglePlanDate(ua, earliest))
-
                     } else if (requireBudgetingPlanCheck(ua)) {
                       nddService
                         .getEarliestPlanStartDate(request.userAnswers, request.userId)
                         .map(earliest => validateBudgetingPlanDates(ua, earliest))
-
                     } else if (requireVariableAndTcPlanCheck(ua)) {
                       nddService
                         .getEarliestPlanStartDate(request.userAnswers, request.userId)
                         .map(earliest => validateVariableAndTcPlanDates(ua, earliest))
-
                     } else {
                       // No rule means proceed normally (not an error)
                       Future.successful(Right(()))
@@ -169,10 +165,8 @@ class CheckYourAnswersController @Inject() (
                   validationResultF.flatMap {
                     case Right(_) =>
                       processDdiReferenceGeneration(ua, request)
-
                     case Left(errorMessage) =>
                       logger.warn(s"Date validation failed: $errorMessage")
-
                       if (
                         errorMessage.contains("before earliest allowed date")
                         || errorMessage.contains("End date")
@@ -184,13 +178,10 @@ class CheckYourAnswersController @Inject() (
                       } else {
                         // All other errors → system page
                         Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-
                       }
                   }
                 }
-
               }
-
             }
       }
     }
