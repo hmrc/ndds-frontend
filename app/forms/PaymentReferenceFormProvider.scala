@@ -16,17 +16,33 @@
 
 package forms
 
+import javax.inject.Inject
+import models.DirectDebitSource
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import javax.inject.Inject
-
 class PaymentReferenceFormProvider @Inject() extends Mappings {
 
-  def apply(validator: Option[String => Boolean] = None): Form[String] =
-    Form(
-      "value" -> text("paymentReference.error.invalid")
-        .verifying("paymentReference.error.invalid", reference => validator.forall(_(reference)))
-    )
+  private def invalidKeyFor(source: Option[DirectDebitSource]): String =
+    source match {
+      case Some(DirectDebitSource.CT)   => "paymentReference.error.invalid.ct"
+      case Some(DirectDebitSource.MGD)  => "paymentReference.error.invalid.mgd"
+      case Some(DirectDebitSource.NIC)  => "paymentReference.error.invalid.nic"
+      case Some(DirectDebitSource.PAYE) => "paymentReference.error.invalid.paye"
+      case Some(DirectDebitSource.SA)   => "paymentReference.error.invalid.sa"
+      case Some(DirectDebitSource.SDLT) => "paymentReference.error.invalid.sdlt"
+      case Some(DirectDebitSource.TC)   => "paymentReference.error.invalid.tc"
+      case Some(DirectDebitSource.VAT)  => "paymentReference.error.invalid.vat"
+      case Some(DirectDebitSource.OL)   => "paymentReference.error.invalid.other"
+      case _                            => "paymentReference.error.invalid"
+    }
 
+  def apply(selectedSource: Option[DirectDebitSource], validator: Option[String => Boolean] = None): Form[String] = {
+    val invalidKey = invalidKeyFor(selectedSource)
+
+    Form(
+      "value" -> text(invalidKey)
+        .verifying(invalidKey, reference => validator.forall(_(reference)))
+    )
+  }
 }

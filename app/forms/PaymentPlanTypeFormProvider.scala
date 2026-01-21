@@ -17,15 +17,26 @@
 package forms
 
 import forms.mappings.Mappings
-import models.PaymentPlanType
+import models.DirectDebitSource.{MGD, SA, TC}
+import models.{DirectDebitSource, PaymentPlanType}
 import play.api.data.Form
 
 import javax.inject.Inject
 
 class PaymentPlanTypeFormProvider @Inject() extends Mappings {
 
-  def apply(): Form[PaymentPlanType] =
+  def apply(selectedAnswer: Option[DirectDebitSource]): Form[PaymentPlanType] = {
+
+    val errorKey =
+      selectedAnswer match {
+        case Some(MGD) => "paymentPlanType.error.required.mgd"
+        case Some(SA)  => "paymentPlanType.error.required.sa"
+        case Some(TC)  => "paymentPlanType.error.required.tc"
+        case _         => "paymentPlanType.error.required"
+      }
+
     Form(
-      "value" -> enumerable[PaymentPlanType]("paymentPlanType.error.required")
+      "value" -> enumerable[PaymentPlanType](errorKey)
     )
+  }
 }
