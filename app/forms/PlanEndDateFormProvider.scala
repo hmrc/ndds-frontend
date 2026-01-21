@@ -22,9 +22,12 @@ import play.api.data.validation.*
 import play.api.i18n.Messages
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class PlanEndDateFormProvider @Inject() extends Mappings {
+
+  private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
   def apply(startDate: LocalDate)(implicit messages: Messages): Form[Option[LocalDate]] =
     Form(
@@ -39,7 +42,7 @@ class PlanEndDateFormProvider @Inject() extends Mappings {
   private def optionalDateAfter(start: LocalDate, errorKey: String): Constraint[Option[LocalDate]] =
     Constraint {
       case Some(endDate) if endDate.isBefore(start) =>
-        Invalid(ValidationError(errorKey))
+        Invalid(ValidationError(errorKey, start.format(dateTimeFormatter)))
       case _ =>
         Valid
     }
