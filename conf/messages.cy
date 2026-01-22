@@ -63,6 +63,7 @@ yourDirectDebitInstructions.dl.date.setup = Dyddiad sefydlu
 yourDirectDebitInstructions.dl.account.number = Rhif y cyfrif
 yourDirectDebitInstructions.dl.payment.plans = Cynlluniau talu
 yourDirectDebitInstructions.error.count = Ni allwch ychwanegu Cyfarwyddyd Debyd Uniongyrchol newydd oherwydd mai’r nifer uchaf yw 99
+yourDirectDebitInstructions.account.number.hidden = yn gorffen gyda {0}
 
 setupDirectDebitPayment.title = Sefydlu taliad Debyd Uniongyrchol
 setupDirectDebitPayment.heading = Sefydlu taliad Debyd Uniongyrchol
@@ -441,7 +442,7 @@ directDebitPaymentSummary.activePayment.p1.linkText = sefydlu cynllun talu newyd
 directDebitPaymentSummary.activePayment.overPPLimit.p1 = Ni allwch ychwanegu cynllun talu newydd oherwydd mai’r nifer uchaf ar gyfer Debyd Uniongyrchol yw 99.
 directDebitPaymentSummary.activePayment.p2 = Pan fyddwch yn sefydlu taliad Debyd Uniongyrchol newydd, mae’n bosibl y bydd yn cymryd hyd at 36 awr i ymddangos yn eich cyfrif.
 directDebitPaymentSummary.activePayment.summary.title = Cyfeirnod talu: {0}
-directDebitPaymentSummary.activePayment.summary.action = Rheoli’r cynllun
+directDebitPaymentSummary.activePayment.summary.managePlan = Rheoli’r cynllun
 directDebitPaymentSummary.activePayment.summary.planType = Math o gynllun
 directDebitPaymentSummary.activePayment.summary.paymentFor = Taliad ar gyfer
 directDebitPaymentSummary.activePayment.summary.date = Dyddiad sefydlu
@@ -450,6 +451,9 @@ directDebitPaymentSummary.setupPayment.h1 = Sefydlu cynllun talu
 directDebitPaymentSummary.setupPayment.p1 = Pan fyddwch yn sefydlu taliad Debyd Uniongyrchol newydd, mae’n bosibl y bydd yn cymryd hyd at 36 awr i ymddangos yn eich cyfrif.
 directDebitPaymentSummary.addPaymentButton = Sefydlu cynllun talu
 directDebitPaymentSummary.noActivePaymentPlans.p1 = Does dim cynlluniau talu ar waith ar gyfer y Debyd Uniongyrchol hwn.
+directDebitPaymentSummary.accountNumber.hidden = yn gorffen gyda {0}
+directDebitPaymentSummary.sortCode.hidden = yn dechrau gyda {0}
+directDebitPaymentSummary.activePayment.summary.managePlan.hidden = Rheoli cynllun
 
 paymentPlanDetails.title = Manylion eich cynllun talu
 paymentPlanDetails.heading = Manylion eich cynllun talu

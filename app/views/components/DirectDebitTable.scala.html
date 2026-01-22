@@ -52,7 +52,7 @@
             content = HtmlContent(
             s"""${maskAccountNumber(dd.accountNumber)}
                 <span class="govuk-visually-hidden">
-                    ending with ${(dd.accountNumber).substring(4)}
+                    ${messages("yourDirectDebitInstructions.account.number.hidden", {(dd.accountNumber).substring(4)})}
                 </span>
             """
             )

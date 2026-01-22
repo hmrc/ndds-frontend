@@ -52,7 +52,7 @@
                 value = Value(content = HtmlContent(
                     s"""${maskAccountNumber(directDebitDetails.bankAccountNumber)}
                     <span class="govuk-visually-hidden">
-                        ending with ${(directDebitDetails.bankAccountNumber).substring(4)}
+                        ${messages("directDebitPaymentSummary.accountNumber.hidden", (directDebitDetails.bankAccountNumber).substring(4))}
                     </span>
                     """
                 ))
@@ -62,7 +62,7 @@
                 value = Value(content = HtmlContent(
                     s"""${maskSortCode(directDebitDetails.bankSortCode)}
                     <span class="govuk-visually-hidden">
-                        starting with ${(directDebitDetails.bankSortCode).substring(0, 2)}
+                        ${messages("directDebitPaymentSummary.sortCode.hidden", (directDebitDetails.bankSortCode).substring(0, 2))}
                     </span>
                     """
                 ))
