@@ -430,7 +430,7 @@ directDebitPaymentSummary.activePayment.p1.linkText = set up a new payment plan.
 directDebitPaymentSummary.activePayment.overPPLimit.p1 = You cannot add a new payment plan because the maximum number for a Direct Debit is 99.
 directDebitPaymentSummary.activePayment.p2 = When you set up a new Direct Debit payment, it may take up to 36 hours to appear in your account.
 directDebitPaymentSummary.activePayment.summary.title = Payment reference: {0}
-directDebitPaymentSummary.activePayment.summary.action = Manage plan
+directDebitPaymentSummary.activePayment.summary.managePlan = Manage plan
 directDebitPaymentSummary.activePayment.summary.planType = Plan type
 directDebitPaymentSummary.activePayment.summary.paymentFor = Payment for
 directDebitPaymentSummary.activePayment.summary.date = Date set up
@@ -441,6 +441,7 @@ directDebitPaymentSummary.addPaymentButton = Set up a payment plan
 directDebitPaymentSummary.noActivePaymentPlans.p1 = This Direct Debit has no active payment plans.
 directDebitPaymentSummary.accountNumber.hidden = ending with {0}
 directDebitPaymentSummary.sortCode.hidden = starting with {0}
+directDebitPaymentSummary.activePayment.summary.managePlan.hidden = Manage plan
 
 paymentPlanDetails.title = Your payment plan details
 paymentPlanDetails.heading = Your payment plan details
