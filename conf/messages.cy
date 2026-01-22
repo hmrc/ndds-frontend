@@ -654,6 +654,7 @@ amendPaymentAmount.change.hidden =  swm y taliad
 amendRegularPaymentAmount.title = How much is the regular payment amount, in pounds?
 amendRegularPaymentAmount.heading = How much is the regular payment amount, in pounds?
 amendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
+amendRegularPaymentAmount.change.hidden = swm y taliad rheolaidd
 
 amendPlanStartDate.title = When do you want to make this payment?
 amendPlanStartDate.heading = When do you want to make this payment?

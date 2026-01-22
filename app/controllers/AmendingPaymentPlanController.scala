@@ -70,7 +70,7 @@ class AmendingPaymentPlanController @Inject() (
         routes.AmendPaymentAmountController.onPageLoad(mode = NormalMode)
       }
       val hiddenChangeText = if (isBudgetPlan) {
-        "regularPaymentAmount.change.hidden"
+        "amendRegularPaymentAmount.change.hidden"
       } else {
         "paymentAmount.change.hidden"
       }
