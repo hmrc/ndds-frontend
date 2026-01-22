@@ -51,19 +51,13 @@
         )
     }
 
-    @govukInsetText(
-        InsetText(
-            content = HtmlContent(
-                paragraphMessageWithLink(
-                    message1   = Some(messages("yourDirectDebitInstructions.p3.beforeLink")),
-                    linkMessage = messages("yourDirectDebitInstructions.p3.link"),
-                    message2   = Some(messages("yourDirectDebitInstructions.p3.afterLink")),
-                    linkUrl    = hmrcHelplineUrl,
-                    linkRel    = "noreferrer noopener",
-                    target     = "_blank"
-                )
-            )
-        )
+    @paragraphMessageWithLink(
+        message1   = Some(messages("yourDirectDebitInstructions.p3.beforeLink")),
+        linkMessage = messages("yourDirectDebitInstructions.p3.link"),
+        message2   = Some(messages("yourDirectDebitInstructions.p3.afterLink")),
+        linkUrl    = hmrcHelplineUrl,
+        linkRel    = "noreferrer noopener",
+        target     = "_blank"
     )
 
     @directDebitTable(directDebitDetails)
