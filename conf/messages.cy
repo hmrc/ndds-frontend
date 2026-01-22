@@ -632,8 +632,8 @@ accessDenied.link       = Parhau i’ch cyfrif.
 
 systemError.title       = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth hwn
 systemError.heading     = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth hwn
-systemError.p1          = Try again later or contact the
-systemError.link        = Desg Gymorth Gwasanaethau Ar-lein CThEF (opens in a new tab)
+systemError.p1          = Rhowch gynnig arall arni yn nes ymlaen
+systemError.link        = neu cysylltwch â Desg Gymorth Gwasanaethau Ar-lein CThEF (yn agor tab newydd)
 
 amendingPaymentPlan.title = Diwygio’r cynllun talu hwn
 amendingPaymentPlan.heading = Diwygio’r cynllun talu hwn
