@@ -21,7 +21,7 @@ import controllers.actions.*
 import models.{NormalMode, PaymentPlanType}
 import pages.{AmendConfirmRemovePlanEndDatePage, AmendPaymentAmountPage, ManagePaymentPlanTypePage, RegularPaymentAmountPage}
 import play.api.Logging
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
@@ -52,6 +52,7 @@ class AmendingPaymentPlanController @Inject() (
     with Logging {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
     if (!nddsService.amendPaymentPlanGuard(request.userAnswers)) {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
@@ -69,9 +70,9 @@ class AmendingPaymentPlanController @Inject() (
         routes.AmendPaymentAmountController.onPageLoad(mode = NormalMode)
       }
       val hiddenChangeText = if (isBudgetPlan) {
-        "regular payment amount"
+        "regularPaymentAmount.change.hidden"
       } else {
-        "payment amount"
+        "paymentAmount.change.hidden"
       }
 
       val amountRow = AmendPaymentAmountSummary
@@ -82,8 +83,8 @@ class AmendingPaymentPlanController @Inject() (
               Seq(
                 ActionItem(
                   href               = changeCall.url,
-                  content            = Text("Change"),
-                  visuallyHiddenText = Some(hiddenChangeText)
+                  content            = Text(messages("site.change")),
+                  visuallyHiddenText = Some(messages(hiddenChangeText))
                 )
               )
             )
@@ -101,8 +102,8 @@ class AmendingPaymentPlanController @Inject() (
                     items = Seq(
                       ActionItem(
                         href               = routes.AmendPlanStartDateController.onPageLoad(NormalMode).url,
-                        content            = Text("Change"),
-                        visuallyHiddenText = Some("payment date")
+                        content            = Text(messages("site.change")),
+                        visuallyHiddenText = Some(messages("amendPaymentAmount.change.hidden"))
                       )
                     )
                   )
