@@ -48,7 +48,15 @@
             )
           )
         ),
-        TableRow(content = Text(maskAccountNumber(dd.accountNumber))),
+        TableRow(
+            content = HtmlContent(
+            s"""${maskAccountNumber(dd.accountNumber)}
+                <span class="govuk-visually-hidden">
+                    ending with ${(dd.accountNumber).substring(4)}
+                </span>
+            """
+            )
+        ),
         TableRow(content = Text(dd.setupDate)),
         TableRow(content = Text(dd.paymentPlans))
       )
