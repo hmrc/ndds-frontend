@@ -21,7 +21,7 @@ import play.api.data.FormError
 
 class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
 
-  val invalidKey = "paymentReference.error.invalid"
+  val invalidKey = "paymentReference.error.invalid.sa"
   val maxLength = 100
 
   val form = new PaymentReferenceFormProvider()(None)
@@ -36,11 +36,11 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
       stringsWithMaxLength(maxLength)
     )
 
-//    behave like invalidField(
-//      new PaymentReferenceFormProvider().apply(Some(_ => false)),
-//      fieldName,
-//      requiredError = FormError(fieldName, invalidKey),
-//      "test"
-//    )
+    behave like invalidField(
+      new PaymentReferenceFormProvider().apply(Some(models.DirectDebitSource.SA), validator = Some(_ => false)),
+      fieldName,
+      requiredError = FormError(fieldName, invalidKey),
+      "test"
+    )
   }
 }

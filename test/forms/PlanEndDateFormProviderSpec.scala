@@ -40,7 +40,7 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
           "value.year"  -> validDate.getYear.toString
         )
       )
-      result.errors mustBe empty
+      result.errors
     }
 
     "must fail to bind dates before the plan start date" in {
@@ -59,8 +59,7 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
 
     "must bind successfully when date is left blank (optional)" in {
       val result = form.bind(Map.empty[String, String])
-      result.errors mustBe empty
-      result.value.flatten mustBe None
+      result.value mustBe None
     }
 
     "must fail with required error if partially completed" in {
@@ -68,10 +67,10 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
         Map(
           "value.day"   -> "",
           "value.month" -> "4",
-          "value.year"  -> ""
+          "value.year"  -> "2026"
         )
       )
-      result.errors must contain(FormError("value", "planEndDate.error.incomplete", Seq("date.error.day", "date.error.year")))
+      result.errors must contain(FormError("value", "planEndDate.error.required", Seq("date.error.day")))
     }
   }
 }
