@@ -86,8 +86,8 @@ personalOrBusinessAccount.personal = Personal
 personalOrBusinessAccount.business = Business
 personalOrBusinessAccount.error.required = Select an account type.
 
-yourBankDetails.title = What are your bank details?
-yourBankDetails.heading = What are your bank details?
+yourBankDetails.title = What are the bank account details?
+yourBankDetails.heading = What are the bank account details?
 yourBankDetails.accountHolderName = Name on the account
 yourBankDetails.accountHolderName.change.hidden = Name on the account
 yourBankDetails.sortCode.change.hidden = Sort Code
