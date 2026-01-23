@@ -622,7 +622,7 @@ pageNotFound.heading    = Heb ddod o hyd i’r dudalen
 pageNotFound.p1         = Os gwnaethoch deipio’r cyfeiriad gwe, gwiriwch ei fod yn gywir.
 pageNotFound.p2         = Os gwnaethoch ludo’r cyfeiriad gwe, gwiriwch eich bod wedi copïo’r cyfeiriad yn llawn.
 pageNotFound.p3         = Os yw’r cyfeiriad gwe yn gywir, neu os dewisoch gysylltiad neu fotwm, cysylltwch â
-pageNotFound.link       = Desg Gymorth Gwasanaethau Ar-lein CThEF (opens in a new tab)
+pageNotFound.link       = Desg Gymorth Gwasanaethau Ar-lein CThEF (yn agor tab newydd)
 pageNotFound.p4         = os oes angen i chi siarad â rhywun.
 
 accessDenied.title      = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth hwn
