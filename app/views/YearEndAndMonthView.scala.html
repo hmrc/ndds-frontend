@@ -44,9 +44,10 @@
             @govukErrorSummary(ErrorSummaryViewModel(form, errorLinkOverrides = Map("value" -> "value")))
         }
 
-        @govukLabel(HmrcPageHeadingLabel.apply(
-            content = Text(messages("yearEndAndMonth.heading"))
-        ).withCssClass("govuk-!-margin-bottom-0"))
+        @header1(
+            msg = "yearEndAndMonth.heading",
+            classes = "govuk-heading-xl govuk-!-margin-bottom-2"
+        )
 
         @paragraph("yearEndAndMonth.p1")
 
