@@ -17,7 +17,6 @@
 package forms
 
 import forms.behaviours.StringFieldBehaviours
-import play.api.data.FormError
 
 class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
 

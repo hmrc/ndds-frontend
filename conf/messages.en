@@ -174,6 +174,7 @@ paymentPlanType.change.hidden = plan type
 paymentPlanType.error.required.mgd = Select if this is a single payment or a variable payment plan
 paymentPlanType.error.required.sa = Select if this is a single payment or a budget payment plan
 paymentPlanType.error.required.tc = Select if this is a single payment or a tax credit repayment plan
+
 paymentPlan.collapsable              = Help choosing your payment plan type
 paymentPlan.collapsable.mgd.p1       = There are 2 different payment plans available: the single payment plan and the variable payment plan.
 paymentPlan.collapsable.mgd.single   = Single payment
@@ -518,7 +519,6 @@ cancelPaymentPlan.paymentAmount.single = Payment amount:
 cancelPaymentPlan.paymentAmount.budget = Regular payment amount:
 cancelPaymentPlan.p1 = Payments due within the next 3 working days cannot be cancelled.
 cancelPaymentPlan.h2 = Are you sure you want to cancel this payment plan?
-cancelPaymentPlan.checkYourAnswersLabel = cancelPaymentPlan
 cancelPaymentPlan.error.required = Select yes if you want to cancel this payment plan.
 cancelPaymentPlan.change.hidden =  Cancel Payment Plan
 
@@ -592,7 +592,7 @@ removingThisSuspension.paymentDetails = Payment reference: <strong>{0}</strong>
 removingThisSuspension.suspensionInfo = This suspension period is from <strong>{0}</strong> to <strong>{1}</strong>
 removingThisSuspension.question = Are you sure you want to remove this suspension?
 removingThisSuspension.checkYourAnswersLabel = Removing this suspension
-removingThisSuspension.error.required = Select yes if you want to remove this suspension.
+removingThisSuspension.error.required = Select yes if you want to remove this suspension
 removingThisSuspension.change.hidden =  Removing this suspension
 
 removeSuspensionConfirmation.title = Payment plan suspension removed
