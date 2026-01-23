@@ -54,7 +54,7 @@ object AmendRegularPaymentAmountSummary {
           .map(call =>
             Seq(
               ActionItemViewModel("site.change", call.url)
-                .withVisuallyHiddenText(messages("regularPaymentAmount.change.hidden"))
+                .withVisuallyHiddenText(messages("amendRegularPaymentAmount.change.hidden"))
             )
           )
           .getOrElse(Seq.empty)

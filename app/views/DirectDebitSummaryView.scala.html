@@ -49,11 +49,23 @@
             ),
             SummaryListRow(
                 key = Key(content = messages("directDebitPaymentSummary.directDebit.accountNumber")),
-                value = Value(content = HtmlContent(maskAccountNumber(directDebitDetails.bankAccountNumber)))
+                value = Value(content = HtmlContent(
+                    s"""${maskAccountNumber(directDebitDetails.bankAccountNumber)}
+                    <span class="govuk-visually-hidden">
+                        ${messages("directDebitPaymentSummary.accountNumber.hidden", (directDebitDetails.bankAccountNumber).substring(4))}
+                    </span>
+                    """
+                ))
             ),
             SummaryListRow(
                 key = Key(content = messages("directDebitPaymentSummary.directDebit.sortCode")),
-                value = Value(content = HtmlContent(maskSortCode(directDebitDetails.bankSortCode)))
+                value = Value(content = HtmlContent(
+                    s"""${maskSortCode(directDebitDetails.bankSortCode)}
+                    <span class="govuk-visually-hidden">
+                        ${messages("directDebitPaymentSummary.sortCode.hidden", (directDebitDetails.bankSortCode).substring(0, 2))}
+                    </span>
+                    """
+                ))
             )
         )
     ))
@@ -61,7 +73,7 @@
     @if(paymentPlansList.size > 0) {
         @h2("directDebitPaymentSummary.activePayment.h1")
 
-        @if(directDebitDetails.paymentPlanCount < ppLimit){
+        @if(directDebitDetails.paymentPlanCount < ppLimit) {
             @paragraphWithLink(
                 Some(messages("directDebitPaymentSummary.activePayment.p1")),
                 linkMessage = messages("directDebitPaymentSummary.activePayment.p1.linkText"),

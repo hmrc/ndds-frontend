@@ -132,8 +132,8 @@ class DirectDebitSummaryController @Inject() (
                 items = Seq(
                   ActionItem(
                     href               = routes.PaymentPlanDetailsController.onRedirect(plan.planRefNumber).url,
-                    content            = Text(messages("directDebitPaymentSummary.activePayment.summary.action")),
-                    visuallyHiddenText = None
+                    content            = Text(messages("directDebitPaymentSummary.activePayment.summary.managePlan")),
+                    visuallyHiddenText = Some(messages("directDebitPaymentSummary.activePayment.summary.managePlan.hidden"))
                   )
                 )
               )

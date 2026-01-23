@@ -91,13 +91,10 @@ class PlanStartDateController @Inject() (
     val optPaymentType = answers.get(PaymentPlanTypePage)
     val optSourceType = answers.get(DirectDebitSourcePage)
     (optSourceType, optPaymentType) match {
-      case (Some(MGD), Some(VariablePaymentPlan)) =>
-        routes.PaymentReferenceController.onPageLoad(mode)
-      case (Some(SA), Some(BudgetPaymentPlan)) =>
-        routes.RegularPaymentAmountController.onPageLoad(mode)
-      case (Some(TC), Some(TaxCreditRepaymentPlan)) =>
-        routes.TotalAmountDueController.onPageLoad(mode)
-      case _ => routes.SystemErrorController.onPageLoad()
+      case (Some(MGD), Some(VariablePaymentPlan))   => routes.PaymentReferenceController.onPageLoad(mode)
+      case (Some(SA), Some(BudgetPaymentPlan))      => routes.RegularPaymentAmountController.onPageLoad(mode)
+      case (Some(TC), Some(TaxCreditRepaymentPlan)) => routes.TotalAmountDueController.onPageLoad(mode)
+      case _                                        => routes.SystemErrorController.onPageLoad()
     }
   }
 

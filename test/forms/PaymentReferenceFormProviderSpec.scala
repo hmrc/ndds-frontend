@@ -21,8 +21,6 @@ import play.api.data.FormError
 
 class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey = "paymentReference.error.required"
-  val lengthKey = "paymentReference.error.length"
   val invalidKey = "paymentReference.error.invalid"
   val maxLength = 100
 

@@ -25,6 +25,6 @@ class DuplicateWarningFormProvider @Inject() extends Mappings {
 
   def apply(): Form[Boolean] =
     Form(
-      "value" -> boolean("duplicateWarning.error.required")
+      "value" -> boolean("amendDuplicateWarning.error.required")
     )
 }
