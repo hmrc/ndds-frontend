@@ -411,7 +411,6 @@ directDebitConfirmation.variablePaymentPlan = Taliad newidiol
 directDebitConfirmation.budgetPaymentPlan = Taliad cyllidebol
 directDebitConfirmation.taxCreditRepaymentPlan = Ad-daliad credydau treth
 directDebitConfirmation.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
-directDebitConfirmation.viewPaymentPlans = Bwrw golwg dros bob cynllun talu
 directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instructions
 
 under_construction.heading = Under Construction
@@ -494,6 +493,7 @@ paymentPlanDetails.details.hodService.sdlt = Treth Dir y Tollau Stamp (SDLT)
 paymentPlanDetails.details.hodService.tc = Credydau treth (TC)
 paymentPlanDetails.details.hodService.vat = Treth Ar Werth (TAW)
 paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
+paymentPlanDetails.viewPaymentPlans.link = Bwrw golwg dros bob cynllun talu
 
 paymentPlanLockedWarning.title = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
 paymentPlanLockedWarning.heading = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
