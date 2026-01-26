@@ -24,8 +24,11 @@ import play.api.test.Helpers.stubMessages
 import utils.DateFormats
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class PlanStartDateFormatterSpec extends SpecBase {
+
+  private val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   private val formatter = new PlanStartDateFormatter(
     invalidKey               = "planStartDate.error.invalid",
@@ -54,6 +57,7 @@ class PlanStartDateFormatterSpec extends SpecBase {
     }
 
     "must return error when date is before earliest plan start date" in {
+      val earliest = LocalDate.of(2024, 1, 15)
       val data = Map(
         "value.day"   -> "10",
         "value.month" -> "1",
@@ -61,11 +65,14 @@ class PlanStartDateFormatterSpec extends SpecBase {
       )
 
       val result = formatter.bind("value", data)
-      result mustBe Left(Seq(FormError("value", "planStartDate.error.beforeEarliestDate")))
+      result mustBe Left(
+        Seq(FormError("value", "planStartDate.error.beforeEarliestDate", Seq(earliest.format(dateFormatter))))
+      )
     }
 
     "must return error for BUDGET payment plan when date is more than 12 months after current date" in {
       val currentDate = LocalDate.now()
+      val expectedMax = currentDate.plusYears(1)
       val budgetUserAnswers = UserAnswers("test-id")
         .set(DirectDebitSourcePage, DirectDebitSource.SA)
         .success
@@ -95,11 +102,14 @@ class PlanStartDateFormatterSpec extends SpecBase {
       )
 
       val result = formatterWithBudget.bind("value", data)
-      result mustBe Left(Seq(FormError("value", "planStartDate.error.budgetAfterMaxDate")))
+      result mustBe Left(
+        Seq(FormError("value", "planStartDate.error.budgetAfterMaxDate", Seq(expectedMax.format(dateFormatter))))
+      )
     }
 
     "must return error for TIME_TO_PAY/VPP payment plan when date is more than 30 days after current date" in {
       val currentDate = LocalDate.now()
+      val expectedMax = currentDate.plusDays(30)
       val vppUserAnswers = UserAnswers("test-id")
         .set(DirectDebitSourcePage, DirectDebitSource.MGD)
         .success
@@ -129,7 +139,9 @@ class PlanStartDateFormatterSpec extends SpecBase {
       )
 
       val result = formatterWithVpp.bind("value", data)
-      result mustBe Left(Seq(FormError("value", "planStartDate.error.timeToPayAfterMaxDate")))
+      result mustBe Left(
+        Seq(FormError("value", "planStartDate.error.timeToPayAfterMaxDate", Seq(expectedMax.format(dateFormatter))))
+      )
     }
 
     "must allow valid date for BUDGET payment plan within 12 months" in {

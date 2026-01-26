@@ -55,7 +55,7 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
       result mustBe Right(LocalDate.of(2025, 8, 15))
     }
 
-    "return error for missing day" in {
+    "return error when some fields are missing" in {
       val data = Map(
         "date.month" -> "8",
         "date.year"  -> "2025"
@@ -64,8 +64,10 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
       val result = formatter.bind("date", data)
 
       result match {
-        case Left(errors) => errors must contain(FormError("date.day", "date.error.day"))
-        case Right(_)     => fail("Expected Left with errors but got Right")
+        case Left(errors) =>
+          errors must contain(FormError("date", "error.twoRequired", Seq()))
+        case Right(_) =>
+          fail("Expected Left with errors but got Right")
       }
     }
 
@@ -79,8 +81,10 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
       val result = formatter.bind("date", data)
 
       result match {
-        case Left(errors) => errors must contain(FormError("date.month", "error.month"))
-        case Right(_)     => fail("Expected Left with errors but got Right")
+        case Left(errors) =>
+          errors must contain(FormError("date", "error.invalid", Seq()))
+        case Right(_) =>
+          fail("Expected Left with errors but got Right")
       }
     }
 
