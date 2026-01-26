@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-//package forms
-//
-//import forms.behaviours.OptionFieldBehaviours
-//import models.PersonalOrBusinessAccount
-//import play.api.data.FormError
-//
-//class PersonalOrBusinessAccountFormProviderSpec extends OptionFieldBehaviours {
-//
-//  val form = new PersonalOrBusinessAccountFormProvider()()
-//
-//  ".value" - {
-//
-//    val fieldName = "value"
-//    val requiredKey = "personalOrBusinessAccount.error.required"
-//
-//    behave like optionsField[PersonalOrBusinessAccount](
-//      form,
-//      fieldName,
-//      validValues  = PersonalOrBusinessAccount.values,
-//      invalidError = FormError(fieldName, "error.invalid")
-//    )
-//
-//    behave like mandatoryField(
-//      form,
-//      fieldName,
-//      requiredError = FormError(fieldName, requiredKey)
-//    )
-//  }
-//}
+package forms
+
+import forms.behaviours.OptionFieldBehaviours
+import models.PersonalOrBusinessAccount
+import play.api.data.FormError
+
+class PersonalOrBusinessAccountFormProviderSpec extends OptionFieldBehaviours {
+
+  val form = new PersonalOrBusinessAccountFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+    val requiredKey = "personalOrBusinessAccount.error.required"
+
+    behave like optionsField[PersonalOrBusinessAccount](
+      form,
+      fieldName,
+      validValues  = PersonalOrBusinessAccount.values,
+      invalidError = FormError(fieldName, "error.invalid")
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
+}

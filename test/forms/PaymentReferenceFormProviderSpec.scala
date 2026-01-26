@@ -37,7 +37,7 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
     )
 
     behave like invalidField(
-      new PaymentReferenceFormProvider().apply(Some(models.DirectDebitSource.SA), validator = Some(_ => false)),
+      new PaymentReferenceFormProvider().apply(Some(models.DirectDebitSource.SA), Some(_ => false)),
       fieldName,
       requiredError = FormError(fieldName, invalidKey),
       "test"

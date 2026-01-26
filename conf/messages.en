@@ -174,6 +174,7 @@ paymentPlanType.change.hidden = plan type
 paymentPlanType.error.required.mgd = Select if this is a single payment or a variable payment plan
 paymentPlanType.error.required.sa = Select if this is a single payment or a budget payment plan
 paymentPlanType.error.required.tc = Select if this is a single payment or a tax credit repayment plan
+
 paymentPlan.collapsable              = Help choosing your payment plan type
 paymentPlan.collapsable.mgd.p1       = There are 2 different payment plans available: the single payment plan and the variable payment plan.
 paymentPlan.collapsable.mgd.single   = Single payment
@@ -274,7 +275,7 @@ planStartDate.error.required = Payment plan start date must include a day, month
 planStartDate.error.invalid = Payment plan start date must be a real date
 planStartDate.error.beforeEarliestDate = Payment plan start date must be the same as or after {0}
 planStartDate.error.budgetAfterMaxDate = Payment plan start date must be the same as or before {0}
-planStartDate.error.timeToPayAfterMaxDate = The plan start date you have entered is not valid. It must be within 30 days of the current date.
+planStartDate.error.timeToPayAfterMaxDate = The plan start date you have entered is not valid. It must be within 30 days of the current date
 planStartDate.error.AfterOrEqualEndDate = Payment plan start date must be the same as or before the plan end date, which is {0}
 planStartDate.change.hidden =  plan start date
 
@@ -287,7 +288,7 @@ tellAboutThisPayment.p1.2 = , or
 tellAboutThisPayment.p1.link.2 = a P11D payment (opens in a new tab)
 tellAboutThisPayment.p1.3 =  , you need to add 4 extra numbers to your payment reference. We need this information to make sure your payment is allocated correctly.
 tellAboutThisPayment.checkYourAnswersLabel = Add 4 extra numbers
-tellAboutThisPayment.error.required = Select yes if you need to add 4 extra numbers.
+tellAboutThisPayment.error.required = Select yes if you need to add 4 extra numbers
 tellAboutThisPayment.change.hidden = Add 4 extra numbers
 
 yearEndAndMonth.title = Add 4 extra numbers to your payment reference
@@ -331,7 +332,7 @@ addPaymentPlanEndDate.title = Do you want to add a payment plan end date?
 addPaymentPlanEndDate.heading = Do you want to add a payment plan end date?
 addPaymentPlanEndDate.p1 = This is not mandatory. You will be able to add an end date once the payment plan is set up.
 addPaymentPlanEndDate.checkYourAnswersLabel = Add plan end date
-addPaymentPlanEndDate.error.required = Select yes if you want to add a payment plan end date.
+addPaymentPlanEndDate.error.required = Select yes if you want to add a payment plan end date
 addPaymentPlanEndDate.change.hidden =  add plan end date
 
 planEndDate.title = When do you want this payment plan to end?
@@ -390,7 +391,7 @@ duplicateError.linkText = Return to plan start date.
 duplicateWarningForAddOrCreatePP.title = You already have a payment plan with these details
 duplicateWarningForAddOrCreatePP.heading = You already have a payment plan with these details
 duplicateWarningForAddOrCreatePP.checkYourAnswersLabel = duplicateWarningForAddOrCreatePP
-duplicateWarningForAddOrCreatePP.error.required = Select yes if you want to continue setting up this plan.
+duplicateWarningForAddOrCreatePP.error.required = Select yes if you want to continue setting up this plan
 duplicateWarningForAddOrCreatePP.change.hidden = Duplicate Warning For Add Or Create Payment Plan
 duplicateWarningForAddOrCreatePP.p1 = You already have a payment plan set up with the same amount and dates.
 duplicateWarningForAddOrCreatePP.h2 = Do you want to continue setting up this plan?
@@ -518,8 +519,7 @@ cancelPaymentPlan.paymentAmount.single = Payment amount:
 cancelPaymentPlan.paymentAmount.budget = Regular payment amount:
 cancelPaymentPlan.p1 = Payments due within the next 3 working days cannot be cancelled.
 cancelPaymentPlan.h2 = Are you sure you want to cancel this payment plan?
-cancelPaymentPlan.checkYourAnswersLabel = cancelPaymentPlan
-cancelPaymentPlan.error.required = Select yes if you want to cancel this payment plan.
+cancelPaymentPlan.error.required = Select yes if you want to cancel this payment plan
 cancelPaymentPlan.change.hidden =  Cancel Payment Plan
 
 paymentPlanCancelled.title = Payment plan cancelled
@@ -592,7 +592,7 @@ removingThisSuspension.paymentDetails = Payment reference: <strong>{0}</strong>
 removingThisSuspension.suspensionInfo = This suspension period is from <strong>{0}</strong> to <strong>{1}</strong>
 removingThisSuspension.question = Are you sure you want to remove this suspension?
 removingThisSuspension.checkYourAnswersLabel = Removing this suspension
-removingThisSuspension.error.required = Select yes if you want to remove this suspension.
+removingThisSuspension.error.required = Select yes if you want to remove this suspension
 removingThisSuspension.change.hidden =  Removing this suspension
 
 removeSuspensionConfirmation.title = Payment plan suspension removed
@@ -698,7 +698,7 @@ amendConfirmRemovePlanEndDate.p1.line2 = The plan end date is <strong>{0}</stron
 amendConfirmRemovePlanEndDate.q1 = Are you sure you want to remove this plan end date?
 amendConfirmRemovePlanEndDate.checkYourAnswersLabel = Removing this plan end date
 amendConfirmRemovePlanEndDate.change.hidden = Removing this plan end date
-amendConfirmRemovePlanEndDate.error.required = Select yes if you want to remove this plan end date.
+amendConfirmRemovePlanEndDate.error.required = Select yes if you want to remove this plan end date
 
 amendPaymentPlanConfirmation.title = Check your amendment details
 amendPaymentPlanConfirmation.heading = Check your amendment details
