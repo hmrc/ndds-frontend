@@ -417,7 +417,7 @@ directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instruct
 under_construction.heading = Under Construction
 
 directDebitPaymentSummary.title.noPlans = Sefydlu cynllun talu ar gyfer y Debyd Uniongyrchol hwn
-directDebitPaymentSummary.title.withPlans = Sefydlu cynllun talu ar gyfer y Debyd Uniongyrchol hwn
+directDebitPaymentSummary.title.withPlans = Crynodeb o gynlluniau talu ar gyfer y Debyd Uniongyrchol hwn
 directDebitPaymentSummary.heading.noPlans = Sefydlu cynllun talu ar gyfer y Debyd Uniongyrchol hwn
 directDebitPaymentSummary.heading.withPlans = Crynodeb o gynlluniau talu ar gyfer y Debyd Uniongyrchol hwn
 directDebitPaymentSummary.directDebit.title = Manylion Debyd Uniongyrchol

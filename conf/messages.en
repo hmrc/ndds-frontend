@@ -417,7 +417,7 @@ directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instruct
 under_construction.heading = Under Construction
 
 directDebitPaymentSummary.title.noPlans = Set up a payment plan for this Direct Debit
-directDebitPaymentSummary.title.withPlans = Set up a payment plan for this Direct Debit
+directDebitPaymentSummary.title.withPlans = Summary of payment plans for this Direct Debit
 directDebitPaymentSummary.heading.noPlans = Set up a payment plan for this Direct Debit
 directDebitPaymentSummary.heading.withPlans = Summary of payment plans for this Direct Debit
 directDebitPaymentSummary.directDebit.title = Direct Debit details
