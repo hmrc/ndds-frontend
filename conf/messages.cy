@@ -56,7 +56,7 @@ yourDirectDebitInstructions.p2.beforeLink = Os oes angen i chi
 yourDirectDebitInstructions.p2.link = sefydlu taliad Debyd Uniongyrchol newydd
 yourDirectDebitInstructions.p2.afterLink = gan ddefnyddio cyfrif banc newydd neu wahanol, mae’n bosibl y bydd yn cymryd hyd at 36 awr i ymddangos yn eich cyfrif.
 yourDirectDebitInstructions.p3.beforeLink = Er mwyn canslo Debyd Uniongyrchol,
-yourDirectDebitInstructions.p3.link = Er mwyn canslo Debyd Uniongyrchol (yn agor tab newydd)
+yourDirectDebitInstructions.p3.link = mae’n rhaid i chi gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF (yn agor tab newydd)
 yourDirectDebitInstructions.p3.afterLink = neu gallwch ganslo drwy’ch banc.
 yourDirectDebitInstructions.dl.direct.debit.reference = Cyfeirnod Debyd Uniongyrchol
 yourDirectDebitInstructions.dl.date.setup = Dyddiad sefydlu
@@ -128,8 +128,8 @@ accountDetailsNotVerified.return.link = Yn ôl i’r Cyfarwyddiadau Debyd Uniong
 confirmYourAuthority.title = Cadarnhau’ch awdurdod
 confirmYourAuthority.heading = Cadarnhau’ch awdurdod
 confirmYourAuthority.p1 = Cadarnhewch mai chi yw deiliad neu lofnodwr awdurdodedig y cyfrif, a’ch bod yn gallu awdurdodi taliadau Debyd Uniongyrchol o’r cyfrif hon.
-confirmYourAuthority.yes= Iawn
-confirmYourAuthority.no= Na
+confirmYourAuthority.yes = Iawn
+confirmYourAuthority.no = Na
 confirmYourAuthority.error.required = Dewiswch ‘Iawn’ os mai chi yw deiliad neu lofnodwr awdurdodedig y cyfrif, a’ch bod yn gallu awdurdodi taliadau Debyd Uniongyrchol o’r cyfrif hon
 
 bankDetailsCheckYourAnswer.title = Gwirio’ch atebion
@@ -145,8 +145,8 @@ bankDetailsCheckYourAnswer.change.accountHolderName = Enw deiliad y cyfrif
 
 bankApproval.title = Mae problem gyda’ch cymeradwyaeth
 bankApproval.heading = Mae problem gyda’ch cymeradwyaeth
-bankApproval.p1 = Mae angen awdurdod gan fwy nag un person er mwyn awdurdodi taliadau ar gyfer eich cyfrif busnes. Gallwch ofyn i’ch banc alluogi un llofnodwr i sefydlu taliadau Debyd Uniongyrchol i CThEF, mae’n rhaid
-bankApproval.p1.link = i chi dalu gydag opsiwn talu gwahanol. (yn agor tab newydd)
+bankApproval.p1 = Mae angen awdurdod gan fwy nag un person er mwyn awdurdodi taliadau ar gyfer eich cyfrif busnes. Gallwch ofyn i’ch banc alluogi un llofnodwr i sefydlu taliadau Debyd Uniongyrchol i CThEF,
+bankApproval.p1.link = mae’n rhaid i chi dalu gydag opsiwn talu gwahanol (yn agor tab newydd).
 
 directDebitSource.title = Pa dreth neu doll y mae’r cynllun talu hwn ar ei chyfer?
 directDebitSource.heading = Pa dreth neu doll y mae’r cynllun talu hwn ar ei chyfer?
