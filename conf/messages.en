@@ -86,15 +86,15 @@ personalOrBusinessAccount.personal = Personal
 personalOrBusinessAccount.business = Business
 personalOrBusinessAccount.error.required = Select an account type.
 
-yourBankDetails.title = What are your bank details?
-yourBankDetails.heading = What are your bank details?
+yourBankDetails.title = What are the bank account details?
+yourBankDetails.heading = What are the bank account details?
 yourBankDetails.accountHolderName = Name on the account
 yourBankDetails.accountHolderName.change.hidden = Name on the account
 yourBankDetails.sortCode.change.hidden = Sort Code
 yourBankDetails.sortCode = Sort code
 yourBankDetails.sortCode.hint = Must be 6 digits long
 yourBankDetails.accountNumber = Account number
-yourBankDetails.accountNumber.hint = Must be 8 digits long. For example, 47239036
+yourBankDetails.accountNumber.hint = Must be 8 digits long
 yourBankDetails.checkYourAnswersLabel = Your bank details
 yourBankDetails.error.accountHolderName.required = Enter the name on the account
 yourBankDetails.error.accountHolderName.length = The name on the account must be 35 characters or less
@@ -417,7 +417,7 @@ directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instruct
 under_construction.heading = Under Construction
 
 directDebitPaymentSummary.title.noPlans = Set up a payment plan for this Direct Debit
-directDebitPaymentSummary.title.withPlans = Set up a payment plan for this Direct Debit
+directDebitPaymentSummary.title.withPlans = Summary of payment plans for this Direct Debit
 directDebitPaymentSummary.heading.noPlans = Set up a payment plan for this Direct Debit
 directDebitPaymentSummary.heading.withPlans = Summary of payment plans for this Direct Debit
 directDebitPaymentSummary.directDebit.title = Direct Debit details
