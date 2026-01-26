@@ -18,12 +18,12 @@ package controllers
 
 import base.SpecBase
 import forms.PlanEndDateFormProvider
-import models.{NormalMode, PlanStartDateDetails, UserAnswers}
+import models.{DirectDebitSource, NormalMode, PlanStartDateDetails, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{PlanEndDatePage, PlanStartDatePage}
+import pages.{DirectDebitSourcePage, PlanEndDatePage, PlanStartDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -46,6 +46,8 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private def form = formProvider(startDate)
 
   lazy val addPaymentPlanEndDateRoute: String = routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode).url
+
+  lazy val addPaymentPlanEndDateRouteOnSubmit: String = routes.AddPaymentPlanEndDateController.onSubmit(NormalMode).url
 
   def onwardRoute: Call = Call("GET", "/foo")
 
@@ -105,7 +107,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanEndDateView]
         val result = route(application, getRequest).value
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(Some(validAnswer)), NormalMode, Call("GET", addPaymentPlanEndDateRoute))(
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", addPaymentPlanEndDateRoute))(
           getRequest,
           messages(application)
         ).toString
@@ -151,8 +153,18 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
     "must remove the PlanEndDatePage and redirect when no data is submitted" in {
       val mockSessionRepository = mock[SessionRepository]
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val userAnswersWithEndDate =
+        emptyUserAnswers
+          .set(DirectDebitSourcePage, DirectDebitSource.SA)
+          .success
+          .value
+          .set(PlanEndDatePage, validAnswer)
+          .success
+          .value
+
       val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        applicationBuilder(userAnswers = Some(userAnswersWithEndDate))
           .overrides(
             bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
             bind[SessionRepository].toInstance(mockSessionRepository)
@@ -161,8 +173,8 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
       running(application) {
         val request =
-          FakeRequest(POST, planEndDateRoute)
-            .withFormUrlEncodedBody()
+          FakeRequest(POST, addPaymentPlanEndDateRouteOnSubmit)
+            .withFormUrlEncodedBody("value" -> "false")
 
         val result = route(application, request).value
         status(result) mustEqual SEE_OTHER

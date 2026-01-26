@@ -30,10 +30,10 @@ POST       /personal-or-business-account                      controllers.Person
 GET        /change-personal-or-business-account               controllers.PersonalOrBusinessAccountController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-personal-or-business-account               controllers.PersonalOrBusinessAccountController.onSubmit(mode: Mode = CheckMode)
 
-GET        /your-bank-details                                 controllers.YourBankDetailsController.onPageLoad(mode: Mode = NormalMode)
-POST       /your-bank-details                                 controllers.YourBankDetailsController.onSubmit(mode: Mode = NormalMode)
-GET        /change-your-bank-details                          controllers.YourBankDetailsController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-your-bank-details                          controllers.YourBankDetailsController.onSubmit(mode: Mode = CheckMode)
+GET        /bank-account-details                              controllers.YourBankDetailsController.onPageLoad(mode: Mode = NormalMode)
+POST       /bank-account-details                              controllers.YourBankDetailsController.onSubmit(mode: Mode = NormalMode)
+GET        /change-bank-account-details                       controllers.YourBankDetailsController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-bank-account-details                       controllers.YourBankDetailsController.onSubmit(mode: Mode = CheckMode)
 
 GET        /reached-limit                                     controllers.ReachedLimitController.onPageLoad()
 
