@@ -40,7 +40,7 @@ class PlanEndDateFormProvider @Inject() extends Mappings {
   private def dateAfter(start: LocalDate, errorKey: String): Constraint[LocalDate] = {
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
     Constraint { endDate =>
-      if (!endDate.isAfter(start)) {
+      if (!endDate.isAfter(start.minusDays(1))) {
         Invalid(ValidationError(errorKey, start.format(formatter)))
       } else {
         Valid
