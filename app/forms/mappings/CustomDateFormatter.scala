@@ -37,20 +37,23 @@ class CustomDateFormatter(invalidKey: String,
       field -> data.get(s"$key.$field").filter(_.nonEmpty)
     }.toMap
 
-    lazy val missingFieldErrors = fields.collect { case (field, None) =>
-      FormError(s"$key.$field", s"date.error.$field")
-    }.toList
+    val missingCount = fields.values.count(_.isEmpty)
 
     val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
-
     if (regexErrors.nonEmpty) {
-      Left(regexErrors)
-    } else if (missingFieldErrors.nonEmpty) {
-      Left(missingFieldErrors)
-    } else {
-      formatDate(key, data).left.map {
-        _.map(_.copy(key = key, args = args))
-      }
+      return Left(regexErrors.map(_.copy(key = key, messages = Seq(invalidKey), args = args)))
+    }
+
+    if (missingCount == 3) {
+      return Left(Seq(FormError(key, allRequiredKey, args)))
+    }
+
+    if (missingCount > 0) {
+      return Left(Seq(FormError(key, twoRequiredKey, args)))
+    }
+
+    formatDate(key, data).left.map { errors =>
+      errors.map(_.copy(key = key, messages = Seq(invalidKey), args = args))
     }
   }
 

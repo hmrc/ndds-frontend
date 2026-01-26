@@ -56,7 +56,7 @@ class PaymentReferenceController @Inject() (
       case None =>
         Redirect(navigator.nextPage(PaymentReferencePage, mode, answers))
       case Some(_) =>
-        val form = formProvider(None)
+        val form = formProvider(selectedAnswers, None)
         val preparedForm = answers.get(PaymentReferencePage) match {
           case None        => form
           case Some(value) => form.fill(value)
@@ -80,7 +80,7 @@ class PaymentReferenceController @Inject() (
       case None =>
         Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
       case Some(serviceType) =>
-        val form = formProvider(Some(serviceType))
+        val form = formProvider(selectedAnswers, Some(serviceType))
         form
           .bindFromRequest()
           .fold(
