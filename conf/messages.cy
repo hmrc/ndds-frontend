@@ -740,7 +740,7 @@ errorWarning.title = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.heading = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.p1 = Ni ellir sefydlu’r cynllun talu hwn oherwydd bod y manylion yn annilys. Mae’n rhaid i chi newid y manylion canlynol i barhau:
 errorWarning.bulletList1 = mae’n rhaid i ddyddiad dod i ben y cynllun fod ar neu ar ôl dyddiad dechrau’r cynllun
-errorWarning.link = Newid manylion eich cynllun talu.
+errorWarning.link = Newid manylion eich cynllun talu
 
 confirmAnswersError.title = You need to confirm some answers
 confirmAnswersError.heading = You need to confirm some answers
