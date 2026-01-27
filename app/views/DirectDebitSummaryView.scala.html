@@ -50,7 +50,8 @@
             SummaryListRow(
                 key = Key(content = messages("directDebitPaymentSummary.directDebit.accountNumber")),
                 value = Value(content = HtmlContent(
-                    s"""${maskAccountNumber(directDebitDetails.bankAccountNumber)}
+                    s"""
+                    <span aria-hidden="true">${maskAccountNumber(directDebitDetails.bankAccountNumber)}</span>
                     <span class="govuk-visually-hidden">
                         ${messages("directDebitPaymentSummary.accountNumber.hidden", (directDebitDetails.bankAccountNumber).substring(4))}
                     </span>
@@ -60,7 +61,8 @@
             SummaryListRow(
                 key = Key(content = messages("directDebitPaymentSummary.directDebit.sortCode")),
                 value = Value(content = HtmlContent(
-                    s"""${maskSortCode(directDebitDetails.bankSortCode)}
+                    s"""
+                    <span aria-hidden="true">${maskSortCode(directDebitDetails.bankSortCode)}</span>
                     <span class="govuk-visually-hidden">
                         ${messages("directDebitPaymentSummary.sortCode.hidden", (directDebitDetails.bankSortCode).substring(0, 2))}
                     </span>
