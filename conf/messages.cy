@@ -510,7 +510,7 @@ paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
 paymentPlanLockedWarning.title = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
 paymentPlanLockedWarning.heading = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
 paymentPlanLockedWarning.paragraph = Mae’ch diweddariad blaenorol yn cael ei brosesu. Byddwch yn gallu bwrw golwg dros neu reoli’r cynllun talu hwn o fewn 36 awr.
-paymentPlanLockedWarning.returnLink = Yn ôl i’r cynllun talus
+paymentPlanLockedWarning.returnLink = Yn ôl i'r cynlluniau talu
 
 cancelPaymentPlan.title = Canslo’r cynllun talu hwn
 cancelPaymentPlan.heading = Canslo’r cynllun talu hwn
