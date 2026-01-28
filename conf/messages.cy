@@ -276,7 +276,7 @@ planStartDate.error.invalid = Mae’n rhaid i ddyddiad dechrau’r cynllun talu 
 planStartDate.error.beforeEarliestDate = Mae’n rhaid i ddyddiad dechrau’r cynllun talu fod yr un fath â neu ar ôl {0}
 planStartDate.error.budgetAfterMaxDate = Mae’n rhaid i ddyddiad dechrau’r cynllun talu fod yr un fath â neu cyn {0}
 planStartDate.error.timeToPayAfterMaxDate = Nid yw dyddiad dechrau’r cynllun a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod o fewn 30 diwrnod i’r dyddiad cyfredol
-planStartDate.error.AfterOrEqualEndDate = Payment plan start date must be the same as or before the plan end date, which is {0}
+planStartDate.error.AfterOrEqualEndDate = Mae’n rhaid i ddyddiad dechrau’r cynllun talu fod yr un fath â dyddiad dod i ben y cynllun neu cyn hynny, sef {0}
 planStartDate.change.hidden =  dyddiad dechrau’r cynllun
 
 tellAboutThisPayment.title = Rhowch wybod i ni am y taliad hwn
