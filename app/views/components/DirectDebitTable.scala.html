@@ -19,24 +19,19 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.*
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.table.*
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.content.*
-
-@import models.DirectDebitDetails
-@import utils.MaskAndFormatUtils.*
-@import uk.gov.hmrc.govukfrontend.views.html.components.*
-@import uk.gov.hmrc.govukfrontend.views.viewmodels.table.*
-@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.*
 @import java.time.LocalDate
 @import java.time.format.DateTimeFormatter
 @import java.util.Locale
+@import utils.Constants
 
 @this(govukTable: GovukTable, linkWithHiddenText: LinkWithHiddenText)
 
 @(rows: Seq[DirectDebitDetails])(implicit request: Request[_], messages: Messages)
 
 @* Define a formatter using the user's locale *@
-@defining(DateTimeFormatter.ofPattern("d MMM yyyy", messages.lang.locale)) { localeFormatter =>
+@defining(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, messages.lang.locale)) { localeFormatter =>
     @defining((setupDateStr: String) => {
-        val parsedDate = LocalDate.parse(setupDateStr, DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH))
+        val parsedDate = LocalDate.parse(setupDateStr, DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, Locale.ENGLISH))
         parsedDate.format(localeFormatter)
     }) { formatDateWithLocale =>
 
