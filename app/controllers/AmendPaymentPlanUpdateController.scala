@@ -53,6 +53,7 @@ class AmendPaymentPlanUpdateController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
+    implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
 
     if (nddsService.amendPaymentPlanGuard(userAnswers)) {
       val maybeResult = for {
@@ -62,7 +63,8 @@ class AmendPaymentPlanUpdateController @Inject() (
         directDebitRef <- userAnswers.get(DirectDebitReferenceQuery)
         paymentPlanRef <- userAnswers.get(PaymentPlanReferenceQuery)
       } yield {
-        val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
+        val dateFormatLong: DateTimeFormatter =
+          DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
         val formattedStartDateLong = startDate.format(dateFormatLong)
         val directDebitDetails = paymentPlan.directDebitDetails
         val formattedSortCode = directDebitDetails.bankSortCode

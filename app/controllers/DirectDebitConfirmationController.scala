@@ -27,6 +27,7 @@ import queries.ExistingDirectDebitIdentifierQuery
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import views.html.DirectDebitConfirmationView
@@ -75,7 +76,8 @@ class DirectDebitConfirmationController @Inject() (
         )
         .getOrElse(throw new Exception("Missing date"))
 
-    val paymentDateString: String = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+    val paymentDateString: String =
+      paymentDate.format(DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale))
 
     val showPlanEndDate = if (hasEndDate.contains(false)) {
       None
@@ -158,7 +160,7 @@ class DirectDebitConfirmationController @Inject() (
         key = Key(Text("Date set up")),
         value = ValueViewModel(
           Text(
-            LocalDate.now().format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+            LocalDate.now().format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, messages.lang.locale))
           )
         ),
         actions = Seq.empty

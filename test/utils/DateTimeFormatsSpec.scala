@@ -24,6 +24,7 @@ import utils.DateTimeFormats.dateTimeFormat
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class DateTimeFormatsSpec extends AnyFreeSpec with Matchers {
 
@@ -48,9 +49,14 @@ class DateTimeFormatsSpec extends AnyFreeSpec with Matchers {
     }
 
     "formattedCurrentDate" - {
-      "should return today's date in 'd MMMM yyyy' format" in {
+      "should return today's date in 'd MMMM yyyy' format for English" in {
+        implicit val messages: Messages =
+          stubMessagesApi(Map("en" -> Map.empty)).preferred(Seq(Lang("en")))
+
         val today = LocalDate.now()
-        val expected = today.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        val expected = today.format(
+          DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+        )
 
         DateTimeFormats.formattedCurrentDate mustEqual expected
       }
