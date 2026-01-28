@@ -75,7 +75,8 @@ class DirectDebitConfirmationController @Inject() (
         )
         .getOrElse(throw new Exception("Missing date"))
 
-    val paymentDateString: String = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+    val paymentDateString: String =
+      paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", messages.lang.locale))
 
     val showPlanEndDate = if (hasEndDate.contains(false)) {
       None
@@ -158,7 +159,7 @@ class DirectDebitConfirmationController @Inject() (
         key = Key(Text("Date set up")),
         value = ValueViewModel(
           Text(
-            LocalDate.now().format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+            LocalDate.now().format(DateTimeFormatter.ofPattern("d MMM yyyy", messages.lang.locale))
           )
         ),
         actions = Seq.empty

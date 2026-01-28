@@ -20,47 +20,65 @@
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.table.*
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.content.*
 
+@import models.DirectDebitDetails
+@import utils.MaskAndFormatUtils.*
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.table.*
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.*
+@import java.time.LocalDate
+@import java.time.format.DateTimeFormatter
+@import java.util.Locale
+
 @this(govukTable: GovukTable, linkWithHiddenText: LinkWithHiddenText)
 
 @(rows: Seq[DirectDebitDetails])(implicit request: Request[_], messages: Messages)
 
-@govukTable(
-  Table(
-    classes = "direct-debit-table",
-    head = Some(
-      Seq(
-        "yourDirectDebitInstructions.dl.direct.debit.reference",
-        "yourDirectDebitInstructions.dl.account.number",
-        "yourDirectDebitInstructions.dl.date.setup",
-        "yourDirectDebitInstructions.dl.payment.plans"
-      ).map { key =>
-        HeadCell(content = Text(messages(key)), classes = "govuk-!-width-one-quarter")
-      }
-    ),
-    rows = rows.map { dd =>
-      Seq(
-        TableRow(
-          content = HtmlContent(
-            linkWithHiddenText(
-              url = routes.DirectDebitSummaryController.onRedirect(dd.directDebitReference).url,
-              text = dd.directDebitReference,
-              visuallyHiddenText = None
+@* Define a formatter using the user's locale *@
+@defining(DateTimeFormatter.ofPattern("d MMM yyyy", messages.lang.locale)) { localeFormatter =>
+    @defining((setupDateStr: String) => {
+        val parsedDate = LocalDate.parse(setupDateStr, DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH))
+        parsedDate.format(localeFormatter)
+    }) { formatDateWithLocale =>
+
+    @govukTable(
+        Table(
+            classes = "direct-debit-table",
+            head = Some(
+                Seq(
+                "yourDirectDebitInstructions.dl.direct.debit.reference",
+                "yourDirectDebitInstructions.dl.account.number",
+                "yourDirectDebitInstructions.dl.date.setup",
+                "yourDirectDebitInstructions.dl.payment.plans"
+                ).map { key =>
+                    HeadCell(content = Text(messages(key)), classes = "govuk-!-width-one-quarter")
+                    }
+            ),
+            rows = rows.map { dd =>
+                Seq(
+                    TableRow(
+                        content = HtmlContent(
+                            linkWithHiddenText(
+                                url = routes.DirectDebitSummaryController.onRedirect(dd.directDebitReference).url,
+                                text = dd.directDebitReference,
+                                visuallyHiddenText = None
+                            )
+                        )
+                    ),
+                    TableRow(
+                        content = HtmlContent(
+                                    s"""
+                                        <span aria-hidden="true">${maskAccountNumber(dd.accountNumber)}</span>
+                                        <span class="govuk-visually-hidden">
+                                            ${messages("yourDirectDebitInstructions.account.number.hidden", {(dd.accountNumber).substring(4)})}
+                                        </span>
+                                    """
+                        )
+                    ),
+                    TableRow(content = Text(formatDateWithLocale(dd.setupDate))),
+                    TableRow(content = Text(dd.paymentPlans))
+                    )
+                }
             )
-          )
-        ),
-        TableRow(
-            content = HtmlContent(
-            s"""
-                <span aria-hidden="true">${maskAccountNumber(dd.accountNumber)}</span>
-                <span class="govuk-visually-hidden">
-                    ${messages("yourDirectDebitInstructions.account.number.hidden", {(dd.accountNumber).substring(4)})}
-                </span>
-            """
-            )
-        ),
-        TableRow(content = Text(dd.setupDate)),
-        TableRow(content = Text(dd.paymentPlans))
-      )
+        )
     }
-  )
-)
+}
