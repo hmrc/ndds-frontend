@@ -389,7 +389,7 @@ duplicateError.linkText = Yn ôl i ddyddiad dechrau’r cynllun
 
 duplicateWarningForAddOrCreatePP.title = Mae gennych gynllun talu eisoes gyda’r manylion hyn
 duplicateWarningForAddOrCreatePP.heading = Mae gennych gynllun talu eisoes gyda’r manylion hyn
-duplicateWarningForAddOrCreatePP.checkYourAnswersLabel = duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.checkYourAnswersLabel = Mae gennych gynllun talu eisoes gyda’r manylion hyn
 duplicateWarningForAddOrCreatePP.error.required = Dewiswch ‘Iawn’ os ydych am barhau i sefydlu’r cynllun hwn
 duplicateWarningForAddOrCreatePP.change.hidden = Mae gennych gynllun talu eisoes gyda’r manylion hyn
 duplicateWarningForAddOrCreatePP.p1 = Mae gennych gynllun talu wedi’i sefydlu eisoes sydd â’r un symiau a dyddiadau.
@@ -708,7 +708,7 @@ amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Payment referen
 
 amendPaymentPlanUpdate.title = Cynllun talu wedi’i ddiwygio
 amendPaymentPlanUpdate.panel.title = Cynllun talu wedi’i ddiwygio
-amendPaymentPlanUpdate.h1 = What happens next
+amendPaymentPlanUpdate.h2 = Yr hyn sy’n digwydd nesaf
 amendPaymentPlanUpdate.SinglePlan.p1 = Mae’r cynllun talu hwn bellach wedi’i ddiwygio. Bydd taliad o {0} yn cael ei gasglu ar {1}.
 amendPaymentPlanUpdate.BudgetPlan.p1 = This payment plan has now been amended. The next payment of {0} for this plan will be collected on {1}.
 amendPaymentPlanUpdate.p2 = Bydd unrhyw ohiriad sy’n bodoli ar y cynllun talu hwn yn cael ei dynnu. Gall gymryd hyd at 36 awr i’r diwygiad hwn ymddangos yn eich cyfrif.
