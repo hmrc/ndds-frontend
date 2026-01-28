@@ -385,7 +385,7 @@ checkYourAnswers.acceptAndSubmit = Accept and submit
 duplicateError.title = You cannot set up a duplicate payment plan
 duplicateError.heading = You cannot set up a duplicate payment plan
 duplicateError.p1 = You already have a payment plan set up with the same date.
-duplicateError.linkText = Return to plan start date.
+duplicateError.linkText = Return to plan start date
 
 duplicateWarningForAddOrCreatePP.title = You already have a payment plan with these details
 duplicateWarningForAddOrCreatePP.heading = You already have a payment plan with these details
@@ -528,7 +528,7 @@ paymentPlanCancelled.p1 = This payment plan has now been cancelled. No further p
 paymentPlanCancelled.h2 = Your cancelled payment plan
 paymentPlanCancelled.paymentReference = Payment reference: {0}
 paymentPlanCancelled.pleaseNote = You can print this page for your records using the print function on your browser.
-paymentPlanCancelled.link = Return to Direct Debit Instruction
+paymentPlanCancelled.link = Return to Direct Debit Instructions.
 
 suspendPaymentPlan.title = Suspending this payment plan
 suspendPaymentPlan.heading = Suspending this payment plan
