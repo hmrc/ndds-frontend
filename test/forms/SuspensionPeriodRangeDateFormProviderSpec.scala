@@ -20,6 +20,7 @@ import models.SuspensionPeriodRange
 import org.scalatest.OptionValues.convertOptionToValuable
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
@@ -157,8 +158,12 @@ class SuspensionPeriodRangeDateFormProviderSpec extends AnyWordSpec with Matcher
       )
 
       val result = form.bind(data)
-      val errors = result.errors.map(_.message)
-      errors must contain atLeastOneOf ("date.error.day", "date.error.month")
+      val expectedErrors = Seq(
+        FormError("suspensionPeriodRangeStartDate", "suspensionPeriodRangeDate.error.invalid.startDate.base", Seq()),
+        FormError("suspensionPeriodRangeStartDate", "suspensionPeriodRangeDate.error.invalid.startDate.base", Seq()),
+        FormError("suspensionPeriodRangeStartDate", "suspensionPeriodRangeDate.error.invalid.startDate.base", Seq())
+      )
+      result.errors must contain theSameElementsAs expectedErrors
     }
 
     "should fail when end date format is invalid" in {
@@ -172,8 +177,12 @@ class SuspensionPeriodRangeDateFormProviderSpec extends AnyWordSpec with Matcher
       )
 
       val result = form.bind(data)
-      val errors = result.errors.map(_.message)
-      errors must contain atLeastOneOf ("date.error.day", "date.error.month")
+      val expectedErrors = Seq(
+        FormError("suspensionPeriodRangeEndDate", "suspensionPeriodRangeDate.error.invalid.endDate.base", Seq()),
+        FormError("suspensionPeriodRangeEndDate", "suspensionPeriodRangeDate.error.invalid.endDate.base", Seq()),
+        FormError("suspensionPeriodRangeEndDate", "suspensionPeriodRangeDate.error.invalid.endDate.base", Seq())
+      )
+      result.errors must contain theSameElementsAs expectedErrors
     }
 
     "withMappedErrors" should {

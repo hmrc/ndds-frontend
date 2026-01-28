@@ -31,6 +31,7 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
 
   private implicit val messages: Messages = stubMessages()
   private val form = new PlanStartDateFormProvider()()
+  private val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   ".value" - {
 
@@ -44,9 +45,7 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
     "fail to bind an empty date" in {
       val result = form.bind(Map.empty[String, String])
       result.errors must contain theSameElementsAs Seq(
-        FormError("value.day", "date.error.day"),
-        FormError("value.month", "date.error.month"),
-        FormError("value.year", "date.error.year")
+        FormError("value", "planStartDate.error.required.all", Seq())
       )
     }
   }
@@ -78,11 +77,14 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
       )
 
       val result = formWithRules.bind(data)
-      result.errors must contain(FormError("value", "planStartDate.error.beforeEarliestDate"))
+      result.errors must contain(
+        FormError("value", "planStartDate.error.beforeEarliestDate", Seq(earliestPlanStartDate.format(formatter)))
+      )
     }
 
     "must return error for BUDGET payment plan when date is more than 12 months after current date" in {
       val currentDate = LocalDate.now()
+      val expectedMax = currentDate.plusYears(1)
       val budgetUserAnswers = UserAnswers("test-id")
         .set(DirectDebitSourcePage, DirectDebitSource.SA)
         .success
@@ -92,7 +94,7 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
         .value
 
       val formWithRules = new PlanStartDateFormProvider().apply(budgetUserAnswers, earliestPlanStartDate)
-      val futureDate = currentDate.plusYears(1).plusDays(1)
+      val futureDate = expectedMax.plusDays(1)
       val data = Map(
         "value.day"   -> futureDate.getDayOfMonth.toString,
         "value.month" -> futureDate.getMonthValue.toString,
@@ -100,11 +102,14 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
       )
 
       val result = formWithRules.bind(data)
-      result.errors must contain(FormError("value", "planStartDate.error.budgetAfterMaxDate"))
+      result.errors must contain(
+        FormError("value", "planStartDate.error.budgetAfterMaxDate", Seq(expectedMax.format(formatter)))
+      )
     }
 
     "must return error for TIME_TO_PAY/VPP payment plan when date is more than 30 days after current date" in {
       val currentDate = LocalDate.now()
+      val expectedMax = currentDate.plusDays(30)
       val vppUserAnswers = UserAnswers("test-id")
         .set(DirectDebitSourcePage, DirectDebitSource.MGD)
         .success
@@ -122,7 +127,9 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
       )
 
       val result = formWithRules.bind(data)
-      result.errors must contain(FormError("value", "planStartDate.error.timeToPayAfterMaxDate"))
+      result.errors must contain(
+        FormError("value", "planStartDate.error.timeToPayAfterMaxDate", Seq(expectedMax.format(formatter)))
+      )
     }
 
     "fail binding when start date is after end date" in {

@@ -50,7 +50,8 @@
         ),
         TableRow(
             content = HtmlContent(
-            s"""${maskAccountNumber(dd.accountNumber)}
+            s"""
+                <span aria-hidden="true">${maskAccountNumber(dd.accountNumber)}</span>
                 <span class="govuk-visually-hidden">
                     ${messages("yourDirectDebitInstructions.account.number.hidden", {(dd.accountNumber).substring(4)})}
                 </span>

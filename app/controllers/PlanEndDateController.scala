@@ -51,7 +51,7 @@ class PlanEndDateController @Inject() (
     request.userAnswers.get(PlanStartDatePage) match {
       case Some(startDate) =>
         val form = formProvider(startDate.enteredDate)
-        val preparedForm = request.userAnswers.get(PlanEndDatePage).map(Some(_)).fold(form)(form.fill)
+        val preparedForm = request.userAnswers.get(PlanEndDatePage).fold(form)(form.fill)
 
         Ok(view(preparedForm, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode)))
 
@@ -73,18 +73,12 @@ class PlanEndDateController @Inject() (
                 Future.successful(
                   BadRequest(view(formWithErrors, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode)))
                 ),
-              {
-                case Some(endDate) =>
-                  val updatedAnswers = request.userAnswers.set(PlanEndDatePage, endDate).get
-                  sessionRepository.set(updatedAnswers).map { _ =>
-                    Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
-                  }
+              { endDate =>
+                val updatedAnswers = request.userAnswers.set(PlanEndDatePage, endDate).get
+                sessionRepository.set(updatedAnswers).map { _ =>
+                  Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
+                }
 
-                case None =>
-                  val updatedAnswers = request.userAnswers.remove(PlanEndDatePage).get
-                  sessionRepository.set(updatedAnswers).map { _ =>
-                    Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
-                  }
               }
             )
 

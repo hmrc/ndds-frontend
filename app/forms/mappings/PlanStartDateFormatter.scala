@@ -22,6 +22,7 @@ import play.api.data.FormError
 import play.api.i18n.Messages
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class PlanStartDateFormatter(
   invalidKey: String,
@@ -41,19 +42,20 @@ class PlanStartDateFormatter(
   private val BudgetPaymentPlanMaxYears = 1
   private val TimeToPayMaxDays = 30
 
-  override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
+  private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+  private def fmt(d: LocalDate): String = d.format(formatter)
 
+  override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] =
     super.bind(key, data).flatMap { date =>
       validateBusinessRules(key, date)
     }
-  }
 
   private def validateBusinessRules(key: String, enteredDate: LocalDate): Either[Seq[FormError], LocalDate] = {
     val currentDate = LocalDate.now()
     val errors = scala.collection.mutable.ListBuffer[FormError]()
 
     if (enteredDate.isBefore(earliestPlanStartDate)) {
-      errors += FormError(key, beforeEarliestDateKey, args)
+      errors += FormError(key, beforeEarliestDateKey, Seq(fmt(earliestPlanStartDate)))
     }
 
     val paymentPlanType = userAnswers.get(PaymentPlanTypePage)
@@ -62,14 +64,14 @@ class PlanStartDateFormatter(
     if (isBudgetPaymentPlan(paymentPlanType, directDebitSource)) {
       val maxPlanStartDate = currentDate.plusYears(BudgetPaymentPlanMaxYears)
       if (enteredDate.isAfter(maxPlanStartDate)) {
-        errors += FormError(key, budgetAfterMaxDateKey, args)
+        errors += FormError(key, budgetAfterMaxDateKey, Seq(fmt(maxPlanStartDate)))
       }
     }
 
     if (isTimeToPayOrVppPaymentPlan(paymentPlanType, directDebitSource)) {
       val maxPlanStartDate = currentDate.plusDays(TimeToPayMaxDays)
       if (enteredDate.isAfter(maxPlanStartDate)) {
-        errors += FormError(key, timeToPayAfterMaxDateKey, args)
+        errors += FormError(key, timeToPayAfterMaxDateKey, Seq(fmt(maxPlanStartDate)))
       }
     }
 
