@@ -21,7 +21,7 @@ POST       /confirm-authority                                 controllers.Confir
 GET        /change-confirm-authority                          controllers.ConfirmAuthorityController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-confirm-authority                          controllers.ConfirmAuthorityController.onSubmit(mode: Mode = CheckMode)
 
-GET        /your-direct-debit-payment                         controllers.YourDirectDebitInstructionsController.onPageLoad()
+GET        /your-direct-debit-instructions                    controllers.YourDirectDebitInstructionsController.onPageLoad()
 
 GET        /set-up-direct-debit-payment                       controllers.SetupDirectDebitPaymentController.onPageLoad()
 
@@ -52,10 +52,10 @@ POST       /which-tax-duty-payment-plan                       controllers.Direct
 GET        /change-which-tax-duty-payment-plan                controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-which-tax-duty-payment-plan                controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
 
-GET        /what-type-payment-plan-selecting                  controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
-POST       /what-type-payment-plan-selecting                  controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
-GET        /change-what-type-payment-plan-selecting           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-what-type-payment-plan-selecting           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
+GET        /tell-us-about-this-payment-plan                   controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
+POST       /tell-us-about-this-payment-plan                   controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
+GET        /change-tell-us-about-this-payment-plan            controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-tell-us-about-this-payment-plan            controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-reference                                 controllers.PaymentReferenceController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-reference                                 controllers.PaymentReferenceController.onSubmit(mode: Mode = NormalMode)
@@ -82,10 +82,10 @@ POST       /add-extra-numbers-payment-reference               controllers.YearEn
 GET        /change-add-extra-numbers-payment-reference        controllers.YearEndAndMonthController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-add-extra-numbers-payment-reference        controllers.YearEndAndMonthController.onSubmit(mode: Mode = CheckMode)
 
-GET        /frequency-of-payments                             controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
-POST       /frequency-of-payments                             controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
-GET        /change-frequency-of-payments                      controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-frequency-of-payments                      controllers.PaymentsFrequencyController.onSubmit(mode: Mode = CheckMode)
+GET        /how-often-want-to-make-payments                   controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = NormalMode)
+POST       /how-often-want-to-make-payments                   controllers.PaymentsFrequencyController.onSubmit(mode: Mode = NormalMode)
+GET        /change-how-often-want-to-make-payments            controllers.PaymentsFrequencyController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-how-often-want-to-make-payments            controllers.PaymentsFrequencyController.onSubmit(mode: Mode = CheckMode)
 
 GET        /regular-payment-amount                            controllers.RegularPaymentAmountController.onPageLoad(mode: Mode = NormalMode)
 POST       /regular-payment-amount                            controllers.RegularPaymentAmountController.onSubmit(mode: Mode = NormalMode)
@@ -160,10 +160,10 @@ POST       /already-have-payment-plan                         controllers.Duplic
 GET        /change-already-have-payment-plan                  controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-already-have-payment-plan                  controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = CheckMode)
 
-GET        /tell-us-about-this-payment                        controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = NormalMode)
-POST       /tell-us-about-this-payment                        controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = NormalMode)
-GET        /change-tell-us-about-this-payment                 controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-tell-us-about-this-payment                 controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = CheckMode)
+GET        /tell-us-about-this-payment                   controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = NormalMode)
+POST       /tell-us-about-this-payment                   controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = NormalMode)
+GET        /change-tell-us-about-this-payment            controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-tell-us-about-this-payment            controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = CheckMode)
 
 GET        /amending-payment-plan                             controllers.AmendingPaymentPlanController.onPageLoad()
 
