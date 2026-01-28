@@ -62,8 +62,7 @@ class PaymentPlanTypeController @Inject() (
         preparedForm,
         mode,
         selectedAnswers,
-        Some(appConfig.selfAssessmentUrl),
-        Some(appConfig.paymentProblemUrl),
+        appConfig.hmrcHelplineUrl,
         routes.DirectDebitSourceController.onPageLoad(mode)
       )
     )
@@ -82,8 +81,7 @@ class PaymentPlanTypeController @Inject() (
                 formWithErrors,
                 mode,
                 selectedSource,
-                None,
-                None,
+                appConfig.hmrcHelplineUrl,
                 routes.DirectDebitSourceController.onPageLoad(mode)
               )
             )
