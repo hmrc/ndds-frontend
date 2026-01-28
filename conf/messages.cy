@@ -56,7 +56,7 @@ yourDirectDebitInstructions.p2.beforeLink = Os oes angen i chi
 yourDirectDebitInstructions.p2.link = sefydlu taliad Debyd Uniongyrchol newydd
 yourDirectDebitInstructions.p2.afterLink = gan ddefnyddio cyfrif banc newydd neu wahanol, mae’n bosibl y bydd yn cymryd hyd at 36 awr i ymddangos yn eich cyfrif.
 yourDirectDebitInstructions.p3.beforeLink = Er mwyn canslo Debyd Uniongyrchol,
-yourDirectDebitInstructions.p3.link = mae’n rhaid i chi gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF (yn agor tab newydd)
+yourDirectDebitInstructions.p3.link = mae’n rhaid i chi gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF (yn agor tab newydd),
 yourDirectDebitInstructions.p3.afterLink = neu gallwch ganslo drwy’ch banc.
 yourDirectDebitInstructions.dl.direct.debit.reference = Cyfeirnod Debyd Uniongyrchol
 yourDirectDebitInstructions.dl.date.setup = Dyddiad sefydlu
@@ -123,7 +123,7 @@ accountDetailsNotVerified.heading = Doedd dim modd dilysu manylion y cyfrif
 accountDetailsNotVerified.p1 = Mae’n rhaid i chi aros tan <strong>{0}</strong> cyn i chi allu nodi’r manylion ar gyfer cyfrif banc gwahanol.
 accountDetailsNotVerified.p2 = Os nad oes gennych gyfrif banc arall, mae’n rhaid i chi
 accountDetailsNotVerified.p2.link =  dalu drwy ddull talu gwahanol (yn agor tab newydd)
-accountDetailsNotVerified.return.link = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol.
+accountDetailsNotVerified.return.link = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol
 
 confirmYourAuthority.title = Cadarnhau’ch awdurdod
 confirmYourAuthority.heading = Cadarnhau’ch awdurdod

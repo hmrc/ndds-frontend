@@ -52,10 +52,10 @@ POST       /which-tax-duty-payment-plan                       controllers.Direct
 GET        /change-which-tax-duty-payment-plan                controllers.DirectDebitSourceController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-which-tax-duty-payment-plan                controllers.DirectDebitSourceController.onSubmit(mode: Mode = CheckMode)
 
-GET        /what-type-payment-plan-selecting                  controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
-POST       /what-type-payment-plan-selecting                  controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
-GET        /change-what-type-payment-plan-selecting           controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-what-type-payment-plan-selecting           controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
+GET        /tell-us-about-this-payment-plan                   controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = NormalMode)
+POST       /tell-us-about-this-payment-plan                   controllers.PaymentPlanTypeController.onSubmit(mode: Mode = NormalMode)
+GET        /change-tell-us-about-this-payment-plan            controllers.PaymentPlanTypeController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-tell-us-about-this-payment-plan            controllers.PaymentPlanTypeController.onSubmit(mode: Mode = CheckMode)
 
 GET        /payment-reference                                 controllers.PaymentReferenceController.onPageLoad(mode: Mode = NormalMode)
 POST       /payment-reference                                 controllers.PaymentReferenceController.onSubmit(mode: Mode = NormalMode)
@@ -160,10 +160,10 @@ POST       /already-have-payment-plan                         controllers.Duplic
 GET        /change-already-have-payment-plan                  controllers.DuplicateWarningForAddOrCreatePPController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-already-have-payment-plan                  controllers.DuplicateWarningForAddOrCreatePPController.onSubmit(mode: Mode = CheckMode)
 
-GET        /tell-us-about-this-payment-plan                   controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = NormalMode)
-POST       /tell-us-about-this-payment-plan                   controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = NormalMode)
-GET        /change-tell-us-about-this-payment-plan            controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-tell-us-about-this-payment-plan            controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = CheckMode)
+GET        /tell-us-about-this-payment                   controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = NormalMode)
+POST       /tell-us-about-this-payment                   controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = NormalMode)
+GET        /change-tell-us-about-this-payment            controllers.TellAboutThisPaymentController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-tell-us-about-this-payment            controllers.TellAboutThisPaymentController.onSubmit(mode: Mode = CheckMode)
 
 GET        /amending-payment-plan                             controllers.AmendingPaymentPlanController.onPageLoad()
 
