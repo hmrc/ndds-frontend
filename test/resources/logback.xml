@@ -4,7 +4,13 @@
             <pattern>%date{ISO8601} level=[%level] logger=[%logger] thread=[%thread] message=[%message] %replace(exception=[%xException]){'^exception=\[\]$',''}%n</pattern>
         </encoder>
     </appender>
-    <root level="OFF">
+
+    <logger name="WIREMOCK" level="ERROR" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root level="ERROR">
         <appender-ref ref="CONSOLE"/>
     </root>
+
 </configuration>
