@@ -18,27 +18,32 @@ package splitter.controllers
 
 import controllers.actions.IdentifierAction
 import play.api.mvc.*
-import play.api.Configuration
+import play.api.{Configuration, Logging}
 import splitter.connectors.AllowListConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class SplitterController @Inject() (identify: IdentifierAction,
                                     connector: AllowListConnector,
                                     configuration: Configuration,
                                     val controllerComponents: MessagesControllerComponents
                                    )(using ExecutionContext)
-    extends FrontendBaseController:
+    extends FrontendBaseController,
+      Logging:
 
   private val legacyStartUrl = configuration.get[String]("microservice.services.ndds-legacy.path")
   private lazy val nddsFrontendStartUrl = controllers.routes.LandingController.onPageLoad()
 
+  private val allowListChecksEnabled: Boolean = configuration.get[Boolean]("features.allowListChecksEnabled")
+
   def redirect(path: String): Action[AnyContent] = identify.async:
     implicit req =>
-      connector
-        .check(req.userId)
+      (if allowListChecksEnabled then connector.check(req.userId) else Future.successful(false))
         .map:
           case true  => SeeOther(nddsFrontendStartUrl.url)
           case false => SeeOther(legacyStartUrl)
+        .recover: e =>
+          logger.error("Error when checking for user id ", e)
+          SeeOther(legacyStartUrl)

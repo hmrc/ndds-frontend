@@ -32,22 +32,28 @@ import scala.concurrent.Future
 
 class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
 
-  class FakeAllowListConnector(result: Boolean) extends AllowListConnector:
-    override def check(userId: String)(using HeaderCarrier): Future[Boolean] = Future.successful(result)
+  class FakeAllowListConnector(result: Exception | Boolean) extends AllowListConnector:
+    override def check(userId: String)(using HeaderCarrier): Future[Boolean] =
+      result match
+        case res: Boolean   => Future.successful(res)
+        case res: Exception => Future.failed(res)
 
-  def application(connectorResponse: Boolean)(builder: GuiceApplicationBuilder): GuiceApplicationBuilder =
+  def withConnector(connectorResponse: Boolean | Exception)(builder: GuiceApplicationBuilder): GuiceApplicationBuilder =
     builder
       .overrides(
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[AllowListConnector].toInstance(FakeAllowListConnector(connectorResponse))
       )
 
+  def allowListDisabled(builder: GuiceApplicationBuilder): GuiceApplicationBuilder =
+    builder.configure(Map("features.allowListChecksEnabled" -> "false"))
+
   private def nddsFrontendUrl = controllers.routes.LandingController.onPageLoad().url
 
   "redirect on GET" - {
     "for GET request to /directdebits" - {
       "the user is redirect to the legacy service when the check is false" in {
-        running(application(false)) { app =>
+        running(withConnector(false)) { app =>
           val result = route(app, FakeRequest("GET", "/directdebits")).value
 
           status(result) mustBe Status.SEE_OTHER
@@ -56,7 +62,7 @@ class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
       }
 
       "the user is redirected to start page of the replatform service when the check is true" in {
-        running(application(true)) { app =>
+        running(withConnector(true)) { app =>
           val result = route(app, FakeRequest("GET", "/directdebits")).value
 
           status(result) mustBe Status.SEE_OTHER
@@ -67,7 +73,7 @@ class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
 
     "for GET requests that are prefixed with /directdebits and have additional path components" - {
       "the user is redirect to the legacy service when the check is false" in {
-        running(application(false)) { app =>
+        running(withConnector(false)) { app =>
           val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
 
           status(result) mustBe Status.SEE_OTHER
@@ -76,11 +82,33 @@ class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
       }
 
       "the user is redirected to start page of the replatform service when the check is true" in {
-        running(application(true)) { app =>
+        running(withConnector(true)) { app =>
           val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
 
           status(result) mustBe Status.SEE_OTHER
           redirectLocation(result).value mustBe nddsFrontendUrl
+        }
+      }
+    }
+
+    "for GET requests that are prefixed with /directdebits when there is an exception from the connector" - {
+      "the user is redirect to the legacy service when the check is false" in {
+        running(withConnector(Exception("Some downstream exception"))) { app =>
+          val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
+
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result).value mustBe "/national-direct-debits"
+        }
+      }
+    }
+
+    "for GET requests that are prefixed with /directdebits when the feature flag is disabled" - {
+      "the user is redirect to the legacy service when the check is false" in {
+        running(withConnector(Exception("Some downstream exception")) andThen allowListDisabled) { app =>
+          val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
+
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result).value mustBe "/national-direct-debits"
         }
       }
     }
