@@ -19,10 +19,11 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.*
 import pages.*
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{AdvanceNoticeResponseQuery, DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import views.html.AdvanceNoticeView
 
 import java.text.NumberFormat
@@ -45,9 +46,10 @@ class AdvanceNoticeController @Inject() (
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
     val userAnswers = request.userAnswers
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
-    val dateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
+    val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
 
     userAnswers.get(PaymentPlanDetailsQuery) match {
       case Some(response) =>

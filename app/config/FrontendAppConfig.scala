@@ -38,6 +38,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"
 
+  def getBasGatewayFrontendSignOutUrl(continueUrl: String): String =
+    s"$contactHost/contact/bas-gateway/sign-out-without-state?continue=$continueUrl"
+
   lazy val loginUrl: String = configuration.get[String]("urls.login")
   lazy val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
   lazy val signOutUrl: String = configuration.get[String]("urls.signOut")
