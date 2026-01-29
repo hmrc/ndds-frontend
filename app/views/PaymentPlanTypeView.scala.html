@@ -32,7 +32,7 @@
     bulletList: BulletList
 )
 
-@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], selfAssessmentUrl: Option[String], paymentProblemUrl: Option[String], call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], hmrcHelplineUrl: String, call: Call)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("paymentPlanType.title")), backLink = Some(call.url)) {
 
@@ -98,16 +98,14 @@
                     )
                 ),
                 paragraph("paymentPlan.collapsable.sa.p5"),
-                selfAssessmentUrl.map { url =>
-                    paragraphWithLink(
-                        message1 = Some(messages("paymentPlan.collapsable.sa.p6")),
-                        linkMessage = messages("paymentPlan.collapsable.sa.p6.link"),
-                        linkUrl = url,
-                        message2 = Some(messages("paymentPlan.collapsable.sa.p7")),
-                        linkRel  = "noreferrer noopener",
-                        target   = "_blank",
-                    )
-                }.getOrElse(HtmlFormat.empty)
+                paragraphWithLink(
+                    message1 = Some(messages("paymentPlan.collapsable.sa.p6")),
+                    linkMessage = messages("paymentPlan.collapsable.sa.p6.link"),
+                    linkUrl = hmrcHelplineUrl,
+                    message2 = Some(messages("paymentPlan.collapsable.sa.p7")),
+                    linkRel  = "noreferrer noopener",
+                    target   = "_blank",
+                )
             ))) { content =>
 
                 @govukDetails(
@@ -140,16 +138,14 @@
                         "paymentPlan.collapsable.tc.b4"
                     )
                 ),
-                paymentProblemUrl.map { url =>
-                    paragraphWithLink(
-                        message1     = Some(messages("paymentPlan.collapsable.tc.p6")),
-                        linkMessage  = messages("paymentPlan.collapsable.tc.p6.link"),
-                        linkUrl      = url,
-                        linkFullStop = true,
-                        linkRel      = "noreferrer noopener",
-                        target       = "_blank"
-                    )
-                }.getOrElse(HtmlFormat.empty)
+                paragraphWithLink(
+                    message1     = Some(messages("paymentPlan.collapsable.tc.p6")),
+                    linkMessage  = messages("paymentPlan.collapsable.tc.p6.link"),
+                    linkUrl      = hmrcHelplineUrl,
+                    linkFullStop = true,
+                    linkRel      = "noreferrer noopener",
+                    target       = "_blank"
+                )
             ))) { content =>
 
                 @govukDetails(

@@ -69,8 +69,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
             form(Some(TC)),
             NormalMode,
             Some(TC),
-            Some(appConfig.selfAssessmentUrl),
-            Some(appConfig.paymentProblemUrl),
+            appConfig.hmrcHelplineUrl,
             Call("GET", directDebitSourceRoute)
           )(request, messages(application)).toString
       }
@@ -147,6 +146,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
 
       val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, TC)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+      val appConfig = application.injector.instanceOf[FrontendAppConfig]
 
       running(application) {
         val request =
@@ -163,8 +163,7 @@ class PaymentPlanTypeControllerSpec extends SpecBase with MockitoSugar {
             boundForm,
             NormalMode,
             Some(TC),
-            None,
-            None,
+            appConfig.hmrcHelplineUrl,
             Call("GET", directDebitSourceRoute)
           )(request, messages(application)).toString
       }

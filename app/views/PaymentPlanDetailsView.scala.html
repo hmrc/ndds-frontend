@@ -100,4 +100,10 @@
         )),
         rows = rows
     ))
+
+    @paragraphWithLink(
+        linkMessage = messages("paymentPlanDetails.viewPaymentPlans.link"),
+        linkUrl = routes.DirectDebitSummaryController.onPageLoad().url
+    )
+
 }
