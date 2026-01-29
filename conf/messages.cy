@@ -422,7 +422,6 @@ directDebitConfirmation.variablePaymentPlan = Taliad newidiol
 directDebitConfirmation.budgetPaymentPlan = Taliad cyllidebol
 directDebitConfirmation.taxCreditRepaymentPlan = Ad-daliad credydau treth
 directDebitConfirmation.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
-directDebitConfirmation.viewPaymentPlans = Bwrw golwg dros bob cynllun talu
 directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instructions
 
 under_construction.heading = Under Construction
@@ -505,11 +504,12 @@ paymentPlanDetails.details.hodService.sdlt = Treth Dir y Tollau Stamp (SDLT)
 paymentPlanDetails.details.hodService.tc = Credydau treth (TC)
 paymentPlanDetails.details.hodService.vat = Treth Ar Werth (TAW)
 paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
+paymentPlanDetails.viewPaymentPlans.link = Bwrw golwg dros bob cynllun talu
 
 paymentPlanLockedWarning.title = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
 paymentPlanLockedWarning.heading = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
 paymentPlanLockedWarning.paragraph = Mae’ch diweddariad blaenorol yn cael ei brosesu. Byddwch yn gallu bwrw golwg dros neu reoli’r cynllun talu hwn o fewn 36 awr.
-paymentPlanLockedWarning.returnLink = Yn ôl i’r cynllun talus
+paymentPlanLockedWarning.returnLink = Yn ôl i'r cynlluniau talu
 
 cancelPaymentPlan.title = Canslo’r cynllun talu hwn
 cancelPaymentPlan.heading = Canslo’r cynllun talu hwn
@@ -530,8 +530,8 @@ paymentPlanCancelled.paymentReference = Cyfeirnod talu: {0}
 paymentPlanCancelled.pleaseNote = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
 paymentPlanCancelled.link = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol.
 
-suspendPaymentPlan.title = Gohirio’r cynllun talu
-suspendPaymentPlan.heading = Gohirio’r cynllun talu
+suspendPaymentPlan.title = Gohirio’r cynllun talu hwn
+suspendPaymentPlan.heading = Gohirio’r cynllun talu hwn
 suspendPaymentPlan.p1 = Gallwch ohirio’r cynllun talu hwn os oes angen i chi oedi’r taliadau.
 suspendPaymentPlan.p2 = Pan fyddwch yn gohirio cynllun talu:
 suspendPaymentPlan.l1 = ni chaiff taliadau eu cymryd yn ystod y cyfnod gohirio
@@ -550,8 +550,8 @@ suspensionPeriodRangeDate.startDate = Dyddiad dechrau
 suspensionPeriodRangeDate.hint = Er enghraifft, 27 3 2020
 suspensionPeriodRangeDate.endDate = Dyddiad dod i ben
 suspensionPeriodRangeEndDate.hint = Er enghraifft, 28 4 2020
-suspensionPeriodRangeDate.title.change = Newid y cyfnod gohirio
-suspensionPeriodRangeDate.heading.change = Newid y cyfnod gohirio
+suspensionPeriodRangeDate.title.change = Newid y cyfnod gohirio hwn
+suspensionPeriodRangeDate.heading.change = Newid y cyfnod gohirio hwn
 suspensionPeriodRangeDate.change.inset = Mae’r cynllun talu hwn wedi ei ohirio o {0} i {1}.
 suspensionPeriodRangeDate.change.paragraph = I newid y cyfnod gohirio, golygu’r dyddiad dechrau, dyddiad dod i ben, neu’r ddau.
 suspensionPeriodRangeStartDate.error.required.all = Nodwch ddyddiad dechrau’r gohiriad
@@ -573,7 +573,7 @@ checkYourSuspensionDetails.heading = Gwirio manylion eich gohiriad
 checkYourSuspensionDetails.confirm = Cadarnhau a pharhau
 
 paymentPlanSuspended.title = Cynllun talu wedi’i ohirio
-paymentPlanSuspended.panel.title = Cynllun gohirio taliadau
+paymentPlanSuspended.panel.title = Cynllun talu wedi’i ohirio
 paymentPlanSuspended.panel.p = O <strong>{0}</strong> i <strong>{1}</strong>
 paymentPlanSuspended.h1 = Yr hyn sy’n digwydd nesaf
 paymentPlanSuspended.p1.normal = Mae’r cynllun talu hwn bellach wedi cael ei ohirio. Ni chaiff taliadau eu cymryd o {0} i {1}.
@@ -594,8 +594,8 @@ removingThisSuspension.checkYourAnswersLabel = Dileu’r gohiriad hwn
 removingThisSuspension.error.required = Dewiswch ‘Iawn’ os ydych am dynnu’r gohiriad hwn
 removingThisSuspension.change.hidden =  Dileu’r gohiriad hwn
 
-removeSuspensionConfirmation.title = Cynllun gohirio taliadau wedi’i dynnu
-removeSuspensionConfirmation.panel.title = Cynllun gohirio taliadau wedi’i dynnu
+removeSuspensionConfirmation.title = Gohiriad cynllun talu wedi’i ddileu
+removeSuspensionConfirmation.panel.title = Gohiriad cynllun talu wedi’i ddileu
 removeSuspensionConfirmation.h1 = Yr hyn sy’n digwydd nesaf
 removeSuspensionConfirmation.p1 = Mae’r gohiriad ar gyfer y cynllun talu hwn bellach wedi’i dod i ben. Bydd y taliad nesaf o {0} ar gyfer y cynllun hwn yn cael ei gasglu ar {1}. Mae’n bosibl y byddwch yn dal i weld y gohiriad hwn yn eich cyfrif am hyd at 36 awr.
 removeSuspensionConfirmation.h2 = Manylion cynllun talu
@@ -739,7 +739,7 @@ errorWarning.title = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.heading = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.p1 = Ni ellir sefydlu’r cynllun talu hwn oherwydd bod y manylion yn annilys. Mae’n rhaid i chi newid y manylion canlynol i barhau:
 errorWarning.bulletList1 = mae’n rhaid i ddyddiad dod i ben y cynllun fod ar neu ar ôl dyddiad dechrau’r cynllun
-errorWarning.link = Newid manylion eich cynllun talu.
+errorWarning.link = Newid manylion eich cynllun talu
 
 confirmAnswersError.title = Mae angen i chi gadarnhau rhai atebion
 confirmAnswersError.heading = Mae angen i chi gadarnhau rhai atebion
