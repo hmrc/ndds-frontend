@@ -62,6 +62,9 @@ class AllowListConnectorImpl @Inject() (config: ServicesConfig, httpClientV2: Ht
           case x if x >= 500 =>
             logger.error(s"Error in downstream. Received response status code $x")
             false
+          case x =>
+            logger.error(s"Unexpected response status code from downstream. Received response status code $x")
+            false
         }
 
 case class CheckResponse(included: Boolean)

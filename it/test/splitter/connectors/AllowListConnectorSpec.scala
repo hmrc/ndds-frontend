@@ -109,3 +109,20 @@ class AllowListConnectorSpec extends AnyFreeSpec, Matchers, WireMockSupport,  Ht
 
     result mustEqual false
   }
+
+  "return false, for an unexpected response status" in {
+    val identifierValue = "a user identifier"
+
+    stubFor(
+      post(urlPathEqualTo(path))
+        .withRequestBody(equalToJson(Json.obj("identifier" -> identifierValue).toString))
+        .willReturn(
+          aResponse()
+            .withStatus(201)
+        )
+    )
+
+    val result = connector.check(identifierValue).futureValue
+
+    result mustEqual false
+  }
