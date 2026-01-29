@@ -120,7 +120,7 @@ reachedLimit.p1 = Bydd angen i chi aros tan {0} cyn ceisio cadarnhau’ch manyli
 
 accountDetailsNotVerified.title = Doedd dim modd dilysu manylion y cyfrif
 accountDetailsNotVerified.heading = Doedd dim modd dilysu manylion y cyfrif
-accountDetailsNotVerified.p1 = Mae’n rhaid i chi aros tan <strong>{0}</strong> cyn i chi allu nodi’r manylion ar gyfer cyfrif banc gwahanol.
+accountDetailsNotVerified.p1 = Mae’n rhaid i chi aros tan {0} cyn i chi allu nodi’r manylion ar gyfer cyfrif banc gwahanol.
 accountDetailsNotVerified.p2 = Os nad oes gennych gyfrif banc arall, mae’n rhaid i chi
 accountDetailsNotVerified.p2.link =  dalu drwy ddull talu gwahanol (yn agor tab newydd)
 accountDetailsNotVerified.return.link = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol

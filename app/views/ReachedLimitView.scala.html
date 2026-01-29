@@ -27,5 +27,5 @@
 
 @layout(pageTitle = titleNoForm(messages("reachedLimit.title")), showBackLink = false) {
     @header1("reachedLimit.heading")
-    @paragraphWithParam("reachedLimit.p1", retryDate)
+    @paragraphWithParam("reachedLimit.p1", s"<strong>$retryDate</strong>")
 }

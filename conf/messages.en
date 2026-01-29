@@ -120,7 +120,7 @@ reachedLimit.p1 = You will need to wait until {0} before trying to confirm your 
 
 accountDetailsNotVerified.title = Account details could not be verified
 accountDetailsNotVerified.heading = Account details could not be verified
-accountDetailsNotVerified.p1 = You must wait until <strong>{0}</strong> before you can enter the details of another bank account.
+accountDetailsNotVerified.p1 = You must wait until {0} before you can enter the details of another bank account.
 accountDetailsNotVerified.p2 = If you do not have another bank account, you must
 accountDetailsNotVerified.p2.link =  pay with a different payment option (opens in a new tab)
 accountDetailsNotVerified.return.link = Return to Direct Debit Instructions
