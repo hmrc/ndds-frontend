@@ -336,7 +336,7 @@ addPaymentPlanEndDate.change.hidden =  ychwanegu dyddiad dod i ben y cynllun
 
 planEndDate.title = Pryd ydych am i’r cynllun talu hwn ddod i ben?
 planEndDate.heading = Pryd ydych am i’r cynllun talu hwn ddod i ben?
-planEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
+planEndDate.p1 = Mae’n rhaid i hyn fod cyn {0}. Ni fydd CThEF yn casglu taliadau ar ôl y dyddiad hwn.
 planEndDate.hint = Er enghraifft, 27 3 2020
 planEndDate.checkYourAnswersLabel = Dyddiad dod i ben y cynllun
 planEndDate.change.hidden =  dyddiad dod i ben y cynllun

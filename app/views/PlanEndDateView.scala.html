@@ -24,7 +24,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, call: Call, beforeDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("planEndDate.title")), backLink = Some(call.url)) {
 
@@ -33,20 +33,20 @@
         @mainErrorSummary(form, errorLinkOverrides = Map("value" -> "value.day"))
 
         @govukDateInput(
-                DateViewModel(
-                    field  = form("value"),
-                    legend = LegendViewModel(messages("planEndDate.heading")).asPageHeading()
-                    ).withHint(
-                    HintViewModel(
-                        HtmlContent(
-                        Seq(
-                            s"<p class='govuk-body'>${messages("planEndDate.p1")}</p>",
-                            messages("planEndDate.hint"),
-                            ).mkString
-                        )
+            DateViewModel(
+                field  = form("value"),
+                legend = LegendViewModel(messages("planEndDate.heading")).asPageHeading()
+                ).withHint(
+                HintViewModel(
+                    HtmlContent(
+                    Seq(
+                        s"<p class='govuk-body'>${messages("planEndDate.p1", s"<strong>$beforeDate</strong>")}</p>",
+                        messages("planEndDate.hint"),
+                        ).mkString
                     )
                 )
             )
+        )
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))
