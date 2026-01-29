@@ -422,7 +422,6 @@ directDebitConfirmation.variablePaymentPlan = Taliad newidiol
 directDebitConfirmation.budgetPaymentPlan = Taliad cyllidebol
 directDebitConfirmation.taxCreditRepaymentPlan = Ad-daliad credydau treth
 directDebitConfirmation.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
-directDebitConfirmation.viewPaymentPlans = Bwrw golwg dros bob cynllun talu
 directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instructions
 
 under_construction.heading = Under Construction
@@ -505,6 +504,7 @@ paymentPlanDetails.details.hodService.sdlt = Treth Dir y Tollau Stamp (SDLT)
 paymentPlanDetails.details.hodService.tc = Credydau treth (TC)
 paymentPlanDetails.details.hodService.vat = Treth Ar Werth (TAW)
 paymentPlanDetails.details.hodService.unknownHodService = Unknown Hod Service
+paymentPlanDetails.viewPaymentPlans.link = Bwrw golwg dros bob cynllun talu
 
 paymentPlanLockedWarning.title = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
 paymentPlanLockedWarning.heading = Ni allwch fwrw golwg dros na rheoli’r cynllun talu hwn
@@ -739,7 +739,7 @@ errorWarning.title = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.heading = Ni ellir sefydlu’r cynllun talu hwn
 errorWarning.p1 = Ni ellir sefydlu’r cynllun talu hwn oherwydd bod y manylion yn annilys. Mae’n rhaid i chi newid y manylion canlynol i barhau:
 errorWarning.bulletList1 = mae’n rhaid i ddyddiad dod i ben y cynllun fod ar neu ar ôl dyddiad dechrau’r cynllun
-errorWarning.link = Newid manylion eich cynllun talu.
+errorWarning.link = Newid manylion eich cynllun talu
 
 confirmAnswersError.title = Mae angen i chi gadarnhau rhai atebion
 confirmAnswersError.heading = Mae angen i chi gadarnhau rhai atebion
