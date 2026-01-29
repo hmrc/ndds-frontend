@@ -410,6 +410,7 @@ directDebitConfirmation.summaryTextDetails.p3 = If an error is made in the payme
 directDebitConfirmation.summaryTextDetails.p4 = If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to.
 directDebitConfirmation.summaryTextDetails.p5 = You can cancel a Direct Debit at any time, by contacting your bank or building society. Written confirmation may be required.
 directDebitConfirmation.directDebitDetails = Direct Debit details
+directDebitConfirmation.directDebitReference = Direct Debit reference
 directDebitConfirmation.accountName = Name on the account
 directDebitConfirmation.accountNumber = Account number
 directDebitConfirmation.sortCode = Sort code
@@ -424,7 +425,7 @@ directDebitConfirmation.budgetPaymentPlan = Budget payment
 directDebitConfirmation.taxCreditRepaymentPlan = Tax Credit repayment
 directDebitConfirmation.printInset = You can print this page for your records using the print function on your browser.
 directDebitConfirmation.viewPaymentPlans = View all payment plans
-directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instructions
+directDebitConfirmation.viewDirectDebitInstructions = Return to Direct Debit Instructions
 
 under_construction.heading = Under Construction
 

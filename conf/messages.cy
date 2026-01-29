@@ -330,7 +330,7 @@ regularPaymentAmount.change.hidden =  symiau’r taliadau rheolaidd
 
 addPaymentPlanEndDate.title = A ydych am ychwanegu dyddiad dod i ben y cynllun talu?
 addPaymentPlanEndDate.heading = A ydych am ychwanegu dyddiad dod i ben y cynllun talu?
-addPaymentPlanEndDate.p1 = Nid yw hyn yn orfodol. Byddwch yn gallu ychwanegu dyddiad dod i ben unwaith y bydd y cynllun talu wedi’i sefydlu
+addPaymentPlanEndDate.p1 = Nid yw hyn yn orfodol. Byddwch yn gallu ychwanegu dyddiad dod i ben unwaith y bydd y cynllun talu wedi’i sefydlu.
 addPaymentPlanEndDate.checkYourAnswersLabel = Ychwanegu dyddiad dod i ben y cynllun
 addPaymentPlanEndDate.error.required = Dewiswch ‘Iawn’ os ydych am ychwanegu dyddiad dod i ben y cynllun talu
 addPaymentPlanEndDate.change.hidden =  ychwanegu dyddiad dod i ben y cynllun
@@ -410,6 +410,7 @@ directDebitConfirmation.summaryTextDetails.p3 = Os gwneir camgymeriad gan CThEF 
 directDebitConfirmation.summaryTextDetails.p4 = Os byddwch yn cael ad-daliad nad oes hawl gennych iddo, bydd yn rhaid i chi ei dalu’n ôl pan fydd CThEF yn gofyn i chi wneud hynny.
 directDebitConfirmation.summaryTextDetails.p5 = Gallwch ganslo Debyd Uniongyrchol ar unrhyw adeg drwy gysylltu â’ch banc neu’ch cymdeithas adeiladu. Efallai y bydd angen cadarnhad ysgrifenedig.
 directDebitConfirmation.directDebitDetails = Manylion Debyd Uniongyrchol
+directDebitConfirmation.directDebitReference = Cyfeirnod Debyd Uniongyrchol
 directDebitConfirmation.accountName = Yr enw sydd ar y cyfrif
 directDebitConfirmation.accountNumber = Rhif y cyfrif
 directDebitConfirmation.sortCode = Cod didoli
@@ -424,7 +425,7 @@ directDebitConfirmation.budgetPaymentPlan = Taliad cyllidebol
 directDebitConfirmation.taxCreditRepaymentPlan = Ad-daliad credydau treth
 directDebitConfirmation.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
 directDebitConfirmation.viewPaymentPlans = Bwrw golwg dros bob cynllun talu
-directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instructions
+directDebitConfirmation.viewDirectDebitInstructions = Yn ôl i'r Cyfarwyddiadau Debyd Uniongyrchol
 
 under_construction.heading = Under Construction
 
