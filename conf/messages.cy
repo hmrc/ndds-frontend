@@ -704,7 +704,7 @@ amendPaymentPlanConfirmation.heading = Gwirio manylion eich diwygiad
 amendPaymentPlanConfirmation.confirmAndContinue.button = Cadarnhau a pharhau
 amendPaymentPlanConfirmation.cancel.link = Canslo a mynd yn ôl i’r cynllun talu
 amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor = Taliad ar gyfer
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Payment reference: {0}
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Cyfeirnod talu: {0}
 
 amendPaymentPlanUpdate.title = Cynllun talu wedi’i ddiwygio
 amendPaymentPlanUpdate.panel.title = Cynllun talu wedi’i ddiwygio
