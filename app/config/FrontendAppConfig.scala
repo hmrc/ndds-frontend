@@ -29,6 +29,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   private lazy val contactHost = configuration.get[String]("contact-frontend.host")
   private lazy val contactFormServiceIdentifier = configuration.get[String]("contact-frontend.serviceId")
+  private lazy val basGatewayFrontend = configuration.get[String]("bas-gateway-frontend")
 
   lazy val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-enabled")
   lazy val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-not-enabled")
@@ -39,7 +40,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"
 
   def getBasGatewayFrontendSignOutUrl(continueUrl: String): String =
-    s"$contactHost/contact/bas-gateway/sign-out-without-state?continue=$continueUrl"
+    s"$basGatewayFrontend/bas-gateway/sign-out-without-state?continue=$continueUrl"
 
   lazy val loginUrl: String = configuration.get[String]("urls.login")
   lazy val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
