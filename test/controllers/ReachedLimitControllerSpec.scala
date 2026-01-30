@@ -64,7 +64,7 @@ class ReachedLimitControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
 
         val view = application.injector.instanceOf[ReachedLimitView]
-        val expectedDate = "28 June 2025, 4:30pm"
+        val expectedDate = "28 June 2025, 16:30"
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(expectedDate)(request, messages(application)).toString

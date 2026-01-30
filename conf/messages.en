@@ -60,7 +60,7 @@ yourDirectDebitInstructions.p3.link = you must contact the HMRC Helpline (opens 
 yourDirectDebitInstructions.p3.afterLink = or cancel through your bank.
 yourDirectDebitInstructions.dl.direct.debit.reference = Direct Debit reference
 yourDirectDebitInstructions.dl.date.setup = Date set up
-yourDirectDebitInstructions.dl.account.number = Account Number
+yourDirectDebitInstructions.dl.account.number = Account number
 yourDirectDebitInstructions.dl.payment.plans = Payment plans
 yourDirectDebitInstructions.error.count = You cannot add a new Direct Debit Instruction because the maximum number is 99.
 yourDirectDebitInstructions.account.number.hidden = ending with {0}
@@ -74,10 +74,10 @@ setUpDirectDebitPayment.collapsable = More information about Direct Debit paymen
 setUpDirectDebitPayment.more.p1 = You can use Direct Debit for single payments, budget payment plans, repaying a tax credits overpayment, or setting up a variable payment plan for Machine Games Duty (MGD).
 setUpDirectDebitPayment.more.p2 = You''ll need your bank details and payment reference from HMRC correspondence.
 setUpDirectDebitPayment.more.p3 = Find out more (links will open in new tabs):
-setUpDirectDebitPayment.more.bullet.l1 = what you can pay by Direct Debit
-setUpDirectDebitPayment.more.bullet.l2 = how Direct Debit works
-setUpDirectDebitPayment.more.bullet.l3 = managing your Direct Debit payments
-setUpDirectDebitPayment.more.bullet.l4 = the Direct Debit Guarantee
+setUpDirectDebitPayment.more.bullet.l1 = What you can pay by Direct Debit
+setUpDirectDebitPayment.more.bullet.l2 = How Direct Debit works
+setUpDirectDebitPayment.more.bullet.l3 = Managing your Direct Debit payments
+setUpDirectDebitPayment.more.bullet.l4 = The Direct Debit Guarantee
 setupDirectDebitPayment.startNow = Start now
 
 personalOrBusinessAccount.title = Is this a personal or business account?
@@ -114,11 +114,11 @@ yourBankDetails.error.sortCodeOnDenyList = You have entered a sort code that doe
 
 reachedLimit.title = You’ve reached the limit for confirming your bank details
 reachedLimit.heading = You’ve reached the limit for confirming your bank details
-reachedLimit.p1 = You will need to wait until {0} before trying to confirm your bank detail.
+reachedLimit.p1 = You will need to wait until {0} before trying to confirm your bank details.
 
 accountDetailsNotVerified.title = Account details could not be verified
 accountDetailsNotVerified.heading = Account details could not be verified
-accountDetailsNotVerified.p1 = You must wait until <strong>{0}</strong> before you can enter the details of another bank account.
+accountDetailsNotVerified.p1 = You must wait until {0} before you can enter the details of another bank account.
 accountDetailsNotVerified.p2 = If you do not have another bank account, you must
 accountDetailsNotVerified.p2.link =  pay with a different payment option (opens in a new tab)
 accountDetailsNotVerified.return.link = Return to Direct Debit Instructions
@@ -126,8 +126,8 @@ accountDetailsNotVerified.return.link = Return to Direct Debit Instructions
 confirmYourAuthority.title = Confirm your authority
 confirmYourAuthority.heading = Confirm your authority
 confirmYourAuthority.p1 = Confirm that you are the account holder or an authorised signatory, and are able to authorise Direct Debit payments from this account.
-confirmYourAuthority.yes= Yes
-confirmYourAuthority.no= No
+confirmYourAuthority.yes = Yes
+confirmYourAuthority.no = No
 confirmYourAuthority.error.required = Select yes if you are the account holder and are able to authorise Direct Debit payments from this account
 
 bankDetailsCheckYourAnswer.title = Check your answers
@@ -143,8 +143,8 @@ bankDetailsCheckYourAnswer.change.accountHolderName = Account holder(s) name
 
 bankApproval.title = There is a problem with your approval
 bankApproval.heading = There is a problem with your approval
-bankApproval.p1 = Your business account requires more than one person to authorise payments. You can ask your bank to allow one signatory to set up Direct Debit payments to HMRC, or you must
-bankApproval.p1.link = pay with a different payment option (opens in a new tab)
+bankApproval.p1 = Your business account requires more than one person to authorise payments. You can ask your bank to allow one signatory to set up Direct Debit payments to HMRC,
+bankApproval.p1.link = you must pay with a different payment option (opens in a new tab).
 
 directDebitSource.title = Which tax or duty is this payment plan for?
 directDebitSource.heading = Which tax or duty is this payment plan for?
