@@ -407,6 +407,7 @@ directDebitConfirmation.summaryTextDetails.p3 = If an error is made in the payme
 directDebitConfirmation.summaryTextDetails.p4 = If you receive a refund you are not entitled to, you must pay it back when HMRC NDDS asks you to.
 directDebitConfirmation.summaryTextDetails.p5 = You can cancel a Direct Debit at any time, by contacting your bank or building society. Written confirmation may be required.
 directDebitConfirmation.directDebitDetails = Direct Debit details
+directDebitConfirmation.directDebitReference = Direct Debit reference
 directDebitConfirmation.accountName = Name on the account
 directDebitConfirmation.accountNumber = Account number
 directDebitConfirmation.sortCode = Sort code
@@ -420,7 +421,7 @@ directDebitConfirmation.variablePaymentPlan = Variable payment
 directDebitConfirmation.budgetPaymentPlan = Budget payment
 directDebitConfirmation.taxCreditRepaymentPlan = Tax Credit repayment
 directDebitConfirmation.printInset = You can print this page for your records using the print function on your browser.
-directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instructions
+directDebitConfirmation.viewDirectDebitInstructions = Return to Direct Debit Instructions
 
 under_construction.heading = Under Construction
 
@@ -667,11 +668,11 @@ amendRegularPaymentAmount.heading = How much is the regular payment amount, in p
 amendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
 amendRegularPaymentAmount.change.hidden = regular payment amount
 
-amendPlanStartDate.title = When do you want to make this payment?
-amendPlanStartDate.heading = When do you want to make this payment?
+amendPlanStartDate.title = What date are you making this payment?
+amendPlanStartDate.heading = What date are you making this payment?
 amendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
 amendPlanStartDate.warning = If your payment is late, you may be liable to pay interest or a surcharge.
-amendPlanStartDate.hint = For example, {0}
+amendPlanStartDate.hint = The earliest date you can start is 16 6 2025. Enter the date as numbers, for example {0}.
 amendPlanStartDate.error.beforeEarliest=The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
 amendPlanStartDate.error.tooFarInFuture=The date you have entered is not valid. It cannot be more than 12 months after the current date.
 amendPlanStartDate.startDate = Plan start date
