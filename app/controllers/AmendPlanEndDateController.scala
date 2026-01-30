@@ -21,16 +21,17 @@ import forms.AmendPlanEndDateFormProvider
 import models.Mode
 import pages.*
 import play.api.Logging
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{CurrentPageQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Frequency
+import utils.{Constants, Frequency}
 import views.html.AmendPlanEndDateView
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -51,15 +52,17 @@ class AmendPlanEndDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val answers = request.userAnswers
-
+    implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
     if (nddsService.isBudgetPaymentPlan(answers)) {
       val form = formProvider()
       val preparedForm = request.userAnswers.get(AmendPlanEndDatePage) match {
         case None        => form
         case Some(value) => form.fill(value)
       }
+      val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
+      val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
 
-      Ok(view(preparedForm, mode, routes.AmendingPaymentPlanController.onPageLoad()))
+      Ok(view(preparedForm, mode, routes.AmendingPaymentPlanController.onPageLoad(), beforeDate))
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
@@ -68,13 +71,16 @@ class AmendPlanEndDateController @Inject() (
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
+    implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
+    val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
+    val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
     val form = formProvider()
     val userAnswers = request.userAnswers
 
     form
       .bindFromRequest()
       .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendingPaymentPlanController.onPageLoad()))),
+        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, routes.AmendingPaymentPlanController.onPageLoad(), beforeDate))),
         value =>
           userAnswers.get(PaymentPlanDetailsQuery) match {
             case Some(planDetails) =>
@@ -91,7 +97,7 @@ class AmendPlanEndDateController @Inject() (
                     message = "amendPlanEndDate.error.planEndDateBeforeStartDate"
                   )
                 Future.successful(
-                  BadRequest(view(errorForm, mode, routes.AmendingPaymentPlanController.onPageLoad()))
+                  BadRequest(view(errorForm, mode, routes.AmendingPaymentPlanController.onPageLoad(), beforeDate))
                 )
               } else {
                 // F20 check
@@ -103,7 +109,7 @@ class AmendPlanEndDateController @Inject() (
                         key     = "value",
                         message = "amendPlanEndDate.error.nextPaymentDateValid"
                       )
-                    Future.successful(BadRequest(view(errorForm, mode, routes.AmendingPaymentPlanController.onPageLoad())))
+                    Future.successful(BadRequest(view(errorForm, mode, routes.AmendingPaymentPlanController.onPageLoad(), beforeDate)))
                   } else {
                     for {
                       updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanEndDatePage, value))

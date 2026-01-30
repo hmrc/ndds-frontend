@@ -27,7 +27,7 @@
     govukLabel: GovukLabel
 )
 
-@(form: Form[_], mode: Mode, call: Call)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, call: Call, beforeDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("amendPlanEndDate.title")), backLink = Some(call.url)) {
 
@@ -39,7 +39,7 @@
             content = Text(messages("amendPlanEndDate.heading"))
         ).withCssClass("govuk-!-margin-bottom-0"))
 
-        @p(messages("amendPlanEndDate.p1"))
+        @p(messages("amendPlanEndDate.p1", <strong>{beforeDate}</strong>))
 
         @govukDateInput(
             DateViewModel(
