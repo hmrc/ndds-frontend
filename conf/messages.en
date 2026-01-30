@@ -423,7 +423,7 @@ directDebitConfirmation.variablePaymentPlan = Variable payment
 directDebitConfirmation.budgetPaymentPlan = Budget payment
 directDebitConfirmation.taxCreditRepaymentPlan = Tax Credit repayment
 directDebitConfirmation.printInset = You can print this page for your records using the print function on your browser.
-directDebitConfirmation.viewDirectDebitInstructions = View Direct Debit Instructions
+directDebitConfirmation.viewDirectDebitInstructions = Return to Direct Debit Instructions
 
 under_construction.heading = Under Construction
 
