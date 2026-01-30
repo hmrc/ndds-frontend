@@ -122,8 +122,8 @@ GET        /payment-plan-cancelled                            controllers.Paymen
 
 GET        /how-long-suspension-period-last                   controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = NormalMode)
 POST       /how-long-suspension-period-last                   controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = NormalMode)
-GET        /change-changing-suspension-period                 controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-changing-suspension-period                 controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
+GET        /changing-suspension-period                        controllers.SuspensionPeriodRangeDateController.onPageLoad(mode: Mode = CheckMode)
+POST       /changing-suspension-period                        controllers.SuspensionPeriodRangeDateController.onSubmit(mode: Mode = CheckMode)
 
 GET        /check-suspension-details                          controllers.CheckYourSuspensionDetailsController.onPageLoad(mode: Mode = NormalMode)
 POST       /check-suspension-details                          controllers.CheckYourSuspensionDetailsController.onSubmit(mode: Mode = NormalMode)
@@ -133,6 +133,7 @@ POST       /change-check-suspension-details                   controllers.CheckY
 GET        /payment-plan-suspension-removed                   controllers.RemoveSuspensionConfirmationController.onPageLoad()
 
 GET        /payment-plan-suspended                            controllers.PaymentPlanSuspendedController.onPageLoad()
+
 GET        /removing-this-suspension                          controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = NormalMode)
 POST       /removing-this-suspension                          controllers.RemovingThisSuspensionController.onSubmit(mode: Mode = NormalMode)
 GET        /change-removing-this-suspension                   controllers.RemovingThisSuspensionController.onPageLoad(mode: Mode = CheckMode)
