@@ -144,7 +144,7 @@ class DirectDebitConfirmationController @Inject() (
       rows = Seq(
         Some(
           SummaryListRowViewModel(
-            key     = Key(Text("Direct Debit reference")),
+            key     = Key(Text(messages("directDebitConfirmation.directDebitReference"))),
             value   = ValueViewModel(Text(referenceNumber.ddiRefNumber)),
             actions = Seq.empty
           )
@@ -157,7 +157,7 @@ class DirectDebitConfirmationController @Inject() (
 
     val dateSetupRow: Option[SummaryListRow] = Some(
       SummaryListRowViewModel(
-        key = Key(Text("Date set up")),
+        key = Key(Text(messages("directDebitConfirmation.details.dateSetUp"))),
         value = ValueViewModel(
           Text(
             LocalDate.now().format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, messages.lang.locale))
