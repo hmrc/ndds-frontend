@@ -43,9 +43,9 @@ object DateTimeFormats {
     LocalDate.now().format(formatter)
   }
 
-  def formattedDateTime(dateTime: ZonedDateTime): String = { // example: 24 July 2020, 16:29pm in local zone BST time (ZonedDateTime)
-    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, h:mma")
-    val extractDateSuffix = """(.*)(am|pm|AM|PM)""".r
+  def formattedDateTime(dateTime: ZonedDateTime)(implicit messages: Messages): String = { // example: 24 July 2020, 16:29pm in local zone BST time (ZonedDateTime)
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, h:mma", messages.lang.locale)
+    val extractDateSuffix = """(.*)(am|pm|AM|PM|yh|YH)""".r
 
     dateTime.format(formatter) match {
       case extractDateSuffix(dateThing, suffix) => dateThing + suffix.toLowerCase

@@ -17,14 +17,14 @@
 package controllers
 
 import controllers.actions.*
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.LockService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.DateTimeFormats
 import views.html.ReachedLimitView
 
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
@@ -40,10 +40,12 @@ class ReachedLimitController @Inject() (
     with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
+    implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
+    val dateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", messages.lang.locale)
     lockService.isUserLocked(request.userId) map { response =>
       val formattedDate = response.lockoutExpiryDateTime
         .map(_.atZone(ZoneId.of("Europe/London")))
-        .map(DateTimeFormats.formattedDateTime)
+        .map(_.format(dateFormat))
         .getOrElse(throw Exception("Locked user has no expiry time"))
 
       Ok(view(formattedDate))

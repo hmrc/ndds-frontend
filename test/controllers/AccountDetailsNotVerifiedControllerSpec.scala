@@ -66,7 +66,7 @@ class AccountDetailsNotVerifiedControllerSpec extends SpecBase with MockitoSugar
 
         val view = application.injector.instanceOf[AccountDetailsNotVerifiedView]
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
-        val expectedDate = "28 June 2025, 4:30pm"
+        val expectedDate = "28 June 2025, 16:30"
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual view(appConfig.payingHmrcUrl, expectedDate)(request, messages(application)).toString
