@@ -108,8 +108,6 @@ yourBankDetails.error.accountNumber.tooShort = Account number must be 8 digits
 yourBankDetails.error.accountNumber.numericOnly = Account number must be 8 digits
 yourBankDetails.error.accountHolderName.unverified = These account details could not be verified. Check your details or try different account details.
 yourBankDetails.error.accountNumberAndSortCode.invalid = Enter a valid combination of bank account number and sort code.
-yourBankDetails.error.sortCode.incorrectPaymentType = You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details of a different account.
-yourBankDetails.error.accountHolderName.default = Enter the name on the account as it appears on the bank statement. Do not copy and paste it.
 yourBankDetails.error.nameMismatch.invalid = Enter the name on the account as it appears on the bank statement. Do not copy and paste it.
 yourBankDetails.error.sortCodeNotSupported.invalid = You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details of a different account.
 yourBankDetails.error.sortCodeOnDenyList = You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account.
@@ -347,7 +345,6 @@ planEndDate.error.required = Payment plan end date must include a day, month and
 planEndDate.error.invalid = Payment plan end date must be a real date
 planEndDate.error.incomplete = Payment plan end date must include a day, month and year
 planEndDate.error.beforeOrEqualStartDate = Payment plan end date must be the same as or after {0}
-planEndDate.enter = Enter plan end date
 
 totalAmountDue.title = How much is the total amount due, in pounds?
 totalAmountDue.heading = How much is the total amount due, in pounds?
@@ -381,6 +378,7 @@ checkYourAnswers.paymentPlanType.budgetPaymentPlan = Budget payment
 checkYourAnswers.paymentPlanType.taxCreditRepaymentPlan = Tax credits repayment plan
 checkYourAnswers.directDebitSource = Payment for
 checkYourAnswers.acceptAndSubmit = Accept and submit
+checkYourAnswers.planEndDate.enter = Enter plan end date
 
 duplicateError.title = You cannot set up a duplicate payment plan
 duplicateError.heading = You cannot set up a duplicate payment plan
@@ -681,7 +679,7 @@ amendPlanStartDate.startDate.hidden = payment date
 
 amendPlanEndDate.title = When do you want this payment plan to end?
 amendPlanEndDate.heading = When do you want this payment plan to end?
-amendPlanEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
+amendPlanEndDate.p1 = This must be before {0}. HMRC will not collect payments after this date.
 amendPlanEndDate.hint = For example, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change to be processed. Extend or remove the plan end date if you wish to continue.
 amendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.

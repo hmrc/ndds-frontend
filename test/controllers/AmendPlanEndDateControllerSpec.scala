@@ -31,8 +31,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
+import utils.Constants
 import views.html.AmendPlanEndDateView
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
@@ -48,7 +50,7 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   lazy val planConfirmationPage: String = routes.AmendPaymentPlanConfirmationController.onPageLoad().url
 
   def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest(GET, amendPlanEndDateRoute)
+    FakeRequest(GET, amendPlanEndDateRoute + "?beforeDate=2027-01-01")
 
   def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
     FakeRequest(POST, amendPlanEndDateRoutePost)
@@ -65,6 +67,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         "value.month" -> date.getMonthValue.toString,
         "value.year"  -> date.getYear.toString
       )
+
+  val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)
+  val beforeDate: String = LocalDate.now().plusMonths(12).format(dateFormat)
 
   "AmendPlanEndDate Controller" - {
     val mockService = mock[NationalDirectDebitService]
@@ -86,9 +91,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val view = application.injector.instanceOf[AmendPlanEndDateView]
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendingPaymentPlanRoute))(getRequest(),
-                                                                                                          messages(application)
-                                                                                                         ).toString
+          contentAsString(result) mustEqual view(form, NormalMode, Call("GET", amendingPaymentPlanRoute), beforeDate)(getRequest(),
+                                                                                                                      messages(application)
+                                                                                                                     ).toString
         }
       }
 
@@ -111,9 +116,10 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, getRequest()).value
 
           status(result) mustEqual OK
-          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendingPaymentPlanRoute))(getRequest(),
-                                                                                                                            messages(application)
-                                                                                                                           ).toString
+          contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", amendingPaymentPlanRoute), beforeDate)(
+            getRequest(),
+            messages(application)
+          ).toString
         }
       }
 
@@ -203,9 +209,9 @@ class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendingPaymentPlanRoute))(request,
-                                                                                                               messages(application)
-                                                                                                              ).toString
+          contentAsString(result) mustEqual view(boundForm, NormalMode, Call("GET", amendingPaymentPlanRoute), beforeDate)(request,
+                                                                                                                           messages(application)
+                                                                                                                          ).toString
         }
       }
 

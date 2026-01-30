@@ -37,172 +37,173 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
-//class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
-//
-//  private implicit val messages: Messages = stubMessages()
-//  private val startDate: LocalDate = LocalDate.of(2024, 1, 1)
-//  private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(startDate, "2024-1-11")
-//  private val formProvider = new PlanEndDateFormProvider()
-//
-//  private def form = formProvider(startDate)
-//  lazy val addPaymentPlanEndDateRoute: String = routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode).url
-//  lazy val addPaymentPlanEndDateRouteOnSubmit: String = routes.AddPaymentPlanEndDateController.onSubmit(NormalMode).url
-//
-//  def onwardRoute: Call = Call("GET", "/foo")
-//
-//  val validAnswer: LocalDate = LocalDate.now(ZoneOffset.UTC)
-//  lazy val planEndDateRoute: String = routes.PlanEndDateController.onPageLoad(NormalMode).url
-//  override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId).set(PlanStartDatePage, planStartDateDetails).success.value
-//
-//  val getRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(GET, planEndDateRoute)
-//
-//  def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
-//    FakeRequest(POST, planEndDateRoute)
-//      .withFormUrlEncodedBody(
-//        "value.day"   -> validAnswer.getDayOfMonth.toString,
-//        "value.month" -> validAnswer.getMonthValue.toString,
-//        "value.year"  -> validAnswer.getYear.toString
-//      )
-//
-//  val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)
-//  val beforeDate: String = LocalDate.now().plusMonths(12).format(dateFormat)
-//
-//  "PlanEndDate Controller" - {
-//
-//    "must return OK and the correct view for a GET" in {
-//
-//      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-//      running(application) {
-//        val result = route(application, getRequest).value
-//        val view = application.injector.instanceOf[PlanEndDateView]
-//        status(result) mustEqual OK
-//        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(getRequest,
-//                                                                                                                      messages(application)
-//                                                                                                                     ).toString
-//      }
-//    }
-//
-//    "must redirect to System Error for a GET if PlanStartDatePage is missing" in {
-//      val application = applicationBuilder(userAnswers = None).build()
-//
-//      running(application) {
-//        val request = FakeRequest(GET, planEndDateRoute)
-//
-//        val result = route(application, request).value
-//
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
-//      }
-//    }
-//
-//    "must populate the view correctly on a GET when the question has previously been answered" in {
-//
-//      val userAnswers = UserAnswers(userAnswersId)
-//        .set(PlanStartDatePage, planStartDateDetails)
-//        .success
-//        .value
-//        .set(PlanEndDatePage, validAnswer)
-//        .success
-//        .value
-//
-//      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-//      running(application) {
-//        val view = application.injector.instanceOf[PlanEndDateView]
-//        val result = route(application, getRequest).value
-//        status(result) mustEqual OK
-//        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(
-//          getRequest,
-//          messages(application)
-//        ).toString
-//      }
-//    }
-//
-//    "must redirect to the next page when valid data is submitted" in {
-//
-//      val mockSessionRepository = mock[SessionRepository]
-//      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-//      val application =
-//        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-//          .overrides(
-//            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-//            bind[SessionRepository].toInstance(mockSessionRepository)
-//          )
-//          .build()
-//
-//      running(application) {
-//        val result = route(application, postRequest()).value
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual onwardRoute.url
-//      }
-//    }
-//
-//    "must return a Bad Request and errors when invalid data is submitted" in {
-//
-//      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-//      val request =
-//        FakeRequest(POST, planEndDateRoute)
-//          .withFormUrlEncodedBody(("value", "invalid value"))
-//
-//      running(application) {
-//        val boundForm = form.bind(Map("value" -> "invalid value"))
-//        val view = application.injector.instanceOf[PlanEndDateView]
-//        val result = route(application, request).value
-//        status(result) mustEqual BAD_REQUEST
-//        contentAsString(result) mustEqual
-//          view(boundForm, NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(request, messages(application)).toString
-//      }
-//    }
-//
-//    "must remove the PlanEndDatePage and redirect when no data is submitted" in {
-//      val mockSessionRepository = mock[SessionRepository]
-//      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-//
-//      val userAnswersWithEndDate =
-//        emptyUserAnswers
-//          .set(DirectDebitSourcePage, DirectDebitSource.SA)
-//          .success
-//          .value
-//          .set(PlanEndDatePage, validAnswer)
-//          .success
-//          .value
-//
-//      val application =
-//        applicationBuilder(userAnswers = Some(userAnswersWithEndDate))
-//          .overrides(
-//            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-//            bind[SessionRepository].toInstance(mockSessionRepository)
-//          )
-//          .build()
-//
-//      running(application) {
-//        val request =
-//          FakeRequest(POST, addPaymentPlanEndDateRouteOnSubmit)
-//            .withFormUrlEncodedBody("value" -> "false")
-//
-//        val result = route(application, request).value
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual onwardRoute.url
-//      }
-//    }
-//
-//    "must redirect to System Error for a GET if no existing data is found" in {
-//
-//      val application = applicationBuilder(userAnswers = None).build()
-//      running(application) {
-//        val result = route(application, getRequest).value
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
-//      }
-//    }
-//
-//    "must redirect to System Error for a POST if no existing data is found" in {
-//
-//      val application = applicationBuilder(userAnswers = None).build()
-//      running(application) {
-//        val result = route(application, postRequest()).value
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
-//      }
-//    }
-//  }
-//}
+class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
+
+  private implicit val messages: Messages = stubMessages()
+  private val startDate: LocalDate = LocalDate.of(2024, 1, 1)
+  private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(startDate, "2024-1-11")
+  private val formProvider = new PlanEndDateFormProvider()
+
+  private def form = formProvider(startDate)
+  lazy val addPaymentPlanEndDateRoute: String = routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode).url
+  lazy val addPaymentPlanEndDateRouteOnSubmit: String = routes.AddPaymentPlanEndDateController.onSubmit(NormalMode).url
+
+  def onwardRoute: Call = Call("GET", "/foo")
+
+  val validAnswer: LocalDate = LocalDate.now(ZoneOffset.UTC)
+  lazy val planEndDateRoute: String = routes.PlanEndDateController.onPageLoad(NormalMode).url
+  override val emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId).set(PlanStartDatePage, planStartDateDetails).success.value
+
+  def getRequest(): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(GET, planEndDateRoute + "?beforeDate=2027-01-01")
+
+  def postRequest(): FakeRequest[AnyContentAsFormUrlEncoded] =
+    FakeRequest(POST, planEndDateRoute)
+      .withFormUrlEncodedBody(
+        "value.day"   -> validAnswer.getDayOfMonth.toString,
+        "value.month" -> validAnswer.getMonthValue.toString,
+        "value.year"  -> validAnswer.getYear.toString
+      )
+
+  val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)
+  val beforeDate: String = LocalDate.now().plusMonths(12).format(dateFormat)
+
+  "PlanEndDate Controller" - {
+
+    "must return OK and the correct view for a GET" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      running(application) {
+        val result = route(application, getRequest()).value
+        val view = application.injector.instanceOf[PlanEndDateView]
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(getRequest(),
+                                                                                                                      messages(application)
+                                                                                                                     ).toString
+      }
+    }
+
+    "must redirect to System Error for a GET if PlanStartDatePage is missing" in {
+      val application = applicationBuilder(userAnswers = None).build()
+
+      running(application) {
+        val request = FakeRequest(GET, planEndDateRoute)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+      }
+    }
+
+    "must populate the view correctly on a GET when the question has previously been answered" in {
+
+      val userAnswers = UserAnswers(userAnswersId)
+        .set(PlanStartDatePage, planStartDateDetails)
+        .success
+        .value
+        .set(PlanEndDatePage, validAnswer)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      running(application) {
+        val view = application.injector.instanceOf[PlanEndDateView]
+        val result = route(application, getRequest()).value
+        status(result) mustEqual OK
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(
+          getRequest(),
+          messages(application)
+        ).toString
+      }
+    }
+
+    "must redirect to the next page when valid data is submitted" in {
+
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val result = route(application, postRequest()).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual onwardRoute.url
+      }
+    }
+
+    "must return a Bad Request and errors when invalid data is submitted" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request =
+        FakeRequest(POST, planEndDateRoute)
+          .withFormUrlEncodedBody(("value", "invalid value"))
+
+      running(application) {
+        val boundForm = form.bind(Map("value" -> "invalid value"))
+        val view = application.injector.instanceOf[PlanEndDateView]
+        val result = route(application, request).value
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) mustEqual
+          view(boundForm, NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(request, messages(application)).toString
+      }
+    }
+
+    "must remove the PlanEndDatePage and redirect when no data is submitted" in {
+      val mockSessionRepository = mock[SessionRepository]
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val userAnswersWithEndDate =
+        emptyUserAnswers
+          .set(DirectDebitSourcePage, DirectDebitSource.SA)
+          .success
+          .value
+          .set(PlanEndDatePage, validAnswer)
+          .success
+          .value
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswersWithEndDate))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, addPaymentPlanEndDateRouteOnSubmit)
+            .withFormUrlEncodedBody("value" -> "false")
+
+        val result = route(application, request).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual onwardRoute.url
+      }
+    }
+
+    "must redirect to System Error for a GET if no existing data is found" in {
+
+      val application = applicationBuilder(userAnswers = None).build()
+      running(application) {
+        val result = route(application, getRequest()).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+      }
+    }
+
+    "must redirect to System Error for a POST if no existing data is found" in {
+
+      val application = applicationBuilder(userAnswers = None).build()
+      running(application) {
+        val result = route(application, postRequest()).value
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+      }
+    }
+  }
+}

@@ -83,13 +83,11 @@ class PlanEndDateController @Inject() (
                 Future.successful(
                   BadRequest(view(formWithErrors, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode), beforeDate))
                 ),
-              { endDate =>
+              endDate =>
                 val updatedAnswers = request.userAnswers.set(PlanEndDatePage, endDate).get
                 sessionRepository.set(updatedAnswers).map { _ =>
                   Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
                 }
-
-              }
             )
 
         case _ =>
