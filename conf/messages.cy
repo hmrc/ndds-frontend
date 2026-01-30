@@ -663,12 +663,12 @@ amendingPaymentPlan.cancel.link = Canslo a mynd yn ôl i’r cynllun talu
 
 amendPaymentAmount.title = How much do you want to pay, in pounds?
 amendPaymentAmount.heading = How much do you want to pay, in pounds?
-amendPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
+amendPaymentAmount.hint = Mae’n rhaid i’r swm fod mewn punnoedd a cheiniogau, fel 967 neu 967.82
 amendPaymentAmount.change.hidden =  swm y taliad
 
 amendRegularPaymentAmount.title = How much is the regular payment amount, in pounds?
 amendRegularPaymentAmount.heading = How much is the regular payment amount, in pounds?
-amendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
+amendRegularPaymentAmount.hint = Mae’n rhaid i’r swm fod mewn punnoedd a cheiniogau, fel 967 neu 967.82
 amendRegularPaymentAmount.change.hidden = swm y taliad rheolaidd
 
 amendPlanStartDate.title = When do you want to make this payment?
@@ -681,10 +681,10 @@ amendPlanStartDate.error.tooFarInFuture = Nid yw’r dyddiad a nodwyd gennych yn
 amendPlanStartDate.startDate = Dyddiad dechrau’r cynllun
 amendPlanStartDate.startDate.hidden = dyddiad talu
 
-amendPlanEndDate.title = When do you want this payment plan to end?
-amendPlanEndDate.heading = When do you want this payment plan to end?
+amendPlanEndDate.title = Pryd ydych am i’r cynllun talu hwn ddod i ben?
+amendPlanEndDate.heading = Pryd ydych am i’r cynllun talu hwn ddod i ben?
 amendPlanEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
-amendPlanEndDate.hint = For example, 27 3 2020
+amendPlanEndDate.hint = Er enghraifft, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = Nid oes digon o amser cyn dyddiad dod i ben y cynllun i brosesu’r newid rydych wedi gofyn amdano. Estyn neu ddileu dyddiad dod i ben y cynllun os ydych am barhau.
 amendPlanEndDate.error.planEndDateBeforeStartDate = Nid yw dyddiad dod i ben y cynllun a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â dyddiad dechrau’r cynllun neu’n fwy na hynny.
 amendPlanEndDate.endDate = Dyddiad dod i ben y cynllun
