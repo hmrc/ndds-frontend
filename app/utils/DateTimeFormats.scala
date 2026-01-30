@@ -36,7 +36,10 @@ object DateTimeFormats {
   }
 
   def formattedCurrentDate(implicit messages: Messages): String = {
-    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", messages.lang.locale)
+    val formatter = DateTimeFormatter.ofPattern(
+      "d MMMM yyyy",
+      messages.lang.locale
+    )
     LocalDate.now().format(formatter)
   }
 
