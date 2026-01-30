@@ -35,11 +35,11 @@ index.title = Set up a direct debit
 index.heading = Set up a direct debit
 index.guidance = Welcome to your NDDS frontend. Please see the README file for a guide to getting started.
 
-journeyRecovery.continue.title = Sorry, there is a problem with this service
-journeyRecovery.continue.heading = Sorry, there is a problem with this service
+journeyRecovery.continue.title = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth hwn
+journeyRecovery.continue.heading = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth hwn
 journeyRecovery.continue.guidance = You will need to start again to create a direct debit.
-journeyRecovery.startAgain.title = Sorry, there is a problem with this service
-journeyRecovery.startAgain.heading = Sorry, there is a problem with this service
+journeyRecovery.startAgain.title = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth hwn
+journeyRecovery.startAgain.heading = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth hwn
 journeyRecovery.startAgain.guidance = You will need to start again to create a direct debit.
 
 signedOut.title = For your security, we signed you out
@@ -347,7 +347,7 @@ planEndDate.error.required = Mae’n rhaid i ddyddiad dod i ben y cynllun talu g
 planEndDate.error.invalid = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod yn ddyddiad go iawn
 planEndDate.error.incomplete = Mae’n rhaid i ddyddiad dod i ben y cynllun talu gynnwys diwrnod, mis a blwyddyn
 planEndDate.error.beforeOrEqualStartDate = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod yr un fath â neu ar ôl {0}
-planEndDate.enter = Enter plan end date
+planEndDate.enter = Nodwch ddyddiad dod i ben y cynllun talu
 
 totalAmountDue.title = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
 totalAmountDue.heading = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
@@ -661,21 +661,21 @@ amendingPaymentPlan.list.3 = cyfeirnod talu
 amendingPaymentPlan.p3 = Ni ellir diwygio taliadau sy’n ddyledus o fewn y 3 diwrnod gwaith nesaf.
 amendingPaymentPlan.cancel.link = Canslo a mynd yn ôl i’r cynllun talu
 
-amendPaymentAmount.title = How much do you want to pay, in pounds?
-amendPaymentAmount.heading = How much do you want to pay, in pounds?
+amendPaymentAmount.title = Faint yr hoffech ei dalu mewn punnoedd?
+amendPaymentAmount.heading = Faint yr hoffech ei dalu mewn punnoedd?
 amendPaymentAmount.hint = Mae’n rhaid i’r swm fod mewn punnoedd a cheiniogau, fel 967 neu 967.82
 amendPaymentAmount.change.hidden =  swm y taliad
 
-amendRegularPaymentAmount.title = How much is the regular payment amount, in pounds?
-amendRegularPaymentAmount.heading = How much is the regular payment amount, in pounds?
+amendRegularPaymentAmount.title = Faint yw swm y taliad rheolaidd, mewn punnoedd?
+amendRegularPaymentAmount.heading = Faint yw swm y taliad rheolaidd, mewn punnoedd?
 amendRegularPaymentAmount.hint = Mae’n rhaid i’r swm fod mewn punnoedd a cheiniogau, fel 967 neu 967.82
 amendRegularPaymentAmount.change.hidden = swm y taliad rheolaidd
 
-amendPlanStartDate.title = When do you want to make this payment?
-amendPlanStartDate.heading = When do you want to make this payment?
-amendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
-amendPlanStartDate.warning = If your payment is late, you may be liable to pay interest or a surcharge.
-amendPlanStartDate.hint = For example, {0}
+amendPlanStartDate.title = Ar ba ddyddiad rydych chi’n gwneud y taliad hwn?
+amendPlanStartDate.heading = Ar ba ddyddiad rydych chi’n gwneud y taliad hwn?
+amendPlanStartDate.p1 = Dyma’r dyddiad cynharaf y bydd CThEF yn casglu taliad o’ch cyfrif.Mae’n rhaid i’r dyddiad talu fod cyn pen 12 mis.
+amendPlanStartDate.warning = Os bydd eich taliad yn hwyr, mae’n bosibl y byddwch yn agored i dalu llog neu ordal.
+amendPlanStartDate.hint = Y dyddiad cynharaf y gallwch ddechrau yw 16 6 2025. Nodwch y dyddiad fel rhifau, er enghraifft {0}.
 amendPlanStartDate.error.beforeEarliest = Nid yw’r dyddiad a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â’r dyddiad cynharaf a ddangosir neu’n fwy na hynny
 amendPlanStartDate.error.tooFarInFuture = Nid yw’r dyddiad a nodwyd gennych yn ddilys. Ni all fod yn fwy na 12 mis ar ôl y dyddiad cyfredol
 amendPlanStartDate.startDate = Dyddiad dechrau’r cynllun

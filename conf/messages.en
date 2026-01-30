@@ -670,11 +670,11 @@ amendRegularPaymentAmount.heading = How much is the regular payment amount, in p
 amendRegularPaymentAmount.hint = Amount must be in pounds and pence, like 967 or 967.82
 amendRegularPaymentAmount.change.hidden = regular payment amount
 
-amendPlanStartDate.title = When do you want to make this payment?
-amendPlanStartDate.heading = When do you want to make this payment?
+amendPlanStartDate.title = What date are you making this payment?
+amendPlanStartDate.heading = What date are you making this payment?
 amendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
 amendPlanStartDate.warning = If your payment is late, you may be liable to pay interest or a surcharge.
-amendPlanStartDate.hint = For example, {0}
+amendPlanStartDate.hint = The earliest date you can start is 16 6 2025. Enter the date as numbers, for example {0}.
 amendPlanStartDate.error.beforeEarliest=The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
 amendPlanStartDate.error.tooFarInFuture=The date you have entered is not valid. It cannot be more than 12 months after the current date.
 amendPlanStartDate.startDate = Plan start date
