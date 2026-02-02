@@ -22,13 +22,15 @@ import models.{Mode, PlanStartDateDetails}
 import navigation.Navigator
 import pages.{PlanEndDatePage, PlanStartDatePage}
 import play.api.Logging
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.Constants
 import views.html.PlanEndDateView
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -48,12 +50,16 @@ class PlanEndDateController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
     request.userAnswers.get(PlanStartDatePage) match {
       case Some(startDate) =>
         val form = formProvider(startDate.enteredDate)
         val preparedForm = request.userAnswers.get(PlanEndDatePage).fold(form)(form.fill)
 
-        Ok(view(preparedForm, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode)))
+        val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
+        val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
+
+        Ok(view(preparedForm, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode), beforeDate))
 
       case None =>
         Redirect(routes.SystemErrorController.onPageLoad())
@@ -62,24 +68,26 @@ class PlanEndDateController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] =
     (identify andThen getData andThen requireData).async { implicit request =>
+      implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
+
       request.userAnswers.get(PlanStartDatePage) match {
         case Some(startDate) =>
           val form = formProvider(startDate.enteredDate)
+          val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
+          val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
 
           form
             .bindFromRequest()
             .fold(
               formWithErrors =>
                 Future.successful(
-                  BadRequest(view(formWithErrors, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode)))
+                  BadRequest(view(formWithErrors, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode), beforeDate))
                 ),
-              { endDate =>
+              endDate =>
                 val updatedAnswers = request.userAnswers.set(PlanEndDatePage, endDate).get
                 sessionRepository.set(updatedAnswers).map { _ =>
                   Redirect(navigator.nextPage(PlanEndDatePage, mode, updatedAnswers))
                 }
-
-              }
             )
 
         case _ =>

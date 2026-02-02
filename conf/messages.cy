@@ -29,7 +29,7 @@ timeout.signOut = Sign out
 
 error.title.prefix = Error:
 error.prefix = Error
-error.summary.title = Mae problem wedi codi
+error.summary.title = There is a problem
 
 index.title = Set up a direct debit
 index.heading = Set up a direct debit
@@ -108,8 +108,6 @@ yourBankDetails.error.accountNumber.tooShort = Mae’n rhaid i rif y cyfrif fod 
 yourBankDetails.error.accountNumber.numericOnly = Mae’n rhaid i rif y cyfrif fod yn 8 digid
 yourBankDetails.error.accountHolderName.unverified = These account details could not be verified. Check your details or try different account details.
 yourBankDetails.error.accountNumberAndSortCode.invalid = Enter a valid combination of bank account number and sort code.
-yourBankDetails.error.sortCode.incorrectPaymentType = You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details of a different account.
-yourBankDetails.error.accountHolderName.default = Enter the name on the account as it appears on the bank statement. Do not copy and paste it.
 yourBankDetails.error.nameMismatch.invalid = Enter the name on the account as it appears on the bank statement. Do not copy and paste it.
 yourBankDetails.error.sortCodeNotSupported.invalid = You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details of a different account.
 yourBankDetails.error.sortCodeOnDenyList = You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account.
@@ -336,7 +334,7 @@ addPaymentPlanEndDate.change.hidden =  ychwanegu dyddiad dod i ben y cynllun
 
 planEndDate.title = Pryd ydych am i’r cynllun talu hwn ddod i ben?
 planEndDate.heading = Pryd ydych am i’r cynllun talu hwn ddod i ben?
-planEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
+planEndDate.p1 = Mae’n rhaid i hyn fod cyn {0}. Ni fydd CThEF yn casglu taliadau ar ôl y dyddiad hwn.
 planEndDate.hint = Er enghraifft, 27 3 2020
 planEndDate.checkYourAnswersLabel = Dyddiad dod i ben y cynllun
 planEndDate.change.hidden =  dyddiad dod i ben y cynllun
@@ -347,7 +345,6 @@ planEndDate.error.required = Mae’n rhaid i ddyddiad dod i ben y cynllun talu g
 planEndDate.error.invalid = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod yn ddyddiad go iawn
 planEndDate.error.incomplete = Mae’n rhaid i ddyddiad dod i ben y cynllun talu gynnwys diwrnod, mis a blwyddyn
 planEndDate.error.beforeOrEqualStartDate = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod yr un fath â neu ar ôl {0}
-planEndDate.enter = Enter plan end date
 
 totalAmountDue.title = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
 totalAmountDue.heading = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
@@ -381,6 +378,7 @@ checkYourAnswers.paymentPlanType.budgetPaymentPlan = Taliad cyllidebol
 checkYourAnswers.paymentPlanType.taxCreditRepaymentPlan = Cynllun ad-dalu credydau treth
 checkYourAnswers.directDebitSource = Taliad ar gyfer
 checkYourAnswers.acceptAndSubmit = Derbyn a chyflwyno
+checkYourAnswers.planEndDate.enter = Enter plan end date
 
 duplicateError.title = Ni allwch sefydlu cynllun talu dyblyg
 duplicateError.heading = Ni allwch sefydlu cynllun talu dyblyg
@@ -389,7 +387,7 @@ duplicateError.linkText = Yn ôl i ddyddiad dechrau’r cynllun
 
 duplicateWarningForAddOrCreatePP.title = Mae gennych gynllun talu eisoes gyda’r manylion hyn
 duplicateWarningForAddOrCreatePP.heading = Mae gennych gynllun talu eisoes gyda’r manylion hyn
-duplicateWarningForAddOrCreatePP.checkYourAnswersLabel = duplicateWarningForAddOrCreatePP
+duplicateWarningForAddOrCreatePP.checkYourAnswersLabel = Mae gennych gynllun talu eisoes gyda’r manylion hyn
 duplicateWarningForAddOrCreatePP.error.required = Dewiswch ‘Iawn’ os ydych am barhau i sefydlu’r cynllun hwn
 duplicateWarningForAddOrCreatePP.change.hidden = Mae gennych gynllun talu eisoes gyda’r manylion hyn
 duplicateWarningForAddOrCreatePP.p1 = Mae gennych gynllun talu wedi’i sefydlu eisoes sydd â’r un symiau a dyddiadau.
@@ -683,7 +681,7 @@ amendPlanStartDate.startDate.hidden = dyddiad talu
 
 amendPlanEndDate.title = Pryd ydych am i’r cynllun talu hwn ddod i ben?
 amendPlanEndDate.heading = Pryd ydych am i’r cynllun talu hwn ddod i ben?
-amendPlanEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
+amendPlanEndDate.p1 = Mae’n rhaid i hyn fod cyn {0}. Ni fydd CThEF yn casglu taliadau ar ôl y dyddiad hwn.
 amendPlanEndDate.hint = Er enghraifft, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = Nid oes digon o amser cyn dyddiad dod i ben y cynllun i brosesu’r newid rydych wedi gofyn amdano. Estyn neu ddileu dyddiad dod i ben y cynllun os ydych am barhau.
 amendPlanEndDate.error.planEndDateBeforeStartDate = Nid yw dyddiad dod i ben y cynllun a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â dyddiad dechrau’r cynllun neu’n fwy na hynny.
@@ -706,13 +704,13 @@ amendPaymentPlanConfirmation.heading = Gwirio manylion eich diwygiad
 amendPaymentPlanConfirmation.confirmAndContinue.button = Cadarnhau a pharhau
 amendPaymentPlanConfirmation.cancel.link = Canslo a mynd yn ôl i’r cynllun talu
 amendPaymentPlanConfirmation.amendPaymentPlan.paymentFor = Taliad ar gyfer
-amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Payment reference: {0}
+amendPaymentPlanConfirmation.amendPaymentPlan.paymentReference = Cyfeirnod talu: {0}
 
 amendPaymentPlanUpdate.title = Cynllun talu wedi’i ddiwygio
 amendPaymentPlanUpdate.panel.title = Cynllun talu wedi’i ddiwygio
-amendPaymentPlanUpdate.h1 = What happens next
+amendPaymentPlanUpdate.h2 = Yr hyn sy’n digwydd nesaf
 amendPaymentPlanUpdate.SinglePlan.p1 = Mae’r cynllun talu hwn bellach wedi’i ddiwygio. Bydd taliad o {0} yn cael ei gasglu ar {1}.
-amendPaymentPlanUpdate.BudgetPlan.p1 = This payment plan has now been amended. The next payment of {0} for this plan will be collected on {1}.
+amendPaymentPlanUpdate.BudgetPlan.p1 = Mae’r cynllun talu hwn bellach wedi’i ddiwygio. Bydd taliad o {0} yn cael ei gasglu ar {1}.
 amendPaymentPlanUpdate.p2 = Bydd unrhyw ohiriad sy’n bodoli ar y cynllun talu hwn yn cael ei dynnu. Gall gymryd hyd at 36 awr i’r diwygiad hwn ymddangos yn eich cyfrif.
 amendPaymentPlanUpdate.p3 = Mae’n rhaid i chi fod â digon o arian yn eich cyfrif er mwyn i’r taliad hwn allu cael ei gasglu. Os oes unrhyw fanylion yn anghywir,
 amendPaymentPlanUpdate.p3.link = mae’n rhaid i chi gysylltu â Gwasanaeth Cwsmeriaid Cymraeg CThEF. (yn agor tab newydd)
