@@ -22,14 +22,14 @@ date.error.day = Nodwch ddyddiad dilys
 date.error.month = Nodwch ddyddiad dilys
 date.error.year = Nodwch ddyddiad dilys
 
-timeout.title = You’re about to be signed out
-timeout.message = For security reasons, you will be signed out of this service in
-timeout.keepAlive = Stay signed in
-timeout.signOut = Sign out
+timeout.title = Rydych ar fin cael eich allgofnodi
+timeout.message = Am resymau diogelwch, cewch eich allgofnodi o’r gwasanaeth hwn ymhen
+timeout.keepAlive = Peidio ag allgofnodi
+timeout.signOut = Allgofnodi
 
-error.title.prefix = Error:
-error.prefix = Error
-error.summary.title = There is a problem
+error.title.prefix = Gwall:
+error.prefix = Gwall
+error.summary.title = Mae problem
 
 index.title = Set up a direct debit
 index.heading = Set up a direct debit
@@ -42,12 +42,12 @@ journeyRecovery.startAgain.title = Mae’n ddrwg gennym, mae problem gyda’r gw
 journeyRecovery.startAgain.heading = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth hwn
 journeyRecovery.startAgain.guidance = You will need to start again to create a direct debit.
 
-signedOut.title = For your security, we signed you out
-signedOut.heading = For your security, we signed you out
-signedOut.guidance = We did not save your answers.
+signedOut.title = Er eich diogelwch, gwnaethom eich allgofnodi
+signedOut.heading = Er eich diogelwch, gwnaethom eich allgofnodi
+signedOut.guidance = Ni wnaethom gadw’ch atebion.
 
-unauthorised.title = You can’t access this service with this account
-unauthorised.heading = You can’t access this service with this account
+unauthorised.title = Ni allwch ddefnyddio’r gwasanaeth hwn gyda’r cyfrif hwn
+unauthorised.heading = Ni allwch ddefnyddio’r gwasanaeth hwn gyda’r cyfrif hwn
 
 yourDirectDebitInstructions.title = Eich Cyfarwyddiadau Debyd Uniongyrchol
 yourDirectDebitInstructions.heading = Eich Cyfarwyddiadau Debyd Uniongyrchol
@@ -106,11 +106,11 @@ yourBankDetails.error.accountNumber.required = Nodwch rif eich cyfrif
 yourBankDetails.error.accountNumber.length = Mae’n rhaid i rif y cyfrif fod yn 8 digid
 yourBankDetails.error.accountNumber.tooShort = Mae’n rhaid i rif y cyfrif fod yn 8 digid
 yourBankDetails.error.accountNumber.numericOnly = Mae’n rhaid i rif y cyfrif fod yn 8 digid
-yourBankDetails.error.accountHolderName.unverified = These account details could not be verified. Check your details or try different account details.
-yourBankDetails.error.accountNumberAndSortCode.invalid = Enter a valid combination of bank account number and sort code.
-yourBankDetails.error.nameMismatch.invalid = Enter the name on the account as it appears on the bank statement. Do not copy and paste it.
-yourBankDetails.error.sortCodeNotSupported.invalid = You have entered a sort code which does not accept this type of payment. Check you have entered a valid sort code or enter details of a different account.
-yourBankDetails.error.sortCodeOnDenyList = You have entered a sort code that does not accept automated payments, like direct debits. Check the sort code or enter details for a different account.
+yourBankDetails.error.accountHolderName.unverified = Nid oedd modd dilysu manylion y cyfrif hwn. Gwiriwch eich manylion neu rhowch gynnig ar fanylion cyfrif gwahanol.
+yourBankDetails.error.accountNumberAndSortCode.invalid = Nodwch gyfuniad dilys o rif cyfrif banc a chod didoli
+yourBankDetails.error.nameMismatch.invalid = Nodwch yr enw ar y cyfrif fel y mae’n ymddangos ar y gyfriflen banc. Peidiwch â’i gopïo a’i gludo.
+yourBankDetails.error.sortCodeNotSupported.invalid = Rydych wedi nodi cod didoli nad yw’n derbyn y math hwn o daliad. Gwiriwch eich bod wedi nodi cod didoli dilys, neu nodwch fanylion ar gyfer cyfrif gwahanol.
+yourBankDetails.error.sortCodeOnDenyList = Rydych wedi nodi cod didoli nad yw’n derbyn taliadau awtomataidd, fel Debyd Uniongyrchol. Gwiriwch y cod didoli neu nodwch fanylion ar gyfer cyfrif gwahanol.
 
 reachedLimit.title = Rydych wedi cyrraedd y terfyn ar gyfer cadarnhau eich manylion banc
 reachedLimit.heading = Rydych wedi cyrraedd y terfyn ar gyfer cadarnhau eich manylion banc
@@ -239,7 +239,7 @@ paymentAmount.checkYourAnswersLabel = Swm y taliad
 paymentAmount.hint = Mae’n rhaid i’r swm fod mewn punnoedd a cheiniogau, fel 967 neu 967.82
 paymentAmount.error.nonNumeric = Dim ond punnoedd a cheiniogau all fod yn y swm
 paymentAmount.error.required = Nodwch swm
-paymentAmount.error.invalidNumeric = Enter your payment amount using up to two decimal places
+paymentAmount.error.invalidNumeric = Nodwch swm eich taliad gan ddefnyddio hyd at ddau le degol
 paymentAmount.error.max.min.range = Mae’n rhaid i’r swm a nodir fod rhwng 1.00 a 20,000,000.00
 paymentAmount.change.hidden =  swm y taliad
 
@@ -357,7 +357,7 @@ totalAmountDue.final.checkYourAnswersLabel = Swm y taliad olaf
 totalAmountDue.error.nonNumeric = Dim ond punnoedd a cheiniogau all fod yn y swm
 totalAmountDue.error.required = Nodwch swm
 totalAmountDue.error.invalidNumeric = Nodwch swm dilys
-totalAmountDue.error.aboveMaximum = The amount entered must be less than or equal to 99999999.99
+totalAmountDue.error.aboveMaximum = Mae’n rhaid i’r swm a nodwyd fod yn llai na neu’n hafal i 99999999.99
 totalAmountDue.error.belowMinimum = Mae’n rhaid i’r swm a nodwyd fod yn fwy na neu’n hafal i 12.00
 
 checkYourAnswers.title = Gwiriwch fanylion eich cynllun talu
@@ -378,7 +378,7 @@ checkYourAnswers.paymentPlanType.budgetPaymentPlan = Taliad cyllidebol
 checkYourAnswers.paymentPlanType.taxCreditRepaymentPlan = Cynllun ad-dalu credydau treth
 checkYourAnswers.directDebitSource = Taliad ar gyfer
 checkYourAnswers.acceptAndSubmit = Derbyn a chyflwyno
-checkYourAnswers.planEndDate.enter = Enter plan end date
+checkYourAnswers.planEndDate.enter = Nodwch ddyddiad dod i ben y cynllun
 
 duplicateError.title = Ni allwch sefydlu cynllun talu dyblyg
 duplicateError.heading = Ni allwch sefydlu cynllun talu dyblyg
@@ -671,7 +671,7 @@ amendRegularPaymentAmount.change.hidden = swm y taliad rheolaidd
 
 amendPlanStartDate.title = Ar ba ddyddiad rydych chi’n gwneud y taliad hwn?
 amendPlanStartDate.heading = Ar ba ddyddiad rydych chi’n gwneud y taliad hwn?
-amendPlanStartDate.p1 = Dyma’r dyddiad cynharaf y bydd CThEF yn casglu taliad o’ch cyfrif.Mae’n rhaid i’r dyddiad talu fod cyn pen 12 mis.
+amendPlanStartDate.p1 = Dyma’r dyddiad cynharaf y bydd CThEF yn casglu taliad o’ch cyfrif. Mae’n rhaid i’r dyddiad fod cyn pen 12 mis.
 amendPlanStartDate.warning = Os bydd eich taliad yn hwyr, mae’n bosibl y byddwch yn agored i dalu llog neu ordal.
 amendPlanStartDate.hint = Y dyddiad cynharaf y gallwch ddechrau yw 16 6 2025. Nodwch y dyddiad fel rhifau, er enghraifft {0}.
 amendPlanStartDate.error.beforeEarliest = Nid yw’r dyddiad a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â’r dyddiad cynharaf a ddangosir neu’n fwy na hynny
