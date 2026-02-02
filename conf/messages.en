@@ -144,7 +144,7 @@ bankDetailsCheckYourAnswer.change.accountHolderName = Account holder(s) name
 bankApproval.title = There is a problem with your approval
 bankApproval.heading = There is a problem with your approval
 bankApproval.p1 = Your business account requires more than one person to authorise payments. You can ask your bank to allow one signatory to set up Direct Debit payments to HMRC,
-bankApproval.p1.link = you must pay with a different payment option (opens in a new tab).
+bankApproval.p1.link = you must pay with a different payment option (opens in a new tab)
 
 directDebitSource.title = Which tax or duty is this payment plan for?
 directDebitSource.heading = Which tax or duty is this payment plan for?
