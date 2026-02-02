@@ -144,7 +144,7 @@ bankDetailsCheckYourAnswer.change.accountHolderName = Enw deiliad y cyfrif
 bankApproval.title = Mae problem gyda’ch cymeradwyaeth
 bankApproval.heading = Mae problem gyda’ch cymeradwyaeth
 bankApproval.p1 = Mae angen awdurdod gan fwy nag un person er mwyn awdurdodi taliadau ar gyfer eich cyfrif busnes. Gallwch ofyn i’ch banc alluogi un llofnodwr i sefydlu taliadau Debyd Uniongyrchol i CThEF,
-bankApproval.p1.link = mae’n rhaid i chi dalu gydag opsiwn talu gwahanol (yn agor tab newydd).
+bankApproval.p1.link = mae’n rhaid i chi dalu gydag opsiwn talu gwahanol (yn agor tab newydd)
 
 directDebitSource.title = Pa dreth neu doll y mae’r cynllun talu hwn ar ei chyfer?
 directDebitSource.heading = Pa dreth neu doll y mae’r cynllun talu hwn ar ei chyfer?
