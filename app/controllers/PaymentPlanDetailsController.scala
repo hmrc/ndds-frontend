@@ -87,6 +87,10 @@ class PaymentPlanDetailsController @Inject() (
                                   }
                 updatedAnswers     <- cleanseSessionPages(updatedAnswers)
                 showAllActionsFlag <- calculateShowAction(nddService, planDetail)
+                isSuspensionActive = isSuspendPeriodActive(planDetail)
+                updatedAnswers <- Future.fromTry(
+                                    updatedAnswers.set(IsSuspensionActivePage, isSuspensionActive)
+                                  )
                 isVariablePlan = nddService.isVariablePaymentPlan(planDetail.planType)
                 (advanceNoticeResponse, isAdvanceNoticePresent) <- getAdvanceNoticeData(directDebitReference, paymentPlanReference, isVariablePlan)
                 updatedAnswers <- Future.fromTry(updatedAnswers.set(AdvanceNoticeResponseQuery, advanceNoticeResponse))
@@ -96,7 +100,6 @@ class PaymentPlanDetailsController @Inject() (
                 val showCancelLink = isCancelLinkVisible(showAllActionsFlag, planDetail)
                 val showSuspendLink = isSuspendLinkVisible(showAllActionsFlag, planDetail)
                 val summaryRows: Seq[SummaryListRow] = buildSummaryRows(showAllActionsFlag, planDetail)
-                val isSuspensionActive = isSuspendPeriodActive(planDetail)
 
                 val formatterLocale: DateTimeFormatter =
                   DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)

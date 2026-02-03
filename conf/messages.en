@@ -744,3 +744,8 @@ confirmAnswersError.title = You need to confirm some answers
 confirmAnswersError.heading = You need to confirm some answers
 confirmAnswersError.paragraph = You chose to add a plan end date to this payment plan, but did not enter a date. You need to enter a date or confirm that you do not want to add a plan end date.
 confirmAnswersError.returnLink = Return to check your payment plan
+
+alreadySuspendedError.title = This payment plan is already suspended
+alreadySuspendedError.heading = This payment plan is already suspended
+alreadySuspendedError.p1 = This payment plan is suspended from {0} to {1}. You can change the suspension dates or remove the suspension.
+alreadySuspendedError.link = Return to your payment plan details

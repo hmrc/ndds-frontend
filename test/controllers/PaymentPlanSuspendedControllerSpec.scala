@@ -20,7 +20,7 @@ import base.SpecBase
 import models.responses.PaymentPlanDetails
 import models.{PaymentPlanType, SuspensionPeriodRange, UserAnswers}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
+import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.Application
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -63,6 +63,9 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
           .success
           .value
           .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(IsSuspensionActivePage, false)
           .success
           .value
 
@@ -120,6 +123,34 @@ class PaymentPlanSuspendedControllerSpec extends SpecBase with MockitoSugar {
           summaryListRows,
           suspensionIsActiveMode = false
         )(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to AlreadySuspendedErrorController when suspension is active" in {
+      val userAnswersWithData: UserAnswers =
+        emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, mockBudgetPaymentPlanDetailResponse)
+          .success
+          .value
+          .set(SuspensionPeriodRangeDatePage, suspensionRange)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
+          .success
+          .value
+          .set(IsSuspensionActivePage, true)
+          .success
+          .value
+
+      val application = applicationBuilder(Some(userAnswersWithData)).build()
+
+      running(application) {
+        val request = FakeRequest(GET, paymentPlanSuspendedRoute)
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual
+          routes.AlreadySuspendedErrorController.onPageLoad().url
       }
     }
 

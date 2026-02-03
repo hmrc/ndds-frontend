@@ -24,7 +24,7 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
+import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -148,6 +148,29 @@ class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar
         status(result) mustEqual OK
         contentAsString(result) mustEqual
           view(form, NormalMode, planReference, paymentAmount, "12-12-2025", "3-3-2026")(request, messages(application)).toString
+      }
+    }
+
+    "must redirect to AlreadySuspendedErrorController when suspension is active" in {
+      val mockNddsService = mock[NationalDirectDebitService]
+
+      val userAnswersSuspended = userAnswersWithBudgetPlan
+        .set(IsSuspensionActivePage, true)
+        .success
+        .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersSuspended))
+        .overrides(bind[NationalDirectDebitService].toInstance(mockNddsService))
+        .build()
+
+      running(application) {
+        when(mockNddsService.suspendPaymentPlanGuard(any())).thenReturn(true)
+
+        val request = getRequest()
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AlreadySuspendedErrorController.onPageLoad().url
       }
     }
 
