@@ -334,7 +334,7 @@ addPaymentPlanEndDate.change.hidden =  add plan end date
 
 planEndDate.title = When do you want this payment plan to end?
 planEndDate.heading = When do you want this payment plan to end?
-planEndDate.p1 = This must be before {0}. HMRC will not collect payments after this date.
+planEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
 planEndDate.hint = For example, 27 3 2020
 planEndDate.checkYourAnswersLabel = Plan end date
 planEndDate.change.hidden =  plan end date
@@ -680,7 +680,7 @@ amendPlanStartDate.startDate.hidden = payment date
 
 amendPlanEndDate.title = When do you want this payment plan to end?
 amendPlanEndDate.heading = When do you want this payment plan to end?
-amendPlanEndDate.p1 = This must be before {0}. HMRC will not collect payments after this date.
+amendPlanEndDate.p1 = This must be on or after the payment plan start date. HMRC will not collect payments after this date.
 amendPlanEndDate.hint = For example, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = There is insufficient time prior to the plan end date for your requested change to be processed. Extend or remove the plan end date if you wish to continue.
 amendPlanEndDate.error.planEndDateBeforeStartDate = The plan end date you have entered is not valid. It must be either the same or greater than the plan start date.
