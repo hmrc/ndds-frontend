@@ -334,7 +334,7 @@ addPaymentPlanEndDate.change.hidden =  ychwanegu dyddiad dod i ben y cynllun
 
 planEndDate.title = Pryd ydych am i’r cynllun talu hwn ddod i ben?
 planEndDate.heading = Pryd ydych am i’r cynllun talu hwn ddod i ben?
-planEndDate.p1 = Rhaid i hyn fod ar neu ar ôl dyddiad cychwyn y cynllun talu. Ni fydd CThEM yn casglu taliadau ar ôl y dyddiad hwn.
+planEndDate.p1 = Mae’n rhaid i hyn fod ar neu ar ôl dyddiad dechrau’r cynllun talu. Ni fydd CThEF yn casglu taliadau ar ôl y dyddiad hwn.
 planEndDate.hint = Er enghraifft, 27 3 2020
 planEndDate.checkYourAnswersLabel = Dyddiad dod i ben y cynllun
 planEndDate.change.hidden =  dyddiad dod i ben y cynllun
@@ -681,7 +681,7 @@ amendPlanStartDate.startDate.hidden = dyddiad talu
 
 amendPlanEndDate.title = Pryd ydych am i’r cynllun talu hwn ddod i ben?
 amendPlanEndDate.heading = Pryd ydych am i’r cynllun talu hwn ddod i ben?
-amendPlanEndDate.p1 = Rhaid i hyn fod ar neu ar ôl dyddiad cychwyn y cynllun talu. Ni fydd CThEM yn casglu taliadau ar ôl y dyddiad hwn.
+amendPlanEndDate.p1 = Mae’n rhaid i hyn fod ar neu ar ôl dyddiad dechrau’r cynllun talu. Ni fydd CThEF yn casglu taliadau ar ôl y dyddiad hwn.
 amendPlanEndDate.hint = Er enghraifft, 27 3 2020
 amendPlanEndDate.error.nextPaymentDateValid = Nid oes digon o amser cyn dyddiad dod i ben y cynllun i brosesu’r newid rydych wedi gofyn amdano. Estyn neu ddileu dyddiad dod i ben y cynllun os ydych am barhau.
 amendPlanEndDate.error.planEndDateBeforeStartDate = Nid yw dyddiad dod i ben y cynllun a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â dyddiad dechrau’r cynllun neu’n fwy na hynny.
