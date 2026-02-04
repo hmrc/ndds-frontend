@@ -26,7 +26,7 @@ import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, Paym
 import pages.*
 import play.api.Logging
 import play.api.mvc.Request
-import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery, PaymentPlansCountQuery}
+import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{Frequency, Utils}
@@ -108,16 +108,19 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     for {
       paymentPlanType <- userAnswers
                            .get(PaymentPlanTypePage)
-                           .map(Future.successful)
-                           .getOrElse(Future.failed(new Exception("PaymentPlanTypePage details missing from user answers")))
+                           .fold(Future.successful(ManagePaymentPlanTypePage))(Future.successful)
       directDebitSource <- userAnswers
                              .get(DirectDebitSourcePage)
                              .map(Future.successful)
                              .getOrElse(Future.failed(new Exception("DirectDebitSourcePage details missing from user answers")))
       result <-
         if (directDebitSource == MGD && paymentPlanType == VariablePaymentPlan) {
+          println(s"************* mgd paymentPlanType: $paymentPlanType")
+          println(s"************* directDebitSource: $directDebitSource")
           nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.TEN_WORKING_DAYS))
         } else {
+          println(s"************* paymentPlanType: $paymentPlanType")
+          println(s"************* directDebitSource: $directDebitSource")
           val auddisStatusFuture: Future[Boolean] = getAuddiStatus(userAnswers, userId)
           val df = new SimpleDateFormat("yyyy-MM-dd")
           val setupDate = userAnswers
@@ -138,13 +141,13 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
             earliestDate <-
               if (effectiveCalendar.after(currentCalendar)) {
-                println(s"********** IF effectiveCalendar: $effectiveCalendar")
-                println(s"********** currentCalendar: $currentCalendar")
                 println(s"************ effectiveDate: $effectiveDate")
+                println(s"********** IF effectiveCalendar: ${effectiveCalendar.toInstant}")
+                println(s"********** currentCalendar: ${currentCalendar.toInstant}")
                 nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(effectiveDate.date, config.TWO_WORKING_DAYS))
               } else {
-                println(s"********** IF effectiveCalendar: $effectiveCalendar")
-                println(s"********** currentCalendar: $currentCalendar")
+                println(s"********** IF effectiveCalendar: ${effectiveCalendar.toInstant}")
+                println(s"********** currentCalendar: ${currentCalendar.toInstant}")
                 println(s"********** noOfWorkingDays: $noOfWorkingDays")
 
                 nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.THREE_WORKING_DAYS))
@@ -152,7 +155,11 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
           } yield earliestDate
         }
-    } yield result
+    } yield {
+      println(s"****** Result: $result")
+      result
+    }
+
   }
 
   private def getAuddiStatus(userAnswers: UserAnswers, userId: String): Future[Boolean] = {
