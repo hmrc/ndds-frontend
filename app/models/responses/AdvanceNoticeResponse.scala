@@ -20,8 +20,11 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-case class AdvanceNoticeResponse(totalAmount: Option[BigDecimal], dueDate: Option[LocalDate])
+case class AdvanceNoticeResponse(totalAmount: Option[BigDecimal], dueDate: Option[LocalDate]) {
+  val isAdvanceNoticePresent: Boolean = totalAmount.isDefined && dueDate.isDefined
+}
 
 object AdvanceNoticeResponse {
   implicit val format: OFormat[AdvanceNoticeResponse] = Json.format
+  val notPresent = AdvanceNoticeResponse(None, None)
 }

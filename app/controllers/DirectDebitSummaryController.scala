@@ -56,45 +56,53 @@ class DirectDebitSummaryController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val userAnswers = request.userAnswers
     val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
+
     userAnswers.get(DirectDebitReferenceQuery) match {
+      case None => Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       case Some(reference) =>
-        cleanConfirmationFlags(userAnswers).flatMap { cleansedAnswers =>
-          cleanseUserData(cleansedAnswers).flatMap { furtherCleansedAnswers =>
-            nddService.retrieveDirectDebitPaymentPlans(request.userId, reference).flatMap { ddPaymentPlans =>
-              for {
-                updatedAnswers <- Future.fromTry(furtherCleansedAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
-                updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
-                _              <- sessionRepository.set(updatedAnswers)
-              } yield {
-
-                val (title, heading) = if (ddPaymentPlans.paymentPlanList.nonEmpty) {
-                  ("directDebitPaymentSummary.title.withPlans", "directDebitPaymentSummary.heading.withPlans")
-                } else {
-                  ("directDebitPaymentSummary.title.noPlans", "directDebitPaymentSummary.title.noPlans")
-                }
-
-                val paginationResult = paginationService.paginatePaymentPlans(
-                  allPaymentPlans = ddPaymentPlans.paymentPlanList,
-                  currentPage     = currentPage,
-                  baseUrl         = routes.DirectDebitSummaryController.onPageLoad().url
-                )
-                Ok(
-                  view(
-                    reference,
-                    ddPaymentPlans,
-                    buildCards(paginationResult.paginatedData),
-                    paginationViewModel = paginationResult.paginationViewModel,
-                    title,
-                    heading,
-                    config.maxNumberPPsAllowed
-                  )
-                )
-              }
-            }
+        val cleanedAnswers = cleanConfirmationFlags(userAnswers)(
+          Seq(
+            PaymentPlanReferenceQuery,
+            PaymentPlanDetailsQuery,
+            ManagePaymentPlanTypePage,
+            AmendPaymentAmountPage,
+            AmendPlanStartDatePage,
+            AmendPlanEndDatePage,
+            SuspensionPeriodRangeDatePage,
+            ExistingDirectDebitIdentifierQuery
+          )
+        )
+        for {
+          _              <- sessionRepository.set(cleanedAnswers)
+          ddPaymentPlans <- nddService.retrieveDirectDebitPaymentPlans(request.userId, reference)
+          updatedAnswers <- Future.fromTry(cleanedAnswers.set(PaymentPlansCountQuery, ddPaymentPlans.paymentPlanCount))
+          updatedAnswers <- Future.fromTry(updatedAnswers.set(DirectDebitReferenceQuery, reference))
+          _              <- sessionRepository.set(updatedAnswers)
+        } yield {
+          val (title, heading) = if (ddPaymentPlans.paymentPlanList.nonEmpty) {
+            ("directDebitPaymentSummary.title.withPlans", "directDebitPaymentSummary.heading.withPlans")
+          } else {
+            ("directDebitPaymentSummary.title.noPlans", "directDebitPaymentSummary.title.noPlans")
           }
+
+          val paginationResult = paginationService.paginatePaymentPlans(
+            allPaymentPlans = ddPaymentPlans.paymentPlanList,
+            currentPage     = currentPage,
+            baseUrl         = routes.DirectDebitSummaryController.onPageLoad().url
+          )
+
+          Ok(
+            view(
+              reference,
+              ddPaymentPlans,
+              buildCards(paginationResult.paginatedData),
+              paginationViewModel = paginationResult.paginationViewModel,
+              title,
+              heading,
+              config.maxNumberPPsAllowed
+            )
+          )
         }
-      case None =>
-        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 
@@ -148,40 +156,21 @@ class DirectDebitSummaryController @Inject() (
   // this is to build rows based on the plan type - similar pp1
   private def buildSummaryRows(paymentPlanList: Seq[NddPaymentPlan])(implicit messages: Messages): Seq[SummaryListRow] = {
     paymentPlanList.flatMap { plan =>
-
-      def optionalRow[T](maybeValue: Option[T])(build: T => SummaryListRow): Option[SummaryListRow] =
-        maybeValue.map(build)
-
       plan.planType match {
-
         case PaymentPlanType.VariablePaymentPlan.toString =>
           Seq(
-            optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
-            optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
-            optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v))
-          ).flatten
-
+            AmendPaymentPlanTypeSummary.row(plan.planType),
+            AmendPaymentPlanSourceSummary.row(plan.hodService),
+            DateSetupSummary.row(plan.submissionDateTime)
+          )
         case _ => // For Single, TaxCreditRepaymentPlan and Budget plan
           Seq(
-            optionalRow(Option(plan.planType))(v => AmendPaymentPlanTypeSummary.row(v)),
-            optionalRow(Option(plan.hodService))(v => AmendPaymentPlanSourceSummary.row(v)),
-            optionalRow(Option(plan.submissionDateTime))(v => DateSetupSummary.row(v)),
-            optionalRow(Option(plan.scheduledPaymentAmount))(amount => AmendPaymentAmountSummary.row(plan.planType, amount))
-          ).flatten
+            AmendPaymentPlanTypeSummary.row(plan.planType),
+            AmendPaymentPlanSourceSummary.row(plan.hodService),
+            DateSetupSummary.row(plan.submissionDateTime),
+            AmendPaymentAmountSummary.row(plan.planType, plan.scheduledPaymentAmount)
+          )
       }
     }
   }
-
-  private def cleanseUserData(userAnswers: UserAnswers): Future[UserAnswers] =
-    for {
-      updatedUserAnswers <- Future.fromTry(userAnswers.remove(PaymentPlanReferenceQuery))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(PaymentPlanDetailsQuery))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(ManagePaymentPlanTypePage))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPaymentAmountPage))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanStartDatePage))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(AmendPlanEndDatePage))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(SuspensionPeriodRangeDatePage))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(ExistingDirectDebitIdentifierQuery))
-      _                  <- sessionRepository.set(updatedUserAnswers)
-    } yield updatedUserAnswers
 }

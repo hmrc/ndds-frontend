@@ -19,43 +19,38 @@ package utils
 import models.requests.PaymentPlanDuplicateCheckRequest
 import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.*
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, Settable}
 
 import java.time.LocalDate
-import scala.concurrent.{ExecutionContext, Future}
 
 object Utils {
   val emptyString = ""
-  val LockExpirySessionKey = "lockoutExpiryDateTime"
 
-  val listHodServices: Map[DirectDebitSource, String] = Map(
-    DirectDebitSource.CT   -> "COTA",
-    DirectDebitSource.PAYE -> "PAYE",
-    DirectDebitSource.SA   -> "CESA",
-    DirectDebitSource.TC   -> "NTC",
-    DirectDebitSource.VAT  -> "VAT",
-    DirectDebitSource.MGD  -> "MGD",
-    DirectDebitSource.NIC  -> "NIDN",
-    DirectDebitSource.OL   -> "SAFE",
-    DirectDebitSource.SDLT -> "SDLT"
-  )
+//  val listHodServices: Map[DirectDebitSource, String] = Map(
+//    DirectDebitSource.CT   -> "COTA",
+//    DirectDebitSource.PAYE -> "PAYE",
+//    DirectDebitSource.SA   -> "CESA",
+//    DirectDebitSource.TC   -> "NTC",
+//    DirectDebitSource.VAT  -> "VAT",
+//    DirectDebitSource.MGD  -> "MGD",
+//    DirectDebitSource.NIC  -> "NIDN",
+//    DirectDebitSource.OL   -> "SAFE",
+//    DirectDebitSource.SDLT -> "SDLT"
+//  ) TODO
 
-  def cleanConfirmationFlags(userAnswers: UserAnswers)(implicit ec: ExecutionContext): Future[UserAnswers] = {
-    val pagesToRemove = Seq(
+  def cleanConfirmationFlags(userAnswers: UserAnswers)(additionalPagesToRemove: Seq[Settable[_]] = Seq()): UserAnswers = {
+    val pagesToRemove: Seq[Settable[_]] = Seq(
       AmendPaymentPlanConfirmationPage,
       CreateConfirmationPage,
       SuspensionDetailsCheckYourAnswerPage,
       RemovingThisSuspensionPage,
       CancelPaymentPlanConfirmationPage,
       RemovingThisSuspensionConfirmationPage
-    )
+    ) :++ additionalPagesToRemove
 
     pagesToRemove
-      .foldLeft(Future.successful(userAnswers)) { case (accFut, page) =>
-        accFut.flatMap(answers => Future.fromTry(answers.remove(page)))
-      }
-      .recover { case ex: Throwable =>
-        userAnswers
+      .foldLeft(userAnswers) { case (answers, page) =>
+        answers.remove(page).getOrElse(userAnswers)
       }
   }
 
