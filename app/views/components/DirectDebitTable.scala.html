@@ -1,5 +1,5 @@
 @*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@
 @* Define a formatter using the user's locale *@
 @defining(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, messages.lang.locale)) { localeFormatter =>
     @defining((setupDateStr: String) => {
-        val parsedDate = LocalDate.parse(setupDateStr, DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, Locale.ENGLISH))
+        val parsedDate = LocalDate.parse(setupDateStr, DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, messages.lang.locale))
         parsedDate.format(localeFormatter)
     }) { formatDateWithLocale =>
 

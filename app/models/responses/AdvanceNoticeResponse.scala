@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,11 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-case class AdvanceNoticeResponse(totalAmount: Option[BigDecimal], dueDate: Option[LocalDate])
+case class AdvanceNoticeResponse(totalAmount: Option[BigDecimal], dueDate: Option[LocalDate]) {
+  val isAdvanceNoticePresent: Boolean = totalAmount.isDefined && dueDate.isDefined
+}
 
 object AdvanceNoticeResponse {
   implicit val format: OFormat[AdvanceNoticeResponse] = Json.format
+  val notPresent = AdvanceNoticeResponse(None, None)
 }

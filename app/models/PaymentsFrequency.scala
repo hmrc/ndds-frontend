@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,6 @@ object PaymentsFrequency extends Enumerable.Implicits {
   val values: Seq[PaymentsFrequency] = Seq(
     Weekly,
     Monthly
-  )
-
-  val paymentFrequencyMapping: Map[String, Int] = Map(
-    PaymentsFrequency.FortNightly.toString -> 1,
-    PaymentsFrequency.Weekly.toString      -> 2,
-    PaymentsFrequency.FourWeekly.toString  -> 3,
-    PaymentsFrequency.Monthly.toString     -> 5,
-    PaymentsFrequency.Quarterly.toString   -> 6,
-    PaymentsFrequency.SixMonthly.toString  -> 7,
-    PaymentsFrequency.Annually.toString    -> 9
   )
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>

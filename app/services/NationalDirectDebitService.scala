@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,10 +103,8 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   }
 
   def getFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
-    println(userId)
-    println(userAnswers)
     val currentDate = LocalDate.now().toString
-    println(currentDate)
+    println(s"*******************currentDate: $currentDate")
     for {
       paymentPlanType <- userAnswers
                            .get(PaymentPlanTypePage)
@@ -120,14 +118,13 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
         if (directDebitSource == MGD && paymentPlanType == VariablePaymentPlan) {
           nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.TEN_WORKING_DAYS))
         } else {
-          println("In Else of service")
           val auddisStatusFuture: Future[Boolean] = getAuddiStatus(userAnswers, userId)
           val df = new SimpleDateFormat("yyyy-MM-dd")
           val setupDate = userAnswers
-            .get(PaymentPlanDetailsQuery)
-            .map(_.paymentPlanDetails.submissionDateTime.toString)
+            .get(ExistingDirectDebitIdentifierQuery)
+            .map(_.submissionDateTime.toLocalDate.toString)
             .getOrElse("")
-          println("after setup")
+          println(s"******************** setup: $setupDate")
           for {
             auddisStatus <- auddisStatusFuture
             noOfWorkingDays = if (auddisStatus) {
@@ -141,10 +138,18 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
             earliestDate <-
               if (effectiveCalendar.after(currentCalendar)) {
+                println(s"********** IF effectiveCalendar: $effectiveCalendar")
+                println(s"********** currentCalendar: $currentCalendar")
+                println(s"************ effectiveDate: $effectiveDate")
                 nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(effectiveDate.date, config.TWO_WORKING_DAYS))
               } else {
+                println(s"********** IF effectiveCalendar: $effectiveCalendar")
+                println(s"********** currentCalendar: $currentCalendar")
+                println(s"********** noOfWorkingDays: $noOfWorkingDays")
+
                 nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.THREE_WORKING_DAYS))
               }
+
           } yield earliestDate
         }
     } yield result
