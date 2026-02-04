@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import utils.Utils.cleanConfirmationFlags
 import views.html.YourDirectDebitInstructionsView
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class YourDirectDebitInstructionsController @Inject() (
   override val messagesApi: MessagesApi,
@@ -49,35 +49,30 @@ class YourDirectDebitInstructionsController @Inject() (
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
 
-    cleanConfirmationFlags(userAnswers).flatMap { cleansedAnswers =>
-      cleanseDirectDebitReference(cleansedAnswers).flatMap { _ =>
-        nddService.retrieveAllDirectDebits(request.userId).map { directDebitDetailsData =>
-          val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
+    val cleanedAnswers = cleanConfirmationFlags(userAnswers)(
+      Seq(DirectDebitReferenceQuery, PaymentPlansCountQuery, ExistingDirectDebitIdentifierQuery)
+    )
 
-          val paginationResult = paginationService.paginateDirectDebits(
-            allDirectDebits = directDebitDetailsData.directDebitList,
-            currentPage     = currentPage,
-            baseUrl         = routes.YourDirectDebitInstructionsController.onPageLoad().url
-          )
+    for {
+      _                      <- sessionRepository.set(cleanedAnswers)
+      directDebitDetailsData <- nddService.retrieveAllDirectDebits(request.userId)
+    } yield {
+      val maxLimitReached = directDebitDetailsData.directDebitCount > appConfig.maxNumberDDIsAllowed
 
-          Ok(
-            view(
-              directDebitDetails  = paginationResult.paginatedData,
-              maxLimitReached     = maxLimitReached,
-              paginationViewModel = paginationResult.paginationViewModel,
-              hmrcHelplineUrl     = appConfig.hmrcHelplineUrl
-            )
-          )
-        }
-      }
+      val paginationResult = paginationService.paginateDirectDebits(
+        allDirectDebits = directDebitDetailsData.directDebitList,
+        currentPage     = currentPage,
+        baseUrl         = routes.YourDirectDebitInstructionsController.onPageLoad().url
+      )
+
+      Ok(
+        view(
+          directDebitDetails  = paginationResult.paginatedData,
+          maxLimitReached     = maxLimitReached,
+          paginationViewModel = paginationResult.paginationViewModel,
+          hmrcHelplineUrl     = appConfig.hmrcHelplineUrl
+        )
+      )
     }
   }
-
-  private def cleanseDirectDebitReference(userAnswers: UserAnswers): Future[UserAnswers] =
-    for {
-      updatedUserAnswers <- Future.fromTry(userAnswers.remove(DirectDebitReferenceQuery))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(PaymentPlansCountQuery))
-      updatedUserAnswers <- Future.fromTry(updatedUserAnswers.remove(ExistingDirectDebitIdentifierQuery))
-      _                  <- sessionRepository.set(updatedUserAnswers)
-    } yield updatedUserAnswers
 }

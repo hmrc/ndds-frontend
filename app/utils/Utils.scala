@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,43 +19,60 @@ package utils
 import models.requests.PaymentPlanDuplicateCheckRequest
 import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.*
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
+import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, Settable}
 
 import java.time.LocalDate
-import scala.concurrent.{ExecutionContext, Future}
 
 object Utils {
   val emptyString = ""
-  val LockExpirySessionKey = "lockoutExpiryDateTime"
 
-  val listHodServices: Map[DirectDebitSource, String] = Map(
-    DirectDebitSource.CT   -> "COTA",
-    DirectDebitSource.PAYE -> "PAYE",
-    DirectDebitSource.SA   -> "CESA",
-    DirectDebitSource.TC   -> "NTC",
-    DirectDebitSource.VAT  -> "VAT",
-    DirectDebitSource.MGD  -> "MGD",
-    DirectDebitSource.NIC  -> "NIDN",
-    DirectDebitSource.OL   -> "SAFE",
-    DirectDebitSource.SDLT -> "SDLT"
+  private def invertMap[K, V](m: Map[K, V]): Map[V, K] = m map ((k, v) => (v, k))
+
+  val debitSourceToHodMapping: Map[String, String] = Map(
+    DirectDebitSource.CT.toString   -> "COTA",
+    DirectDebitSource.NIC.toString  -> "NIDN",
+    DirectDebitSource.OL.toString   -> "SAFE",
+    DirectDebitSource.PAYE.toString -> "PAYE",
+    DirectDebitSource.SA.toString   -> "CESA",
+    DirectDebitSource.SDLT.toString -> "SDLT",
+    DirectDebitSource.TC.toString   -> "NTC",
+    DirectDebitSource.VAT.toString  -> "VAT",
+    DirectDebitSource.MGD.toString  -> "MGD"
   )
+  val hodToDebitSourceMapping: Map[String, String] = invertMap(debitSourceToHodMapping)
 
-  def cleanConfirmationFlags(userAnswers: UserAnswers)(implicit ec: ExecutionContext): Future[UserAnswers] = {
-    val pagesToRemove = Seq(
+  val numericToPlanTypeMapping: Map[String, String] = Map(
+    "01" -> PaymentPlanType.SinglePaymentPlan.toString,
+    "02" -> PaymentPlanType.BudgetPaymentPlan.toString,
+    "03" -> PaymentPlanType.TaxCreditRepaymentPlan.toString,
+    "04" -> PaymentPlanType.VariablePaymentPlan.toString
+  )
+  val planTypeToNumericMapping: Map[String, String] = invertMap(numericToPlanTypeMapping)
+
+  val numericToPaymentFrequencyMapping: Map[Int, String] = Map(
+    1 -> PaymentsFrequency.FortNightly.toString,
+    2 -> PaymentsFrequency.Weekly.toString,
+    3 -> PaymentsFrequency.FourWeekly.toString,
+    5 -> PaymentsFrequency.Monthly.toString,
+    6 -> PaymentsFrequency.Quarterly.toString,
+    7 -> PaymentsFrequency.SixMonthly.toString,
+    9 -> PaymentsFrequency.Annually.toString
+  )
+  val paymentFrequencyToNumericMapping: Map[String, Int] = invertMap(numericToPaymentFrequencyMapping)
+
+  def cleanConfirmationFlags(userAnswers: UserAnswers)(additionalPagesToRemove: Seq[Settable[_]] = Seq()): UserAnswers = {
+    val pagesToRemove: Seq[Settable[_]] = Seq(
       AmendPaymentPlanConfirmationPage,
       CreateConfirmationPage,
       SuspensionDetailsCheckYourAnswerPage,
       RemovingThisSuspensionPage,
       CancelPaymentPlanConfirmationPage,
       RemovingThisSuspensionConfirmationPage
-    )
+    ) :++ additionalPagesToRemove
 
     pagesToRemove
-      .foldLeft(Future.successful(userAnswers)) { case (accFut, page) =>
-        accFut.flatMap(answers => Future.fromTry(answers.remove(page)))
-      }
-      .recover { case ex: Throwable =>
-        userAnswers
+      .foldLeft(userAnswers) { case (answers, page) =>
+        answers.remove(page).getOrElse(userAnswers)
       }
   }
 
@@ -64,11 +81,11 @@ object Utils {
     macGenerator: MacGenerator,
     bacsNumber: String
   ): Option[String] = {
-    val maybeBankAddress = answers.get(BankDetailsAddressPage)
-    val maybeBankName = answers.get(BankDetailsBankNamePage)
-    val maybeBankDetails = answers.get(YourBankDetailsPage)
-
-    (maybeBankAddress, maybeBankName, maybeBankDetails) match {
+    (
+      answers.get(BankDetailsAddressPage),
+      answers.get(BankDetailsBankNamePage),
+      answers.get(YourBankDetailsPage)
+    ) match {
       case (Some(bankAddress), Some(bankName), Some(details)) =>
         Some(
           macGenerator.generateMac(
@@ -151,18 +168,6 @@ object Utils {
       PaymentsFrequency.Annually.toString    -> 9
     )
 
-    val hodServiceMapping: Map[String, String] = Map(
-      DirectDebitSource.CT.toString   -> "COTA",
-      DirectDebitSource.NIC.toString  -> "NIDN",
-      DirectDebitSource.OL.toString   -> "SAFE",
-      DirectDebitSource.PAYE.toString -> "PAYE",
-      DirectDebitSource.SA.toString   -> "CESA",
-      DirectDebitSource.SDLT.toString -> "SDLT",
-      DirectDebitSource.TC.toString   -> "NTC",
-      DirectDebitSource.VAT.toString  -> "VAT",
-      DirectDebitSource.MGD.toString  -> "MGD"
-    )
-
     PaymentPlanDuplicateCheckRequest(
       directDebitReference = userAnswers.get(DirectDebitReferenceQuery).getOrElse(throw new RuntimeException("Missing DirectDebitReferenceQuery")),
       paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse(throw new RuntimeException("Missing PaymentPlanReferenceQuery")),
@@ -174,7 +179,7 @@ object Utils {
       paymentService = userAnswers
         .get(PaymentPlanDetailsQuery)
         .map(_.paymentPlanDetails.hodService)
-        .flatMap(hodServiceMapping.get)
+        .flatMap(debitSourceToHodMapping.get)
         .getOrElse(throw new RuntimeException("Missing paymentService")),
       paymentReference = userAnswers
         .get(PaymentPlanDetailsQuery)

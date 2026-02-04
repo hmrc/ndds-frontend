@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,18 +62,6 @@ object DirectDebitSource extends Enumerable.Implicits {
     SDLT,
     VAT,
     OL
-  )
-
-  val hodServiceMapping: Map[String, String] = Map(
-    "COTA" -> CT.toString,
-    "NIDN" -> NIC.toString,
-    "SAFE" -> OL.toString,
-    "PAYE" -> PAYE.toString,
-    "CESA" -> SA.toString,
-    "SDLT" -> SDLT.toString,
-    "NTC"  -> TC.toString,
-    "VAT"  -> VAT.toString,
-    "MGD"  -> MGD.toString
   )
 
   def options(implicit messages: Messages): Seq[RadioItem] = values.zipWithIndex.map { case (value, index) =>

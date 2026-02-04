@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,9 @@ class AmendPlanEndDateController @Inject() (
     with I18nSupport
     with Logging {
 
+  private def dateFormat(using messages: Messages) =
+    DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
+
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val answers = request.userAnswers
     implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
@@ -59,8 +62,7 @@ class AmendPlanEndDateController @Inject() (
         case None        => form
         case Some(value) => form.fill(value)
       }
-      val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
-      val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
+      val beforeDate = LocalDate.now().plusYears(1).format(dateFormat)
 
       Ok(view(preparedForm, mode, routes.AmendingPaymentPlanController.onPageLoad(), beforeDate))
     } else {
@@ -72,11 +74,9 @@ class AmendPlanEndDateController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
-    val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
     val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
     val form = formProvider()
     val userAnswers = request.userAnswers
-
     form
       .bindFromRequest()
       .fold(
@@ -122,7 +122,6 @@ class AmendPlanEndDateController @Inject() (
                   }
                 }
               }
-
             case _ =>
               logger.warn("Missing amend payment amount and/or amend plan end date")
               Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))

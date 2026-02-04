@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package models.responses
 
-import models.{DirectDebitSource, PaymentPlanType}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
+import utils.Utils.{debitSourceToHodMapping, numericToPlanTypeMapping}
 
 import java.time.LocalDateTime
 
@@ -31,22 +31,16 @@ case class NddPaymentPlan(scheduledPaymentAmount: Option[BigDecimal],
                          )
 
 object NddPaymentPlan {
-  private val planTypeMapping: Map[String, String] = Map(
-    "01" -> PaymentPlanType.SinglePaymentPlan.toString,
-    "02" -> PaymentPlanType.BudgetPaymentPlan.toString,
-    "03" -> PaymentPlanType.TaxCreditRepaymentPlan.toString,
-    "04" -> PaymentPlanType.VariablePaymentPlan.toString
-  )
 
   implicit val reads: Reads[NddPaymentPlan] = (
     (__ \ "scheduledPaymentAmount").readNullable[BigDecimal] and
       (__ \ "planRefNumber").read[String] and
       (__ \ "planType").read[String].map { code =>
-        planTypeMapping.getOrElse(code, code)
+        numericToPlanTypeMapping.getOrElse(code, code)
       } and
       (__ \ "paymentReference").read[String] and
       (__ \ "hodService").read[String].map { code =>
-        DirectDebitSource.hodServiceMapping.getOrElse(code, code)
+        debitSourceToHodMapping.getOrElse(code, code)
       } and
       (__ \ "submissionDateTime").read[LocalDateTime]
   )(NddPaymentPlan.apply _)
