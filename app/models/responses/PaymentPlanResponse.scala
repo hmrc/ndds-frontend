@@ -16,9 +16,9 @@
 
 package models.responses
 
-import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency}
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
+import utils.Utils.{hodToDebitSourceMapping, numericToPaymentFrequencyMapping, numericToPlanTypeMapping}
 
 import java.time.{LocalDate, LocalDateTime}
 
@@ -53,29 +53,13 @@ case class PaymentPlanDetails(
 )
 
 object PaymentPlanDetails {
-  private val planTypeMapping: Map[String, String] = Map(
-    "01" -> PaymentPlanType.SinglePaymentPlan.toString,
-    "02" -> PaymentPlanType.BudgetPaymentPlan.toString,
-    "03" -> PaymentPlanType.TaxCreditRepaymentPlan.toString,
-    "04" -> PaymentPlanType.VariablePaymentPlan.toString
-  )
-
-  private val paymentFrequencyMapping: Map[Int, String] = Map(
-    1 -> PaymentsFrequency.FortNightly.toString,
-    2 -> PaymentsFrequency.Weekly.toString,
-    3 -> PaymentsFrequency.FourWeekly.toString,
-    5 -> PaymentsFrequency.Monthly.toString,
-    6 -> PaymentsFrequency.Quarterly.toString,
-    7 -> PaymentsFrequency.SixMonthly.toString,
-    9 -> PaymentsFrequency.Annually.toString
-  )
 
   implicit val reads: Reads[PaymentPlanDetails] = (
     (__ \ "hodService").read[String].map { code =>
-      DirectDebitSource.hodServiceMapping.getOrElse(code, code)
+      hodToDebitSourceMapping.getOrElse(code, code)
     } and
       (__ \ "planType").read[String].map { code =>
-        planTypeMapping.getOrElse(code, code)
+        numericToPlanTypeMapping.getOrElse(code, code)
       } and
       (__ \ "paymentReference").read[String] and
       (__ \ "submissionDateTime").read[LocalDateTime] and
@@ -86,8 +70,8 @@ object PaymentPlanDetails {
       (__ \ "scheduledPaymentEndDate").readNullable[LocalDate] and
       (__ \ "scheduledPaymentFrequency").readNullable[JsValue].map {
         _.flatMap {
-          case JsNumber(num)  => paymentFrequencyMapping.get(num.toInt)
-          case JsString(code) => code.toIntOption.flatMap(paymentFrequencyMapping.get).orElse(Some(code))
+          case JsNumber(num)  => numericToPaymentFrequencyMapping.get(num.toInt)
+          case JsString(code) => code.toIntOption.flatMap(numericToPaymentFrequencyMapping.get).orElse(Some(code))
           case _              => Some("unknownFrequency")
         }
       } and
