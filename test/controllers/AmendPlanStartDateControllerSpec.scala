@@ -17,14 +17,18 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
+import connectors.NationalDirectDebitConnector
 import forms.AmendPlanStartDateFormProvider
+import models.DirectDebitSource.MGD
+import models.PaymentPlanType.VariablePaymentPlan
 import models.responses.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
+import pages.{AmendPaymentAmountPage, AmendPlanStartDatePage, DirectDebitSourcePage, ManagePaymentPlanTypePage, PaymentPlanTypePage}
 import play.api.i18n.Messages
 import play.api.inject.bind
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
@@ -32,10 +36,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
+import uk.gov.hmrc.http.HeaderCarrier
 import views.html.AmendPlanStartDateView
 
 import java.time.{Clock, LocalDate, LocalDateTime, ZoneId}
-import scala.concurrent.Future
+import java.util.{Calendar, Date}
+import scala.concurrent.{ExecutionContext, Future}
 
 class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
@@ -76,10 +82,46 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       )
 
   val date: LocalDateTime = LocalDateTime.now(fixedClock)
-
   private val earliestPaymentDate = EarliestPaymentDate("2025-02-06")
-
   private val formattedDateNumeric = "06 02 2025"
+  val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
+  private val mockConnector: NationalDirectDebitConnector = mock[NationalDirectDebitConnector]
+  val calendar = Calendar.getInstance()
+  calendar.set(2024, Calendar.JANUARY, 15, 14, 30, 45)
+  val calDate: Date = calendar.getTime
+//  import utils
+//  val mockUtils = mock[Utils]
+  val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+    bankSortCode       = Some("12-34-56"),
+    bankAccountNumber  = Some("12345678"),
+    bankAccountName    = Some("John Doe"),
+    auDdisFlag         = true,
+    submissionDateTime = LocalDateTime.now()
+  )
+  val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
+    hodService                = "HOD1",
+    planType                  = "02",
+    paymentReference          = "PP123",
+    submissionDateTime        = LocalDateTime.now(),
+    scheduledPaymentAmount    = Some(BigDecimal(100)),
+    scheduledPaymentStartDate = Some(LocalDate.now()),
+    initialPaymentStartDate   = Some(LocalDate.now()),
+    initialPaymentAmount      = Some(BigDecimal(50)),
+    scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(6)),
+    scheduledPaymentFrequency = Some("Monthly"),
+    suspensionStartDate       = None,
+    suspensionEndDate         = None,
+    balancingPaymentAmount    = None,
+    balancingPaymentDate      = None,
+    totalLiability            = Some(BigDecimal(600)),
+    paymentPlanEditable       = true
+  )
+  val paymentPlanResponse: PaymentPlanResponse = PaymentPlanResponse(
+    directDebitDetails = directDebitDetails,
+    paymentPlanDetails = paymentPlanDetails
+  )
+  implicit val ec: ExecutionContext = ExecutionContext.global
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "AmendPlanStartDate Controller" - {
     val mockService = mock[NationalDirectDebitService]
@@ -89,6 +131,19 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
           .success
           .value
+          .set(PaymentPlanTypePage, VariablePaymentPlan)
+          .success
+          .value
+          .set(DirectDebitSourcePage, MGD)
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
@@ -96,7 +151,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.isSinglePaymentPlan(any())).thenReturn(true)
-          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+          when(mockService.getFutureWorkingDays(any(), any())(any()))
             .thenReturn(Future.successful(earliestPaymentDate))
 
           val result = route(application, getRequest()).value

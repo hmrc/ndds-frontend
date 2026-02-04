@@ -32,8 +32,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   lazy val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-enabled")
   lazy val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-not-enabled")
-  lazy val paymentDelayFixed: Int = configuration.get[Int]("working-days-delay.fixed-delay")
-  lazy val variableMgdFixedDelay: Int = configuration.get[Int]("working-days-delay.variable-mgd-fixed-delay")
+  lazy val TWO_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.two-days")
+  lazy val THREE_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.three-days")
+  lazy val TEN_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.ten-days")
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"

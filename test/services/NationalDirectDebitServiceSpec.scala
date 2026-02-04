@@ -114,14 +114,13 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         val result = service.retrieveAllDirectDebits(testId).futureValue
         result mustEqual NddResponse(0, Seq())
       }
-
     }
 
-    "getEarliestPaymentDate" - {
+    "calculateFutureWorkingDays" - {
       "must successfully return the Earliest Payment Date" in {
         val expectedUserAnswers = emptyUserAnswers.set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
@@ -134,7 +133,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "must successfully return the Earliest Payment Date when direct debit is exists" in {
         val expectedUserAnswers = emptyUserAnswers.set(DirectDebitReferenceQuery, "ddRef").success.value
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
@@ -155,7 +154,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "fail when the connector call fails" in {
         val expectedUserAnswers = emptyUserAnswers.set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
@@ -179,7 +178,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
@@ -201,7 +200,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
@@ -267,7 +266,116 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           .success
           .value
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.failed(new Exception("bang")))
+
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue)
+
+        result.getMessage must include("bang")
+      }
+    }
+
+    "getFutureWorkingDays" - {
+      "must successfully return the Earliest Payment Date for MGD VPP" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+          .success
+          .value
+
+        when(mockConfig.TEN_WORKING_DAYS).thenReturn(2)
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+
+        val result = service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue
+        result mustBe EarliestPaymentDate("2025-12-25")
+      }
+
+      "must successfully return the Earliest Payment Date for SA Budget with add payment plan (DDI reference exists)" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, BudgetPaymentPlan)
+          .success
+          .value
+          .set(DirectDebitSourcePage, SA)
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, "ddRef")
+          .success
+          .value
+
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+        when(mockCache.getDirectDebit(any())(any()))
+          .thenReturn(Future.successful(nddResponse.directDebitList.head))
+
+        val result = service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue
+        result mustBe EarliestPaymentDate("2025-12-25")
+      }
+
+      "fail when auddis status is not in user answers" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
+
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue)
+
+        result.getMessage must include("YourBankDetailsPage details missing from user answers")
+      }
+
+      "fail when payment plan type is not in user answers" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+          .success
+          .value
+
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue)
+
+        result.getMessage must include("PaymentPlanTypePage details missing from user answers")
+      }
+
+      "fail when direct debit source is not in user answers" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+          .success
+          .value
+
+        val result = intercept[Exception](service.getEarliestPlanStartDate(expectedUserAnswers, "123").futureValue)
+
+        result.getMessage must include("DirectDebitSourcePage details missing from user answers")
+      }
+
+      "fail when the connector call fails" in {
+        val expectedUserAnswers = emptyUserAnswers
+          .set(PaymentPlanTypePage, testPaymentPlanType)
+          .success
+          .value
+          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .success
+          .value
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+          .success
+          .value
+
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
@@ -282,7 +390,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "successfully calculate the offset when auddis status is enabled" in {
         val auddisStatus = true
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
         val expected = 5
@@ -293,7 +401,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         val auddisStatus = false
         val expectedVariableDelay = 8
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
 
         val expected = 10
@@ -306,7 +414,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "successfully calculate the offset when source is machine games duty" in {
         val auddisStatus = true
 
-        when(mockConfig.variableMgdFixedDelay).thenReturn(10)
+        when(mockConfig.TEN_WORKING_DAYS).thenReturn(10)
 
         val expected = 10
 
@@ -316,7 +424,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "successfully calculate the offset when auddis status is enabled and source is self assessment" in {
         val auddisStatus = true
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
         val expected = 5
@@ -328,7 +436,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         val auddisStatus = false
         val expectedVariableDelay = 8
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
 
         val expected = 10
@@ -339,7 +447,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "successfully calculate the offset when auddis status is enabled and source is tax credits" in {
         val auddisStatus = true
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
         val expected = 5
@@ -351,7 +459,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         val auddisStatus = false
         val expectedVariableDelay = 8
 
-        when(mockConfig.paymentDelayFixed).thenReturn(2)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
         when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
 
         val expected = 10

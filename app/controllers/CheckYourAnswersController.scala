@@ -143,20 +143,31 @@ class CheckYourAnswersController @Inject() (
                   }
                   Future.successful(Redirect(warningUrl))
                 } else {
+                  val earliestDateFuture = if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
+                    println("If")
+                    nddService.getEarliestPlanStartDate(request.userAnswers, request.userId)
+                  } else {
+                    println("Else")
+                    nddService.getFutureWorkingDays(request.userAnswers, request.userId)
+                  }
+
+                  println(s"earliestDateFuture: $earliestDateFuture")
                   // NEW: earliest payment date check BEFORE MAC validation
                   val validationResultF: Future[Either[String, Unit]] =
                     if (requiresEarliestPaymentDateCheckForSinglePlan(ua)) {
-                      nddService
-                        .calculateFutureWorkingDays(request.userAnswers, request.userId)
-                        .map(earliest => validateSinglePlanDate(ua, earliest))
+                      if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
+                        nddService
+                          .calculateFutureWorkingDays(request.userAnswers, request.userId)
+                          .map(earliest => validateSinglePlanDate(ua, earliest))
+                      } else {
+                        nddService
+                          .getFutureWorkingDays(request.userAnswers, request.userId)
+                          .map(earliest => validateSinglePlanDate(ua, earliest))
+                      }
                     } else if (requireBudgetingPlanCheck(ua)) {
-                      nddService
-                        .getEarliestPlanStartDate(request.userAnswers, request.userId)
-                        .map(earliest => validateBudgetingPlanDates(ua, earliest))
+                      earliestDateFuture.map(earliest => validateBudgetingPlanDates(ua, earliest))
                     } else if (requireVariableAndTcPlanCheck(ua)) {
-                      nddService
-                        .getEarliestPlanStartDate(request.userAnswers, request.userId)
-                        .map(earliest => validateVariableAndTcPlanDates(ua, earliest))
+                      earliestDateFuture.map(earliest => validateVariableAndTcPlanDates(ua, earliest))
                     } else {
                       // No rule means proceed normally (not an error)
                       Future.successful(Right(()))

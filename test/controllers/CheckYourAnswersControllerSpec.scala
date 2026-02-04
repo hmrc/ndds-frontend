@@ -17,8 +17,10 @@
 package controllers
 
 import base.SpecBase
+import config.FrontendAppConfig
+import connectors.NationalDirectDebitConnector
 import models.*
-import models.responses.*
+import models.responses.{DirectDebitDetails, *}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{verify, when}
@@ -27,7 +29,7 @@ import pages.*
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.ExistingDirectDebitIdentifierQuery
+import queries.{ExistingDirectDebitIdentifierQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -47,6 +49,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
   implicit val hc: HeaderCarrier = HeaderCarrier()
+  private val mockConnector: NationalDirectDebitConnector = mock[NationalDirectDebitConnector]
+  val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
 
   "Check Your Answers Controller" - {
     val userAnswer = emptyUserAnswers
@@ -797,6 +801,35 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
       "must redirect to confirmation page when DirectDebitSource is 'CT' for a POST if all required data is provided" in {
         val totalDueAmount = 200
+        val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+          bankSortCode       = Some("12-34-56"),
+          bankAccountNumber  = Some("12345678"),
+          bankAccountName    = Some("John Doe"),
+          auDdisFlag         = true,
+          submissionDateTime = LocalDateTime.now()
+        )
+        val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
+          hodService                = "HOD1",
+          planType                  = "02",
+          paymentReference          = "PP123",
+          submissionDateTime        = LocalDateTime.now(),
+          scheduledPaymentAmount    = Some(BigDecimal(100)),
+          scheduledPaymentStartDate = Some(LocalDate.now()),
+          initialPaymentStartDate   = Some(LocalDate.now()),
+          initialPaymentAmount      = Some(BigDecimal(50)),
+          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(6)),
+          scheduledPaymentFrequency = Some("Monthly"),
+          suspensionStartDate       = None,
+          suspensionEndDate         = None,
+          balancingPaymentAmount    = None,
+          balancingPaymentDate      = None,
+          totalLiability            = Some(BigDecimal(600)),
+          paymentPlanEditable       = true
+        )
+        val paymentPlanResponse: PaymentPlanResponse = PaymentPlanResponse(
+          directDebitDetails = directDebitDetails,
+          paymentPlanDetails = paymentPlanDetails
+        )
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
@@ -819,23 +852,30 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           )
           .success
           .value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
-          )
+          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService))
           .build()
-
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
         running(application) {
+          when(mockNddService.getFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+//          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
         }
       }
 

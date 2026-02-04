@@ -24,6 +24,7 @@ import pages.PaymentDatePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import queries.ExistingDirectDebitIdentifierQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -52,7 +53,13 @@ class PaymentDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     {
-      nddService.calculateFutureWorkingDays(request.userAnswers, request.userId) map { earliestPaymentDate =>
+      val earliestPaymentDateFuture = if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
+        nddService.calculateFutureWorkingDays(request.userAnswers, request.userId)
+      } else {
+        nddService.getFutureWorkingDays(request.userAnswers, request.userId)
+      }
+
+      earliestPaymentDateFuture map { earliestPaymentDate =>
         val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
@@ -76,8 +83,13 @@ class PaymentDateController @Inject() (
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    nddService
-      .calculateFutureWorkingDays(request.userAnswers, request.userId)
+    val earliestPaymentDateFuture = if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
+      nddService.calculateFutureWorkingDays(request.userAnswers, request.userId)
+    } else {
+      nddService.getFutureWorkingDays(request.userAnswers, request.userId)
+    }
+
+    earliestPaymentDateFuture
       .flatMap { earliestPaymentDate =>
         val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
@@ -85,8 +97,8 @@ class PaymentDateController @Inject() (
         form
           .bindFromRequest()
           .fold(
-            formWithErrors =>
-              nddService.calculateFutureWorkingDays(request.userAnswers, request.userId).map { earliestPaymentDate =>
+            formWithErrors => {
+              Future.successful(
                 BadRequest(
                   view(formWithErrors,
                        mode,
@@ -94,12 +106,12 @@ class PaymentDateController @Inject() (
                        routes.PaymentAmountController.onPageLoad(mode)
                       )
                 )
-              },
+              )
+            },
             value =>
               for {
-                earliestPaymentDate <- nddService.calculateFutureWorkingDays(request.userAnswers, request.userId)
-                updatedAnswers      <- Future.fromTry(request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
-                _                   <- sessionRepository.set(updatedAnswers)
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
+                _              <- sessionRepository.set(updatedAnswers)
               } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
           )
       }
