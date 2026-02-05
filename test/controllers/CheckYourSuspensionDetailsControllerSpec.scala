@@ -22,7 +22,7 @@ import models.{NormalMode, PaymentPlanType, SuspensionPeriodRange, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
+import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -80,6 +80,32 @@ class CheckYourSuspensionDetailsControllerSpec extends SpecBase with MockitoSuga
         status(result) mustEqual OK
         contentAsString(result) must include("Check your suspension details")
         contentAsString(result) must include("10 Oct 2025 to 10 Dec 2025")
+      }
+    }
+
+    "must redirect to AlreadySuspendedErrorController if suspension is active in NormalMode" in {
+
+      val userAnswersWithSuspensionActive: UserAnswers =
+        userAnswersWithSuspensionRange
+          .set(IsSuspensionActivePage, true)
+          .success
+          .value
+
+      val application = applicationBuilder(userAnswers = Some(userAnswersWithSuspensionActive))
+        .overrides(
+          bind[SessionRepository].toInstance(mockSessionRepository),
+          bind[NationalDirectDebitService].toInstance(mockNddService)
+        )
+        .build()
+
+      running(application) {
+        when(mockNddService.suspendPaymentPlanGuard(any())).thenReturn(true)
+
+        val request = FakeRequest(GET, routes.CheckYourSuspensionDetailsController.onPageLoad(NormalMode).url)
+        val result = route(application, request).value
+
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result).value mustEqual routes.AlreadySuspendedErrorController.onPageLoad().url
       }
     }
 

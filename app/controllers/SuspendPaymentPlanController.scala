@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import models.Mode
-import pages.ManagePaymentPlanTypePage
+import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage}
 import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -44,7 +44,12 @@ class SuspendPaymentPlanController @Inject() (
     val userAnswers = request.userAnswers
 
     if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
-      Future.successful(Ok(view(mode)))
+      if (!userAnswers.get(IsSuspensionActivePage).getOrElse(false)) {
+        Future.successful(Ok(view(mode)))
+      } else {
+        logger.error("Cannot do suspension on already suspended budget plan")
+        Future.successful(Redirect(routes.AlreadySuspendedErrorController.onPageLoad()))
+      }
     } else {
       val planType = userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
       logger.error(s"NDDS Payment Plan Guard: Cannot carry out suspension functionality for this plan type: $planType")

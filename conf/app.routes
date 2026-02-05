@@ -205,3 +205,5 @@ POST       /change-amend-already-have-payment-plan            controllers.AmendD
 GET        /payment-plan-cannot-be-set-up                     controllers.ErrorWarningController.onPageLoad()
 
 GET        /you-need-to-confirm-some-answers                  controllers.ConfirmAnswersErrorController.onPageLoad()
+
+GET        /payment-plan-already-suspended                    controllers.AlreadySuspendedErrorController.onPageLoad()

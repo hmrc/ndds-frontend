@@ -19,7 +19,7 @@ package controllers
 import controllers.actions.*
 import models.UserAnswers
 import models.responses.PaymentPlanDetails
-import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
+import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -51,33 +51,43 @@ class PaymentPlanSuspendedController @Inject() (
 
     if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
 
-      val maybeResult = for {
-        planDetails           <- userAnswers.get(PaymentPlanDetailsQuery)
-        suspensionPeriodRange <- userAnswers.get(SuspensionPeriodRangeDatePage)
-      } yield {
+      val alreadyConfirmed =
+        userAnswers.get(SuspensionDetailsCheckYourAnswerPage).contains(true)
 
-        val messages = messagesApi.preferred(request)
-        val dateFormatter = DateTimeFormatter.ofPattern(
-          Constants.longDateTimeFormatPattern,
-          messages.lang.locale
-        )
+      if (userAnswers.get(IsSuspensionActivePage).getOrElse(false) && !alreadyConfirmed) {
+        logger.error("Cannot do suspension on already suspended budget plan")
+        Redirect(routes.AlreadySuspendedErrorController.onPageLoad())
 
-        val formattedStartDate =
-          suspensionPeriodRange.startDate.format(dateFormatter)
+      } else {
 
-        val formattedEndDate =
-          suspensionPeriodRange.endDate.format(dateFormatter)
-        val paymentReference = planDetails.paymentPlanDetails.paymentReference
+        val maybeResult = for {
+          planDetails           <- userAnswers.get(PaymentPlanDetailsQuery)
+          suspensionPeriodRange <- userAnswers.get(SuspensionPeriodRangeDatePage)
+        } yield {
 
-        val suspensionIsActiveMode = isSuspendPeriodActive(planDetails.paymentPlanDetails)
+          val messages = messagesApi.preferred(request)
+          val dateFormatter = DateTimeFormatter.ofPattern(
+            Constants.longDateTimeFormatPattern,
+            messages.lang.locale
+          )
 
-        val rows = buildRows(paymentReference, userAnswers, planDetails.paymentPlanDetails)
-        Ok(view(formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows, suspensionIsActiveMode))
-      }
+          val formattedStartDate =
+            suspensionPeriodRange.startDate.format(dateFormatter)
 
-      maybeResult match {
-        case Some(result) => result
-        case _            => Redirect(routes.SystemErrorController.onPageLoad())
+          val formattedEndDate =
+            suspensionPeriodRange.endDate.format(dateFormatter)
+          val paymentReference = planDetails.paymentPlanDetails.paymentReference
+
+          val suspensionIsActiveMode = isSuspendPeriodActive(planDetails.paymentPlanDetails)
+
+          val rows = buildRows(paymentReference, userAnswers, planDetails.paymentPlanDetails)
+          Ok(view(formattedStartDate, formattedEndDate, routes.PaymentPlanDetailsController.onPageLoad(), rows, suspensionIsActiveMode))
+        }
+
+        maybeResult match {
+          case Some(result) => result
+          case _            => Redirect(routes.SystemErrorController.onPageLoad())
+        }
       }
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
