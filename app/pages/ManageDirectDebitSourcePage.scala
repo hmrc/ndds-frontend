@@ -16,12 +16,12 @@
 
 package pages
 
-import models.PaymentPlanType
+import models.DirectDebitSource
 import play.api.libs.json.JsPath
 
-case object ManagePaymentPlanTypePage extends QuestionPage[String] {
+case object ManageDirectDebitSourcePage extends QuestionPage[String] {
 
   override def path: JsPath = JsPath \ toString
 
-  override def toString: String = "managePaymentPlanType"
+  override def toString: String = "manageDirectDebitSource"
 }

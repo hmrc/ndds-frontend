@@ -82,8 +82,7 @@ class AmendPlanStartDateController @Inject() (
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-
-    nddsService.calculateFutureWorkingDays(request.userAnswers, request.userId) flatMap { earliestPlanStartDate =>
+    nddsService.getFutureWorkingDays(request.userAnswers, request.userId) flatMap { earliestPlanStartDate =>
       val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
       val userAnswers = request.userAnswers
       val form = formProvider(userAnswers, earliestDate)

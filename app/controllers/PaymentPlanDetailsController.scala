@@ -66,6 +66,7 @@ class PaymentPlanDetailsController @Inject() (
             for {
               updatedAnswers <- Future.fromTry(cleanedAnswers.set(PaymentPlanDetailsQuery, response))
               updatedAnswers <- Future.fromTry(updatedAnswers.set(ManagePaymentPlanTypePage, planDetail.planType))
+              updatedAnswers <- Future.fromTry(updatedAnswers.set(ManageDirectDebitSourcePage, planDetail.hodService))
               updatedAnswers <- planDetail.scheduledPaymentAmount match {
                                   case Some(amount) => Future.fromTry(updatedAnswers.set(AmendPaymentAmountPage, amount))
                                   case _            => Future.successful(updatedAnswers)

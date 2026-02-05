@@ -24,7 +24,6 @@ import pages.PaymentDatePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import queries.ExistingDirectDebitIdentifierQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -53,13 +52,7 @@ class PaymentDateController @Inject() (
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     {
-      val earliestPaymentDateFuture = if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
-        nddService.calculateFutureWorkingDays(request.userAnswers, request.userId)
-      } else {
-        nddService.getFutureWorkingDays(request.userAnswers, request.userId)
-      }
-
-      earliestPaymentDateFuture map { earliestPaymentDate =>
+      nddService.getFutureWorkingDays(request.userAnswers, request.userId) map { earliestPaymentDate =>
         val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
@@ -83,13 +76,8 @@ class PaymentDateController @Inject() (
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    val earliestPaymentDateFuture = if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
-      nddService.calculateFutureWorkingDays(request.userAnswers, request.userId)
-    } else {
-      nddService.getFutureWorkingDays(request.userAnswers, request.userId)
-    }
-
-    earliestPaymentDateFuture
+    nddService
+      .getFutureWorkingDays(request.userAnswers, request.userId)
       .flatMap { earliestPaymentDate =>
         val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)

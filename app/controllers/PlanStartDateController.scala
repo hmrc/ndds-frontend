@@ -61,12 +61,12 @@ class PlanStartDateController @Inject() (
       answers.get(DirectDebitSourcePage) match {
         case Some(value)
             if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) =>
-          val earliestPlanStartDateFuture = if (answers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
-            nddService.getEarliestPlanStartDate(answers, request.userId)
-          } else {
-            nddService.getFutureWorkingDays(answers, request.userId)
-          }
-          earliestPlanStartDateFuture map { earliestPlanStartDate =>
+//          val earliestPlanStartDateFuture = if (answers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
+//            nddService.getEarliestPlanStartDate(answers, request.userId)
+//          } else {
+//            nddService.getFutureWorkingDays(answers, request.userId)
+//          }
+          nddService.getFutureWorkingDays(answers, request.userId) map { earliestPlanStartDate =>
             val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
             val form = formProvider(answers, earliestDate)
             val preparedForm = answers.get(PlanStartDatePage) match {
@@ -106,11 +106,12 @@ class PlanStartDateController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     (for {
-      earliestPlanStartDate <- if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
-                                 nddService.getEarliestPlanStartDate(request.userAnswers, request.userId)
-                               } else {
-                                 nddService.getFutureWorkingDays(request.userAnswers, request.userId)
-                               }
+//      earliestPlanStartDate <- if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
+//                                 nddService.getEarliestPlanStartDate(request.userAnswers, request.userId)
+//                               } else {
+//                                 nddService.getFutureWorkingDays(request.userAnswers, request.userId)
+//                               }
+      earliestPlanStartDate <- nddService.getFutureWorkingDays(request.userAnswers, request.userId)
       earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
       form = formProvider(request.userAnswers, earliestDate)
       result <- form
