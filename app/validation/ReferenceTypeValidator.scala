@@ -24,6 +24,7 @@ import utils.ModUtils.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Right, Success, Try}
+import java.time.format.ResolverStyle
 
 object ReferenceTypeValidator {
   trait Validator[A <: DirectDebitSource] {
@@ -226,8 +227,6 @@ object ReferenceTypeValidator {
         else
           Right(ref)
       }
-
-      import java.time.format.ResolverStyle
 
       val checkDateFormat = (ref: String) => {
         val formatter =
