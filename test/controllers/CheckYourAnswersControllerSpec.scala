@@ -763,6 +763,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 //
 //        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
 //          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+//        when(mockNddService.getFutureWorkingDays(any(), any())(any()))
+//          .thenReturn(
+//            Future.successful(EarliestPaymentDate("2026-02-15")),
+//            Future.successful(EarliestPaymentDate("2026-02-18")))
 //        when(mockNddService.generateNewDdiReference(any())(any()))
 //          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
 //        when(mockNddService.submitChrisData(any())(any()))

@@ -20,8 +20,9 @@ import base.SpecBase
 import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
 import controllers.routes
-import models.DirectDebitSource.{MGD, SA}
-import models.PaymentPlanType.{BudgetPaymentPlan, VariablePaymentPlan}
+import models.DirectDebitSource.*
+import models.PaymentPlanType.{SinglePaymentPlan, VariablePaymentPlan}
+import models.requests.WorkingDaysOffsetRequest
 import models.responses.*
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
 import org.mockito.ArgumentMatchers.any
@@ -75,6 +76,14 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
                                     false
                                    )
 
+  val testBankDetailsAuddisFalse: YourBankDetailsWithAuddisStatus =
+    YourBankDetailsWithAuddisStatus(accountHolderName = testAccountHolderName,
+                                    sortCode          = testSortCode,
+                                    accountNumber     = testAccountNumber,
+                                    auddisStatus      = false,
+                                    false
+                                   )
+
   val testPaymentPlanType: PaymentPlanType = VariablePaymentPlan
   val testDirectDebitSource: DirectDebitSource = MGD
 
@@ -82,6 +91,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
   val budgetPlan = "budgetPaymentPlan"
 
   "NationalDirectDebitService" - {
+
     "retrieveDirectDebits" - {
       "should retrieve existing details from Cache first" in {
         when(mockCache.retrieveCache(any()))
@@ -116,76 +126,123 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       }
     }
 
-    "calculateFutureWorkingDays" - {
-//      "must successfully return the Earliest Payment Date" in {
-//        val expectedUserAnswers = emptyUserAnswers.set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-//        when(mockConnector.getFutureWorkingDays(any())(any()))
-//          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
-//
-//        val result = service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue
-//
-//        result mustBe EarliestPaymentDate("2025-12-25")
-//      }
+    "getFutureWorkingDays" - {
+      "should use TEN_WORKING_DAYS for MGD variable payment plan" in {
+        val userAnswers =
+          emptyUserAnswers
+            .set(DirectDebitSourcePage, MGD)
+            .success
+            .value
+            .set(PaymentPlanTypePage, VariablePaymentPlan)
+            .success
+            .value
+            .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+            .success
+            .value
 
-//      "must successfully return the Earliest Payment Date when direct debit is exists" in {
-//        val expectedUserAnswers = emptyUserAnswers.set(DirectDebitReferenceQuery, "ddRef").success.value
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-//        when(mockConnector.getFutureWorkingDays(any())(any()))
-//          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
-//        when(mockCache.getDirectDebit(any())(any()))
-//          .thenReturn(Future.successful(nddResponse.directDebitList.head))
-//
-//        val result = service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue
-//
-//        result mustBe EarliestPaymentDate("2025-12-25")
-//      }
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2026-02-20")))
+        when(mockConfig.TEN_WORKING_DAYS).thenReturn(10)
+
+        val result = service.getFutureWorkingDays(userAnswers, "user-1").futureValue
+        result mustBe EarliestPaymentDate("2026-02-20")
+      }
+
+      "should add TWO_WORKING_DAYS for new direct debit setup" in {
+        val userAnswers =
+          emptyUserAnswers
+            .set(DirectDebitSourcePage, CT)
+            .success
+            .value
+            .set(PaymentPlanTypePage, SinglePaymentPlan)
+            .success
+            .value
+            .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+            .success
+            .value
+
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(5)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2026-02-16")))
+
+        val result = service.getFutureWorkingDays(userAnswers, "user-1").futureValue
+        result mustBe EarliestPaymentDate("2026-02-16")
+      }
+
+      "should add TWO_WORKING_DAYS for new direct debit setup for auddis disabled" in {
+        val userAnswers =
+          emptyUserAnswers
+            .set(DirectDebitSourcePage, CT)
+            .success
+            .value
+            .set(PaymentPlanTypePage, SinglePaymentPlan)
+            .success
+            .value
+            .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+            .success
+            .value
+
+        when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(8)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2026-02-25")))
+
+        val result = service.getFutureWorkingDays(userAnswers, "user-1").futureValue
+        result mustBe EarliestPaymentDate("2026-02-25")
+      }
+
+      "should calculate earliest date for add or amend flow" in {
+        val userAnswers =
+          emptyUserAnswers
+            .set(
+              ExistingDirectDebitIdentifierQuery,
+              NddDetails("directDebitReference",
+                         LocalDateTime.now(),
+                         "bankSortCode",
+                         "bankAccountNumber",
+                         "bankAccountName",
+                         auDdisFlag       = true,
+                         numberOfPayPlans = 2
+                        )
+            )
+            .success
+            .value
+            .set(DirectDebitSourcePage, MGD)
+            .success
+            .value
+            .set(PaymentPlanTypePage, SinglePaymentPlan)
+            .success
+            .value
+            .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+            .success
+            .value
+            .set(DirectDebitReferenceQuery, "dd-ref")
+            .success
+            .value
+
+        val submissionDate = LocalDate.now().minusDays(10)
+
+        when(mockCache.getDirectDebit(any())(any()))
+          .thenReturn(Future.successful(nddResponse.directDebitList.head))
+        when(mockConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(submissionDate.toString, 3)))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-02-18")))
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(5)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+        when(mockConfig.THREE_WORKING_DAYS).thenReturn(3)
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2026-02-15")))
+
+        val result = service.getFutureWorkingDays(userAnswers, "user-1").futureValue
+        result mustBe EarliestPaymentDate("2026-02-15")
+      }
 
       "fail when auddis status is not in user answers" in {
         val result = intercept[Exception](service.getFutureWorkingDays(emptyUserAnswers, "123").futureValue)
 
         result.getMessage must include("YourBankDetailsPage details missing from user answers")
-      }
-
-//      "fail when the connector call fails" in {
-//        val expectedUserAnswers = emptyUserAnswers.set(YourBankDetailsPage, testBankDetailsAuddisTrue).success.value
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-//        when(mockConnector.getFutureWorkingDays(any())(any()))
-//          .thenReturn(Future.failed(new Exception("bang")))
-//
-//        val result = intercept[Exception](service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue)
-//
-//        result.getMessage must include("bang")
-//      }
-    }
-
-    "getEarliestPlanStartDate" - {
-      "must successfully return the Earliest Payment Date" in {
-        val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, testPaymentPlanType)
-          .success
-          .value
-          .set(DirectDebitSourcePage, testDirectDebitSource)
-          .success
-          .value
-          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
-          .success
-          .value
-
-        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getFutureWorkingDays(any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
-
-        val result = service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue
-
-        result mustBe EarliestPaymentDate("2025-12-25")
       }
 
       "must successfully return the Earliest Payment Date when direct debit is exists" in {
@@ -212,47 +269,19 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         result mustBe EarliestPaymentDate("2025-12-25")
       }
 
-      "fail when auddis status is not in user answers" in {
+      "fail when direct debit source is not in user answers" in {
         val expectedUserAnswers = emptyUserAnswers
           .set(PaymentPlanTypePage, testPaymentPlanType)
           .success
           .value
-          .set(DirectDebitSourcePage, testDirectDebitSource)
+          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
           .success
           .value
 
         val result = intercept[Exception](service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue)
 
-        result.getMessage must include("YourBankDetailsPage details missing from user answers")
+        result.getMessage must include("Missing directDebitSource")
       }
-
-//      "fail when payment plan type is not in user answers" in {
-//        val expectedUserAnswers = emptyUserAnswers
-//          .set(DirectDebitSourcePage, testDirectDebitSource)
-//          .success
-//          .value
-//          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
-//          .success
-//          .value
-//
-//        val result = intercept[Exception](service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue)
-//
-//        result.getMessage must include("PaymentPlanTypePage details missing from user answers")
-//      }
-
-//      "fail when direct debit source is not in user answers" in {
-//        val expectedUserAnswers = emptyUserAnswers
-//          .set(PaymentPlanTypePage, testPaymentPlanType)
-//          .success
-//          .value
-//          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
-//          .success
-//          .value
-//
-//        val result = intercept[Exception](service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue)
-//
-//        result.getMessage must include("DirectDebitSourcePage details missing from user answers")
-//      }
 
       "fail when the connector call fails" in {
         val expectedUserAnswers = emptyUserAnswers
@@ -275,198 +304,8 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
         result.getMessage must include("bang")
       }
+
     }
-
-    "getFutureWorkingDays" - {
-      "must successfully return the Earliest Payment Date for MGD VPP" in {
-        val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, testPaymentPlanType)
-          .success
-          .value
-          .set(DirectDebitSourcePage, testDirectDebitSource)
-          .success
-          .value
-          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
-          .success
-          .value
-
-        when(mockConfig.TEN_WORKING_DAYS).thenReturn(2)
-        when(mockConnector.getFutureWorkingDays(any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
-
-        val result = service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue
-        result mustBe EarliestPaymentDate("2025-12-25")
-      }
-
-      "must successfully return the Earliest Payment Date for SA Budget with add payment plan (DDI reference exists)" in {
-        val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, BudgetPaymentPlan)
-          .success
-          .value
-          .set(DirectDebitSourcePage, SA)
-          .success
-          .value
-          .set(DirectDebitReferenceQuery, "ddRef")
-          .success
-          .value
-
-        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getFutureWorkingDays(any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
-        when(mockCache.getDirectDebit(any())(any()))
-          .thenReturn(Future.successful(nddResponse.directDebitList.head))
-
-        val result = service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue
-        result mustBe EarliestPaymentDate("2025-12-25")
-      }
-
-      "fail when auddis status is not in user answers" in {
-        val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, testPaymentPlanType)
-          .success
-          .value
-          .set(DirectDebitSourcePage, testDirectDebitSource)
-          .success
-          .value
-
-        val result = intercept[Exception](service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue)
-
-        result.getMessage must include("YourBankDetailsPage details missing from user answers")
-      }
-
-//      "fail when payment plan type is not in user answers" in {
-//        val expectedUserAnswers = emptyUserAnswers
-//          .set(DirectDebitSourcePage, testDirectDebitSource)
-//          .success
-//          .value
-//          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
-//          .success
-//          .value
-//
-//        val result = intercept[Exception](service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue)
-//
-//        result.getMessage must include("PaymentPlanTypePage details missing from user answers")
-//      }
-
-//      "fail when direct debit source is not in user answers" in {
-//        val expectedUserAnswers = emptyUserAnswers
-//          .set(PaymentPlanTypePage, testPaymentPlanType)
-//          .success
-//          .value
-//          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
-//          .success
-//          .value
-//
-//        val result = intercept[Exception](service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue)
-//
-//        result.getMessage must include("DirectDebitSourcePage details missing from user answers")
-//      }
-
-      "fail when the connector call fails" in {
-        val expectedUserAnswers = emptyUserAnswers
-          .set(PaymentPlanTypePage, testPaymentPlanType)
-          .success
-          .value
-          .set(DirectDebitSourcePage, testDirectDebitSource)
-          .success
-          .value
-          .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
-          .success
-          .value
-
-        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-        when(mockConnector.getFutureWorkingDays(any())(any()))
-          .thenReturn(Future.failed(new Exception("bang")))
-
-        val result = intercept[Exception](service.getFutureWorkingDays(expectedUserAnswers, "123").futureValue)
-
-        result.getMessage must include("bang")
-      }
-    }
-
-//    "calculateOffset using auddis status method" - {
-//      "successfully calculate the offset when auddis status is enabled" in {
-//        val auddisStatus = true
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-//
-//        val expected = 5
-//
-//        service.calculateOffset(auddisStatus) mustBe expected
-//      }
-//      "successfully calculate the offset when auddis status is not enabled" in {
-//        val auddisStatus = false
-//        val expectedVariableDelay = 8
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
-//
-//        val expected = 10
-//
-//        service.calculateOffset(auddisStatus) mustBe expected
-//      }
-//    }
-
-//    "calculateOffset using auddis status, payment plan type and direct debit source method " - {
-//      "successfully calculate the offset when source is machine games duty" in {
-//        val auddisStatus = true
-//
-//        when(mockConfig.TEN_WORKING_DAYS).thenReturn(10)
-//
-//        val expected = 10
-//
-//        service.calculateOffset(auddisStatus, VariablePaymentPlan, MGD) mustBe expected
-//      }
-//
-//      "successfully calculate the offset when auddis status is enabled and source is self assessment" in {
-//        val auddisStatus = true
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-//
-//        val expected = 5
-//
-//        service.calculateOffset(auddisStatus, BudgetPaymentPlan, SA) mustBe expected
-//      }
-//
-//      "successfully calculate the offset when auddis status is not enabled and source is tax credits" in {
-//        val auddisStatus = false
-//        val expectedVariableDelay = 8
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
-//
-//        val expected = 10
-//
-//        service.calculateOffset(auddisStatus, BudgetPaymentPlan, SA) mustBe expected
-//      }
-//
-//      "successfully calculate the offset when auddis status is enabled and source is tax credits" in {
-//        val auddisStatus = true
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-//
-//        val expected = 5
-//
-//        service.calculateOffset(auddisStatus, TaxCreditRepaymentPlan, TC) mustBe expected
-//      }
-//
-//      "successfully calculate the offset when auddis status is not enabled and source is self assessment" in {
-//        val auddisStatus = false
-//        val expectedVariableDelay = 8
-//
-//        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-//        when(mockConfig.paymentDelayDynamicAuddisNotEnabled).thenReturn(expectedVariableDelay)
-//
-//        val expected = 10
-//
-//        service.calculateOffset(auddisStatus, TaxCreditRepaymentPlan, TC) mustBe expected
-//      }
-//    }
 
     "isVariablePaymentPlan" - {
       "must return true for VariablePaymentPlan" in {

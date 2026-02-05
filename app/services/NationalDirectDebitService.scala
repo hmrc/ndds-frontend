@@ -111,12 +111,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           if (existingDirectDebitIdentifierQuery.isDefined || userAnswers.get(AmendPlanStartDatePage).isDefined) { // add payment plan or Amend flow
             calculateEarliestDate(userAnswers, currentDate, offsetWorkingDays, userId)
           } else { // new direct debit setup flow
-            for {
-              futureDate <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, offsetWorkingDays + config.TWO_WORKING_DAYS))
-            } yield {
-              println(s"****** futureDate: $futureDate")
-              futureDate
-            }
+            nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, offsetWorkingDays + config.TWO_WORKING_DAYS))
           }
         }
     } yield {
