@@ -227,14 +227,19 @@ object ReferenceTypeValidator {
           Right(ref)
       }
 
-      val checkDateFormat = (ref: String) => {
-        val formatter = DateTimeFormatter.ofPattern("ddMMyy")
+      import java.time.format.ResolverStyle
 
-        val extractDate = reference.substring(8, 14)
-        Try(LocalDate.parse(extractDate, formatter)) match {
-          case Success(_) => Right(ref)
-          case Failure(_) => Left("Error: Invalid date format")
-        }
+      val checkDateFormat = (ref: String) => {
+        val formatter =
+          DateTimeFormatter
+            .ofPattern("ddMMuu")
+            .withResolverStyle(ResolverStyle.STRICT)
+
+        val extractDate = ref.substring(8, 14)
+
+        Try(LocalDate.parse(extractDate, formatter)).toEither.left
+          .map(_ => "Error: Invalid date format")
+          .map(_ => ref)
       }
 
       val result = for {
