@@ -25,7 +25,7 @@
 )
 
 @(suspensionStartDate: String, suspensionEndDate: String)(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = titleNoForm(messages("alreadySuspendedError.title"))) {
+@layout(pageTitle = titleNoForm(messages("alreadySuspendedError.title")), showBackLink = false) {
 
     @h1("alreadySuspendedError.heading")
 
