@@ -745,3 +745,8 @@ confirmAnswersError.title = Mae angen i chi gadarnhau rhai atebion
 confirmAnswersError.heading = Mae angen i chi gadarnhau rhai atebion
 confirmAnswersError.paragraph = Dewisoch ychwanegu dyddiad dod i ben y cynllun at y cynllun talu hwn, ond wnaethoch ddim nodi dyddiad. Mae angen i chi nodi dyddiad neu gadarnhau nad ydych am ychwanegu dyddiad dod i ben y cynllun.
 confirmAnswersError.returnLink = Yn ôl i wirio’ch cynllun talu
+
+alreadySuspendedError.title = This payment plan is already suspended
+alreadySuspendedError.heading = This payment plan is already suspended
+alreadySuspendedError.p1 = This payment plan is suspended from {0} to {1}. You can change the suspension dates or remove the suspension.
+alreadySuspendedError.link = Return to your payment plan details
