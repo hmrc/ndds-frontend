@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package controllers
 import controllers.actions.*
 import models.UserAnswers
 import models.responses.PaymentPlanDetails
-import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
+import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.i18n.Lang.logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -50,7 +50,11 @@ class PaymentPlanSuspendedController @Inject() (
     val userAnswers = request.userAnswers
 
     if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
-      if (userAnswers.get(IsSuspensionActivePage).getOrElse(false)) {
+
+      val alreadyConfirmed =
+        userAnswers.get(SuspensionDetailsCheckYourAnswerPage).contains(true)
+
+      if (userAnswers.get(IsSuspensionActivePage).getOrElse(false) && !alreadyConfirmed) {
         logger.error("Cannot do suspension on already suspended budget plan")
         Redirect(routes.AlreadySuspendedErrorController.onPageLoad())
 

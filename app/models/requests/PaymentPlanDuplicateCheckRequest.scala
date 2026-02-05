@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswer
 import pages.*
 import play.api.libs.json.{Json, OFormat}
 import queries.*
+import utils.Utils.{debitSourceToHodMapping, paymentFrequencyToNumericMapping, planTypeToNumericMapping}
 
 import java.time.LocalDate
 
@@ -39,46 +40,25 @@ object PaymentPlanDuplicateCheckRequest {
   implicit val format: OFormat[PaymentPlanDuplicateCheckRequest] = Json.format[PaymentPlanDuplicateCheckRequest]
 
   def build(userAnswers: UserAnswers, paymentAmount: Option[BigDecimal], paymentStartDate: Option[LocalDate]): PaymentPlanDuplicateCheckRequest = {
-    // Adding a new payment plan
-    val existingDd =
-      userAnswers
-        .get(ExistingDirectDebitIdentifierQuery)
-        .getOrElse(throw new RuntimeException("Missing ExistingDirectDebitIdentifierQuery"))
+    val existingDd = userAnswers
+      .get(ExistingDirectDebitIdentifierQuery)
+      .getOrElse(throw new RuntimeException("Missing ExistingDirectDebitIdentifierQuery"))
 
-    val planType =
-      userAnswers
-        .get(PaymentPlanTypePage)
-        .map(_.toString)
-        .getOrElse(PaymentPlanType.SinglePaymentPlan.toString)
+    val planType = userAnswers
+      .get(PaymentPlanTypePage)
+      .map(_.toString)
+      .getOrElse(PaymentPlanType.SinglePaymentPlan.toString)
 
-    val hodServiceMapping: Map[String, String] = Map(
-      DirectDebitSource.CT.toString   -> "COTA",
-      DirectDebitSource.NIC.toString  -> "NIDN",
-      DirectDebitSource.OL.toString   -> "SAFE",
-      DirectDebitSource.PAYE.toString -> "PAYE",
-      DirectDebitSource.SA.toString   -> "CESA",
-      DirectDebitSource.SDLT.toString -> "SDLT",
-      DirectDebitSource.TC.toString   -> "NTC",
-      DirectDebitSource.VAT.toString  -> "VAT",
-      DirectDebitSource.MGD.toString  -> "MGD"
-    )
+    val hodService = userAnswers
+      .get(DirectDebitSourcePage)
+      .flatMap(value => debitSourceToHodMapping.get(value.toString))
+      .getOrElse(throw new RuntimeException("Missing DirectDebitSourcePage"))
 
-    val hodService =
-      userAnswers
-        .get(DirectDebitSourcePage)
-        .map(_.toString)
-        .flatMap(hodServiceMapping.get)
-        .getOrElse(throw new RuntimeException("Missing DirectDebitSourcePage"))
+    val paymentReference = userAnswers
+      .get(PaymentReferencePage)
+      .getOrElse(throw new RuntimeException("Missing PaymentReferencePage"))
 
-    val paymentReference =
-      userAnswers
-        .get(PaymentReferencePage)
-        .getOrElse(throw new RuntimeException("Missing PaymentReferencePage"))
-
-    val frequency = userAnswers.get(PaymentsFrequencyPage) match {
-      case Some(value) => PaymentsFrequency.paymentFrequencyMapping.get(value.toString)
-      case _           => None
-    }
+    val frequency = userAnswers.get(PaymentsFrequencyPage).flatMap(value => paymentFrequencyToNumericMapping.get(value.toString))
 
     val amount = planType match {
       case PaymentPlanType.BudgetPaymentPlan.toString => userAnswers.get(RegularPaymentAmountPage)
@@ -98,20 +78,13 @@ object PaymentPlanDuplicateCheckRequest {
           .getOrElse(throw new RuntimeException("Missing PlanStartDatePage"))
     }
 
-    val planTypeMapping: Map[String, String] = Map(
-      PaymentPlanType.SinglePaymentPlan.toString      -> "01",
-      PaymentPlanType.BudgetPaymentPlan.toString      -> "02",
-      PaymentPlanType.TaxCreditRepaymentPlan.toString -> "03",
-      PaymentPlanType.VariablePaymentPlan.toString    -> "04"
-    )
-
     PaymentPlanDuplicateCheckRequest(
       directDebitReference = existingDd.ddiRefNumber,
       paymentPlanReference = "",
       planType = userAnswers
         .get(PaymentPlanTypePage)
         .map(_.toString)
-        .flatMap(planTypeMapping.get)
+        .flatMap(planTypeToNumericMapping.get)
         .getOrElse(PaymentPlanType.SinglePaymentPlan.toString),
       paymentService   = hodService,
       paymentReference = paymentReference,
