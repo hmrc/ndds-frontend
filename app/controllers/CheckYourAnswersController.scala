@@ -143,27 +143,11 @@ class CheckYourAnswersController @Inject() (
                   }
                   Future.successful(Redirect(warningUrl))
                 } else {
-//                  val earliestDateFuture = if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
-//                    println("If")
-//                    nddService.getEarliestPlanStartDate(request.userAnswers, request.userId)
-//                  } else {
-//                    println("Else")
-//                    nddService.getFutureWorkingDays(request.userAnswers, request.userId)
-//                  }
-
-//                  println(s"earliestDateFuture: $earliestDateFuture")
-                  // NEW: earliest payment date check BEFORE MAC validation
                   val validationResultF: Future[Either[String, Unit]] =
                     if (requiresEarliestPaymentDateCheckForSinglePlan(ua)) {
-//                      if (request.userAnswers.get(ExistingDirectDebitIdentifierQuery).isEmpty) {
-//                        nddService
-//                          .calculateFutureWorkingDays(request.userAnswers, request.userId)
-//                          .map(earliest => validateSinglePlanDate(ua, earliest))
-//                      } else {
                       nddService
                         .getFutureWorkingDays(request.userAnswers, request.userId)
                         .map(earliest => validateSinglePlanDate(ua, earliest))
-//                      }
                     } else if (requireBudgetingPlanCheck(ua)) {
                       nddService
                         .getFutureWorkingDays(request.userAnswers, request.userId)

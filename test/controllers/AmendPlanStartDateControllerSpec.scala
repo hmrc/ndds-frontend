@@ -243,7 +243,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.isSinglePaymentPlan(any())).thenReturn(true)
-          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+          when(mockService.getFutureWorkingDays(any(), any())(any()))
             .thenReturn(Future.successful(earliestPaymentDate))
           val boundForm = form.bind(Map("value" -> "invalid value"))
           val view = application.injector.instanceOf[AmendPlanStartDateView]
@@ -278,7 +278,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
         running(application) {
           when(mockService.isSinglePaymentPlan(any())).thenReturn(true)
-          when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+          when(mockService.getFutureWorkingDays(any(), any())(any()))
             .thenReturn(Future.successful(earliestPaymentDate))
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = route(application, request).value

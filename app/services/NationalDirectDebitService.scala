@@ -18,8 +18,8 @@ package services
 
 import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
-import models.DirectDebitSource.{MGD, SA, TC, singlePlanDirectDebitSources}
-import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
+import models.DirectDebitSource.{MGD, singlePlanDirectDebitSources}
+import models.PaymentPlanType.VariablePaymentPlan
 import models.requests.*
 import models.responses.*
 import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers, responses}
@@ -28,7 +28,7 @@ import play.api.Logging
 import play.api.mvc.Request
 import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
-import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Frequency, Utils}
 
 import java.text.SimpleDateFormat
@@ -72,66 +72,62 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       }
   }
 
-  def calculateFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
-    val auddisStatusFuture: Future[Boolean] = getAuddiStatus(userAnswers, userId)
+//  def calculateFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
+//    val auddisStatusFuture: Future[Boolean] = getAuddiStatus(userAnswers, userId)
+//
+//    for {
+//      auddisStatus <- auddisStatusFuture
+//      offsetWorkingDays = calculateOffset(auddisStatus = auddisStatus)
+//      currentDate = LocalDate.now().toString
+//      result <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
+//    } yield result
+//  }
 
-    for {
-      auddisStatus <- auddisStatusFuture
-      offsetWorkingDays = calculateOffset(auddisStatus = auddisStatus)
-      currentDate = LocalDate.now().toString
-      result <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
-    } yield result
-  }
-
-  def getEarliestPlanStartDate(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
-    val auddisStatusFuture: Future[Boolean] = getAuddiStatus(userAnswers, userId)
-
-    for {
-      auddisStatus <- auddisStatusFuture
-      paymentPlanType <- userAnswers
-                           .get(PaymentPlanTypePage)
-                           .map(Future.successful)
-                           .getOrElse(Future.failed(new Exception("PaymentPlanTypePage details missing from user answers")))
-      directDebitSource <- userAnswers
-                             .get(DirectDebitSourcePage)
-                             .map(Future.successful)
-                             .getOrElse(Future.failed(new Exception("DirectDebitSourcePage details missing from user answers")))
-      offsetWorkingDays = calculateOffset(auddisStatus, paymentPlanType, directDebitSource)
-      currentDate = LocalDate.now().toString
-      result <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
-    } yield result
-  }
+//  def getEarliestPlanStartDate(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
+//    val auddisStatusFuture: Future[Boolean] = getAuddiStatus(userAnswers, userId)
+//
+//    for {
+//      auddisStatus <- auddisStatusFuture
+//      paymentPlanType <- userAnswers
+//                           .get(PaymentPlanTypePage)
+//                           .map(Future.successful)
+//                           .getOrElse(Future.failed(new Exception("PaymentPlanTypePage details missing from user answers")))
+//      directDebitSource <- userAnswers
+//                             .get(DirectDebitSourcePage)
+//                             .map(Future.successful)
+//                             .getOrElse(Future.failed(new Exception("DirectDebitSourcePage details missing from user answers")))
+//      offsetWorkingDays = calculateOffset(auddisStatus, paymentPlanType, directDebitSource)
+//      currentDate = LocalDate.now().toString
+//      result <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = offsetWorkingDays))
+//    } yield result
+//  }
 
   def getFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val currentDate = LocalDate.now().toString
     println(s"*******************currentDate: $currentDate")
+    val auddisStatusFuture: Future[Boolean] = getAuddiStatus(userAnswers, userId)
     for {
       paymentPlanType <- userAnswers
                            .get(PaymentPlanTypePage)
-                           .fold(Future.successful(ManagePaymentPlanTypePage))(Future.successful)
+                           .fold(Future.successful(userAnswers.get(ManagePaymentPlanTypePage).get))(Future.successful)
       directDebitSource <- userAnswers
                              .get(DirectDebitSourcePage)
-                             .fold(Future.successful(ManageDirectDebitSourcePage))(Future.successful)
+                             .fold(Future.successful(userAnswers.get(ManageDirectDebitSourcePage).get))(Future.successful)
+      auddisStatus <- auddisStatusFuture
       result <-
-        if (
-          (directDebitSource == MGD || directDebitSource.toString.contains(
-            MGD
-          )) && (paymentPlanType == VariablePaymentPlan || paymentPlanType.toString.contains(VariablePaymentPlan))
-        ) {
+        if (directDebitSource == MGD && paymentPlanType == VariablePaymentPlan) {
           println(s"************* mgd paymentPlanType: $paymentPlanType")
           println(s"************* directDebitSource: $directDebitSource")
           nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.TEN_WORKING_DAYS))
         } else {
-//          println(s"************* paymentPlanType: ${paymentPlanType.toString}")
-//          println(s"************* directDebitSource: ${directDebitSource.toString}")
-          val auddisStatusFuture: Future[Boolean] = getAuddiStatus(userAnswers, userId)
+          println(s"************* paymentPlanType: $paymentPlanType")
+          println(s"************* directDebitSource: $directDebitSource")
+          val offsetWorkingDays = calculateWorkingDays(auddisStatus)
           val existingDirectDebitIdentifierQuery = userAnswers.get(ExistingDirectDebitIdentifierQuery)
           if (existingDirectDebitIdentifierQuery.nonEmpty) { // add payment plan or Amend flow
-            calculateEarliestDate(userAnswers, currentDate, auddisStatusFuture)
+            calculateEarliestDate(userAnswers, currentDate, offsetWorkingDays, userId)
           } else { // new direct debit setup flow
             for {
-              auddisStatus <- auddisStatusFuture
-              offsetWorkingDays = calculateWorkingDays(auddisStatus)
               futureDate <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, offsetWorkingDays + config.TWO_WORKING_DAYS))
             } yield {
               println(s"****** futureDate: $futureDate")
@@ -146,33 +142,32 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
   }
 
-  private def calculateEarliestDate(userAnswers: UserAnswers, currentDate: String, auddisStatusFuture: Future[Boolean])(implicit
+  private def calculateEarliestDate(userAnswers: UserAnswers, currentDate: String, noOfWorkingDays: Int, userId: String)(implicit
     hc: HeaderCarrier
   ): Future[EarliestPaymentDate] = {
-    val setupDate = userAnswers
-      .get(ExistingDirectDebitIdentifierQuery)
-      .map(_.submissionDateTime.toLocalDate.toString)
-      .getOrElse(Future.failed(new Exception("ExistingDirectDebitIdentifierQuery details missing from user answers")).toString)
-    println(s"******************** setup: $setupDate")
+    println(s"********** noOfWorkingDays: $noOfWorkingDays")
+    val directDebitReference = userAnswers.get(DirectDebitReferenceQuery).getOrElse(throw new RuntimeException("Missing DirectDebitReferenceQuery"))
+    println(s"********* directDebitReference: $directDebitReference")
     for {
-      auddisStatus <- auddisStatusFuture
-      noOfWorkingDays = calculateWorkingDays(auddisStatus)
-      effectiveDate <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(setupDate, noOfWorkingDays))
+      directDebit <- directDebitCache.getDirectDebit(directDebitReference)(userId)
+      ddSetupDate = directDebit.submissionDateTime.toString
+      effectiveDate <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(ddSetupDate, noOfWorkingDays))
       df = new SimpleDateFormat("yyyy-MM-dd")
       effectiveCalendar = Utils.getSpecifiedCalendar(df.parse(effectiveDate.date))
       currentCalendar = Utils.getSpecifiedCalendar(df.parse(currentDate))
 
       earliestDate <-
         if (effectiveCalendar.after(currentCalendar)) {
+          println(s"********* ddSetupDate: $ddSetupDate")
           println(s"************ IF effectiveDate: $effectiveDate")
           println(s"********** IF effectiveCalendar: ${effectiveCalendar.toInstant}")
           println(s"********** currentCalendar: ${currentCalendar.toInstant}")
-          println(s"********** noOfWorkingDays: $noOfWorkingDays")
           nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(effectiveDate.date, config.TWO_WORKING_DAYS))
         } else {
+          println(s"********* ddSetupDate: $ddSetupDate")
+          println(s"********** ELSE currentDate: $currentDate")
           println(s"********** ELSE effectiveCalendar: ${effectiveCalendar.toInstant}")
           println(s"********** currentCalendar: ${currentCalendar.toInstant}")
-          println(s"********** noOfWorkingDays: $noOfWorkingDays")
           nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.THREE_WORKING_DAYS))
         }
     } yield earliestDate
@@ -194,17 +189,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
-  private[services] def calculateOffset(auddisStatus: Boolean, paymentPlanType: PaymentPlanType, directDebitSource: DirectDebitSource): Int = {
-    (paymentPlanType, directDebitSource) match {
-      case (VariablePaymentPlan, MGD) =>
-        config.TEN_WORKING_DAYS
-      case (BudgetPaymentPlan, SA) | (TaxCreditRepaymentPlan, TC) =>
-        calculateOffset(auddisStatus)
-      case _ =>
-        throw new InternalServerException("User should not be on this page without being on one of the specified journeys")
-    }
-  }
-
   private[services] def calculateWorkingDays(auddisStatus: Boolean): Int = {
     if (auddisStatus) {
       config.paymentDelayDynamicAuddisEnabled
@@ -213,14 +197,25 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     }
   }
 
-  private[services] def calculateOffset(auddisStatus: Boolean): Int = {
-    val dynamicDelay = if (auddisStatus) {
-      config.paymentDelayDynamicAuddisEnabled
-    } else {
-      config.paymentDelayDynamicAuddisNotEnabled
-    }
-    config.TWO_WORKING_DAYS + dynamicDelay
-  }
+  //  private[services] def calculateOffset(auddisStatus: Boolean, paymentPlanType: PaymentPlanType, directDebitSource: DirectDebitSource): Int = {
+//    (paymentPlanType, directDebitSource) match {
+//      case (VariablePaymentPlan, MGD) =>
+//        config.TEN_WORKING_DAYS
+//      case (BudgetPaymentPlan, SA) | (TaxCreditRepaymentPlan, TC) =>
+//        calculateOffset(auddisStatus)
+//      case _ =>
+//        throw new InternalServerException("User should not be on this page without being on one of the specified journeys")
+//    }
+//  }
+
+//  private[services] def calculateOffset(auddisStatus: Boolean): Int = {
+//    val dynamicDelay = if (auddisStatus) {
+//      config.paymentDelayDynamicAuddisEnabled
+//    } else {
+//      config.paymentDelayDynamicAuddisNotEnabled
+//    }
+//    config.TWO_WORKING_DAYS + dynamicDelay
+//  }
 
   // PaymentPlanTypePage used for setup journey and ManagePaymentPlanTypePage used for Amend journey
   def isSinglePaymentPlan(userAnswers: UserAnswers): Boolean =

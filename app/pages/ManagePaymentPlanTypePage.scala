@@ -16,7 +16,6 @@
 
 package pages
 
-import models.PaymentPlanType
 import play.api.libs.json.JsPath
 
 case object ManagePaymentPlanTypePage extends QuestionPage[String] {

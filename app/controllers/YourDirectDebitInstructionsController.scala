@@ -29,7 +29,7 @@ import utils.Utils.cleanConfirmationFlags
 import views.html.YourDirectDebitInstructionsView
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class YourDirectDebitInstructionsController @Inject() (
   override val messagesApi: MessagesApi,
