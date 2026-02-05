@@ -18,7 +18,7 @@ package models.responses
 
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
-import utils.Utils.{debitSourceToHodMapping, numericToPlanTypeMapping}
+import utils.Utils.{hodToDebitSourceMapping, numericToPlanTypeMapping}
 
 import java.time.LocalDateTime
 
@@ -40,7 +40,7 @@ object NddPaymentPlan {
       } and
       (__ \ "paymentReference").read[String] and
       (__ \ "hodService").read[String].map { code =>
-        debitSourceToHodMapping.getOrElse(code, code)
+        hodToDebitSourceMapping.getOrElse(code, code)
       } and
       (__ \ "submissionDateTime").read[LocalDateTime]
   )(NddPaymentPlan.apply _)
