@@ -672,7 +672,7 @@ amendPlanStartDate.title = What date are you making this payment?
 amendPlanStartDate.heading = What date are you making this payment?
 amendPlanStartDate.p1 = This is the earliest date that HMRC will collect payment from your account. The date must be within the next 12 months.
 amendPlanStartDate.warning = If your payment is late, you may be liable to pay interest or a surcharge.
-amendPlanStartDate.hint = The earliest date you can start is {0}. Enter the date as numbers, for example 27 7 2025.
+amendPlanStartDate.hint = The earliest date you can start is {0}. Enter the date as numbers, for example 16 6 2025.
 amendPlanStartDate.error.beforeEarliest=The date you have entered is not valid. It must be either the same or greater than the earliest date displayed.
 amendPlanStartDate.error.tooFarInFuture=The date you have entered is not valid. It cannot be more than 12 months after the current date.
 amendPlanStartDate.startDate = Plan start date
@@ -744,3 +744,8 @@ confirmAnswersError.title = You need to confirm some answers
 confirmAnswersError.heading = You need to confirm some answers
 confirmAnswersError.paragraph = You chose to add a plan end date to this payment plan, but did not enter a date. You need to enter a date or confirm that you do not want to add a plan end date.
 confirmAnswersError.returnLink = Return to check your payment plan
+
+alreadySuspendedError.title = This payment plan is already suspended
+alreadySuspendedError.heading = This payment plan is already suspended
+alreadySuspendedError.p1 = This payment plan is suspended from {0} to {1}. You can change the suspension dates or remove the suspension.
+alreadySuspendedError.link = Return to your payment plan details

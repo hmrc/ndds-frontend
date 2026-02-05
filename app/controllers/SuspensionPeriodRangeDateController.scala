@@ -19,9 +19,9 @@ package controllers
 import controllers.actions.*
 import forms.SuspensionPeriodRangeDateFormProvider
 import models.requests.DataRequest
-import models.{Mode, PaymentPlanType}
+import models.{Mode, NormalMode, PaymentPlanType}
 import navigation.Navigator
-import pages.{ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
+import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.*
@@ -63,7 +63,16 @@ class SuspensionPeriodRangeDateController @Inject() (
           messages.lang.locale
         )
       val userAnswers = request.userAnswers
-      if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
+      val isSuspensionActive =
+        userAnswers.get(IsSuspensionActivePage).getOrElse(false)
+
+      if (mode == NormalMode && isSuspensionActive) {
+        logger.error("Cannot do suspension on already suspended budget plan")
+        Future.successful(
+          Redirect(routes.AlreadySuspendedErrorController.onPageLoad())
+        )
+
+      } else if (nddsService.suspendPaymentPlanGuard(userAnswers)) {
         val planDates = userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails)
         val planStart = planDates.flatMap(_.scheduledPaymentStartDate)
         val planEnd = planDates.flatMap(_.scheduledPaymentEndDate)

@@ -86,6 +86,10 @@ class PaymentPlanDetailsController @Inject() (
                                 }
               updatedAnswers     <- cleanseSessionPages(updatedAnswers)
               showAllActionsFlag <- calculateShowAction(nddService, planDetail)
+              isSuspensionActive = isSuspendPeriodActive(planDetail)
+              updatedAnswers <- Future.fromTry(
+                                  updatedAnswers.set(IsSuspensionActivePage, isSuspensionActive)
+                                )
               isVariablePlan = nddService.isVariablePaymentPlan(planDetail.planType)
               advanceNoticeResponse <- getAdvanceNoticeData(directDebitReference, paymentPlanReference, isVariablePlan)
               updatedAnswers        <- Future.fromTry(updatedAnswers.set(AdvanceNoticeResponseQuery, advanceNoticeResponse))

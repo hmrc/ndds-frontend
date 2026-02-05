@@ -672,7 +672,7 @@ amendPlanStartDate.title = Ar ba ddyddiad rydych chi’n gwneud y taliad hwn?
 amendPlanStartDate.heading = Ar ba ddyddiad rydych chi’n gwneud y taliad hwn?
 amendPlanStartDate.p1 = Dyma’r dyddiad cynharaf y bydd CThEF yn casglu taliad o’ch cyfrif. Mae’n rhaid i’r dyddiad fod cyn pen 12 mis.
 amendPlanStartDate.warning = Os bydd eich taliad yn hwyr, mae’n bosibl y byddwch yn agored i dalu llog neu ordal.
-amendPlanStartDate.hint = Y dyddiad cynharaf y gallwch ddechrau yw {0}. Nodwch y dyddiad fel rhifau, er enghraifft 27 7 2025.
+amendPlanStartDate.hint = Y dyddiad cynharaf y gallwch ddechrau yw {0}. Nodwch y dyddiad fel rhifau, er enghraifft 16 6 2025.
 amendPlanStartDate.error.beforeEarliest = Nid yw’r dyddiad a nodwyd gennych yn ddilys. Mae’n rhaid iddo fod yr un fath â’r dyddiad cynharaf a ddangosir neu’n fwy na hynny
 amendPlanStartDate.error.tooFarInFuture = Nid yw’r dyddiad a nodwyd gennych yn ddilys. Ni all fod yn fwy na 12 mis ar ôl y dyddiad cyfredol
 amendPlanStartDate.startDate = Dyddiad dechrau’r cynllun
@@ -744,3 +744,8 @@ confirmAnswersError.title = Mae angen i chi gadarnhau rhai atebion
 confirmAnswersError.heading = Mae angen i chi gadarnhau rhai atebion
 confirmAnswersError.paragraph = Dewisoch ychwanegu dyddiad dod i ben y cynllun at y cynllun talu hwn, ond wnaethoch ddim nodi dyddiad. Mae angen i chi nodi dyddiad neu gadarnhau nad ydych am ychwanegu dyddiad dod i ben y cynllun.
 confirmAnswersError.returnLink = Yn ôl i wirio’ch cynllun talu
+
+alreadySuspendedError.title = This payment plan is already suspended
+alreadySuspendedError.heading = This payment plan is already suspended
+alreadySuspendedError.p1 = This payment plan is suspended from {0} to {1}. You can change the suspension dates or remove the suspension.
+alreadySuspendedError.link = Return to your payment plan details

@@ -284,7 +284,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
 
     "must fail to validate Tax Credit reference with incorrect format" in {
       val validation = summon[ReferenceTypeValidator.Validator[TC.type]]
-      val invalidTaxCreditReference = Seq("AB123456310724NC", "ZT23456280724NC")
+      val invalidTaxCreditReference = Seq("AB123456310724NC", "ZT23456280724NC", "WT447571310226NE")
 
       invalidTaxCreditReference.foreach(ref => validation.validate(ref) mustEqual false)
     }

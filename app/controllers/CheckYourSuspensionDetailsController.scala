@@ -22,7 +22,7 @@ import models.requests.ChrisSubmissionRequest
 import models.responses.{DirectDebitDetails, PaymentPlanDetails}
 import models.{CheckMode, DirectDebitSource, Mode, NormalMode, PaymentPlanType, PlanStartDateDetails, UserAnswers, YourBankDetails, YourBankDetailsWithAuddisStatus}
 import navigation.Navigator
-import pages.{ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
+import pages.{IsSuspensionActivePage, ManagePaymentPlanTypePage, SuspensionDetailsCheckYourAnswerPage, SuspensionPeriodRangeDatePage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -65,7 +65,14 @@ class CheckYourSuspensionDetailsController @Inject() (
       } else {
         val userAnswers = request.userAnswers
 
-        if (nddService.suspendPaymentPlanGuard(userAnswers)) {
+        val isSuspensionActive =
+          userAnswers.get(IsSuspensionActivePage).getOrElse(false)
+
+        if (mode == NormalMode && isSuspensionActive) {
+          logger.error("Cannot do suspension on already suspended budget plan")
+          Redirect(routes.AlreadySuspendedErrorController.onPageLoad())
+
+        } else if (nddService.suspendPaymentPlanGuard(userAnswers)) {
           val summaryList = buildSummaryList(userAnswers)
           Ok(view(summaryList, mode, routes.SuspensionPeriodRangeDateController.onPageLoad(mode)))
         } else {
