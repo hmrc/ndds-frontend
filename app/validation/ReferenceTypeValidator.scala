@@ -24,6 +24,7 @@ import utils.ModUtils.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Right, Success, Try}
+import java.time.format.ResolverStyle
 
 object ReferenceTypeValidator {
   trait Validator[A <: DirectDebitSource] {
@@ -228,13 +229,16 @@ object ReferenceTypeValidator {
       }
 
       val checkDateFormat = (ref: String) => {
-        val formatter = DateTimeFormatter.ofPattern("ddMMyy")
+        val formatter =
+          DateTimeFormatter
+            .ofPattern("ddMMuu")
+            .withResolverStyle(ResolverStyle.STRICT)
 
-        val extractDate = reference.substring(8, 14)
-        Try(LocalDate.parse(extractDate, formatter)) match {
-          case Success(_) => Right(ref)
-          case Failure(_) => Left("Error: Invalid date format")
-        }
+        val extractDate = ref.substring(8, 14)
+
+        Try(LocalDate.parse(extractDate, formatter)).toEither.left
+          .map(_ => "Error: Invalid date format")
+          .map(_ => ref)
       }
 
       val result = for {
