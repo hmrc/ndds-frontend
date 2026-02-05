@@ -16,7 +16,6 @@
 
 package pages
 
-import models.DirectDebitSource
 import play.api.libs.json.JsPath
 
 case object ManageDirectDebitSourcePage extends QuestionPage[String] {
