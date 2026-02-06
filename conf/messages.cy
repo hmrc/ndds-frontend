@@ -421,7 +421,6 @@ directDebitConfirmation.variablePaymentPlan = Taliad newidiol
 directDebitConfirmation.budgetPaymentPlan = Taliad cyllidebol
 directDebitConfirmation.taxCreditRepaymentPlan = Ad-daliad credydau treth
 directDebitConfirmation.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
-directDebitConfirmation.viewPaymentPlans = Bwrw golwg dros bob cynllun talu
 directDebitConfirmation.viewDirectDebitInstructions = Yn ôl i'r Cyfarwyddiadau Debyd Uniongyrchol
 
 under_construction.heading = Under Construction

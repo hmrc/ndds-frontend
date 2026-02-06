@@ -143,19 +143,18 @@ class CheckYourAnswersController @Inject() (
                   }
                   Future.successful(Redirect(warningUrl))
                 } else {
-                  // NEW: earliest payment date check BEFORE MAC validation
                   val validationResultF: Future[Either[String, Unit]] =
                     if (requiresEarliestPaymentDateCheckForSinglePlan(ua)) {
                       nddService
-                        .calculateFutureWorkingDays(request.userAnswers, request.userId)
+                        .getFutureWorkingDays(request.userAnswers, request.userId)
                         .map(earliest => validateSinglePlanDate(ua, earliest))
                     } else if (requireBudgetingPlanCheck(ua)) {
                       nddService
-                        .getEarliestPlanStartDate(request.userAnswers, request.userId)
+                        .getFutureWorkingDays(request.userAnswers, request.userId)
                         .map(earliest => validateBudgetingPlanDates(ua, earliest))
                     } else if (requireVariableAndTcPlanCheck(ua)) {
                       nddService
-                        .getEarliestPlanStartDate(request.userAnswers, request.userId)
+                        .getFutureWorkingDays(request.userAnswers, request.userId)
                         .map(earliest => validateVariableAndTcPlanDates(ua, earliest))
                     } else {
                       // No rule means proceed normally (not an error)

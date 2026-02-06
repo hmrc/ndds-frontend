@@ -112,7 +112,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
-        when(mockService.calculateFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
+        when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         running(application) {
@@ -133,7 +133,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
-        when(mockService.calculateFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
+        when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         running(application) {
@@ -167,7 +167,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
-        when(mockService.calculateFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
+        when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
         running(application) {
@@ -185,7 +185,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
-        when(mockService.calculateFutureWorkingDays(ArgumentMatchers.eq(emptyUserAnswers), any())(any()))
+        when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(emptyUserAnswers), any())(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         val validDate = LocalDate.parse(expectedEarliestPaymentDate.date)
@@ -220,7 +220,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
-        when(mockService.calculateFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
+        when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         val request =
@@ -255,7 +255,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
       "must redirect to System Error for a POST if the earliest payment date cannot be obtained and the data is valid" in {
         val mockSessionRepository = mock[SessionRepository]
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-        when(mockService.calculateFutureWorkingDays(ArgumentMatchers.any(), any())(any()))
+        when(mockService.getFutureWorkingDays(ArgumentMatchers.any(), any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
         val validDate = LocalDate.now()
@@ -283,7 +283,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         }
       }
       "must return Bad Request with earliest date error if date is before earliest payment date" in {
-        when(mockService.calculateFutureWorkingDays(any(), any())(any()))
+        when(mockService.getFutureWorkingDays(any(), any())(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
         val earliest = LocalDate.parse(expectedEarliestPaymentDate.date)
@@ -314,7 +314,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
-        when(mockService.calculateFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
+        when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
 
         val request =

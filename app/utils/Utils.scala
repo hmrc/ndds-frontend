@@ -22,6 +22,7 @@ import pages.*
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, Settable}
 
 import java.time.LocalDate
+import java.util.{Calendar, Date}
 
 object Utils {
   val emptyString = ""
@@ -194,4 +195,19 @@ object Utils {
       paymentStartDate = startDate
     )
   }
+
+  def getSpecifiedCalendar(date: Date): Calendar = {
+    if (date != null) {
+      val c = Calendar.getInstance()
+      c.setTime(date)
+      c.set(Calendar.HOUR, 0)
+      c.set(Calendar.MINUTE, 0)
+      c.set(Calendar.SECOND, 0)
+      c.set(Calendar.MILLISECOND, 0)
+      c
+    } else {
+      null
+    }
+  }
+
 }

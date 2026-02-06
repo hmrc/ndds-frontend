@@ -22,9 +22,8 @@ import utils.ModUtils
 import utils.ModUtils.*
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import scala.util.{Failure, Right, Success, Try}
-import java.time.format.ResolverStyle
+import java.time.format.{DateTimeFormatter, ResolverStyle}
+import scala.util.{Right, Try}
 
 object ReferenceTypeValidator {
   trait Validator[A <: DirectDebitSource] {

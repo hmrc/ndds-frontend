@@ -60,7 +60,7 @@ class PlanStartDateController @Inject() (
       answers.get(DirectDebitSourcePage) match {
         case Some(value)
             if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) =>
-          nddService.getEarliestPlanStartDate(answers, request.userId) map { earliestPlanStartDate =>
+          nddService.getFutureWorkingDays(answers, request.userId) map { earliestPlanStartDate =>
             val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
             val form = formProvider(answers, earliestDate)
             val preparedForm = answers.get(PlanStartDatePage) match {
@@ -100,7 +100,7 @@ class PlanStartDateController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     (for {
-      earliestPlanStartDate <- nddService.getEarliestPlanStartDate(request.userAnswers, request.userId)
+      earliestPlanStartDate <- nddService.getFutureWorkingDays(request.userAnswers, request.userId)
       earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
       form = formProvider(request.userAnswers, earliestDate)
       result <- form
@@ -122,16 +122,15 @@ class PlanStartDateController @Inject() (
                       ),
                     value =>
                       for {
-                        updatedAnswers <- Future.fromTry(
-                                            request.userAnswers
-                                              .set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date))
-                                          )
+                        updatedAnswers <-
+                          Future.fromTry(request.userAnswers.set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date)))
                         _ <- sessionRepository.set(updatedAnswers)
                       } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
                   )
-    } yield result).recover { case e =>
-      logger.warn(s"Unexpected error: $e")
-      Redirect(routes.SystemErrorController.onPageLoad())
-    }
+    } yield result)
+      .recover { case e =>
+        logger.warn(s"Unexpected error: $e")
+        Redirect(routes.SystemErrorController.onPageLoad())
+      }
   }
 }

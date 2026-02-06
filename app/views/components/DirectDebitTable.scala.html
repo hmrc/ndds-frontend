@@ -29,12 +29,13 @@
 @(rows: Seq[DirectDebitDetails])(implicit request: Request[_], messages: Messages)
 
 @* Define a formatter using the user's locale *@
-@defining(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, messages.lang.locale)) { localeFormatter =>
-    @defining((setupDateStr: String) => {
-        val parsedDate = LocalDate.parse(setupDateStr, DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, Locale.ENGLISH))
-        parsedDate.format(localeFormatter)
-    }) { formatDateWithLocale =>
-
+@defining(DateTimeFormatter.ofPattern(
+    Constants.shortDateTimeFormatPattern,
+    messages.lang.locale
+)) { formatter =>
+    @defining { (date: String) =>
+        LocalDate.parse(date, formatter).format(formatter)
+    } { formatDate =>
     @govukTable(
         Table(
             classes = "direct-debit-table",
@@ -69,7 +70,7 @@
                                     """
                         )
                     ),
-                    TableRow(content = Text(formatDateWithLocale(dd.setupDate))),
+                    TableRow(content = Text(dd.setupDate)),
                     TableRow(content = Text(dd.paymentPlans))
                     )
                 }
