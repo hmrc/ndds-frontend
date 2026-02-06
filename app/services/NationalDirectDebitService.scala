@@ -615,7 +615,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     directDebitCache
       .getDirectDebit(directDebitRef)(userId)
       .flatMap { debit =>
-        if (debit.numberOfPayPlans <= 1) {
+        if (debit.numberOfPayPlans < 1) {
           Future.successful(DuplicateCheckResponse(false))
         } else {
           val request = PaymentPlanDuplicateCheckRequest.build(userAnswers, paymentAmount, paymentStartDate)
