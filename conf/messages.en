@@ -382,7 +382,7 @@ checkYourAnswers.planEndDate.enter = Enter plan end date
 
 duplicateError.title = You cannot set up a duplicate payment plan
 duplicateError.heading = You cannot set up a duplicate payment plan
-duplicateError.p1 = You already have a payment plan set up with the same date.
+duplicateError.p1 = You already have a payment plan set up with the same amount and dates.
 duplicateError.linkText = Return to plan start date
 
 duplicateWarningForAddOrCreatePP.title = You already have a payment plan with these details
