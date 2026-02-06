@@ -65,6 +65,7 @@ class DirectDebitSummaryController @Inject() (
             PaymentPlanReferenceQuery,
             PaymentPlanDetailsQuery,
             ManagePaymentPlanTypePage,
+            ManageDirectDebitSourcePage,
             AmendPaymentAmountPage,
             AmendPlanStartDatePage,
             AmendPlanEndDatePage,

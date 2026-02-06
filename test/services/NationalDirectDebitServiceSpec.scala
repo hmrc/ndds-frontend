@@ -235,13 +235,13 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
             .set(
               ExistingDirectDebitIdentifierQuery,
               NddDetails("directDebitReference",
-                LocalDateTime.now(),
-                "bankSortCode",
-                "bankAccountNumber",
-                "bankAccountName",
-                auDdisFlag       = true,
-                numberOfPayPlans = 2
-              )
+                         LocalDateTime.now(),
+                         "bankSortCode",
+                         "bankAccountNumber",
+                         "bankAccountName",
+                         auDdisFlag       = true,
+                         numberOfPayPlans = 2
+                        )
             )
             .success
             .value
