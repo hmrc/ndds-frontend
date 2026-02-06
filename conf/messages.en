@@ -125,7 +125,7 @@ accountDetailsNotVerified.return.link = Return to Direct Debit Instructions
 
 confirmYourAuthority.title = Confirm your authority
 confirmYourAuthority.heading = Confirm your authority
-confirmYourAuthority.p1 = Confirm that you are the account holder or an authorised signatory, and are able to authorise Direct Debit payments from this account.
+confirmYourAuthority.p1 = Confirm that you are the account holder and are able to authorise Direct Debit payments from this account.
 confirmYourAuthority.yes = Yes
 confirmYourAuthority.no = No
 confirmYourAuthority.error.required = Select yes if you are the account holder and are able to authorise Direct Debit payments from this account
