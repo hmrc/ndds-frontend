@@ -209,7 +209,7 @@ class PaymentPlanDetailsController @Inject() (
     ec: ExecutionContext
   ): Future[Boolean] = {
     planDetail.planType match {
-      case PaymentPlanType.SinglePaymentPlan.toString | PaymentPlanType.VariablePaymentPlan.toString =>
+      case PaymentPlanType.SinglePaymentPlan.toString =>
         planDetail.scheduledPaymentStartDate match {
           case Some(startDate) => nddService.isTwoDaysPriorPaymentDate(startDate)
           case None            => Future.successful(true)
@@ -222,6 +222,7 @@ class PaymentPlanDetailsController @Inject() (
                                   }
         } yield isThreeDaysBeforeEnd
       case PaymentPlanType.TaxCreditRepaymentPlan.toString => Future.successful(false)
+      case PaymentPlanType.VariablePaymentPlan.toString    => Future.successful(true)
     }
   }
 

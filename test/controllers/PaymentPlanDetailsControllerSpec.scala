@@ -1157,7 +1157,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
             }
           }
 
-          "should not show Amend, Cancel and Suspend actions when scheduledPaymentStartDate is within 2 working days" in {
+          "should show Cancel action when scheduledPaymentStartDate is within 2 working days" in {
             val mockVariablePaymentPlanDetailResponse =
               dummyPlanDetailResponse.copy(paymentPlanDetails =
                 dummyPlanDetailResponse.paymentPlanDetails.copy(
@@ -1208,7 +1208,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
               when(mockService.getPaymentPlanDetails(any(), any())(any(), any()))
                 .thenReturn(Future.successful(mockVariablePaymentPlanDetailResponse))
               when(mockService.isTwoDaysPriorPaymentDate(any())(any()))
-                .thenReturn(Future.successful(false))
+                .thenReturn(Future.successful(true))
               when(mockService.isPaymentPlanEditable(any()))
                 .thenReturn(true)
               when(mockService.isVariablePaymentPlan(any()))
@@ -1226,7 +1226,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 "variablePaymentPlan",
                 mockPaymentReference,
                 false,
-                false,
+                true,
                 false,
                 false,
                 "",
@@ -1235,7 +1235,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 false,
                 "",
                 "",
-                false,
+                true,
                 routes.AdvanceNoticeController.onPageLoad()
               )(
                 request,
