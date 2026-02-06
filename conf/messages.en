@@ -125,7 +125,7 @@ accountDetailsNotVerified.return.link = Return to Direct Debit Instructions
 
 confirmYourAuthority.title = Confirm your authority
 confirmYourAuthority.heading = Confirm your authority
-confirmYourAuthority.p1 = Confirm that you are the account holder or an authorised signatory, and are able to authorise Direct Debit payments from this account.
+confirmYourAuthority.p1 = Confirm that you are the account holder and are able to authorise Direct Debit payments from this account.
 confirmYourAuthority.yes = Yes
 confirmYourAuthority.no = No
 confirmYourAuthority.error.required = Select yes if you are the account holder and are able to authorise Direct Debit payments from this account
@@ -143,7 +143,7 @@ bankDetailsCheckYourAnswer.change.accountHolderName = Account holder(s) name
 
 bankApproval.title = There is a problem with your approval
 bankApproval.heading = There is a problem with your approval
-bankApproval.p1 = Your business account requires more than one person to authorise payments. You can ask your bank to allow one signatory to set up Direct Debit payments to HMRC,
+bankApproval.p1 = You must be the account holder, and able to authorise payments, to continue setting up this Direct Debit. Alternatively,
 bankApproval.p1.link = you must pay with a different payment option (opens in a new tab)
 
 directDebitSource.title = Which tax or duty is this payment plan for?
@@ -364,7 +364,7 @@ checkYourAnswers.title = Check your payment plan details
 checkYourAnswers.heading = Check your payment plan details
 checkYourAnswers.ddDeclaration.h2 = Direct Debit declaration
 checkYourAnswers.ddDeclaration.p1 = By continuing, you agree to pay HMRC by Direct Debit and accept the terms of the Direct Debit Guarantee.
-checkYourAnswers.ddDeclaration.p2 = This instruction may remain with HMRC and, if so, details will be passed electronically to your bank or building society from {0}.
+checkYourAnswers.ddDeclaration.p2 = This instruction may remain with HMRC and, if so, details will be passed electronically to your bank or building society from {0}. HMRC will send you a letter by post, within 3 days, confirming the set up of your Direct Debit or no later than 10 working days before the first collection.
 checkYourAnswers.collapsable = The Direct Debit Guarantee
 checkYourAnswers.collapsable.p1 = This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits.
 checkYourAnswers.collapsable.p2 = If there are any changes to the amount, date or frequency of your Direct Debit, HMRC NDDS will notify you 10 working days in advance of your account being debited, or as otherwise agreed. If you request HMRC NDDS to collect a payment, confirmation of the amount and date will be given to you at the time of the request.
