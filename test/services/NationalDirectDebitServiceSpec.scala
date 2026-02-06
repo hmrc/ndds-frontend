@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
 import controllers.routes
 import models.DirectDebitSource.*
-import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, VariablePaymentPlan}
+import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
 import models.requests.WorkingDaysOffsetRequest
 import models.responses.*
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
@@ -174,10 +174,10 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "should add TWO_WORKING_DAYS for new direct debit setup for auddis disabled" in {
         val userAnswers =
           emptyUserAnswers
-            .set(DirectDebitSourcePage, CT)
+            .set(DirectDebitSourcePage, TC)
             .success
             .value
-            .set(PaymentPlanTypePage, SinglePaymentPlan)
+            .set(PaymentPlanTypePage, TaxCreditRepaymentPlan)
             .success
             .value
             .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
