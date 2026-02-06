@@ -33,7 +33,7 @@ case class PaymentPlanDuplicateCheckRequest(
   paymentAmount: Option[BigDecimal],
   totalLiability: Option[BigDecimal],
   paymentFrequency: Option[Int],
-  paymentStartDate: LocalDate
+  paymentStartDate: Option[LocalDate]
 )
 
 object PaymentPlanDuplicateCheckRequest {
@@ -48,6 +48,12 @@ object PaymentPlanDuplicateCheckRequest {
       .get(PaymentPlanTypePage)
       .map(_.toString)
       .getOrElse(PaymentPlanType.SinglePaymentPlan.toString)
+
+    val mappedPlanType: String =
+      planTypeToNumericMapping.getOrElse(
+        planType,
+        PaymentPlanType.SinglePaymentPlan.toString
+      )
 
     val hodService = userAnswers
       .get(DirectDebitSourcePage)
@@ -70,28 +76,69 @@ object PaymentPlanDuplicateCheckRequest {
         userAnswers
           .get(PaymentDatePage)
           .map(_.enteredDate)
-          .getOrElse(throw new RuntimeException("Missing PaymentDatePage"))
       case _ =>
         userAnswers
           .get(PlanStartDatePage)
           .map(_.enteredDate)
-          .getOrElse(throw new RuntimeException("Missing PlanStartDatePage"))
     }
 
-    PaymentPlanDuplicateCheckRequest(
-      directDebitReference = existingDd.ddiRefNumber,
-      paymentPlanReference = "",
-      planType = userAnswers
-        .get(PaymentPlanTypePage)
-        .map(_.toString)
-        .flatMap(planTypeToNumericMapping.get)
-        .getOrElse(PaymentPlanType.SinglePaymentPlan.toString),
-      paymentService   = hodService,
-      paymentReference = paymentReference,
-      paymentAmount    = amount,
-      totalLiability   = userAnswers.get(TotalAmountDuePage),
-      paymentFrequency = frequency,
-      paymentStartDate = startDate
-    )
+    planType match {
+
+      // SINGLE
+      case PaymentPlanType.SinglePaymentPlan.toString =>
+        PaymentPlanDuplicateCheckRequest(
+          directDebitReference = existingDd.ddiRefNumber,
+          paymentPlanReference = "",
+          planType             = mappedPlanType,
+          paymentService       = hodService,
+          paymentReference     = paymentReference,
+          paymentAmount        = amount,
+          totalLiability       = None,
+          paymentFrequency     = None,
+          paymentStartDate     = startDate
+        )
+
+      // BUDGET
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        PaymentPlanDuplicateCheckRequest(
+          directDebitReference = existingDd.ddiRefNumber,
+          paymentPlanReference = "",
+          planType             = mappedPlanType,
+          paymentService       = hodService,
+          paymentReference     = paymentReference,
+          paymentAmount        = amount,
+          totalLiability       = userAnswers.get(TotalAmountDuePage),
+          paymentFrequency     = frequency,
+          paymentStartDate     = startDate
+        )
+
+      // REPAYMENT
+      case PaymentPlanType.TaxCreditRepaymentPlan.toString =>
+        PaymentPlanDuplicateCheckRequest(
+          directDebitReference = existingDd.ddiRefNumber,
+          paymentPlanReference = "",
+          planType             = mappedPlanType,
+          paymentService       = hodService,
+          paymentReference     = paymentReference,
+          paymentAmount        = amount,
+          totalLiability       = userAnswers.get(TotalAmountDuePage),
+          paymentFrequency     = None,
+          paymentStartDate     = startDate
+        )
+
+      // VARIABLE
+      case PaymentPlanType.VariablePaymentPlan.toString =>
+        PaymentPlanDuplicateCheckRequest(
+          directDebitReference = existingDd.ddiRefNumber,
+          paymentPlanReference = "",
+          planType             = mappedPlanType,
+          paymentService       = hodService,
+          paymentReference     = paymentReference,
+          paymentAmount        = None,
+          totalLiability       = None,
+          paymentFrequency     = None,
+          paymentStartDate     = None
+        )
+    }
   }
 }
