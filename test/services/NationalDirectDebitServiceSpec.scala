@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
 import controllers.routes
 import models.DirectDebitSource.*
-import models.PaymentPlanType.{SinglePaymentPlan, VariablePaymentPlan}
+import models.PaymentPlanType.{BudgetPaymentPlan, SinglePaymentPlan, VariablePaymentPlan}
 import models.requests.WorkingDaysOffsetRequest
 import models.responses.*
 import models.{DirectDebitSource, NddDetails, NddResponse, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, YourBankDetailsWithAuddisStatus}
@@ -194,26 +194,61 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         result mustBe EarliestPaymentDate("2026-02-25")
       }
 
-      "should calculate earliest date for add or amend flow" in {
+      "should calculate earliest date for amend flow" in {
+        val userAnswers =
+          emptyUserAnswers
+            .set(DirectDebitSourcePage, PAYE)
+            .success
+            .value
+            .set(AmendPlanStartDatePage, LocalDate.now().plusDays(6))
+            .success
+            .value
+            .set(PaymentPlanTypePage, SinglePaymentPlan)
+            .success
+            .value
+            .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
+            .success
+            .value
+            .set(DirectDebitReferenceQuery, "dd-ref")
+            .success
+            .value
+
+        val submissionDate = LocalDate.parse("2025-02-10").plusDays(10)
+
+        when(mockCache.getDirectDebit(any())(any()))
+          .thenReturn(Future.successful(nddResponse.directDebitList.head))
+        when(mockConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(submissionDate.toString, 3)))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-02-24")))
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(5)
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+        when(mockConfig.THREE_WORKING_DAYS).thenReturn(3)
+        when(mockConnector.getFutureWorkingDays(any())(any()))
+          .thenReturn(Future.successful(EarliestPaymentDate("2026-02-20")))
+
+        val result = service.getFutureWorkingDays(userAnswers, "user-1").futureValue
+        result mustBe EarliestPaymentDate("2026-02-20")
+      }
+
+      "should calculate earliest date for add flow" in {
         val userAnswers =
           emptyUserAnswers
             .set(
               ExistingDirectDebitIdentifierQuery,
               NddDetails("directDebitReference",
-                         LocalDateTime.now(),
-                         "bankSortCode",
-                         "bankAccountNumber",
-                         "bankAccountName",
-                         auDdisFlag       = true,
-                         numberOfPayPlans = 2
-                        )
+                LocalDateTime.now(),
+                "bankSortCode",
+                "bankAccountNumber",
+                "bankAccountName",
+                auDdisFlag       = true,
+                numberOfPayPlans = 2
+              )
             )
             .success
             .value
-            .set(DirectDebitSourcePage, MGD)
+            .set(DirectDebitSourcePage, SA)
             .success
             .value
-            .set(PaymentPlanTypePage, SinglePaymentPlan)
+            .set(PaymentPlanTypePage, BudgetPaymentPlan)
             .success
             .value
             .set(YourBankDetailsPage, testBankDetailsAuddisTrue)
