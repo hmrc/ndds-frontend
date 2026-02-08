@@ -1130,7 +1130,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       ".frequency is Weekly" - {
         "when planStartDate is a past date but potentialNextPaymentDate is not within 3 working days" in {
           val today = LocalDate.of(2026, 2, 8)
-          val startDate = today.minusDays(10)
+          val startDate = today.minusDays(19)
           val planEndDate = today.plusDays(20)
 
           when(mockConnector.getFutureWorkingDays(any())(any()))
@@ -1138,7 +1138,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
           result.nextPaymentDateValid mustBe true
         }
 

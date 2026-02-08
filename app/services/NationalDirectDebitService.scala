@@ -337,7 +337,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     logger.debug("****** Number of days difference between start date and today " + daysDifference)
     println("****** Number of days difference between start date and today " + daysDifference)
 
-    val wholeFrequencies = Math.ceil(daysDifference / daysPerFrequency).toInt
+    val wholeFrequencies = Math.ceil(daysDifference.toDouble / daysPerFrequency).toInt
     logger.debug("****** Number of payments taken on this plan so far " + wholeFrequencies)
     println("****** Number of payments taken on this plan so far " + wholeFrequencies)
 
