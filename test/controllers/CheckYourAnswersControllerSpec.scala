@@ -18,7 +18,6 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
-import connectors.NationalDirectDebitConnector
 import models.*
 import models.responses.{DirectDebitDetails, *}
 import org.mockito.ArgumentCaptor
@@ -49,7 +48,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  private val mockConnector: NationalDirectDebitConnector = mock[NationalDirectDebitConnector]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
 
   "Check Your Answers Controller" - {

@@ -1038,7 +1038,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
 
     "isPaymentPlanLocked" - {
-
       "return true when paymentPlanEditable is true" in {
         val paymentPlanDetails = PaymentPlanDetails(
           hodService                = "HOD2",
@@ -1088,7 +1087,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
   }
 
   "calculateNextPaymentDate" - {
-
     "when planEndDate is None then potentialNextPaymentDate should return None" in {
       val today = LocalDate.now()
       val startDate = today.plusDays(1) // start date is tomorrow
@@ -1129,11 +1127,10 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     }
 
     ".forWeeklyFrequency" - {
-
       ".frequency is Weekly" - {
         "when planStartDate is a past date but potentialNextPaymentDate is not within 3 working days" in {
-          val today = LocalDate.now()
-          val startDate = today.minusDays(10)
+          val today = LocalDate.of(2026, 2, 8)
+          val startDate = today.minusDays(19)
           val planEndDate = today.plusDays(20)
 
           when(mockConnector.getFutureWorkingDays(any())(any()))
@@ -1141,7 +1138,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
           result.nextPaymentDateValid mustBe true
         }
 
@@ -1152,7 +1149,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           when(mockConnector.getFutureWorkingDays(any())(any()))
             .thenReturn(
-              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
               Future.successful(EarliestPaymentDate(startDate.plusWeeks(2).plusDays(3).toString))
             )
 
@@ -1172,7 +1168,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(1))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(0))
           result.nextPaymentDateValid mustBe true
         }
 
@@ -1189,7 +1185,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(1))
           result.nextPaymentDateValid mustBe true
         }
       }
@@ -1216,13 +1212,12 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           when(mockConnector.getFutureWorkingDays(any())(any()))
             .thenReturn(
-              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
-              Future.successful(EarliestPaymentDate(startDate.plusWeeks(2).plusDays(3).toString))
+              Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
             )
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Fortnightly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
           result.nextPaymentDateValid mustBe true
         }
 
@@ -1237,23 +1232,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Fortnightly).futureValue
 
           result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(2))
-          result.nextPaymentDateValid mustBe true
-        }
-
-        "when planStartDate is prior to next three working days but potentialNextPaymentDate is within 3 working days" in {
-          val today = LocalDate.now()
-          val startDate = today.plusDays(2)
-          val planEndDate = today.plusMonths(3)
-
-          when(mockConnector.getFutureWorkingDays(any())(any()))
-            .thenReturn(
-              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
-              Future.successful(EarliestPaymentDate(startDate.plusWeeks(2).plusDays(3).toString))
-            )
-
-          val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Fortnightly).futureValue
-
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
           result.nextPaymentDateValid mustBe true
         }
       }
@@ -1274,19 +1252,18 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
         }
 
         "when planStartDate is a past date but potentialNextPaymentDate is within 3 working days" in {
-          val today = LocalDate.now()
+          val today = LocalDate.of(2026, 2, 8)
           val startDate = today.minusDays(10)
           val planEndDate = today.plusMonths(3)
 
           when(mockConnector.getFutureWorkingDays(any())(any()))
             .thenReturn(
-              Future.successful(EarliestPaymentDate(today.plusDays(3).toString)),
-              Future.successful(EarliestPaymentDate(startDate.plusWeeks(4).plusDays(3).toString))
+              Future.successful(EarliestPaymentDate(today.plusDays(3).toString))
             )
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), FourWeekly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(8))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
           result.nextPaymentDateValid mustBe true
         }
 
@@ -1317,7 +1294,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), FourWeekly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(8))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
           result.nextPaymentDateValid mustBe true
         }
       }

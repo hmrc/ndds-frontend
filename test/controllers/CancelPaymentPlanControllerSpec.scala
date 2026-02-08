@@ -34,7 +34,6 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.MaskAndFormatUtils.*
 import views.html.CancelPaymentPlanView
 
 import scala.concurrent.Future
