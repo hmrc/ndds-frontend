@@ -240,15 +240,17 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
   def isTwoDaysPriorPaymentDate(planStarDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now(clock).toString
-    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 2)).map { futureWorkingDays =>
-      planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = config.TWO_WORKING_DAYS)).map {
+      futureWorkingDays =>
+        planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
     }
   }
 
   def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val currentDate = LocalDate.now(clock).toString
-    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = 3)).map { futureWorkingDays =>
-      planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
+    nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = config.THREE_WORKING_DAYS)).map {
+      futureWorkingDays =>
+        planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
     }
   }
 
@@ -277,19 +279,20 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
             if (planStartDate.isAfter(today) && isBeyondThreeDays) {
               // Start date is after today and beyond 3 working days
               // Skip frequency logic — per business rule Step 1.1
-              println("Start date is after today's date")
               Future.successful(planStartDate)
             } else {
               //  Otherwise, calculate next payment date using frequency logic (Step 1.2)
               // Step 1.2 – calculate potential next payment date
               paymentFrequency match {
                 case Frequency.Weekly | Frequency.Fortnightly | Frequency.FourWeekly =>
-                  println("*********** Weekly calculation")
-                  calculateWeeklyBasedNextDate(planStartDate, today, paymentFrequency)
+                  val weeklyNextPotential = calculateWeeklyBasedNextDate(planStartDate, today, paymentFrequency)
+                  println(s"************** weeklyNextPotential: $weeklyNextPotential")
+                  weeklyNextPotential
 
                 case Frequency.Monthly | Frequency.Quarterly | Frequency.SixMonthly | Frequency.Annually =>
-                  println("********* Monthly calculation")
-                  calculateMonthlyBasedNextDate(planStartDate, today, paymentFrequency)
+                  val monthlyNextPotential = calculateMonthlyBasedNextDate(planStartDate, today, paymentFrequency)
+                  println(s"************** monthlyNextPotential: $monthlyNextPotential")
+                  monthlyNextPotential
               }
             }
         } yield {
@@ -321,11 +324,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       case other                 => throw new IllegalArgumentException(s"Invalid weekly frequency: $other")
     }
 
-    logger.debug(
-      "Entering - getNextPaymentWeeklyBased() with startDate :: " + startDate
-        + " and frequency :: " + daysInWeek
-    )
-
     val todayCal = Calendar.getInstance
     todayCal.setTime(new Date())
     val startCal = Calendar.getInstance
@@ -333,16 +331,16 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     val potentialNextCollectionCal = Calendar.getInstance
     todayCal.setTime(Date.from(startDate.atStartOfDay(ZoneOffset.UTC).toInstant))
 
-    val daysPerFrequency = daysFrequency.toDouble
-    val weeksPerFrequency = daysFrequency.toDouble / daysInWeek
+    val daysPerFrequency = daysFrequency
+    val weeksPerFrequency = daysFrequency / daysInWeek
 
-    val daysDifference = (todayCal.getTimeInMillis - startCal.getTimeInMillis).toDouble / MILLISEC_IN_DAY
+    val daysDifference = (todayCal.getTimeInMillis - startCal.getTimeInMillis) / MILLISEC_IN_DAY
     logger.debug("****** Number of days difference between start date and today " + daysDifference)
 
-    val wholeFrequencies = Math.ceil(daysDifference / daysPerFrequency).toInt
+    val wholeFrequencies = Math.ceil(daysDifference / daysPerFrequency)
     logger.debug("****** Number of payments taken on this plan so far " + wholeFrequencies)
-    potentialNextCollectionCal.add(Calendar.WEEK_OF_YEAR, wholeFrequencies * weeksPerFrequency.toInt)
-//    logger.debug("The next collection date after today is ", potentialNextCollectionCal)
+    potentialNextCollectionCal.add(Calendar.WEEK_OF_YEAR, wholeFrequencies * weeksPerFrequency)
+    logger.debug(s"**** The next collection date after today is ${potentialNextCollectionCal.getTime}")
 
     // Step 1 – find days difference
 //    val daysDiff = Math.abs(ChronoUnit.DAYS.between(today, startDate)).toInt
@@ -356,39 +354,23 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 //    // Step 4 – potential next payment date
 //    val potentialNext = startDate.plusWeeks(paymentsTakenToDate.toLong * weeksUntilNextPayment)
 
-//    potentialNextCollectionCal.add(Calendar.WEEK_OF_YEAR, wholeFrequencies * weeksPerFrequency)
-    val nextPotentialDate = potentialNextCollectionCal.toInstant
-      .atZone(potentialNextCollectionCal.getTimeZone.toZoneId)
-      .toLocalDate
-
     // Step 5 – if within 3 working days → add one cycle
-    isThreeDaysPriorPlanEndDate(nextPotentialDate) map { isBeyondThreeWorkingDays =>
-      if (isBeyondThreeWorkingDays) {
-        nextPotentialDate
-      } else {
+    for {
+      workingDays <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(LocalDate.now().toString, config.THREE_WORKING_DAYS))
+    } yield {
+      val df = SimpleDateFormat("yyyy-MM-dd")
+      val nextdate: Calendar = if (potentialNextCollectionCal.getTime.before(df.parse(workingDays.date))) {
         val cal = potentialNextCollectionCal.clone().asInstanceOf[Calendar]
         cal.add(Calendar.WEEK_OF_YEAR, weeksPerFrequency.toInt)
-        cal.toInstant
-          .atZone(cal.getTimeZone.toZoneId)
-          .toLocalDate
+        cal
+      } else {
+        potentialNextCollectionCal
       }
-    }
-//    val nextPotentialEndCal: Calendar = isThreeDaysPriorPlanEndDate(nextPotentialDate) match {
-//      case Some(false) =>
-//        val cal = potentialNextCollectionCal.clone().asInstanceOf[Calendar]
-//        cal.add(Calendar.WEEK_OF_YEAR, weeksPerFrequency)
-//        cal
-//      case _ =>
-//        potentialNextCollectionCal.clone().asInstanceOf[Calendar] // fallback
-//    }
 
-    // Step 4 – convert to LocalDate
-//    val nextPotentialEndDate: LocalDate = nextPotentialEndCal.toInstant
-//      .atZone(nextPotentialEndCal.getTimeZone.toZoneId)
-//      .toLocalDate
-//
-//    logger.info(s"Next potential end date: $nextPotentialEndDate")
-//    Future.successful(nextPotentialEndDate)
+      nextdate.toInstant
+        .atZone(nextdate.getTimeZone.toZoneId)
+        .toLocalDate
+    }
   }
 
   private def calculateMonthlyBasedNextDate(
