@@ -29,7 +29,7 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DuplicateWarningForAddOrCreatePPView
-
+import queries.ExistingDirectDebitIdentifierQuery
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -60,39 +60,65 @@ class DuplicateWarningForAddOrCreatePPController @Inject() (
     Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    implicit val ua: UserAnswers = request.userAnswers
-    form
-      .bindFromRequest()
-      .fold(
-        formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
-        value =>
-          if (value) {
-            for {
-              generatedDdiRef <- nddService.generateNewDdiReference(required(PaymentReferencePage))
-              chrisRequest =
-                ChrisSubmissionRequest.buildChrisSubmissionRequest(ua, generatedDdiRef.ddiRefNumber, request.userId, appConfig)
-              chrisSuccess <- nddService.submitChrisData(chrisRequest)
-              result <- {
-                if (chrisSuccess) {
-                  for {
-                    updatedAnswers <- Future.fromTry(ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(generatedDdiRef.ddiRefNumber)))
-                    updatedAnswers <- Future.fromTry(updatedAnswers.set(CreateConfirmationPage, value))
-                    _              <- sessionRepository.set(updatedAnswers)
-                  } yield Redirect(routes.DirectDebitConfirmationController.onPageLoad())
-                } else {
-                  Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-                }
-              }
-            } yield result
-          } else {
-            for {
-              updatedAnswers <- Future.fromTry(ua.set(CreateConfirmationPage, value))
-              _              <- sessionRepository.set(updatedAnswers)
-            } yield Redirect(routes.CheckYourAnswersController.onPageLoad())
-          }
-      )
-  }
+  def onSubmit(mode: Mode): Action[AnyContent] =
+    (identify andThen getData andThen requireData).async { implicit request =>
+
+      implicit val ua: UserAnswers = request.userAnswers
+
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          value =>
+            if (value) {
+
+              val ddiRefF: Future[String] =
+                ua.get(ExistingDirectDebitIdentifierQuery)
+                  .map(existing => Future.successful(existing.ddiRefNumber))
+                  .getOrElse(
+                    nddService
+                      .generateNewDdiReference(required(PaymentReferencePage))
+                      .map(_.ddiRefNumber)
+                  )
+
+              for {
+                ddiRefNumber <- ddiRefF
+
+                chrisRequest =
+                  ChrisSubmissionRequest.buildChrisSubmissionRequest(
+                    ua,
+                    ddiRefNumber,
+                    request.userId,
+                    appConfig
+                  )
+
+                chrisSuccess <- nddService.submitChrisData(chrisRequest)
+
+                result <-
+                  if (chrisSuccess) {
+                    for {
+                      updated1 <- Future.fromTry(
+                                    ua.set(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber))
+                                  )
+                      updated2 <- Future.fromTry(
+                                    updated1.set(CreateConfirmationPage, value)
+                                  )
+                      _ <- sessionRepository.set(updated2)
+                    } yield Redirect(routes.DirectDebitConfirmationController.onPageLoad())
+                  } else {
+                    Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
+                  }
+
+              } yield result
+
+            } else {
+              for {
+                updatedAnswers <- Future.fromTry(ua.set(CreateConfirmationPage, value))
+                _              <- sessionRepository.set(updatedAnswers)
+              } yield Redirect(routes.CheckYourAnswersController.onPageLoad())
+            }
+        )
+    }
 
   private def required[A](page: QuestionPage[A])(implicit ua: UserAnswers, rds: play.api.libs.json.Reads[A]): A =
     ua.get(page).getOrElse(throw new Exception(s"Missing details: ${page.toString}"))
