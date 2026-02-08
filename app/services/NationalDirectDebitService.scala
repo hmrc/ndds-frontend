@@ -323,45 +323,41 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
     val startCal = Calendar.getInstance
     startCal.setTime(Date.from(startDate.atStartOfDay(ZoneOffset.UTC).toInstant))
+    logger.info(s"******* Start date is $startDate")
 
     val potentialNextCollectionCal = Calendar.getInstance
     potentialNextCollectionCal.setTime(Date.from(startDate.atStartOfDay(ZoneOffset.UTC).toInstant))
-    println(s"******* Start date is $startDate")
-    println(s"******* Start startCal is ${startCal.toInstant}")
+    logger.info(s"******* Start startCal is ${startCal.toInstant}")
 
     val daysPerFrequency = daysFrequency
     val weeksPerFrequency = daysFrequency / daysInWeek
-    println(s"******* weeksPerFrequency: $weeksPerFrequency")
+    logger.info(s"******* weeksPerFrequency: $weeksPerFrequency")
 
     val daysDifference = (todayCal.getTimeInMillis - startCal.getTimeInMillis) / MILLISEC_IN_DAY
-    logger.debug("****** Number of days difference between start date and today " + daysDifference)
-    println("****** Number of days difference between start date and today " + daysDifference)
+    logger.info("****** Number of days difference between start date and today " + daysDifference)
 
     val wholeFrequencies = Math.ceil(daysDifference.toDouble / daysPerFrequency).toInt
-    logger.debug("****** Number of payments taken on this plan so far " + wholeFrequencies)
-    println("****** Number of payments taken on this plan so far " + wholeFrequencies)
+    logger.info("****** Number of payments taken on this plan so far " + wholeFrequencies)
 
     potentialNextCollectionCal.add(Calendar.WEEK_OF_YEAR, wholeFrequencies * weeksPerFrequency)
-    logger.debug(s"**** The next collection date is ${potentialNextCollectionCal.getTime}")
-    println(s"**** The next collection date is ${potentialNextCollectionCal.getTime}")
+    logger.info(s"**** The next collection date is ${potentialNextCollectionCal.getTime}")
 
     for {
-      workingDays <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(LocalDate.now().toString, config.THREE_WORKING_DAYS))
+      workingDays <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(LocalDate.now(clock).toString, config.THREE_WORKING_DAYS))
     } yield {
-      logger.debug(s"The date 3 working days from today is $workingDays")
+      logger.info(s"The date 3 working days from today is $workingDays")
       println(s"The date 3 working days from today is $workingDays")
       val df = SimpleDateFormat("yyyy-MM-dd")
       val nextPaymentDate: Calendar = if (potentialNextCollectionCal.getTime.before(df.parse(workingDays.date))) {
         val cal = potentialNextCollectionCal.clone().asInstanceOf[Calendar]
         cal.add(Calendar.WEEK_OF_YEAR, weeksPerFrequency)
-        println(s"****** cal: ${cal.toInstant}")
+        logger.info(s"****** if potential date is before working days cal: ${cal.toInstant}")
         cal
       } else {
-        println(s"****** potentialNextCollectionCal: ${potentialNextCollectionCal.toInstant}")
+        logger.info(s"****** potentialNextCollectionCal is equal or after working days: ${potentialNextCollectionCal.toInstant}")
         potentialNextCollectionCal
       }
 
-      println(s"**** nextPaymentDate: ${nextPaymentDate.toInstant}")
 //    convert to local date format
       nextPaymentDate.toInstant.atZone(nextPaymentDate.getTimeZone.toZoneId).toLocalDate
     }

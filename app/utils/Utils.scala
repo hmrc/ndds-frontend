@@ -180,9 +180,6 @@ object Utils {
           .get(PaymentPlanDetailsQuery)
           .flatMap(_.paymentPlanDetails.scheduledPaymentStartDate)
 
-      case PaymentPlanType.VariablePaymentPlan.toString =>
-        None
-
       case _ => None
     }
 
