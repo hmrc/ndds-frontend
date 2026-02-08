@@ -377,7 +377,7 @@ checkYourAnswers.paymentPlanType.variablePaymentPlan = Taliad newidiol
 checkYourAnswers.paymentPlanType.budgetPaymentPlan = Taliad cyllidebol
 checkYourAnswers.paymentPlanType.taxCreditRepaymentPlan = Cynllun ad-dalu credydau treth
 checkYourAnswers.directDebitSource = Taliad ar gyfer
-checkYourAnswers.acceptAndSubmit = Derbyn a pharhau
+checkYourAnswers.acceptAndSubmit = Derbyn a chyflwyno
 checkYourAnswers.planEndDate.enter = Nodwch ddyddiad dod i ben y cynllun
 
 duplicateError.title = Ni allwch sefydlu cynllun talu dyblyg
