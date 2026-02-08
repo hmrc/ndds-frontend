@@ -225,7 +225,7 @@ object Utils {
           paymentService       = hodService,
           paymentReference     = paymentReference,
           paymentAmount        = paymentAmount,
-          totalLiability       = totalLiability,
+          totalLiability       = None,
           paymentFrequency     = frequency,
           paymentStartDate     = startDate
         )
