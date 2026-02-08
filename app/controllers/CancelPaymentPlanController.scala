@@ -66,6 +66,11 @@ class CancelPaymentPlanController @Inject() (
         request.userAnswers.get(PaymentPlanDetailsQuery) match {
           case Some(paymentPlanDetail) =>
             val paymentPlan = paymentPlanDetail.paymentPlanDetails
+            logger.info(
+              s"""|[CancelPaymentPlanController]
+                  |  paymentPlanDetail: $paymentPlan
+                  |""".stripMargin
+            )
             val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
               case None        => form
               case Some(value) => form.fill(value)
