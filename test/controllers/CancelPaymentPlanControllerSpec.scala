@@ -88,7 +88,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount)(
             request,
             messages(application)
           ).toString
@@ -183,7 +183,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount)(
             request,
             messages(application)
           ).toString
@@ -232,7 +232,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form.fill(true), paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form.fill(true), paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount)(
             request,
             messages(application)
           ).toString

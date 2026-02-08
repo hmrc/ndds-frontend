@@ -66,16 +66,12 @@ class CancelPaymentPlanController @Inject() (
         request.userAnswers.get(PaymentPlanDetailsQuery) match {
           case Some(paymentPlanDetail) =>
             val paymentPlan = paymentPlanDetail.paymentPlanDetails
-            logger.info(
-              s"""|[CancelPaymentPlanController]
-                  |  paymentPlanDetail: $paymentPlan
-                  |""".stripMargin
-            )
             val preparedForm = request.userAnswers.get(CancelPaymentPlanPage) match {
               case None        => form
               case Some(value) => form.fill(value)
             }
-            Ok(view(preparedForm, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get))
+
+            Ok(view(preparedForm, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount))
 
           case _ =>
             logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery")
@@ -108,7 +104,7 @@ class CancelPaymentPlanController @Inject() (
               formWithErrors,
               paymentPlan.planType,
               paymentPlan.paymentReference,
-              paymentPlan.scheduledPaymentAmount.get
+              paymentPlan.scheduledPaymentAmount
             )
           )
         )
