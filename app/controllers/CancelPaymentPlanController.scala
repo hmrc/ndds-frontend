@@ -70,7 +70,8 @@ class CancelPaymentPlanController @Inject() (
               case None        => form
               case Some(value) => form.fill(value)
             }
-            Ok(view(preparedForm, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get))
+
+            Ok(view(preparedForm, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount))
 
           case _ =>
             logger.warn("Unable to load CancelPaymentPlanController missing PaymentPlanDetailsQuery")
@@ -103,7 +104,7 @@ class CancelPaymentPlanController @Inject() (
               formWithErrors,
               paymentPlan.planType,
               paymentPlan.paymentReference,
-              paymentPlan.scheduledPaymentAmount.get
+              paymentPlan.scheduledPaymentAmount
             )
           )
         )

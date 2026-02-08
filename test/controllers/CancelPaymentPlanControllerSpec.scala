@@ -88,13 +88,14 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount)(
             request,
             messages(application)
           ).toString
 
         contentAsString(result) must include(s"Payment reference: <strong>${paymentPlan.paymentReference}</strong>")
-        contentAsString(result) must include(s"Regular payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
+        contentAsString(result) must include("Regular payment amount:")
+        contentAsString(result) must include("120.00")
       }
     }
 
@@ -183,13 +184,14 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form, paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount)(
             request,
             messages(application)
           ).toString
 
         contentAsString(result) must include(s"Payment reference: <strong>${paymentPlan.paymentReference}</strong>")
-        contentAsString(result) must include(s"Payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
+        contentAsString(result) must include(s"Payment amount:")
+        contentAsString(result) must include(s"120.00")
       }
     }
 
@@ -232,7 +234,7 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual
-          view(form.fill(true), paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount.get)(
+          view(form.fill(true), paymentPlan.planType, paymentPlan.paymentReference, paymentPlan.scheduledPaymentAmount)(
             request,
             messages(application)
           ).toString

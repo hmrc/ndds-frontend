@@ -19,7 +19,7 @@ package utils
 import models.requests.PaymentPlanDuplicateCheckRequest
 import models.{DirectDebitSource, PaymentPlanType, PaymentsFrequency, UserAnswers}
 import pages.*
-import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, Settable}
+import queries.{PaymentPlanDetailsQuery, PaymentPlanReferenceQuery, Settable}
 
 import java.time.LocalDate
 import java.util.{Calendar, Date}
@@ -113,45 +113,6 @@ object Utils {
     val planType =
       userAnswers.get(PaymentPlanDetailsQuery).map(_.paymentPlanDetails.planType).getOrElse(throw new RuntimeException("Missing PaymentPlanType"))
 
-    val paymentAmount: Option[BigDecimal] = userAnswers
-      .get(AmendPaymentAmountPage)
-      .orElse(
-        userAnswers
-          .get(PaymentPlanDetailsQuery)
-          .flatMap(_.paymentPlanDetails.scheduledPaymentAmount)
-      )
-
-    val totalLiability: Option[BigDecimal] = planType match {
-      case PaymentPlanType.SinglePaymentPlan.toString =>
-        userAnswers
-          .get(AmendPaymentAmountPage)
-
-      case PaymentPlanType.BudgetPaymentPlan.toString =>
-        userAnswers
-          .get(PaymentPlanDetailsQuery)
-          .flatMap(_.paymentPlanDetails.totalLiability)
-
-      case _ =>
-        throw new RuntimeException(s"Unsupported plan type: $planType")
-    }
-
-    val startDate: LocalDate = planType match {
-      case PaymentPlanType.SinglePaymentPlan.toString =>
-        userAnswers
-          .get(AmendPlanStartDatePage)
-          .orElse(userAnswers.get(PaymentPlanDetailsQuery).flatMap(_.paymentPlanDetails.scheduledPaymentStartDate))
-          .getOrElse(throw new RuntimeException("Missing start date from both NewAmendPlanStartDatePage and AmendPlanStartDatePage"))
-
-      case PaymentPlanType.BudgetPaymentPlan.toString =>
-        userAnswers
-          .get(PaymentPlanDetailsQuery)
-          .flatMap(_.paymentPlanDetails.scheduledPaymentStartDate)
-          .getOrElse(throw new RuntimeException("Missing scheduledPaymentStartDate in PaymentPlanDetailsQuery"))
-
-      case _ =>
-        throw new RuntimeException(s"Unsupported plan type: $planType")
-    }
-
     val planTypeMapping: Map[String, String] = Map(
       PaymentPlanType.SinglePaymentPlan.toString      -> "01",
       PaymentPlanType.BudgetPaymentPlan.toString      -> "02",
@@ -169,31 +130,132 @@ object Utils {
       PaymentsFrequency.Annually.toString    -> 9
     )
 
-    PaymentPlanDuplicateCheckRequest(
-      directDebitReference = userAnswers.get(DirectDebitReferenceQuery).getOrElse(throw new RuntimeException("Missing DirectDebitReferenceQuery")),
-      paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse(throw new RuntimeException("Missing PaymentPlanReferenceQuery")),
-      planType = userAnswers
-        .get(PaymentPlanDetailsQuery)
-        .map(_.paymentPlanDetails.planType)
-        .flatMap(planTypeMapping.get)
-        .getOrElse(throw new RuntimeException("Missing PaymentPlanType")),
-      paymentService = userAnswers
-        .get(PaymentPlanDetailsQuery)
-        .map(_.paymentPlanDetails.hodService)
-        .flatMap(debitSourceToHodMapping.get)
-        .getOrElse(throw new RuntimeException("Missing paymentService")),
-      paymentReference = userAnswers
-        .get(PaymentPlanDetailsQuery)
-        .map(_.paymentPlanDetails.paymentReference)
-        .getOrElse(throw new RuntimeException("Missing PaymentPlanDetailsQuery or paymentReference")),
-      paymentAmount  = paymentAmount,
-      totalLiability = totalLiability,
-      paymentFrequency = userAnswers
-        .get(PaymentPlanDetailsQuery)
-        .flatMap(_.paymentPlanDetails.scheduledPaymentFrequency)
-        .flatMap(paymentFrequencyMapping.get),
-      paymentStartDate = startDate
+    val mappedPlanType: String = planTypeMapping.getOrElse(
+      planType,
+      PaymentPlanType.SinglePaymentPlan.toString
     )
+
+    val paymentAmount: Option[BigDecimal] = userAnswers
+      .get(AmendPaymentAmountPage)
+      .orElse(
+        userAnswers
+          .get(PaymentPlanDetailsQuery)
+          .flatMap(_.paymentPlanDetails.scheduledPaymentAmount)
+      )
+
+    val totalLiability: Option[BigDecimal] = planType match {
+      case PaymentPlanType.SinglePaymentPlan.toString =>
+        userAnswers.get(AmendPaymentAmountPage)
+
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        userAnswers
+          .get(PaymentPlanDetailsQuery)
+          .flatMap(_.paymentPlanDetails.totalLiability)
+
+      case PaymentPlanType.TaxCreditRepaymentPlan.toString =>
+        userAnswers
+          .get(PaymentPlanDetailsQuery)
+          .flatMap(_.paymentPlanDetails.totalLiability)
+
+      case PaymentPlanType.VariablePaymentPlan.toString =>
+        None
+
+      case other =>
+        throw new RuntimeException(s"Unsupported plan type: $other")
+    }
+
+    val startDate: Option[LocalDate] = planType match {
+      case PaymentPlanType.SinglePaymentPlan.toString =>
+        userAnswers
+          .get(AmendPlanStartDatePage)
+          .orElse(userAnswers.get(PaymentPlanDetailsQuery).flatMap(_.paymentPlanDetails.scheduledPaymentStartDate))
+
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        userAnswers
+          .get(PaymentPlanDetailsQuery)
+          .flatMap(_.paymentPlanDetails.scheduledPaymentStartDate)
+
+      case PaymentPlanType.TaxCreditRepaymentPlan.toString =>
+        userAnswers
+          .get(PaymentPlanDetailsQuery)
+          .flatMap(_.paymentPlanDetails.scheduledPaymentStartDate)
+
+      case PaymentPlanType.VariablePaymentPlan.toString =>
+        None
+
+      case _ => None
+    }
+
+    val frequency = userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .flatMap(_.paymentPlanDetails.scheduledPaymentFrequency)
+      .flatMap(paymentFrequencyMapping.get)
+
+    val hodService = userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .map(_.paymentPlanDetails.hodService)
+      .flatMap(debitSourceToHodMapping.get)
+      .getOrElse(throw new RuntimeException("Missing paymentService"))
+
+    val paymentReference = userAnswers
+      .get(PaymentPlanDetailsQuery)
+      .map(_.paymentPlanDetails.paymentReference)
+      .getOrElse(throw new RuntimeException("Missing PaymentPlanDetailsQuery or paymentReference"))
+
+    planType match {
+
+      case PaymentPlanType.SinglePaymentPlan.toString =>
+        PaymentPlanDuplicateCheckRequest(
+          directDebitReference = directDebitRef,
+          paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse(""),
+          planType             = mappedPlanType,
+          paymentService       = hodService,
+          paymentReference     = paymentReference,
+          paymentAmount        = paymentAmount,
+          totalLiability       = None,
+          paymentFrequency     = None,
+          paymentStartDate     = startDate
+        )
+
+      case PaymentPlanType.BudgetPaymentPlan.toString =>
+        PaymentPlanDuplicateCheckRequest(
+          directDebitReference = directDebitRef,
+          paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse(""),
+          planType             = mappedPlanType,
+          paymentService       = hodService,
+          paymentReference     = paymentReference,
+          paymentAmount        = paymentAmount,
+          totalLiability       = None,
+          paymentFrequency     = frequency,
+          paymentStartDate     = startDate
+        )
+
+      case PaymentPlanType.TaxCreditRepaymentPlan.toString =>
+        PaymentPlanDuplicateCheckRequest(
+          directDebitReference = directDebitRef,
+          paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse(""),
+          planType             = mappedPlanType,
+          paymentService       = hodService,
+          paymentReference     = paymentReference,
+          paymentAmount        = paymentAmount,
+          totalLiability       = totalLiability,
+          paymentFrequency     = None,
+          paymentStartDate     = startDate
+        )
+
+      case PaymentPlanType.VariablePaymentPlan.toString =>
+        PaymentPlanDuplicateCheckRequest(
+          directDebitReference = directDebitRef,
+          paymentPlanReference = userAnswers.get(PaymentPlanReferenceQuery).getOrElse(""),
+          planType             = mappedPlanType,
+          paymentService       = hodService,
+          paymentReference     = paymentReference,
+          paymentAmount        = None,
+          totalLiability       = None,
+          paymentFrequency     = None,
+          paymentStartDate     = None
+        )
+    }
   }
 
   def getSpecifiedCalendar(date: Date): Calendar = {
