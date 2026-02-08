@@ -29,7 +29,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], planType: String, paymentReference: String, paymentAmount: BigDecimal)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], planType: String, paymentReference: String, paymentAmount: Option[BigDecimal])(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("cancelPaymentPlan.title")), backLink = Some(routes.PaymentPlanDetailsController.onPageLoad().url)) {
 
@@ -43,14 +43,21 @@
 
         <p class="govuk-body">
             @messages("cancelPaymentPlan.paymentReference") <strong>@paymentReference</strong><br/>
-            @if(planType == PaymentPlanType.SinglePaymentPlan.toString) {
-                @messages("cancelPaymentPlan.paymentAmount.single") <strong>@formatAmount(paymentAmount)</strong><br/>
-            } else if(planType == PaymentPlanType.BudgetPaymentPlan.toString) {
-                @messages("cancelPaymentPlan.paymentAmount.budget") <strong>@formatAmount(paymentAmount)</strong><br/>
+
+            @paymentAmount.map { amount =>
+            @messages(
+            if (planType == PaymentPlanType.SinglePaymentPlan.toString)
+            "cancelPaymentPlan.paymentAmount.single"
+            else
+            "cancelPaymentPlan.paymentAmount.budget"
+            )
+            <strong>@formatAmount(amount)</strong><br/>
             }
         </p>
 
-        @paragraph("cancelPaymentPlan.p1")
+
+
+@paragraph("cancelPaymentPlan.p1")
 
         @govukRadios(
             RadiosViewModel.yesNo(
