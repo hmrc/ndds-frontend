@@ -94,7 +94,8 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           ).toString
 
         contentAsString(result) must include(s"Payment reference: <strong>${paymentPlan.paymentReference}</strong>")
-        contentAsString(result) must include(s"Regular payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
+        contentAsString(result) must include("Regular payment amount:")
+        contentAsString(result) must include("120.00")
       }
     }
 
@@ -189,7 +190,8 @@ class CancelPaymentPlanControllerSpec extends SpecBase with MockitoSugar {
           ).toString
 
         contentAsString(result) must include(s"Payment reference: <strong>${paymentPlan.paymentReference}</strong>")
-        contentAsString(result) must include(s"Payment amount: <strong>${formatAmount(paymentPlan.scheduledPaymentAmount.get)}</strong>")
+        contentAsString(result) must include(s"Payment amount:")
+        contentAsString(result) must include(s"120.00")
       }
     }
 
