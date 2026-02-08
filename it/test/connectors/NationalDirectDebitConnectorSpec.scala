@@ -980,7 +980,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       paymentAmount        = Some(120.00),
       totalLiability       = Some(120.00),
       paymentFrequency     = Some(1),
-      paymentStartDate     = currentDate
+      paymentStartDate     = Some(currentDate)
     )
 
     "successfully return true when there is a duplicate Plan with 200 OK" in {
