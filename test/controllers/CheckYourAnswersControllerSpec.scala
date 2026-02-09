@@ -762,7 +762,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.getFutureWorkingDays(any(), any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+          .thenReturn(Future.successful(EarliestPaymentDate("2025-07-01")))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
         when(mockNddService.submitChrisData(any())(any()))
@@ -791,7 +791,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-//          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
         }
       }
 
@@ -867,12 +867,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
         running(application) {
-          when(mockNddService.getFutureWorkingDays(any(), any())(any()))
-            .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
+          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(EarliestPaymentDate("2025-06-15")))
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-//          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
         }
       }
 
@@ -914,7 +914,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
-//          redirectLocation(result).value mustEqual routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode).url
         }
       }
 
@@ -1008,7 +1008,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
       }
     }
 
@@ -1111,7 +1111,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
       }
     }
 

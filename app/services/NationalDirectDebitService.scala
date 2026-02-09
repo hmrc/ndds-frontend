@@ -346,7 +346,6 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       workingDays <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(LocalDate.now(clock).toString, config.THREE_WORKING_DAYS))
     } yield {
       logger.info(s"The date 3 working days from today is $workingDays")
-      println(s"The date 3 working days from today is $workingDays")
       val df = SimpleDateFormat("yyyy-MM-dd")
       val nextPaymentDate: Calendar = if (potentialNextCollectionCal.getTime.before(df.parse(workingDays.date))) {
         val cal = potentialNextCollectionCal.clone().asInstanceOf[Calendar]
