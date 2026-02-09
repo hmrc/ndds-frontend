@@ -1060,7 +1060,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
       }
     }
 
