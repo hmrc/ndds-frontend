@@ -31,17 +31,6 @@ error.title.prefix = Error:
 error.prefix = Error
 error.summary.title = There is a problem
 
-index.title = Set up a direct debit
-index.heading = Set up a direct debit
-index.guidance = Welcome to your NDDS frontend. Please see the README file for a guide to getting started.
-
-journeyRecovery.continue.title = Sorry, there is a problem with this service
-journeyRecovery.continue.heading = Sorry, there is a problem with this service
-journeyRecovery.continue.guidance = You will need to start again to create a direct debit.
-journeyRecovery.startAgain.title = Sorry, there is a problem with this service
-journeyRecovery.startAgain.heading = Sorry, there is a problem with this service
-journeyRecovery.startAgain.guidance = You will need to start again to create a direct debit.
-
 signedOut.title = For your security, we signed you out
 signedOut.heading = For your security, we signed you out
 signedOut.guidance = We did not save your answers.
@@ -95,7 +84,6 @@ yourBankDetails.sortCode = Sort code
 yourBankDetails.sortCode.hint = Must be 6 digits long
 yourBankDetails.accountNumber = Account number
 yourBankDetails.accountNumber.hint = Must be 8 digits long
-yourBankDetails.checkYourAnswersLabel = Your bank details
 yourBankDetails.error.accountHolderName.required = Enter the name on the account
 yourBankDetails.error.accountHolderName.length = The name on the account must be 35 characters or less
 yourBankDetails.error.sortCode.required = Enter your sort code
@@ -132,7 +120,7 @@ confirmYourAuthority.error.required = Select yes if you are the account holder a
 
 bankDetailsCheckYourAnswer.title = Check your answers
 bankDetailsCheckYourAnswer.heading = Check your answers
-bankDetailsCheckYourAnswer.error.required = Select yes if you are the account holder or an authorised signatory
+bankDetailsCheckYourAnswer.error.required = Select yes if you are the account holder and are able to authorise Direct Debit payments from this account
 bankDetailsCheckYourAnswer.h2 = Your bank details
 bankDetailsCheckYourAnswer.account.holder.name = Account holder(s) name
 bankDetailsCheckYourAnswer.account.account.number = Account number
@@ -423,8 +411,6 @@ directDebitConfirmation.taxCreditRepaymentPlan = Tax Credit repayment
 directDebitConfirmation.printInset = You can print this page for your records using the print function on your browser.
 directDebitConfirmation.viewDirectDebitInstructions = Return to Direct Debit Instructions
 
-under_construction.heading = Under Construction
-
 directDebitPaymentSummary.title.noPlans = Set up a payment plan for this Direct Debit
 directDebitPaymentSummary.title.withPlans = Summary of payment plans for this Direct Debit
 directDebitPaymentSummary.heading.noPlans = Set up a payment plan for this Direct Debit
@@ -483,8 +469,6 @@ paymentPlanDetails.details.startDate = Plan start date
 paymentPlanDetails.details.date = Payment date
 paymentPlanDetails.details.planStartDate = Plan start date
 paymentPlanDetails.details.planEndDate = Plan end date
-paymentPlanDetails.details.suspendStartDate = Suspend start date
-paymentPlanDetails.details.suspendEndDate = Suspend end date
 paymentPlanDetails.details.paymentsFrequency = Frequency of payments
 paymentPlanDetails.paymentsFrequency.monthly = Monthly
 paymentPlanDetails.paymentsFrequency.weekly = Weekly
