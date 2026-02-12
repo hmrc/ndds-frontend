@@ -35,7 +35,7 @@
         @govukDateInput(
             DateViewModel(
                 field  = form("value"),
-                legend = LegendViewModel(messages("planEndDate.heading")).asPageHeading()
+                legend = LegendViewModel(messages("planEndDate.heading")).withCssClass("govuk-fieldset__legend--l")
                 ).withHint(
                 HintViewModel(
                     HtmlContent(
