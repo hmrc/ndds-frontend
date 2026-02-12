@@ -34,6 +34,7 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
       "accountHolderName" -> text("yourBankDetails.error.accountHolderName.required")
         .verifying(maxLength(MAX_ACCOUNT_HOLDER_NAME_LENGTH, "yourBankDetails.error.accountHolderName.length")),
       "sortCode" -> text("yourBankDetails.error.sortCode.required")
+        .transform[String](value => value.replaceAll("[\\s-]", ""), identity)
         .verifying(
           firstError(
             minLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
@@ -42,6 +43,7 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
           )
         ),
       "accountNumber" -> text("yourBankDetails.error.accountNumber.required")
+        .transform[String](value => value.replaceAll("\\s", ""), identity)
         .verifying(
           firstError(
             minLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.tooShort"),
