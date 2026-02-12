@@ -34,7 +34,8 @@ class CustomDateFormatter(invalidKey: String,
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
     val fields = fieldKeys.map { field =>
-      field -> data.get(s"$key.$field").filter(_.nonEmpty)
+      val cleanedValueOpt = data.get(s"$key.$field").map(_.replaceAll("\\s", ""))
+      field -> cleanedValueOpt.filter(_.nonEmpty)
     }.toMap
 
     val missingCount = fields.values.count(_.isEmpty)
@@ -52,7 +53,11 @@ class CustomDateFormatter(invalidKey: String,
       return Left(Seq(FormError(key, twoRequiredKey, args)))
     }
 
-    formatDate(key, data).left.map { errors =>
+    val cleanedData: Map[String, String] = fields.collect { case (k, Some(v)) =>
+      s"$key.$k" -> v
+    }
+
+    formatDate(key, cleanedData).left.map { errors =>
       errors.map(_.copy(key = key, messages = Seq(invalidKey), args = args))
     }
   }

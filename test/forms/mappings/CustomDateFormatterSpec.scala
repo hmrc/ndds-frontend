@@ -88,5 +88,17 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
       }
     }
 
+    "bind successfully with date input containing spaces" in {
+      val data = Map(
+        "date.day"   -> " 1 5 ",
+        "date.month" -> " 0 8 ",
+        "date.year"  -> " 2 0 2 5 "
+      )
+
+      val result = formatter.bind("date", data)
+
+      result mustBe Right(LocalDate.of(2025, 8, 15))
+    }
+
   }
 }
