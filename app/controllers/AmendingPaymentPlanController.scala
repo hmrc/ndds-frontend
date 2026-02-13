@@ -103,7 +103,7 @@ class AmendingPaymentPlanController @Inject() (
                       ActionItem(
                         href               = routes.AmendPlanStartDateController.onPageLoad(NormalMode).url,
                         content            = Text(messages("site.change")),
-                        visuallyHiddenText = Some(messages("amendPaymentAmount.change.hidden"))
+                        visuallyHiddenText = Some(messages("amendPlanStartDate.startDate.hidden"))
                       )
                     )
                   )
