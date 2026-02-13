@@ -38,7 +38,7 @@
         @fieldSet(
             legend = "addPaymentPlanEndDate.heading",
             asHeading = true,
-            describedBy = None
+            describedBy = form.error("value").map(_ => "value-error")
         ) {
             @paragraph("addPaymentPlanEndDate.p1")
 
