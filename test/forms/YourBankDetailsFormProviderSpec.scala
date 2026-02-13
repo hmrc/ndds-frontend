@@ -27,11 +27,6 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
   def numericStringOfLength(n: Int): Gen[String] =
     Gen.listOfN(n, Gen.numChar).map(_.mkString)
 
-  def numericStringWithSpacesOrHyphens(length: Int): Gen[String] =
-    numericStringOfLength(length).map { s =>
-      s.grouped(2).mkString("-")
-    }
-
   ".accountHolderName" - {
 
     val fieldName = "accountHolderName"
@@ -108,7 +103,7 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
       val bound = form.bind(
         Map(
           "accountHolderName" -> "John Doe",
-          "sortCode"          -> "12 34 56",
+          "sortCode"          -> " 12 34 56 ",
           "accountNumber"     -> "12345678"
         )
       )
@@ -161,7 +156,7 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
         Map(
           "accountHolderName" -> "John Doe",
           "sortCode"          -> "123456",
-          "accountNumber"     -> "12 34 56 78"
+          "accountNumber"     -> " 12 34 56 78 "
         )
       )
 
