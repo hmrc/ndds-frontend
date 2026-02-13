@@ -297,7 +297,7 @@ yearEndAndMonth.change.hidden = 4 rhif ychwanegol
 paymentsFrequency.title = Pa mor aml yr hoffech wneud taliadau?
 paymentsFrequency.heading = Pa mor aml yr hoffech wneud taliadau?
 paymentsFrequency.weekly = Bob wythnos
-paymentsFrequency.monthly = Bob mis
+paymentsFrequency.monthly = Yn fisol
 paymentsFrequency.error.required = Dewiswch a yw amlder y taliadau’n wythnosol neu’n fisol
 paymentsFrequency.change.hidden =  Amlder y taliadau
 paymentsFrequency.checkYourAnswersLabel = Amlder y taliadau
@@ -732,5 +732,5 @@ confirmAnswersError.returnLink = Yn ôl i wirio’ch cynllun talu
 
 alreadySuspendedError.title = Mae’r cynllun talu hwn eisoes wedi’i ohirio
 alreadySuspendedError.heading = Mae’r cynllun talu hwn eisoes wedi’i ohirio
-alreadySuspendedError.p1 = Mae’r cynllun talu hwn wedi’i ohirio o {0} i {1}. Gallwch newid y dyddiadau gohirio neu ddileu'r gohiriad.
-alreadySuspendedError.link = Ewch yn ôl i fanylion eich cynllun talu.
+alreadySuspendedError.p1 = Mae’r cynllun talu hwn wedi’i ohirio o {0} i {1}. Gallwch newid y dyddiadau gohirio neu ddileu’r gohiriad.
+alreadySuspendedError.link = Ewch yn ôl i fanylion eich cynllun talu
