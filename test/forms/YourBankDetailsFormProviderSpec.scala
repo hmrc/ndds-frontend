@@ -86,6 +86,32 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
       result.errors.exists(_.message == numericOnlyKey) mustBe true
     }
 
+    "bind valid sort code with spaces or hyphens" in {
+      val bound = form.bind(
+        Map(
+          "accountHolderName" -> "John Doe",
+          "sortCode"          -> "12-34-56",
+          "accountNumber"     -> "12345678"
+        )
+      )
+
+      bound.errors mustBe empty
+      bound.value.get.sortCode mustBe "123456"
+    }
+
+    "bind valid sort code with spaces" in {
+      val bound = form.bind(
+        Map(
+          "accountHolderName" -> "John Doe",
+          "sortCode"          -> " 12 34 56 ",
+          "accountNumber"     -> "12345678"
+        )
+      )
+
+      bound.errors mustBe empty
+      bound.value.get.sortCode mustBe "123456"
+    }
+
     behave like mandatoryField(
       form,
       fieldName,
@@ -123,6 +149,19 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
     "not bind non-numeric input" in {
       val result = form.bind(Map(fieldName -> "1234A678")).apply(fieldName)
       result.errors.exists(_.message == numericOnlyKey) mustBe true
+    }
+
+    "bind valid account number with spaces" in {
+      val bound = form.bind(
+        Map(
+          "accountHolderName" -> "John Doe",
+          "sortCode"          -> "123456",
+          "accountNumber"     -> " 12 34 56 78 "
+        )
+      )
+
+      bound.errors mustBe empty
+      bound.value.get.accountNumber mustBe "12345678"
     }
 
     behave like mandatoryField(
