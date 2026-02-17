@@ -117,7 +117,7 @@ class YourBankDetailsController @Inject() (
 
       case Left(barsError) =>
         logger.warn(
-          s"BARS verification failed for userId=$credId, accountType=$accountType. " +
+          s"BARS verification failed for accountType=$accountType. " +
             s"Reason: ${barsError.toString}"
         )
         onFailedVerification(credId, bankDetails, mode, barsError)
