@@ -42,7 +42,7 @@ import scala.concurrent.Future
 
 class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute: Call = Call("GET", "/direct-debits/check-amendment-details")
+  def onwardRoute: Call = Call("GET", "/directdebits/check-amendment-details")
 
   val formProvider = new AmendConfirmRemovePlanEndDateFormProvider()
   val form: Form[Boolean] = formProvider()

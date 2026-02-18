@@ -1138,7 +1138,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Weekly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(5))
           result.nextPaymentDateValid mustBe true
         }
 

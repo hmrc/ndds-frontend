@@ -64,8 +64,8 @@ class AuthenticatedIdentifierAction @Inject() (
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    authorised().retrieve(Retrievals.internalId and Retrievals.credentials and Retrievals.allEnrolments) {
-      case Some(internalId) ~ Some(credentials) ~ userEnrolments =>
+    authorised().retrieve(Retrievals.credentials and Retrievals.allEnrolments) {
+      case Some(credentials) ~ userEnrolments =>
         if (usingSupportedEnrolments(userEnrolments)) {
           block(IdentifierRequest(request, credentials.providerId))
         } else {

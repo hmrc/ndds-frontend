@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute: Call = Call("GET", "/direct-debits/year-end-and-month")
+  def onwardRoute: Call = Call("GET", "/directdebits/year-end-and-month")
 
   private val formProvider = new PaymentReferenceFormProvider()
   private def formFor(source: Option[DirectDebitSource]): Form[String] =

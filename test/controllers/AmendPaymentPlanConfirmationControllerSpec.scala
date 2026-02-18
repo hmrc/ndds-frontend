@@ -114,7 +114,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPlanEndDatePage, LocalDate.now())
           .success
           .value
-          .set(CurrentPageQuery, "/direct-debits/amend-regular-payment-amount")
+          .set(CurrentPageQuery, "/directdebits/amend-regular-payment-amount")
           .success
           .value
 
@@ -167,7 +167,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(AddPaymentPlanEndDatePage, false)
             .success
             .value
-            .set(CurrentPageQuery, "/direct-debits/amend-payment-plan-end-date")
+            .set(CurrentPageQuery, "/directdebits/amend-payment-plan-end-date")
             .success
             .value
 
@@ -213,7 +213,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
             .set(AmendPlanStartDatePage, LocalDate.now())
             .success
             .value
-            .set(CurrentPageQuery, "/direct-debits/removing-plan-end-date")
+            .set(CurrentPageQuery, "/directdebits/removing-plan-end-date")
             .success
             .value
 
@@ -302,7 +302,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPlanStartDatePage, LocalDate.now())
           .success
           .value
-          .set(CurrentPageQuery, "/direct-debits/amend-plan-how-much-do-you-want-to-pay")
+          .set(CurrentPageQuery, "/directdebits/amend-plan-how-much-do-you-want-to-pay")
           .success
           .value
 
@@ -353,7 +353,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           .set(AmendPlanStartDatePage, LocalDate.now())
           .success
           .value
-          .set(CurrentPageQuery, "/direct-debits/amend-plan-payment-date")
+          .set(CurrentPageQuery, "/directdebits/amend-plan-payment-date")
           .success
           .value
 
