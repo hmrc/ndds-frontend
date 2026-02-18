@@ -16,7 +16,6 @@
 
 package splitter.controllers
 
-import controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.OptionValues
@@ -41,7 +40,7 @@ class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
   def withConnector(connectorResponse: Boolean | Exception)(builder: GuiceApplicationBuilder): GuiceApplicationBuilder =
     builder
       .overrides(
-        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
         bind[AllowListConnector].toInstance(FakeAllowListConnector(connectorResponse))
       )
 
