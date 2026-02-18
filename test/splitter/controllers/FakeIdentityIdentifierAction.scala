@@ -36,4 +36,3 @@ class FakeIdentityIdentifierAction @Inject() (bodyParsers: PlayBodyParsers) exte
 
   override def authConnector: AuthConnector = ???
 }
-

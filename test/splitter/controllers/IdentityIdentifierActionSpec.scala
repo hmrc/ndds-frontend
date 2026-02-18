@@ -40,13 +40,12 @@ class IdentityIdentifierActionSpec extends SpecBase {
   "IdentityIdentifierAction" - {
     "redirect to legacy service when allow list checks are disabled" in {
       val application = applicationBuilder().build()
-      
+
       running(application) {
         val bodyParsers = application.injector.instanceOf[BodyParsers.Default]
         val appConfig = application.injector.instanceOf[FrontendAppConfig]
         val configuration = Configuration("features.allowListChecksEnabled" -> "false")
           .withFallback(application.injector.instanceOf[Configuration])
-
 
         val authAction =
           new IdentityIdentifierActionImpl(new FakeFailingAuthConnector(new UnsupportedAffinityGroup), appConfig, configuration, bodyParsers)
@@ -57,7 +56,7 @@ class IdentityIdentifierActionSpec extends SpecBase {
         redirectLocation(result) mustBe Some("/national-direct-debits")
       }
     }
-    
+
     "returns the result from the controller when" - {
       "when the user is successfully logged in" in {
         val application = applicationBuilder().build()
@@ -76,7 +75,7 @@ class IdentityIdentifierActionSpec extends SpecBase {
           val controller = new Harness(authAction)
           val request = FakeRequest().withSession(SessionKeys.sessionId -> "Bearer Foo")
           val result = controller.onPageLoad()(request)
-          
+
           status(result) mustBe OK
         }
       }
@@ -164,7 +163,8 @@ class IdentityIdentifierActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
           val configuration = application.injector.instanceOf[Configuration]
 
-          val authAction = new IdentityIdentifierActionImpl(new FakeFailingAuthConnector(new MissingBearerToken), appConfig, configuration, bodyParsers)
+          val authAction =
+            new IdentityIdentifierActionImpl(new FakeFailingAuthConnector(new MissingBearerToken), appConfig, configuration, bodyParsers)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 
@@ -181,7 +181,8 @@ class IdentityIdentifierActionSpec extends SpecBase {
           val appConfig = application.injector.instanceOf[FrontendAppConfig]
           val configuration = application.injector.instanceOf[Configuration]
 
-          val authAction = new IdentityIdentifierActionImpl(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig, configuration, bodyParsers)
+          val authAction =
+            new IdentityIdentifierActionImpl(new FakeFailingAuthConnector(new BearerTokenExpired), appConfig, configuration, bodyParsers)
           val controller = new Harness(authAction)
           val result = controller.onPageLoad()(FakeRequest())
 

@@ -34,12 +34,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait IdentityIdentifierAction extends IdentifierAction, AuthorisedFunctions
 
-class IdentityIdentifierActionImpl @Inject()(
+class IdentityIdentifierActionImpl @Inject() (
   override val authConnector: AuthConnector,
   config: FrontendAppConfig,
   configuration: Configuration,
   val parser: BodyParsers.Default
-)(using val executionContext: ExecutionContext) extends IdentityIdentifierAction {
+)(using val executionContext: ExecutionContext)
+    extends IdentityIdentifierAction {
 
   private val allowListChecksEnabled: Boolean = configuration.get[Boolean]("features.allowListChecksEnabled")
   private val legacyStartUrl = configuration.get[String]("microservice.services.ndds-legacy.path")
@@ -49,12 +50,11 @@ class IdentityIdentifierActionImpl @Inject()(
 
     if allowListChecksEnabled then
       authorised().retrieve(Retrievals.credentials) {
-        case Some(credentials)         => block(IdentifierRequest(request, credentials.providerId))
-        case None                      => throw new UnauthorizedException("Unable to retrieve credential id")
+        case Some(credentials) => block(IdentifierRequest(request, credentials.providerId))
+        case None              => throw new UnauthorizedException("Unable to retrieve credential id")
       } recover {
         case _: NoActiveSession        => Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
         case _: AuthorisationException => Redirect(routes.UnauthorisedController.onPageLoad())
       }
-    else
-      Future.successful(Redirect(legacyStartUrl))
+    else Future.successful(Redirect(legacyStartUrl))
 }
