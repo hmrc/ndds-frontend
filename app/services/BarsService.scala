@@ -91,7 +91,7 @@ case class BarsService @Inject() (
         )
       )
     }
-    
+
     val verificationFuture: Future[Either[BarsErrors, BarsVerificationResponse]] =
       barsConnector.verify(endpoint, requestJson).map(Right(_)).recover {
         case e: UpstreamBarsException if e.status == 400 && e.errorCode.contains("SORT_CODE_ON_DENY_LIST") =>
