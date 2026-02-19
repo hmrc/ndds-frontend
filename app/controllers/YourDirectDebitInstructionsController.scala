@@ -70,7 +70,9 @@ class YourDirectDebitInstructionsController @Inject() (
           directDebitDetails  = paginationResult.paginatedData,
           maxLimitReached     = maxLimitReached,
           paginationViewModel = paginationResult.paginationViewModel,
-          hmrcHelplineUrl     = appConfig.hmrcHelplineUrl
+          hmrcHelplineUrl     = appConfig.hmrcHelplineUrl,
+          currentPage         = paginationResult.currentPage,
+          totalPages          = paginationResult.totalPages
         )
       )
     }
