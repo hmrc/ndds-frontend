@@ -20,6 +20,7 @@ import forms.mappings.Mappings
 import models.YourBankDetails
 import play.api.data.Form
 import play.api.data.Forms.*
+import play.api.data.validation.{Constraint, Invalid, Valid}
 
 import javax.inject.Inject
 
@@ -29,19 +30,32 @@ class YourBankDetailsFormProvider @Inject() extends Mappings {
   val MAX_SORT_CODE_LENGTH = 6
   val MAX_ACCOUNT_NUMBER_LENGTH = 8
 
+  private def normaliseSortCode(value: String): String =
+    value.replaceAll("[\\s-]", "")
+
+  private val sortCodeConstraint: Constraint[String] =
+    Constraint("constraints.sortCode") { value =>
+      val normalised = normaliseSortCode(value)
+
+      if (normalised.length < MAX_SORT_CODE_LENGTH) {
+        Invalid("yourBankDetails.error.sortCode.tooShort", MAX_SORT_CODE_LENGTH)
+      } else if (normalised.length > MAX_SORT_CODE_LENGTH) {
+        Invalid("yourBankDetails.error.sortCode.length", MAX_SORT_CODE_LENGTH)
+      } else if (!normalised.forall(_.isDigit)) {
+        Invalid("yourBankDetails.error.sortCode.numericOnly")
+      } else {
+        Valid
+      }
+    }
+
   def apply(): Form[YourBankDetails] = Form(
     mapping(
       "accountHolderName" -> text("yourBankDetails.error.accountHolderName.required")
         .verifying(maxLength(MAX_ACCOUNT_HOLDER_NAME_LENGTH, "yourBankDetails.error.accountHolderName.length")),
       "sortCode" -> text("yourBankDetails.error.sortCode.required")
-        .verifying(
-          firstError(
-            minLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.tooShort"),
-            maxLength(MAX_SORT_CODE_LENGTH, "yourBankDetails.error.sortCode.length"),
-            regexp(NumericRegex, "yourBankDetails.error.sortCode.numericOnly")
-          )
-        ),
+        .verifying(sortCodeConstraint),
       "accountNumber" -> text("yourBankDetails.error.accountNumber.required")
+        .transform[String](value => value.replaceAll("\\s", ""), identity)
         .verifying(
           firstError(
             minLength(MAX_ACCOUNT_NUMBER_LENGTH, "yourBankDetails.error.accountNumber.tooShort"),

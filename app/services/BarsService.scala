@@ -76,7 +76,6 @@ case class BarsService @Inject() (
   def barsVerification(personalOrBusiness: String, bankDetails: YourBankDetails)(implicit
     hc: HeaderCarrier
   ): Future[Either[BarsErrors, (BarsVerificationResponse, Bank)]] = {
-
     val (endpoint, requestJson) = if (personalOrBusiness.toLowerCase == "personal") {
       "personal" -> Json.toJson(
         BarsPersonalRequest(
@@ -93,7 +92,6 @@ case class BarsService @Inject() (
       )
     }
 
-    // Call BARS and map known errors
     val verificationFuture: Future[Either[BarsErrors, BarsVerificationResponse]] =
       barsConnector.verify(endpoint, requestJson).map(Right(_)).recover {
         case e: UpstreamBarsException if e.status == 400 && e.errorCode.contains("SORT_CODE_ON_DENY_LIST") =>

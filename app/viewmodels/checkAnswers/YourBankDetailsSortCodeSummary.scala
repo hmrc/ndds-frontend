@@ -35,7 +35,7 @@ object YourBankDetailsSortCodeSummary {
 
       SummaryListRowViewModel(
         key   = "bankDetailsCheckYourAnswer.account.sort.code",
-        value = ValueViewModel(HtmlContent(value)),
+        value = ValueViewModel(HtmlContent(value.replaceAll("[\\s-]", ""))),
         actions = Seq(
           ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#sortCode")
             .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.account.sort.code"))

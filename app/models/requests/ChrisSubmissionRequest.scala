@@ -81,12 +81,16 @@ object ChrisSubmissionRequest {
       case Some(existingDd) =>
         YourBankDetailsWithAuddisStatus(
           accountHolderName = existingDd.bankAccountName,
-          sortCode          = existingDd.bankSortCode,
+          sortCode          = existingDd.bankSortCode.replaceAll("[\\s-]", ""),
           accountNumber     = existingDd.bankAccountNumber,
           auddisStatus      = existingDd.auDdisFlag,
           accountVerified   = true
         )
-      case _ => required(YourBankDetailsPage)
+      case _ =>
+        val existing = required(YourBankDetailsPage)
+        existing.copy(
+          sortCode = existing.sortCode.replaceAll("[\\s-]", "")
+        )
     }
 
     ChrisSubmissionRequest(
