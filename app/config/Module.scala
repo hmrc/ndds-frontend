@@ -19,6 +19,7 @@ package config
 import controllers.actions.*
 import play.api.inject.{Binding, Module as PlayModule}
 import play.api.{Configuration, Environment}
+import splitter.controllers.{IdentityIdentifierAction, IdentityIdentifierActionImpl}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
 import java.time.{Clock, ZoneOffset}
@@ -32,6 +33,7 @@ class Module extends PlayModule {
     bind[Encrypter with Decrypter].toProvider[CryptoProvider],
     // For session based storage instead of persistent, change to SessionIdentifierAction
     bind[IdentifierAction].to[AuthenticatedIdentifierAction],
+    bind[IdentityIdentifierAction].to[IdentityIdentifierActionImpl],
     bind[Clock].toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
   )
 }
