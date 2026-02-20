@@ -33,9 +33,26 @@
     pageNavigator: PageNavigator
 )
 
-@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList], paginationViewModel: PaginationViewModel = PaginationViewModel(), title: String, heading: String, ppLimit: Int)(implicit request: Request[_], messages: Messages)
+@(directDebitReference: String, directDebitDetails: NddDDPaymentPlansResponse,  paymentPlansList: Seq[SummaryList],
+paginationViewModel: PaginationViewModel = PaginationViewModel(),
+title: String, heading: String, ppLimit: Int, currentPage: Int,
+totalPages: Int)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages(title)), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
+
+    @defining(
+    if (totalPages > 1)
+    messages(
+    "directDebitPaymentSummary.title.paginated",
+    messages(title),
+    currentPage,
+    totalPages
+    )
+    else
+    messages(title)
+    ) { computedTitle =>
+
+
+@layout(pageTitle = titleNoForm(messages(computedTitle)), backLink = Some(routes.YourDirectDebitInstructionsController.onPageLoad().url)) {
 
     @h1(heading)
 
@@ -104,4 +121,5 @@
             content = Text(messages("directDebitPaymentSummary.addPaymentButton"))
         ))
     }
+}
 }

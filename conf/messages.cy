@@ -38,7 +38,7 @@ signedOut.guidance = Ni wnaethom gadw’ch atebion.
 unauthorised.title = Ni allwch ddefnyddio’r gwasanaeth hwn gyda’r cyfrif hwn
 unauthorised.heading = Ni allwch ddefnyddio’r gwasanaeth hwn gyda’r cyfrif hwn
 
-yourDirectDebitInstructions.title = Eich Cyfarwyddiadau Debyd Uniongyrchol
+yourDirectDebitInstructions.title = Eich Cyfarwyddiadau Debyd Uniongyrchol (tudalen {0} o {1})
 yourDirectDebitInstructions.heading = Eich Cyfarwyddiadau Debyd Uniongyrchol
 yourDirectDebitInstructions.p1 = Dyma’r Cyfarwyddiadau Debyd Uniongyrchol rydych wedi’u sefydlu. Dewiswch gyfeirnod Debyd Uniongyrchol i fwrw golwg dros gynllun talu, neu i rheoli neu ychwanegu un.
 yourDirectDebitInstructions.p2.beforeLink = Os oes angen i chi
@@ -411,6 +411,7 @@ directDebitConfirmation.taxCreditRepaymentPlan = Ad-daliad credydau treth
 directDebitConfirmation.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
 directDebitConfirmation.viewDirectDebitInstructions = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol
 
+directDebitPaymentSummary.title.paginated = {0} (tudalen {1} 0 {2})
 directDebitPaymentSummary.title.noPlans = Sefydlu cynllun talu ar gyfer y Debyd Uniongyrchol hwn
 directDebitPaymentSummary.title.withPlans = Crynodeb o gynlluniau talu ar gyfer y Debyd Uniongyrchol hwn
 directDebitPaymentSummary.heading.noPlans = Sefydlu cynllun talu ar gyfer y Debyd Uniongyrchol hwn
