@@ -27,17 +27,18 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-class AllowListFilterAction @Inject()(connector: AllowListConnector,
-                                      configuration: Configuration
-                                      )(implicit val executionContext: ExecutionContext) extends ActionFilter[IdentifierRequest] with Logging {
+class AllowListFilterAction @Inject() (connector: AllowListConnector, configuration: Configuration)(implicit val executionContext: ExecutionContext)
+    extends ActionFilter[IdentifierRequest]
+    with Logging {
 
   private val legacyStartUrl = configuration.get[String]("microservice.services.ndds-legacy.path")
 
   override protected def filter[A](request: IdentifierRequest[A]): Future[Option[Result]] =
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    connector.check(request.userId)
+    connector
+      .check(request.userId)
       .map:
-        case true => None
+        case true  => None
         case false => Some(SeeOther(legacyStartUrl))
       .recover:
         case NonFatal(e) =>
