@@ -34,12 +34,13 @@ class SetupDirectDebitPaymentController @Inject() (
   nddService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
   view: SetupDirectDebitPaymentView,
-  lockService: LockService
+  lockService: LockService,
+  allowListFilter: AllowListFilterAction
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async { implicit request =>
+  def onPageLoad(): Action[AnyContent] = (identify andThen allowListFilter andThen getData).async { implicit request =>
     lockService.isUserLocked(request.userId) flatMap {
       _.lockStatus match
         case NotLocked =>
