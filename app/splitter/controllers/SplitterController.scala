@@ -16,7 +16,6 @@
 
 package splitter.controllers
 
-import controllers.actions.IdentifierAction
 import play.api.mvc.*
 import play.api.{Configuration, Logging}
 import splitter.connectors.AllowListConnector

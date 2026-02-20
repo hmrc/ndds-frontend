@@ -144,7 +144,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           userAnswers
             .get(YourBankDetailsPage)
             .map(_.auddisStatus)
-            .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
+            .getOrElse(throw new Exception("Missing information from user answers"))
         )
     }
   }
