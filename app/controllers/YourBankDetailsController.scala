@@ -76,7 +76,7 @@ class YourBankDetailsController @Inject() (
 
       personalOrBusinessOpt match {
         case None =>
-          logger.warn(s"Missing PersonalOrBusinessAccountPage for user: $credId")
+          logger.warn(s"Missing PersonalOrBusinessAccountPage for user")
           Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
         case Some(accountType) =>

@@ -277,7 +277,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "fail when auddis status is not in user answers" in {
         val result = intercept[Exception](service.getFutureWorkingDays(emptyUserAnswers, "123").futureValue)
 
-        result.getMessage must include("YourBankDetailsPage details missing from user answers")
+        result.getMessage must include("Missing information from user answers")
       }
 
       "must successfully return the Earliest Payment Date when direct debit is exists" in {
