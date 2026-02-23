@@ -134,7 +134,7 @@ class DirectDebitConfirmationController @Inject() (
         .map { v =>
           SummaryListRowViewModel(
             key     = Key(Text(messages("directDebitConfirmation.sortCode"))),
-            value   = ValueViewModel(Text(v)),
+            value   = ValueViewModel(Text(v.replaceAll("[\\s-]", ""))),
             actions = Seq.empty
           )
         }

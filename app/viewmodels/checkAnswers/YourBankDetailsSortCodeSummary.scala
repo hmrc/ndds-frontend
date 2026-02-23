@@ -51,7 +51,7 @@ object YourBankDetailsSortCodeSummary {
 
       SummaryListRowViewModel(
         key   = "directDebitConfirmation.sortCode",
-        value = ValueViewModel(HtmlContent(value)),
+        value = ValueViewModel(HtmlContent(value.replaceAll("[\\s-]", ""))),
         actions = if (showChange) {
           Seq(
             ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#sortCode")
