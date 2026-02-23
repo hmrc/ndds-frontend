@@ -81,9 +81,49 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
       result.errors must contain only FormError(fieldName, tooShortKey, Seq(maxLength))
     }
 
+    "bind valid sort code with multiple hyphens" in {
+      val bound = form.bind(
+        Map(
+          "accountHolderName" -> "John Doe",
+          "sortCode"          -> "20--71--02",
+          "accountNumber"     -> "12345678"
+        )
+      )
+
+      bound.errors mustBe empty
+      bound.value.get.sortCode mustBe "20--71--02"
+    }
+
     "not bind non-numeric input" in {
       val result = form.bind(Map(fieldName -> "12A456")).apply(fieldName)
       result.errors.exists(_.message == numericOnlyKey) mustBe true
+    }
+
+    "bind valid sort code with spaces or hyphens" in {
+      val bound = form.bind(
+        Map(
+          "accountHolderName" -> "John Doe",
+          "sortCode"          -> "12-34-56",
+          "accountNumber"     -> "12345678"
+        )
+      )
+
+      bound.errors mustBe empty
+      bound.value.get.sortCode mustBe "12-34-56"
+    }
+
+    "bind valid sort code with spaces" in {
+      val bound = form.bind(
+        Map(
+          "accountHolderName" -> "John Doe",
+          "sortCode"          -> " 12 34 56 ",
+          "accountNumber"     -> "12345678"
+        )
+      )
+
+      bound.errors mustBe empty
+      // Form now preserves raw input (including surrounding spaces)
+      bound.value.get.sortCode mustBe " 12 34 56 "
     }
 
     behave like mandatoryField(
@@ -123,6 +163,19 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
     "not bind non-numeric input" in {
       val result = form.bind(Map(fieldName -> "1234A678")).apply(fieldName)
       result.errors.exists(_.message == numericOnlyKey) mustBe true
+    }
+
+    "bind valid account number with spaces" in {
+      val bound = form.bind(
+        Map(
+          "accountHolderName" -> "John Doe",
+          "sortCode"          -> "123456",
+          "accountNumber"     -> " 12 34 56 78 "
+        )
+      )
+
+      bound.errors mustBe empty
+      bound.value.get.accountNumber mustBe "12345678"
     }
 
     behave like mandatoryField(
