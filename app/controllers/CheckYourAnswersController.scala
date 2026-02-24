@@ -310,7 +310,7 @@ class CheckYourAnswersController @Inject() (
                 .map(ref => Right(ref.ddiRefNumber))
 
             case (Some(_), Some(_)) =>
-              logger.error(s"MAC validation failed for user ${request.userId}")
+              logger.error(s"MAC validation failed for user")
               Future.successful(Left(Redirect(routes.SystemErrorController.onPageLoad())))
             case _ =>
               logger.error("MAC generation failed or MAC1 missing in UserAnswers")

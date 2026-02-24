@@ -76,7 +76,7 @@ class YourBankDetailsController @Inject() (
 
       personalOrBusinessOpt match {
         case None =>
-          logger.warn(s"Missing PersonalOrBusinessAccountPage for user: $credId")
+          logger.warn(s"Missing PersonalOrBusinessAccountPage for user")
           Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
         case Some(accountType) =>
@@ -92,6 +92,9 @@ class YourBankDetailsController @Inject() (
       }
     }
 
+  private def normaliseSortCode(value: String): String =
+    value.replaceAll("[\\s-]", "")
+
   private def startVerification(
     accountType: PersonalOrBusinessAccount,
     bankDetails: YourBankDetails,
@@ -100,7 +103,10 @@ class YourBankDetailsController @Inject() (
     mode: Mode
   )(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Result] = {
 
-    barsService.barsVerification(accountType.toString, bankDetails).flatMap {
+    val bankDetailsForBars =
+      bankDetails.copy(sortCode = normaliseSortCode(bankDetails.sortCode))
+
+    barsService.barsVerification(accountType.toString, bankDetailsForBars).flatMap {
       case Right((verificationResponse, bank)) =>
         onSuccessfulVerification(
           userAnswers,
@@ -117,7 +123,7 @@ class YourBankDetailsController @Inject() (
 
       case Left(barsError) =>
         logger.warn(
-          s"BARS verification failed for userId=$credId, accountType=$accountType. " +
+          s"BARS verification failed for accountType=$accountType. " +
             s"Reason: ${barsError.toString}"
         )
         onFailedVerification(credId, bankDetails, mode, barsError)

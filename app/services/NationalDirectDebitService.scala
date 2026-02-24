@@ -144,7 +144,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           userAnswers
             .get(YourBankDetailsPage)
             .map(_.auddisStatus)
-            .getOrElse(throw new Exception("YourBankDetailsPage details missing from user answers"))
+            .getOrElse(throw new Exception("Missing information from user answers"))
         )
     }
   }
@@ -185,7 +185,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     directDebitCache.retrieveCache(userId) flatMap {
       case Seq() =>
         throw new NoSuchElementException(
-          s"No direct debit cache found for Id $userId"
+          s"No direct debit cache found for ddReference $directDebitReference"
         )
       case existingCache =>
         val filteredDirectDebitOpt = existingCache.find(_.ddiRefNumber == directDebitReference)

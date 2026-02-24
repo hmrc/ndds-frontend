@@ -40,12 +40,13 @@ class YourDirectDebitInstructionsController @Inject() (
   appConfig: FrontendAppConfig,
   nddService: NationalDirectDebitService,
   paginationService: PaginationService,
-  sessionRepository: SessionRepository
+  sessionRepository: SessionRepository,
+  allowListFilter: AllowListFilterAction
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
+  def onPageLoad: Action[AnyContent] = (identify andThen allowListFilter andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
 
@@ -70,7 +71,9 @@ class YourDirectDebitInstructionsController @Inject() (
           directDebitDetails  = paginationResult.paginatedData,
           maxLimitReached     = maxLimitReached,
           paginationViewModel = paginationResult.paginationViewModel,
-          hmrcHelplineUrl     = appConfig.hmrcHelplineUrl
+          hmrcHelplineUrl     = appConfig.hmrcHelplineUrl,
+          currentPage         = paginationResult.currentPage,
+          totalPages          = paginationResult.totalPages
         )
       )
     }

@@ -16,32 +16,22 @@
 
 package splitter.controllers
 
-import controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.OptionValues
 import play.api.http.Status
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import splitter.connectors.AllowListConnector
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.Future
+import splitter.connectors.{AllowListConnector, FakeAllowListConnector}
 
 class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
-
-  class FakeAllowListConnector(result: Exception | Boolean) extends AllowListConnector:
-    override def check(userId: String)(using HeaderCarrier): Future[Boolean] =
-      result match
-        case res: Boolean   => Future.successful(res)
-        case res: Exception => Future.failed(res)
 
   def withConnector(connectorResponse: Boolean | Exception)(builder: GuiceApplicationBuilder): GuiceApplicationBuilder =
     builder
       .overrides(
-        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
         bind[AllowListConnector].toInstance(FakeAllowListConnector(connectorResponse))
       )
 
