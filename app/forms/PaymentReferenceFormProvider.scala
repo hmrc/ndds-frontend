@@ -43,7 +43,7 @@ class PaymentReferenceFormProvider @Inject() extends Mappings {
     case ref if source == DirectDebitSource.MGD  => ref.length == 14
     case ref if source == DirectDebitSource.NIC  => ref.length == 18
     case ref if source == DirectDebitSource.PAYE => ref.length == 13 || ref.length == 14
-    case ref if source == DirectDebitSource.SA   => ref.length == 11
+    case ref if source == DirectDebitSource.SA   => ref.length == 10
     case ref if source == DirectDebitSource.SDLT => ref.length == 11
     case ref if source == DirectDebitSource.TC   => ref.length == 16
     case ref if source == DirectDebitSource.VAT  => ref.length == 9

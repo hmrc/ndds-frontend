@@ -17,14 +17,17 @@
 package forms
 
 import forms.behaviours.StringFieldBehaviours
+import models.DirectDebitSource
 import play.api.data.FormError
 
 class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
 
   val invalidKey = "paymentReference.error.invalid.sa"
+  val lengthKey = "paymentReference.error.length.sa"
+  val requiredKey = "paymentReference.error.required.sa"
   val maxLength = 100
 
-  val form = new PaymentReferenceFormProvider()(None)
+  val form = new PaymentReferenceFormProvider().apply(None, None)
 
   ".value" - {
 
@@ -36,11 +39,45 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
       stringsWithMaxLength(maxLength)
     )
 
+    "trim spaces before validating (SA)" in {
+      val saForm = new PaymentReferenceFormProvider().apply(
+        Some(DirectDebitSource.SA),
+        Some(_ => true)
+      )
+
+      val result = saForm.bind(Map(fieldName -> " 582982038K "))
+
+      result.errors mustBe empty
+      result.value mustBe Some("582982038K")
+    }
+
+    "return required error when value is only spaces (SA)" in {
+      val saForm = new PaymentReferenceFormProvider().apply(
+        Some(DirectDebitSource.SA),
+        Some(_ => true)
+      )
+
+      val result = saForm.bind(Map(fieldName -> "   "))
+
+      result.errors must contain(FormError(fieldName, requiredKey))
+    }
+
+    "return length error when trimmed value is wrong length (SA expects 10)" in {
+      val saForm = new PaymentReferenceFormProvider().apply(
+        Some(DirectDebitSource.SA),
+        Some(_ => true)
+      )
+
+      val result = saForm.bind(Map(fieldName -> " 58298203K "))
+      result.errors must contain(FormError(fieldName, lengthKey))
+    }
+
+
     behave like invalidField(
-      new PaymentReferenceFormProvider().apply(Some(models.DirectDebitSource.SA), Some(_ => false)),
+      new PaymentReferenceFormProvider().apply(Some(DirectDebitSource.SA), Some(_ => false)),
       fieldName,
       requiredError = FormError(fieldName, invalidKey),
-      "test"
+      "1234567890"
     )
   }
 }
