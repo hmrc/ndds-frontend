@@ -45,10 +45,10 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
         Some(_ => true)
       )
 
-      val result = saForm.bind(Map(fieldName -> " 582982038K "))
+      val result = saForm.bind(Map(fieldName -> " 12345678901 "))
 
       result.errors mustBe empty
-      result.value mustBe Some("582982038K")
+      result.value mustBe Some("12345678901")
     }
 
     "return required error when value is only spaces (SA)" in {
@@ -62,22 +62,22 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
       result.errors must contain(FormError(fieldName, requiredKey))
     }
 
-    "return length error when trimmed value is wrong length (SA expects 10)" in {
+    "return length error when trimmed value is wrong length (SA expects 11)" in {
       val saForm = new PaymentReferenceFormProvider().apply(
         Some(DirectDebitSource.SA),
         Some(_ => true)
       )
 
-      val result = saForm.bind(Map(fieldName -> " 58298203K "))
+      val result = saForm.bind(Map(fieldName -> " 1234567890 "))
+
       result.errors must contain(FormError(fieldName, lengthKey))
     }
-
 
     behave like invalidField(
       new PaymentReferenceFormProvider().apply(Some(DirectDebitSource.SA), Some(_ => false)),
       fieldName,
       requiredError = FormError(fieldName, invalidKey),
-      "1234567890"
+      "12345678901"
     )
   }
 }
