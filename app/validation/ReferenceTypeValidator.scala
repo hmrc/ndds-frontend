@@ -125,6 +125,7 @@ object ReferenceTypeValidator {
       */
     def validate(reference: String): Boolean = {
       val ref = reference.toUpperCase
+
       /** Check against SDLT regex format.
         */
       if (!SDLT_FORMAT.matcher(ref).matches) return false
@@ -189,6 +190,7 @@ object ReferenceTypeValidator {
   given Validator[NIC.type] with {
     def validate(reference: String): Boolean = {
       val ref = reference.toUpperCase
+
       /** First we check for NICDN Format and then we check whether first two digits in reference number are 60 */
       if (!NIC_FORMAT.matcher(ref).matches || (!ref.substring(0, 2).equals("60"))) return false
 

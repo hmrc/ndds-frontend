@@ -238,20 +238,62 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
 
     "must validate Other Liability reference with correct format successfully" in {
       val validation = summon[ReferenceTypeValidator.Validator[OL.type]]
-      val validOLReference = Seq("XW200001000187", "XG000001000188", "XS000001000191", "XD000001000195", "XX100001000203", "XN900001000204",
-        "XZN10001100205", "XRZ10001100555", "XBN10001100555", "XKK10001100550", "XZK10001100555", "XXX10001110484", "xxx10001110484",
-      "XR0000100000552", "XV0000100000556", "XA0000100000558", "XZ0000100000563", "XB0000100000567", "XWECL0021000013", "xwecl0021000013")
+      val validOLReference = Seq(
+        "XW200001000187",
+        "XG000001000188",
+        "XS000001000191",
+        "XD000001000195",
+        "XX100001000203",
+        "XN900001000204",
+        "XZN10001100205",
+        "XRZ10001100555",
+        "XBN10001100555",
+        "XKK10001100550",
+        "XZK10001100555",
+        "XXX10001110484",
+        "xxx10001110484",
+        "XR0000100000552",
+        "XV0000100000556",
+        "XA0000100000558",
+        "XZ0000100000563",
+        "XB0000100000567",
+        "XWECL0021000013",
+        "xwecl0021000013"
+      )
 
       validOLReference.foreach(ref => validation.validate(ref) mustEqual true)
     }
 
     "must fail to validate Other Liability reference with incorrect format successfully" in {
       val validation = summon[ReferenceTypeValidator.Validator[OL.type]]
-      val invalidOLReference = Seq("XE000001000189", "XG000001000189", "XS000001000193", "XD000001000196", "XW000001000204", "XB000001000205",
-        "PH000001000205", "9H000001000205", "XRM00001000205", "XDNA0001000205", "XDN0000100020Z", "XDN00001P00205",
-        "XR0000100000554", "XV0000100000559", "XA0000100000556", "XZ0000100000583", "XB0000100000767",
-        "XAM000100000767", "PH0000100000767", "9H0000100000767", "XH000010000076Z", "XB000010H000761",
-        "XWECL002100001A3", "XWECL00210000130", "YLECL9876543210", "XAECL0021000013", "xaecl0021000013"
+      val invalidOLReference = Seq(
+        "XE000001000189",
+        "XG000001000189",
+        "XS000001000193",
+        "XD000001000196",
+        "XW000001000204",
+        "XB000001000205",
+        "PH000001000205",
+        "9H000001000205",
+        "XRM00001000205",
+        "XDNA0001000205",
+        "XDN0000100020Z",
+        "XDN00001P00205",
+        "XR0000100000554",
+        "XV0000100000559",
+        "XA0000100000556",
+        "XZ0000100000583",
+        "XB0000100000767",
+        "XAM000100000767",
+        "PH0000100000767",
+        "9H0000100000767",
+        "XH000010000076Z",
+        "XB000010H000761",
+        "XWECL002100001A3",
+        "XWECL00210000130",
+        "YLECL9876543210",
+        "XAECL0021000013",
+        "xaecl0021000013"
       )
 
       invalidOLReference.foreach(ref => validation.validate(ref) mustEqual false)
