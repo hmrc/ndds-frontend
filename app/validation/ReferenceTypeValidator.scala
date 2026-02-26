@@ -31,7 +31,7 @@ object ReferenceTypeValidator {
   given Validator[PAYE.type] with {
     def validate(ref: String): Boolean = {
       val reference = ref.toUpperCase
-
+      println(s"************ Reference: $reference")
       val tempReference = (ref: String) => if (ref.length >= 13) Right(ref) else Left(s"Error: reference $ref length less than 13")
       val updatedTempRef = (tempRef: String) => {
         (if (Set('N', 'P').contains(tempRef(0))) Right(tempRef.drop(1)) else Right(tempRef)).flatMap { ref =>
@@ -76,6 +76,7 @@ object ReferenceTypeValidator {
   given Validator[MGD.type] with {
     def validate(reference: String): Boolean = {
       val ref = reference.toUpperCase
+      println(s"************ Reference: $ref")
       if (ref.length != MGD_REF_LENGTH) return false
 
       /** Check against MGD Ref number regex format.
@@ -105,6 +106,7 @@ object ReferenceTypeValidator {
   given Validator[SA.type] with {
     def validate(ref: String): Boolean = {
       val reference = ref.toUpperCase
+      println(s"************ Reference: $reference")
       UTR_FORMAT.matcher(reference).matches && modulusU11(reference)
     }
   }
@@ -112,6 +114,7 @@ object ReferenceTypeValidator {
   given Validator[CT.type] with {
     def validate(ref: String): Boolean = {
       val reference = ref.toUpperCase
+      println(s"************ Reference: $reference")
       COTAX_FORMAT.matcher(reference).matches && modulusU11(reference)
     }
   }
@@ -126,6 +129,7 @@ object ReferenceTypeValidator {
       */
     def validate(reference: String): Boolean = {
       val ref = reference.toUpperCase
+      println(s"************ Reference: $ref")
 
       /** Check against SDLT regex format.
         */
@@ -153,6 +157,7 @@ object ReferenceTypeValidator {
   given Validator[VAT.type] with {
     def validate(reference: String): Boolean = {
       val ref = reference.toUpperCase
+      println(s"************ Reference: $ref")
       if (ref.length < 9 || !VAT_REF_FORMAT.matcher(ref).matches) return false
 
       // the value to divide sumOfWeightedValues by in the first modulus calculation
@@ -191,6 +196,7 @@ object ReferenceTypeValidator {
   given Validator[NIC.type] with {
     def validate(reference: String): Boolean = {
       val ref = reference.toUpperCase
+      println(s"************ Reference: $ref")
 
       /** First we check for NICDN Format and then we check whether first two digits in reference number are 60
         */
@@ -232,6 +238,7 @@ object ReferenceTypeValidator {
   given Validator[OL.type] with {
     def validate(ref: String): Boolean = {
       val reference = ref.toUpperCase
+      println(s"************ Reference: $reference")
       isValidSafe14Ref(reference) || isValidSafe15RefECL(reference) || isValidSafe15Ref(reference)
     }
   }
@@ -370,8 +377,8 @@ object ReferenceTypeValidator {
     def validate(reference: String): Boolean = {
       val invalidChars = Set('D', 'F', 'I', 'O', 'Q', 'U', 'V')
       val invalidPrefix = Set("FY", "GB", "NK", "TN", "ZZ")
-
       val tcPayRef = reference.toUpperCase
+      println(s"************ Reference: $tcPayRef")
       val prefix = tcPayRef.take(2)
       val chkChar = tcPayRef.last
 
