@@ -83,11 +83,6 @@ object ModUtils {
   val SAFE_REF_CHAR3_NUMERIC_FORMAT: Pattern = Pattern.compile("\\d{1}")
   val SAFE_REF_CHAR3 = "M"
 
-  def modTCRef(reference: String): Boolean = {
-    val chkChar = reference.toUpperCase().charAt(reference.length() - 1);
-    chkChar == taxCreditModCheck(reference)
-  }
-
   def taxCreditModCheck(reference: String): Char = {
     val ninoLength = 8
     val weighting = Array(256, 128, 64, 32, 16, 8, 4, 2)
@@ -108,19 +103,6 @@ object ModUtils {
     checkDigits(remainder)
   }
 
-  def modSDLT(reference: String) = {
-    val modDivisor = 23
-    val indexOfCheckChar = 10
-    val indexOfFirstProtectedChar = 0
-    val indexOfLastProtectedChar = 9
-    val weightings = Array(6, 7, 8, 9, 10, 5, 4, 3, 2)
-    val checkChar = reference.charAt(indexOfCheckChar)
-    val protectedChars = reference.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
-    val expectedChar = modCheck(modDivisor, weightings, charRemainderMap, parseIntArray(protectedChars))
-    expectedChar == checkChar
-
-  }
-
   def modulusU11(reference: String): Boolean = {
     assert(reference.length >= 10, "Payment reference must be at least 10 characters long")
     val modDivisor = 11
@@ -135,26 +117,7 @@ object ModUtils {
     expectedChar == checkChar
   }
 
-  def mod11(reference: String): Boolean = {
-    val modDivisor = 11
-    val indexOfCheckChar = 17
-    val indexOfFirstProtectedChar = 0
-    val indexOfLastProtectedChar = 17
-
-    val weightings = Array(8, 4, 6, 3, 5, 2, 1, 9, 10, 7, 8, 4, 6, 3, 5, 2, 1)
-    val checkChar = reference.charAt(indexOfCheckChar)
-    val checkCharVal = Character.digit(checkChar, 10)
-    val protectedChars = reference.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
-    val remainder = modCheck(modDivisor, weightings, protectedChars)
-
-    remainder match {
-      case 1 => checkChar == 'X'
-      case 0 => checkCharVal == 0
-      case _ => checkCharVal == (modDivisor - remainder)
-    }
-  }
-
-  def payeModCheckResult(ref: String) = {
+  def payeModCheckResult(ref: String): Boolean = {
     val PAYE_THIRTEEN_CHAR_STRING = 'X'
     val modDivisor = 23
     val indexOfCheckChar = 4
@@ -183,18 +146,6 @@ object ModUtils {
     checkChar == charRemainderMap(modResult)
   }
 
-  def mod23(reference: String): Boolean = {
-    val modDivisor = 23
-    val indexOfCheckChar = 1
-    val indexOfFirstProtectedChar = 2
-    val indexOfLastProtectedChar = 14
-    val weightings = Array(9, 10, 11, 12, 13, 8, 7, 6, 5, 4, 3, 2)
-    val checkChar = reference.charAt(indexOfCheckChar)
-    val protectedChars = reference.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
-    val expectedChar = mgdModCheck(modDivisor, weightings, charRemainderMap, protectedChars)
-    checkChar == expectedChar
-  }
-
   /** modCheckForVat
     *
     * @param modDivisor
@@ -204,7 +155,7 @@ object ModUtils {
     * @return
     *   int
     */
-  def modCheckForVat(modDivisor: Int, sumOfWeightedValues: Int) = {
+  def modCheckForVat(modDivisor: Int, sumOfWeightedValues: Int): Int = {
     var value = sumOfWeightedValues
     while (value > modDivisor) value = value - modDivisor
     if (value <= modDivisor) value   = modDivisor - value
@@ -218,7 +169,7 @@ object ModUtils {
     remainderMap(modResult)
   }
 
-  def modCheck(modDivisor: Int, weightings: Array[Int], protectedChars: String) = {
+  def modCheck(modDivisor: Int, weightings: Array[Int], protectedChars: String): Int = {
     val numericValues = parseIntArray(protectedChars)
     val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
       acc + (value * weightings(index))
@@ -237,7 +188,7 @@ object ModUtils {
     * @return
     *   CheckDigit Character
     */
-  def modCheckTotal(modDivisor: Int, weightings: Array[Int], protectedChars: String) = {
+  def modCheckTotal(modDivisor: Int, weightings: Array[Int], protectedChars: String): Int = {
     // the numeric values of protected chars to multiply by weightings
     val numericValues = parseIntArray(protectedChars)
     var sumOfWeightedValues = 0

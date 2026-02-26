@@ -372,17 +372,15 @@ object ReferenceTypeValidator {
       val prefix = tcPayRef.take(2)
       val chkChar = tcPayRef.last
 
-      val validRef =
-        TC_FORMAT.matcher(tcPayRef).matches &&
-          !prefix.exists(invalidChars.contains) &&
-          !invalidPrefix.contains(prefix) &&
-          isValidDate(
-            tcPayRef.substring(8, 10).toInt,
-            tcPayRef.substring(10, 12).toInt,
-            tcPayRef.substring(12, 14).toInt
-          ) && taxCreditModCheck(tcPayRef) == chkChar
+      TC_FORMAT.matcher(tcPayRef).matches &&
+      !prefix.exists(invalidChars.contains) &&
+      !invalidPrefix.contains(prefix) &&
+      isValidDate(
+        tcPayRef.substring(8, 10).toInt,
+        tcPayRef.substring(10, 12).toInt,
+        tcPayRef.substring(12, 14).toInt
+      ) && taxCreditModCheck(tcPayRef) == chkChar
 
-      validRef
     }
   }
 
