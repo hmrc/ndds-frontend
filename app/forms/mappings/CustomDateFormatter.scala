@@ -33,34 +33,48 @@ class CustomDateFormatter(invalidKey: String,
     extends LocalDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args) {
 
   override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
-    val fields = fieldKeys.map { field =>
-      val cleanedValueOpt = data.get(s"$key.$field").map(_.replaceAll("\\s", ""))
-      field -> cleanedValueOpt.filter(_.nonEmpty)
-    }.toMap
+    val fields: Map[String, Option[String]] =
+      fieldKeys.map { field =>
+        val cleanedValueOpt = data.get(s"$key.$field").map(_.replaceAll("\\s", ""))
+        field -> cleanedValueOpt.filter(_.nonEmpty)
+      }.toMap
 
-    val missingCount = fields.values.count(_.isEmpty)
+    val missingFields: Seq[String] =
+      fieldKeys.filter(f => fields.getOrElse(f, None).isEmpty)
 
     val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
     if (regexErrors.nonEmpty) {
-      return Left(regexErrors.map(_.copy(key = key, messages = Seq(invalidKey), args = args)))
+      return Left(regexErrors.map(e => e.copy(messages = Seq(invalidKey), args = args)))
     }
 
-    if (missingCount == 3) {
-      return Left(Seq(FormError(key, allRequiredKey, args)))
+    if (missingFields.nonEmpty) {
+
+      val errs = missingFields.map { f =>
+        missingFields.size match {
+          case 1 =>
+            FormError(s"$key.$f", requiredKey, Seq(labelFor(f)))
+
+          case 2 =>
+            FormError(s"$key.$f", twoRequiredKey, missingFields.map(labelFor))
+
+          case 3 =>
+            FormError(s"$key.$f", allRequiredKey)
+        }
+      }
+
+      return Left(errs)
     }
 
-    if (missingCount > 0) {
-      return Left(Seq(FormError(key, twoRequiredKey, args)))
-    }
-
-    val cleanedData: Map[String, String] = fields.collect { case (k, Some(v)) =>
-      s"$key.$k" -> v
-    }
+    val cleanedData: Map[String, String] =
+      fields.collect { case (k, Some(v)) => s"$key.$k" -> v }
 
     formatDate(key, cleanedData).left.map { errors =>
-      errors.map(_.copy(key = key, messages = Seq(invalidKey), args = args))
+      errors.map(e => e.copy(messages = Seq(invalidKey), args = args))
     }
   }
+
+  private def labelFor(part: String)(implicit messages: Messages): String =
+    messages(s"datePart.$part")
 
   private def checkInput(key: String, fields: Map[String, Option[String]], dateFormat: DateFormat): Option[FormError] = {
     fields.get(dateFormat.dateType).flatten match {

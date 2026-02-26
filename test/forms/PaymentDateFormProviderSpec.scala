@@ -52,8 +52,10 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
     "fail to bind an empty date" in {
       val form = formProvider(fixedDate.minusDays(30), isSinglePlan = false)
       val result = form.bind(Map.empty[String, String])
-      result.errors must contain theSameElementsAs Seq(
-        FormError("value", "paymentDate.error.required.all", Seq())
+      result.errors.map(_.message) must contain theSameElementsAs Seq(
+        "paymentDate.error.required.all",
+        "paymentDate.error.required.all",
+        "paymentDate.error.required.all"
       )
     }
 

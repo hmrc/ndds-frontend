@@ -52,8 +52,11 @@ class AmendPlanEndDateFormProviderSpec extends DateBehaviours {
 
       "fail to bind an empty date" in {
         val result = form.bind(Map.empty[String, String])
+
         result.errors must contain theSameElementsAs Seq(
-          FormError("value", "planEndDate.error.required.all", Seq())
+          FormError("value.day", "planEndDate.error.required.all", Seq()),
+          FormError("value.month", "planEndDate.error.required.all", Seq()),
+          FormError("value.year", "planEndDate.error.required.all", Seq())
         )
       }
     }
