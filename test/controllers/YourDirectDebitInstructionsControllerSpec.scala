@@ -32,7 +32,6 @@ import repositories.SessionRepository
 import services.{NationalDirectDebitService, PaginationResult, PaginationService}
 import splitter.connectors.{AllowListConnector, FakeAllowListConnector}
 import splitter.controllers.{FakeIdentityIdentifierAction, IdentityIdentifierAction}
-import uk.gov.hmrc.http.HeaderCarrier
 import viewmodels.govuk.PaginationFluency.*
 
 import java.time.LocalDateTime

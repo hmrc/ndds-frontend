@@ -17,11 +17,11 @@
 package utils
 
 import java.util.regex.Pattern
-import scala.annotation.tailrec
 
 object ModUtils {
 
-  private val nddsMValue = 45
+  private val M_VALUE = 45
+  val MGD_REF_LENGTH = 14
   val charRemainderMap: Array[Char] = Array(
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'X', 'J', 'K', 'L', 'M', 'N', 'Y', 'P', 'Q', 'R', 'S', 'T', 'Z', 'V', 'W'
   )
@@ -29,11 +29,61 @@ object ModUtils {
   private val C_INT_VAL = 35
   private val L_INT_VAL = 44
 
+  /** This constant represents UTR Regex Format. */
+  val UTR_FORMAT: Pattern = Pattern.compile("\\d{10}K")
+
+  /** This constant represents COTAX Regex Format. */
+  val COTAX_FORMAT: Pattern = Pattern.compile("\\d{10}A001\\d{2}A")
+
+  /** This constant represents NINO Regex Format. */
+  val NINO_FORMAT: Pattern = Pattern.compile("[a-zA-Z]{2}\\d{6}[a-zA-Z]{0,1}")
+
+  /** Pattern for Tax Credits payment reference */
+  val TC_FORMAT: Pattern = Pattern.compile("[A-Z]{2}\\d{12}N[A-Z]")
+
+  /** This constant represents VAT Regex Format. */
+  val VAT_REF_FORMAT: Pattern = Pattern.compile("\\d{9}")
+
+  /** This constant represents NIC Regex Format */
+  val NIC_FORMAT: Pattern = Pattern.compile("\\d{17}[\\d{1}|X]")
+
+  /** This constant represents SDLT Regex Format */
+  val SDLT_FORMAT: Pattern = Pattern.compile("\\d{9}M[A-Z]")
+
+  /** This constant represents PAYE BROCS Regex Format */
+  val PAYE_BROCS_FORAMT = "\\d{3}P[A-Z]\\d{7}"
+
+  /** This constant represents PAYE Single Digit (Bit) Regex Format */
+  val PAYE_BIT_FORMAT: Pattern = Pattern.compile("\\d{1}")
+
+  /** This constant represents PAYE reference starting with 961 */
+  val PAYE961_START_STRING = "961"
+
+  /** This constant represents PAYE prefix characters array */
+  val PAYE_REF_PREFIX: Array[String] = Array("N", "P")
+
+  /** This constant represents PAYE Seven Digit (Bit) Regex Format */
+  val PAYE_BIT_SEVEN_FORMAT = "\\d{7}"
+
+  /** This constant represents PAYE Sixth Character when 13th is 'X' and first 3 are 961 */
+  val PAYE961_SIXTH_VALUE = 0
+
+  /** This constant represents PAYE optional last 4 digits */
+  val YYMM_FORMAT: Pattern = Pattern.compile("\\d{4}")
+
+  /** This constant represents MGD reference number Regex Format */
+  val MGD_REF_FORMAT: Pattern = Pattern.compile("X[A-Z]M0000\\d{7}")
+
+  /** This constant represents SAFE reference number 14 char Regex Format */
   val SAFE_14_REF_FORMAT: Pattern = Pattern.compile("X[A-Z][A-Z0-9]\\d{11}")
+
+  /** This constant represents SAFE reference number 15 char Regex Format */
   val SAFE_15_REF_FORMAT: Pattern = Pattern.compile("X[A-Z]\\d{13}")
   val SAFE_ECL_REF_FORMAT: Pattern = Pattern.compile("X[A-Z]ECL\\d{10}")
+  val SAFE_REF_CHAR3_NUMERIC_FORMAT: Pattern = Pattern.compile("\\d{1}")
+  val SAFE_REF_CHAR3 = "M"
 
-  def modTCRef(reference: String) = {
+  def modTCRef(reference: String): Boolean = {
     val chkChar = reference.toUpperCase().charAt(reference.length() - 1);
     chkChar == taxCreditModCheck(reference)
   }
@@ -58,30 +108,6 @@ object ModUtils {
     checkDigits(remainder)
   }
 
-  def modSafe14(reference: String) = {
-    val modDivisor = 23
-    val indexOfCheckChar = 1
-    val indexOfFirstProtectedChar = 2
-    val indexOfLastProtectedChar = 14
-    val weightings = Array(9, 10, 11, 12, 13, 8, 7, 6, 5, 4, 3, 2)
-    val checkChar = reference.charAt(indexOfCheckChar)
-    val protectedChars = reference.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
-    val expectedChar = safe14ModCheck(modDivisor, weightings, charRemainderMap, protectedChars)
-    checkChar == expectedChar
-  }
-
-  def modSafe15(reference: String) = {
-    val modDivisor = 23
-    val indexOfCheckChar = 1
-    val indexOfFirstProtectedChar = 2
-    val indexOfLastProtectedChar = 15
-    val weightings = Array(9, 10, 11, 12, 13, 8, 7, 6, 5, 4, 3, 2, 1)
-    val checkChar = reference.charAt(indexOfCheckChar)
-    val protectedChars = reference.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
-    val expectedChar = modCheck(modDivisor, weightings, charRemainderMap, parseIntArray(protectedChars))
-    checkChar == expectedChar
-  }
-
   def modSDLT(reference: String) = {
     val modDivisor = 23
     val indexOfCheckChar = 10
@@ -96,6 +122,7 @@ object ModUtils {
   }
 
   def modulusU11(reference: String): Boolean = {
+    assert(reference.length >= 10, "Payment reference must be at least 10 characters long")
     val modDivisor = 11
     val indexOfCheckChar = 0
     val indexOfFirstProtectedChar = 1
@@ -168,40 +195,21 @@ object ModUtils {
     checkChar == expectedChar
   }
 
-  def mod97(reference: String): Boolean = {
-    val modDivisor = 97
-    val indexOfFirstProtectedChar = 0
-    val indexOfLastProtectedChar = 7
-    val weightings = Array(8, 7, 6, 5, 4, 3, 2)
-    val checkDigitVal = Integer.valueOf(reference.substring(7, 9))
-    val protectedChars = reference.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
-    val total1 = modCheckTotal(weightings, protectedChars)
-    val result1 = modCheckForVat(modDivisor, total1)
-    val mod97Flag = result1 == checkDigitVal
-    val total2 = total1 + 55;
-    val result2 = modCheckForVat(modDivisor, total2)
-    val mod9755Flag = result2 == checkDigitVal
-
-    (mod97Flag, mod9755Flag) match {
-      case (true, false) => true
-      case (false, true) => true
-      case _             => false
-    }
+  /** modCheckForVat
+    *
+    * @param modDivisor
+    *   int
+    * @param sumOfWeightedValues
+    *   int
+    * @return
+    *   int
+    */
+  def modCheckForVat(modDivisor: Int, sumOfWeightedValues: Int) = {
+    var value = sumOfWeightedValues
+    while (value > modDivisor) value = value - modDivisor
+    if (value <= modDivisor) value   = modDivisor - value
+    value
   }
-
-  @tailrec
-  private def modCheckForVat(modDivisor: Int, sumOfWeightedValues: Int): Int = {
-    if (sumOfWeightedValues > modDivisor) {
-      modCheckForVat(modDivisor, sumOfWeightedValues - modDivisor)
-    } else {
-      if (sumOfWeightedValues <= modDivisor) {
-        modDivisor - sumOfWeightedValues
-      } else {
-        sumOfWeightedValues
-      }
-    }
-  }
-
   def modCheck(modDivisor: Int, weightings: Array[Int], remainderMap: Array[Char], numericValues: Array[Int]): Char = {
     val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
       acc + (value * weightings(index))
@@ -218,30 +226,96 @@ object ModUtils {
     sumOfWeightedValues % modDivisor
   }
 
-  private def modCheckTotal(weightings: Array[Int], protectedChar: String): Int = {
-    val numericValues = parseIntArray(protectedChar)
-    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
-      acc + (value * weightings(index))
+  /** This method does Modulus check for VAT module
+    *
+    * @param modDivisor
+    *   int
+    * @param weightings
+    *   int[]
+    * @param protectedChars
+    *   String
+    * @return
+    *   CheckDigit Character
+    */
+  def modCheckTotal(modDivisor: Int, weightings: Array[Int], protectedChars: String) = {
+    // the numeric values of protected chars to multiply by weightings
+    val numericValues = parseIntArray(protectedChars)
+    var sumOfWeightedValues = 0
+    for (index <- numericValues.indices) {
+      sumOfWeightedValues += numericValues(index) * weightings(index)
     }
     sumOfWeightedValues
   }
 
-  private def mgdModCheck(modeDivisor: Int, weightings: Array[Int], remainderMap: Array[Char], protectedChars: String): Char = {
-    val numericValues = mgdParseIntArray(protectedChars)
-    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
-      acc + (value * weightings(index))
+  /** Method checks whether a date is valid
+    *
+    * @param day
+    *   \- date
+    * @param month
+    *   \- month
+    * @param year
+    *   \- year
+    * @return
+    *   boolean value indicating if a valid date
+    */
+  def isValidDate(day: Int, month: Int, year: Int): Boolean = {
+    if (month < 1 || month > 12) {
+      return false
     }
-    val modResult = sumOfWeightedValues % modeDivisor
-    val expectedChar = remainderMap(modResult)
-    expectedChar
-
+    if (day < 1 || day > 31) {
+      return false
+    }
+    if ((month == 4 || month == 6 || month == 9 || month == 11) && day == 31) {
+      return false
+    }
+    if (month == 2) {
+      val leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
+      if (day > 29 || (day == 29 && !leap)) {
+        return false
+      }
+    }
+    true
   }
 
-  private def mgdParseIntArray(allDigits: String): Array[Int] = {
-    val intArray = for (i <- 1 until allDigits.length) yield {
-      allDigits.substring(i, i + 1).toInt
+  /** This method does Modulus check.
+    *
+    * @param modDivisor
+    *   int
+    * @param weightings
+    *   int[]
+    * @param remainderMap
+    *   char[]
+    * @param protectedChars
+    *   String
+    * @return
+    *   CheckDigit Character
+    */
+  def mgdModCheck(modDivisor: Int, weightings: Array[Int], remainderMap: Array[Char], protectedChars: String): Char = {
+    // the numeric values of protected chars to multiply by weightings
+    val numericValues = mgdParseIntArray(protectedChars)
+    var sumOfWeightedValues = 0
+    for (index <- numericValues.indices) {
+      sumOfWeightedValues += numericValues(index) * weightings(index)
     }
-    Array(nddsMValue) ++ intArray
+    val modResult = sumOfWeightedValues % modDivisor
+    remainderMap(modResult)
+  }
+
+  /** Convert a numeric String to an int array.
+    *
+    * @param allDigits
+    *   a non-null String where all chars are digits.
+    * @return
+    *   the int[]
+    */
+  private def mgdParseIntArray(allDigits: String) = {
+    val ints = new Array[Int](allDigits.length)
+    // Adding char 'M' value to array
+    ints(0) = M_VALUE
+    for (i <- 1 until ints.length) {
+      ints(i) = allDigits.substring(i, i + 1).toInt
+    }
+    ints
   }
 
   def parseIntArray(allDigits: String): Array[Int] = {
@@ -263,22 +337,4 @@ object ModUtils {
     ints
   }
 
-  def safe14ModCheck(modDivisor: Int, weightings: Array[Int], remainderMap: Array[Char], protectedChars: String) = {
-    val numericValues = safe14ParseIntArray(protectedChars)
-    val sumOfWeightedValues = numericValues.zipWithIndex.foldLeft(0) { case (acc, (value, index)) =>
-      acc + (value * weightings(index))
-    }
-    val modResult = sumOfWeightedValues % modDivisor
-    remainderMap(modResult)
-  }
-
-  private def safe14ParseIntArray(protectedChars: String) = {
-    val characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    val char1 = protectedChars.take(1)
-    val tempValue = if (char1.matches("\\d{1}")) char1.toInt else characters.indexOf(protectedChars.charAt(0)) + 33
-    val intArray = for (i <- 1 until protectedChars.length) yield {
-      protectedChars.substring(i, i + 1).toInt
-    }
-    Array(tempValue) ++ intArray
-  }
 }

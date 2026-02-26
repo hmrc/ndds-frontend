@@ -21,9 +21,7 @@ import models.DirectDebitSource.*
 import utils.ModUtils
 import utils.ModUtils.*
 
-import java.time.LocalDate
-import java.time.format.{DateTimeFormatter, ResolverStyle}
-import scala.util.{Right, Try}
+import scala.util.Right
 
 object ReferenceTypeValidator {
   trait Validator[A <: DirectDebitSource] {
@@ -31,8 +29,10 @@ object ReferenceTypeValidator {
   }
 
   given Validator[PAYE.type] with {
-    def validate(reference: String): Boolean = {
-      val tempReference = (ref: String) => if (reference.length >= 13) Right(ref) else Left(s"Error: reference $ref length less than 13")
+    def validate(ref: String): Boolean = {
+      val reference = ref.toUpperCase
+
+      val tempReference = (ref: String) => if (ref.length >= 13) Right(ref) else Left(s"Error: reference $ref length less than 13")
       val updatedTempRef = (tempRef: String) => {
         (if (Set('N', 'P').contains(tempRef(0))) Right(tempRef.drop(1)) else Right(tempRef)).flatMap { ref =>
           if (ref.length <= 13) {
@@ -43,16 +43,16 @@ object ReferenceTypeValidator {
         }
       }
       val isUpdatedRefFormatValid = (ref: String) => {
-        (if (ref.take(12).matches("\\d{3}P[A-Z]\\d{7}")) Right(ref) else Left(s"Error: $ref is in an invalid format")).flatMap { validRef =>
+        (if (ref.take(12).matches(PAYE_BROCS_FORAMT)) Right(ref) else Left(s"Error: $ref is in an invalid format")).flatMap { validRef =>
           if (validRef.length == 13) {
             validRef.take(3) match {
-              case "961" if validRef(12).isDigit || validRef(12) == 'X' =>
+              case PAYE961_START_STRING if validRef(12).isDigit || validRef(12) == 'X' =>
                 Right(validRef)
-              case "961" if validRef(12) == 'X' && validRef(5) == '0' =>
+              case PAYE961_START_STRING if validRef(12) == 'X' && validRef(5) == '0' =>
                 Right(validRef)
-              case "961" if validRef(12) != 'X' && validRef.substring(5, 11).matches("\\d{7}") => Right(validRef)
+              case PAYE961_START_STRING if validRef(12) != 'X' && validRef.substring(5, 11).matches(PAYE_BIT_SEVEN_FORMAT) => Right(validRef)
               case _ =>
-                if (!validRef.substring(0, 2).matches("961") && validRef(12).isDigit) {
+                if (!validRef.substring(0, 2).matches(PAYE961_START_STRING) && validRef(12).isDigit) {
                   Right(validRef)
                 } else {
                   Left(s"Error: $validRef is not a decimal")
@@ -75,117 +75,257 @@ object ReferenceTypeValidator {
 
   given Validator[MGD.type] with {
     def validate(reference: String): Boolean = {
-      val refLengthCheck = (ref: String) => if (ref.length == 14) Right(ref) else Left("Error: Invalid Length")
-      val isValidFormat = (ref: String) => if (ref.matches("X[A-Z]M0000\\d{7}")) Right(ref) else Left(s"Error: $ref Invalid format")
-      val result = for {
-        _ <- refLengthCheck(reference)
-        _ <- isValidFormat(reference)
-      } yield reference
-      result.fold(_ => false, ref => ModUtils.mod23(ref))
+      val ref = reference.toUpperCase
+      if (ref.length != MGD_REF_LENGTH) return false
+
+      /** Check against MGD Ref number regex format.
+        */
+      if (!MGD_REF_FORMAT.matcher(ref).matches) return false
+
+      // the value to divide sumOfWeightedValues by in the modulus calculation
+      val modDivisor = 23
+      // the index of the check character in ref
+      val indexOfCheckChar = 1
+      // the index of the first character protected by the check character
+      val indexOfFirstProtectedChar = 2
+      // the index of the last character protected by the check character
+      val indexOfLastProtectedChar = 14
+      // the weightings to multiply equivalent indices in numericValues by
+      val weightings = Array(9, 10, 11, 12, 13, 8, 7, 6, 5, 4, 3, 2)
+      // expected value in remainderMap at the index given by the calculation
+      val checkChar = ref.charAt(indexOfCheckChar)
+      // range of protected chars
+      val protectedChars = ref.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
+      val expectedChar = mgdModCheck(modDivisor, weightings, charRemainderMap, protectedChars)
+
+      expectedChar == checkChar
     }
   }
 
   given Validator[SA.type] with {
-    def validate(reference: String): Boolean = {
-      val isValidFormat = (ref: String) => if (ref.matches("\\d{10}K")) Right(ref) else Left(s"Error: $ref Invalid format")
-      isValidFormat(reference).fold(_ => false, ModUtils.modulusU11)
+    def validate(ref: String): Boolean = {
+      val reference = ref.toUpperCase
+      UTR_FORMAT.matcher(reference).matches && modulusU11(reference)
     }
   }
 
   given Validator[CT.type] with {
-    def validate(reference: String): Boolean = {
-      val isValidFormat = (ref: String) => if (ref.matches("\\d{10}A001\\d{2}A")) Right(ref) else Left(s"Error: $ref Invalid format")
-      isValidFormat(reference).fold(_ => false, ModUtils.modulusU11)
+    def validate(ref: String): Boolean = {
+      val reference = ref.toUpperCase
+      COTAX_FORMAT.matcher(reference).matches && modulusU11(reference)
     }
   }
 
   given Validator[SDLT.type] with {
+
+    /** This method validates SDLT Payment Reference Number.
+      * @param reference
+      *   String SDLT Payment Reference Number
+      * @return
+      *   boolean
+      */
     def validate(reference: String): Boolean = {
-      val isValidFormat = (ref: String) => if (ref.matches("\\d{9}M[A-Z]")) Right(ref) else Left(s"Error: $ref Invalid format")
-      isValidFormat(reference).fold(_ => false, ModUtils.modSDLT)
+      val ref = reference.toUpperCase
+
+      /** Check against SDLT regex format.
+        */
+      if (!SDLT_FORMAT.matcher(ref).matches) return false
+      // the value to divide sumOfWeightedValues by in the modulus calculation
+      val modDivisor = 23
+      // the index of the check character in ref
+      val indexOfCheckChar = 10
+      // the index of the first character protected by the check character
+      val indexOfFirstProtectedChar = 0
+      // the index of the last character protected by the check character
+      val indexOfLastProtectedChar = 9
+      // the weightings to multiply equivalent indices in numericValues by
+      val weightings = Array(6, 7, 8, 9, 10, 5, 4, 3, 2)
+      // expected value in remainderMap at the index given by the calculation
+      val checkChar = ref.charAt(indexOfCheckChar)
+      // range of protected chars
+      val protectedChars = ref.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
+      // Mod Check
+      val expectedCheckChar = modCheck(modDivisor, weightings, charRemainderMap, parseIntArray(protectedChars))
+      checkChar == expectedCheckChar
     }
   }
 
   given Validator[VAT.type] with {
     def validate(reference: String): Boolean = {
-      val refLengthCheck = (ref: String) => if (ref.length >= 9) Right(ref) else Left(s"Error: too many characters")
-      val isValidFormat = (ref: String) => if (ref.matches("\\d{9}")) Right(ref) else Left(s"Error: $ref Invalid format")
-      val result = for {
-        _ <- refLengthCheck(reference)
-        _ <- isValidFormat(reference)
-      } yield reference
-      result.fold(_ => false, ModUtils.mod97)
+      val ref = reference.toUpperCase
+      if (ref.length < 9 || !VAT_REF_FORMAT.matcher(ref).matches) return false
+
+      // the value to divide sumOfWeightedValues by in the first modulus calculation
+      val modDivisor = 97
+
+      // the index of the first character protected by the check character
+      val indexOfFirstProtectedChar = 0
+
+      // the index of the last character protected by the check character
+      val indexOfLastProtectedChar = 7
+
+      // the weightings to multiply equivalent indices in numericValues by
+      val weightings = Array(8, 7, 6, 5, 4, 3, 2)
+
+      // Check Digit Value
+      val checkDigitVal = Integer.valueOf(ref.substring(7, 9))
+
+      // range of protected chars
+      val protectedChars = ref.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
+
+      val total1 = modCheckTotal(modDivisor, weightings, protectedChars)
+      val result1 = modCheckForVat(modDivisor, total1)
+
+      var mod97Flag = false
+      if (result1 == checkDigitVal) mod97Flag = true
+
+      var mod9755Flag = false
+      val total2 = total1 + 55
+      val result2 = modCheckForVat(modDivisor, total2)
+      if (result2 == checkDigitVal) mod9755Flag = true
+
+      (mod97Flag && !mod9755Flag) || (!mod97Flag && mod9755Flag)
     }
   }
 
   given Validator[NIC.type] with {
     def validate(reference: String): Boolean = {
-      val checkFirstTwoChars = (ref: String) => if (ref.take(2) == "60") Right(ref) else Left(s"Error: too many characters")
-      val isValidFormat = (ref: String) => if (ref.matches("\\d{17}[\\d{1}|X]")) Right(ref) else Left(s"Error: $ref Invalid format")
-      val result = for {
-        _ <- checkFirstTwoChars(reference)
-        _ <- isValidFormat(reference)
-      } yield reference
-      result.fold(_ => false, ModUtils.mod11)
+      val ref = reference.toUpperCase
+
+      /** First we check for NICDN Format and then we check whether first two digits in reference number are 60
+        */
+      if (!NIC_FORMAT.matcher(ref).matches || (!ref.substring(0, 2).equals("60"))) return false
+
+      // the value to divide sumOfWeightedValues by in the modulus calculation
+      val modDivisor = 11
+
+      // the index of the check character in ref
+      val indexOfCheckChar = 17
+
+      // the index of the first character protected by the check character
+      val indexOfFirstProtectedChar = 0
+
+      // the index of the last character protected by the check character
+      val indexOfLastProtectedChar = 17
+
+      // the weightings to multiply equivalent indices in numericValues by
+      val weightings = Array(8, 4, 6, 3, 5, 2, 1, 9, 10, 7, 8, 4, 6, 3, 5, 2, 1)
+
+      // expected value in remainderMap at the index given by the calculation
+      val checkChar = ref.charAt(indexOfCheckChar)
+      val checkCharVal = Character.digit(checkChar, 10)
+
+      // range of protected chars
+      val protectedChars = ref.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
+
+      val remainder = modCheck(modDivisor, weightings, protectedChars)
+
+      var calculatedCheckCharVal = -1
+      if (remainder == 0) calculatedCheckCharVal = 0
+      else if (remainder == 1) return checkChar == 'X'
+      else calculatedCheckCharVal = modDivisor - remainder
+
+      checkCharVal == calculatedCheckCharVal
     }
   }
-
-  //  given Validator[OL.type] with {
-  //    def validate(reference: String): Boolean = {
-  //
-  //      val thirdCharacter = 2
-  //      val length14AndFormatCheck = reference.length == 14 && reference.matches("X[A-Z][A-Z0-9]\\d{11}") && (reference(thirdCharacter) != 'M')
-  //      val length15AndFormatCheck = reference.length == 15 && (reference.matches("X[A-Z]ECL\\d{10}") || reference.matches("X[A-Z]\\d{13}"))
-  //
-  //      (length14AndFormatCheck, length15AndFormatCheck) match {
-  //        case (true, _) => ModUtils.modSafe14(reference)
-  //        case (_, true) => ModUtils.modSafe15(reference)
-  //        case _ => false
-  //      }
-  //
-  //    }
-  //  }
 
   given Validator[OL.type] with {
     def validate(ref: String): Boolean = {
-      isValidSafe14Ref(ref) || isValidSafe15RefECL(ref) || isValidSafe15Ref(ref)
+      val reference = ref.toUpperCase
+      isValidSafe14Ref(reference) || isValidSafe15RefECL(reference) || isValidSafe15Ref(reference)
     }
   }
 
-  private[validation] def isValidSafe14Ref(ref: String): Boolean = {
-    // Validate length of reference
+  /** This method validates SAFE Payment Reference Number having 14 digits length.
+    *
+    * @param ref
+    *   String SAFE Payment Reference Number
+    * @return
+    *   boolean
+    */
+  private def isValidSafe14Ref(ref: String): Boolean = {
     if (ref.length != 14) return false
-    // Check if the reference matches the SAFE 14 format and char 3 is not 'M'
-    if (!ModUtils.SAFE_14_REF_FORMAT.matcher(ref).matches || ref.charAt(2) == 'M') return false
-    // Weightings for the modulus check
-    val weightings = Array(9, 10, 11, 12, 13, 8, 7, 6, 5, 4, 3, 2)
-    // Protected characters to check the modulus against
-    val protectedChars = ref.substring(2, 14)
-    // Perform the modulus check
-    val expectedChar = safe14ModCheck(23, weightings, charRemainderMap, protectedChars)
-    // The check character should match the expected value
-    ref.charAt(1) == expectedChar
-  }
 
-  private def isValidSafe15RefECL(ref: String): Boolean = {
-    // check max length 15 and matches regex pattern
-    if (ref.length != 15 || !ModUtils.SAFE_ECL_REF_FORMAT.matcher(ref).matches) return false
+    /** EARS00018219138 - not correctly validating format of reference Check against SAFE 14 char Reference Number regex format. Additional check that
+      * char 3 is not M as this is reserved for MGD references
+      */
+    val refCharNo3 = ref.substring(2, 3)
+    if (!SAFE_14_REF_FORMAT.matcher(ref).matches) return false
+    else if (SAFE_REF_CHAR3.equals(refCharNo3)) return false
+    // the value to divide sumOfWeightedValues by in the modulus calculation
     val modDivisor = 23
+    // the index of the check character in ref
     val indexOfCheckChar = 1
+    // the index of the first character protected by the check character
     val indexOfFirstProtectedChar = 2
-    val indexOfLastProtectedChar = 15
+    // the index of the last character protected by the check character
+    val indexOfLastProtectedChar = 14
     // the weightings to multiply equivalent indices in numericValues by
-    val weightings = Array(9, 10, 11, 12, 13, 8, 7, 6, 5, 4, 3, 2, 1)
+    val weightings = Array(9, 10, 11, 12, 13, 8, 7, 6, 5, 4, 3, 2)
     // expected value in remainderMap at the index given by the calculation
     val checkChar = ref.charAt(indexOfCheckChar)
     // range of protected chars
     val protectedChars = ref.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
-    modCheck(modDivisor, weightings, charRemainderMap, ModUtils.eclParseIntArray(protectedChars)) == checkChar
+    val expectedChar = safe14ModCheck(modDivisor, weightings, charRemainderMap, protectedChars)
+    expectedChar == checkChar
   }
 
-  private[validation] def isValidSafe15Ref(ref: String): Boolean = {
+  /** This method does Modulus check for 14 character SAFE references.
+    *
+    * @param modDivisor
+    *   int
+    * @param weightings
+    *   int[]
+    * @param remainderMap
+    *   char[]
+    * @param protectedChars
+    *   String
+    * @return
+    *   CheckDigit Character
+    */
+  private def safe14ModCheck(modDivisor: Int, weightings: Array[Int], remainderMap: Array[Char], protectedChars: String) = {
+    // the numeric values of protected chars to multiply by weightings
+    val numericValues = safe14ParseIntArray(protectedChars)
+    var sumOfWeightedValues = 0
+    for (index <- numericValues.indices) {
+      sumOfWeightedValues += numericValues(index) * weightings(index)
+    }
+    val modResult = sumOfWeightedValues % modDivisor
+    remainderMap(modResult)
+  }
+
+  /** Convert an alphanumeric String to an int array.
+    *
+    * @param protectedChars
+    *   may include a leading Alpha character which needs to be covered to a numeric value.
+    * @return
+    *   the int[]
+    */
+  private def safe14ParseIntArray(protectedChars: String) = {
+    val characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    val ints = new Array[Int](protectedChars.length)
+    val char1 = protectedChars.substring(0, 1)
+    if (SAFE_REF_CHAR3_NUMERIC_FORMAT.matcher(char1).matches) ints(0) = char1.toInt
+    else ints(0)                                                      = characters.indexOf(protectedChars.charAt(0)) + 33
+    for (i <- 1 until ints.length) {
+      ints(i) = protectedChars.substring(i, i + 1).toInt
+    }
+    ints
+  }
+
+  /** This method validates SAFE Payment Reference Number having 15 digits length.
+    *
+    * @param ref
+    *   String SAFE Payment Reference Number
+    * @return
+    *   boolean
+    */
+  private def isValidSafe15Ref(ref: String): Boolean = {
     if (ref.length != 15) return false
-    if (!(ModUtils.SAFE_15_REF_FORMAT.matcher(ref).matches || ModUtils.SAFE_ECL_REF_FORMAT.matcher(ref).matches)) return false
+
+    /** EARS00018219138 - previously allowing alpha's in chars 3 - 15. Check against SAFE 15 char Reference Number regex format.
+      */
+    if (!(SAFE_15_REF_FORMAT.matcher(ref).matches || SAFE_ECL_REF_FORMAT.matcher(ref).matches)) return false
     // the value to divide sumOfWeightedValues by in the modulus calculation
     val modDivisor = 23
     // the index of the check character in ref
@@ -209,49 +349,47 @@ object ReferenceTypeValidator {
     }
   }
 
+  private def isValidSafe15RefECL(ref: String): Boolean = {
+    // check max length 15 and matches regex pattern
+    if (ref.length != 15 || !SAFE_ECL_REF_FORMAT.matcher(ref).matches) return false
+    val modDivisor = 23
+    val indexOfCheckChar = 1
+    val indexOfFirstProtectedChar = 2
+    val indexOfLastProtectedChar = 15
+    // the weightings to multiply equivalent indices in numericValues by
+    val weightings = Array(9, 10, 11, 12, 13, 8, 7, 6, 5, 4, 3, 2, 1)
+    // expected value in remainderMap at the index given by the calculation
+    val checkChar = ref.charAt(indexOfCheckChar)
+    // range of protected chars
+    val protectedChars = ref.substring(indexOfFirstProtectedChar, indexOfLastProtectedChar)
+    val expectedChar = modCheck(modDivisor, weightings, charRemainderMap, eclParseIntArray(protectedChars))
+    expectedChar == checkChar
+  }
+
   given Validator[TC.type] with {
     def validate(reference: String): Boolean = {
       val invalidChars = Set('D', 'F', 'I', 'O', 'Q', 'U', 'V')
-      val invalidCharacterPairs = Set("FY", "GB", "NK", "TN", "ZZ")
-      val invalidFormat = (ref: String) => if (ref.matches("[A-Z]{2}\\d{12}N[A-Z]")) Right(ref) else Left("Error: invalid format")
-      val checkFirstTwoChars = (ref: String) => {
-        if (invalidChars.contains(ref(0)) || invalidChars.contains(ref(1)))
-          Left("Error: First 2 values contain invalid characters")
-        else
-          Right(ref)
-      }
-      val checkCharacterPairs = (ref: String) => {
-        if (invalidCharacterPairs.contains(ref.take(2)))
-          Left("Error: Contains invalid pairs")
-        else
-          Right(ref)
-      }
+      val invalidPrefix = Set("FY", "GB", "NK", "TN", "ZZ")
 
-      val checkDateFormat = (ref: String) => {
-        val formatter =
-          DateTimeFormatter
-            .ofPattern("ddMMuu")
-            .withResolverStyle(ResolverStyle.STRICT)
+      val tcPayRef = reference.toUpperCase
+      val prefix = tcPayRef.take(2)
+      val chkChar = tcPayRef.last
 
-        val extractDate = ref.substring(8, 14)
+      val validRef =
+        TC_FORMAT.matcher(tcPayRef).matches &&
+          !prefix.exists(invalidChars.contains) &&
+          !invalidPrefix.contains(prefix) &&
+          isValidDate(
+            tcPayRef.substring(8, 10).toInt,
+            tcPayRef.substring(10, 12).toInt,
+            tcPayRef.substring(12, 14).toInt
+          ) && taxCreditModCheck(tcPayRef) == chkChar
 
-        Try(LocalDate.parse(extractDate, formatter)).toEither.left
-          .map(_ => "Error: Invalid date format")
-          .map(_ => ref)
-      }
-
-      val result = for {
-        _ <- invalidFormat(reference)
-        _ <- checkFirstTwoChars(reference)
-        _ <- checkCharacterPairs(reference)
-        _ <- checkDateFormat(reference)
-      } yield ()
-      result.fold(_ => false, _ => ModUtils.modTCRef(reference))
-
+      validRef
     }
   }
 
-  def validate[A <: DirectDebitSource](reference: String)(using v: Validator[DirectDebitSource]): Boolean = {
+  def validate[A <: DirectDebitSource](reference: String)(using v: Validator[A]): Boolean = {
     v.validate(reference)
   }
 
