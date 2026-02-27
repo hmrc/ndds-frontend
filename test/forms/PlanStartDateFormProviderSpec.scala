@@ -44,8 +44,11 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
 
     "fail to bind an empty date" in {
       val result = form.bind(Map.empty[String, String])
+
       result.errors must contain theSameElementsAs Seq(
-        FormError("value", "planStartDate.error.required.all", Seq())
+        FormError("value.day", "planStartDate.error.required.all", Seq()),
+        FormError("value.month", "planStartDate.error.required.all", Seq()),
+        FormError("value.year", "planStartDate.error.required.all", Seq())
       )
     }
   }
