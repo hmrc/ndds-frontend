@@ -25,9 +25,9 @@ datePart.month = month
 datePart.year  = year
 
 
-date.error.day = Enter a valid date
-date.error.month = Enter a valid date
-date.error.year = Enter a valid date
+date.error.day = day
+date.error.month = month
+date.error.year = year
 
 timeout.title = You’re about to be signed out
 timeout.message = For security reasons, you will be signed out of this service in

@@ -24,9 +24,9 @@ datePart.day   = diwrnod
 datePart.month = mis
 datePart.year  = blwyddyn
 
-date.error.day = Nodwch ddyddiad dilys
-date.error.month = Nodwch ddyddiad dilys
-date.error.year = Nodwch ddyddiad dilys
+date.error.day = diwrnod
+date.error.month = mis
+date.error.year = blwyddyn
 
 timeout.title = Rydych ar fin cael eich allgofnodi
 timeout.message = Am resymau diogelwch, cewch eich allgofnodi o’r gwasanaeth hwn ymhen
