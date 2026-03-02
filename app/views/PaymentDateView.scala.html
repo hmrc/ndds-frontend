@@ -32,7 +32,15 @@
 
     @formHelper(action = routes.PaymentDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @mainErrorSummary(form, errorLinkOverrides = Map("value" -> "value.day"))
+        @mainErrorSummary(
+        form,
+        errorLinkOverrides = Map(
+        "value.day"   -> "value.day",
+        "value.month" -> "value.month",
+        "value.year"  -> "value.year",
+        "value"       -> "value.day" // fallback
+        )
+        )
 
         @govukDateInput(
             DateViewModel(
