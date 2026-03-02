@@ -49,18 +49,38 @@ class CustomDateFormatter(invalidKey: String,
 
     if (missingFields.nonEmpty) {
 
-      val err = missingFields.size match {
-        case 1 =>
-          FormError(key, requiredKey, Seq(labelFor(missingFields.head)))
-
-        case 2 =>
-          FormError(key, twoRequiredKey, missingFields.map(labelFor))
-
-        case 3 =>
-          FormError(key, allRequiredKey)
+      val fieldErrors = missingFields.map { field =>
+        FormError(
+          s"$key.$field",
+          requiredKey,
+          Seq(labelFor(field))
+        )
       }
 
-      return Left(Seq(err))
+      val groupError = missingFields.size match {
+
+        case 1 =>
+          FormError(
+            key,
+            requiredKey,
+            Seq(labelFor(missingFields.head))
+          )
+
+        case 2 =>
+          FormError(
+            key,
+            twoRequiredKey,
+            missingFields.map(labelFor)
+          )
+
+        case 3 =>
+          FormError(
+            key,
+            allRequiredKey
+          )
+      }
+
+      return Left(fieldErrors :+ groupError)
     }
 
     val cleanedData: Map[String, String] =
