@@ -758,3 +758,6 @@ alreadySuspendedError.title = Mae’r cynllun talu hwn eisoes wedi’i ohirio
 alreadySuspendedError.heading = Mae’r cynllun talu hwn eisoes wedi’i ohirio
 alreadySuspendedError.p1 = Mae’r cynllun talu hwn wedi’i ohirio o {0} i {1}. Gallwch newid y dyddiadau gohirio neu ddileu’r gohiriad.
 alreadySuspendedError.link = Ewch yn ôl i fanylion eich cynllun talu
+
+user.banner.heading = Helpwch i wella GOV.UK
+user.banner.signUp = Cofrestrwch i gymryd rhan mewn ymchwil (yn agor tab newydd)
