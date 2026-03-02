@@ -56,17 +56,10 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
   lazy val exitSurveyUrl: String = s"$exitSurveyBaseUrl/feedback/ndds-frontend"
 
-  lazy val languageTranslationEnabled: Boolean =
-    configuration.get[Boolean]("features.welsh-translation")
-
-  lazy val maxNumberDDIsAllowed: Int =
-    configuration.get[Int]("features.maxNumberDDIsAllowed")
-
-  lazy val maxNumberPPsAllowed: Int =
-    configuration.get[Int]("features.maxNumberPPsAllowed")
-
-  lazy val isLockServiceEnabled: Boolean =
-    configuration.get[Boolean]("features.enableLockService")
+  lazy val languageTranslationEnabled: Boolean = configuration.get[Boolean]("features.welsh-translation")
+  lazy val maxNumberDDIsAllowed: Int = configuration.get[Int]("features.maxNumberDDIsAllowed")
+  lazy val maxNumberPPsAllowed: Int = configuration.get[Int]("features.maxNumberPPsAllowed")
+  lazy val isLockServiceEnabled: Boolean = configuration.get[Boolean]("features.enableLockService")
 
   def languageMap: Map[String, Lang] = Map(
     "en" -> Lang("en"),

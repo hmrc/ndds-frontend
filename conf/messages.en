@@ -759,3 +759,5 @@ alreadySuspendedError.heading = This payment plan is already suspended
 alreadySuspendedError.p1 = This payment plan is suspended from {0} to {1}. You can change the suspension dates or remove the suspension.
 alreadySuspendedError.link = Return to your payment plan details
 
+user.banner.heading = Help make GOV.UK better
+user.banner.signUp = Sign up to take part in research (opens in new tab)
