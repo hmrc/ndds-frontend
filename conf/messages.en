@@ -346,7 +346,7 @@ addPaymentPlanEndDate.change.hidden =  add plan end date
 
 planEndDate.title = When do you want this payment plan to end?
 planEndDate.heading = When do you want this payment plan to end?
-planEndDate.p1 = This must be before {0}. HMRC will not collect payments after this date.
+planEndDate.p1 = This must be after {0}. HMRC will not collect payments after this date.
 planEndDate.hint = For example, 27 3 2020
 planEndDate.checkYourAnswersLabel = Plan end date
 planEndDate.change.hidden =  plan end date

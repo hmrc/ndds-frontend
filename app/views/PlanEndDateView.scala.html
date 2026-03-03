@@ -24,7 +24,7 @@
     govukButton: GovukButton
 )
 
-@(form: Form[_], mode: Mode, call: Call, beforeDate: String)(implicit request: Request[_], messages: Messages)
+@(form: Form[_], mode: Mode, call: Call, planStartDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("planEndDate.title")), backLink = Some(call.url)) {
 
@@ -49,7 +49,7 @@
                 HintViewModel(
                     HtmlContent(
                     Seq(
-                        s"<p class='govuk-body'>${messages("planEndDate.p1", s"<strong>$beforeDate</strong>")}</p>",
+                        s"<p class='govuk-body'>${messages("planEndDate.p1", s"<strong>$planStartDate</strong>")}</p>",
                         messages("planEndDate.hint"),
                         ).mkString
                     )
