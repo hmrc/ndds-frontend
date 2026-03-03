@@ -244,7 +244,9 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          boundForm.errors.map(_.key) must contain only "value.day"
+
+          val expectedKeys = Seq("value.day", "value")
+          boundForm.errors.map(_.key) must contain theSameElementsAs expectedKeys
         }
       }
 

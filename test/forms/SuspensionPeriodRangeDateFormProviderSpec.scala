@@ -158,11 +158,14 @@ class SuspensionPeriodRangeDateFormProviderSpec extends AnyWordSpec with Matcher
       )
 
       val result = form.bind(data)
+
       val expectedErrors = Seq(
         FormError("suspensionPeriodRangeStartDate.day", "suspensionPeriodRangeDate.error.invalid.startDate.base", Seq()),
         FormError("suspensionPeriodRangeStartDate.month", "suspensionPeriodRangeDate.error.invalid.startDate.base", Seq()),
-        FormError("suspensionPeriodRangeStartDate.year", "suspensionPeriodRangeDate.error.invalid.startDate.base", Seq())
+        FormError("suspensionPeriodRangeStartDate.year", "suspensionPeriodRangeDate.error.invalid.startDate.base", Seq()),
+        FormError("suspensionPeriodRangeStartDate", "suspensionPeriodRangeDate.error.invalid.startDate.base", Seq())
       )
+
       result.errors must contain theSameElementsAs expectedErrors
     }
 
@@ -177,11 +180,14 @@ class SuspensionPeriodRangeDateFormProviderSpec extends AnyWordSpec with Matcher
       )
 
       val result = form.bind(data)
+
       val expectedErrors = Seq(
         FormError("suspensionPeriodRangeEndDate.day", "suspensionPeriodRangeDate.error.invalid.endDate.base", Seq()),
         FormError("suspensionPeriodRangeEndDate.month", "suspensionPeriodRangeDate.error.invalid.endDate.base", Seq()),
-        FormError("suspensionPeriodRangeEndDate.year", "suspensionPeriodRangeDate.error.invalid.endDate.base", Seq())
+        FormError("suspensionPeriodRangeEndDate.year", "suspensionPeriodRangeDate.error.invalid.endDate.base", Seq()),
+        FormError("suspensionPeriodRangeEndDate", "suspensionPeriodRangeDate.error.invalid.endDate.base", Seq())
       )
+
       result.errors must contain theSameElementsAs expectedErrors
     }
 
