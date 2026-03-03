@@ -27,44 +27,41 @@
 
 @(form: Form[_], mode: Mode, selectedAnswer: Option[DirectDebitSource], call: Call)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = title(form, messages("paymentReference.title")), backLink = Some(call.url)) {
+    @defining(selectedAnswer.getOrElse(VAT)) { source =>
 
-    @formHelper(action = routes.PaymentReferenceController.onSubmit(mode)) {
+        @defining(source.toString) { key =>
 
-        @if(form.errors.nonEmpty) {
-            @govukErrorSummary(ErrorSummaryViewModel(form))
-        }
+            @layout(
+                pageTitle = title(form, messages(s"paymentReference.$key.title")),
+                backLink = Some(call.url)
+                ) {
 
-        @govukInput(
-            InputViewModel(
-                field = form("value"),
-                label = LabelViewModel(messages("paymentReference.heading")).asPageHeading()
-            )
-            .withWidth(Full)
-            .withHint(HintViewModel(Text(
-                if (selectedAnswer.contains(CT))
-                    messages("paymentReference.ct.hint")
-                else if (selectedAnswer.contains(MGD))
-                    messages("paymentReference.mgd.hint")
-                else if (selectedAnswer.contains(SA))
-                    messages("paymentReference.sa.hint")
-                else if (selectedAnswer.contains(NIC))
-                    messages("paymentReference.nic.hint")
-                else if (selectedAnswer.contains(OL))
-                    messages("paymentReference.other.hint")
-                else if (selectedAnswer.contains(PAYE))
-                    messages("paymentReference.paye.hint")
-                else if (selectedAnswer.contains(SDLT))
-                    messages("paymentReference.sdlt.hint")
-                else if (selectedAnswer.contains(TC))
-                    messages("paymentReference.tc.hint")
-                else
-                    messages("paymentReference.vat.hint")
-            )))
-        )
+                @formHelper(action = routes.PaymentReferenceController.onSubmit(mode)) {
 
-        @govukButton(
-            ButtonViewModel(messages("site.continue"))
-        )
+                    @if(form.errors.nonEmpty) {
+                        @govukErrorSummary(ErrorSummaryViewModel(form))
+                        }
+
+                        @govukInput(
+                            InputViewModel(
+                            field = form("value"),
+                            label = LabelViewModel(
+                            messages(s"paymentReference.$key.heading")
+                            ).asPageHeading()
+                        )
+                        .withWidth(Full)
+                        .withHint(
+                        HintViewModel(
+                        Text(messages(s"paymentReference.$key.hint"))
+                        )
+                        )
+                        )
+
+                        @govukButton(
+                        ButtonViewModel(messages("site.continue"))
+                        )
+
+                    }
+                }
+            }
     }
-}

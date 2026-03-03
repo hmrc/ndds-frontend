@@ -23,53 +23,58 @@ import play.api.data.Form
 
 class PaymentReferenceFormProvider @Inject() extends Mappings {
 
-  private def requiredKey(source: Option[DirectDebitSource]) =
-    source
-      .map(s => s"paymentReference.error.required.${s.toString.toLowerCase}")
-      .getOrElse("paymentReference.error.required")
+  private val validCharactersRegex = "^[A-Za-z0-9]+$".r
 
-  private def lengthKey(source: Option[DirectDebitSource]) =
-    source
-      .map(s => s"paymentReference.error.length.${s.toString.toLowerCase}")
-      .getOrElse("paymentReference.error.invalid")
-
-  private def invalidKey(source: Option[DirectDebitSource]) =
-    source
-      .map(s => s"paymentReference.error.invalid.${s.toString.toLowerCase}")
-      .getOrElse("paymentReference.error.invalid")
-
-  private def expectedLength(source: DirectDebitSource): String => Boolean = {
-    case ref if source == DirectDebitSource.CT   => ref.length == 17
-    case ref if source == DirectDebitSource.MGD  => ref.length == 14
-    case ref if source == DirectDebitSource.NIC  => ref.length == 18
-    case ref if source == DirectDebitSource.PAYE => ref.length == 13 || ref.length == 14
-    case ref if source == DirectDebitSource.SA   => ref.length == 11
-    case ref if source == DirectDebitSource.SDLT => ref.length == 11
-    case ref if source == DirectDebitSource.TC   => ref.length == 16
-    case ref if source == DirectDebitSource.VAT  => ref.length == 9
-    case _                                       => true
-  }
+  private def key(source: DirectDebitSource, suffix: String) =
+    s"paymentReference.${source.toString}.$suffix"
 
   def apply(
     source: Option[DirectDebitSource],
     validator: Option[String => Boolean]
-  ): Form[String] =
+  ): Form[String] = {
+
+    val src = source.getOrElse(
+      throw new IllegalStateException("DirectDebitSource must be defined")
+    )
+
     Form(
-      "value" -> text(requiredKey(source))
-        .transform[String](_.trim, identity)
+      "value" -> text(key(src, "required"))
+        .transform[String](_.trim.toUpperCase, identity)
+        .verifying(key(src, "required"), _.nonEmpty)
         .verifying(
-          lengthKey(source),
-          ref => source.forall(expectedLength(_)(ref))
+          key(src, "invalidCharacters"),
+          value => value.isEmpty || validCharactersRegex.matches(value)
         )
         .verifying(
-          invalidKey(source),
-          ref =>
-            source match {
-              case Some(s) if !expectedLength(s)(ref) =>
-                true
-              case _ =>
-                validator.forall(_(ref))
-            }
+          key(src, "invalidFormat"),
+          value =>
+            value.isEmpty ||
+              !validCharactersRegex.matches(value) ||
+              formatCheck(src, value)
+        )
+        .verifying(
+          key(src, "invalid"),
+          value =>
+            value.isEmpty ||
+              !validCharactersRegex.matches(value) ||
+              !formatCheck(src, value) ||
+              validator.forall(_(value))
         )
     )
+  }
+
+  // Only basic structural checks here (length/regex),
+  // NOT modulus checks.
+  private def formatCheck(source: DirectDebitSource, ref: String): Boolean =
+    source match {
+      case DirectDebitSource.CT   => ref.length == 17
+      case DirectDebitSource.MGD  => ref.length == 14
+      case DirectDebitSource.NIC  => ref.length == 18
+      case DirectDebitSource.PAYE => ref.length == 13 || ref.length == 14
+      case DirectDebitSource.SA   => ref.length == 10 || ref.length == 11
+      case DirectDebitSource.SDLT => ref.length == 11
+      case DirectDebitSource.TC   => ref.length == 16
+      case DirectDebitSource.VAT  => ref.length == 9
+      case DirectDebitSource.OL   => ref.length >= 14 && ref.length <= 15
+    }
 }
