@@ -44,7 +44,15 @@ class CustomDateFormatter(invalidKey: String,
 
     val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
     if (regexErrors.nonEmpty) {
-      return Left(regexErrors.map(e => e.copy(messages = Seq(invalidKey), args = args)))
+      val fieldErrors =
+        regexErrors.map(e => e.copy(messages = Seq(invalidKey), args = args))
+      val groupError =
+        FormError(
+          key,
+          invalidKey,
+          args
+        )
+      return Left(fieldErrors :+ groupError)
     }
 
     if (missingFields.nonEmpty) {
