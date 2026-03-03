@@ -61,9 +61,10 @@ class AmendPlanStartDateFormProviderSpec extends DateBehaviours {
         val result = form.bind(Map.empty[String, String])
 
         result.errors must contain theSameElementsAs Seq(
-          FormError("value.day", "planStartDate.error.required.all", Seq()),
-          FormError("value.month", "planStartDate.error.required.all", Seq()),
-          FormError("value.year", "planStartDate.error.required.all", Seq())
+          FormError("value.day", "planStartDate.error.required", Seq("datePart.day")),
+          FormError("value.month", "planStartDate.error.required", Seq("datePart.month")),
+          FormError("value.year", "planStartDate.error.required", Seq("datePart.year")),
+          FormError("value", "planStartDate.error.required.all", Seq())
         )
       }
 
