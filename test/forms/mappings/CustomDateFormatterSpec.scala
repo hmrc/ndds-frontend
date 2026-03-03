@@ -72,7 +72,8 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
       }
     }
 
-    "return errors when two fields are missing (twoRequiredKey attached to each missing field)" in {
+    "return field-level required errors and one group-level twoRequired error when two fields are missing" in {
+
       val data = Map(
         "date.year" -> "2025"
       )
@@ -81,10 +82,10 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
 
       result match {
         case Left(errors) =>
-          errors must contain allOf (
-            FormError("date.day", "error.twoRequired", Seq("datePart.day", "datePart.month")),
-            FormError("date.month", "error.twoRequired", Seq("datePart.day", "datePart.month"))
-          )
+          errors must contain(FormError("date.day", "error.required", Seq("datePart.day")))
+          errors must contain(FormError("date.month", "error.required", Seq("datePart.month")))
+          errors must contain(FormError("date", "error.twoRequired", Seq("datePart.day", "datePart.month")))
+
         case Right(_) =>
           fail("Expected Left with errors but got Right")
       }

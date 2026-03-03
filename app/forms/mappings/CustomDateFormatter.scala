@@ -44,25 +44,51 @@ class CustomDateFormatter(invalidKey: String,
 
     val regexErrors = dateFormats.flatMap(checkInput(key, fields, _))
     if (regexErrors.nonEmpty) {
-      return Left(regexErrors.map(e => e.copy(messages = Seq(invalidKey), args = args)))
+      val fieldErrors =
+        regexErrors.map(e => e.copy(messages = Seq(invalidKey), args = args))
+      val groupError =
+        FormError(
+          key,
+          invalidKey,
+          args
+        )
+      return Left(fieldErrors :+ groupError)
     }
 
     if (missingFields.nonEmpty) {
 
-      val errs = missingFields.map { f =>
-        missingFields.size match {
-          case 1 =>
-            FormError(s"$key.$f", requiredKey, Seq(labelFor(f)))
-
-          case 2 =>
-            FormError(s"$key.$f", twoRequiredKey, missingFields.map(labelFor))
-
-          case 3 =>
-            FormError(s"$key.$f", allRequiredKey)
-        }
+      val fieldErrors = missingFields.map { field =>
+        FormError(
+          s"$key.$field",
+          requiredKey,
+          Seq(labelFor(field))
+        )
       }
 
-      return Left(errs)
+      val groupError = missingFields.size match {
+
+        case 1 =>
+          FormError(
+            key,
+            requiredKey,
+            Seq(labelFor(missingFields.head))
+          )
+
+        case 2 =>
+          FormError(
+            key,
+            twoRequiredKey,
+            missingFields.map(labelFor)
+          )
+
+        case 3 =>
+          FormError(
+            key,
+            allRequiredKey
+          )
+      }
+
+      return Left(fieldErrors :+ groupError)
     }
 
     val cleanedData: Map[String, String] =

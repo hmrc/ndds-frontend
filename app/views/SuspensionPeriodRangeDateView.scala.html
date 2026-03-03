@@ -52,22 +52,47 @@
 
         @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
-        @if(adjustedForm.errors.nonEmpty) {
-            @defining({
-                val baseFields = Seq("suspensionPeriodRangeStartDate", "suspensionPeriodRangeEndDate")
-                val filteredErrors = baseFields.flatMap { baseField =>
-                    adjustedForm.errors.find(_.key == baseField).orElse {
-                        adjustedForm.errors.find(e => e.key.startsWith(baseField + "."))
-                    }
-                }
-                adjustedForm.copy(errors = filteredErrors)
-            }) { filteredForm =>
-                @govukErrorSummary(ErrorSummaryViewModel(filteredForm, errorLinkOverrides = Map(
-                    "suspensionPeriodRangeStartDate" -> "suspensionPeriodRangeStartDate.day",
-                    "suspensionPeriodRangeEndDate" -> "suspensionPeriodRangeEndDate.day"
-                )))
+    @if(adjustedForm.errors.nonEmpty) {
+
+        @defining({
+
+            def firstFieldError(base: String): String =
+            adjustedForm.errors
+            .find(e =>
+            e.key == s"$base.day" ||
+            e.key == s"$base.month" ||
+            e.key == s"$base.year"
+            )
+            .map(_.key)
+            .getOrElse(s"$base.day")
+
+            val baseFields = Seq(
+                "suspensionPeriodRangeStartDate",
+                "suspensionPeriodRangeEndDate"
+            )
+
+            val filteredErrors = baseFields.flatMap { baseField =>
+            adjustedForm.errors.find(_.key == baseField).orElse {
+            adjustedForm.errors.find(e => e.key.startsWith(baseField + "."))
             }
-        }
+            }
+
+            (
+            adjustedForm.copy(errors = filteredErrors),
+            Map(
+            "suspensionPeriodRangeStartDate" -> firstFieldError("suspensionPeriodRangeStartDate"),
+            "suspensionPeriodRangeEndDate"   -> firstFieldError("suspensionPeriodRangeEndDate")
+            )
+            )
+
+            }) { case (filteredForm, errorOverrides) =>
+                @govukErrorSummary(
+                    ErrorSummaryViewModel(
+                    filteredForm,
+                    errorLinkOverrides = errorOverrides
+                ))
+                }
+    }
 
             @if(mode == NormalMode) {
                 @header1("suspensionPeriodRangeDate.heading.normal")

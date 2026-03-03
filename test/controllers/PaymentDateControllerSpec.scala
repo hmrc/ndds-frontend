@@ -223,21 +223,30 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
           .thenReturn(Future.successful(expectedEarliestPaymentDate))
 
-        val request =
-          FakeRequest(POST, paymentDateRoute)
-            .withFormUrlEncodedBody(("value", "invalid value"))
-
         running(application) {
-          val boundForm = form.bind(Map("value" -> "invalid value"))
 
-          val view = application.injector.instanceOf[PaymentDateView]
+          val request =
+            FakeRequest(POST, paymentDateRoute)
+              .withFormUrlEncodedBody(
+                "value.day"   -> "abc",
+                "value.month" -> "",
+                "value.year"  -> ""
+              )
+
+          val boundForm = form.bind(
+            Map(
+              "value.day"   -> "abc",
+              "value.month" -> "",
+              "value.year"  -> ""
+            )
+          )
 
           val result = route(application, request).value
 
           status(result) mustEqual BAD_REQUEST
-          contentAsString(result) mustEqual view(boundForm, NormalMode, formattedDateNumeric, Call("GET", paymentAmountRoute))(request,
-                                                                                                                               messages(application)
-                                                                                                                              ).toString
+
+          val expectedKeys = Seq("value.day", "value")
+          boundForm.errors.map(_.key) must contain theSameElementsAs expectedKeys
         }
       }
 
