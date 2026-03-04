@@ -260,12 +260,7 @@ paymentReference.sdlt.invalidCharacters = Your Stamp Duty Land Tax payment refer
 paymentReference.sdlt.invalidFormat = Enter your Stamp Duty Land Tax payment reference in the correct format
 paymentReference.sdlt.invalid = Enter a real Stamp Duty Land Tax payment reference
 
-paymentReference.sdlt.required = Enter your Stamp Duty Land Tax payment reference
-paymentReference.sdlt.invalidCharacters = Your Stamp Duty Land Tax payment reference must only include letters a to z and numbers 0 to 9
-paymentReference.sdlt.invalidFormat = Enter your Stamp Duty Land Tax payment reference in the correct format
-paymentReference.sdlt.invalid = Enter a real Stamp Duty Land Tax payment reference
-
-paymentReference.tc.required = Enter your tax credits payment reference
+paymentReference.tc.required = Nodwch eich cyfeirnod talu ar gyfer credydau treth
 paymentReference.tc.invalidCharacters = Your tax credits payment reference must only include letters a to z and numbers 0 to 9
 paymentReference.tc.invalidFormat = Enter your tax credits payment reference in the correct format
 paymentReference.tc.invalid = Enter a real tax credits payment reference
@@ -285,40 +280,15 @@ paymentReference.otherLiability.invalid = Enter a real Other liability payment r
 
 
 
-paymentReference.error.length.ct = Your Corporation Tax (CT) payment reference must be 17 characters long
-paymentReference.error.invalid.ct = Your Corporation Tax (CT) must be 17 characters long and end with an A, like 8337018376A00108A
 paymentReference.ct.hint = You can find this on your notice to deliver your tax return. It’s 17 characters long and starts with 10 numbers, then ‘A001’, another 2 numbers and ends with an A, such as 8337018376A00108A.
-paymentReference.error.required.mgd = Enter your Machine Games Duty (MGD) payment reference
-paymentReference.error.length.mgd = Your Machine Games Duty (MGD) payment reference must be 14 characters long
-paymentReference.error.invalid.mgd = Your Machine Games Duty (MGD) payment reference must be 14 characters long and start with a X, like XVM00005554321
 paymentReference.mgd.hint = You can find this on your MGD Registration Certificate. It’s 14 characters long and begins with X, then an uppercase letter, then ‘M0000’ and then 7 numbers, such as XVM00005554321.
-paymentReference.error.required.nic = Enter your National Insurance Contributions (NIC) payment reference
-paymentReference.error.length.nic = Your National Insurance Contributions (NIC) payment reference must be 18 characters long
-paymentReference.error.invalid.nic = Your National Insurance Contributions (NIC) payment reference must be 18 characters long, start with a 60 and end with a digit or an X, like 600340016213526259 or 60034001621352625X
 paymentReference.nic.hint = You can find this on letters from HMRC. It starts with ‘60’ and is 18 characters long, ending in X or a number, such as 600340016213526259 or 60034001621352625X.
-paymentReference.error.required.otherliability = Enter your payment reference
-paymentReference.error.invalid.otherliability = Your payment reference can be found on letters from HMRC, like XCA23456789345
-paymentReference.other.hint = You can find this on letters from HMRC, for example XCA23456789345
-paymentReference.error.required.paye = Enter your Pay As You Earn (PAYE) payment reference
-paymentReference.error.length.paye = Your Pay As You Earn (PAYE) payment reference must be either 13 or 14 characters long
-paymentReference.error.invalid.paye = Your Pay As You Earn (PAYE) payment reference must be either 13 or 14 characters long, like 961PX0023480X or 961PX00234801X
 paymentReference.paye.hint = You can find this on letters from HMRC. It’s 13 characters long.
-paymentReference.error.required.sa = Enter your Self Assessment (SA) payment reference
-paymentReference.error.length.sa = Your Self Assessment (SA) payment reference must be 10 characters long
-paymentReference.error.invalid.sa = Your Self Assessment (SA) payment reference must be 11 characters long and end with a K, like 5829820538K
 paymentReference.sa.hint = You can find this on letters from HMRC, it is 10 characters long and ends with a K, such as 1234567890K.
-paymentReference.error.required.sdlt = Enter your Stamp Duty Land Tax (SDLT) payment reference
-paymentReference.error.length.sdlt = Your Stamp Duty Land Tax (SDLT) payment reference must be 11 characters long
-paymentReference.error.invalid.sdlt = Your Stamp Duty Land Tax (SDLT) payment reference must be 11 characters long, start with 9 digits and end with 2 digits, like 100000511MX
 paymentReference.sdlt.hint = You can find this on letter from HMRC. It’s 9 numbers, then M and ends in a capital letter, such as 123456789MC.
-paymentReference.error.required.tc = Enter your tax credits (TC) payment reference
-paymentReference.error.length.tc = Your tax credits (TC) payment reference must be 16 characters long
-paymentReference.error.invalid.tc = Your tax credits (TC) payment reference must be 16 characters long, like WT447571311207NE
 paymentReference.tc.hint = You can find this on letters from HMRC. It’s 16 characters long.
-paymentReference.error.required.vat=Enter your Value Added Tax (VAT) payment reference
-paymentReference.error.length.vat=Your Value Added Tax (VAT) payment reference must be 9 characters long
-paymentReference.error.invalid.vat=Your Value Added Tax (VAT) payment reference must be 9 characters long, like 562235945
 paymentReference.vat.hint = You can find this on letters from HMRC. It’s 9 characters long, such as 123A456B0.
+paymentReference.other.hint = You can find this on letters from HMRC.
 
 paymentAmount.title = How much do you want to pay, in pounds?
 paymentAmount.heading = How much do you want to pay, in pounds?

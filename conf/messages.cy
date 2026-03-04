@@ -205,44 +205,88 @@ paymentPlan.collapsable.tc.p6.link   = mae’n rhaid i chi gysylltu â Gwasanaet
 
 paymentReference.title = Beth yw’ch cyfeirnod talu?
 paymentReference.heading = Beth yw’ch cyfeirnod talu?
+
+paymentReference.ct.title = Beth yw’ch cyfeirnod talu ar gyfer Treth Gorfforaeth (CT)?
+paymentReference.ct.heading = Beth yw’ch cyfeirnod talu ar gyfer Treth Gorfforaeth (CT)?
+paymentReference.mgd.title = Beth yw’ch cyfeirnod talu ar gyfer Toll Peiriannau Hapchwarae (MGD)?
+paymentReference.mgd.heading = Beth yw’ch cyfeirnod talu ar gyfer Toll Peiriannau Hapchwarae (MGD)?
+paymentReference.nic.title = Beth yw’ch cyfeirnod talu ar gyfer cyfraniadau Yswiriant Gwladol (CYG)?
+paymentReference.nic.heading = Beth yw’ch cyfeirnod talu ar gyfer cyfraniadau Yswiriant Gwladol (CYG)?
+paymentReference.paye.title = Beth yw’ch cyfeirnod talu ar gyfer TWE?
+paymentReference.paye.heading = Beth yw’ch cyfeirnod talu ar gyfer TWE?
+paymentReference.sa.title = Beth yw’ch cyfeirnod talu ar gyfer Hunanasesiad (SA)?
+paymentReference.sa.heading = Beth yw’ch cyfeirnod talu ar gyfer Hunanasesiad (SA)?
+paymentReference.sdlt.title = Beth yw’ch cyfeirnod talu ar gyfer Treth Dir y Tollau Stamp (SDLT)?
+paymentReference.sdlt.heading = Beth yw’ch cyfeirnod talu ar gyfer Treth Dir y Tollau Stamp (SDLT)?
+paymentReference.tc.title = Beth yw’ch cyfeirnod talu ar gyfer credydau treth?
+paymentReference.tc.heading = Beth yw’ch cyfeirnod talu ar gyfer credydau treth?
+paymentReference.vat.title = Beth yw’ch cyfeirnod talu ar gyfer TAW?
+paymentReference.vat.heading = Beth yw’ch cyfeirnod talu ar gyfer TAW?
+paymentReference.otherLiability.title = Beth yw’ch cyfeirnod talu ar gyfer rhwymedigaeth eraill?
+paymentReference.otherLiability.heading = Beth yw’ch cyfeirnod talu ar gyfer rhwymedigaeth eraill?
+
+paymentReference.checkYourAnswersLabel = Payment reference
+paymentReference.error.invalid = Enter a valid payment reference
+paymentReference.change.hidden =  Payment reference
+
+paymentReference.ct.required = Nodwch eich cyfeirnod talu ar gyfer Treth Gorfforaeth
+paymentReference.ct.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer Treth Gorfforaeth gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.ct.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer Teth Gorfforaeth yn y fformat cywir
+paymentReference.ct.invalid = Nodwch gyfeirnod talu go iawn ar gyfer Treth Gorfforaeth
+
+paymentReference.mgd.required = Nodwch eich cyfeirnod talu ar gyfer Toll Peiriannau Hapchwarae
+paymentReference.mgd.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer Toll Peiriannau Hapchwarae gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.mgd.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer Toll Peiriannau Hapchwarae yn y fformat cywir
+paymentReference.mgd.invalid = Nodwch gyfeirnod talu go iawn ar gyfer Toll Peiriannau Hapchwarae
+
+paymentReference.nic.required = Enter your National Insurance contributions payment reference
+paymentReference.nic.invalidCharacters = Your National Insurance contributions payment reference must only include letters a to z and numbers 0 to 9
+paymentReference.nic.invalidFormat = Enter your National Insurance contributions payment reference in the correct format
+paymentReference.nic.invalid = Enter a real National Insurance contributions payment reference
+
+paymentReference.paye.required = Nodwch eich cyfeirnod talu ar gyfer TWE
+paymentReference.paye.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer TWE gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.paye.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer TWE yn y fformat cywir
+paymentReference.paye.invalid = Nodwch gyfeirnod talu go iawn ar gyfer TWE
+
+paymentReference.sa.required = Nodwch eich cyfeirnod talu ar gyfer Hunanasesiad
+paymentReference.sa.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer Hunanasesiad gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.sa.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer Hunanasesiad yn y fformat cywir
+paymentReference.sa.invalid = Nodwch gyfeirnod talu go iawn ar gyfer Hunanasesiad
+
+paymentReference.sdlt.required = Nodwch eich cyfeirnod talu ar gyfer Treth Dir y Tollau Stamp
+paymentReference.sdlt.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer Treth Dir y Tollau Stamp gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.sdlt.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer Treth Dir y Tollau Stamp yn y fformat cywir
+paymentReference.sdlt.invalid = Nodwch gyfeirnod talu go iawn ar gyfer Treth Dir y Tollau Stamp
+
+paymentReference.tc.required = Enter your tax credits payment reference
+paymentReference.tc.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer credydau treth gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.tc.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer credydau treth yn y fformat cywir
+paymentReference.tc.invalid = Nodwch gyfeirnod talu go iawn ar gyfer credydau treth
+
+paymentReference.vat.required = Nodwch eich cyfeirnod talu ar gyfer TAW
+paymentReference.vat.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer TAW gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.vat.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer TAW yn y fformat cywir
+paymentReference.vat.invalid = Nodwch gyfeirnod talu go iawn ar gyfer TAW
+
+paymentReference.otherLiability.required = Nodwch eich cyfeirnod talu ar gyfer rhwymedigaeth arall
+paymentReference.otherLiability.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer rhwymedigaeth arall gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.otherLiability.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer rhwymedigaeth arall yn y fformat cywir
+paymentReference.otherLiability.invalid = Nodwch gyfeirnod talu go iawn ar gyfer rhwymedigaeth arall
+
+
 paymentReference.checkYourAnswersLabel = Cyfeirnod talu
 paymentReference.error.invalid = Nodwch gyfeirnod talu dilys
 paymentReference.change.hidden = y cyfeirnod talu
-paymentReference.error.required.ct = Nodwch eich cyfeirnod talu Treth Gorfforaeth (CT)
-paymentReference.error.length.ct = Mae’n rhaid i’ch cyfeirnod talu Treth Gorfforaeth (CT) fod yn 17 cymeriad o hyd
-paymentReference.error.invalid.ct = Mae’n rhaid i’ch Treth Gorfforaeth (CT) fod yn 17 cymeriad o hyd a gorffen gydag A, fel 8337018376A00108A
-paymentReference.ct.hint = Bydd hwn i’w weld ar eich ‘hysbysiad i gyflwyno’ch Ffurflen Dreth’, neu ar unrhyw nodyn atgoffa gan CThEF
-paymentReference.error.required.mgd = Nodwch gyfeirnod talu’ch Toll Peiriannau Hapchwarae (MGD)
-paymentReference.error.length.mgd = Mae’n rhaid i’ch cyfeirnod talu Toll Peiriannau Hapchwarae (MGD) fod yn 14 cymeriad o hyd
-paymentReference.error.invalid.mgd = Mae’n rhaid i’ch cyfeirnod talu Toll Peiriannau Hapchwarae (MGD) fod yn 14 cymeriad o hyd a dechrau gydag X, fel XVM00005554321
-paymentReference.mgd.hint = Gallwch ddod o hyd i hyn ar Dystysgrif Cofrestru MGD gan CThEF, mae’n dechrau gydag X ac mae’n 14 cymeriad o hyd
-paymentReference.error.required.nic = Nodwch eich cyfeirnod talu Cyfraniadau Yswiriant Gwladol (NIC)
-paymentReference.error.length.nic = Mae’n rhaid i’ch cyfeirnod talu Cyfraniadau Yswiriant Gwladol (NIC) fod yn 18 cymeriad o hyd
-paymentReference.error.invalid.nic = Mae’n rhaid i gyfeirnod talu eich Cyfraniadau Yswiriant Gwladol (NIC) fod yn 18 cymeriad o hyd, dechrau gyda 60 a gorffen gyda digid neu X, fel 600340016213526259 neu 60034001621352625X
-paymentReference.nic.hint = Gallwch ddod o hyd i hwn ar lythyrau gan CThEF, mae’n 18 cymeriad o hyd
-paymentReference.error.required.otherliability = Nodwch eich cyfeirnod talu
-paymentReference.error.invalid.otherliability = Gellir dod o hyd i’ch cyfeirnod talu ar lythyrau gan CThEF, fel XCA23456789345
-paymentReference.other.hint = Gallwch ddod o hyd i hwn ar lythyrau gan CThEF, er enghraifft, XCA23456789345
-paymentReference.error.required.paye = Nodwch eich Cyfeirnod Talu Wrth Ennill (TWE)
-paymentReference.error.length.paye = Mae’n rhaid i’ch cyfeirnod talu Talu Wrth Ennill (TWE) fod naill ai’n 13 neu 14 cymeriad o hyd
-paymentReference.error.invalid.paye = Mae’n rhaid i’ch cyfeirnod talu Talu Wrth Ennill (TWE) fod naill ai’n 13 neu 14 cymeriad o hyd, fel 961PX0023480X neu 961PX00234801X
-paymentReference.paye.hint = Gallwch ddod o hyd i hwn ar lythyrau gan CThEF, mae’n 13 cymeriad o hyd
-paymentReference.error.required.sa = Nodwch eich cyfeirnod talu ar gyfer Hunanasesiad (SA)
-paymentReference.error.length.sa = Mae’n rhaid i’ch cyfeirnod talu Hunanasesiad (SA) fod yn 10 cymeriad o hyd
-paymentReference.error.invalid.sa = Mae’n rhaid i’ch cyfeirnod talu Hunanasesiad (SA) fod yn 11 cymeriad o hyd a gorffen gyda K, fel 5829820538K
-paymentReference.sa.hint = Gallwch ddod o hyd i hwn ar lythyrau gan CThEF, mae’n 10 cymeriad o hyd ac yn gorffen gyda K
-paymentReference.error.required.sdlt = Nodwch eich cyfeirnod talu Treth Dir y Tollau Stamp (SDLT)
-paymentReference.error.length.sdlt = Mae’n rhaid i’ch cyfeirnod talu Treth Dir y Tollau Stamp (SDLT) fod yn 11 cymeriad o hyd
-paymentReference.error.invalid.sdlt = Mae’n rhaid i’ch cyfeirnod talu Treth Dir y Tollau Stamp (SDLT) fod yn 11 cymeriad o hyd, dechrau gyda 9 digid a gorffen gyda 2 ddigid, fel 100000511MX
-paymentReference.sdlt.hint = Gallwch ddod o hyd i hwn ar lythyrau gan CThEF, mae’n 11 cymeriad o hyd, er enghraifft, 123456789MX
-paymentReference.error.required.tc = Nodwch eich cyfeirnod talu credydau treth (TC)
-paymentReference.error.length.tc = Mae’n rhaid i’ch cyfeirnod talu credydau treth (TC) fod yn 16 cymeriad o hyd
-paymentReference.error.invalid.tc = Mae’n rhaid i’ch cyfeirnod talu credydau treth (TC) fod yn 16 cymeriad o hyd, fel WT447571311207NE
-paymentReference.tc.hint = Gallwch ddod o hyd i hwn ar lythyrau gan CThEF, mae’n 16 cymeriad o hyd
-paymentReference.error.required.vat = Nodwch eich cyfeirnod talu Treth Ar Werth (TAW)
-paymentReference.error.length.vat = Mae’n rhaid i’ch cyfeirnod talu Treth Ar Werth (TAW) fod yn 9 cymeriad o hyd
-paymentReference.error.invalid.vat = Mae’n rhaid i’ch cyfeirnod talu Treth Ar Werth (TAW) fod yn 9 cymeriad o hyd, fel 562235945
-paymentReference.vat.hint = Gallwch ddod o hyd i hwn ar lythyrau gan CThEF, mae’n 9 cymeriad o hyd
+paymentReference.ct.hint = Bydd hwn i’w weld ar eich hysbysiad i gyflwyno’ch Ffurflen Dreth. Mae’n 17 o gymeriadau, yn dechrau gyda 10 rhif, wedyn ‘A001’, 2 rif arall, ac yn gorffen gydag ‘A’, megis 8337018376A00108A.
+paymentReference.mgd.hint = Bydd hwn i’w weld ar eich Tystysgrif Cofrestru MGD. Mae’n 14 o gymeriadau, yn dechrau gydag ‘X’, wedyn prif lythyren, wedyn ‘M0000’, ac yna 7 rhif, megis XVM00005554321.
+paymentReference.nic.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 18 o gymeriadau, yn dechrau gyda ‘60’ ac yn gorffen gydag ‘X’ neu rif, megis 600340016213526259 neu 60034001621352625X.
+paymentReference.paye.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 13 o gymeriadau.
+paymentReference.sa.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 10 o gymeriadau ac yn gorffen gyda ‘K’, megis 1234567890K.
+paymentReference.sdlt.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 9 o rifau ac yn gorffen gydag ‘M’ a phrif lythyren arall, megis 123456789MC.
+paymentReference.tc.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 16 o gymeriadau.
+paymentReference.vat.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 9 o gymeriadau, megis 123A456B0.
+paymentReference.other.hint = Bydd hwn i’w weld ar lythyrau gan CThEF.
 
 paymentAmount.title = Faint yr hoffech ei dalu mewn punnoedd?
 paymentAmount.heading = Faint yr hoffech ei dalu mewn punnoedd?
