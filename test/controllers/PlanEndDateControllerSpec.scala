@@ -66,7 +66,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
       )
 
   val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern)
-  val beforeDate: String = LocalDate.now().plusMonths(12).format(dateFormat)
+  val planStartDate: String = planStartDateDetails.enteredDate.format(dateFormat)
 
   "PlanEndDate Controller" - {
 
@@ -77,9 +77,9 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, getRequest()).value
         val view = application.injector.instanceOf[PlanEndDateView]
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(getRequest(),
-                                                                                                                      messages(application)
-                                                                                                                     ).toString
+        contentAsString(result) mustEqual view(form, NormalMode, Call("GET", addPaymentPlanEndDateRoute), planStartDate)(getRequest(),
+                                                                                                                         messages(application)
+                                                                                                                        ).toString
       }
     }
 
@@ -111,7 +111,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val view = application.injector.instanceOf[PlanEndDateView]
         val result = route(application, getRequest()).value
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(
+        contentAsString(result) mustEqual view(form.fill(validAnswer), NormalMode, Call("GET", addPaymentPlanEndDateRoute), planStartDate)(
           getRequest(),
           messages(application)
         ).toString
@@ -150,7 +150,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
         val result = route(application, request).value
         status(result) mustEqual BAD_REQUEST
         contentAsString(result) mustEqual
-          view(boundForm, NormalMode, Call("GET", addPaymentPlanEndDateRoute), beforeDate)(request, messages(application)).toString
+          view(boundForm, NormalMode, Call("GET", addPaymentPlanEndDateRoute), planStartDate)(request, messages(application)).toString
       }
     }
 
