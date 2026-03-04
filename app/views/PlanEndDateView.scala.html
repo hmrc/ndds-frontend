@@ -30,16 +30,16 @@
 
     @formHelper(action = routes.PlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
+        @* Define the order of date fields for error linking *@
+        @defining(Seq("value.day", "value.month", "value.year")) { fieldOrder =>
+
         @mainErrorSummary(
-        form.copy(errors = form.errors.filter(_.key == "value")),
+        form.copy(errors = form.errors.filter(_.key.startsWith("value"))),
         errorLinkOverrides = Map(
-        "value" ->
-        form.errors
-        .find(e => Seq("value.day","value.month","value.year").contains(e.key))
-        .map(_.key)
-        .getOrElse("value.day")
+        "value" -> fieldOrder.find(f => form.errors.exists(_.key == f)).getOrElse("value.day")
         )
         )
+        }
 
         @govukDateInput(
             DateViewModel(

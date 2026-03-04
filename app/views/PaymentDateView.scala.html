@@ -33,8 +33,14 @@
     @formHelper(action = routes.PaymentDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @mainErrorSummary(
-        form.copy(errors = form.errors.filter(_.key == "value")),
-        errorLinkOverrides = Map("value" -> "value.day")
+            form.copy(errors = form.errors.filter(_.key == "value")),
+            errorLinkOverrides = Map(
+                "value" ->
+                form.errors
+                    .find(_.key.startsWith("value."))
+                    .map(_.key)
+                    .getOrElse("value.day")
+            )
         )
 
         @govukDateInput(
