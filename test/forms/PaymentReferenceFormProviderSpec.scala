@@ -22,62 +22,118 @@ import play.api.data.FormError
 
 class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
 
-  val invalidKey = "paymentReference.error.invalid.sa"
-  val lengthKey = "paymentReference.error.length.sa"
-  val requiredKey = "paymentReference.error.required.sa"
-  val maxLength = 100
+  val fieldName = "value"
 
-  val form = new PaymentReferenceFormProvider().apply(None, None)
+  private val sources = Seq(
+    DirectDebitSource.CT,
+    DirectDebitSource.MGD,
+    DirectDebitSource.NIC,
+    DirectDebitSource.PAYE,
+    DirectDebitSource.SA,
+    DirectDebitSource.SDLT,
+    DirectDebitSource.TC,
+    DirectDebitSource.VAT,
+    DirectDebitSource.OL
+  )
 
-  ".value" - {
+  private val dummyValues: Map[DirectDebitSource, String] = Map(
+    DirectDebitSource.SA   -> "12345678901",
+    DirectDebitSource.CT   -> "12345678901234567",
+    DirectDebitSource.VAT  -> "123456789",
+    DirectDebitSource.MGD  -> "A1234567890123",
+    DirectDebitSource.NIC  -> "601234567890123456",
+    DirectDebitSource.PAYE -> "1234567890123",
+    DirectDebitSource.SDLT -> "12345678901",
+    DirectDebitSource.TC   -> "AB123456789012CD",
+    DirectDebitSource.OL   -> "12345678901234"
+  )
 
-    val fieldName = "value"
+  private def form(
+    source: DirectDebitSource,
+    validator: String => Boolean = _ => true
+  ) =
+    new PaymentReferenceFormProvider()
+      .apply(Some(source), Some(validator))
 
-    behave like fieldThatBindsValidData(
-      form,
-      fieldName,
-      stringsWithMaxLength(maxLength)
-    )
+  sources.foreach { source =>
 
-    "trim spaces before validating (SA)" in {
-      val saForm = new PaymentReferenceFormProvider().apply(
-        Some(DirectDebitSource.SA),
-        Some(_ => true)
-      )
+    s".value (${source.toString})" - {
 
-      val result = saForm.bind(Map(fieldName -> " 12345678901 "))
+      val baseKey = source match {
+        case DirectDebitSource.OL => "otherLiability"
+        case _                    => source.toString.toLowerCase
+      }
+      val requiredKey = s"paymentReference.$baseKey.required"
+      val invalidCharsKey = s"paymentReference.$baseKey.invalidCharacters"
+      val invalidFormatKey = s"paymentReference.$baseKey.invalidFormat"
+      val invalidKey = s"paymentReference.$baseKey.invalid"
 
-      result.errors mustBe empty
-      result.value mustBe Some("12345678901")
+      "trim spaces before validating" in {
+        val result =
+          form(source).bind(Map(fieldName -> s"  ${dummyValues(source)}  "))
+        result.errors mustBe empty
+        result.value mustBe Some(dummyValues(source))
+      }
+
+      "return required when blank" in {
+        val result =
+          form(source).bind(Map(fieldName -> "   "))
+        result.errors must contain(FormError(fieldName, requiredKey))
+        result.errors.size mustBe 1
+      }
+
+      "return invalidCharacters when non-alphanumeric" in {
+        val result =
+          form(source).bind(Map(fieldName -> "ABC-123"))
+        result.errors must contain(FormError(fieldName, invalidCharsKey))
+        result.errors.size mustBe 1
+      }
+
+      "return invalidFormat when length clearly wrong" in {
+        val result =
+          form(source).bind(Map(fieldName -> "123"))
+        result.errors must contain(FormError(fieldName, invalidFormatKey))
+        result.errors.size mustBe 1
+      }
+
+      source match {
+        case DirectDebitSource.SA | DirectDebitSource.CT | DirectDebitSource.VAT =>
+          "return invalid when validator fails" in {
+            val result =
+              form(source, _ => false)
+                .bind(Map(fieldName -> dummyValues(source)))
+            result.errors must contain(FormError(fieldName, invalidKey))
+          }
+
+          "bind successfully when all checks pass" in {
+            val result =
+              form(source, _ => true)
+                .bind(Map(fieldName -> dummyValues(source)))
+            result.errors mustBe empty
+          }
+
+        case _ =>
+          "bind successfully with mock validator" in {
+            val result =
+              form(source, _ => true)
+                .bind(Map(fieldName -> dummyValues(source)))
+            result.errors mustBe empty
+          }
+      }
+
+      "error precedence: required blocks others" in {
+        val result =
+          form(source, _ => false)
+            .bind(Map(fieldName -> ""))
+        result.errors.map(_.message) mustBe Seq(requiredKey)
+      }
+
+      "error precedence: invalidCharacters blocks format" in {
+        val result =
+          form(source, _ => false)
+            .bind(Map(fieldName -> "ABC-123"))
+        result.errors.map(_.message) mustBe Seq(invalidCharsKey)
+      }
     }
-
-    "return required error when value is only spaces (SA)" in {
-      val saForm = new PaymentReferenceFormProvider().apply(
-        Some(DirectDebitSource.SA),
-        Some(_ => true)
-      )
-
-      val result = saForm.bind(Map(fieldName -> "   "))
-
-      result.errors must contain(FormError(fieldName, requiredKey))
-    }
-
-    "return length error when trimmed value is wrong length (SA expects 11)" in {
-      val saForm = new PaymentReferenceFormProvider().apply(
-        Some(DirectDebitSource.SA),
-        Some(_ => true)
-      )
-
-      val result = saForm.bind(Map(fieldName -> " 1234567890 "))
-
-      result.errors must contain(FormError(fieldName, lengthKey))
-    }
-
-    behave like invalidField(
-      new PaymentReferenceFormProvider().apply(Some(DirectDebitSource.SA), Some(_ => false)),
-      fieldName,
-      requiredError = FormError(fieldName, invalidKey),
-      "12345678901"
-    )
   }
 }

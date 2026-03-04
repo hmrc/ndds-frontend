@@ -63,8 +63,6 @@ class PaymentReferenceFormProvider @Inject() extends Mappings {
     )
   }
 
-  // Only basic structural checks here (length/regex),
-  // NOT modulus checks.
   private def formatCheck(source: DirectDebitSource, ref: String): Boolean =
     source match {
       case DirectDebitSource.CT   => ref.length == 17
