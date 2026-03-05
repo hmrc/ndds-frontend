@@ -36,16 +36,17 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
     DirectDebitSource.OL
   )
 
+  // Valid dummy values
   private val dummyValues: Map[DirectDebitSource, String] = Map(
-    DirectDebitSource.SA   -> "12345678901",
-    DirectDebitSource.CT   -> "12345678901234567",
-    DirectDebitSource.VAT  -> "123456789",
-    DirectDebitSource.MGD  -> "A1234567890123",
-    DirectDebitSource.NIC  -> "601234567890123456",
-    DirectDebitSource.PAYE -> "1234567890123",
-    DirectDebitSource.SDLT -> "12345678901",
-    DirectDebitSource.TC   -> "AB123456789012CD",
-    DirectDebitSource.OL   -> "12345678901234"
+    DirectDebitSource.CT   -> "8337018376A00108A", // 10 digits + A001 + 2 digits + A
+    DirectDebitSource.MGD  -> "XVM00005554321", // X + uppercase + M0000 + 7 digits
+    DirectDebitSource.NIC  -> "600340016213526259", // starts 60 + 16 digits + last digit
+    DirectDebitSource.PAYE -> "ABC1234567890", // 13–14 chars
+    DirectDebitSource.SA   -> "1234567890K", // 10 digits + K
+    DirectDebitSource.SDLT -> "123456789C", // 9 digits + 1 letter
+    DirectDebitSource.TC   -> "AB123456789012CD", // 16 alphanum
+    DirectDebitSource.VAT  -> "12345678A", // 9 alphanum
+    DirectDebitSource.OL   -> "12345678901234" // 14–15 alphanum
   )
 
   private def form(
@@ -89,9 +90,19 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
         result.errors.size mustBe 1
       }
 
-      "return invalidFormat when length clearly wrong" in {
-        val result =
-          form(source).bind(Map(fieldName -> "123"))
+      "return invalidFormat when valid characters but wrong pattern" in {
+        val invalidFormatValue = source match {
+          case DirectDebitSource.CT   => "8337018376B99108B" // valid chars, fails A001 pattern
+          case DirectDebitSource.MGD  => "XBM00001234567" // valid chars, second char wrong for MGD
+          case DirectDebitSource.NIC  => "601234567890123457" // valid chars, last digit wrong for NIC
+          case DirectDebitSource.PAYE => "123456789012" // too short, valid chars
+          case DirectDebitSource.SA   => "1234567891K" // valid digits, pattern fails
+          case DirectDebitSource.SDLT => "123456780A" // valid alphanum, pattern wrong
+          case DirectDebitSource.TC   => "AB123456789012CE" // valid alphanum, pattern wrong
+          case DirectDebitSource.VAT  => "12345678B" // 9 alphanum, pattern wrong
+          case DirectDebitSource.OL   => "123456789012345" // 15 chars, pattern wrong if max 14
+        }
+        val result = form(source).bind(Map(fieldName -> invalidFormatValue))
         result.errors must contain(FormError(fieldName, invalidFormatKey))
         result.errors.size mustBe 1
       }
