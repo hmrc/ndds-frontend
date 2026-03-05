@@ -27,7 +27,6 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
 
   private implicit val messages: Messages = stubMessages()
 
-  // Use fixed clock so tests are deterministic
   private val fixedDate = LocalDate.of(2025, 8, 6)
   private val fixedClock = Clock.fixed(
     fixedDate.atStartOfDay(ZoneId.systemDefault()).toInstant,
@@ -52,8 +51,11 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
     "fail to bind an empty date" in {
       val form = formProvider(fixedDate.minusDays(30), isSinglePlan = false)
       val result = form.bind(Map.empty[String, String])
-      result.errors must contain theSameElementsAs Seq(
-        FormError("value", "paymentDate.error.required.all", Seq())
+      result.errors.map(e => (e.key, e.message)) must contain theSameElementsAs Seq(
+        "value.day"   -> "paymentDate.error.required",
+        "value.month" -> "paymentDate.error.required",
+        "value.year"  -> "paymentDate.error.required",
+        "value"       -> "paymentDate.error.required.all"
       )
     }
 

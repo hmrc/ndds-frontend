@@ -103,7 +103,7 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
           rows = Seq(
             DirectDebitSourceSummary.rowNoAction(userAnswers),
             PaymentPlanTypeSummary.rowNoAction(userAnswers),
-            PaymentReferenceSummary.rowNoAction(userAnswers).map(Some(_)).getOrElse(None),
+            PaymentReferenceSummary.rowNoAction(userAnswers).flatMap(Some(_)),
             Some(
               SummaryListRowViewModel(
                 key     = Key(Text("Date set up")),
@@ -143,7 +143,6 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
         val result = intercept[Exception](route(application, request).value.futureValue)
 
         result.getMessage must include("Missing generated DDI reference number")
-
       }
     }
 

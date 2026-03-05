@@ -31,10 +31,22 @@
     pageNavigator: PageNavigator
 )
 
-@(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false, paginationViewModel: PaginationViewModel = PaginationViewModel(), hmrcHelplineUrl: String)(implicit request: Request[_], messages: Messages)
+    @(directDebitDetails: Seq[DirectDebitDetails], maxLimitReached: Boolean = false,
+    paginationViewModel: PaginationViewModel = PaginationViewModel(), hmrcHelplineUrl: String,
+    currentPage: Int,
+    totalPages: Int
+    )(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("yourDirectDebitInstructions.title")), showBackLink = false, useThreeQuartersGrid = true) {
 
+    @defining(
+    if (totalPages > 1)
+    messages("yourDirectDebitInstructions.title", currentPage, totalPages)
+    else
+    messages("yourDirectDebitInstructions.heading")
+    ) { computedTitle =>
+
+    @layout(pageTitle = titleNoForm(computedTitle), showBackLink = false, useThreeQuartersGrid = true
+    ) {
     @header1("yourDirectDebitInstructions.heading")
     @paragraph("yourDirectDebitInstructions.p1")
 
@@ -63,4 +75,6 @@
     @directDebitTable(directDebitDetails)
 
     @pageNavigator(paginationViewModel)
+
+    }
 }

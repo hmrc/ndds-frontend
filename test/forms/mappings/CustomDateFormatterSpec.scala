@@ -25,7 +25,8 @@ import java.time.LocalDate
 
 class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
 
-  implicit val messages: Messages = MessagesImpl(Lang("en"), new play.api.i18n.DefaultMessagesApi())
+  implicit val messages: Messages =
+    MessagesImpl(Lang("en"), new play.api.i18n.DefaultMessagesApi())
 
   val dateFormats = Seq(
     DateFormat("day", "error.day", """\d{1,2}"""),
@@ -55,7 +56,7 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
       result mustBe Right(LocalDate.of(2025, 8, 15))
     }
 
-    "return error when some fields are missing" in {
+    "return errors when some fields are missing (one missing)" in {
       val data = Map(
         "date.month" -> "8",
         "date.year"  -> "2025"
@@ -65,13 +66,32 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
 
       result match {
         case Left(errors) =>
-          errors must contain(FormError("date", "error.twoRequired", Seq()))
+          errors must contain(FormError("date.day", "error.required", Seq("datePart.day")))
         case Right(_) =>
           fail("Expected Left with errors but got Right")
       }
     }
 
-    "return error for invalid month format" in {
+    "return field-level required errors and one group-level twoRequired error when two fields are missing" in {
+
+      val data = Map(
+        "date.year" -> "2025"
+      )
+
+      val result = formatter.bind("date", data)
+
+      result match {
+        case Left(errors) =>
+          errors must contain(FormError("date.day", "error.required", Seq("datePart.day")))
+          errors must contain(FormError("date.month", "error.required", Seq("datePart.month")))
+          errors must contain(FormError("date", "error.twoRequired", Seq("datePart.day", "datePart.month")))
+
+        case Right(_) =>
+          fail("Expected Left with errors but got Right")
+      }
+    }
+
+    "return error for invalid month format (regex) mapped to invalidKey and attached to the field" in {
       val data = Map(
         "date.day"   -> "15",
         "date.month" -> "abc",
@@ -82,10 +102,22 @@ class CustomDateFormatterSpec extends AnyWordSpec with Matchers {
 
       result match {
         case Left(errors) =>
-          errors must contain(FormError("date", "error.invalid", Seq()))
+          errors must contain(FormError("date.month", "error.invalid", Seq.empty))
         case Right(_) =>
           fail("Expected Left with errors but got Right")
       }
+    }
+
+    "bind successfully with date input containing spaces" in {
+      val data = Map(
+        "date.day"   -> " 1 5 ",
+        "date.month" -> " 0 8 ",
+        "date.year"  -> " 2 0 2 5 "
+      )
+
+      val result = formatter.bind("date", data)
+
+      result mustBe Right(LocalDate.of(2025, 8, 15))
     }
 
   }

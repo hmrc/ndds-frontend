@@ -100,7 +100,9 @@ class DirectDebitSummaryController @Inject() (
               paginationViewModel = paginationResult.paginationViewModel,
               title,
               heading,
-              config.maxNumberPPsAllowed
+              config.maxNumberPPsAllowed,
+              currentPage = paginationResult.currentPage,
+              totalPages  = paginationResult.totalPages
             )
           )
         }

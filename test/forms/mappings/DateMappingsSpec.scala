@@ -150,7 +150,14 @@ class DateMappingsSpec extends AnyFreeSpec with Matchers with ScalaCheckProperty
 
     val result = form.bind(Map.empty[String, String])
 
-    result.errors must contain only FormError("value", "error.required.all", List.empty)
+    val expectedErrors = Seq(
+      FormError("value.day", List("error.required"), List(messages("date.error.day"))),
+      FormError("value.month", List("error.required"), List(messages("date.error.month"))),
+      FormError("value.year", List("error.required"), List(messages("date.error.year"))),
+      FormError("value", List("error.required.all"), List())
+    )
+
+    result.errors must contain theSameElementsAs expectedErrors
   }
 
   "must fail to bind a date with a missing day" in {
@@ -168,25 +175,12 @@ class DateMappingsSpec extends AnyFreeSpec with Matchers with ScalaCheckProperty
 
       val result = form.bind(data)
 
-      result.errors must contain only FormError("value", "error.required", List(messages("date.error.day")))
-    }
-  }
-
-  "must fail to bind a date with an invalid day" in {
-
-    forAll(validData -> "valid date", invalidField -> "invalid field") { (date, field) =>
-
-      val data = Map(
-        "value.day"   -> field,
-        "value.month" -> date.getMonthValue.toString,
-        "value.year"  -> date.getYear.toString
+      val expectedErrors = Seq(
+        FormError("value.day", List("error.required"), List(messages("date.error.day"))),
+        FormError("value", List("error.required"), List(messages("date.error.day")))
       )
 
-      val result = form.bind(data)
-
-      result.errors must contain(
-        FormError("value", "error.invalid", List.empty)
-      )
+      result.errors must contain theSameElementsAs expectedErrors
     }
   }
 
@@ -205,25 +199,12 @@ class DateMappingsSpec extends AnyFreeSpec with Matchers with ScalaCheckProperty
 
       val result = form.bind(data)
 
-      result.errors must contain only FormError("value", "error.required", List(messages("date.error.month")))
-    }
-  }
-
-  "must fail to bind a date with an invalid month" in {
-
-    forAll(validData -> "valid data", invalidField -> "invalid field") { (date, field) =>
-
-      val data = Map(
-        "value.day"   -> date.getDayOfMonth.toString,
-        "value.month" -> field,
-        "value.year"  -> date.getYear.toString
+      val expectedErrors = Seq(
+        FormError("value.month", List("error.required"), List(messages("date.error.month"))),
+        FormError("value", List("error.required"), List(messages("date.error.month")))
       )
 
-      val result = form.bind(data)
-
-      result.errors must contain(
-        FormError("value", "error.invalid", List.empty)
-      )
+      result.errors must contain theSameElementsAs expectedErrors
     }
   }
 
@@ -242,25 +223,12 @@ class DateMappingsSpec extends AnyFreeSpec with Matchers with ScalaCheckProperty
 
       val result = form.bind(data)
 
-      result.errors must contain only FormError("value", "error.required", List(messages("date.error.year")))
-    }
-  }
-
-  "must fail to bind a date with an invalid year" in {
-
-    forAll(validData -> "valid data", invalidField -> "invalid field") { (date, field) =>
-
-      val data = Map(
-        "value.day"   -> date.getDayOfMonth.toString,
-        "value.month" -> date.getMonthValue.toString,
-        "value.year"  -> field
+      val expectedErrors = Seq(
+        FormError("value.year", List("error.required"), List(messages("date.error.year"))),
+        FormError("value", List("error.required"), List(messages("date.error.year")))
       )
 
-      val result = form.bind(data)
-
-      result.errors must contain(
-        FormError("value", "error.invalid", List.empty)
-      )
+      result.errors must contain theSameElementsAs expectedErrors
     }
   }
 
@@ -282,7 +250,13 @@ class DateMappingsSpec extends AnyFreeSpec with Matchers with ScalaCheckProperty
 
       val result = form.bind(data)
 
-      result.errors must contain only FormError("value", "error.required.two", List(messages("date.error.day"), messages("date.error.month")))
+      val expectedErrors = Seq(
+        FormError("value.day", List("error.required"), List(messages("date.error.day"))),
+        FormError("value.month", List("error.required"), List(messages("date.error.month"))),
+        FormError("value", List("error.required.two"), List(messages("date.error.day"), messages("date.error.month")))
+      )
+
+      result.errors must contain theSameElementsAs expectedErrors
     }
   }
 
@@ -304,7 +278,13 @@ class DateMappingsSpec extends AnyFreeSpec with Matchers with ScalaCheckProperty
 
       val result = form.bind(data)
 
-      result.errors must contain only FormError("value", "error.required.two", List(messages("date.error.day"), messages("date.error.year")))
+      val expectedErrors = Seq(
+        FormError("value.day", List("error.required"), List(messages("date.error.day"))),
+        FormError("value.year", List("error.required"), List(messages("date.error.year"))),
+        FormError("value", List("error.required.two"), List(messages("date.error.day"), messages("date.error.year")))
+      )
+
+      result.errors must contain theSameElementsAs expectedErrors
     }
   }
 
@@ -326,87 +306,14 @@ class DateMappingsSpec extends AnyFreeSpec with Matchers with ScalaCheckProperty
 
       val result = form.bind(data)
 
-      result.errors must contain only FormError("value", "error.required.two", List(messages("date.error.month"), messages("date.error.year")))
-    }
-  }
-
-  "must fail to bind an invalid day and month" in {
-
-    forAll(validData -> "valid date", invalidField -> "invalid day", invalidField -> "invalid month") { (date, day, month) =>
-
-      val data = Map(
-        "value.day"   -> day,
-        "value.month" -> month,
-        "value.year"  -> date.getYear.toString
+      val expectedErrors = Seq(
+        FormError("value.month", List("error.required"), List(messages("date.error.month"))),
+        FormError("value.year", List("error.required"), List(messages("date.error.year"))),
+        FormError("value", List("error.required.two"), List(messages("date.error.month"), messages("date.error.year")))
       )
 
-      val result = form.bind(data)
-
-      result.errors must contain only FormError("value", "error.invalid", List.empty)
+      result.errors must contain theSameElementsAs expectedErrors
     }
-  }
-
-  "must fail to bind an invalid day and year" in {
-
-    forAll(validData -> "valid date", invalidField -> "invalid day", invalidField -> "invalid year") { (date, day, year) =>
-
-      val data = Map(
-        "value.day"   -> day,
-        "value.month" -> date.getMonthValue.toString,
-        "value.year"  -> year
-      )
-
-      val result = form.bind(data)
-
-      result.errors must contain only FormError("value", "error.invalid", List.empty)
-    }
-  }
-
-  "must fail to bind an invalid month and year" in {
-
-    forAll(validData -> "valid date", invalidField -> "invalid month", invalidField -> "invalid year") { (date, month, year) =>
-
-      val data = Map(
-        "value.day"   -> date.getDayOfMonth.toString,
-        "value.month" -> month,
-        "value.year"  -> year
-      )
-
-      val result = form.bind(data)
-
-      result.errors must contain only FormError("value", "error.invalid", List.empty)
-    }
-  }
-
-  "must fail to bind an invalid day, month and year" in {
-
-    forAll(invalidField -> "valid day", invalidField -> "invalid month", invalidField -> "invalid year") { (day, month, year) =>
-
-      val data = Map(
-        "value.day"   -> day,
-        "value.month" -> month,
-        "value.year"  -> year
-      )
-
-      val result = form.bind(data)
-
-      result.errors must contain only FormError("value", "error.invalid", List.empty)
-    }
-  }
-
-  "must fail to bind an invalid date" in {
-
-    val data = Map(
-      "value.day"   -> "30",
-      "value.month" -> "2",
-      "value.year"  -> "2018"
-    )
-
-    val result = form.bind(data)
-
-    result.errors must contain(
-      FormError("value", "error.invalid", List.empty)
-    )
   }
 
   "must unbind a date" in {

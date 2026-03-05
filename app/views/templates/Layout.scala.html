@@ -16,10 +16,10 @@
 
 @import config.FrontendAppConfig
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
-@import uk.gov.hmrc.hmrcfrontend.views.html.components._
-@import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.*
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.*
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.*
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.backlink.BackLink
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukBackLink
 @import views.html.helper.CSPNonce
@@ -37,7 +37,7 @@
     hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
 )
 
-@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false, backLink: Option[String] = None, templateOverrides: TemplateOverrides = TemplateOverrides(), useThreeQuartersGrid: Boolean = false)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
+@(pageTitle: String, showBackLink: Boolean = true, timeout: Boolean = true, showSignOut: Boolean = true, showHmrcBanner: Boolean = false, backLink: Option[String] = None, templateOverrides: TemplateOverrides = TemplateOverrides(), useThreeQuartersGrid: Boolean = false, showUserBanner: Boolean = false)(contentBlock: Html)(implicit rh: RequestHeader, messages: Messages)
 
 @head = {
     @if(timeout) {
@@ -75,7 +75,10 @@
     ),
     banners = Banners(
         displayHmrcBanner = showHmrcBanner,
-        phaseBanner = Some(betaBanner(appConfig.feedbackUrl))
+        phaseBanner = Some(betaBanner(appConfig.feedbackUrl)),
+        userResearchBanner = if(showUserBanner) Some(UserResearchBanner(
+            url = "https://survey.take-part-in-research.service.gov.uk/jfe/form/SV_74GjifgnGv6GsMC?Source=BannerList_HMRC_DASS"
+        )) else None
     ),
     isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
     backLink = if (showBackLink) backLink.map(BackLink(_)).orElse(Some(BackLink.mimicsBrowserBackButtonViaJavaScript)) else None

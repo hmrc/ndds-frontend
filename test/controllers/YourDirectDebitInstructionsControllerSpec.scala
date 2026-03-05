@@ -38,9 +38,7 @@ import scala.concurrent.Future
 class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers with MockitoSugar {
 
   "YourDirectDebitInstructionsController" - {
-
     "onPageLoad" - {
-
       "must return OK and the correct view for a GET with no page parameter" in {
         val testData = createTestNddResponse(5)
         val mockNddService = mock[NationalDirectDebitService]

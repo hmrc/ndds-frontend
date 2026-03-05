@@ -25,17 +25,16 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.NationalDirectDebitService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 class LandingControllerSpec extends SpecBase {
 
   "Landing Controller" - {
-
     val mockService = mock[NationalDirectDebitService]
 
     "must return REDIRECT and the correct view for a GET with no existing debits" in {
-
       val application = applicationBuilder(userAnswers = None)
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockService)
@@ -43,21 +42,18 @@ class LandingControllerSpec extends SpecBase {
         .build()
 
       running(application) {
-
         when(mockService.retrieveAllDirectDebits(any())(any(), any()))
           .thenReturn(Future.successful(NddResponse(0, Seq())))
 
         val request = FakeRequest(GET, routes.LandingController.onPageLoad().url)
-
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value must startWith(controllers.routes.SetupDirectDebitPaymentController.onPageLoad().url)
+        redirectLocation(result).value mustBe controllers.routes.SetupDirectDebitPaymentController.onPageLoad().url
       }
     }
 
     "must return REDIRECT and the correct view for a GET with existing debits" in {
-
       val application = applicationBuilder(userAnswers = None)
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockService)
@@ -70,16 +66,14 @@ class LandingControllerSpec extends SpecBase {
           .thenReturn(Future.successful(NddResponse(2, Seq())))
 
         val request = FakeRequest(GET, routes.LandingController.onPageLoad().url)
-
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value must startWith(controllers.routes.YourDirectDebitInstructionsController.onPageLoad().url)
+        redirectLocation(result).value mustBe controllers.routes.YourDirectDebitInstructionsController.onPageLoad().url
       }
     }
 
     "must return REDIRECT and the correct view for an unauthenticated user" in {
-
       val application = applicationBuilder(userAnswers = None)
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockService)
@@ -88,12 +82,12 @@ class LandingControllerSpec extends SpecBase {
 
       running(application) {
         val request = FakeRequest(GET, routes.LandingController.onPageLoad().url)
-
         val result = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value must startWith(controllers.routes.YourDirectDebitInstructionsController.onPageLoad().url)
+        redirectLocation(result).value mustBe controllers.routes.YourDirectDebitInstructionsController.onPageLoad().url
       }
     }
+
   }
 }

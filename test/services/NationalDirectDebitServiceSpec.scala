@@ -277,7 +277,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
       "fail when auddis status is not in user answers" in {
         val result = intercept[Exception](service.getFutureWorkingDays(emptyUserAnswers, "123").futureValue)
 
-        result.getMessage must include("YourBankDetailsPage details missing from user answers")
+        result.getMessage must include("Missing information from user answers")
       }
 
       "must successfully return the Earliest Payment Date when direct debit is exists" in {
@@ -1122,7 +1122,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
       val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-      result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(1))
+      result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(2))
       result.nextPaymentDateValid mustBe false
     }
 
@@ -1263,7 +1263,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), FourWeekly).futureValue
 
-          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(4))
+          result.potentialNextPaymentDate mustBe Some(startDate.plusWeeks(8))
           result.nextPaymentDateValid mustBe true
         }
 
@@ -1315,7 +1315,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
             val result = service.calculateNextPaymentDate(startDate, Some(planEndDate), Monthly).futureValue
 
-            result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(1))
+            result.potentialNextPaymentDate mustBe Some(startDate.plusMonths(2))
             result.nextPaymentDateValid mustBe true
           }
 

@@ -35,11 +35,12 @@ class LandingController @Inject() (nddService: NationalDirectDebitService,
     with Logging {
 
   def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
-    nddService.retrieveAllDirectDebits(request.userId) map {
-      case rdsResponse if rdsResponse.directDebitCount == 0 =>
+    nddService.retrieveAllDirectDebits(request.userId).map { rdsResponse =>
+      if (rdsResponse.directDebitCount == 0) {
         Redirect(routes.SetupDirectDebitPaymentController.onPageLoad())
-      case response =>
+      } else {
         Redirect(routes.YourDirectDebitInstructionsController.onPageLoad())
+      }
     }
   }
 }

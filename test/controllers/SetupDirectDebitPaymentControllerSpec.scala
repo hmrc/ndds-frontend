@@ -35,7 +35,6 @@ import scala.concurrent.Future
 class SetupDirectDebitPaymentControllerSpec extends SpecBase {
 
   "SetupDirectDebitPayment Controller" - {
-
     val mockService = mock[LockService]
     val returnedDate = "2025-06-28T15:30:30Z"
 

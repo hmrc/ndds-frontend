@@ -57,9 +57,9 @@ class PlanEndDateController @Inject() (
         val preparedForm = request.userAnswers.get(PlanEndDatePage).fold(form)(form.fill)
 
         val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
-        val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
+        val planStartDate = startDate.enteredDate.format(dateFormat)
 
-        Ok(view(preparedForm, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode), beforeDate))
+        Ok(view(preparedForm, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode), planStartDate))
 
       case None =>
         Redirect(routes.SystemErrorController.onPageLoad())
@@ -74,14 +74,14 @@ class PlanEndDateController @Inject() (
         case Some(startDate) =>
           val form = formProvider(startDate.enteredDate)
           val dateFormat = DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
-          val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
+          val planStartDate = startDate.enteredDate.format(dateFormat)
 
           form
             .bindFromRequest()
             .fold(
               formWithErrors =>
                 Future.successful(
-                  BadRequest(view(formWithErrors, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode), beforeDate))
+                  BadRequest(view(formWithErrors, mode, routes.AddPaymentPlanEndDateController.onPageLoad(mode), planStartDate))
                 ),
               endDate =>
                 val updatedAnswers = request.userAnswers.set(PlanEndDatePage, endDate).get
