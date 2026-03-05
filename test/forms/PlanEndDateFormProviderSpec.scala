@@ -62,7 +62,7 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
       result.value mustBe None
     }
 
-    "must fail to bind dates more than 100 years in the future" in {
+    "must fail to bind plan end dates more than 100 years in the future" in {
       val maxDate = LocalDate.now().plusYears(100)
       val invalidDate = maxDate.plusDays(1)
 

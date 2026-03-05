@@ -357,7 +357,7 @@ planEndDate.error.required = Payment plan end date must include a {0}
 planEndDate.error.invalid = Payment plan end date must be a real date
 planEndDate.error.incomplete = Payment plan end date must include a day, month and year
 planEndDate.error.beforeOrEqualStartDate = Payment plan end date must be the same as or after {0}
-planEndDate.error.maxYear = Payment plan end date must be before {0}
+planEndDate.error.maxYear = The plan end date must be on or before {0}
 
 totalAmountDue.title = How much is the total amount due, in pounds?
 totalAmountDue.heading = How much is the total amount due, in pounds?

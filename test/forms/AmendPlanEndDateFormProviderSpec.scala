@@ -21,6 +21,7 @@ import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
 
+import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZoneOffset}
 
 class AmendPlanEndDateFormProviderSpec extends DateBehaviours {
@@ -49,6 +50,38 @@ class AmendPlanEndDateFormProviderSpec extends DateBehaviours {
       )
 
       behave like dateField(form, "value", validData)
+
+      "fail to bind a date more than 100 years in the future" in {
+        val maxDate = LocalDate.now().plusYears(100)
+        val invalidDate = maxDate.plusDays(1)
+        val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
+        val result = form.bind(
+          Map(
+            "value.day"   -> invalidDate.getDayOfMonth.toString,
+            "value.month" -> invalidDate.getMonthValue.toString,
+            "value.year"  -> invalidDate.getYear.toString
+          )
+        )
+
+        result.errors must contain(
+          FormError("value", "planEndDate.error.maxYear", Seq(maxDate.format(formatter)))
+        )
+      }
+
+      "bind successfully for a date exactly 100 years in the future" in {
+        val maxDate = LocalDate.now().plusYears(100)
+
+        val result = form.bind(
+          Map(
+            "value.day"   -> maxDate.getDayOfMonth.toString,
+            "value.month" -> maxDate.getMonthValue.toString,
+            "value.year"  -> maxDate.getYear.toString
+          )
+        )
+
+        result.errors mustBe empty
+      }
 
       "fail to bind an empty date" in {
         val result = form.bind(Map.empty[String, String])
