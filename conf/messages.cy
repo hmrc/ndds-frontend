@@ -272,6 +272,7 @@ paymentReference.vat.invalid = Nodwch gyfeirnod talu go iawn ar gyfer TAW
 paymentReference.otherLiability.required = Nodwch eich cyfeirnod talu ar gyfer rhwymedigaeth arall
 paymentReference.otherLiability.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer rhwymedigaeth arall gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
 paymentReference.otherLiability.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer rhwymedigaeth arall yn y fformat cywir
+paymentReference.otherLiability.hint = Bydd hwn i’w weld ar lythyrau gan CThEF.
 paymentReference.otherLiability.invalid = Nodwch gyfeirnod talu go iawn ar gyfer rhwymedigaeth arall
 
 

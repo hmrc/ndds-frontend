@@ -36,16 +36,17 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
     DirectDebitSource.OL
   )
 
+  // Updated valid dummy values per current provider
   private val dummyValues: Map[DirectDebitSource, String] = Map(
     DirectDebitSource.CT   -> "8337018376A00108A",
     DirectDebitSource.MGD  -> "XVM00005554321",
     DirectDebitSource.NIC  -> "600340016213526259",
-    DirectDebitSource.PAYE -> "123PABC1234567",
+    DirectDebitSource.PAYE -> "123PA12345678", // 3 digits + P + 1 letter + 7 digits + optional digit (13 chars)
     DirectDebitSource.SA   -> "1234567890K",
-    DirectDebitSource.SDLT -> "123456789C",
-    DirectDebitSource.TC   -> "AB123456789012CD",
-    DirectDebitSource.VAT  -> "12345678A",
-    DirectDebitSource.OL   -> "XAB12345678901"
+    DirectDebitSource.SDLT -> "123456789MA", // 9 digits + M + letter
+    DirectDebitSource.TC   -> "AB123456789012NA", // 2 letters + 12 digits + N + letter
+    DirectDebitSource.VAT  -> "123456789", // 9+ digits only
+    DirectDebitSource.OL   -> "XAB12345678901" // matches OL regex; 3rd char != 'M'
   )
 
   private def form(
@@ -59,10 +60,7 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
 
     s".value (${source.toString})" - {
 
-      val baseKey = source match {
-        case DirectDebitSource.OL => "otherLiability"
-        case _                    => source.toString.toLowerCase
-      }
+      val baseKey = if (source == DirectDebitSource.OL) "otherLiability" else source.toString.toLowerCase
       val requiredKey = s"paymentReference.$baseKey.required"
       val invalidCharsKey = s"paymentReference.$baseKey.invalidCharacters"
       val invalidFormatKey = s"paymentReference.$baseKey.invalidFormat"
@@ -91,16 +89,17 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
 
       "return invalidFormat when valid characters but wrong pattern" in {
         val invalidFormatValue = source match {
-          case DirectDebitSource.CT   => "8337018376B99108B"
-          case DirectDebitSource.MGD  => "XBM00001234567"
-          case DirectDebitSource.NIC  => "601234567890123457"
-          case DirectDebitSource.PAYE => "123456789012"
-          case DirectDebitSource.SA   => "1234567891K"
-          case DirectDebitSource.SDLT => "123456780A"
-          case DirectDebitSource.TC   => "AB123456789012CE"
-          case DirectDebitSource.VAT  => "12345678B"
-          case DirectDebitSource.OL   => "123M5678901234"
+          case DirectDebitSource.CT   => "8337018376B00108A"
+          case DirectDebitSource.MGD  => "XAM100005554321"
+          case DirectDebitSource.NIC  => "611234567890123458"
+          case DirectDebitSource.PAYE => "123ABC1234567"
+          case DirectDebitSource.SA   => "1234567891L"
+          case DirectDebitSource.SDLT => "123456789DA"
+          case DirectDebitSource.TC   => "AB123456789012ZZ"
+          case DirectDebitSource.VAT  => "12345678"
+          case DirectDebitSource.OL   => "XAM12345678901"
         }
+
         val result = form(source).bind(Map(fieldName -> invalidFormatValue))
         result.errors must contain(FormError(fieldName, invalidFormatKey))
         result.errors.size mustBe 1
