@@ -62,6 +62,39 @@ class PlanEndDateFormProviderSpec extends DateBehaviours {
       result.value mustBe None
     }
 
+    "must fail to bind dates more than 100 years in the future" in {
+      val maxDate = LocalDate.now().plusYears(100)
+      val invalidDate = maxDate.plusDays(1)
+
+      val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
+      val result = form.bind(
+        Map(
+          "value.day"   -> invalidDate.getDayOfMonth.toString,
+          "value.month" -> invalidDate.getMonthValue.toString,
+          "value.year"  -> invalidDate.getYear.toString
+        )
+      )
+
+      result.errors must contain(
+        FormError("value", "planEndDate.error.maxYear", Seq(maxDate.format(formatter)))
+      )
+    }
+
+    "must bind dates up to 100 years in the future" in {
+      val maxDate = LocalDate.now().plusYears(100)
+
+      val result = form.bind(
+        Map(
+          "value.day"   -> maxDate.getDayOfMonth.toString,
+          "value.month" -> maxDate.getMonthValue.toString,
+          "value.year"  -> maxDate.getYear.toString
+        )
+      )
+
+      result.errors mustBe empty
+    }
+
     "must fail with required error if partially completed" in {
       val result = form.bind(
         Map(

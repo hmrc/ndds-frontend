@@ -94,7 +94,6 @@ class CustomDateFormatter(invalidKey: String,
     val cleanedData: Map[String, String] =
       fields.collect { case (k, Some(v)) => s"$key.$k" -> v }
 
-    // 🔹 Normalise month if alphabetic
     val normalisedData: Map[String, String] =
       cleanedData.map {
         case (k, v) if k.endsWith(".month") =>
@@ -102,7 +101,7 @@ class CustomDateFormatter(invalidKey: String,
             if (v.matches("""\d{1,2}""")) {
               v
             } else {
-              parseMonthName(v).getOrElse(v) // fallback to original if invalid
+              parseMonthName(v).getOrElse(v)
             }
 
           k -> normalisedMonth
