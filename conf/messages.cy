@@ -239,10 +239,10 @@ paymentReference.mgd.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar 
 paymentReference.mgd.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer Toll Peiriannau Hapchwarae yn y fformat cywir
 paymentReference.mgd.invalid = Nodwch gyfeirnod talu go iawn ar gyfer Toll Peiriannau Hapchwarae
 
-paymentReference.nic.required = Enter your National Insurance contributions payment reference
-paymentReference.nic.invalidCharacters = Your National Insurance contributions payment reference must only include letters a to z and numbers 0 to 9
-paymentReference.nic.invalidFormat = Enter your National Insurance contributions payment reference in the correct format
-paymentReference.nic.invalid = Enter a real National Insurance contributions payment reference
+paymentReference.nic.required = Nodwch eich cyfeirnod talu ar gyfer cyfraniadau Yswiriant Gwladol
+paymentReference.nic.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer cyfraniadau Yswiriant Gwladol gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
+paymentReference.nic.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer cyfraniadau Yswiriant Gwladol yn y fformat cywir
+paymentReference.nic.invalid = Nodwch gyfeirnod talu go iawn ar gyfer cyfraniadau Yswiriant Gwladol
 
 paymentReference.paye.required = Nodwch eich cyfeirnod talu ar gyfer TWE
 paymentReference.paye.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer TWE gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
