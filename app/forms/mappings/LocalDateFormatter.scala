@@ -35,19 +35,22 @@ private[mappings] class LocalDateFormatter(
 
   protected val fieldKeys: List[String] = List("day", "month", "year")
 
-  private def toDate(key: String, day: Int, month: Int, year: Int): Either[Seq[FormError], LocalDate] =
-    Try(LocalDate.of(year, month, day)) match {
-      case Success(date) => Right(date)
-      case Failure(_) =>
-        val fieldError = month match {
-          case m if m < 1 || m > 12                  => s"$key.month"
-          case 2 if day < 1 || day > 29              => s"$key.day"
-          case 4 | 6 | 9 | 11 if day < 1 || day > 30 => s"$key.day"
-          case _ if day < 1 || day > 31              => s"$key.day"
-          case _                                     => s"$key.year"
-        }
-        Left(Seq(FormError(fieldError, invalidKey, args)))
+  import java.time.{LocalDate, YearMonth}
+  import scala.util.{Failure, Success, Try}
+
+  def isValidDate(year: Int, month: Int, day: Int): Boolean = {
+    if (month < 1 || month > 12) return false
+    val maxDay = YearMonth.of(year, month).lengthOfMonth()
+    day >= 1 && day <= maxDay
+  }
+
+  private def toDate(key: String, day: Int, month: Int, year: Int): Either[Seq[FormError], LocalDate] = {
+    if (!isValidDate(year, month, day)) {
+      Left(Seq(FormError(key, invalidKey, args)))
+    } else {
+      Right(LocalDate.of(year, month, day))
     }
+  }
 
   protected def formatDate(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
 
