@@ -29,30 +29,20 @@ class PaymentReferenceFormProvider @Inject() extends Mappings {
     s"paymentReference.${source.toString}.$suffix"
 
   private val formatRegexMap: Map[DirectDebitSource, String] = Map(
-    DirectDebitSource.CT ->
-      "^\\d{10}A001\\d{2}A$",
-    DirectDebitSource.MGD ->
-      "^X[A-Z]M0000\\d{7}$",
-    DirectDebitSource.NIC ->
-      "^60\\d{15}[0-9X]$",
-    DirectDebitSource.PAYE ->
-      "^[A-Z0-9]{13,14}$",
-    DirectDebitSource.SA ->
-      "^\\d{10}K$",
-    DirectDebitSource.SDLT ->
-      "^\\d{9}M[A-Z]$",
-    DirectDebitSource.TC ->
-      "^[A-Z]{2}\\d{12}N[A-Z]$",
-    DirectDebitSource.VAT ->
-      "^\\d{9,}$",
-    DirectDebitSource.OL ->
-      "^(X[A-Z][A-Z0-9]\\d{11}|X[A-Z]ECL\\d{10}|X[A-Z]\\d{13})$"
+    DirectDebitSource.CT   -> "^\\d{10}A001\\d{2}A$",
+    DirectDebitSource.MGD  -> "^X[A-Z]M0000\\d{7}$",
+    DirectDebitSource.NIC  -> "^60\\d{15}[0-9X]$",
+    DirectDebitSource.PAYE -> "^[A-Z0-9]{13,14}$",
+    DirectDebitSource.SA   -> "^\\d{10}K$",
+    DirectDebitSource.SDLT -> "^\\d{9}M[A-Z]$",
+    DirectDebitSource.TC   -> "^[A-Z]{2}\\d{12}N[A-Z]$",
+    DirectDebitSource.VAT  -> "^\\d{9,}$",
+    DirectDebitSource.OL   -> "^(X[A-Z][A-Z0-9]\\d{11}|X[A-Z]ECL\\d{10}|X[A-Z]\\d{13})$"
   )
 
   private def formatCheck(source: DirectDebitSource, ref: String): Boolean =
     source match {
-      case DirectDebitSource.PAYE =>
-        "^\\d{3}P[A-Z]\\d{7}(\\d|X)?$".r.matches(ref)
+      case DirectDebitSource.PAYE => "^\\d{3}P[A-Z]\\d{7}(\\d|X)?$".r.matches(ref)
 
       case DirectDebitSource.OL =>
         val matches = formatRegexMap(DirectDebitSource.OL).r.matches(ref)
