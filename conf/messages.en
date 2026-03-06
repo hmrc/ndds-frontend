@@ -220,8 +220,8 @@ paymentReference.tc.title = What is your tax credits payment reference?
 paymentReference.tc.heading = What is your tax credits payment reference?
 paymentReference.vat.title = What is your VAT payment reference?
 paymentReference.vat.heading = What is your VAT payment reference?
-paymentReference.other.title = What is your Other liability payment reference?
-paymentReference.other.heading = What is your Other liability payment reference?
+paymentReference.otherLiability.title = What is your Other liability payment reference?
+paymentReference.otherLiability.heading = What is your Other liability payment reference?
 
 paymentReference.checkYourAnswersLabel = Payment reference
 paymentReference.error.invalid = Enter a valid payment reference
@@ -280,7 +280,7 @@ paymentReference.sa.hint = You can find this on letters from HMRC, it is 10 char
 paymentReference.sdlt.hint = You can find this on letter from HMRC. It’s 9 numbers, then M and ends in a capital letter, such as 123456789MC.
 paymentReference.tc.hint = You can find this on letters from HMRC. It’s 16 characters long.
 paymentReference.vat.hint = You can find this on letters from HMRC. It’s 9 characters long, such as 123A456B0.
-paymentReference.other.hint = You can find this on letters from HMRC.
+paymentReference.otherLiability.hint = You can find this on letters from HMRC.
 
 paymentAmount.title = How much do you want to pay, in pounds?
 paymentAmount.heading = How much do you want to pay, in pounds?

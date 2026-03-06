@@ -280,7 +280,7 @@ paymentReference.sa.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 10
 paymentReference.sdlt.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 9 o rifau ac yn gorffen gydag ‘M’ a phrif lythyren arall, megis 123456789MC.
 paymentReference.tc.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 16 o gymeriadau.
 paymentReference.vat.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 9 o gymeriadau, megis 123A456B0.
-paymentReference.other.hint = Bydd hwn i’w weld ar lythyrau gan CThEF.
+paymentReference.otherLiability.hint = Bydd hwn i’w weld ar lythyrau gan CThEF.
 
 paymentAmount.title = Faint yr hoffech ei dalu mewn punnoedd?
 paymentAmount.heading = Faint yr hoffech ei dalu mewn punnoedd?
