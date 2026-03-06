@@ -68,7 +68,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         )(request, messages(application)).toString
 
         contentAsString(result) must include(
-          "You can find this on the MGD Registration Certificate from HMRC, it begins with an X and is 14 characters long"
+          "You can find this on your MGD Registration Certificate. It’s 14 characters long and begins with X, then an uppercase letter, then ‘M0000’ and then 7 numbers, such as XVM00005554321."
         )
       }
     }
@@ -119,7 +119,7 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         )(request, messages(application)).toString
 
         contentAsString(result) must include(
-          "You can find this on letters from HMRC, it is 16 characters long"
+          "You can find this on letters from HMRC"
         )
       }
     }
