@@ -18,10 +18,10 @@ package forms
 
 import forms.mappings.Mappings
 import play.api.data.Form
+import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.i18n.Messages
-import utils.DateFormats
-
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class AmendPlanEndDateFormProvider @Inject() extends Mappings {
@@ -33,8 +33,20 @@ class AmendPlanEndDateFormProvider @Inject() extends Mappings {
         allRequiredKey = "planEndDate.error.required.all",
         twoRequiredKey = "planEndDate.error.required.two",
         requiredKey    = "planEndDate.error.required",
-        dateFormats    = DateFormats.defaultDateFormats
-      )
+        dateFormats    = utils.DateFormats.defaultDateFormats
+      ).verifying(maxYearConstraint)
     )
 
+  private def maxYearConstraint(implicit messages: Messages): Constraint[LocalDate] = {
+    val maxDate = LocalDate.now().plusYears(100)
+    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy").withLocale(messages.lang.locale)
+
+    Constraint { endDate =>
+      if (endDate.isAfter(maxDate)) {
+        Invalid("planEndDate.error.maxYear", maxDate.format(formatter))
+      } else {
+        Valid
+      }
+    }
+  }
 }

@@ -280,7 +280,7 @@ paymentReference.sa.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 10
 paymentReference.sdlt.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 9 o rifau ac yn gorffen gydag ‘M’ a phrif lythyren arall, megis 123456789MC.
 paymentReference.tc.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 16 o gymeriadau.
 paymentReference.vat.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 9 o gymeriadau, megis 123A456B0.
-paymentReference.other.hint = Bydd hwn i’w weld ar lythyrau gan CThEF.
+paymentReference.otherLiability.hint = Bydd hwn i’w weld ar lythyrau gan CThEF.
 
 paymentAmount.title = Faint yr hoffech ei dalu mewn punnoedd?
 paymentAmount.heading = Faint yr hoffech ei dalu mewn punnoedd?
@@ -394,6 +394,7 @@ planEndDate.error.required = Mae’n rhaid i ddyddiad dod i ben y cynllun talu g
 planEndDate.error.invalid = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod yn ddyddiad go iawn
 planEndDate.error.incomplete = Mae’n rhaid i ddyddiad dod i ben y cynllun talu gynnwys diwrnod, mis a blwyddyn
 planEndDate.error.beforeOrEqualStartDate = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod yr un fath â neu ar ôl {0}
+planEndDate.error.maxYear = Dyddiad dod i ben y cynllun: mae’n rhaid i hyn fod ar, neu cyn {0}
 
 totalAmountDue.title = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
 totalAmountDue.heading = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
