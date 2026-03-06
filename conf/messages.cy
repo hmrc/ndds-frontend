@@ -19,7 +19,6 @@ date.day = Diwrnod
 date.month = Mis
 date.year = Blwyddyn
 
-
 datePart.day   = diwrnod
 datePart.month = mis
 datePart.year  = blwyddyn
@@ -205,7 +204,6 @@ paymentPlan.collapsable.tc.p6.link   = mae’n rhaid i chi gysylltu â Gwasanaet
 
 paymentReference.title = Beth yw’ch cyfeirnod talu?
 paymentReference.heading = Beth yw’ch cyfeirnod talu?
-
 paymentReference.ct.title = Beth yw’ch cyfeirnod talu ar gyfer Treth Gorfforaeth (CT)?
 paymentReference.ct.heading = Beth yw’ch cyfeirnod talu ar gyfer Treth Gorfforaeth (CT)?
 paymentReference.mgd.title = Beth yw’ch cyfeirnod talu ar gyfer Toll Peiriannau Hapchwarae (MGD)?
@@ -225,9 +223,9 @@ paymentReference.vat.heading = Beth yw’ch cyfeirnod talu ar gyfer TAW?
 paymentReference.otherLiability.title = Beth yw’ch cyfeirnod talu ar gyfer rhwymedigaeth eraill?
 paymentReference.otherLiability.heading = Beth yw’ch cyfeirnod talu ar gyfer rhwymedigaeth eraill?
 
-paymentReference.checkYourAnswersLabel = Payment reference
-paymentReference.error.invalid = Enter a valid payment reference
-paymentReference.change.hidden =  Payment reference
+paymentReference.checkYourAnswersLabel = Cyfeirnod talu
+paymentReference.error.invalid = Nodwch gyfeirnod talu dilys
+paymentReference.change.hidden = y cyfeirnod talu
 
 paymentReference.ct.required = Nodwch eich cyfeirnod talu ar gyfer Treth Gorfforaeth
 paymentReference.ct.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer Treth Gorfforaeth gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
@@ -259,7 +257,7 @@ paymentReference.sdlt.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar
 paymentReference.sdlt.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer Treth Dir y Tollau Stamp yn y fformat cywir
 paymentReference.sdlt.invalid = Nodwch gyfeirnod talu go iawn ar gyfer Treth Dir y Tollau Stamp
 
-paymentReference.tc.required = Enter your tax credits payment reference
+paymentReference.tc.required = Nodwch eich cyfeirnod talu ar gyfer credydau treth
 paymentReference.tc.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer credydau treth gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
 paymentReference.tc.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer credydau treth yn y fformat cywir
 paymentReference.tc.invalid = Nodwch gyfeirnod talu go iawn ar gyfer credydau treth
@@ -272,13 +270,8 @@ paymentReference.vat.invalid = Nodwch gyfeirnod talu go iawn ar gyfer TAW
 paymentReference.otherLiability.required = Nodwch eich cyfeirnod talu ar gyfer rhwymedigaeth arall
 paymentReference.otherLiability.invalidCharacters = Mae’n rhaid i’ch cyfeirnod talu ar gyfer rhwymedigaeth arall gynnwys y llythrennau A i Z a’r rhifau 0 i 9 yn unig
 paymentReference.otherLiability.invalidFormat = Nodwch eich cyfeirnod talu ar gyfer rhwymedigaeth arall yn y fformat cywir
-paymentReference.otherLiability.hint = Bydd hwn i’w weld ar lythyrau gan CThEF.
 paymentReference.otherLiability.invalid = Nodwch gyfeirnod talu go iawn ar gyfer rhwymedigaeth arall
 
-
-paymentReference.checkYourAnswersLabel = Cyfeirnod talu
-paymentReference.error.invalid = Nodwch gyfeirnod talu dilys
-paymentReference.change.hidden = y cyfeirnod talu
 paymentReference.ct.hint = Bydd hwn i’w weld ar eich hysbysiad i gyflwyno’ch Ffurflen Dreth. Mae’n 17 o gymeriadau, yn dechrau gyda 10 rhif, wedyn ‘A001’, 2 rif arall, ac yn gorffen gydag ‘A’, megis 8337018376A00108A.
 paymentReference.mgd.hint = Bydd hwn i’w weld ar eich Tystysgrif Cofrestru MGD. Mae’n 14 o gymeriadau, yn dechrau gydag ‘X’, wedyn prif lythyren, wedyn ‘M0000’, ac yna 7 rhif, megis XVM00005554321.
 paymentReference.nic.hint = Bydd hwn i’w weld ar lythyrau gan CThEF. Mae’n 18 o gymeriadau, yn dechrau gyda ‘60’ ac yn gorffen gydag ‘X’ neu rif, megis 600340016213526259 neu 60034001621352625X.
@@ -772,7 +765,6 @@ amendPaymentPlanUpdate.summary.p2 = Os oes unrhyw newidiadau i swm, dyddiad neu 
 amendPaymentPlanUpdate.summary.p3 = Os gwneir camgymeriad gan NDDS CThEF neu eich banc neu gymdeithas adeiladu wrth dalu’ch Debyd Uniongyrchol, mae gennych hawl i ad-daliad llawn, ar unwaith, o’r swm a dalwyd gan eich banc neu’ch cymdeithas adeiladu.
 amendPaymentPlanUpdate.summary.p4 = Os byddwch yn cael ad-daliad nad oes hawl gennych iddo, bydd yn rhaid i chi ei dalu’n ôl pan fydd NDDS CThEF yn gofyn i chi wneud hynny.
 amendPaymentPlanUpdate.summary.p5 = Gallwch ganslo Debyd Uniongyrchol ar unrhyw adeg drwy gysylltu â’ch banc neu’ch cymdeithas adeiladu. Efallai y bydd angen cadarnhad ysgrifenedig.
-amendPaymentPlanUpdate.summary.p6 = Payments will appear on your bank statement as ‘HMRC NDDS’.
 amendPaymentPlanUpdate.directDebitDetails = Manylion Debyd Uniongyrchol
 amendPaymentPlanUpdate.directDebit.reference = Cyfeirnod Debyd Uniongyrchol
 amendPaymentPlanUpdate.directDebit.accountName = Yr enw sydd ar y cyfrif

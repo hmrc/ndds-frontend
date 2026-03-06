@@ -19,11 +19,9 @@ date.day = Day
 date.month = Month
 date.year = Year
 
-
 datePart.day   = day
 datePart.month = month
 datePart.year  = year
-
 
 date.error.day = day
 date.error.month = month
@@ -239,7 +237,6 @@ paymentReference.mgd.invalidCharacters = Your Machine Games Duty payment referen
 paymentReference.mgd.invalidFormat = Enter your Machine Games Duty payment reference in the correct format
 paymentReference.mgd.invalid = Enter a real Machine Games Duty payment reference
 
-
 paymentReference.nic.required = Enter your National Insurance contributions payment reference
 paymentReference.nic.invalidCharacters = Your National Insurance contributions payment reference must only include letters a to z and numbers 0 to 9
 paymentReference.nic.invalidFormat = Enter your National Insurance contributions payment reference in the correct format
@@ -260,7 +257,7 @@ paymentReference.sdlt.invalidCharacters = Your Stamp Duty Land Tax payment refer
 paymentReference.sdlt.invalidFormat = Enter your Stamp Duty Land Tax payment reference in the correct format
 paymentReference.sdlt.invalid = Enter a real Stamp Duty Land Tax payment reference
 
-paymentReference.tc.required = Nodwch eich cyfeirnod talu ar gyfer credydau treth
+paymentReference.tc.required = Enter your tax credits payment reference
 paymentReference.tc.invalidCharacters = Your tax credits payment reference must only include letters a to z and numbers 0 to 9
 paymentReference.tc.invalidFormat = Enter your tax credits payment reference in the correct format
 paymentReference.tc.invalid = Enter a real tax credits payment reference
@@ -270,15 +267,10 @@ paymentReference.vat.invalidCharacters = Your VAT payment reference must only in
 paymentReference.vat.invalidFormat = Enter your VAT payment reference in the correct format
 paymentReference.vat.invalid = Enter a real VAT payment reference
 
-paymentReference.otherLiability.title = What is your Other liability payment reference?
-paymentReference.otherLiability.heading = What is your Other liability payment reference?
-paymentReference.otherLiability.hint = You can find this on letters from HMRC
 paymentReference.otherLiability.required = Enter your Other liability payment reference
 paymentReference.otherLiability.invalidCharacters = Your Other liability payment reference must only include letters a to z and numbers 0 to 9
 paymentReference.otherLiability.invalidFormat = Enter your Other liability payment reference in the correct format
 paymentReference.otherLiability.invalid = Enter a real Other liability payment reference
-
-
 
 paymentReference.ct.hint = You can find this on your notice to deliver your tax return. It’s 17 characters long and starts with 10 numbers, then ‘A001’, another 2 numbers and ends with an A, such as 8337018376A00108A.
 paymentReference.mgd.hint = You can find this on your MGD Registration Certificate. It’s 14 characters long and begins with X, then an uppercase letter, then ‘M0000’ and then 7 numbers, such as XVM00005554321.
