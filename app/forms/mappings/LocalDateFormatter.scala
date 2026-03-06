@@ -20,8 +20,7 @@ import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
 
-import java.time.{LocalDate, Month}
-import scala.util.{Failure, Success, Try}
+import java.time.{LocalDate, Month, YearMonth}
 
 private[mappings] class LocalDateFormatter(
   invalidKey: String,
@@ -34,9 +33,6 @@ private[mappings] class LocalDateFormatter(
     with Formatters {
 
   protected val fieldKeys: List[String] = List("day", "month", "year")
-
-  import java.time.{LocalDate, YearMonth}
-  import scala.util.{Failure, Success, Try}
 
   def isValidDate(year: Int, month: Int, day: Int): Boolean = {
     if (month < 1 || month > 12) return false

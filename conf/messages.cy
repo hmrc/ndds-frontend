@@ -394,7 +394,7 @@ planEndDate.error.required = Mae’n rhaid i ddyddiad dod i ben y cynllun talu g
 planEndDate.error.invalid = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod yn ddyddiad go iawn
 planEndDate.error.incomplete = Mae’n rhaid i ddyddiad dod i ben y cynllun talu gynnwys diwrnod, mis a blwyddyn
 planEndDate.error.beforeOrEqualStartDate = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod yr un fath â neu ar ôl {0}
-planEndDate.error.maxYear = Mae’n rhaid i ddyddiad dod i ben y cynllun talu fod ar neu cyn {0}
+planEndDate.error.maxYear = Dyddiad dod i ben y cynllun: mae’n rhaid i hyn fod ar, neu cyn {0}
 
 totalAmountDue.title = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
 totalAmountDue.heading = Faint yw’r cyfanswm sy’n ddyledus, mewn punnoedd?
