@@ -27,19 +27,16 @@
 @(form: Form[_], mode: Mode, call: Call, planStartDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("planEndDate.title")), backLink = Some(call.url)) {
-
     @formHelper(action = routes.PlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
-
-        @* Define the order of date fields for error linking *@
-        @defining(Seq("value.day", "value.month", "value.year")) { fieldOrder =>
-
         @mainErrorSummary(
-        form.copy(errors = form.errors.filter(_.key.startsWith("value"))),
-        errorLinkOverrides = Map(
-        "value" -> fieldOrder.find(f => form.errors.exists(_.key == f)).getOrElse("value.day")
+            form.copy(errors = form.errors.filter(_.key == "value")),
+            errorLinkOverrides = Map("value" ->
+                form.errors
+                    .find(_.key.startsWith("value."))
+                    .map(_.key)
+                    .getOrElse("value.day")
+            )
         )
-        )
-        }
 
         @govukDateInput(
             DateViewModel(
