@@ -21,7 +21,7 @@ import forms.mappings.DateFormat
 object DateFormats {
   private val DayRegex = "^([1-9]|0[1-9]|1[0-9]|2[0-9]|3[0-1])$"
   private val MonthRegex =
-    "^(0?[1-9]|1[0-2]|(?i)jan|january|feb|february|mar|march|apr|apil|may|jun|june|jul|july|aug|august|sep|september|oct|october|nov|november|dec|december)$"
+    "^(0?[1-9]|1[0-2]|(?i)jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|september|oct|october|nov|november|dec|december)$"
   private val YearEndMonthRegex = "^\\d{4}$"
   private val YearRegex = "^\\d{4}$"
 
