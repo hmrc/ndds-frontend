@@ -22,7 +22,6 @@ lazy val microservice = (project in file("."))
     libraryDependencies ++= AppDependencies(),
     Test / parallelExecution := false,
     Test / fork := false,
-    Runtime / fork := true,
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
