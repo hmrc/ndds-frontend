@@ -36,12 +36,12 @@
         @mainErrorSummary(form)
 
         @govukRadios(
-        RadiosViewModel.yesNo(
-        field  = form("value"),
-        legend = LegendViewModel(messages("addPaymentPlanEndDate.heading")).asPageHeading()
-        )
-        .withHint(Hint(content = Text(messages("addPaymentPlanEndDate.p1"))))
-        )
+            RadiosViewModel.yesNo(
+                field  = form("value"),
+                legend = LegendViewModel(messages("addPaymentPlanEndDate.heading")).asPageHeading()
+            )
+            .withHint(Hint(content = Text(messages("addPaymentPlanEndDate.p1"))))
+            )
 
 
         @govukButton(
