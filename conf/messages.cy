@@ -369,7 +369,7 @@ regularPaymentAmount.checkYourAnswersLabel = Swm y taliad rheolaidd
 regularPaymentAmount.hint = Mae’n rhaid i’r swm fod mewn punnoedd a cheiniogau, fel 967 neu 967.82
 regularPaymentAmount.error.nonNumeric = Dim ond punnoedd a cheiniogau all fod yn y swm
 regularPaymentAmount.error.required = Nodwch swm y taliad rheolaidd
-regularPaymentAmount.error.invalidNumeric = Nodwch swm dilys
+regularPaymentAmount.error.invalidNumeric = Nodwch swm eich taliad rheolaidd gan ddefnyddio hyd at ddau le degol
 regularPaymentAmount.error.aboveMaximum = Mae’n rhaid i’r swm a nodir fod rhwng 1.00 a 20,000,000.00
 regularPaymentAmount.error.belowMinimum = Mae’n rhaid i’r swm a nodir fod rhwng 1.00 a 20,000,000.00
 regularPaymentAmount.change.hidden =  symiau’r taliadau rheolaidd
@@ -406,7 +406,7 @@ totalAmountDue.monthly.checkYourAnswersLabel = Swm y taliad misol
 totalAmountDue.final.checkYourAnswersLabel = Swm y taliad olaf
 totalAmountDue.error.nonNumeric = Dim ond punnoedd a cheiniogau all fod yn y swm
 totalAmountDue.error.required = Nodwch swm
-totalAmountDue.error.invalidNumeric = Nodwch swm dilys
+totalAmountDue.error.invalidNumeric = Nodwch swm cyfanswm sy’n ddyledus gan ddefnyddio hyd at ddau le degol
 totalAmountDue.error.aboveMaximum = Mae’n rhaid i’r swm a nodwyd fod yn llai na neu’n hafal i 99999999.99
 totalAmountDue.error.belowMinimum = Mae’n rhaid i’r swm a nodwyd fod yn fwy na neu’n hafal i 12.00
 
