@@ -22,7 +22,7 @@ lazy val microservice = (project in file("."))
     libraryDependencies ++= AppDependencies(),
     Test / parallelExecution := false,
     Test / fork := false,
-    Runtime / fork := true,
+    Compile / run / fork := true,
     retrieveManaged := true,
     routesGenerator := InjectedRoutesGenerator,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
@@ -42,9 +42,11 @@ lazy val microservice = (project in file("."))
       "controllers.routes._",
       "viewmodels.govuk.all._"
     ),
+    scalacOptions := scalacOptions.value.filterNot(_.startsWith("-Wunused")),
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",
+      "-Werror",                // or -Xfatal-warnings for Scala 2
       "-Wconf:src=html/.*:s",
       "-Wconf:src=routes/.*:s",
       "-Wconf:msg=Flag.*repeatedly:s"
