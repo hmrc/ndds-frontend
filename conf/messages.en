@@ -220,8 +220,8 @@ paymentReference.tc.title = What is your tax credits payment reference?
 paymentReference.tc.heading = What is your tax credits payment reference?
 paymentReference.vat.title = What is your VAT payment reference?
 paymentReference.vat.heading = What is your VAT payment reference?
-paymentReference.otherLiability.title = What is your Other liability payment reference?
-paymentReference.otherLiability.heading = What is your Other liability payment reference?
+paymentReference.otherLiability.title = What is your other liability payment reference?
+paymentReference.otherLiability.heading = What is your other liability payment reference?
 
 paymentReference.checkYourAnswersLabel = Payment reference
 paymentReference.error.invalid = Enter a valid payment reference
@@ -267,10 +267,10 @@ paymentReference.vat.invalidCharacters = Your VAT payment reference must only in
 paymentReference.vat.invalidFormat = Enter your VAT payment reference in the correct format
 paymentReference.vat.invalid = Enter a real VAT payment reference
 
-paymentReference.otherLiability.required = Enter your Other liability payment reference
-paymentReference.otherLiability.invalidCharacters = Your Other liability payment reference must only include letters a to z and numbers 0 to 9
-paymentReference.otherLiability.invalidFormat = Enter your Other liability payment reference in the correct format
-paymentReference.otherLiability.invalid = Enter a real Other liability payment reference
+paymentReference.otherLiability.required = Enter your other liability payment reference
+paymentReference.otherLiability.invalidCharacters = Your other liability payment reference must only include letters a to z and numbers 0 to 9
+paymentReference.otherLiability.invalidFormat = Enter your other liability payment reference in the correct format
+paymentReference.otherLiability.invalid = Enter a real other liability payment reference
 
 paymentReference.ct.hint = You can find this on your notice to deliver your tax return. It’s 17 characters long and starts with 10 numbers, then ‘A001’, another 2 numbers and ends with an A, such as 8337018376A00108A.
 paymentReference.mgd.hint = You can find this on your MGD Registration Certificate. It’s 14 characters long and begins with X, then an uppercase letter, then ‘M0000’ and then 7 numbers, such as XVM00005554321.
@@ -280,7 +280,7 @@ paymentReference.sa.hint = You can find this on letters from HMRC, it is 10 char
 paymentReference.sdlt.hint = You can find this on letter from HMRC. It’s 9 numbers, then M and ends in a capital letter, such as 123456789MC.
 paymentReference.tc.hint = You can find this on letters from HMRC. It’s 16 characters long.
 paymentReference.vat.hint = You can find this on letters from HMRC. It’s 9 characters long, such as 123A456B0.
-paymentReference.otherLiability.hint = You can find this on letters from HMRC.
+paymentReference.otherLiability.hint = You can find this on letters from HMRC. It can be 15 characters long and must start with an X, such as XEECL1234567890 or XAECL1234567890. It can also be 14 characters long and must start with an X, such as XAB12345678901.
 
 paymentAmount.title = How much do you want to pay, in pounds?
 paymentAmount.heading = How much do you want to pay, in pounds?
