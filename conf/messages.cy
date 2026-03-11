@@ -406,7 +406,7 @@ totalAmountDue.monthly.checkYourAnswersLabel = Swm y taliad misol
 totalAmountDue.final.checkYourAnswersLabel = Swm y taliad olaf
 totalAmountDue.error.nonNumeric = Dim ond punnoedd a cheiniogau all fod yn y swm
 totalAmountDue.error.required = Nodwch swm
-totalAmountDue.error.invalidNumeric = Nodwch swm cyfanswm sy’n ddyledus gan ddefnyddio hyd at ddau le degol
+totalAmountDue.error.invalidNumeric = Nodwch eich cyfanswm sy'n ddyledus gan ddefnyddio hyd at ddau le degol
 totalAmountDue.error.aboveMaximum = Mae’n rhaid i’r swm a nodwyd fod yn llai na neu’n hafal i 99999999.99
 totalAmountDue.error.belowMinimum = Mae’n rhaid i’r swm a nodwyd fod yn fwy na neu’n hafal i 12.00
 
