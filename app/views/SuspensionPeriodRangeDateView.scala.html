@@ -38,16 +38,15 @@
                 else "suspensionPeriodRangeDate.title.change"
             ) { pageTitleKey =>
 
-            @layout(
-                pageTitle = titleNoForm(messages(pageTitleKey)),
-                backLink  = Some(
-                    if (mode == NormalMode)
-                    routes.SuspendPaymentPlanController.onPageLoad().url
-                    else
-                    controllers.routes.PaymentPlanDetailsController.onPageLoad().url
-                )
-            ) {
-
+    @layout(
+        pageTitle = title(form, messages(pageTitleKey)),
+        backLink  = Some(
+            if (mode == NormalMode)
+              routes.SuspendPaymentPlanController.onPageLoad().url
+            else
+                controllers.routes.PaymentPlanDetailsController.onPageLoad().url
+        )
+    ) {
     @defining(formProvider.withMappedErrors(form.asInstanceOf[Form[SuspensionPeriodRange]])) { adjustedForm =>
 
         @formHelper(action = routes.SuspensionPeriodRangeDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
