@@ -150,16 +150,6 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
           )
 
       running(application) {
-        val boundForm = form.bind(
-          Map(
-            "value.day"   -> "",
-            "value.month" -> "abc",
-            "value.year"  -> "202888"
-          )
-        )
-
-        val view = application.injector.instanceOf[PlanEndDateView]
-
         val result = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST

@@ -32,7 +32,7 @@
     <logger name="play.core.netty.utils.ServerCookieDecoder" level="WARN"/>
     <logger name="org.asynchttpclient.netty.handler.HttpHandler" level="WARN"/>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>
