@@ -280,7 +280,7 @@ paymentReference.sa.hint = You can find this on letters from HMRC, it is 10 char
 paymentReference.sdlt.hint = You can find this on letter from HMRC. It’s 9 numbers, then M and ends in a capital letter, such as 123456789MC.
 paymentReference.tc.hint = You can find this on letters from HMRC. It’s 16 characters long.
 paymentReference.vat.hint = You can find this on letters from HMRC. It’s 9 characters long, such as 123A456B0.
-paymentReference.otherLiability.hint = You can find this on letters from HMRC. It can be 15 characters long and must start with an X, such as XEECL1234567890 or XAECL1234567890. It can also be 14 characters long and must start with an X, such as XAB12345678901.
+paymentReference.otherLiability.hint = You can find this on letters from HMRC. It can be 15 characters long and must start with an X, such as XEECL1234567890 or XAECL1234567890. It can also be 14 characters long, must start with an X and must not have M as the third character, such as XAB12345678901.
 
 paymentAmount.title = How much do you want to pay, in pounds?
 paymentAmount.heading = How much do you want to pay, in pounds?
