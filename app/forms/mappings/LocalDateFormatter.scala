@@ -20,8 +20,7 @@ import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
 
-import java.time.{LocalDate, Month}
-import scala.util.{Failure, Success, Try}
+import java.time.{LocalDate, Month, YearMonth}
 
 private[mappings] class LocalDateFormatter(
   invalidKey: String,
@@ -35,13 +34,19 @@ private[mappings] class LocalDateFormatter(
 
   protected val fieldKeys: List[String] = List("day", "month", "year")
 
-  private def toDate(key: String, day: Int, month: Int, year: Int): Either[Seq[FormError], LocalDate] =
-    Try(LocalDate.of(year, month, day)) match {
-      case Success(date) => Right(date)
-      case Failure(_)    =>
-        // Attach error to the field that is actually invalid, prefer month if non-numeric
-        Left(Seq(FormError(s"$key.month", invalidKey, args)))
+  def isValidDate(year: Int, month: Int, day: Int): Boolean = {
+    if (month < 1 || month > 12) return false
+    val maxDay = YearMonth.of(year, month).lengthOfMonth()
+    day >= 1 && day <= maxDay
+  }
+
+  private def toDate(key: String, day: Int, month: Int, year: Int): Either[Seq[FormError], LocalDate] = {
+    if (!isValidDate(year, month, day)) {
+      Left(Seq(FormError(key, invalidKey, args)))
+    } else {
+      Right(LocalDate.of(year, month, day))
     }
+  }
 
   protected def formatDate(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
 
@@ -75,7 +80,7 @@ private[mappings] class LocalDateFormatter(
       case 0 =>
         val cleanedData = fields.collect { case (k, Some(v)) => s"$key.$k" -> v }
         formatDate(key, cleanedData).left.map { errors =>
-          errors.map(e => e.copy(key = key))
+          errors
         }
 
       case 1 | 2 =>

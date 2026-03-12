@@ -35,20 +35,14 @@
 
         @mainErrorSummary(form)
 
-        @fieldSet(
-            legend = "addPaymentPlanEndDate.heading",
-            asHeading = true,
-            describedBy = form.error("value").map(_ => "value-error")
-        ) {
-            @paragraph("addPaymentPlanEndDate.p1")
-
-            @govukRadios(
-                RadiosViewModel.yesNo(
-                    field = form("value"),
-                    legend = LegendViewModel(messages(""))
-                ).copy(fieldset = None)
+        @govukRadios(
+            RadiosViewModel.yesNo(
+                field  = form("value"),
+                legend = LegendViewModel(messages("addPaymentPlanEndDate.heading")).asPageHeading()
             )
-        }
+            .withHint(Hint(content = Text(messages("addPaymentPlanEndDate.p1"))))
+            )
+
 
         @govukButton(
             ButtonViewModel(messages("site.continue"))

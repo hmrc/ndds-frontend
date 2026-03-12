@@ -94,7 +94,22 @@ class CustomDateFormatter(invalidKey: String,
     val cleanedData: Map[String, String] =
       fields.collect { case (k, Some(v)) => s"$key.$k" -> v }
 
-    formatDate(key, cleanedData).left.map { errors =>
+    val normalisedData: Map[String, String] =
+      cleanedData.map {
+        case (k, v) if k.endsWith(".month") =>
+          val normalisedMonth =
+            if (v.matches("""\d{1,2}""")) {
+              v
+            } else {
+              parseMonthName(v).getOrElse(v)
+            }
+
+          k -> normalisedMonth
+
+        case other => other
+      }
+
+    formatDate(key, normalisedData).left.map { errors =>
       errors.map(e => e.copy(messages = Seq(invalidKey), args = args))
     }
   }
@@ -109,6 +124,38 @@ class CustomDateFormatter(invalidKey: String,
       case _ =>
         None
     }
+  }
+
+  private def parseMonthName(input: String): Option[String] = {
+    val normalised = input.trim.toLowerCase
+
+    val months = Map(
+      "january"   -> 1,
+      "jan"       -> 1,
+      "february"  -> 2,
+      "feb"       -> 2,
+      "march"     -> 3,
+      "mar"       -> 3,
+      "april"     -> 4,
+      "apr"       -> 4,
+      "may"       -> 5,
+      "june"      -> 6,
+      "jun"       -> 6,
+      "july"      -> 7,
+      "jul"       -> 7,
+      "august"    -> 8,
+      "aug"       -> 8,
+      "september" -> 9,
+      "sep"       -> 9,
+      "october"   -> 10,
+      "oct"       -> 10,
+      "november"  -> 11,
+      "nov"       -> 11,
+      "december"  -> 12,
+      "dec"       -> 12
+    )
+
+    months.get(normalised).map(_.toString)
   }
 
 }

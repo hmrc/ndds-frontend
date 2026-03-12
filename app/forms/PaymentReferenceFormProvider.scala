@@ -23,53 +23,60 @@ import play.api.data.Form
 
 class PaymentReferenceFormProvider @Inject() extends Mappings {
 
-  private def requiredKey(source: Option[DirectDebitSource]) =
-    source
-      .map(s => s"paymentReference.error.required.${s.toString.toLowerCase}")
-      .getOrElse("paymentReference.error.required")
+  private val validCharactersRegex = "^[A-Za-z0-9]+$".r
 
-  private def lengthKey(source: Option[DirectDebitSource]) =
-    source
-      .map(s => s"paymentReference.error.length.${s.toString.toLowerCase}")
-      .getOrElse("paymentReference.error.invalid")
+  private def key(source: DirectDebitSource, suffix: String) =
+    s"paymentReference.${source.toString}.$suffix"
 
-  private def invalidKey(source: Option[DirectDebitSource]) =
-    source
-      .map(s => s"paymentReference.error.invalid.${s.toString.toLowerCase}")
-      .getOrElse("paymentReference.error.invalid")
+  private val formatRegexMap: Map[DirectDebitSource, String] = Map(
+    DirectDebitSource.CT   -> "^\\d{10}A001\\d{2}A$",
+    DirectDebitSource.MGD  -> "^X[A-Z]M0000\\d{7}$",
+    DirectDebitSource.NIC  -> "^60\\d{15}[0-9X]$",
+    DirectDebitSource.PAYE -> "^[A-Z0-9]{13,14}$",
+    DirectDebitSource.SA   -> "^\\d{10}K$",
+    DirectDebitSource.SDLT -> "^\\d{9}M[A-Z]$",
+    DirectDebitSource.TC   -> "^[A-Z]{2}\\d{12}N[A-Z]$",
+    DirectDebitSource.VAT  -> "^\\d{9,}$",
+    DirectDebitSource.OL   -> "^(X[A-Z][A-Z0-9]\\d{11}|X[A-Z]ECL\\d{10}|X[A-Z]\\d{13})$"
+  )
 
-  private def expectedLength(source: DirectDebitSource): String => Boolean = {
-    case ref if source == DirectDebitSource.CT   => ref.length == 17
-    case ref if source == DirectDebitSource.MGD  => ref.length == 14
-    case ref if source == DirectDebitSource.NIC  => ref.length == 18
-    case ref if source == DirectDebitSource.PAYE => ref.length == 13 || ref.length == 14
-    case ref if source == DirectDebitSource.SA   => ref.length == 11
-    case ref if source == DirectDebitSource.SDLT => ref.length == 11
-    case ref if source == DirectDebitSource.TC   => ref.length == 16
-    case ref if source == DirectDebitSource.VAT  => ref.length == 9
-    case _                                       => true
-  }
+  private def formatCheck(source: DirectDebitSource, ref: String): Boolean =
+    source match {
+      case DirectDebitSource.PAYE => "^\\d{3}P[A-Z]\\d{7}(\\d|X)?$".r.matches(ref)
+
+      case DirectDebitSource.OL =>
+        val matches = formatRegexMap(DirectDebitSource.OL).r.matches(ref)
+        matches && !(ref.length == 14 && ref.charAt(2) == 'M')
+
+      case _ =>
+        formatRegexMap.get(source).forall(regex => ref.matches(regex))
+    }
 
   def apply(
     source: Option[DirectDebitSource],
     validator: Option[String => Boolean]
-  ): Form[String] =
+  ): Form[String] = {
+
+    val src = source.getOrElse(
+      throw new IllegalStateException("DirectDebitSource must be defined")
+    )
+
     Form(
-      "value" -> text(requiredKey(source))
-        .transform[String](_.trim, identity)
+      "value" -> text(key(src, "required"))
+        .transform[String](_.trim.toUpperCase, identity)
+        .verifying(key(src, "required"), _.nonEmpty)
         .verifying(
-          lengthKey(source),
-          ref => source.forall(expectedLength(_)(ref))
+          key(src, "invalidCharacters"),
+          value => value.isEmpty || validCharactersRegex.matches(value)
         )
         .verifying(
-          invalidKey(source),
-          ref =>
-            source match {
-              case Some(s) if !expectedLength(s)(ref) =>
-                true
-              case _ =>
-                validator.forall(_(ref))
-            }
+          key(src, "invalidFormat"),
+          value => value.isEmpty || !validCharactersRegex.matches(value) || formatCheck(src, value)
+        )
+        .verifying(
+          key(src, "invalid"),
+          value => value.isEmpty || !formatCheck(src, value) || validator.forall(_(value))
         )
     )
+  }
 }

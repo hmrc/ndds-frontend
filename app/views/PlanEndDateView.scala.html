@@ -27,18 +27,15 @@
 @(form: Form[_], mode: Mode, call: Call, planStartDate: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = title(form, messages("planEndDate.title")), backLink = Some(call.url)) {
-
     @formHelper(action = routes.PlanEndDateController.onSubmit(mode), Symbol("autoComplete") -> "off") {
-
         @mainErrorSummary(
-        form.copy(errors = form.errors.filter(_.key == "value")),
-        errorLinkOverrides = Map(
-        "value" ->
-        form.errors
-        .find(e => Seq("value.day","value.month","value.year").contains(e.key))
-        .map(_.key)
-        .getOrElse("value.day")
-        )
+            form.copy(errors = form.errors.filter(_.key == "value")),
+            errorLinkOverrides = Map("value" ->
+                form.errors
+                    .find(_.key.startsWith("value."))
+                    .map(_.key)
+                    .getOrElse("value.day")
+            )
         )
 
         @govukDateInput(

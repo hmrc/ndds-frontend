@@ -34,7 +34,9 @@ class PlanEndDateFormProvider @Inject() extends Mappings {
         allRequiredKey = "planEndDate.error.required.all",
         twoRequiredKey = "planEndDate.error.required.two",
         requiredKey    = "planEndDate.error.required"
-      ).verifying(dateAfter(startDate, "planEndDate.error.beforeOrEqualStartDate"))
+      )
+        .verifying(dateAfter(startDate, "planEndDate.error.beforeOrEqualStartDate"))
+        .verifying(maxYearConstraint("planEndDate.error.maxYear"))
     )
 
   private def dateAfter(start: LocalDate, errorKey: String): Constraint[LocalDate] = {
@@ -42,6 +44,21 @@ class PlanEndDateFormProvider @Inject() extends Mappings {
     Constraint { endDate =>
       if (!endDate.isAfter(start.minusDays(1))) {
         Invalid(ValidationError(errorKey, start.format(formatter)))
+      } else {
+        Valid
+      }
+    }
+  }
+
+  private def maxYearConstraint(errorKey: String)(implicit messages: Messages): Constraint[LocalDate] = {
+    val maxDate = LocalDate.now().plusYears(100)
+    val formatter = DateTimeFormatter
+      .ofPattern("d MMMM yyyy")
+      .withLocale(messages.lang.locale)
+
+    Constraint { endDate =>
+      if (endDate.isAfter(maxDate)) {
+        Invalid(errorKey, maxDate.format(formatter))
       } else {
         Valid
       }

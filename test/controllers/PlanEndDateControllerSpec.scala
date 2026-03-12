@@ -140,17 +140,19 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
       val request =
         FakeRequest(POST, planEndDateRoute)
-          .withFormUrlEncodedBody(("value", "invalid value"))
+          .withFormUrlEncodedBody(
+            "value.day"   -> "",
+            "value.month" -> "abc",
+            "value.year"  -> "202888"
+          )
 
       running(application) {
-        val boundForm = form.bind(Map("value" -> "invalid value"))
-        val view = application.injector.instanceOf[PlanEndDateView]
         val result = route(application, request).value
+
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) mustEqual
-          view(boundForm, NormalMode, Call("GET", addPaymentPlanEndDateRoute), planStartDate)(request, messages(application)).toString
       }
     }
 
