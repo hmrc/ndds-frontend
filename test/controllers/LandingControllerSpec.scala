@@ -25,21 +25,11 @@ import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.NationalDirectDebitService
-import splitter.connectors.AllowListConnector
-import splitter.controllers.{FakeIdentityIdentifierAction, IdentityIdentifierAction}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 class LandingControllerSpec extends SpecBase {
-
-  class FakeAllowListConnector(result: Exception | Boolean) extends AllowListConnector:
-    override def check(userId: String)(using HeaderCarrier): Future[Boolean] =
-      result match
-        case res: Boolean   => Future.successful(res)
-        case res: Exception => Future.failed(res)
-
-  private def legacyUrl = "/national-direct-debits"
 
   "Landing Controller" - {
     val mockService = mock[NationalDirectDebitService]
@@ -47,9 +37,7 @@ class LandingControllerSpec extends SpecBase {
     "must return REDIRECT and the correct view for a GET with no existing debits" in {
       val application = applicationBuilder(userAnswers = None)
         .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService),
-          bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-          bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+          bind[NationalDirectDebitService].toInstance(mockService)
         )
         .build()
 
@@ -68,9 +56,7 @@ class LandingControllerSpec extends SpecBase {
     "must return REDIRECT and the correct view for a GET with existing debits" in {
       val application = applicationBuilder(userAnswers = None)
         .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService),
-          bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-          bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+          bind[NationalDirectDebitService].toInstance(mockService)
         )
         .build()
 
@@ -90,9 +76,7 @@ class LandingControllerSpec extends SpecBase {
     "must return REDIRECT and the correct view for an unauthenticated user" in {
       val application = applicationBuilder(userAnswers = None)
         .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService),
-          bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-          bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+          bind[NationalDirectDebitService].toInstance(mockService)
         )
         .build()
 
@@ -102,24 +86,6 @@ class LandingControllerSpec extends SpecBase {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustBe controllers.routes.YourDirectDebitInstructionsController.onPageLoad().url
-      }
-    }
-
-    "must return REDIRECT to legacy url when check is false" in {
-      val application = applicationBuilder(userAnswers = None)
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService),
-          bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-          bind[AllowListConnector].toInstance(FakeAllowListConnector(false))
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, routes.LandingController.onPageLoad().url)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustBe legacyUrl
       }
     }
 

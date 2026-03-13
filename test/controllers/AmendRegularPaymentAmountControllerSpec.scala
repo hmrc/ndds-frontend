@@ -40,7 +40,7 @@ class AmendRegularPaymentAmountControllerSpec extends SpecBase with MockitoSugar
 
   private val formProvider = new RegularPaymentAmountFormProvider()
   private val form = formProvider()
-  private val route = "/direct-debits/amend-plan-how-much-do-you-want-to-pay"
+  private val route = "/directdebits/amend-plan-how-much-do-you-want-to-pay"
   private val validAnswer = BigDecimal(150.73).setScale(2, RoundingMode.HALF_UP)
 
   private def buildApplication(mockService: NationalDirectDebitService) =

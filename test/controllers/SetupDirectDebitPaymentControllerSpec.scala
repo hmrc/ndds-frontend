@@ -27,8 +27,6 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.{LockService, NationalDirectDebitService}
-import splitter.connectors.{AllowListConnector, FakeAllowListConnector}
-import splitter.controllers.{FakeIdentityIdentifierAction, IdentityIdentifierAction}
 import views.html.SetupDirectDebitPaymentView
 
 import java.time.Instant
@@ -61,9 +59,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockRDSDatacacheService),
-          bind[LockService].toInstance(mockService),
-          bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-          bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+          bind[LockService].toInstance(mockService)
         )
         .build()
 
@@ -92,9 +88,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
           bind[NationalDirectDebitService].toInstance(mockRDSDatacacheService),
-          bind[LockService].toInstance(mockService),
-          bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-          bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+          bind[LockService].toInstance(mockService)
         )
         .build()
 
@@ -123,9 +117,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     "must return See Other and redirect for a GET if the user is locked but not verified" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
-          bind[LockService].toInstance(mockService),
-          bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-          bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+          bind[LockService].toInstance(mockService)
         )
         .build()
 
@@ -146,9 +138,7 @@ class SetupDirectDebitPaymentControllerSpec extends SpecBase {
     "must return See Other and redirect for a GET if the user is locked and verified" in {
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
         .overrides(
-          bind[LockService].toInstance(mockService),
-          bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-          bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+          bind[LockService].toInstance(mockService)
         )
         .build()
 

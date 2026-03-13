@@ -1164,7 +1164,6 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           result.potentialNextPaymentDate.value.isAfter(today) mustBe true
           result.potentialNextPaymentDate.value.getDayOfWeek mustBe startDate.getDayOfWeek
           result.nextPaymentDateValid mustBe true
-
         }
 
         "when planStartDate is a past date but potentialNextPaymentDate is within 3 working days" in {

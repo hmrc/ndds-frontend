@@ -39,7 +39,7 @@ class AmendPaymentAmountControllerSpec extends SpecBase with MockitoSugar {
 
   private val formProvider = new AmendPaymentAmountFormProvider()
   private val form = formProvider()
-  private val onwardRoute = Call("GET", "/direct-debits/check-amendment-details")
+  private val onwardRoute = Call("GET", "/directdebits/check-amendment-details")
   private val validAnswer = BigDecimal(1.00).setScale(2, RoundingMode.HALF_UP)
 
   "AmendPaymentAmountController" - {
