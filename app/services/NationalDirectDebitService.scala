@@ -74,35 +74,28 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
 
   def getFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[EarliestPaymentDate] = {
     val currentDate = LocalDate.now().toString
+    val paymentPlanType = userAnswers
+      .get(PaymentPlanTypePage)
+      .orElse(userAnswers.get(ManagePaymentPlanTypePage))
+      .getOrElse("singlePaymentPlan")
+
+    val directDebitSource = userAnswers
+      .get(DirectDebitSourcePage)
+      .orElse(userAnswers.get(ManageDirectDebitSourcePage))
+      .getOrElse(throw new RuntimeException("Missing directDebitSource"))
+
     for {
-      paymentPlanType <- userAnswers
-                           .get(PaymentPlanTypePage)
-                           .fold(
-                             Future.successful(
-                               userAnswers
-                                 .get(ManagePaymentPlanTypePage)
-                                 .getOrElse("singlePaymentPlan")
-                             )
-                           )(Future.successful)
-      directDebitSource <- userAnswers
-                             .get(DirectDebitSourcePage)
-                             .fold(
-                               Future.successful(
-                                 userAnswers
-                                   .get(ManageDirectDebitSourcePage)
-                                   .getOrElse(throw new RuntimeException("Missing directDebitSource"))
-                               )
-                             )(Future.successful)
       result <-
         if (
           (directDebitSource == MGD || directDebitSource == "mgd") && (paymentPlanType == VariablePaymentPlan || paymentPlanType == "variablePaymentPlan")
         ) {
           nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.TEN_WORKING_DAYS))
         } else {
+          val hasExistingDDI = userAnswers.get(ExistingDirectDebitIdentifierQuery).isDefined
+          val isAmendPlanFlow = userAnswers.get(AmendPlanStartDatePage).isDefined
           getAuddiStatus(userAnswers, userId).flatMap { auddisStatus =>
             val offsetWorkingDays = calculateWorkingDays(auddisStatus)
-            val existingDirectDebitIdentifierQuery = userAnswers.get(ExistingDirectDebitIdentifierQuery)
-            if (existingDirectDebitIdentifierQuery.isDefined || userAnswers.get(AmendPlanStartDatePage).isDefined) { // add payment plan or Amend flow
+            if (hasExistingDDI || isAmendPlanFlow) { // add payment plan or Amend flow
               calculateEarliestDate(userAnswers, currentDate, offsetWorkingDays, userId)
             } else { // new direct debit setup flow
               nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, offsetWorkingDays + config.TWO_WORKING_DAYS))

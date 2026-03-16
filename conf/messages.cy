@@ -574,7 +574,7 @@ paymentPlanCancelled.p1 = Mae’r cynllun talu hwn bellach wedi’i ganslo. Ni f
 paymentPlanCancelled.h2 = Eich cynllun talu sydd wedi’i ganslo
 paymentPlanCancelled.paymentReference = Cyfeirnod talu: {0}
 paymentPlanCancelled.pleaseNote = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
-paymentPlanCancelled.link = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol.
+paymentPlanCancelled.link = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol
 
 suspendPaymentPlan.title = Gohirio’r cynllun talu hwn
 suspendPaymentPlan.heading = Gohirio’r cynllun talu hwn

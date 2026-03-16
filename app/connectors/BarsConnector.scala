@@ -62,7 +62,7 @@ case class BarsConnector @Inject() (
         case Right(verificationData) => Future.successful(verificationData)
 
         case Left(errorResponse) =>
-          logger.warn(s"BARS verification failed with UpstreamErrorResponse: $errorResponse")
+          logger.warn(s"BARS verification failed with UpstreamErrorResponse with error code: ${errorResponse.statusCode}")
 
           // Safely extract JSON from message string
           val errorCode: Option[String] = {
