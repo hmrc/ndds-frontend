@@ -574,7 +574,7 @@ paymentPlanCancelled.p1 = This payment plan has now been cancelled. No further p
 paymentPlanCancelled.h2 = Your cancelled payment plan
 paymentPlanCancelled.paymentReference = Payment reference: {0}
 paymentPlanCancelled.pleaseNote = You can print this page for your records using the print function on your browser.
-paymentPlanCancelled.link = Return to Direct Debit Instructions.
+paymentPlanCancelled.link = Return to Direct Debit Instructions
 
 suspendPaymentPlan.title = Suspending this payment plan
 suspendPaymentPlan.heading = Suspending this payment plan
