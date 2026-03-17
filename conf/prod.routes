@@ -1,3 +1,4 @@
 # Add all the application routes to the app.routes file
-->         /directdebits                       app.Routes
-->         /                                   health.Routes
+->         /direct-debits                       app.Routes
+->         /directdebits                        splitter.Routes
+->         /                                    health.Routes
