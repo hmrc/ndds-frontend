@@ -32,16 +32,17 @@ class SplitterController @Inject() (identify: IdentityIdentifierAction,
     extends FrontendBaseController,
       Logging:
 
-  private val legacyStartUrl = configuration.get[String]("microservice.services.ndds-legacy.path")
+//  private val legacyStartUrl = configuration.get[String]("microservice.services.ndds-legacy.path")
   private lazy val nddsFrontendStartUrl = controllers.routes.LandingController.onPageLoad()
 
   def redirect(path: String): Action[AnyContent] = identify.async:
     implicit req =>
       connector
         .check(req.userId)
-        .map:
-          case true  => SeeOther(nddsFrontendStartUrl.url)
-          case false => SeeOther(legacyStartUrl)
-        .recover: e =>
-          logger.error("Error when checking for user id ", e)
-          SeeOther(legacyStartUrl)
+        .map { _ =>
+          SeeOther(nddsFrontendStartUrl.url)
+        }
+        .recover { e =>
+          logger.error("Error when checking user ID", e)
+          SeeOther(nddsFrontendStartUrl.url)
+        }

@@ -40,13 +40,12 @@ class YourDirectDebitInstructionsController @Inject() (
   appConfig: FrontendAppConfig,
   nddService: NationalDirectDebitService,
   paginationService: PaginationService,
-  sessionRepository: SessionRepository,
-  allowListFilter: AllowListFilterAction
+  sessionRepository: SessionRepository
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen allowListFilter andThen getData).async { implicit request =>
+  def onPageLoad: Action[AnyContent] = (identify andThen getData).async { implicit request =>
     val userAnswers = request.userAnswers.getOrElse(UserAnswers(request.userId))
     val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
 

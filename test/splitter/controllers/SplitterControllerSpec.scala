@@ -42,12 +42,13 @@ class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
 
   "redirect on GET" - {
     "for GET request to /directdebits" - {
-      "the user is redirect to the legacy service when the check is false" in {
+      "the user is redirect to the new service when the check is false" in {
         running(withConnector(false)) { app =>
           val result = route(app, FakeRequest("GET", "/directdebits")).value
 
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result).value mustBe "/national-direct-debits"
+          redirectLocation(result).value mustBe nddsFrontendUrl
+//          redirectLocation(result).value mustBe "/national-direct-debits"
         }
       }
 
@@ -62,12 +63,13 @@ class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
     }
 
     "for GET requests that are prefixed with /directdebits and have additional path components" - {
-      "the user is redirect to the legacy service when the check is false" in {
+      "the user is redirect to the new service when the check is false" in {
         running(withConnector(false)) { app =>
           val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
 
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result).value mustBe "/national-direct-debits"
+          redirectLocation(result).value mustBe nddsFrontendUrl
+          //          redirectLocation(result).value mustBe "/national-direct-debits"
         }
       }
 
@@ -82,23 +84,25 @@ class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
     }
 
     "for GET requests that are prefixed with /directdebits when there is an exception from the connector" - {
-      "the user is redirect to the legacy service when the check is false" in {
+      "the user is redirect to the new service when the check is false" in {
         running(withConnector(Exception("Some downstream exception"))) { app =>
           val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
 
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result).value mustBe "/national-direct-debits"
+          redirectLocation(result).value mustBe nddsFrontendUrl
+//          redirectLocation(result).value mustBe "/national-direct-debits"
         }
       }
     }
 
     "for GET requests that are prefixed with /directdebits when the feature flag is disabled" - {
-      "the user is redirect to the legacy service when the check is false" in {
+      "the user is redirect to the new service when the check is false" in {
         running(withConnector(Exception("Some downstream exception")) andThen allowListDisabled) { app =>
           val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
 
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result).value mustBe "/national-direct-debits"
+          redirectLocation(result).value mustBe nddsFrontendUrl
+//          redirectLocation(result).value mustBe "/national-direct-debits"
         }
       }
     }
