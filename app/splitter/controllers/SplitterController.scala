@@ -30,7 +30,6 @@ class SplitterController @Inject() (
     extends FrontendBaseController,
       Logging:
 
-//  private val legacyStartUrl = configuration.get[String]("microservice.services.ndds-legacy.path")
   private lazy val nddsFrontendStartUrl = controllers.routes.LandingController.onPageLoad()
 
   def redirect(path: String): Action[AnyContent] = Action:
