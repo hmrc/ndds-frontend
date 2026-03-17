@@ -88,6 +88,6 @@ class LandingControllerSpec extends SpecBase {
         redirectLocation(result).value mustBe controllers.routes.YourDirectDebitInstructionsController.onPageLoad().url
       }
     }
-
   }
+
 }
