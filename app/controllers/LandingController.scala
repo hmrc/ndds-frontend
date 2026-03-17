@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AllowListFilterAction, IdentifierAction}
+import controllers.actions.IdentifierAction
 import play.api.Logging
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -28,14 +28,13 @@ import scala.concurrent.ExecutionContext
 
 class LandingController @Inject() (nddService: NationalDirectDebitService,
                                    val controllerComponents: MessagesControllerComponents,
-                                   identify: IdentifierAction,
-                                   allowListFilter: AllowListFilterAction
+                                   identify: IdentifierAction
                                   )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
     with Logging {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen allowListFilter).async { implicit request =>
+  def onPageLoad(): Action[AnyContent] = identify.async { implicit request =>
     nddService.retrieveAllDirectDebits(request.userId).map { rdsResponse =>
       if (rdsResponse.directDebitCount == 0) {
         Redirect(routes.SetupDirectDebitPaymentController.onPageLoad())

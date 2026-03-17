@@ -30,8 +30,6 @@ import play.api.test.Helpers.*
 import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlansCountQuery}
 import repositories.SessionRepository
 import services.{NationalDirectDebitService, PaginationResult, PaginationService}
-import splitter.connectors.{AllowListConnector, FakeAllowListConnector}
-import splitter.controllers.{FakeIdentityIdentifierAction, IdentityIdentifierAction}
 import viewmodels.govuk.PaginationFluency.*
 
 import java.time.LocalDateTime
@@ -58,9 +56,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers w
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
             bind[PaginationService].toInstance(mockPaginationService),
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-            bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 
@@ -90,9 +86,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers w
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
             bind[PaginationService].toInstance(mockPaginationService),
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-            bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 
@@ -122,9 +116,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers w
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
             bind[PaginationService].toInstance(mockPaginationService),
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-            bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 
@@ -154,9 +146,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers w
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
             bind[PaginationService].toInstance(mockPaginationService),
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-            bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 
@@ -210,9 +200,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers w
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
             bind[PaginationService].toInstance(mockPaginationService),
-            bind[SessionRepository].toInstance(mockSessionRepository),
-            bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-            bind[AllowListConnector].toInstance(FakeAllowListConnector(true))
+            bind[SessionRepository].toInstance(mockSessionRepository)
           )
           .build()
 
