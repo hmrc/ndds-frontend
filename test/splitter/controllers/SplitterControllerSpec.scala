@@ -19,92 +19,45 @@ package splitter.controllers
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.http.Status
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import splitter.connectors.{AllowListConnector, FakeAllowListConnector}
 
 class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
 
-  def withConnector(connectorResponse: Boolean | Exception)(builder: GuiceApplicationBuilder): GuiceApplicationBuilder =
-    builder
-      .overrides(
-        bind[IdentityIdentifierAction].to[FakeIdentityIdentifierAction],
-        bind[AllowListConnector].toInstance(FakeAllowListConnector(connectorResponse))
-      )
+  "SplitterController" - {
 
-  def allowListDisabled(builder: GuiceApplicationBuilder): GuiceApplicationBuilder =
-    builder.configure(Map("features.allowListChecksEnabled" -> "false"))
+    def nddsFrontendUrl =
+      controllers.routes.LandingController.onPageLoad().url
 
-  private def nddsFrontendUrl = controllers.routes.LandingController.onPageLoad().url
+    "redirect on GET" - {
 
-  "redirect on GET" - {
-    "for GET request to /directdebits" - {
-      "the user is redirect to the new service when the check is false" in {
-        running(withConnector(false)) { app =>
-          val result = route(app, FakeRequest("GET", "/directdebits")).value
+      "redirects /directdebits to the new service" in {
+        val application =
+          new GuiceApplicationBuilder()
+            .build()
 
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result).value mustBe nddsFrontendUrl
-//          redirectLocation(result).value mustBe "/national-direct-debits"
-        }
-      }
+        running(application) {
+          val result = route(application, FakeRequest(GET, "/directdebits")).value
 
-      "the user is redirected to start page of the replatform service when the check is true" in {
-        running(withConnector(true)) { app =>
-          val result = route(app, FakeRequest("GET", "/directdebits")).value
-
-          status(result) mustBe Status.SEE_OTHER
+          status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe nddsFrontendUrl
         }
       }
-    }
 
-    "for GET requests that are prefixed with /directdebits and have additional path components" - {
-      "the user is redirect to the new service when the check is false" in {
-        running(withConnector(false)) { app =>
-          val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
+      "redirects /directdebits/* to the new service" in {
+        val application =
+          new GuiceApplicationBuilder()
+            .build()
 
-          status(result) mustBe Status.SEE_OTHER
+        running(application) {
+          val result = route(application, FakeRequest(GET, "/directdebits/foo?bar=1")).value
+
+          status(result) mustBe SEE_OTHER
           redirectLocation(result).value mustBe nddsFrontendUrl
-          //          redirectLocation(result).value mustBe "/national-direct-debits"
-        }
-      }
-
-      "the user is redirected to start page of the replatform service when the check is true" in {
-        running(withConnector(true)) { app =>
-          val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
-
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result).value mustBe nddsFrontendUrl
-        }
-      }
-    }
-
-    "for GET requests that are prefixed with /directdebits when there is an exception from the connector" - {
-      "the user is redirect to the new service when the check is false" in {
-        running(withConnector(Exception("Some downstream exception"))) { app =>
-          val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
-
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result).value mustBe nddsFrontendUrl
-//          redirectLocation(result).value mustBe "/national-direct-debits"
-        }
-      }
-    }
-
-    "for GET requests that are prefixed with /directdebits when the feature flag is disabled" - {
-      "the user is redirect to the new service when the check is false" in {
-        running(withConnector(Exception("Some downstream exception")) andThen allowListDisabled) { app =>
-          val result = route(app, FakeRequest("GET", "/directdebits/foo?bar=1")).value
-
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result).value mustBe nddsFrontendUrl
-//          redirectLocation(result).value mustBe "/national-direct-debits"
         }
       }
     }
   }
+
 }
