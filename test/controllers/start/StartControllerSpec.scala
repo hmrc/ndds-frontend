@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.start
 
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec

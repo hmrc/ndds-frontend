@@ -1,0 +1,5 @@
+# Routes for splitter functionality
+
+GET   /               controllers.start.StartController.redirect(path: String = "")
+GET   /*path          controllers.start.StartController.redirect(path)
+

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.start
 
 import play.api.mvc.*
 import play.api.{Configuration, Logging}
