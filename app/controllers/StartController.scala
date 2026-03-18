@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package splitter.controllers
+package controllers
 
 import play.api.mvc.*
 import play.api.{Configuration, Logging}
@@ -23,7 +23,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class SplitterController @Inject() (
+class StartController @Inject() (
   configuration: Configuration,
   val controllerComponents: MessagesControllerComponents
 )(using ExecutionContext)

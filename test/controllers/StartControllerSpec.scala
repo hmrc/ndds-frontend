@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package splitter.controllers
+package controllers
 
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
@@ -23,9 +23,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 
-class SplitterControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
+class StartControllerSpec extends AnyFreeSpec, Matchers, OptionValues {
 
-  "SplitterController" - {
+  "StartController" - {
 
     def nddsFrontendUrl =
       controllers.routes.LandingController.onPageLoad().url
