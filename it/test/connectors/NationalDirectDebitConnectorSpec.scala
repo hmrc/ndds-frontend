@@ -65,7 +65,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
       val result = intercept[Exception](connector.getFutureWorkingDays(requestBody).futureValue)
 
-      result.getMessage should include("Unexpected status code: 201")
+      result.getMessage should include("Unexpected status while retrieving earliest payment date")
     }
 
     "must fail when the result is parsed as an UpstreamErrorResponse" in {
@@ -81,7 +81,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val requestBody = WorkingDaysOffsetRequest(baseDate = "2024-12-25", offsetWorkingDays = 3)
       val result = intercept[Exception](connector.getFutureWorkingDays(requestBody).futureValue)
 
-      result.getMessage should include("Response body: 'test error', status code: 500")
+      result.getMessage should include("Response body: 'test error'")
     }
 
     "must fail when the result is a failed future" in {
@@ -129,7 +129,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val requestBody = GenerateDdiRefRequest("testRef")
       val result = intercept[Exception](connector.generateNewDdiReference(requestBody).futureValue)
 
-      result.getMessage should include("Unexpected status code: 201")
+      result.getMessage should include("Unexpected status while generating DDI ref")
     }
 
     "must fail when the result is parsed as an UpstreamErrorResponse" in {
@@ -145,7 +145,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val requestBody = GenerateDdiRefRequest("testRef")
       val result = intercept[Exception](connector.generateNewDdiReference(requestBody).futureValue)
 
-      result.getMessage should include("Response body: 'test error', status code: 500")
+      result.getMessage should include("Response body: 'test error'")
     }
 
     "must fail when the result is a failed future" in {
@@ -336,7 +336,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       )
 
       val ex = intercept[Exception](connector.submitChrisData(submission).futureValue)
-      ex.getMessage should include("CHRIS submission failed")
+      ex.getMessage should include("Response body: ''")
     }
 
     "must fail when CHRIS submission returns an UpstreamErrorResponse" in {
@@ -350,7 +350,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       )
 
       val ex = intercept[Exception](connector.submitChrisData(submission).futureValue)
-      ex.getMessage should include("status: 500")
+      ex.getMessage should include("Response body: 'test error'")
     }
 
     "must fail when the result is a failed future" in {

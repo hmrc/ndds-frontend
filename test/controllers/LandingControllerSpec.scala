@@ -88,22 +88,6 @@ class LandingControllerSpec extends SpecBase {
         redirectLocation(result).value mustBe controllers.routes.YourDirectDebitInstructionsController.onPageLoad().url
       }
     }
-
-    "must return REDIRECT to legacy url when check is false" in {
-      val application = applicationBuilder(userAnswers = None)
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockService)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(GET, routes.LandingController.onPageLoad().url)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustBe controllers.routes.YourDirectDebitInstructionsController.onPageLoad().url
-      }
-    }
-
   }
+
 }

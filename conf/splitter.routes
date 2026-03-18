@@ -1,6 +1,0 @@
-# Routes for splitter functionality
-
-GET   /               splitter.controllers.SplitterController.redirect(path: String = "")
-GET   /*path          splitter.controllers.SplitterController.redirect(path)
-
-
