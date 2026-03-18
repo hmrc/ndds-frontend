@@ -54,7 +54,7 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
           Future.fromTry(Try(response.json.as[EarliestPaymentDate]))
         case Left(upstream) => Future.failed(upstream)
         case Right(response) =>
-          Future.failed(UpstreamErrorResponse("Unexpected while retrieving earliest payment date status", response.status))
+          Future.failed(UpstreamErrorResponse("Unexpected status while retrieving earliest payment date", response.status))
       }
   }
 
@@ -67,7 +67,7 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
         case Right(response) if response.status == OK => Future.successful(true)
         case Left(upstream)                           => Future.failed(upstream)
         case Right(response) =>
-          Future.failed(UpstreamErrorResponse("Unexpected ChRIS response status", response.status))
+          Future.failed(UpstreamErrorResponse("Unexpected status ChRIS response", response.status))
       }
   }
 
