@@ -29,7 +29,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 @Singleton
 class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: HttpClientV2)(implicit ec: ExecutionContext)
@@ -51,13 +51,10 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
         case Right(response) if response.status == OK =>
-          Try(response.json.as[EarliestPaymentDate]) match {
-            case Success(data)      => Future.successful(data)
-            case Failure(exception) => Future.failed(new Exception(s"Invalid JSON format $exception"))
-          }
-        case Left(errorResponse) =>
-          Future.failed(new Exception(s"Unexpected response: ${errorResponse.message}, status code: ${errorResponse.statusCode}"))
-        case Right(response) => Future.failed(new Exception(s"Unexpected status code: ${response.status}"))
+          Future.fromTry(Try(response.json.as[EarliestPaymentDate]))
+        case Left(upstream) => Future.failed(upstream)
+        case Right(response) =>
+          Future.failed(UpstreamErrorResponse("Unexpected while retrieving earliest payment date status", response.status))
       }
   }
 
@@ -67,13 +64,10 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
       .withBody(Json.toJson(submission))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
-        case Right(response) if response.status == OK =>
-          Future.successful(true)
-        case Left(errorResponse) =>
-          Future.failed(new Exception(s"CHRIS submission failed with status: ${errorResponse.statusCode}"))
+        case Right(response) if response.status == OK => Future.successful(true)
+        case Left(upstream)                           => Future.failed(upstream)
         case Right(response) =>
-          logger.error(s"Unexpected CHRIS response error status: ${response.status}")
-          Future.failed(new Exception(s"Unexpected status: ${response.status}"))
+          Future.failed(UpstreamErrorResponse("Unexpected ChRIS response status", response.status))
       }
   }
 
@@ -85,11 +79,9 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
       .flatMap {
         case Right(response) if response.status == OK =>
           Future.fromTry(Try(response.json.as[GenerateDdiRefResponse]))
-
-        case Left(upstream) => Future.failed(upstream) // ❗ no wrapping
-
+        case Left(upstream) => Future.failed(upstream)
         case Right(response) =>
-          Future.failed(UpstreamErrorResponse(s"Unexpected status ${response.status}", response.status))
+          Future.failed(UpstreamErrorResponse("Unexpected status while generating DDI ref", response.status))
       }
   }
 

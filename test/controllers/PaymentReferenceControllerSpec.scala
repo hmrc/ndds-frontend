@@ -37,7 +37,7 @@ import scala.concurrent.Future
 
 class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
-  def onwardRoute: Call = Call("GET", "/directdebits/year-end-and-month")
+  def onwardRoute: Call = Call("GET", "/direct-debits/year-end-and-month")
 
   private val formProvider = new PaymentReferenceFormProvider()
   private def formFor(source: Option[DirectDebitSource]): Form[String] =
@@ -68,7 +68,8 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         )(request, messages(application)).toString
 
         contentAsString(result) must include(
-          "You can find this on your MGD Registration Certificate. It’s 14 characters long and begins with X, then an uppercase letter, then ‘M0000’ and then 7 numbers, such as XVM00005554321."
+          "You can find this on your MGD Registration Certificate. It’s 14 characters long and begins with X, then an " +
+            "uppercase letter, then ‘M0000’ and then 7 numbers, such as XVM00005554321."
         )
       }
     }
