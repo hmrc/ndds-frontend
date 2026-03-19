@@ -60,22 +60,24 @@ class PlanStartDateController @Inject() (
       answers.get(DirectDebitSourcePage) match {
         case Some(value)
             if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) =>
-          nddService.getFutureWorkingDays(answers, request.userId) map { earliestPlanStartDate =>
-            val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
-            val form = formProvider(answers, earliestDate)
-            val preparedForm = answers.get(PlanStartDatePage) match {
-              case None        => form
-              case Some(value) => form.fill(value.enteredDate)
-            }
-            Ok(
-              view(
-                preparedForm,
-                mode,
-                DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-                value,
-                backLinkRedirect(mode, answers)
+          nddService.getFutureWorkingDays(answers, request.userId) map {
+            case Right(earliestPlanStartDate) =>
+              val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+              val form = formProvider(answers, earliestDate)
+              val preparedForm = answers.get(PlanStartDatePage) match {
+                case None        => form
+                case Some(value) => form.fill(value.enteredDate)
+              }
+              Ok(
+                view(
+                  preparedForm,
+                  mode,
+                  DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+                  value,
+                  backLinkRedirect(mode, answers)
+                )
               )
-            )
+            case Left(redirect) => redirect
           } recover { case e =>
             logger.warn(s"Unexpected error: $e")
             Redirect(routes.SystemErrorController.onPageLoad())
@@ -99,38 +101,51 @@ class PlanStartDateController @Inject() (
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    (for {
-      earliestPlanStartDate <- nddService.getFutureWorkingDays(request.userAnswers, request.userId)
-      earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
-      form = formProvider(request.userAnswers, earliestDate)
-      result <- form
-                  .bindFromRequest()
-                  .fold(
-                    formWithErrors =>
-                      Future.successful(
-                        BadRequest(
-                          view(
-                            formWithErrors,
-                            mode,
-                            DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-                            request.userAnswers
-                              .get(DirectDebitSourcePage)
-                              .getOrElse(throw new Exception("DirectDebitSourcePage details missing from user answers")),
-                            backLinkRedirect(mode, request.userAnswers)
-                          )
+    nddService
+      .getFutureWorkingDays(request.userAnswers, request.userId)
+      .flatMap {
+        case Left(errorResult) => Future.successful(errorResult)
+
+        case Right(earliestPlanStartDate) => {
+          val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+          val form = formProvider(request.userAnswers, earliestDate)
+
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors => {
+                request.userAnswers.get(DirectDebitSourcePage) match {
+                  case Some(directDebitSource) =>
+                    Future.successful(
+                      BadRequest(
+                        view(
+                          formWithErrors,
+                          mode,
+                          DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+                          directDebitSource,
+                          backLinkRedirect(mode, request.userAnswers)
                         )
-                      ),
-                    value =>
-                      for {
-                        updatedAnswers <-
-                          Future.fromTry(request.userAnswers.set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date)))
-                        _ <- sessionRepository.set(updatedAnswers)
-                      } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
-                  )
-    } yield result)
+                      )
+                    )
+
+                  case None =>
+                    logger.error("DirectDebitSourcePage missing from user answers")
+                    Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
+                }
+              },
+              value =>
+                for {
+                  updatedAnswers <-
+                    Future.fromTry(request.userAnswers.set(PlanStartDatePage, PlanStartDateDetails(value, earliestPlanStartDate.date)))
+                  _ <- sessionRepository.set(updatedAnswers)
+                } yield Redirect(navigator.nextPage(PlanStartDatePage, mode, updatedAnswers))
+            )
+        }
+      }
       .recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.SystemErrorController.onPageLoad())
       }
   }
+
 }

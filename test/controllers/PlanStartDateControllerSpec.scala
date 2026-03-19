@@ -92,7 +92,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
-        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -125,7 +125,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(userAnswers), any())(any()))
-        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -158,7 +158,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(userAnswers), any())(any()))
-        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -174,7 +174,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
-
       val userAnswers = expectedUserAnswers.set(PlanStartDatePage, validPlanStartDateDetails).success.value
 
       val application = applicationBuilder(userAnswers = Some(userAnswers))
@@ -182,7 +181,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(userAnswers), any())(any()))
-        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
 
       running(application) {
         val view = application.injector.instanceOf[PlanStartDateView]
@@ -200,7 +199,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to System Error for a GET if no existing data is found" in {
-
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
@@ -212,7 +210,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to System Error for a GET if the earliest payment date cannot be obtained" in {
-
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
@@ -274,13 +271,12 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to the next page when valid data is submitted" in {
-
       val mockSessionRepository = mock[SessionRepository]
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
-        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
 
       val application =
         applicationBuilder(userAnswers = Some(expectedUserAnswers))
@@ -300,13 +296,12 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
-
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
-        .thenReturn(Future.successful(expectedEarliestPlanStartDate))
+        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
 
       val request =
         FakeRequest(POST, planStartDateRoute)
@@ -341,7 +336,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to the next page for a POST if no existing data is found" in {
-
       val application = applicationBuilder(userAnswers = None).build()
 
       running(application) {
@@ -353,7 +347,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to System Error for a POST if the earliest payment date cannot be obtained and the data is valid" in {
-
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()
@@ -370,7 +363,6 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     }
 
     "must redirect to System Error for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
-
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
         .build()

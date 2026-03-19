@@ -54,22 +54,24 @@ class AmendPlanStartDateController @Inject() (
     val answers = request.userAnswers
 
     if (nddsService.isSinglePaymentPlan(answers)) {
-      nddsService.getFutureWorkingDays(request.userAnswers, request.userId) map { earliestPlanStartDate =>
-        val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
-        val form = formProvider(answers, earliestDate)
-        val preparedForm = request.userAnswers
-          .get(AmendPlanStartDatePage)
-          .orElse(request.userAnswers.get(AmendPlanStartDatePage))
-          .fold(form)(form.fill)
+      nddsService.getFutureWorkingDays(answers, request.userId) map {
+        case Right(earliestPlanStartDate) =>
+          val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+          val form = formProvider(answers, earliestDate)
+          val preparedForm = request.userAnswers
+            .get(AmendPlanStartDatePage)
+            .orElse(request.userAnswers.get(AmendPlanStartDatePage))
+            .fold(form)(form.fill)
 
-        Ok(
-          view(
-            preparedForm,
-            mode,
-            DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-            routes.AmendingPaymentPlanController.onPageLoad()
+          Ok(
+            view(
+              preparedForm,
+              mode,
+              DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+              routes.AmendingPaymentPlanController.onPageLoad()
+            )
           )
-        )
+        case Left(redirect) => redirect
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.SystemErrorController.onPageLoad())
@@ -82,34 +84,36 @@ class AmendPlanStartDateController @Inject() (
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    nddsService.getFutureWorkingDays(request.userAnswers, request.userId) flatMap { earliestPlanStartDate =>
-      val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
-      val userAnswers = request.userAnswers
-      val form = formProvider(userAnswers, earliestDate)
+    nddsService.getFutureWorkingDays(request.userAnswers, request.userId) flatMap {
+      case Right(earliestPlanStartDate) =>
+        val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
+        val userAnswers = request.userAnswers
+        val form = formProvider(userAnswers, earliestDate)
 
-      form
-        .bindFromRequest()
-        .fold(
-          formWithErrors =>
-            Future.successful(
-              BadRequest(
-                view(
-                  formWithErrors,
-                  mode,
-                  DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
-                  routes.AmendingPaymentPlanController.onPageLoad()
+        form
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              Future.successful(
+                BadRequest(
+                  view(
+                    formWithErrors,
+                    mode,
+                    DateTimeFormats.formattedDateTimeNumeric(earliestPlanStartDate.date),
+                    routes.AmendingPaymentPlanController.onPageLoad()
+                  )
                 )
-              )
-            ),
-          value =>
-            for {
-              updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
-              updatedAnswers <- Future.fromTry(updatedAnswers.set(CurrentPageQuery, request.uri))
-              _              <- sessionRepository.set(updatedAnswers)
-            } yield {
-              Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
-            }
-        )
+              ),
+            value =>
+              for {
+                updatedAnswers <- Future.fromTry(userAnswers.set(AmendPlanStartDatePage, value))
+                updatedAnswers <- Future.fromTry(updatedAnswers.set(CurrentPageQuery, request.uri))
+                _              <- sessionRepository.set(updatedAnswers)
+              } yield {
+                Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
+              }
+          )
+      case Left(redirect) => Future.successful(redirect)
     }
   }
 }
