@@ -61,7 +61,7 @@ class PlanStartDateController @Inject() (
         case Some(value)
             if Set(DirectDebitSource.MGD.toString, DirectDebitSource.SA.toString, DirectDebitSource.TC.toString).contains(value.toString) =>
           nddService.getFutureWorkingDays(answers, request.userId) map {
-            case Right(earliestPlanStartDate) =>
+            case Some(earliestPlanStartDate) =>
               val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
               val form = formProvider(answers, earliestDate)
               val preparedForm = answers.get(PlanStartDatePage) match {
@@ -77,7 +77,7 @@ class PlanStartDateController @Inject() (
                   backLinkRedirect(mode, answers)
                 )
               )
-            case Left(redirect) => redirect
+            case None => Redirect(routes.SystemErrorController.onPageLoad())
           } recover { case e =>
             logger.warn(s"Unexpected error: $e")
             Redirect(routes.SystemErrorController.onPageLoad())
@@ -104,9 +104,9 @@ class PlanStartDateController @Inject() (
     nddService
       .getFutureWorkingDays(request.userAnswers, request.userId)
       .flatMap {
-        case Left(errorResult) => Future.successful(errorResult)
+        case None => Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
-        case Right(earliestPlanStartDate) => {
+        case Some(earliestPlanStartDate) => {
           val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
           val form = formProvider(request.userAnswers, earliestDate)
 
@@ -129,7 +129,7 @@ class PlanStartDateController @Inject() (
                     )
 
                   case None =>
-                    logger.error("DirectDebitSourcePage missing from user answers")
+                    logger.warn("DirectDebitSourcePage missing from user answers")
                     Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
                 }
               },

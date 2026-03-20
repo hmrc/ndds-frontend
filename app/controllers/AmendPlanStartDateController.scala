@@ -55,12 +55,11 @@ class AmendPlanStartDateController @Inject() (
 
     if (nddsService.isSinglePaymentPlan(answers)) {
       nddsService.getFutureWorkingDays(answers, request.userId) map {
-        case Right(earliestPlanStartDate) =>
+        case Some(earliestPlanStartDate) =>
           val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
           val form = formProvider(answers, earliestDate)
-          val preparedForm = request.userAnswers
+          val preparedForm = answers
             .get(AmendPlanStartDatePage)
-            .orElse(request.userAnswers.get(AmendPlanStartDatePage))
             .fold(form)(form.fill)
 
           Ok(
@@ -71,21 +70,21 @@ class AmendPlanStartDateController @Inject() (
               routes.AmendingPaymentPlanController.onPageLoad()
             )
           )
-        case Left(redirect) => redirect
+        case None => Redirect(routes.SystemErrorController.onPageLoad())
       } recover { case e =>
         logger.warn(s"Unexpected error: $e")
         Redirect(routes.SystemErrorController.onPageLoad())
       }
     } else {
       val planType = request.userAnswers.get(ManagePaymentPlanTypePage).getOrElse("")
-      logger.error(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
+      logger.warn(s"NDDS Payment Plan Guard: Cannot amend this plan type: $planType")
       Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     nddsService.getFutureWorkingDays(request.userAnswers, request.userId) flatMap {
-      case Right(earliestPlanStartDate) =>
+      case Some(earliestPlanStartDate) =>
         val earliestDate = LocalDate.parse(earliestPlanStartDate.date, DateTimeFormatter.ISO_LOCAL_DATE)
         val userAnswers = request.userAnswers
         val form = formProvider(userAnswers, earliestDate)
@@ -113,7 +112,7 @@ class AmendPlanStartDateController @Inject() (
                 Redirect(routes.AmendPaymentPlanConfirmationController.onPageLoad())
               }
           )
-      case Left(redirect) => Future.successful(redirect)
+      case None => Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
     }
   }
 }

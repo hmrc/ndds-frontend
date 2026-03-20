@@ -92,7 +92,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
-        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
+        .thenReturn(Future.successful(Some(expectedEarliestPlanStartDate)))
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -125,7 +125,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(userAnswers), any())(any()))
-        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
+        .thenReturn(Future.successful(Some(expectedEarliestPlanStartDate)))
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -158,7 +158,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(userAnswers), any())(any()))
-        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
+        .thenReturn(Future.successful(Some(expectedEarliestPlanStartDate)))
 
       running(application) {
         val result = route(application, getRequest()).value
@@ -181,7 +181,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(userAnswers), any())(any()))
-        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
+        .thenReturn(Future.successful(Some(expectedEarliestPlanStartDate)))
 
       running(application) {
         val view = application.injector.instanceOf[PlanStartDateView]
@@ -276,7 +276,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
-        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
+        .thenReturn(Future.successful(Some(expectedEarliestPlanStartDate)))
 
       val application =
         applicationBuilder(userAnswers = Some(expectedUserAnswers))
@@ -301,7 +301,7 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         .build()
 
       when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
-        .thenReturn(Future.successful(Right(expectedEarliestPlanStartDate)))
+        .thenReturn(Future.successful(Some(expectedEarliestPlanStartDate)))
 
       val request =
         FakeRequest(POST, planStartDateRoute)

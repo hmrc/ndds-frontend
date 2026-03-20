@@ -51,12 +51,13 @@ class PaymentDateController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    nddService.getFutureWorkingDays(request.userAnswers, request.userId) map {
-      case Right(earliestPaymentDate) =>
-        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
+    val answers = request.userAnswers
+    nddService.getFutureWorkingDays(answers, request.userId) map {
+      case Some(earliestPaymentDate) =>
+        val isSinglePlan = nddService.isSinglePaymentPlan(answers) || nddService.isSinglePaymentPlanDirectDebitSource(answers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
-        val preparedForm = request.userAnswers.get(PaymentDatePage) match {
+        val preparedForm = answers.get(PaymentDatePage) match {
           case None        => form
           case Some(value) => form.fill(value.enteredDate)
         }
@@ -68,7 +69,7 @@ class PaymentDateController @Inject() (
                routes.PaymentAmountController.onPageLoad(mode)
               )
         )
-      case Left(redirect) => redirect
+      case None => Redirect(routes.SystemErrorController.onPageLoad())
     } recover { case e =>
       logger.warn(s"Unexpected error: $e")
       Redirect(routes.SystemErrorController.onPageLoad())
@@ -79,7 +80,7 @@ class PaymentDateController @Inject() (
     nddService
       .getFutureWorkingDays(request.userAnswers, request.userId)
       .flatMap {
-        case Right(earliestPaymentDate) =>
+        case Some(earliestPaymentDate) =>
           val isSinglePlan =
             nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
           val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
@@ -104,7 +105,7 @@ class PaymentDateController @Inject() (
                   _              <- sessionRepository.set(updatedAnswers)
                 } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
             )
-        case Left(redirect) => Future.successful(redirect)
+        case None => Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
       .recoverWith { case e =>
         logger.warn(s"Unexpected error: $e")

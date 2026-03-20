@@ -71,7 +71,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       }
   }
 
-  def getFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[Either[Result, EarliestPaymentDate]] = {
+  def getFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[Option[EarliestPaymentDate]] = {
     val currentDate = LocalDate.now().toString
     val paymentPlanType = userAnswers
       .get(PaymentPlanTypePage)
@@ -83,18 +83,18 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       .orElse(userAnswers.get(ManageDirectDebitSourcePage))
       .getOrElse {
         logger.warn("Missing DirectDebitSource")
-        Future.successful(Left(Redirect(routes.SystemErrorController.onPageLoad())))
+        Future.successful(None)
       }
 
     if (
       (directDebitSource == MGD || directDebitSource == "mgd") && (paymentPlanType == VariablePaymentPlan || paymentPlanType == "variablePaymentPlan")
     ) {
-      nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.TEN_WORKING_DAYS)).map(Right(_))
+      nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, config.TEN_WORKING_DAYS)).map(Some(_))
     } else {
       getAuddiStatus(userAnswers, userId).flatMap {
         case None =>
           logger.warn("Missing AUDDIS status")
-          Future.successful(Left(Redirect(routes.SystemErrorController.onPageLoad())))
+          Future.successful(None)
 
         case Some(auddisStatus) =>
           val offsetWorkingDays = calculateWorkingDays(auddisStatus)
@@ -103,7 +103,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
           if (hasExistingDDI || isAmendPlanFlow) { // add payment plan or amend flow
             calculateEarliestDate(userAnswers, currentDate, offsetWorkingDays, userId)
           } else { // new direct debit setup flow
-            nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, offsetWorkingDays + config.TWO_WORKING_DAYS)).map(Right(_))
+            nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(currentDate, offsetWorkingDays + config.TWO_WORKING_DAYS)).map(Some(_))
           }
       }
     }
@@ -114,7 +114,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     currentDate: String,
     noOfWorkingDays: Int,
     userId: String
-  )(implicit hc: HeaderCarrier): Future[Either[Result, EarliestPaymentDate]] = {
+  )(implicit hc: HeaderCarrier): Future[Option[EarliestPaymentDate]] = {
     userAnswers.get(DirectDebitReferenceQuery) match {
       case Some(directDebitReference) =>
         for {
@@ -138,11 +138,11 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
               )
             }
 
-        } yield Right(earliestDate)
+        } yield Some(earliestDate)
 
       case None =>
         logger.warn("Missing directDebitReference")
-        Future.successful(Left(Redirect(routes.SystemErrorController.onPageLoad())))
+        Future.successful(None)
     }
   }
 

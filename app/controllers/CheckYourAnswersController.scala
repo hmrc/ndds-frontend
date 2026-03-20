@@ -141,7 +141,7 @@ class CheckYourAnswersController @Inject() (
                 }
                 Future.successful(Redirect(warningUrl))
               } else {
-                val earliestDateF: Future[Either[Result, EarliestPaymentDate]] =
+                val earliestDate: Future[Option[EarliestPaymentDate]] =
                   if (requiresEarliestPaymentDateCheckForSinglePlan(ua)) {
                     nddService.getFutureWorkingDays(ua, request.userId)
                   } else if (requireBudgetingPlanCheck(ua)) {
@@ -149,13 +149,13 @@ class CheckYourAnswersController @Inject() (
                   } else if (requireVariableAndTcPlanCheck(ua)) {
                     nddService.getFutureWorkingDays(ua, request.userId)
                   } else {
-                    Future.successful(Right(EarliestPaymentDate("NO_CHECK")))
+                    Future.successful(None)
                   }
 
-                earliestDateF.flatMap {
-                  case Left(redirectResult) => Future.successful(redirectResult)
+                earliestDate.flatMap {
+                  case None => Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
 
-                  case Right(earliestDate) =>
+                  case Some(earliestDate) =>
                     // Now run your validation rules
                     val validation: Either[String, Unit] =
                       if (requiresEarliestPaymentDateCheckForSinglePlan(ua))
