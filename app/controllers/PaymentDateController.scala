@@ -51,12 +51,13 @@ class PaymentDateController @Inject() (
     with Logging {
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
-    {
-      nddService.getFutureWorkingDays(request.userAnswers, request.userId) map { earliestPaymentDate =>
-        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
+    val answers = request.userAnswers
+    nddService.getFutureWorkingDays(answers, request.userId) map {
+      case Some(earliestPaymentDate) =>
+        val isSinglePlan = nddService.isSinglePaymentPlan(answers) || nddService.isSinglePaymentPlanDirectDebitSource(answers)
         val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
-        val preparedForm = request.userAnswers.get(PaymentDatePage) match {
+        val preparedForm = answers.get(PaymentDatePage) match {
           case None        => form
           case Some(value) => form.fill(value.enteredDate)
         }
@@ -68,40 +69,43 @@ class PaymentDateController @Inject() (
                routes.PaymentAmountController.onPageLoad(mode)
               )
         )
-      } recover { case e =>
-        logger.warn(s"Unexpected error: $e")
-        Redirect(routes.SystemErrorController.onPageLoad())
-      }
+      case None => Redirect(routes.SystemErrorController.onPageLoad())
+    } recover { case e =>
+      logger.warn(s"Unexpected error: $e")
+      Redirect(routes.SystemErrorController.onPageLoad())
     }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     nddService
       .getFutureWorkingDays(request.userAnswers, request.userId)
-      .flatMap { earliestPaymentDate =>
-        val isSinglePlan = nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
-        val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
+      .flatMap {
+        case Some(earliestPaymentDate) =>
+          val isSinglePlan =
+            nddService.isSinglePaymentPlan(request.userAnswers) || nddService.isSinglePaymentPlanDirectDebitSource(request.userAnswers)
+          val form = formProvider(LocalDate.parse(earliestPaymentDate.date), isSinglePlan)
 
-        form
-          .bindFromRequest()
-          .fold(
-            formWithErrors => {
-              Future.successful(
-                BadRequest(
-                  view(formWithErrors,
-                       mode,
-                       DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
-                       routes.PaymentAmountController.onPageLoad(mode)
-                      )
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors => {
+                Future.successful(
+                  BadRequest(
+                    view(formWithErrors,
+                         mode,
+                         DateTimeFormats.formattedDateTimeNumeric(earliestPaymentDate.date),
+                         routes.PaymentAmountController.onPageLoad(mode)
+                        )
+                  )
                 )
-              )
-            },
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
-                _              <- sessionRepository.set(updatedAnswers)
-              } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
-          )
+              },
+              value =>
+                for {
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentDatePage, PaymentDateDetails(value, earliestPaymentDate.date)))
+                  _              <- sessionRepository.set(updatedAnswers)
+                } yield Redirect(navigator.nextPage(PaymentDatePage, mode, updatedAnswers))
+            )
+        case None => Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
       }
       .recoverWith { case e =>
         logger.warn(s"Unexpected error: $e")

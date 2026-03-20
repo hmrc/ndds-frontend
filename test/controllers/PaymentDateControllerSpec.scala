@@ -113,7 +113,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
-          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+          .thenReturn(Future.successful(Some(expectedEarliestPaymentDate)))
 
         running(application) {
           val result = route(application, getRequest()).value
@@ -128,13 +128,12 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must populate the view correctly on a GET when the question has previously been answered" in {
-
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
-          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+          .thenReturn(Future.successful(Some(expectedEarliestPaymentDate)))
 
         running(application) {
           val view = application.injector.instanceOf[PaymentDateView]
@@ -150,7 +149,6 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must redirect to System Error for a GET if no existing data is found" in {
-
         val application = applicationBuilder(userAnswers = None).build()
 
         running(application) {
@@ -162,13 +160,28 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must redirect to System Error for a GET if the earliest payment date cannot be obtained" in {
-
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
           .thenReturn(Future.failed(new Exception("bang")))
+
+        running(application) {
+          val result = route(application, getRequest()).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+        }
+      }
+
+      "must redirect to System Error when future date returns None" in {
+        val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
+          .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
+          .thenReturn(Future.successful(None))
 
         running(application) {
           val result = route(application, getRequest()).value
@@ -186,7 +199,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
         when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(emptyUserAnswers), any())(any()))
-          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+          .thenReturn(Future.successful(Some(expectedEarliestPaymentDate)))
 
         val validDate = LocalDate.parse(expectedEarliestPaymentDate.date)
 
@@ -215,13 +228,12 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must return a Bad Request and errors when invalid data is submitted" in {
-
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
           .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
-          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+          .thenReturn(Future.successful(Some(expectedEarliestPaymentDate)))
 
         running(application) {
 
@@ -293,7 +305,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
       }
       "must return Bad Request with earliest date error if date is before earliest payment date" in {
         when(mockService.getFutureWorkingDays(any(), any())(any()))
-          .thenReturn(Future.successful(expectedEarliestPaymentDate))
+          .thenReturn(Future.successful(Some(expectedEarliestPaymentDate)))
 
         val earliest = LocalDate.parse(expectedEarliestPaymentDate.date)
         val invalidDate = earliest.minusDays(1)

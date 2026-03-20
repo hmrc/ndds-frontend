@@ -380,9 +380,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
       when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-
       when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(EarliestPaymentDate("2025-01-10")))
+        .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-01-10"))))
       when(mockNddService.generateNewDdiReference(any())(any()))
         .thenReturn(Future.successful(GenerateDdiRefResponse("fakeRef")))
 
@@ -427,7 +426,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
       when(
         mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier])
-      ).thenReturn(Future.successful(EarliestPaymentDate("2025-01-10")))
+      ).thenReturn(Future.successful(Some(EarliestPaymentDate("2025-01-10"))))
 
       when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(DuplicateCheckResponse(false)))
@@ -529,13 +528,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-
         when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(EarliestPaymentDate("2025-09-01")))
-
+          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
         when(
@@ -582,7 +578,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-
+        when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.failed(new Exception("chris failed")))
 
@@ -622,7 +619,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(false))
 
@@ -670,7 +666,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
         when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(EarliestPaymentDate("2025-09-01"))) // earliest <= entered (15th)
+          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01")))) // earliest <= entered (15th)
 
         when(
           mockMacGenerator.generateMac(
@@ -716,7 +712,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-
+        when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
         when(
           mockMacGenerator.generateMac(
             any[String],
@@ -762,7 +759,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.getFutureWorkingDays(any(), any())(any()))
-          .thenReturn(Future.successful(EarliestPaymentDate("2025-07-01")))
+          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
         when(mockNddService.generateNewDdiReference(any())(any()))
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
         when(mockNddService.submitChrisData(any())(any()))
@@ -798,7 +795,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
     }
 
     "when set up a new payment plan for existing Direct Debit" - {
-
       "must redirect to confirmation page when DirectDebitSource is 'CT' for a POST if all required data is provided" in {
         val totalDueAmount = 100
         val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
@@ -868,11 +864,88 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
         running(application) {
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-            .thenReturn(Future.successful(EarliestPaymentDate("2025-06-15")))
+            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-06-15"))))
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        }
+      }
+
+      "must redirect to system error page when future date returns None" in {
+        val totalDueAmount = 100
+        val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+          bankSortCode       = Some("12-34-56"),
+          bankAccountNumber  = Some("12345678"),
+          bankAccountName    = Some("John Doe"),
+          auDdisFlag         = true,
+          submissionDateTime = LocalDateTime.now()
+        )
+        val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
+          hodService                = "HOD1",
+          planType                  = "02",
+          paymentReference          = "PP123",
+          submissionDateTime        = LocalDateTime.now(),
+          scheduledPaymentAmount    = Some(BigDecimal(100)),
+          scheduledPaymentStartDate = Some(LocalDate.now()),
+          initialPaymentStartDate   = Some(LocalDate.now()),
+          initialPaymentAmount      = Some(BigDecimal(50)),
+          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(6)),
+          scheduledPaymentFrequency = Some("Monthly"),
+          suspensionStartDate       = None,
+          suspensionEndDate         = None,
+          balancingPaymentAmount    = None,
+          balancingPaymentDate      = None,
+          totalLiability            = Some(BigDecimal(600)),
+          paymentPlanEditable       = true
+        )
+        val paymentPlanResponse: PaymentPlanResponse = PaymentPlanResponse(
+          directDebitDetails = directDebitDetails,
+          paymentPlanDetails = paymentPlanDetails
+        )
+        val incompleteAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(TotalAmountDuePage, totalDueAmount)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(PaymentReferencePage, "testReference")
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+          .set(
+            ExistingDirectDebitIdentifierQuery,
+            NddDetails("directDebitReference",
+                       LocalDateTime.now(),
+                       "bankSortCode",
+                       "bankAccountNumber",
+                       "bankAccountName",
+                       auDdisFlag       = true,
+                       numberOfPayPlans = 2
+                      )
+          )
+          .success
+          .value
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService), bind[MacGenerator].toInstance(mockMacGenerator))
+          .build()
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+        when(mockNddService.submitChrisData(any())(any()))
+          .thenReturn(Future.successful(true))
+        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
+        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
+
+        running(application) {
+          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(None))
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
@@ -979,6 +1052,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
 
       when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+      when(mockNddService.getFutureWorkingDays(any(), any())(any()))
+        .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
       when(mockNddService.generateNewDdiReference(any())(any()))
         .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
       when(mockNddService.submitChrisData(any())(any()))
@@ -1140,10 +1215,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .thenReturn(Future.successful(true))
         when(mockSessionRepository.set(any()))
           .thenReturn(Future.successful(true))
-
-        when(
-          mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier])
-        ).thenReturn(Future.successful(EarliestPaymentDate("2025-07-01")))
+        when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
 
         when(
           mockMacGenerator.generateMac(

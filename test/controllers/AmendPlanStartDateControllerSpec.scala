@@ -89,8 +89,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   val calendar = Calendar.getInstance()
   calendar.set(2024, Calendar.JANUARY, 15, 14, 30, 45)
   val calDate: Date = calendar.getTime
-//  import utils
-//  val mockUtils = mock[Utils]
   val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
     bankSortCode       = Some("12-34-56"),
     bankAccountNumber  = Some("12345678"),
@@ -152,7 +150,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           when(mockService.isSinglePaymentPlan(any())).thenReturn(true)
           when(mockService.getFutureWorkingDays(any(), any())(any()))
-            .thenReturn(Future.successful(earliestPaymentDate))
+            .thenReturn(Future.successful(Some(earliestPaymentDate)))
 
           val result = route(application, getRequest()).value
           val view = application.injector.instanceOf[AmendPlanStartDateView]
@@ -190,7 +188,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       }
 
       "must redirect to System Error for a GET if no existing data is found" in {
-
         val application = applicationBuilder(userAnswers = None)
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
           .build()
@@ -244,7 +241,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           when(mockService.isSinglePaymentPlan(any())).thenReturn(true)
           when(mockService.getFutureWorkingDays(any(), any())(any()))
-            .thenReturn(Future.successful(earliestPaymentDate))
+            .thenReturn(Future.successful(Some(earliestPaymentDate)))
           val boundForm = form.bind(Map("value" -> "invalid value"))
           val view = application.injector.instanceOf[AmendPlanStartDateView]
           val result = route(application, request).value
@@ -279,12 +276,43 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
         running(application) {
           when(mockService.isSinglePaymentPlan(any())).thenReturn(true)
           when(mockService.getFutureWorkingDays(any(), any())(any()))
-            .thenReturn(Future.successful(earliestPaymentDate))
+            .thenReturn(Future.successful(Some(earliestPaymentDate)))
           val request = postRequestWithDate(validAnswer.plusDays(3))
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual planConfirmationPage
+        }
+      }
+
+      "must redirect to system error page when Future working days returns None" in {
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, singlePlan)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, BigDecimal(1500))
+          .success
+          .value
+          .set(AmendPlanStartDatePage, validAnswer.plusDays(3))
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+          when(mockService.isSinglePaymentPlan(any())).thenReturn(true)
+          when(mockService.getFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(None))
+          val request = postRequestWithDate(validAnswer.plusDays(3))
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.SystemErrorController.onPageLoad().url
         }
       }
 

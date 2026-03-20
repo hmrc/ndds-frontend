@@ -129,58 +129,54 @@ class CheckYourAnswersController @Inject() (
       }
 
       validateStartAndEndDates(ua) match {
-        case Some(redirect) =>
-          Future.successful(redirect)
-        case _ =>
+        case Some(redirect) => Future.successful(redirect)
+        case None =>
           nddService
             .isDuplicatePlanSetupAmendAndAddPaymentPlan(userAnswers = ua, userId = request.userId, None, None)
             .flatMap { duplicateResponse =>
-              {
-                if (duplicateResponse.isDuplicate) {
-                  val warningUrl = ua.get(PaymentPlanTypePage) match {
-                    case Some(planType) if planType == PaymentPlanType.VariablePaymentPlan => routes.DuplicateErrorController.onPageLoad()
-                    case _ => routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode)
+              if (duplicateResponse.isDuplicate) {
+                val warningUrl = ua.get(PaymentPlanTypePage) match {
+                  case Some(PaymentPlanType.VariablePaymentPlan) => routes.DuplicateErrorController.onPageLoad()
+                  case _                                         => routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode)
+                }
+                Future.successful(Redirect(warningUrl))
+              } else {
+                val earliestDate: Future[Option[EarliestPaymentDate]] =
+                  if (requiresEarliestPaymentDateCheckForSinglePlan(ua)) {
+                    nddService.getFutureWorkingDays(ua, request.userId)
+                  } else if (requireBudgetingPlanCheck(ua)) {
+                    nddService.getFutureWorkingDays(ua, request.userId)
+                  } else if (requireVariableAndTcPlanCheck(ua)) {
+                    nddService.getFutureWorkingDays(ua, request.userId)
+                  } else {
+                    Future.successful(None)
                   }
-                  Future.successful(Redirect(warningUrl))
-                } else {
-                  val validationResultF: Future[Either[String, Unit]] =
-                    if (requiresEarliestPaymentDateCheckForSinglePlan(ua)) {
-                      nddService
-                        .getFutureWorkingDays(request.userAnswers, request.userId)
-                        .map(earliest => validateSinglePlanDate(ua, earliest))
-                    } else if (requireBudgetingPlanCheck(ua)) {
-                      nddService
-                        .getFutureWorkingDays(request.userAnswers, request.userId)
-                        .map(earliest => validateBudgetingPlanDates(ua, earliest))
-                    } else if (requireVariableAndTcPlanCheck(ua)) {
-                      nddService
-                        .getFutureWorkingDays(request.userAnswers, request.userId)
-                        .map(earliest => validateVariableAndTcPlanDates(ua, earliest))
-                    } else {
-                      // No rule means proceed normally (not an error)
-                      Future.successful(Right(()))
-                    }
 
-                  validationResultF.flatMap {
-                    case Right(_) =>
-                      processDdiReferenceGeneration(ua, request)
-                    case Left(errorMessage) =>
-                      logger.warn(s"Date validation failed: $errorMessage")
-                      if (
-                        errorMessage.contains("before earliest allowed date")
-                        || errorMessage.contains("End date")
-                        || errorMessage.contains("Start date")
-                        || errorMessage.contains("Payment date")
-                        || errorMessage.contains("missing in UserAnswers")
-                      ) {
+                earliestDate.flatMap {
+                  case None => Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
+
+                  case Some(earliestDate) =>
+                    // Now run your validation rules
+                    val validation: Either[String, Unit] =
+                      if (requiresEarliestPaymentDateCheckForSinglePlan(ua))
+                        validateSinglePlanDate(ua, earliestDate)
+                      else if (requireBudgetingPlanCheck(ua))
+                        validateBudgetingPlanDates(ua, earliestDate)
+                      else if (requireVariableAndTcPlanCheck(ua))
+                        validateVariableAndTcPlanDates(ua, earliestDate)
+                      else
+                        Right(())
+
+                    validation match {
+                      case Right(_) =>
+                        processDdiReferenceGeneration(ua, request)
+                      case Left(errorMessage) =>
+                        logger.warn(s"Date validation failed: $errorMessage")
                         Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-                      } else {
-                        // All other errors → system page
-                        Future.successful(Redirect(routes.SystemErrorController.onPageLoad()))
-                      }
-                  }
+                    }
                 }
               }
+
             }
       }
     }

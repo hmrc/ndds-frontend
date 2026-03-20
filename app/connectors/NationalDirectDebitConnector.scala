@@ -67,7 +67,7 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
         case Right(response) if response.status == OK => Future.successful(true)
         case Left(upstream)                           => Future.failed(upstream)
         case Right(response) =>
-          Future.failed(UpstreamErrorResponse("Unexpected status ChRIS response", response.status))
+          Future.failed(UpstreamErrorResponse("Unexpected status from ChRIS response", response.status))
       }
   }
 
