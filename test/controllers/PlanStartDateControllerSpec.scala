@@ -295,6 +295,31 @@ class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
+    "must redirect to the system error page when future date returns None" in {
+      val mockSessionRepository = mock[SessionRepository]
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswers), any())(any()))
+        .thenReturn(Future.successful(None))
+
+      val application =
+        applicationBuilder(userAnswers = Some(expectedUserAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository),
+            bind[NationalDirectDebitService].toInstance(mockService)
+          )
+          .build()
+
+      running(application) {
+        val result = route(application, postRequest()).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+      }
+    }
+
     "must return a Bad Request and errors when invalid data is submitted" in {
       val application = applicationBuilder(userAnswers = Some(expectedUserAnswers))
         .overrides(bind[NationalDirectDebitService].toInstance(mockService))
