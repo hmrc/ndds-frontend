@@ -54,6 +54,7 @@ lazy val microservice = (project in file("."))
     pipelineStages := Seq(digest),
     Assets / pipelineStages := Seq(concat)
   )
+  .settings(SbtUpdatesSettings.settings: _*)
 
 lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   fork := true,
