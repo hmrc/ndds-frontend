@@ -27,7 +27,7 @@ class UtilsSpec extends AnyWordSpec with Matchers {
 
     "return a calendar with time set to midnight when date is provided" in {
       // fixed date with non-zero time
-      val date = new Date()
+      val date = new Date(1234567L)
 
       val calendar = Utils.getSpecifiedCalendar(date)
 
