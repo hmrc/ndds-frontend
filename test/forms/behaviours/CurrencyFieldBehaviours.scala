@@ -20,7 +20,7 @@ import play.api.data.{Form, FormError}
 
 trait CurrencyFieldBehaviours extends FieldBehaviours {
 
-  def currencyField(form: Form[?], fieldName: String, nonNumericError: FormError, invalidNumericError: FormError): Unit = {
+  def currencyField(form: Form[BigDecimal], fieldName: String, nonNumericError: FormError, invalidNumericError: FormError): Unit = {
 
     "must not bind non-numeric numbers" in {
 
@@ -30,10 +30,32 @@ trait CurrencyFieldBehaviours extends FieldBehaviours {
       }
     }
 
-    s"must not bind invalid decimals (over 2dp)" in {
+    "must not bind invalid decimals (over 2dp)" in {
       val result = form.bind(Map(fieldName -> "1.234")).apply(fieldName)
       result.errors mustEqual Seq(invalidNumericError)
     }
+
+    "must bind values with spaces" in {
+      val result = form.bind(Map(fieldName -> " 12 3 . 4 5  "))
+      println(result.errors.toString)
+      result.value mustBe Some(BigDecimal("123.45"))
+    }
+
+    "must bind values with '£' signs" in {
+      val result = form.bind(Map(fieldName -> "£123.45"))
+      result.value mustBe Some(BigDecimal("123.45"))
+    }
+
+    "must bind values with commas" in {
+      val result = form.bind(Map(fieldName -> "£1,000.23"))
+      result.value mustBe Some(BigDecimal("1000.23"))
+    }
+
+    "must bind values with spaces, '£' signs and commas" in {
+      val result = form.bind(Map(fieldName -> "£  1 ,0, 00 .2 3 "))
+      result.value mustBe Some(BigDecimal("1000.23"))
+    }
+
   }
 
   def currencyFieldWithMinimum(form: Form[?], fieldName: String, minimum: BigDecimal, expectedError: FormError): Unit = {
