@@ -75,13 +75,15 @@
 
     @govukInsetText(
         InsetText(
-            content = Text(messages("directDebitConfirmation.printInset"))
+            content = Text(messages("directDebitConfirmation.printInset")),
+            classes = "govuk-!-display-none-print"
         )
     )
 
     @paragraphWithLink(
         linkMessage = messages("directDebitConfirmation.viewDirectDebitInstructions"),
-        linkUrl = routes.YourDirectDebitInstructionsController.onPageLoad().url
+        linkUrl = routes.YourDirectDebitInstructionsController.onPageLoad().url,
+        classes = "govuk-!-display-none-print"
     )
 
 }
