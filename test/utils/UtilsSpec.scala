@@ -25,21 +25,21 @@ class UtilsSpec extends AnyWordSpec with Matchers {
 
   "getSpecifiedCalendar" should {
 
-//    "return a calendar with time set to midnight when date is provided" in {
-//      // fixed date with non-zero time
-//      val date = new Date()
-//
-//      val calendar = Utils.getSpecifiedCalendar(date)
-//
-//      calendar must not be null
-//      calendar.get(Calendar.MINUTE) mustBe 0
-//      calendar.get(Calendar.SECOND) mustBe 0
-//      calendar.get(Calendar.MILLISECOND) mustBe 0
-//
-//      // date part should remain the same
-//      calendar.getTime.toInstant.toEpochMilli / (24 * 60 * 60 * 1000) mustBe
-//        date.toInstant.toEpochMilli / (24 * 60 * 60 * 1000)
-//    }
+    "return a calendar with time set to midnight when date is provided" in {
+      // fixed date with non-zero time
+      val date = new Date(1234567L)
+
+      val calendar = Utils.getSpecifiedCalendar(date)
+
+      calendar must not be null
+      calendar.get(Calendar.MINUTE) mustBe 0
+      calendar.get(Calendar.SECOND) mustBe 0
+      calendar.get(Calendar.MILLISECOND) mustBe 0
+
+      // date part should remain the same
+      calendar.getTime.toInstant.toEpochMilli / (24 * 60 * 60 * 1000) mustBe
+        date.toInstant.toEpochMilli / (24 * 60 * 60 * 1000)
+    }
 
     "return null when date is null" in {
       val calendar = Utils.getSpecifiedCalendar(null)
