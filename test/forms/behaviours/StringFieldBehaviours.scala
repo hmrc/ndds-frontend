@@ -16,11 +16,16 @@
 
 package forms.behaviours
 
+import org.scalacheck.Arbitrary
 import play.api.data.{Form, FormError}
+import org.scalacheck.Arbitrary.*
+import org.scalacheck.Gen
 
 trait StringFieldBehaviours extends FieldBehaviours {
 
-  def fieldWithMaxLength(form: Form[?], fieldName: String, maxLength: Int, lengthError: FormError): Unit = {
+  def fieldWithMaxLength(form: Form[?], fieldName: String, maxLength: Int, lengthError: FormError)(implicit
+    arbChar: Gen[Char] = arbitrary[Char]
+  ): Unit = {
 
     s"not bind strings longer than $maxLength characters" in {
 

@@ -52,13 +52,6 @@ trait Mappings extends Formatters with Constraints {
   ): FieldMapping[LocalDate] =
     of(new LocalDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args))
 
-  protected def currency(requiredKey: String = "error.required",
-                         invalidNumeric: String = "error.invalidNumeric",
-                         nonNumericKey: String = "error.nonNumeric",
-                         args: Seq[String] = Seq.empty
-                        ): FieldMapping[BigDecimal] =
-    of(currencyFormatter(requiredKey, invalidNumeric, nonNumericKey, args))
-
   protected def customPaymentDate(invalidKey: String,
                                   allRequiredKey: String,
                                   twoRequiredKey: String,
@@ -153,6 +146,7 @@ trait Mappings extends Formatters with Constraints {
     nonNumericKey: String
   ): Mapping[BigDecimal] =
     text(requiredKey)
+      .transform(str => str.replaceAll("[£, ]", ""), identity)
       .verifying(currencyConstraint(nonNumericKey, invalidNumericKey))
       .transform[BigDecimal](
         str => BigDecimal(str).setScale(2, BigDecimal.RoundingMode.UNNECESSARY),
