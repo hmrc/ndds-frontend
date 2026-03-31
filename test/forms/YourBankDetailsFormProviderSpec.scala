@@ -19,6 +19,7 @@ package forms
 import forms.behaviours.StringFieldBehaviours
 import org.scalacheck.Gen
 import play.api.data.FormError
+import org.scalacheck.Arbitrary.*
 
 class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
 
@@ -74,7 +75,7 @@ class YourBankDetailsFormProviderSpec extends StringFieldBehaviours {
       fieldName,
       maxLength   = maxLength,
       lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
-    )
+    )(arbitrary[Int].map(i => (i % 10).toChar))
 
     "not bind strings shorter than 6 characters" in {
       val result = form.bind(Map(fieldName -> "12345")).apply(fieldName)
