@@ -26,7 +26,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   lazy val host: String = configuration.get[String]("host")
   lazy val appName: String = configuration.get[String]("appName")
-  lazy val optimizelyProjectId: String = configuration.get[String]("optimizelyProjectId")
+  val optimizelyProjectId: Option[String] = configuration.getOptional[String]("optimizelyProjectId")
 
   private lazy val contactHost = configuration.get[String]("contact-frontend.host")
   private lazy val contactFormServiceIdentifier = configuration.get[String]("contact-frontend.serviceId")

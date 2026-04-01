@@ -55,7 +55,11 @@
             language            = Some(messages.lang.code)
         ))
     }
-    <script @CSPNonce.attr src=s"https://cdn.optimizely.com/js/@{appConfig.optimizelyProjectId}.js"></script>
+
+@if(@{appConfig.optimizelyProjectId}.exists) {
+    <script @CSPNonce.attr src=s"https://cdn.optimizely.com/js/@appConfig.optimizelyProjectId.js"></script>
+}
+
 }
 
 @content = {
