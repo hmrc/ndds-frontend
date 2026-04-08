@@ -63,7 +63,7 @@ class PaymentReferenceFormProvider @Inject() extends Mappings {
 
     Form(
       "value" -> text(key(src, "required"))
-        .transform[String](_.trim.toUpperCase, identity)
+        .transform[String](_.trim.toUpperCase.replaceAll(" ", ""), identity)
         .verifying(key(src, "required"), _.nonEmpty)
         .verifying(
           key(src, "invalidCharacters"),
