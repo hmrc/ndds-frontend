@@ -30,8 +30,17 @@ To start the server locally: `sbt run` or `sbt run 6990`
 
 To execute the scala formatter: `./run_all_checks.sh`
 
+
+| Environment | Url                                                                             |
+|-------------|---------------------------------------------------------------------------------|
+| **Local**   | http://localhost:6690/direct-debit/test-only/start-journey                      |
+| **Dev**     | https://www.development.tax.service.gov.uk/direct-debit/test-only/start-journey |
+| **QA**      | https://www.qa.tax.service.gov.uk/direct-debit/test-only/start-journey          |
+| **Staging** | https://www.staging.tax.service.gov.uk/direct-debit/test-only/start-journey     |
+
+
 Reference to Testing data: https://confluence.tools.tax.service.gov.uk/x/67m5B
 
 ### License
 
-This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
+This code is /open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
