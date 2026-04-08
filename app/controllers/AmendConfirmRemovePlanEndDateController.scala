@@ -127,7 +127,8 @@ class AmendConfirmRemovePlanEndDateController @Inject() (
                 ),
               value =>
                 for {
-                  updatedAnswers <- Future.fromTry(ua.set(AmendConfirmRemovePlanEndDatePage, value))
+                  updatedAnswers <- Future.fromTry(ua.remove(AmendPlanEndDatePage))
+                  updatedAnswers <- Future.fromTry(updatedAnswers.set(AmendConfirmRemovePlanEndDatePage, value))
                   updatedAnswers <- Future.fromTry(updatedAnswers.set(CurrentPageQuery, request.uri))
                   _              <- sessionRepository.set(updatedAnswers)
                 } yield Redirect(navigator.nextPage(AmendConfirmRemovePlanEndDatePage, mode, updatedAnswers))

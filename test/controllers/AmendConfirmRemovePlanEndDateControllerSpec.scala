@@ -21,7 +21,7 @@ import forms.AmendConfirmRemovePlanEndDateFormProvider
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import models.{NormalMode, PaymentPlanType, UserAnswers}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{times, verify, when}
 import org.scalactic.Prettifier.default
 import org.scalatestplus.mockito.MockitoSugar
 import pages.*
@@ -31,7 +31,7 @@ import play.api.inject.bind
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import queries.PaymentPlanDetailsQuery
+import queries.{CurrentPageQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import utils.DateTimeFormats.formattedDateTimeShort
@@ -177,6 +177,17 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
         .success
         .value
 
+      val expectedUpdatedUserAnswers = userAnswers
+        .remove(AmendPlanEndDatePage)
+        .success
+        .value
+        .set(AmendConfirmRemovePlanEndDatePage, true)
+        .success
+        .value
+        .set(CurrentPageQuery, amendConfirmRemovePlanEndDatePost)
+        .success
+        .value
+
       val application =
         applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[SessionRepository].toInstance(mockSessionRepository))
@@ -191,6 +202,8 @@ class AmendConfirmRemovePlanEndDateControllerSpec extends SpecBase with MockitoS
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
+
+        verify(mockSessionRepository, times(1)).set(expectedUpdatedUserAnswers)
       }
     }
 
