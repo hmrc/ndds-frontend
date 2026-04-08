@@ -49,6 +49,19 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
     DirectDebitSource.OL   -> "XAB12345678901" // matches OL regex; 3rd char != 'M'
   )
 
+  // Updated valid dummy values per current provider
+  private val dummyValuesWithMidSpaces: Map[DirectDebitSource, String] = Map(
+    DirectDebitSource.CT   -> "8337018 376A00108A",
+    DirectDebitSource.MGD  -> "XVM000 05554321",
+    DirectDebitSource.NIC  -> "600340 016213526259",
+    DirectDebitSource.PAYE -> "123PA 12345678", // 3 digits + P + 1 letter + 7 digits + optional digit (13 chars)
+    DirectDebitSource.SA   -> "123456 7890K",
+    DirectDebitSource.SDLT -> "1234 56789MA", // 9 digits + M + letter
+    DirectDebitSource.TC   -> "AB1234 56789012NA", // 2 letters + 12 digits + N + letter
+    DirectDebitSource.VAT  -> "12345 6789", // 9+ digits only
+    DirectDebitSource.OL   -> "XAB123 45678901" // matches OL regex; 3rd char != 'M'
+  )
+
   private def form(
     source: DirectDebitSource,
     validator: String => Boolean = _ => true
@@ -66,9 +79,16 @@ class PaymentReferenceFormProviderSpec extends StringFieldBehaviours {
       val invalidFormatKey = s"paymentReference.$baseKey.invalidFormat"
       val invalidKey = s"paymentReference.$baseKey.invalid"
 
-      "trim spaces before validating" in {
+      "trim spaces at ends before validating" in {
         val result =
           form(source).bind(Map(fieldName -> s"  ${dummyValues(source)}  "))
+        result.errors mustBe empty
+        result.value mustBe Some(dummyValues(source))
+      }
+
+      "trim spaces inside before validating" in {
+        val result =
+          form(source).bind(Map(fieldName -> s" ${dummyValuesWithMidSpaces(source)}"))
         result.errors mustBe empty
         result.value mustBe Some(dummyValues(source))
       }

@@ -104,7 +104,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
 
     "must fail to validate SA reference with incorrect format" in {
       val validation = summon[ReferenceTypeValidator.Validator[SA.type]]
-      val invalidSAReference = Seq("1234567890K", "5829820384Z", "1829820384K", "5829830384K")
+      val invalidSAReference = Seq("1234567890K", "5829820384Z", "5829820384K ", "5829820384K ", " 5829820384K", "1829820384K", "5829830384K")
       invalidSAReference.foreach(ref => validation.validate(ref) mustEqual false)
     }
 
