@@ -106,11 +106,9 @@
         )
     ))
 
-    @govukInsetText(
-        InsetText(
-        content = Text(messages("advanceNotice.print.inset"))
-        )
-    )
+    <p class = "govuk-body-m" id="printPage">
+        <a href="#" data-module="hmrc-print-link" class="govuk-link" id="print-page">@messages("advanceNotice.print.inset")</a>
+    </p>
 
     @paragraphWithLink(
         linkMessage = messages("advanceNotice.returnLink"),
