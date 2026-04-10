@@ -50,11 +50,9 @@
         rows = rows
     ))
 
-    @govukInsetText(
-        InsetText(
-            content = Text(messages("paymentPlanCancelled.pleaseNote"))
-        )
-    )
+    <p class = "govuk-body-m" id="printPage">
+        <a href="#" data-module="hmrc-print-link" class="govuk-link" id="print-page">@messages("paymentPlanCancelled.pleaseNote")</a>
+    </p>
 
     @link("paymentPlanCancelled.link", call.url)
 

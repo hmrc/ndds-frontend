@@ -470,7 +470,7 @@ directDebitConfirmation.singlePaymentPlan = Single payment
 directDebitConfirmation.variablePaymentPlan = Variable payment
 directDebitConfirmation.budgetPaymentPlan = Budget payment
 directDebitConfirmation.taxCreditRepaymentPlan = Tax Credit repayment
-directDebitConfirmation.printInset = You can print this page for your records using the print function on your browser.
+directDebitConfirmation.print = You can print this page for your records using the print function on your browser.
 directDebitConfirmation.viewDirectDebitInstructions = Return to Direct Debit Instructions
 
 directDebitPaymentSummary.title.paginated = {0} (page {1} of {2})
@@ -673,7 +673,7 @@ advanceNotice.yourPaymentDetails = Your payment details
 advanceNotice.yourPaymentDetails.reference = Payment reference
 advanceNotice.yourPaymentDetails.totalAmount = Amount to be collected
 advanceNotice.yourPaymentDetails.dueDate = Date of collection
-advanceNotice.print.inset = You can print this page for your records using the print function on your browser.
+advanceNotice.print = You can print this page for your records using the print function on your browser.
 advanceNotice.returnLink = Return to payment plan
 
 pageNotFound.title      = Page not found
@@ -772,7 +772,7 @@ amendPaymentPlanUpdate.directDebit.accountName = Name on the account
 amendPaymentPlanUpdate.directDebit.accountNumber = Account number
 amendPaymentPlanUpdate.directDebit.sortCode = Sort code
 amendPaymentPlanUpdate.amendedPlan = Your amended payment plan
-amendPaymentPlanUpdate.printInset = You can print this page for your records using the print function on your browser.
+amendPaymentPlanUpdate.print = You can print this page for your records using the print function on your browser.
 amendPaymentPlanUpdate.returnLink = Return to payment plan
 
 amendDuplicateWarning.title = You already have a payment plan with these details

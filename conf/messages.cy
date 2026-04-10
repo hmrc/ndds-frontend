@@ -470,7 +470,7 @@ directDebitConfirmation.singlePaymentPlan = Taliad unigol
 directDebitConfirmation.variablePaymentPlan = Taliad newidiol
 directDebitConfirmation.budgetPaymentPlan = Taliad cyllidebol
 directDebitConfirmation.taxCreditRepaymentPlan = Ad-daliad credydau treth
-directDebitConfirmation.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
+directDebitConfirmation.print = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
 directDebitConfirmation.viewDirectDebitInstructions = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol
 
 directDebitPaymentSummary.title.paginated = {0} (tudalen {1} o {2})
@@ -673,7 +673,7 @@ advanceNotice.yourPaymentDetails = Eich manylion talu
 advanceNotice.yourPaymentDetails.reference = Cyfeirnod talu
 advanceNotice.yourPaymentDetails.totalAmount = Swm i’w gasglu
 advanceNotice.yourPaymentDetails.dueDate = Dyddiad casglu
-advanceNotice.print.inset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
+advanceNotice.print = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
 advanceNotice.returnLink = Yn ôl i’r cynllun talu
 
 pageNotFound.title      = Heb ddod o hyd i’r dudalen
@@ -772,7 +772,7 @@ amendPaymentPlanUpdate.directDebit.accountName = Yr enw sydd ar y cyfrif
 amendPaymentPlanUpdate.directDebit.accountNumber = Rhif y cyfrif
 amendPaymentPlanUpdate.directDebit.sortCode = Cod didoli
 amendPaymentPlanUpdate.amendedPlan = Eich cynllun talu sydd wedi’i ddiwygio
-amendPaymentPlanUpdate.printInset = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
+amendPaymentPlanUpdate.print = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr.
 amendPaymentPlanUpdate.returnLink = Yn ôl i’r cynllun talu
 
 amendDuplicateWarning.title = Mae gennych gynllun talu eisoes gyda’r manylion hyn
