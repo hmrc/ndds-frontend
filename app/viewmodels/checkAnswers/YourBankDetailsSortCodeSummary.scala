@@ -28,30 +28,15 @@ import viewmodels.implicits.*
 
 object YourBankDetailsSortCodeSummary {
 
-  def row(answers: UserAnswers)(implicit messages: Messages): Option[SummaryListRow] =
+  def row(answers: UserAnswers, key: String, showChange: Boolean)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(YourBankDetailsPage).map { answer =>
 
-      val value = HtmlFormat.escape(answer.sortCode).toString
-
-      SummaryListRowViewModel(
-        key   = "bankDetailsCheckYourAnswer.account.sort.code",
-        value = ValueViewModel(HtmlContent(value.replaceAll("[\\s-]", ""))),
-        actions = Seq(
-          ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#sortCode")
-            .withVisuallyHiddenText(messages("bankDetailsCheckYourAnswer.account.sort.code"))
-        )
-      )
-    }
-
-  def row(answers: UserAnswers, showChange: Boolean = false)(implicit messages: Messages): Option[SummaryListRow] =
-    answers.get(YourBankDetailsPage).map { answer =>
-
-      val formattedSortCode = answer.sortCode.grouped(2).mkString(" ")
+      val formattedSortCode = answer.sortCode.filter(_.isDigit).grouped(2).mkString(" ")
       val value = HtmlFormat.escape(formattedSortCode).toString
 
       SummaryListRowViewModel(
         key   = "directDebitConfirmation.sortCode",
-        value = ValueViewModel(HtmlContent(value.replaceAll("[\\s-]", ""))),
+        value = ValueViewModel(HtmlContent(value)),
         actions = if (showChange) {
           Seq(
             ActionItemViewModel("site.change", routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#sortCode")

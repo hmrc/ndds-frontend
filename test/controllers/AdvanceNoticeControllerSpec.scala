@@ -120,6 +120,9 @@ class AdvanceNoticeControllerSpec extends SpecBase {
 
         status(result) mustEqual OK
         contentAsString(result) mustEqual expectedView.toString
+
+        // check the sort code
+        contentAsString(result) must include("12 34 56")
       }
     }
   }

@@ -138,7 +138,7 @@ class DirectDebitConfirmationController @Inject() (
             actions = Seq.empty
           )
         }
-        .orElse(YourBankDetailsSortCodeSummary.row(request.userAnswers, false))
+        .orElse(YourBankDetailsSortCodeSummary.row(request.userAnswers, "directDebitConfirmation.sortCode", showChange = false))
 
     val directDebitDetails = SummaryListViewModel(
       rows = Seq(

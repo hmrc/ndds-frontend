@@ -111,7 +111,7 @@ class BankDetailsCheckYourAnswerControllerSpec extends SpecBase with MockitoSuga
         html must include("Check your answers")
         html must include("Your bank details")
         html must include("Account Holder Name")
-        html must include("123212")
+        html must include("12 32 12")
         html must include("34211234")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountHolderName\"")
         html must include("href=\"" + routes.YourBankDetailsController.onPageLoad(CheckMode).url + "#accountNumber\"")
