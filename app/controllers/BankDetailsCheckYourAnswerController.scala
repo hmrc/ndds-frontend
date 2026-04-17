@@ -92,7 +92,7 @@ class BankDetailsCheckYourAnswerController @Inject() (
       rows = Seq(
         YourBankDetailsAccountHolderNameSummary.row(answers),
         YourBankDetailsAccountNumberSummary.row(answers),
-        YourBankDetailsSortCodeSummary.row(answers),
+        YourBankDetailsSortCodeSummary.row(answers, "bankDetailsCheckYourAnswer.account.sort.code", showChange = true),
         YourBankDetailsNameSummary.row(answers),
         YourBankDetailsAddressSummary.row(answers)
       ).flatten

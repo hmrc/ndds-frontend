@@ -92,7 +92,7 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
             ),
             YourBankDetailsAccountHolderNameSummary.row(userAnswers, false),
             YourBankDetailsAccountNumberSummary.row(userAnswers, false),
-            YourBankDetailsSortCodeSummary.row(userAnswers, false)
+            YourBankDetailsSortCodeSummary.row(userAnswers, "directDebitConfirmation.sortCode", showChange = false)
           ).collect { case Some(row) => row }
         )
 

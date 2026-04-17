@@ -82,7 +82,7 @@
             ),
             SummaryListRow(
                 key = Key(content = messages("advanceNotice.directDebit.sortCode")),
-                value = Value(content = HtmlContent(sortCode))
+                value = Value(content = HtmlContent(sortCode.filter(_.isDigit).grouped(2).mkString(" ")))
             )
         )
     ))

@@ -68,7 +68,7 @@ class AmendPaymentPlanUpdateController @Inject() (
         val formattedStartDateLong = startDate.format(dateFormatLong)
         val directDebitDetails = paymentPlan.directDebitDetails
         val formattedSortCode = directDebitDetails.bankSortCode
-          .map(sc => sc.grouped(2).mkString(" "))
+          .map(sc => sc.filter(_.isDigit).grouped(2).mkString(" "))
           .getOrElse("")
         val submissionDate = paymentPlan.paymentPlanDetails.submissionDateTime
         val scheduledFrequency = paymentPlan.paymentPlanDetails.scheduledPaymentFrequency
