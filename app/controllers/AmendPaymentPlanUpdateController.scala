@@ -27,7 +27,7 @@ import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanR
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Constants
+import utils.{Constants, MaskAndFormatUtils}
 import utils.MaskAndFormatUtils.formatAmount
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
@@ -67,9 +67,7 @@ class AmendPaymentPlanUpdateController @Inject() (
           DateTimeFormatter.ofPattern(Constants.longDateTimeFormatPattern, messages.lang.locale)
         val formattedStartDateLong = startDate.format(dateFormatLong)
         val directDebitDetails = paymentPlan.directDebitDetails
-        val formattedSortCode = directDebitDetails.bankSortCode
-          .map(sc => sc.filter(_.isDigit).grouped(2).mkString(" "))
-          .getOrElse("")
+        val formattedSortCode = directDebitDetails.bankSortCode.map(MaskAndFormatUtils.formatSortCode).getOrElse("")
         val submissionDate = paymentPlan.paymentPlanDetails.submissionDateTime
         val scheduledFrequency = paymentPlan.paymentPlanDetails.scheduledPaymentFrequency
         val paymentRef = paymentPlan.paymentPlanDetails.paymentReference

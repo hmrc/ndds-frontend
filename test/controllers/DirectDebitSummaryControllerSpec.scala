@@ -80,6 +80,9 @@ class DirectDebitSummaryControllerSpec extends SpecBase with DirectDebitDetailsD
         html must include("Payment amount")
         html must include("Manage plan")
         html must include("Summary of payment plans for this Direct Debit")
+
+        // check the sort code
+        html must include("so ** **")
       }
     }
 

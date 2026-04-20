@@ -131,6 +131,9 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
         )(request, messages).toString
 
         contentAsString(result) mustEqual expectedHtml
+
+        // check the sort code
+        contentAsString(result) must include("20 51 42")
       }
     }
 

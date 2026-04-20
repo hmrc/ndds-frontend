@@ -15,6 +15,7 @@
  *@
 
 @import views.html.components.*
+@import utils.MaskAndFormatUtils
 
 @this(
         layout: templates.Layout,
@@ -82,7 +83,7 @@
             ),
             SummaryListRow(
                 key = Key(content = messages("advanceNotice.directDebit.sortCode")),
-                value = Value(content = HtmlContent(sortCode.filter(_.isDigit).grouped(2).mkString(" ")))
+                value = Value(content = HtmlContent(MaskAndFormatUtils.formatSortCode(sortCode)))
             )
         )
     ))
