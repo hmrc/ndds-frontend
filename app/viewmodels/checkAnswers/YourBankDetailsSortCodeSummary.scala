@@ -23,6 +23,7 @@ import play.api.i18n.Messages
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import utils.MaskAndFormatUtils
 import viewmodels.govuk.summarylist.*
 import viewmodels.implicits.*
 
@@ -31,7 +32,7 @@ object YourBankDetailsSortCodeSummary {
   def row(answers: UserAnswers, key: String, showChange: Boolean)(implicit messages: Messages): Option[SummaryListRow] =
     answers.get(YourBankDetailsPage).map { answer =>
 
-      val formattedSortCode = answer.sortCode.filter(_.isDigit).grouped(2).mkString(" ")
+      val formattedSortCode = MaskAndFormatUtils.formatSortCode(answer.sortCode)
       val value = HtmlFormat.escape(formattedSortCode).toString
 
       SummaryListRowViewModel(

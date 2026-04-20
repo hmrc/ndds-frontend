@@ -24,7 +24,7 @@ import java.util.Locale
 object MaskAndFormatUtils {
 
   def maskSortCode(sortCode: String): String =
-    sortCode.take(2) + "****"
+    (sortCode.take(2) + " ** **").trim
 
   def maskAccountNumber(accountNumber: String): String =
     "****" + accountNumber.drop(4)
@@ -42,4 +42,8 @@ object MaskAndFormatUtils {
     val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.UK)
     currencyFormatter.format(amount)
   }
+
+  def formatSortCode(sortCode: String): String =
+    sortCode.filter(_.isDigit).grouped(2).mkString(" ")
+
 }

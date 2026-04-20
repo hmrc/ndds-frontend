@@ -27,7 +27,7 @@ import queries.ExistingDirectDebitIdentifierQuery
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Constants
+import utils.{Constants, MaskAndFormatUtils}
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import views.html.DirectDebitConfirmationView
@@ -134,7 +134,7 @@ class DirectDebitConfirmationController @Inject() (
         .map { v =>
           SummaryListRowViewModel(
             key     = Key(Text(messages("directDebitConfirmation.sortCode"))),
-            value   = ValueViewModel(Text(v.replaceAll("[\\s-]", ""))),
+            value   = ValueViewModel(Text(MaskAndFormatUtils.formatSortCode(v))),
             actions = Seq.empty
           )
         }

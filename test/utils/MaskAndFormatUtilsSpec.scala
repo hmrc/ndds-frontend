@@ -25,13 +25,13 @@ class MaskAndFormatUtilsSpec extends AnyFreeSpec with Matchers {
 
     "maskSortCode" - {
       "should mask with first 2 digits and 4 asterisks" in {
-        MaskAndFormatUtils.maskSortCode("123456") mustEqual "12****"
+        MaskAndFormatUtils.maskSortCode("123456") mustEqual "12 ** **"
       }
 
       "should handle short sort codes by still adding ****" in {
-        MaskAndFormatUtils.maskSortCode("12") mustEqual "12****"
-        MaskAndFormatUtils.maskSortCode("1") mustEqual "1****"
-        MaskAndFormatUtils.maskSortCode("") mustEqual "****"
+        MaskAndFormatUtils.maskSortCode("12") mustEqual "12 ** **"
+        MaskAndFormatUtils.maskSortCode("1") mustEqual "1 ** **"
+        MaskAndFormatUtils.maskSortCode("") mustEqual "** **"
       }
     }
 
@@ -55,5 +55,13 @@ class MaskAndFormatUtilsSpec extends AnyFreeSpec with Matchers {
         MaskAndFormatUtils.formatDateToGds("15/12/2023") mustEqual "15 December 2023"
       }
     }
+
+    "formatSortCode" - {
+      "should format sort code with spaces" in {
+        MaskAndFormatUtils.formatSortCode("123456") mustEqual "12 34 56"
+        MaskAndFormatUtils.formatSortCode("12-34-56") mustEqual "12 34 56"
+      }
+    }
+
   }
 }
