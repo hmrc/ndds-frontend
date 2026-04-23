@@ -95,7 +95,11 @@ class PaymentPlanDetailsController @Inject() (
               updatedAnswers        <- Future.fromTry(updatedAnswers.set(AdvanceNoticeResponseQuery, advanceNoticeResponse))
               _                     <- sessionRepository.set(updatedAnswers)
             } yield {
-              val showAmendLink = isAmendLinkVisible(showAllActionsFlag, planDetail)
+              val showAmendLink =
+                if (planDetail.planType == PaymentPlanType.BudgetPaymentPlan.toString)
+                  false
+                else
+                  isAmendLinkVisible(showAllActionsFlag, planDetail)
               val showCancelLink = isCancelLinkVisible(showAllActionsFlag, planDetail)
               val showSuspendLink = isSuspendLinkVisible(showAllActionsFlag, planDetail)
               val summaryRows: Seq[SummaryListRow] = buildSummaryRows(showAllActionsFlag, planDetail)

@@ -37,7 +37,6 @@ trait CurrencyFieldBehaviours extends FieldBehaviours {
 
     "must bind values with spaces" in {
       val result = form.bind(Map(fieldName -> " 12 3 . 4 5  "))
-      println(result.errors.toString)
       result.value mustBe Some(BigDecimal("123.45"))
     }
 

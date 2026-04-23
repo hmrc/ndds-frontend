@@ -359,7 +359,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
                   mockPaymentReference,
-                  true,
+                  false,
                   true,
                   true,
                   false,
@@ -439,7 +439,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
                   mockPaymentReference,
-                  true,
+                  false,
                   true,
                   true,
                   false,
@@ -518,7 +518,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 status(result) mustEqual OK
                 contentAsString(result) mustEqual view("budgetPaymentPlan",
                                                        mockPaymentReference,
-                                                       true,
+                                                       false,
                                                        true,
                                                        true,
                                                        false,
@@ -769,7 +769,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
                   mockPaymentReference,
-                  true,
+                  false,
                   true,
                   false,
                   true,
@@ -857,7 +857,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
                   mockPaymentReference,
-                  true,
+                  false,
                   true,
                   false,
                   true,
@@ -945,7 +945,7 @@ class PaymentPlanDetailsControllerSpec extends SpecBase {
                 contentAsString(result) mustEqual view(
                   "budgetPaymentPlan",
                   mockPaymentReference,
-                  true,
+                  false,
                   true,
                   false,
                   true,
