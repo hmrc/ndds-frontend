@@ -96,7 +96,6 @@ class PaymentPlanDetailsController @Inject() (
               _                     <- sessionRepository.set(updatedAnswers)
             } yield {
               val showAmendLink =
-                println(planDetail.planType)
                 if (planDetail.planType == PaymentPlanType.BudgetPaymentPlan.toString)
                   false
                 else
