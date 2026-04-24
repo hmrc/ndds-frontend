@@ -37,7 +37,10 @@
                 field  = form("value"),
                 legend = LegendViewModel(messages("personalOrBusinessAccount.heading")).asPageHeading(),
                 items  = PersonalOrBusinessAccount.options
-            )
+            ).withHint(Hint(
+                content = Messages("personalOrBusinessAccount.hint"),
+                classes = "govuk-hint")
+                )
         )
 
         @govukButton(

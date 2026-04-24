@@ -74,11 +74,12 @@ setUpDirectDebitPayment.more.bullet.l3 = Rheoli’ch taliadau Debyd Uniongyrchol
 setUpDirectDebitPayment.more.bullet.l4 = Y Warant Debyd Uniongyrchol
 setupDirectDebitPayment.startNow = Dechrau nawr
 
-personalOrBusinessAccount.title = A yw’r cyfrif hwn yn un personol neu’n un busnes?
-personalOrBusinessAccount.heading = A yw’r cyfrif hwn yn un personol neu’n un busnes?
-personalOrBusinessAccount.personal = Personol
-personalOrBusinessAccount.business = Busnes
-personalOrBusinessAccount.error.required = Dewiswch a yw hwn yn gyfrif personol neu’n un busnes
+personalOrBusinessAccount.title = Pa fath o gyfrif banc ydych chi’n ei roi?
+personalOrBusinessAccount.heading = Pa fath o gyfrif banc ydych chi’n ei roi?
+personalOrBusinessAccount.personal = Cyfrif banc personol
+personalOrBusinessAccount.business = Cyfrif banc busnes
+personalOrBusinessAccount.hint = Mae’n rhaid i’r manylion banc rydych yn eu darparu fod ar gyfer cyfrif banc yn y DU
+personalOrBusinessAccount.error.required = Dewiswch pa fath o gyfrif yr ydych yn ei ddarparu
 
 yourBankDetails.title = Beth yw manylion y cyfrif banc?
 yourBankDetails.heading = Beth yw manylion y cyfrif banc?
