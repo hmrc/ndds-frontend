@@ -74,11 +74,12 @@ setUpDirectDebitPayment.more.bullet.l3 = Managing your Direct Debit payments
 setUpDirectDebitPayment.more.bullet.l4 = The Direct Debit Guarantee
 setupDirectDebitPayment.startNow = Start now
 
-personalOrBusinessAccount.title = Is this a personal or business account?
-personalOrBusinessAccount.heading = Is this a personal or business account?
-personalOrBusinessAccount.personal = Personal
-personalOrBusinessAccount.business = Business
-personalOrBusinessAccount.error.required = Select if this is a personal or business account
+personalOrBusinessAccount.title = Which type of bank account are you providing?
+personalOrBusinessAccount.heading = Which type of bank account are you providing?
+personalOrBusinessAccount.personal = Personal bank account
+personalOrBusinessAccount.business = Business bank account
+personalOrBusinessAccount.hint = The bank details you provide must be for a UK bank account
+personalOrBusinessAccount.error.required = Select what type of account details you are providing
 
 yourBankDetails.title = What are the bank account details?
 yourBankDetails.heading = What are the bank account details?
