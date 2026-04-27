@@ -16,17 +16,21 @@
 
 package navigation
 
+import com.typesafe.config.Config
 import controllers.routes
 import models.*
 import models.DirectDebitSource.*
 import models.PaymentPlanType.*
 import pages.*
+import play.api.Logging
 import play.api.mvc.Call
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class Navigator @Inject() () {
+class Navigator @Inject() (config: Config) extends Logging {
+
+  val isSaBppEnabled = config.getBoolean("features.sa-bpp")
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case PaymentDatePage                      => _ => routes.CheckYourAnswersController.onPageLoad()
@@ -96,6 +100,7 @@ class Navigator @Inject() () {
     val optPaymentType = userAnswers.get(PaymentPlanTypePage)
     sourceType match {
       case Some(OL) | Some(NIC) | Some(CT) | Some(SDLT) | Some(VAT) => routes.PaymentAmountController.onPageLoad(NormalMode)
+      case Some(DirectDebitSource.SA) if !isSaBppEnabled            => routes.PaymentAmountController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.MGD) if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan) =>
         routes.PaymentAmountController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.SA) if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan) =>
@@ -109,7 +114,9 @@ class Navigator @Inject() () {
         routes.PaymentsFrequencyController.onPageLoad(NormalMode)
       case Some(DirectDebitSource.TC) if optPaymentType.contains(PaymentPlanType.TaxCreditRepaymentPlan) =>
         routes.TotalAmountDueController.onPageLoad(NormalMode)
-      case _ => routes.SystemErrorController.onPageLoad()
+      case sourceType =>
+        logger.warn(s"Could not find next route for PaymentReferencePage with DirectDebitSource: $sourceType and PaymentPlanType: $optPaymentType")
+        routes.SystemErrorController.onPageLoad()
     }
   }
 
@@ -123,8 +130,9 @@ class Navigator @Inject() () {
   private def checkDirectDebitSource(userAnswers: UserAnswers): Call =
     val answer: Option[DirectDebitSource] = userAnswers.get(DirectDebitSourcePage)
     answer match {
-      case Some(MGD) | Some(SA) | Some(TC) => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
-      case _                               => routes.PaymentReferenceController.onPageLoad(NormalMode)
+      case Some(MGD) | Some(TC)       => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+      case Some(SA) if isSaBppEnabled => routes.PaymentPlanTypeController.onPageLoad(NormalMode)
+      case _                          => routes.PaymentReferenceController.onPageLoad(NormalMode)
     }
 
   private def checkPaymentPlanLogic(userAnswers: UserAnswers, mode: Mode): Call = {

@@ -279,6 +279,7 @@ class CheckYourAnswersController @Inject() (
     val optPaymentType = ua.get(PaymentPlanTypePage)
     optSourceType.exists {
       case OL | NIC | CT | SDLT | VAT | PAYE                                                   => true
+      case DirectDebitSource.SA if !appConfig.isSaBppEnabled                                   => true
       case DirectDebitSource.MGD if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan) => true
       case DirectDebitSource.SA if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan)  => true
       case DirectDebitSource.TC if optPaymentType.contains(PaymentPlanType.SinglePaymentPlan)  => true

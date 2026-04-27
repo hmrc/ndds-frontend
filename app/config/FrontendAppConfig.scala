@@ -24,76 +24,77 @@ import play.api.mvc.RequestHeader
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
-  lazy val host: String = configuration.get[String]("host")
-  lazy val appName: String = configuration.get[String]("appName")
+  val host: String = configuration.get[String]("host")
+  val appName: String = configuration.get[String]("appName")
 
-  private lazy val contactHost = configuration.get[String]("contact-frontend.host")
-  private lazy val contactFormServiceIdentifier = configuration.get[String]("contact-frontend.serviceId")
+  private val contactHost = configuration.get[String]("contact-frontend.host")
+  private val contactFormServiceIdentifier = configuration.get[String]("contact-frontend.serviceId")
 
-  lazy val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-enabled")
-  lazy val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-not-enabled")
-  lazy val TWO_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.two-days")
-  lazy val THREE_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.three-days")
-  lazy val TEN_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.ten-days")
+  val paymentDelayDynamicAuddisEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-enabled")
+  val paymentDelayDynamicAuddisNotEnabled: Int = configuration.get[Int]("working-days-delay.dynamic-delay-with-auddis-not-enabled")
+  val TWO_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.two-days")
+  val THREE_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.three-days")
+  val TEN_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.ten-days")
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"
 
-  lazy val loginUrl: String = configuration.get[String]("urls.login")
-  lazy val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
-  lazy val signOutUrl: String = configuration.get[String]("urls.signOut")
-  lazy val payingHmrcUrl: String = configuration.get[String]("urls.payingHmrc")
-  lazy val hmrcHelplineUrl: String = configuration.get[String]("urls.hmrcHelpline")
-  lazy val selfAssessmentUrl: String = configuration.get[String]("urls.selfAssessment")
-  lazy val paymentProblemUrl: String = configuration.get[String]("urls.paymentProblem")
-  lazy val hmrcOnlineServiceDeskUrl: String = configuration.get[String]("urls.hmrcOnlineServiceDesk")
-  lazy val govUKUrl: String = configuration.get[String]("urls.govUK")
-  lazy val paymentEarlyLateUrl: String = configuration.get[String]("urls.paymentEarlyLate")
-  lazy val p11DPaymentUrl: String = configuration.get[String]("urls.p11DPayment")
-  lazy val payMonthlyUrl: String = configuration.get[String]("urls.payMonthly")
-  lazy val payQuarterlyUrl: String = configuration.get[String]("urls.payQuarterly")
+  val loginUrl: String = configuration.get[String]("urls.login")
+  val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
+  val signOutUrl: String = configuration.get[String]("urls.signOut")
+  val payingHmrcUrl: String = configuration.get[String]("urls.payingHmrc")
+  val hmrcHelplineUrl: String = configuration.get[String]("urls.hmrcHelpline")
+  val selfAssessmentUrl: String = configuration.get[String]("urls.selfAssessment")
+  val paymentProblemUrl: String = configuration.get[String]("urls.paymentProblem")
+  val hmrcOnlineServiceDeskUrl: String = configuration.get[String]("urls.hmrcOnlineServiceDesk")
+  val govUKUrl: String = configuration.get[String]("urls.govUK")
+  val paymentEarlyLateUrl: String = configuration.get[String]("urls.paymentEarlyLate")
+  val p11DPaymentUrl: String = configuration.get[String]("urls.p11DPayment")
+  val payMonthlyUrl: String = configuration.get[String]("urls.payMonthly")
+  val payQuarterlyUrl: String = configuration.get[String]("urls.payQuarterly")
 
-  private val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
-  lazy val exitSurveyUrl: String = s"$exitSurveyBaseUrl/feedback/ndds-frontend"
+  private lazy val exitSurveyBaseUrl: String = configuration.get[Service]("microservice.services.feedback-frontend").baseUrl
+  val exitSurveyUrl: String = s"$exitSurveyBaseUrl/feedback/ndds-frontend"
 
-  lazy val languageTranslationEnabled: Boolean = configuration.get[Boolean]("features.welsh-translation")
-  lazy val maxNumberDDIsAllowed: Int = configuration.get[Int]("features.maxNumberDDIsAllowed")
-  lazy val maxNumberPPsAllowed: Int = configuration.get[Int]("features.maxNumberPPsAllowed")
-  lazy val isLockServiceEnabled: Boolean = configuration.get[Boolean]("features.enableLockService")
+  val languageTranslationEnabled: Boolean = configuration.get[Boolean]("features.welsh-translation")
+  val maxNumberDDIsAllowed: Int = configuration.get[Int]("features.maxNumberDDIsAllowed")
+  val maxNumberPPsAllowed: Int = configuration.get[Int]("features.maxNumberPPsAllowed")
+  val isLockServiceEnabled: Boolean = configuration.get[Boolean]("features.enableLockService")
+  val isSaBppEnabled: Boolean = configuration.get[Boolean]("features.sa-bpp")
 
   def languageMap: Map[String, Lang] = Map(
     "en" -> Lang("en"),
     "cy" -> Lang("cy")
   )
 
-  lazy val timeout: Int = configuration.get[Int]("timeout-dialog.timeout")
-  lazy val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
+  val timeout: Int = configuration.get[Int]("timeout-dialog.timeout")
+  val countdown: Int = configuration.get[Int]("timeout-dialog.countdown")
 
-  lazy val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+  val cacheTtl: Long = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
-  lazy val minimumLiabilityAmount: BigDecimal =
+  val minimumLiabilityAmount: BigDecimal =
     BigDecimal(configuration.get[String]("payment-validation.minimumLiabilityAmount"))
 
   // Derived payment plan config
-  lazy val tcTotalNumberOfPayments: Int =
+  val tcTotalNumberOfPayments: Int =
     configuration.get[Int]("paymentSchedule.tc.totalNumberOfPayments")
 
-  lazy val tcNumberOfEqualPayments: Int =
+  val tcNumberOfEqualPayments: Int =
     configuration.get[Int]("paymentSchedule.tc.numberOfEqualPayments")
 
-  lazy val macKey: String =
+  val macKey: String =
     configuration.get[String]("mac.key")
 
-  lazy val bacsNumber: String =
+  val bacsNumber: String =
     configuration.get[String]("barsClient.serviceUserNumber")
 
-  lazy val tcMonthsUntilSecondPayment: Int =
+  val tcMonthsUntilSecondPayment: Int =
     configuration.get[Int]("paymentSchedule.tc.monthsUntilSecondPayment")
 
-  lazy val tcMonthsUntilPenultimatePayment: Int =
+  val tcMonthsUntilPenultimatePayment: Int =
     configuration.get[Int]("paymentSchedule.tc.monthsUntilPenultimatePayment")
 
-  lazy val tcMonthsUntilFinalPayment: Int =
+  val tcMonthsUntilFinalPayment: Int =
     configuration.get[Int]("paymentSchedule.tc.monthsUntilFinalPayment")
 
 }

@@ -16,11 +16,12 @@
 
 package navigation
 
+import com.typesafe.config.{Config, ConfigFactory}
 import models.{Mode, UserAnswers}
 import pages.*
 import play.api.mvc.Call
 
-class FakeNavigator(desiredRoute: Call) extends Navigator {
+class FakeNavigator(desiredRoute: Call, config: Config = ConfigFactory.parseString("features.sa-bpp = false")) extends Navigator(config) {
 
   override def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call =
     desiredRoute
