@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.*
 import forms.PaymentReferenceFormProvider
 import models.DirectDebitSource.{MGD, SA, TC}
@@ -23,7 +24,7 @@ import models.{DirectDebitSource, Mode}
 import navigation.Navigator
 import pages.{DirectDebitSourcePage, PaymentReferencePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import validation.ReferenceTypeValidatorMap
@@ -41,10 +42,18 @@ class PaymentReferenceController @Inject() (
   requireData: DataRequiredAction,
   formProvider: PaymentReferenceFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: PaymentReferenceView
+  view: PaymentReferenceView,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
+
+  private def backLocation(directDebitSource: Option[DirectDebitSource], mode: Mode): Call =
+    if (directDebitSource.contains(MGD) || (directDebitSource.contains(SA) && appConfig.isSaBppEnabled) || directDebitSource.contains(TC)) {
+      routes.PaymentPlanTypeController.onPageLoad(mode)
+    } else {
+      routes.DirectDebitSourceController.onPageLoad(mode)
+    }
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val answers = request.userAnswers
@@ -61,12 +70,7 @@ class PaymentReferenceController @Inject() (
           case None        => form
           case Some(value) => form.fill(value)
         }
-
-        if (selectedAnswers.contains(MGD) || selectedAnswers.contains(SA) || selectedAnswers.contains(TC)) {
-          Ok(view(preparedForm, mode, selectedAnswers, routes.PaymentPlanTypeController.onPageLoad(mode)))
-        } else {
-          Ok(view(preparedForm, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode)))
-        }
+        Ok(view(preparedForm, mode, selectedAnswers, backLocation(selectedAnswers, mode)))
     }
   }
 
@@ -84,12 +88,7 @@ class PaymentReferenceController @Inject() (
         form
           .bindFromRequest()
           .fold(
-            formWithErrors =>
-              if (selectedAnswers.contains(MGD) || selectedAnswers.contains(SA) || selectedAnswers.contains(TC)) {
-                Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, routes.PaymentPlanTypeController.onPageLoad(mode))))
-              } else {
-                Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, routes.DirectDebitSourceController.onPageLoad(mode))))
-              },
+            formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, backLocation(selectedAnswers, mode)))),
             value =>
               for {
                 updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, value))

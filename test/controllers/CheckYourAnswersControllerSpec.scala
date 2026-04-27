@@ -48,7 +48,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
   private val mockNddService: NationalDirectDebitService = mock[NationalDirectDebitService]
   private val mockMacGenerator: MacGenerator = mock[MacGenerator]
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
 
   "Check Your Answers Controller" - {
     val userAnswer = emptyUserAnswers
@@ -57,570 +56,426 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
       .setOrException(PaymentAmountPage, 123.01)
       .setOrException(PaymentDatePage, paymentDateDetails)
 
-    // GET tests
-    "must return OK and the correct view if CT selected for a GET" in {
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
+    "when handling GET requests" - {
 
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include(
-          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
-        )
-        contentAsString(result) must include("Payment reference")
-        contentAsString(result) must include("Payment amount")
-        contentAsString(result) must include("123.01")
-        contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 Jul 2025")
-        contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and submit")
+      "must return OK and the correct view if CT selected" in {
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("The Direct Debit Guarantee")
+          contentAsString(result) must include(
+            "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+          )
+          contentAsString(result) must include("Payment reference")
+          contentAsString(result) must include("Payment amount")
+          contentAsString(result) must include("123.01")
+          contentAsString(result) must include("Payment date")
+          contentAsString(result) must include("19 Jul 2025")
+          contentAsString(result) must include("£123.01")
+          contentAsString(result) must include("Accept and submit")
+        }
       }
-    }
 
-    "must redirect to not found page if user click browser back button from confirmation page" in {
-      val updatedUserAnswer = userAnswer
-        .setOrException(CreateConfirmationPage, true)
+      "must redirect to not found page if user click browser back button from confirmation page" in {
+        val updatedUserAnswer = userAnswer
+          .setOrException(CreateConfirmationPage, true)
 
-      val application = applicationBuilder(userAnswers = Some(updatedUserAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
+        val application = applicationBuilder(userAnswers = Some(updatedUserAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
 
-        status(result) mustBe SEE_OTHER
-        redirectLocation(result).value mustEqual routes.BackSubmissionController.onPageLoad().url
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result).value mustEqual routes.BackSubmissionController.onPageLoad().url
 
+        }
       }
-    }
 
-    "must return OK and the correct view if MGD selected and type is single for a GET" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentAmountPage, 123.01)
-        .setOrException(PaymentDatePage, paymentDateDetails)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include(
-          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
-        )
-        contentAsString(result) must include("Payment reference")
-        contentAsString(result) must include("Payment amount")
-        contentAsString(result) must include("123.01")
-        contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 Jul 2025")
-        contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("Accept and submit")
+      "must return OK and the correct view if MGD selected and type is single" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentAmountPage, 123.01)
+          .setOrException(PaymentDatePage, paymentDateDetails)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("The Direct Debit Guarantee")
+          contentAsString(result) must include(
+            "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+          )
+          contentAsString(result) must include("Payment reference")
+          contentAsString(result) must include("Payment amount")
+          contentAsString(result) must include("123.01")
+          contentAsString(result) must include("Payment date")
+          contentAsString(result) must include("19 Jul 2025")
+          contentAsString(result) must include("£123.01")
+          contentAsString(result) must include("Accept and submit")
+        }
       }
-    }
 
-    "must return OK and the correct view if PAYE selected for a GET" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(TellAboutThisPaymentPage, true)
-        .setOrException(PaymentAmountPage, 123.01)
-        .setOrException(PaymentDatePage, paymentDateDetails)
-        .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include(
-          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
-        )
-        contentAsString(result) must include("Payment reference")
-        contentAsString(result) must include("Add 4 extra numbers")
-        contentAsString(result) must include("Yes")
-        contentAsString(result) must include("Payment amount")
-        contentAsString(result) must include("123.01")
-        contentAsString(result) must include("Payment date")
-        contentAsString(result) must include("19 Jul 2025")
-        contentAsString(result) must include("£123.01")
-        contentAsString(result) must include("4 extra numbers")
-        contentAsString(result) must include("2504")
-        contentAsString(result) must include("Accept and submit")
+      "must return OK and the correct view if PAYE selected" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(TellAboutThisPaymentPage, true)
+          .setOrException(PaymentAmountPage, 123.01)
+          .setOrException(PaymentDatePage, paymentDateDetails)
+          .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("The Direct Debit Guarantee")
+          contentAsString(result) must include(
+            "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+          )
+          contentAsString(result) must include("Payment reference")
+          contentAsString(result) must include("Add 4 extra numbers")
+          contentAsString(result) must include("Yes")
+          contentAsString(result) must include("Payment amount")
+          contentAsString(result) must include("123.01")
+          contentAsString(result) must include("Payment date")
+          contentAsString(result) must include("19 Jul 2025")
+          contentAsString(result) must include("£123.01")
+          contentAsString(result) must include("4 extra numbers")
+          contentAsString(result) must include("2504")
+          contentAsString(result) must include("Accept and submit")
+        }
       }
-    }
 
-    "must return OK and the correct view if SA selected and plan type is budget for a GET" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, planStartDateDetails)
-        .setOrException(AddPaymentPlanEndDatePage, true)
-        .setOrException(PlanEndDatePage, endDate)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include(
-          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
-        )
-        contentAsString(result) must include("Payment reference")
-        contentAsString(result) must include("Frequency of payments")
-        contentAsString(result) must include("Monthly")
-        contentAsString(result) must include("Regular payment amount")
-        contentAsString(result) must include("19 Jul 2025")
-        contentAsString(result) must include("25 Jul 2027")
-        contentAsString(result) must include("£120")
-        contentAsString(result) must include("Accept and submit")
+      "must return OK and the correct view if SA selected and plan type is budget" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+          .setOrException(RegularPaymentAmountPage, 120)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(AddPaymentPlanEndDatePage, true)
+          .setOrException(PlanEndDatePage, endDate)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("The Direct Debit Guarantee")
+          contentAsString(result) must include(
+            "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+          )
+          contentAsString(result) must include("Payment reference")
+          contentAsString(result) must include("Frequency of payments")
+          contentAsString(result) must include("Monthly")
+          contentAsString(result) must include("Regular payment amount")
+          contentAsString(result) must include("19 Jul 2025")
+          contentAsString(result) must include("25 Jul 2027")
+          contentAsString(result) must include("£120")
+          contentAsString(result) must include("Accept and submit")
+        }
       }
-    }
 
-    "must return OK and the correct view if TC selected and type is repayment for a GET" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(TotalAmountDuePage, 4533)
-        .setOrException(PlanStartDatePage, planStartDateDetails)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("The Direct Debit Guarantee")
-        contentAsString(result) must include(
-          "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
-        )
-        contentAsString(result) must include("Payment reference")
-        contentAsString(result) must include("1234567")
-        contentAsString(result) must include("Total amount due")
-        contentAsString(result) must include("4,533")
-        contentAsString(result) must include("Plan start date")
-        contentAsString(result) must include("19 Jul 2025")
-        contentAsString(result) must include("Monthly payment amount")
-        contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Final payment date")
-        contentAsString(result) must include("19 Jun 2026")
-        contentAsString(result) must include("Final payment amount")
-        contentAsString(result) must include("£377.75")
-        contentAsString(result) must include("Accept and submit")
+      "must return OK and the correct view if TC selected and type is repayment" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(TotalAmountDuePage, 4533)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("The Direct Debit Guarantee")
+          contentAsString(result) must include(
+            "This Guarantee is offered by all banks and building societies that accept instructions to pay Direct Debits."
+          )
+          contentAsString(result) must include("Payment reference")
+          contentAsString(result) must include("1234567")
+          contentAsString(result) must include("Total amount due")
+          contentAsString(result) must include("4,533")
+          contentAsString(result) must include("Plan start date")
+          contentAsString(result) must include("19 Jul 2025")
+          contentAsString(result) must include("Monthly payment amount")
+          contentAsString(result) must include("£377.75")
+          contentAsString(result) must include("Final payment date")
+          contentAsString(result) must include("19 Jun 2026")
+          contentAsString(result) must include("Final payment amount")
+          contentAsString(result) must include("£377.75")
+          contentAsString(result) must include("Accept and submit")
+        }
       }
-    }
 
-    "must not show Plan End Date when AddPaymentPlanEndDatePage is false (NO)" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, planStartDateDetails)
-        .setOrException(AddPaymentPlanEndDatePage, false)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("19 Jul 2025")
-        contentAsString(result) must not include "25 Jul 2027"
-        contentAsString(result) must include("Add plan end date")
-        contentAsString(result) must not include "Plan End Date"
+      "must not show Plan End Date when AddPaymentPlanEndDatePage is false (NO)" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+          .setOrException(RegularPaymentAmountPage, 120)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(AddPaymentPlanEndDatePage, false)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("19 Jul 2025")
+          contentAsString(result) must not include "25 Jul 2027"
+          contentAsString(result) must include("Add plan end date")
+          contentAsString(result) must not include "Plan End Date"
+        }
       }
-    }
 
-    "must show Plan End Date when AddPaymentPlanEndDatePage is true (YES) and PlanEndDatePage has a value" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, planStartDateDetails)
-        .setOrException(PlanEndDatePage, endDate)
-        .setOrException(AddPaymentPlanEndDatePage, true)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("19 Jul 2025")
-        contentAsString(result) must include("25 Jul 2027")
-        contentAsString(result) must include("Plan end date")
-        contentAsString(result) must include("Add plan end date")
+      "must show Plan End Date when AddPaymentPlanEndDatePage is true (YES) and PlanEndDatePage has a value" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+          .setOrException(RegularPaymentAmountPage, 120)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(PlanEndDatePage, endDate)
+          .setOrException(AddPaymentPlanEndDatePage, true)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("19 Jul 2025")
+          contentAsString(result) must include("25 Jul 2027")
+          contentAsString(result) must include("Plan end date")
+          contentAsString(result) must include("Add plan end date")
+        }
       }
-    }
 
-    "must redirect to error warning page when AddPaymentPlanEndDatePage is true (YES) and PlanEndDatePage has no value" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, planStartDateDetails)
-        .setOrException(AddPaymentPlanEndDatePage, true)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = route(application, request).value
+      "must redirect to error warning page when AddPaymentPlanEndDatePage is true (YES) and PlanEndDatePage has no value" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+          .setOrException(RegularPaymentAmountPage, 120)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(AddPaymentPlanEndDatePage, true)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.ConfirmAnswersErrorController.onPageLoad().url
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.ConfirmAnswersErrorController.onPageLoad().url
+        }
       }
-    }
 
-    "must show Plan End Date when AddPaymentPlanEndDatePage is not set and PlanEndDatePage has a value (backwards compatibility)" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, planStartDateDetails)
-        .setOrException(AddPaymentPlanEndDatePage, true)
-        .setOrException(PlanEndDatePage, endDate)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("19 Jul 2025")
-        contentAsString(result) must include("25 Jul 2027")
+      "must show Plan End Date when AddPaymentPlanEndDatePage is not set and PlanEndDatePage has a value (backwards compatibility)" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+          .setOrException(RegularPaymentAmountPage, 120)
+          .setOrException(PlanStartDatePage, planStartDateDetails)
+          .setOrException(AddPaymentPlanEndDatePage, true)
+          .setOrException(PlanEndDatePage, endDate)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("19 Jul 2025")
+          contentAsString(result) must include("25 Jul 2027")
+        }
       }
-    }
 
-    "must not show 4 extra numbers when TellAboutThisPaymentPage is false (NO)" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(TellAboutThisPaymentPage, false)
-        .setOrException(PaymentAmountPage, 123.01)
-        .setOrException(PaymentDatePage, paymentDateDetails)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("Add 4 extra numbers")
-        contentAsString(result) must include("No")
-        contentAsString(result) must not include "2504"
+      "must not show 4 extra numbers when TellAboutThisPaymentPage is false (NO)" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(TellAboutThisPaymentPage, false)
+          .setOrException(PaymentAmountPage, 123.01)
+          .setOrException(PaymentDatePage, paymentDateDetails)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("Add 4 extra numbers")
+          contentAsString(result) must include("No")
+          contentAsString(result) must not include "2504"
+        }
       }
-    }
 
-    "must show 4 extra numbers when TellAboutThisPaymentPage is true (YES) and YearEndAndMonthPage has a value" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(TellAboutThisPaymentPage, true)
-        .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
-        .setOrException(PaymentAmountPage, 123.01)
-        .setOrException(PaymentDatePage, paymentDateDetails)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("Add 4 extra numbers")
-        contentAsString(result) must include("Yes")
-        contentAsString(result) must include("4 extra numbers")
-        contentAsString(result) must include("2504")
+      "must show 4 extra numbers when TellAboutThisPaymentPage is true (YES) and YearEndAndMonthPage has a value" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(TellAboutThisPaymentPage, true)
+          .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
+          .setOrException(PaymentAmountPage, 123.01)
+          .setOrException(PaymentDatePage, paymentDateDetails)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("Add 4 extra numbers")
+          contentAsString(result) must include("Yes")
+          contentAsString(result) must include("4 extra numbers")
+          contentAsString(result) must include("2504")
+        }
       }
-    }
 
-    "must show 4 extra numbers when TellAboutThisPaymentPage is not set and YearEndAndMonthPage has a value (backwards compatibility)" in {
-      val userAnswer = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
-        .setOrException(PaymentAmountPage, 123.01)
-        .setOrException(PaymentDatePage, paymentDateDetails)
-      val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual OK
-        contentAsString(result) must include("Check your payment plan details")
-        contentAsString(result) must include("4 extra numbers")
-        contentAsString(result) must include("2504")
+      "must show 4 extra numbers when TellAboutThisPaymentPage is not set and YearEndAndMonthPage has a value (backwards compatibility)" in {
+        val userAnswer = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
+          .setOrException(PaymentAmountPage, 123.01)
+          .setOrException(PaymentDatePage, paymentDateDetails)
+        val application = applicationBuilder(userAnswers = Some(userAnswer)).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual OK
+          contentAsString(result) must include("Check your payment plan details")
+          contentAsString(result) must include("4 extra numbers")
+          contentAsString(result) must include("2504")
+        }
       }
-    }
 
-    "must redirect to System Error for a GET if no existing data is found" in {
-      val application = applicationBuilder(userAnswers = None).build()
-      running(application) {
-        val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-        val result = route(application, request).value
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+      "must redirect to System Error for a GET if no existing data is found" in {
+        val application = applicationBuilder(userAnswers = None).build()
+        running(application) {
+          val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+          val result = route(application, request).value
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+        }
       }
     }
 
     // POST tests for missing fields, failed submissions, and successful submissions
-    "must redirect to System Error for a POST if PaymentReferencePage data is missing" in {
-      val incompleteAnswers = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-        .setOrException(TotalAmountDuePage, 900)
-        .setOrException(PlanStartDatePage, PlanStartDateDetails(LocalDate.parse("2025-01-15"), "2025-01-15"))
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-        .setOrException(BankDetailsBankNamePage, "Barclays")
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-        .setOrException(pages.MacValuePage, "valid-mac")
+    "when handling POST requests" - {
 
-      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-      when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-01-10"))))
-      when(mockNddService.generateNewDdiReference(any())(any()))
-        .thenReturn(Future.successful(GenerateDdiRefResponse("fakeRef")))
-
-      when(
-        mockMacGenerator.generateMac(
-          any[String],
-          any[String],
-          any[String],
-          any[Seq[String]],
-          any[Option[String]],
-          any[Option[String]],
-          any[String],
-          any[String]
-        )
-      ).thenReturn("valid-mac")
-
-      val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockNddService),
-          bind[MacGenerator].toInstance(mockMacGenerator)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = intercept[Exception](route(application, request).value.futureValue)
-        result.getMessage must include("Missing details: paymentReference")
-      }
-    }
-
-    "must redirect to System Error for a POST if DirectDebitSource data is missing" in {
-      val incompleteAnswers = emptyUserAnswers
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-        .setOrException(TotalAmountDuePage, 900)
-        .setOrException(PlanStartDatePage, PlanStartDateDetails(LocalDate.parse("2025-01-15"), "2025-01-15"))
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-        .setOrException(BankDetailsBankNamePage, "Barclays")
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-        .setOrException(PaymentReferencePage, "testRef")
-        .setOrException(pages.MacValuePage, "valid-mac")
-
-      when(
-        mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier])
-      ).thenReturn(Future.successful(Some(EarliestPaymentDate("2025-01-10"))))
-
-      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-
-      when(
-        mockMacGenerator.generateMac(
-          any[String],
-          any[String],
-          any[String],
-          any[Seq[String]],
-          any[Option[String]],
-          any[Option[String]],
-          any[String],
-          any[String]
-        )
-      ).thenReturn("valid-mac")
-
-      val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockNddService),
-          bind[MacGenerator].toInstance(mockMacGenerator)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val resultFuture: Future[play.api.mvc.Result] = route(application, request).get
-        val exception = intercept[Exception] {
-          await(resultFuture)
-        }
-        exception.getMessage must include("Missing details: directDebitSource")
-      }
-    }
-
-    "must redirect to System Error for a POST if Ddi reference number is not obtained successfully" in {
-      val incompleteAnswers = emptyUserAnswers
-        .setOrException(PaymentReferencePage, "testReference")
-        .setOrException(pages.MacValuePage, "valid-mac")
-
-      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-
-      when(mockNddService.generateNewDdiReference(any())(any()))
-        .thenReturn(Future.failed(new Exception("bang")))
-      when(mockNddService.submitChrisData(any())(any()))
-        .thenReturn(Future.successful(true))
-
-      when(
-        mockMacGenerator.generateMac(
-          any[String],
-          any[String],
-          any[String],
-          any[Seq[String]],
-          any[Option[String]],
-          any[Option[String]],
-          any[String],
-          any[String]
-        )
-      ).thenReturn("valid-mac")
-
-      val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockNddService),
-          bind[MacGenerator].toInstance(mockMacGenerator)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
-      }
-    }
-
-    "must redirect to confirmation page if DirectDebitSource is 'CT' for a POST if all required data is provided" - {
-
-      "and ddi reference is generated successfully" in {
-        val paymentAmount = 200
-        val ua = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
-          .setOrException(
-            YourBankDetailsPage,
-            YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false)
-          )
-          .setOrException(PaymentAmountPage, paymentAmount)
-          .setOrException(
-            PaymentDatePage,
-            PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-15")
-          )
-          .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(
-            BankDetailsAddressPage,
-            BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH"))
-          )
-          .setOrException(BankDetailsBankNamePage, "Barclays")
-          .setOrException(pages.MacValuePage, "valid-mac")
-
-        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-        when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
-        when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-        when(mockNddService.submitChrisData(any())(any()))
-          .thenReturn(Future.successful(true))
-        when(
-          mockMacGenerator.generateMac(
-            any[String],
-            any[String],
-            any[String],
-            any[Seq[String]],
-            any[Option[String]],
-            any[Option[String]],
-            any[String],
-            any[String]
-          )
-        ).thenReturn("valid-mac")
-
-        val application = applicationBuilder(userAnswers = Some(ua))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[MacGenerator].toInstance(mockMacGenerator)
-          )
-          .build()
-
-        running(application) {
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          val result = route(application, request).value
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-        }
-      }
-
-      "must redirect to System Error for a POST if CHRIS submission fails" in {
+      "must redirect to System Error for a POST if PaymentReferencePage data is missing" in {
         val incompleteAnswers = emptyUserAnswers
           .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(TotalAmountDuePage, 900)
+          .setOrException(PlanStartDatePage, PlanStartDateDetails(LocalDate.parse("2025-01-15"), "2025-01-15"))
           .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-          .setOrException(TotalAmountDuePage, 5000)
-          .setOrException(PlanStartDatePage, planStartDateDetails)
-          .setOrException(PaymentReferencePage, "testReference")
           .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
           .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
           .setOrException(pages.MacValuePage, "valid-mac")
 
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-        when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
         when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
-        when(mockNddService.submitChrisData(any())(any()))
-          .thenReturn(Future.failed(new Exception("chris failed")))
+          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-01-10"))))
+        when(mockNddService.generateNewDdiReference(any())(any()))
+          .thenReturn(Future.successful(GenerateDdiRefResponse("fakeRef")))
+
+        when(
+          mockMacGenerator.generateMac(
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[Option[String]],
+            any[Option[String]],
+            any[String],
+            any[String]
+          )
+        ).thenReturn("valid-mac")
 
         val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
           .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator)
           )
           .build()
 
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          val result = route(application, request).value
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+          val result = intercept[Exception](route(application, request).value.futureValue)
+          result.getMessage must include("Missing details: paymentReference")
         }
       }
 
-      "must redirect to System Error for a POST if CHRIS submission returns false" in {
+      "must redirect to System Error for a POST if DirectDebitSource data is missing" in {
         val incompleteAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
           .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-          .setOrException(
-            YourBankDetailsPage,
-            YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false)
-          )
-          .setOrException(TotalAmountDuePage, 5000)
-          .setOrException(PlanStartDatePage, planStartDateDetails)
-          .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(
-            BankDetailsAddressPage,
-            BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH"))
-          )
+          .setOrException(TotalAmountDuePage, 900)
+          .setOrException(PlanStartDatePage, PlanStartDateDetails(LocalDate.parse("2025-01-15"), "2025-01-15"))
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
           .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(PaymentReferencePage, "testRef")
+          .setOrException(pages.MacValuePage, "valid-mac")
+
+        when(
+          mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier])
+        ).thenReturn(Future.successful(Some(EarliestPaymentDate("2025-01-10"))))
+
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+
+        when(
+          mockMacGenerator.generateMac(
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[Option[String]],
+            any[Option[String]],
+            any[String],
+            any[String]
+          )
+        ).thenReturn("valid-mac")
+
+        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val resultFuture: Future[play.api.mvc.Result] = route(application, request).get
+          val exception = intercept[Exception] {
+            await(resultFuture)
+          }
+          exception.getMessage must include("Missing details: directDebitSource")
+        }
+      }
+
+      "must redirect to System Error for a POST if Ddi reference number is not obtained successfully" in {
+        val incompleteAnswers = emptyUserAnswers
+          .setOrException(PaymentReferencePage, "testReference")
           .setOrException(pages.MacValuePage, "valid-mac")
 
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          .thenReturn(Future.failed(new Exception("bang")))
         when(mockNddService.submitChrisData(any())(any()))
-          .thenReturn(Future.successful(false))
+          .thenReturn(Future.successful(true))
 
         when(
           mockMacGenerator.generateMac(
@@ -645,113 +500,579 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
+
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
         }
       }
 
-      "must redirect to System Error for a POST if the generated MAC does not match the stored MAC" in {
-        val paymentAmount = 200
+      "must redirect to confirmation page if DirectDebitSource is 'CT' for a POST if all required data is provided" - {
+
+        "and ddi reference is generated successfully" in {
+          val paymentAmount = 200
+          val ua = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
+            .setOrException(
+              YourBankDetailsPage,
+              YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false)
+            )
+            .setOrException(PaymentAmountPage, paymentAmount)
+            .setOrException(
+              PaymentDatePage,
+              PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-15")
+            )
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(
+              BankDetailsAddressPage,
+              BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH"))
+            )
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .setOrException(pages.MacValuePage, "valid-mac")
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
+          when(mockNddService.generateNewDdiReference(any())(any()))
+            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          when(mockNddService.submitChrisData(any())(any()))
+            .thenReturn(Future.successful(true))
+          when(
+            mockMacGenerator.generateMac(
+              any[String],
+              any[String],
+              any[String],
+              any[Seq[String]],
+              any[Option[String]],
+              any[Option[String]],
+              any[String],
+              any[String]
+            )
+          ).thenReturn("valid-mac")
+
+          val application = applicationBuilder(userAnswers = Some(ua))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService),
+              bind[MacGenerator].toInstance(mockMacGenerator)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+          }
+        }
+
+        "must redirect to System Error for a POST if CHRIS submission fails" in {
+          val incompleteAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+            .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+            .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+            .setOrException(TotalAmountDuePage, 5000)
+            .setOrException(PlanStartDatePage, planStartDateDetails)
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .setOrException(pages.MacValuePage, "valid-mac")
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.generateNewDdiReference(any())(any()))
+            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
+          when(mockNddService.submitChrisData(any())(any()))
+            .thenReturn(Future.failed(new Exception("chris failed")))
+
+          val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+          }
+        }
+
+        "must redirect to System Error for a POST if CHRIS submission returns false" in {
+          val incompleteAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+            .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+            .setOrException(
+              YourBankDetailsPage,
+              YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false)
+            )
+            .setOrException(TotalAmountDuePage, 5000)
+            .setOrException(PlanStartDatePage, planStartDateDetails)
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(
+              BankDetailsAddressPage,
+              BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH"))
+            )
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .setOrException(pages.MacValuePage, "valid-mac")
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.generateNewDdiReference(any())(any()))
+            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          when(mockNddService.submitChrisData(any())(any()))
+            .thenReturn(Future.successful(false))
+
+          when(
+            mockMacGenerator.generateMac(
+              any[String],
+              any[String],
+              any[String],
+              any[Seq[String]],
+              any[Option[String]],
+              any[Option[String]],
+              any[String],
+              any[String]
+            )
+          ).thenReturn("valid-mac")
+
+          val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService),
+              bind[MacGenerator].toInstance(mockMacGenerator)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+          }
+        }
+
+        "must redirect to System Error for a POST if the generated MAC does not match the stored MAC" in {
+          val paymentAmount = 200
+          val userAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(pages.MacValuePage, "stored-mac")
+            .setOrException(PaymentAmountPage, paymentAmount)
+            .setOrException(
+              PaymentDatePage,
+              PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-15")
+            )
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.generateNewDdiReference(any())(any()))
+            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01")))) // earliest <= entered (15th)
+
+          when(
+            mockMacGenerator.generateMac(
+              any[String],
+              any[String],
+              any[String],
+              any[Seq[String]],
+              any[Option[String]],
+              any[Option[String]],
+              any[String],
+              any[String]
+            )
+          ).thenReturn("generated-mac")
+
+          val application = applicationBuilder(userAnswers = Some(userAnswers))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService),
+              bind[MacGenerator].toInstance(mockMacGenerator)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+          }
+        }
+
+        "must redirect to System Error for a POST if the generated MAC1 is not generated" in {
+          val paymentAmount = 200
+          val userAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(PaymentAmountPage, paymentAmount)
+            .setOrException(
+              PaymentDatePage,
+              PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-15")
+            )
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.generateNewDdiReference(any())(any()))
+            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
+          when(
+            mockMacGenerator.generateMac(
+              any[String],
+              any[String],
+              any[String],
+              any[Seq[String]],
+              any[Option[String]],
+              any[Option[String]],
+              any[String],
+              any[String]
+            )
+          ).thenReturn("generated-mac")
+
+          val application = applicationBuilder(userAnswers = Some(userAnswers))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService),
+              bind[MacGenerator].toInstance(mockMacGenerator)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+          }
+        }
+
+        "must redirect to confirmation page if DirectDebitSource is 'TC' and if all required data is provided" in {
+          val totalDueAmount = 200
+          val incompleteAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+            .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+            .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+            .setOrException(TotalAmountDuePage, totalDueAmount)
+            .setOrException(PlanStartDatePage, planStartDateDetails)
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .setOrException(pages.MacValuePage, "valid-mac")
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.getFutureWorkingDays(any(), any())(any()))
+            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
+          when(mockNddService.generateNewDdiReference(any())(any()))
+            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          when(mockNddService.submitChrisData(any())(any()))
+            .thenReturn(Future.successful(true))
+          when(
+            mockMacGenerator.generateMac(
+              any[String],
+              any[String],
+              any[String],
+              any[Seq[String]],
+              any[Option[String]],
+              any[Option[String]],
+              any[String],
+              any[String]
+            )
+          ).thenReturn("valid-mac")
+
+          val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+            .overrides(
+              bind[MacGenerator].toInstance(mockMacGenerator),
+              bind[NationalDirectDebitService].toInstance(mockNddService)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+          }
+        }
+
+      }
+
+      "when set up a new payment plan for existing Direct Debit" - {
+        "must redirect to confirmation page when DirectDebitSource is 'CT' for a POST if all required data is provided" in {
+          val totalDueAmount = 100
+          val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+            bankSortCode       = Some("12-34-56"),
+            bankAccountNumber  = Some("12345678"),
+            bankAccountName    = Some("John Doe"),
+            auDdisFlag         = true,
+            submissionDateTime = LocalDateTime.now()
+          )
+          val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
+            hodService                = "HOD1",
+            planType                  = "02",
+            paymentReference          = "PP123",
+            submissionDateTime        = LocalDateTime.now(),
+            scheduledPaymentAmount    = Some(BigDecimal(100)),
+            scheduledPaymentStartDate = Some(LocalDate.now()),
+            initialPaymentStartDate   = Some(LocalDate.now()),
+            initialPaymentAmount      = Some(BigDecimal(50)),
+            scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(6)),
+            scheduledPaymentFrequency = Some("Monthly"),
+            suspensionStartDate       = None,
+            suspensionEndDate         = None,
+            balancingPaymentAmount    = None,
+            balancingPaymentDate      = None,
+            totalLiability            = Some(BigDecimal(600)),
+            paymentPlanEditable       = true
+          )
+          val paymentPlanResponse: PaymentPlanResponse = PaymentPlanResponse(
+            directDebitDetails = directDebitDetails,
+            paymentPlanDetails = paymentPlanDetails
+          )
+          val incompleteAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
+            .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+            .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+            .setOrException(TotalAmountDuePage, totalDueAmount)
+            .setOrException(PlanStartDatePage, planStartDateDetails)
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .set(
+              ExistingDirectDebitIdentifierQuery,
+              NddDetails("directDebitReference",
+                         LocalDateTime.now(),
+                         "bankSortCode",
+                         "bankAccountNumber",
+                         "bankAccountName",
+                         auDdisFlag       = true,
+                         numberOfPayPlans = 2
+                        )
+            )
+            .success
+            .value
+            .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+            .success
+            .value
+
+          val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+            .overrides(bind[NationalDirectDebitService].toInstance(mockNddService), bind[MacGenerator].toInstance(mockMacGenerator))
+            .build()
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.submitChrisData(any())(any()))
+            .thenReturn(Future.successful(true))
+
+          running(application) {
+            when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+              .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-06-15"))))
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+          }
+        }
+
+        Seq(
+          (DirectDebitSource.OL, None, false),
+          (DirectDebitSource.NIC, None, false),
+          (DirectDebitSource.CT, None, false),
+          (DirectDebitSource.SDLT, None, false),
+          (DirectDebitSource.VAT, None, false),
+          (DirectDebitSource.PAYE, None, false),
+          (DirectDebitSource.MGD, Some(PaymentPlanType.SinglePaymentPlan), false),
+          (DirectDebitSource.TC, Some(PaymentPlanType.SinglePaymentPlan), false),
+          (DirectDebitSource.MGD, Some(PaymentPlanType.BudgetPaymentPlan), false),
+          (DirectDebitSource.TC, Some(PaymentPlanType.BudgetPaymentPlan), false),
+          (DirectDebitSource.MGD, Some(PaymentPlanType.VariablePaymentPlan), false),
+          (DirectDebitSource.TC, Some(PaymentPlanType.TaxCreditRepaymentPlan), false),
+          (DirectDebitSource.SA, Some(PaymentPlanType.SinglePaymentPlan), true),
+          (DirectDebitSource.SA, Some(PaymentPlanType.BudgetPaymentPlan), true)
+        ).foreach { (directDebitSource, paymentPlanType, saBppEnabled) =>
+          s"must redirect to system error page when future date returns None for " +
+            s"directDebitSource $directDebitSource and paymentPlanType $paymentPlanType and saBppEnabled $saBppEnabled" in {
+              val totalDueAmount = 100
+              val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
+                bankSortCode       = Some("12-34-56"),
+                bankAccountNumber  = Some("12345678"),
+                bankAccountName    = Some("John Doe"),
+                auDdisFlag         = true,
+                submissionDateTime = LocalDateTime.now()
+              )
+              val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
+                hodService                = "HOD1",
+                planType                  = "02",
+                paymentReference          = "PP123",
+                submissionDateTime        = LocalDateTime.now(),
+                scheduledPaymentAmount    = Some(BigDecimal(100)),
+                scheduledPaymentStartDate = Some(LocalDate.now()),
+                initialPaymentStartDate   = Some(LocalDate.now()),
+                initialPaymentAmount      = Some(BigDecimal(50)),
+                scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(6)),
+                scheduledPaymentFrequency = Some("Monthly"),
+                suspensionStartDate       = None,
+                suspensionEndDate         = None,
+                balancingPaymentAmount    = None,
+                balancingPaymentDate      = None,
+                totalLiability            = Some(BigDecimal(600)),
+                paymentPlanEditable       = true
+              )
+              val paymentPlanResponse: PaymentPlanResponse = PaymentPlanResponse(
+                directDebitDetails = directDebitDetails,
+                paymentPlanDetails = paymentPlanDetails
+              )
+              val incompleteAnswers = {
+                val answers = emptyUserAnswers
+                  .setOrException(DirectDebitSourcePage, directDebitSource)
+                  .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+                  .setOrException(TotalAmountDuePage, totalDueAmount)
+                  .setOrException(PlanStartDatePage, planStartDateDetails)
+                  .setOrException(PaymentReferencePage, "testReference")
+                  .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+                  .setOrException(BankDetailsBankNamePage, "Barclays")
+                  .set(
+                    ExistingDirectDebitIdentifierQuery,
+                    NddDetails("directDebitReference",
+                               LocalDateTime.now(),
+                               "bankSortCode",
+                               "bankAccountNumber",
+                               "bankAccountName",
+                               auDdisFlag       = true,
+                               numberOfPayPlans = 2
+                              )
+                  )
+                  .success
+                  .value
+                  .set(PaymentPlanDetailsQuery, paymentPlanResponse)
+                  .success
+                  .value
+
+                paymentPlanType match {
+                  case Some(planType) => answers.setOrException(PaymentPlanTypePage, planType)
+                  case None           => answers
+                }
+              }
+
+              val application = applicationBuilder(
+                userAnswers      = Some(incompleteAnswers),
+                additionalConfig = if (saBppEnabled) Map("features.sa-bpp" -> "true") else Map.empty
+              )
+                .overrides(bind[NationalDirectDebitService].toInstance(mockNddService), bind[MacGenerator].toInstance(mockMacGenerator))
+                .build()
+              when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+                .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+              when(mockNddService.submitChrisData(any())(any()))
+                .thenReturn(Future.successful(true))
+
+              running(application) {
+                when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+                  .thenReturn(Future.successful(None))
+                val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+                val result = route(application, request).value
+                status(result) mustEqual SEE_OTHER
+                redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
+              }
+            }
+
+        }
+
+        "must redirect to duplicate warning page 'CT' for a POST if all required data is provided" in {
+          val totalDueAmount = 200
+          val incompleteAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
+            .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+            .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+            .setOrException(TotalAmountDuePage, totalDueAmount)
+            .setOrException(PlanStartDatePage, planStartDateDetails)
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .set(
+              ExistingDirectDebitIdentifierQuery,
+              NddDetails("directDebitReference",
+                         LocalDateTime.now(),
+                         "bankSortCode",
+                         "bankAccountNumber",
+                         "bankAccountName",
+                         auDdisFlag       = true,
+                         numberOfPayPlans = 2
+                        )
+            )
+            .success
+            .value
+
+          val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService)
+            )
+            .build()
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode).url
+          }
+        }
+
+        "must redirect to duplicate error page 'MGD' for a POST if all required data is provided" in {
+          val incompleteAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
+            .setOrException(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan)
+            .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+            .setOrException(PlanStartDatePage, planStartDateDetails)
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .set(
+              ExistingDirectDebitIdentifierQuery,
+              NddDetails("directDebitReference",
+                         LocalDateTime.now(),
+                         "bankSortCode",
+                         "bankAccountNumber",
+                         "bankAccountName",
+                         auDdisFlag       = true,
+                         numberOfPayPlans = 2
+                        )
+            )
+            .success
+            .value
+
+          val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService)
+            )
+            .build()
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(true)))
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.DuplicateErrorController.onPageLoad().url
+          }
+        }
+      }
+
+      "must proceed normally when start date is before end date" in {
+        val startDate = LocalDate.of(2025, 7, 1)
+        val endDate = LocalDate.of(2025, 7, 25)
+        val validStartDateDetails = PlanStartDateDetails(startDate, "2025-7-1")
         val userAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
-          .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(pages.MacValuePage, "stored-mac")
-          .setOrException(PaymentAmountPage, paymentAmount)
-          .setOrException(
-            PaymentDatePage,
-            PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-15")
-          )
-        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-        when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-        when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01")))) // earliest <= entered (15th)
-
-        when(
-          mockMacGenerator.generateMac(
-            any[String],
-            any[String],
-            any[String],
-            any[Seq[String]],
-            any[Option[String]],
-            any[Option[String]],
-            any[String],
-            any[String]
-          )
-        ).thenReturn("generated-mac")
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[MacGenerator].toInstance(mockMacGenerator)
-          )
-          .build()
-
-        running(application) {
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
-        }
-      }
-
-      "must redirect to System Error for a POST if the generated MAC1 is not generated" in {
-        val paymentAmount = 200
-        val userAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
-          .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(PaymentAmountPage, paymentAmount)
-          .setOrException(
-            PaymentDatePage,
-            PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-15")
-          )
-
-        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-        when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-        when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
-        when(
-          mockMacGenerator.generateMac(
-            any[String],
-            any[String],
-            any[String],
-            any[Seq[String]],
-            any[Option[String]],
-            any[Option[String]],
-            any[String],
-            any[String]
-          )
-        ).thenReturn("generated-mac")
-
-        val application = applicationBuilder(userAnswers = Some(userAnswers))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[MacGenerator].toInstance(mockMacGenerator)
-          )
-          .build()
-
-        running(application) {
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
-        }
-      }
-
-      "must redirect to confirmation page if DirectDebitSource is 'TC' and if all required data is provided" in {
-        val totalDueAmount = 200
-        val incompleteAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
-          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+          .setOrException(RegularPaymentAmountPage, 120)
+          .setOrException(PlanStartDatePage, validStartDateDetails)
+          .setOrException(PlanEndDatePage, endDate)
+          .setOrException(AddPaymentPlanEndDatePage, true)
           .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-          .setOrException(TotalAmountDuePage, totalDueAmount)
-          .setOrException(PlanStartDatePage, planStartDateDetails)
-          .setOrException(PaymentReferencePage, "testReference")
           .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
           .setOrException(BankDetailsBankNamePage, "Barclays")
           .setOrException(pages.MacValuePage, "valid-mac")
@@ -777,431 +1098,34 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           )
         ).thenReturn("valid-mac")
 
-        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
-            bind[MacGenerator].toInstance(mockMacGenerator),
-            bind[NationalDirectDebitService].toInstance(mockNddService)
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator)
           )
           .build()
 
         running(application) {
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
           val result = route(application, request).value
+
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
         }
       }
 
-    }
-
-    "when set up a new payment plan for existing Direct Debit" - {
-      "must redirect to confirmation page when DirectDebitSource is 'CT' for a POST if all required data is provided" in {
-        val totalDueAmount = 100
-        val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
-          bankSortCode       = Some("12-34-56"),
-          bankAccountNumber  = Some("12345678"),
-          bankAccountName    = Some("John Doe"),
-          auDdisFlag         = true,
-          submissionDateTime = LocalDateTime.now()
-        )
-        val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
-          hodService                = "HOD1",
-          planType                  = "02",
-          paymentReference          = "PP123",
-          submissionDateTime        = LocalDateTime.now(),
-          scheduledPaymentAmount    = Some(BigDecimal(100)),
-          scheduledPaymentStartDate = Some(LocalDate.now()),
-          initialPaymentStartDate   = Some(LocalDate.now()),
-          initialPaymentAmount      = Some(BigDecimal(50)),
-          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(6)),
-          scheduledPaymentFrequency = Some("Monthly"),
-          suspensionStartDate       = None,
-          suspensionEndDate         = None,
-          balancingPaymentAmount    = None,
-          balancingPaymentDate      = None,
-          totalLiability            = Some(BigDecimal(600)),
-          paymentPlanEditable       = true
-        )
-        val paymentPlanResponse: PaymentPlanResponse = PaymentPlanResponse(
-          directDebitDetails = directDebitDetails,
-          paymentPlanDetails = paymentPlanDetails
-        )
-        val incompleteAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
-          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-          .setOrException(TotalAmountDuePage, totalDueAmount)
-          .setOrException(PlanStartDatePage, planStartDateDetails)
-          .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-          .setOrException(BankDetailsBankNamePage, "Barclays")
-          .set(
-            ExistingDirectDebitIdentifierQuery,
-            NddDetails("directDebitReference",
-                       LocalDateTime.now(),
-                       "bankSortCode",
-                       "bankAccountNumber",
-                       "bankAccountName",
-                       auDdisFlag       = true,
-                       numberOfPayPlans = 2
-                      )
-          )
-          .success
-          .value
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
-          .success
-          .value
-
-        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService), bind[MacGenerator].toInstance(mockMacGenerator))
-          .build()
-        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-        when(mockNddService.submitChrisData(any())(any()))
-          .thenReturn(Future.successful(true))
-        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-
-        running(application) {
-          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-06-15"))))
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          val result = route(application, request).value
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-        }
-      }
-
-      "must redirect to system error page when future date returns None" in {
-        val totalDueAmount = 100
-        val directDebitDetails: DirectDebitDetails = DirectDebitDetails(
-          bankSortCode       = Some("12-34-56"),
-          bankAccountNumber  = Some("12345678"),
-          bankAccountName    = Some("John Doe"),
-          auDdisFlag         = true,
-          submissionDateTime = LocalDateTime.now()
-        )
-        val paymentPlanDetails: PaymentPlanDetails = PaymentPlanDetails(
-          hodService                = "HOD1",
-          planType                  = "02",
-          paymentReference          = "PP123",
-          submissionDateTime        = LocalDateTime.now(),
-          scheduledPaymentAmount    = Some(BigDecimal(100)),
-          scheduledPaymentStartDate = Some(LocalDate.now()),
-          initialPaymentStartDate   = Some(LocalDate.now()),
-          initialPaymentAmount      = Some(BigDecimal(50)),
-          scheduledPaymentEndDate   = Some(LocalDate.now().plusMonths(6)),
-          scheduledPaymentFrequency = Some("Monthly"),
-          suspensionStartDate       = None,
-          suspensionEndDate         = None,
-          balancingPaymentAmount    = None,
-          balancingPaymentDate      = None,
-          totalLiability            = Some(BigDecimal(600)),
-          paymentPlanEditable       = true
-        )
-        val paymentPlanResponse: PaymentPlanResponse = PaymentPlanResponse(
-          directDebitDetails = directDebitDetails,
-          paymentPlanDetails = paymentPlanDetails
-        )
-        val incompleteAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
-          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-          .setOrException(TotalAmountDuePage, totalDueAmount)
-          .setOrException(PlanStartDatePage, planStartDateDetails)
-          .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-          .setOrException(BankDetailsBankNamePage, "Barclays")
-          .set(
-            ExistingDirectDebitIdentifierQuery,
-            NddDetails("directDebitReference",
-                       LocalDateTime.now(),
-                       "bankSortCode",
-                       "bankAccountNumber",
-                       "bankAccountName",
-                       auDdisFlag       = true,
-                       numberOfPayPlans = 2
-                      )
-          )
-          .success
-          .value
-          .set(PaymentPlanDetailsQuery, paymentPlanResponse)
-          .success
-          .value
-
-        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-          .overrides(bind[NationalDirectDebitService].toInstance(mockNddService), bind[MacGenerator].toInstance(mockMacGenerator))
-          .build()
-        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-        when(mockNddService.submitChrisData(any())(any()))
-          .thenReturn(Future.successful(true))
-        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
-
-        running(application) {
-          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-            .thenReturn(Future.successful(None))
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          val result = route(application, request).value
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.SystemErrorController.onPageLoad().url
-        }
-      }
-
-      "must redirect to duplicate warning page 'CT' for a POST if all required data is provided" in {
-        val totalDueAmount = 200
-        val incompleteAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
-          .setOrException(PaymentPlanTypePage, PaymentPlanType.TaxCreditRepaymentPlan)
-          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-          .setOrException(TotalAmountDuePage, totalDueAmount)
-          .setOrException(PlanStartDatePage, planStartDateDetails)
-          .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-          .setOrException(BankDetailsBankNamePage, "Barclays")
-          .set(
-            ExistingDirectDebitIdentifierQuery,
-            NddDetails("directDebitReference",
-                       LocalDateTime.now(),
-                       "bankSortCode",
-                       "bankAccountNumber",
-                       "bankAccountName",
-                       auDdisFlag       = true,
-                       numberOfPayPlans = 2
-                      )
-          )
-          .success
-          .value
-
-        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
-          )
-          .build()
-
-        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(true)))
-
-        running(application) {
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          val result = route(application, request).value
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateWarningForAddOrCreatePPController.onPageLoad(NormalMode).url
-        }
-      }
-
-      "must redirect to duplicate error page 'MGD' for a POST if all required data is provided" in {
-        val incompleteAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
-          .setOrException(PaymentPlanTypePage, PaymentPlanType.VariablePaymentPlan)
-          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-          .setOrException(PlanStartDatePage, planStartDateDetails)
-          .setOrException(PaymentReferencePage, "testReference")
-          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-          .setOrException(BankDetailsBankNamePage, "Barclays")
-          .set(
-            ExistingDirectDebitIdentifierQuery,
-            NddDetails("directDebitReference",
-                       LocalDateTime.now(),
-                       "bankSortCode",
-                       "bankAccountNumber",
-                       "bankAccountName",
-                       auDdisFlag       = true,
-                       numberOfPayPlans = 2
-                      )
-          )
-          .success
-          .value
-
-        val application = applicationBuilder(userAnswers = Some(incompleteAnswers))
-          .overrides(
-            bind[NationalDirectDebitService].toInstance(mockNddService)
-          )
-          .build()
-
-        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-          .thenReturn(Future.successful(DuplicateCheckResponse(true)))
-
-        running(application) {
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          val result = route(application, request).value
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.DuplicateErrorController.onPageLoad().url
-        }
-      }
-    }
-
-    "must proceed normally when start date is before end date" in {
-      val startDate = LocalDate.of(2025, 7, 1)
-      val endDate = LocalDate.of(2025, 7, 25)
-      val validStartDateDetails = PlanStartDateDetails(startDate, "2025-7-1")
-      val userAnswers = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, validStartDateDetails)
-        .setOrException(PlanEndDatePage, endDate)
-        .setOrException(AddPaymentPlanEndDatePage, true)
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-        .setOrException(BankDetailsBankNamePage, "Barclays")
-        .setOrException(pages.MacValuePage, "valid-mac")
-
-      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-      when(mockNddService.getFutureWorkingDays(any(), any())(any()))
-        .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
-      when(mockNddService.generateNewDdiReference(any())(any()))
-        .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-      when(mockNddService.submitChrisData(any())(any()))
-        .thenReturn(Future.successful(true))
-      when(
-        mockMacGenerator.generateMac(
-          any[String],
-          any[String],
-          any[String],
-          any[Seq[String]],
-          any[Option[String]],
-          any[Option[String]],
-          any[String],
-          any[String]
-        )
-      ).thenReturn("valid-mac")
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockNddService),
-          bind[MacGenerator].toInstance(mockMacGenerator)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-      }
-    }
-
-    "must proceed normally when start date equals end date" in {
-      val date = LocalDate.of(2025, 7, 25)
-      val startDateDetails = PlanStartDateDetails(date, "2025-7-25")
-      val userAnswers = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, startDateDetails)
-        .setOrException(PlanEndDatePage, date)
-        .setOrException(AddPaymentPlanEndDatePage, true)
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-        .setOrException(BankDetailsBankNamePage, "Barclays")
-        .setOrException(pages.MacValuePage, "valid-mac")
-
-      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-      when(mockNddService.generateNewDdiReference(any())(any()))
-        .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-      when(mockNddService.submitChrisData(any())(any()))
-        .thenReturn(Future.successful(true))
-      when(
-        mockMacGenerator.generateMac(
-          any[String],
-          any[String],
-          any[String],
-          any[Seq[String]],
-          any[Option[String]],
-          any[Option[String]],
-          any[String],
-          any[String]
-        )
-      ).thenReturn("valid-mac")
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockNddService),
-          bind[MacGenerator].toInstance(mockMacGenerator)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-      }
-    }
-
-    "must proceed normally when AddPaymentPlanEndDatePage is false (no end date required)" in {
-      val startDate = LocalDate.of(2025, 8, 1)
-      val startDateDetails = PlanStartDateDetails(startDate, "2025-8-1")
-      val userAnswers = emptyUserAnswers
-        .setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
-        .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
-        .setOrException(PaymentReferencePage, "1234567")
-        .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
-        .setOrException(RegularPaymentAmountPage, 120)
-        .setOrException(PlanStartDatePage, startDateDetails)
-        .setOrException(AddPaymentPlanEndDatePage, false)
-        .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
-        .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
-        .setOrException(BankDetailsBankNamePage, "Barclays")
-        .setOrException(pages.MacValuePage, "valid-mac")
-
-      when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(DuplicateCheckResponse(false)))
-      when(mockNddService.generateNewDdiReference(any())(any()))
-        .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
-      when(mockNddService.submitChrisData(any())(any()))
-        .thenReturn(Future.successful(true))
-      when(
-        mockMacGenerator.generateMac(
-          any[String],
-          any[String],
-          any[String],
-          any[Seq[String]],
-          any[Option[String]],
-          any[Option[String]],
-          any[String],
-          any[String]
-        )
-      ).thenReturn("valid-mac")
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(
-          bind[NationalDirectDebitService].toInstance(mockNddService),
-          bind[MacGenerator].toInstance(mockMacGenerator)
-        )
-        .build()
-
-      running(application) {
-        val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
-      }
-    }
-
-    "must proceed normally and addFourExtra number to paymentReference when DirectDebitSource is 'PAYE', " +
-      "TellAboutThisPaymentPage is true (YES) and YearEndAndMonthPage has a value" in {
-        val mockSessionRepository = mock[SessionRepository]
-        val paymentReference = "1234567"
-
+      "must proceed normally when start date equals end date" in {
+        val date = LocalDate.of(2025, 7, 25)
+        val startDateDetails = PlanStartDateDetails(date, "2025-7-25")
         val userAnswers = emptyUserAnswers
-          .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
-          .setOrException(PaymentReferencePage, paymentReference)
-          .setOrException(TellAboutThisPaymentPage, true)
-          .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
-          .setOrException(PaymentAmountPage, 123.01)
-          .setOrException(PaymentDatePage, paymentDateDetails)
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+          .setOrException(RegularPaymentAmountPage, 120)
+          .setOrException(PlanStartDatePage, startDateDetails)
+          .setOrException(PlanEndDatePage, date)
+          .setOrException(AddPaymentPlanEndDatePage, true)
           .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
           .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
           .setOrException(BankDetailsBankNamePage, "Barclays")
@@ -1213,11 +1137,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
-        when(mockSessionRepository.set(any()))
-          .thenReturn(Future.successful(true))
-        when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
-
         when(
           mockMacGenerator.generateMac(
             any[String],
@@ -1234,8 +1153,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(
             bind[NationalDirectDebitService].toInstance(mockNddService),
-            bind[MacGenerator].toInstance(mockMacGenerator),
-            bind[SessionRepository].toInstance(mockSessionRepository)
+            bind[MacGenerator].toInstance(mockMacGenerator)
           )
           .build()
 
@@ -1244,15 +1162,125 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           val result = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-
-          val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
-          verify(mockSessionRepository).set(uaCaptor.capture())
-          val savedUa = uaCaptor.getValue
-
-          savedUa.get(PaymentReferencePage) must be(Some(s"$paymentReference${yearEndAndMonthDate.displayFormat}"))
           redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
         }
       }
 
+      "must proceed normally when AddPaymentPlanEndDatePage is false (no end date required)" in {
+        val startDate = LocalDate.of(2025, 8, 1)
+        val startDateDetails = PlanStartDateDetails(startDate, "2025-8-1")
+        val userAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.MGD)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan)
+          .setOrException(PaymentReferencePage, "1234567")
+          .setOrException(PaymentsFrequencyPage, PaymentsFrequency.Monthly)
+          .setOrException(RegularPaymentAmountPage, 120)
+          .setOrException(PlanStartDatePage, startDateDetails)
+          .setOrException(AddPaymentPlanEndDatePage, false)
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(pages.MacValuePage, "valid-mac")
+
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+        when(mockNddService.generateNewDdiReference(any())(any()))
+          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+        when(mockNddService.submitChrisData(any())(any()))
+          .thenReturn(Future.successful(true))
+        when(
+          mockMacGenerator.generateMac(
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[Option[String]],
+            any[Option[String]],
+            any[String],
+            any[String]
+          )
+        ).thenReturn("valid-mac")
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        }
+      }
+
+      "must proceed normally and addFourExtra number to paymentReference when DirectDebitSource is 'PAYE', " +
+        "TellAboutThisPaymentPage is true (YES) and YearEndAndMonthPage has a value" in {
+          val mockSessionRepository = mock[SessionRepository]
+          val paymentReference = "1234567"
+
+          val userAnswers = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.PAYE)
+            .setOrException(PaymentReferencePage, paymentReference)
+            .setOrException(TellAboutThisPaymentPage, true)
+            .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
+            .setOrException(PaymentAmountPage, 123.01)
+            .setOrException(PaymentDatePage, paymentDateDetails)
+            .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+            .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .setOrException(pages.MacValuePage, "valid-mac")
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.generateNewDdiReference(any())(any()))
+            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          when(mockNddService.submitChrisData(any())(any()))
+            .thenReturn(Future.successful(true))
+          when(mockSessionRepository.set(any()))
+            .thenReturn(Future.successful(true))
+          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
+
+          when(
+            mockMacGenerator.generateMac(
+              any[String],
+              any[String],
+              any[String],
+              any[Seq[String]],
+              any[Option[String]],
+              any[Option[String]],
+              any[String],
+              any[String]
+            )
+          ).thenReturn("valid-mac")
+
+          val application = applicationBuilder(userAnswers = Some(userAnswers))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService),
+              bind[MacGenerator].toInstance(mockMacGenerator),
+              bind[SessionRepository].toInstance(mockSessionRepository)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+
+            status(result) mustEqual SEE_OTHER
+
+            val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+            verify(mockSessionRepository).set(uaCaptor.capture())
+            val savedUa = uaCaptor.getValue
+
+            savedUa.get(PaymentReferencePage) must be(Some(s"$paymentReference${yearEndAndMonthDate.displayFormat}"))
+            redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+          }
+        }
+    }
   }
+
 }

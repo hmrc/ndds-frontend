@@ -18,22 +18,17 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
-import org.mockito.Mockito.when
-import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import views.html.AccessDeniedView
 
 class AccessDeniedControllerSpec extends SpecBase {
 
-  private val mockAppConfig = mock[FrontendAppConfig]
-
   "AccessDenied Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      when(mockAppConfig.govUKUrl).thenReturn("https://www.tax.service.gov.uk/account")
 
       running(application) {
         val request = FakeRequest(GET, routes.AccessDeniedController.onPageLoad().url)
@@ -43,7 +38,7 @@ class AccessDeniedControllerSpec extends SpecBase {
         val view = application.injector.instanceOf[AccessDeniedView]
 
         status(result) mustEqual OK
-        contentAsString(result) mustEqual view()(request, mockAppConfig, messages(application)).toString
+        contentAsString(result) mustEqual view()(request, application.injector.instanceOf[FrontendAppConfig], messages(application)).toString
       }
     }
   }

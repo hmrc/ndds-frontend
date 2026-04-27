@@ -24,7 +24,6 @@ import models.DirectDebitSource.MGD
 import models.PaymentPlanType.VariablePaymentPlan
 import models.responses.*
 import models.{NormalMode, PaymentPlanType, UserAnswers}
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -84,7 +83,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
   val date: LocalDateTime = LocalDateTime.now(fixedClock)
   private val earliestPaymentDate = EarliestPaymentDate("2025-02-06")
   private val formattedDateNumeric = "06 02 2025"
-  val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   private val mockConnector: NationalDirectDebitConnector = mock[NationalDirectDebitConnector]
   val calendar = Calendar.getInstance()
   calendar.set(2024, Calendar.JANUARY, 15, 14, 30, 45)
@@ -140,8 +138,6 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
           .value
         when(mockConnector.getFutureWorkingDays(any())(any()))
           .thenReturn(Future.successful(EarliestPaymentDate("2025-12-25")))
-        when(mockConfig.TWO_WORKING_DAYS).thenReturn(2)
-        when(mockConfig.paymentDelayDynamicAuddisEnabled).thenReturn(3)
 
         val application = applicationBuilder(userAnswers = Some(userAnswers))
           .overrides(bind[NationalDirectDebitService].toInstance(mockService))
