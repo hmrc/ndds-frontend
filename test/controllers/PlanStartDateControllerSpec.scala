@@ -35,16 +35,17 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
+import utils.ClockProvider
 import views.html.PlanStartDateView
 
-import java.time.{LocalDate, ZoneOffset}
+import java.time.{Clock, LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
 class PlanStartDateControllerSpec extends SpecBase with MockitoSugar {
 
   private implicit val messages: Messages = stubMessages()
 
-  private val formProvider = new PlanStartDateFormProvider()
+  private val formProvider = new PlanStartDateFormProvider(ClockProvider(Clock.systemUTC()))
 
   private def form = formProvider()
 

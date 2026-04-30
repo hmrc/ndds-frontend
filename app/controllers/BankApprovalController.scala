@@ -23,8 +23,9 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.BankApprovalView
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class BankApprovalController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

@@ -29,10 +29,11 @@ import views.html.AdvanceNoticeView
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+@Singleton
 class AdvanceNoticeController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

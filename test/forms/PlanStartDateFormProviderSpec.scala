@@ -23,14 +23,15 @@ import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PlanEndDatePage}
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
+import utils.ClockProvider
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, ZoneOffset}
+import java.time.{Clock, LocalDate, ZoneOffset}
 
 class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
 
   private implicit val messages: Messages = stubMessages()
-  private val form = new PlanStartDateFormProvider()()
+  private val form = new PlanStartDateFormProvider(ClockProvider(Clock.systemUTC()))()
   private val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   ".value" - {
@@ -60,7 +61,7 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
     val userAnswers = UserAnswers("test-id")
 
     "must bind valid date successfully" in {
-      val formWithRules = new PlanStartDateFormProvider().apply(userAnswers, earliestPlanStartDate)
+      val formWithRules = new PlanStartDateFormProvider(ClockProvider(Clock.systemUTC()))(userAnswers, earliestPlanStartDate)
       val data = Map(
         "value.day"   -> "20",
         "value.month" -> "1",
@@ -73,7 +74,7 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
     }
 
     "must return error when date is before earliest plan start date" in {
-      val formWithRules = new PlanStartDateFormProvider().apply(userAnswers, earliestPlanStartDate)
+      val formWithRules = new PlanStartDateFormProvider(ClockProvider(Clock.systemUTC()))(userAnswers, earliestPlanStartDate)
       val data = Map(
         "value.day"   -> "10",
         "value.month" -> "1",
@@ -97,7 +98,7 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
         .success
         .value
 
-      val formWithRules = new PlanStartDateFormProvider().apply(budgetUserAnswers, earliestPlanStartDate)
+      val formWithRules = new PlanStartDateFormProvider(ClockProvider(Clock.systemUTC()))(budgetUserAnswers, earliestPlanStartDate)
       val futureDate = expectedMax.plusDays(1)
       val data = Map(
         "value.day"   -> futureDate.getDayOfMonth.toString,
@@ -122,7 +123,7 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
         .success
         .value
 
-      val formWithRules = new PlanStartDateFormProvider().apply(vppUserAnswers, earliestPlanStartDate)
+      val formWithRules = new PlanStartDateFormProvider(ClockProvider(Clock.systemUTC()))(vppUserAnswers, earliestPlanStartDate)
       val futureDate = currentDate.plusDays(31)
       val data = Map(
         "value.day"   -> futureDate.getDayOfMonth.toString,
@@ -145,7 +146,7 @@ class PlanStartDateFormProviderSpec extends DateBehaviours with TryValues {
           .success
           .value
 
-      val form = new PlanStartDateFormProvider().apply(userAnswers, LocalDate.of(2024, 1, 1))
+      val form = new PlanStartDateFormProvider(ClockProvider(Clock.systemUTC()))(userAnswers, LocalDate.of(2024, 1, 1))
 
       val boundForm = form.bind(
         Map("value.day" -> "15", "value.month" -> "1", "value.year" -> "2025")

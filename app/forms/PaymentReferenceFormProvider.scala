@@ -16,11 +16,12 @@
 
 package forms
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.DirectDebitSource
 import forms.mappings.Mappings
 import play.api.data.Form
 
+@Singleton
 class PaymentReferenceFormProvider @Inject() extends Mappings {
 
   private val validCharactersRegex = "^[A-Za-z0-9]+$".r

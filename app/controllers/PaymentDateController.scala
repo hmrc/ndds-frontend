@@ -31,9 +31,10 @@ import utils.DateTimeFormats
 import views.html.PaymentDateView
 
 import java.time.LocalDate
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class PaymentDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,

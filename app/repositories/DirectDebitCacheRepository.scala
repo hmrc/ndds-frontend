@@ -27,8 +27,9 @@ import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import utils.ClockProvider
 
-import java.time.{Clock, Instant}
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class DirectDebitCacheRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: FrontendAppConfig,
-  clock: Clock,
+  clockProvider: ClockProvider,
   crypto: Encrypter & Decrypter
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[NddDAO](
@@ -73,7 +74,7 @@ class DirectDebitCacheRepository @Inject() (
   }
 
   def cacheResponse(response: NddResponse)(id: String): Future[Boolean] = Mdc.preservingMdc {
-    val encryptedDocument = NddDAO(id, Instant.now(clock), response.directDebitList.map(_.encrypted))
+    val encryptedDocument = NddDAO(id, Instant.now(clockProvider.clock), response.directDebitList.map(_.encrypted))
 
     retrieveCache(id) flatMap {
       case Seq() =>
@@ -117,7 +118,7 @@ class DirectDebitCacheRepository @Inject() (
 
       val updatedEncryptedDoc = NddDAO(
         id           = id,
-        lastUpdated  = Instant.now(clock),
+        lastUpdated  = Instant.now(clockProvider.clock),
         directDebits = updatedDirectDebitList.map(_.encrypted)
       )
 
@@ -153,7 +154,7 @@ class DirectDebitCacheRepository @Inject() (
     collection
       .updateOne(
         filter = byId(id),
-        update = Updates.set("lastUpdated", Instant.now(clock))
+        update = Updates.set("lastUpdated", Instant.now(clockProvider.clock))
       )
       .toFuture()
       .map(_ => true)

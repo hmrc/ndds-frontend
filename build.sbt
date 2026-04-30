@@ -66,7 +66,7 @@ lazy val it =
 lazy val sCoverageSettings = {
   Seq(
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*components.*;git .*config.*;.*models.*;" +
-      ".*Routes*.*;.*viewmodels.*;.*views.*;testOnlyDoNotUseInAppConf.*;",
+      ".*Routes*.*;.*viewmodels.*;.*views.*;testOnlyDoNotUseInAppConf.*;.*testOnly.*",
     ScoverageKeys.coverageMinimumStmtTotal := 80,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true

@@ -20,6 +20,7 @@ import forms.behaviours.DateBehaviours
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
+import utils.ClockProvider
 
 import java.time.{Clock, LocalDate, ZoneId}
 
@@ -33,7 +34,7 @@ class PaymentDateFormProviderSpec extends DateBehaviours {
     ZoneId.systemDefault()
   )
 
-  private val formProvider = new PaymentDateFormProvider(fixedClock)
+  private val formProvider = new PaymentDateFormProvider(ClockProvider(fixedClock))
 
   ".value" - {
 

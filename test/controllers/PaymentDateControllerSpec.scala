@@ -33,6 +33,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
 import services.NationalDirectDebitService
+import utils.ClockProvider
 import views.html.PaymentDateView
 
 import java.time.*
@@ -45,7 +46,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
   val fixedInstant: Instant = Instant.parse("2024-07-17T00:00:00Z")
   val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneId.systemDefault())
-  private val formProvider = new PaymentDateFormProvider(fixedClock)
+  private val formProvider = new PaymentDateFormProvider(ClockProvider(fixedClock))
 
   private def form = formProvider(LocalDate.parse(expectedEarliestPaymentDate.date), isSinglePlan = false)
 
@@ -109,7 +110,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
     "onPageLoad" - {
       "must return OK and the correct view for a GET" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
-          .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
+          .overrides(bind[ClockProvider].toInstance(ClockProvider(fixedClock)), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
@@ -129,7 +130,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must populate the view correctly on a GET when the question has previously been answered" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
-          .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
+          .overrides(bind[ClockProvider].toInstance(ClockProvider(fixedClock)), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
@@ -161,7 +162,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must redirect to System Error for a GET if the earliest payment date cannot be obtained" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
-          .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
+          .overrides(bind[ClockProvider].toInstance(ClockProvider(fixedClock)), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
@@ -177,7 +178,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must redirect to System Error when future date returns None" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
-          .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
+          .overrides(bind[ClockProvider].toInstance(ClockProvider(fixedClock)), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))
@@ -229,7 +230,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must return a Bad Request and errors when invalid data is submitted" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
-          .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
+          .overrides(bind[ClockProvider].toInstance(ClockProvider(fixedClock)), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersNormalMode), any())(any()))
@@ -318,7 +319,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
           )
 
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersNormalMode))
-          .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
+          .overrides(bind[ClockProvider].toInstance(ClockProvider(fixedClock)), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         running(application) {
@@ -332,7 +333,7 @@ class PaymentDateControllerSpec extends SpecBase with MockitoSugar {
 
       "must redirect to System Error for a POST if the earliest payment date cannot be obtained and the data is invalid" in {
         val application = applicationBuilder(userAnswers = Some(expectedUserAnswersChangeMode))
-          .overrides(bind[Clock].toInstance(fixedClock), bind[NationalDirectDebitService].toInstance(mockService))
+          .overrides(bind[ClockProvider].toInstance(ClockProvider(fixedClock)), bind[NationalDirectDebitService].toInstance(mockService))
           .build()
 
         when(mockService.getFutureWorkingDays(ArgumentMatchers.eq(expectedUserAnswersChangeMode), any())(any()))

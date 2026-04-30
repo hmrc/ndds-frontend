@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.*
 import models.*
-import models.responses.PaymentPlanResponse
+import models.responses.{EarliestPaymentDate, PaymentPlanDetails}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -27,16 +27,17 @@ import queries.{CurrentPageQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.{ChrisSubmissionForAmendService, NationalDirectDebitService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Constants
-import viewmodels.checkAnswers
+import utils.{ClockProvider, Constants}
 import viewmodels.checkAnswers.*
 import views.html.AmendPaymentPlanConfirmationView
 
 import java.time.LocalDate
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class AmendPaymentPlanConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
@@ -46,7 +47,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
   view: AmendPaymentPlanConfirmationView,
   nddService: NationalDirectDebitService,
   sessionRepository: SessionRepository,
-  chrisService: ChrisSubmissionForAmendService
+  chrisService: ChrisSubmissionForAmendService,
+  clockProvider: ClockProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -123,11 +125,11 @@ class AmendPaymentPlanConfirmationController @Inject() (
       userAnswers.get(ManagePaymentPlanTypePage) match {
         case Some(PaymentPlanType.SinglePaymentPlan.toString) =>
           val amendPaymentDate = userAnswers.get(AmendPlanStartDatePage)
-          handlePlanAmendment(userAnswers, amendPaymentDate, PaymentPlanType.SinglePaymentPlan.toString)
+          handlePlanAmendment(userAnswers, amendPaymentDate, PaymentPlanType.SinglePaymentPlan, request.userId)
 
         case Some(PaymentPlanType.BudgetPaymentPlan.toString) =>
           val amendPlanEndDate = userAnswers.get(AmendPlanEndDatePage)
-          handlePlanAmendment(userAnswers, amendPlanEndDate, PaymentPlanType.BudgetPaymentPlan.toString)
+          handlePlanAmendment(userAnswers, amendPlanEndDate, PaymentPlanType.BudgetPaymentPlan, request.userId)
 
         case _ =>
           logger.warn("Missing payment plan type from session")
@@ -138,7 +140,8 @@ class AmendPaymentPlanConfirmationController @Inject() (
   private def handlePlanAmendment(
     userAnswers: UserAnswers,
     amendedDateOption: Option[LocalDate],
-    planType: String
+    planType: PaymentPlanType,
+    userId: String
   )(implicit
     request: Request[?],
     ec: ExecutionContext
@@ -158,10 +161,10 @@ class AmendPaymentPlanConfirmationController @Inject() (
           dbEndDate: Option[LocalDate]
         ): Boolean = {
           val dateMatches = planType match {
-            case PaymentPlanType.SinglePaymentPlan.toString =>
+            case PaymentPlanType.SinglePaymentPlan =>
               amendedDateOption.contains(dbStartDate)
 
-            case PaymentPlanType.BudgetPaymentPlan.toString =>
+            case PaymentPlanType.BudgetPaymentPlan =>
               (amendedDateOption, dbEndDate) match {
                 case (Some(d1), Some(d2)) => d1 == d2
                 case (Some(d1), None)     => false
@@ -181,14 +184,14 @@ class AmendPaymentPlanConfirmationController @Inject() (
             if (isNoChange(dbAmount, dbStartDate, Some(dbEndDate))) {
               Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
             } else {
-              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, planDetails.paymentPlanDetails, userId)
             }
 
           case (Some(dbAmount), Some(dbStartDate), None) =>
             if (isNoChange(dbAmount, dbStartDate, None)) {
               Future.successful(Redirect(routes.AmendPaymentPlanUpdateController.onPageLoad()))
             } else {
-              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption)
+              checkDuplicatePlan(userAnswers, amendedAmount, amendedDateOption, planType, planDetails.paymentPlanDetails, userId)
             }
 
           case _ =>
@@ -203,7 +206,13 @@ class AmendPaymentPlanConfirmationController @Inject() (
   }
 
   // F26 check for duplicate from RDS DB
-  private def checkDuplicatePlan(userAnswers: UserAnswers, amendedAmount: BigDecimal, amendedDate: Option[LocalDate])(implicit
+  private def checkDuplicatePlan(userAnswers: UserAnswers,
+                                 amendedAmount: BigDecimal,
+                                 amendedDate: Option[LocalDate],
+                                 planType: PaymentPlanType,
+                                 planDetails: PaymentPlanDetails,
+                                 userId: String
+                                )(implicit
     ec: ExecutionContext,
     request: Request[?]
   ): Future[Result] = {
@@ -214,7 +223,6 @@ class AmendPaymentPlanConfirmationController @Inject() (
         val updatedAnswers = for {
           updatedUa <- Future.fromTry(userAnswers.set(AmendPaymentPlanConfirmationPage, true))
           updatedUa <- Future.fromTry(updatedUa.set(AmendPaymentAmountPage, amendedAmount))
-          updatedUa <- Future.fromTry(updatedUa.set(AmendPlanStartDatePage, userAnswers.get(AmendPlanStartDatePage).get))
           updatedUa <- if (userAnswers.get(AmendConfirmRemovePlanEndDatePage).contains(true)) {
                          Future.fromTry(updatedUa.remove(AmendPlanEndDatePage))
                        } else {
@@ -224,6 +232,14 @@ class AmendPaymentPlanConfirmationController @Inject() (
                          Future.fromTry(updatedUa.set(AmendPlanEndDatePage, amendedDate.get))
                        } else {
                          Future.successful(updatedUa)
+                       }
+          updatedUa <- planType match {
+                         case PaymentPlanType.BudgetPaymentPlan =>
+                           // amend the payment plan start date
+                           calculateNewStartDateForBpp(userAnswers, planDetails, userId)
+                             .flatMap(date => Future.fromTry(updatedUa.set(AmendPlanStartDatePage, date)))
+                         case _ =>
+                           Future.fromTry(updatedUa.set(AmendPlanStartDatePage, userAnswers.get(AmendPlanStartDatePage).get))
                        }
         } yield updatedUa
 
@@ -239,5 +255,35 @@ class AmendPaymentPlanConfirmationController @Inject() (
       }
     }
   }
+
+  def calculateNewStartDateForBpp(ua: UserAnswers, planDetails: PaymentPlanDetails, userId: String)(using HeaderCarrier): Future[LocalDate] =
+    nddService.getFutureWorkingDays(ua: UserAnswers, userId).map {
+      case None =>
+        sys.error("Failed to calculate new start date for BPP amend")
+
+      case Some(EarliestPaymentDate(earliestPaymentDateString)) =>
+        val earliestPaymentDate = LocalDate.parse(earliestPaymentDateString)
+        val existingScheduledPaymentStartDate =
+          planDetails.scheduledPaymentStartDate.getOrElse(sys.error("Missing existing scheduled payment start date for BPP amend"))
+
+        planDetails.scheduledPaymentFrequency match {
+          case Some(PaymentsFrequency.Weekly.toString) =>
+            val existingDayOfWeek = existingScheduledPaymentStartDate.getDayOfWeek
+            // keep the same day of the week as the existing start date, so  calculate the next date that falls on that day of the week
+            earliestPaymentDate.plusDays((existingDayOfWeek.getValue - earliestPaymentDate.getDayOfWeek.getValue + 7) % 7)
+
+          case Some(PaymentsFrequency.Monthly.toString) =>
+            val proposedNewScheduledPaymentStartDate = earliestPaymentDate.withDayOfMonth(existingScheduledPaymentStartDate.getDayOfMonth)
+
+            if (proposedNewScheduledPaymentStartDate.isBefore(earliestPaymentDate))
+              proposedNewScheduledPaymentStartDate.plusMonths(1)
+            else
+              proposedNewScheduledPaymentStartDate
+
+          case other =>
+            sys.error(s"Unexpected payment frequency for BPP amend: $other")
+        }
+
+    }
 
 }

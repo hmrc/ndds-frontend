@@ -30,11 +30,11 @@ import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Call}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.SessionRepository
-import utils.Constants
+import utils.{ClockProvider, Constants}
 import views.html.PlanEndDateView
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, ZoneOffset}
+import java.time.{Clock, LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
 class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
@@ -42,7 +42,7 @@ class PlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
   private val startDate: LocalDate = LocalDate.of(2024, 1, 1)
   private val planStartDateDetails: PlanStartDateDetails = PlanStartDateDetails(startDate, "2024-1-11")
-  private val formProvider = new PlanEndDateFormProvider()
+  private val formProvider = new PlanEndDateFormProvider(ClockProvider(Clock.systemUTC()))
 
   private def form = formProvider(startDate)
   lazy val addPaymentPlanEndDateRoute: String = routes.AddPaymentPlanEndDateController.onPageLoad(NormalMode).url

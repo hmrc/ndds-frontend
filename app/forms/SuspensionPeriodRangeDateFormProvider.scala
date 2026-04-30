@@ -22,13 +22,14 @@ import play.api.data.Forms.mapping
 import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.data.{Form, FormError}
 import play.api.i18n.Messages
-import utils.DateFormats
+import utils.{ClockProvider, DateFormats}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
-class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
+@Singleton
+class SuspensionPeriodRangeDateFormProvider @Inject() (clockProvider: ClockProvider) extends Mappings {
 
   private val MaxMonthsAhead = 6
 
@@ -50,7 +51,8 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
           dateFormats       = DateFormats.defaultDateFormats,
           planStartDateOpt  = planStartDateOpt,
           planEndDateOpt    = planEndDateOpt,
-          earliestStartDate = earliestStartDate
+          earliestStartDate = earliestStartDate,
+          clock             = clockProvider.clock
         ),
         "suspensionPeriodRangeEndDate" -> customPaymentDate(
           invalidKey     = "suspensionPeriodRangeDate.error.invalid.endDate.base",
@@ -85,8 +87,8 @@ class SuspensionPeriodRangeDateFormProvider @Inject() extends Mappings {
     earliestStartDate: LocalDate
   ): Boolean = {
     val lowerBound = planStartDateOpt.fold(earliestStartDate)(psd => if (psd.isAfter(earliestStartDate)) psd else earliestStartDate)
-    val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
-      val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
+    val upperBound = planEndDateOpt.fold(LocalDate.now(clockProvider.clock).plusMonths(MaxMonthsAhead)) { ped =>
+      val sixMonthsFromToday = LocalDate.now(clockProvider.clock).plusMonths(MaxMonthsAhead)
       if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
     }
     !startDate.isBefore(lowerBound) && !startDate.isAfter(upperBound)

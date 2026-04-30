@@ -22,8 +22,9 @@ import play.api.data.Form
 import play.api.data.Forms.*
 import play.api.data.validation.{Constraint, Invalid, Valid}
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class YourBankDetailsFormProvider @Inject() extends Mappings {
 
   val MAX_ACCOUNT_HOLDER_NAME_LENGTH = 40

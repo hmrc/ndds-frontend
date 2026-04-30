@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import com.google.inject.Inject
+import javax.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import controllers.routes
 import models.requests.IdentifierRequest
@@ -32,6 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with ActionFunction[Request, IdentifierRequest]
 
+@Singleton
 class AuthenticatedIdentifierAction @Inject() (
   override val authConnector: AuthConnector,
   config: FrontendAppConfig,

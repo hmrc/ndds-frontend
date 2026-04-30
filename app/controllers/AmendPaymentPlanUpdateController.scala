@@ -25,7 +25,7 @@ import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import queries.{DirectDebitReferenceQuery, PaymentPlanDetailsQuery, PaymentPlanReferenceQuery}
 import services.NationalDirectDebitService
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.{Constants, MaskAndFormatUtils}
 import utils.MaskAndFormatUtils.formatAmount
@@ -35,9 +35,10 @@ import views.html.AmendPaymentPlanUpdateView
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
+@Singleton
 class AmendPaymentPlanUpdateController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

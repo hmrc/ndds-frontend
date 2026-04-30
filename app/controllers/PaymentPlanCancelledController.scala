@@ -27,13 +27,14 @@ import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.Constants
+import utils.{ClockProvider, Constants}
 import viewmodels.checkAnswers.*
 import views.html.PaymentPlanCancelledView
 
 import java.time.LocalDate
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class PaymentPlanCancelledController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
@@ -41,7 +42,8 @@ class PaymentPlanCancelledController @Inject() (
   requireData: DataRequiredAction,
   nddService: NationalDirectDebitService,
   val controllerComponents: MessagesControllerComponents,
-  view: PaymentPlanCancelledView
+  view: PaymentPlanCancelledView,
+  clockProvider: ClockProvider
 ) extends FrontendBaseController
     with I18nSupport {
 
@@ -69,7 +71,7 @@ class PaymentPlanCancelledController @Inject() (
   private def isSuspendPeriodActive(planDetail: PaymentPlanDetails): Boolean = {
     (for {
       suspensionEndDate <- planDetail.suspensionEndDate
-    } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
+    } yield !LocalDate.now(clockProvider.clock).isAfter(suspensionEndDate)).getOrElse(false)
   }
 
   private def buildRows(planDetail: PaymentPlanDetails)(implicit messages: Messages): Seq[SummaryListRow] = {

@@ -27,14 +27,15 @@ import queries.{CurrentPageQuery, PaymentPlanDetailsQuery}
 import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.{Constants, Frequency}
+import utils.{ClockProvider, Constants, Frequency}
 import views.html.AmendPlanEndDateView
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class AmendPlanEndDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
@@ -44,7 +45,8 @@ class AmendPlanEndDateController @Inject() (
   nddsService: NationalDirectDebitService,
   formProvider: AmendPlanEndDateFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: AmendPlanEndDateView
+  view: AmendPlanEndDateView,
+  clockProvider: ClockProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -62,7 +64,7 @@ class AmendPlanEndDateController @Inject() (
         case None        => form
         case Some(value) => form.fill(value)
       }
-      val beforeDate = LocalDate.now().plusYears(1).format(dateFormat)
+      val beforeDate = LocalDate.now(clockProvider.clock).plusYears(1).format(dateFormat)
 
       Ok(view(preparedForm, mode, routes.AmendingPaymentPlanController.onPageLoad(), beforeDate))
     } else {
@@ -74,7 +76,7 @@ class AmendPlanEndDateController @Inject() (
 
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     implicit val messages: Messages = controllerComponents.messagesApi.preferred(request)
-    val beforeDate = LocalDate.now().plusMonths(12).format(dateFormat)
+    val beforeDate = LocalDate.now(clockProvider.clock).plusMonths(12).format(dateFormat)
     val form = formProvider()
     val userAnswers = request.userAnswers
     form

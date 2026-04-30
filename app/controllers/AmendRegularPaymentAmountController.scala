@@ -30,9 +30,10 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.AmendRegularPaymentAmountView
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class AmendRegularPaymentAmountController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,

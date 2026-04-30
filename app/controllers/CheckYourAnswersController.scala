@@ -16,7 +16,7 @@
 
 package controllers
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import models.*
@@ -33,7 +33,7 @@ import services.NationalDirectDebitService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils.generateMacFromAnswers
-import utils.{DateTimeFormats, MacGenerator}
+import utils.{ClockProvider, DateTimeFormats, MacGenerator}
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.summarylist.*
 import views.html.CheckYourAnswersView
@@ -41,6 +41,7 @@ import views.html.CheckYourAnswersView
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class CheckYourAnswersController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
@@ -51,7 +52,8 @@ class CheckYourAnswersController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   view: CheckYourAnswersView,
   appConfig: FrontendAppConfig,
-  macGenerator: MacGenerator
+  macGenerator: MacGenerator,
+  clockProvider: ClockProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -106,7 +108,7 @@ class CheckYourAnswersController @Inject() (
       )
 
       val backRoute: Call = backRouteCheck(source, hasEndDate)
-      Ok(view(list, DateTimeFormats.formattedCurrentDate, backRoute))
+      Ok(view(list, DateTimeFormats.formattedCurrentDate(clockProvider.clock), backRoute))
     }
   }
 
@@ -185,7 +187,7 @@ class CheckYourAnswersController @Inject() (
     ua: UserAnswers,
     earliest: EarliestPaymentDate
   ): Either[String, Unit] = {
-    val maxDateForSinglePlan = LocalDate.now().plusYears(1)
+    val maxDateForSinglePlan = LocalDate.now(clockProvider.clock).plusYears(1)
     ua.get(PaymentDatePage) match {
       case None =>
         logger.warn("No valid data available for single payment plan")
@@ -212,7 +214,7 @@ class CheckYourAnswersController @Inject() (
     val maybeStart = ua.get(PlanStartDatePage).map(_.enteredDate)
     val maybeEnd = ua.get(PlanEndDatePage)
     val earliest = LocalDate.parse(earliestPlanStartDate.date)
-    val today = LocalDate.now()
+    val today = LocalDate.now(clockProvider.clock)
     val maxDate = today.plusYears(1)
 
     maybeStart match {
@@ -250,7 +252,7 @@ class CheckYourAnswersController @Inject() (
         Left("PlanStartDatePage missing in UserAnswers")
       case Some(start) =>
         val earliestDate = LocalDate.parse(earliest.date)
-        val today = LocalDate.now()
+        val today = LocalDate.now(clockProvider.clock)
         val maxDate = today.plusDays(TimeToPayMaxDays)
 
         if (start.isBefore(earliestDate)) {

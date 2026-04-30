@@ -23,8 +23,9 @@ import org.scalatest.wordspec.AnyWordSpec
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
+import utils.ClockProvider
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 
 class SuspensionPeriodRangeDateFormProviderSpec extends AnyWordSpec with Matchers {
 
@@ -35,7 +36,7 @@ class SuspensionPeriodRangeDateFormProviderSpec extends AnyWordSpec with Matcher
   private val planStart = LocalDate.of(2025, 11, 10)
   private val planEnd = LocalDate.of(2026, 1, 31)
 
-  private val formProvider = new SuspensionPeriodRangeDateFormProvider()
+  private val formProvider = new SuspensionPeriodRangeDateFormProvider(ClockProvider(Clock.systemUTC()))
   private val form = formProvider(Some(planStart), Some(planEnd), earliestStart)
 
   private val validStartDate = planStart.plusDays(2)

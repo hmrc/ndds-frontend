@@ -20,8 +20,9 @@ import forms.mappings.Mappings
 import models.PaymentsFrequency
 import play.api.data.Form
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class PaymentsFrequencyFormProvider @Inject() extends Mappings {
 
   def apply(): Form[PaymentsFrequency] =

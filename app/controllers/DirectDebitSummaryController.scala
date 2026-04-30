@@ -29,14 +29,16 @@ import services.{NationalDirectDebitService, PaginationService}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.ClockProvider
 import utils.Utils.cleanConfirmationFlags
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPaymentPlanSourceSummary, AmendPaymentPlanTypeSummary, DateSetupSummary}
 import views.html.DirectDebitSummaryView
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
+@Singleton
 class DirectDebitSummaryController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
@@ -48,7 +50,8 @@ class DirectDebitSummaryController @Inject() (
   nddService: NationalDirectDebitService,
   sessionRepository: SessionRepository,
   paginationService: PaginationService,
-  config: FrontendAppConfig
+  config: FrontendAppConfig,
+  clockProvider: ClockProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {

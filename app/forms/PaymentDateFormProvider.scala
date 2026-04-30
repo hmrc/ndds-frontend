@@ -16,21 +16,22 @@
 
 package forms
 
-import forms.mappings.{DateFormat, Mappings}
+import forms.mappings.Mappings
 import play.api.data.Form
 import play.api.i18n.Messages
-import utils.DateFormats
+import utils.{ClockProvider, DateFormats}
 
 import java.time.format.DateTimeFormatter
-import java.time.{Clock, LocalDate}
-import javax.inject.Inject
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 
-class PaymentDateFormProvider @Inject() (clock: Clock) extends Mappings {
+@Singleton
+class PaymentDateFormProvider @Inject() (clockProvider: ClockProvider) extends Mappings {
 
   def apply(earliestDate: LocalDate, isSinglePlan: Boolean)(implicit messages: Messages): Form[LocalDate] = {
     val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
-    val today = LocalDate.now(clock)
+    val today = LocalDate.now(clockProvider.clock)
     val maxDateForSinglePlan = today.plusYears(1)
 
     Form(

@@ -19,8 +19,9 @@ package forms
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class TellAboutThisPaymentFormProvider @Inject() extends Mappings {
 
   def apply(): Form[Boolean] =

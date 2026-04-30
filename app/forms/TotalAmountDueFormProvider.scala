@@ -20,8 +20,9 @@ import config.FrontendAppConfig
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class TotalAmountDueFormProvider @Inject() (config: FrontendAppConfig) extends Mappings {
 
   private val maximum = 99999999.99

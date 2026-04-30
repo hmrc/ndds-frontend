@@ -19,8 +19,9 @@ package forms
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class DuplicateWarningFormProvider @Inject() extends Mappings {
 
   def apply(): Form[Boolean] =

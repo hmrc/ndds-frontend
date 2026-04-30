@@ -22,8 +22,9 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.ErrorWarningView
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class ErrorWarningController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

@@ -22,13 +22,14 @@ import pages.PlanEndDatePage
 import play.api.data.Form
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.Messages
-import utils.DateFormats
+import utils.{ClockProvider, DateFormats}
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
-class PlanStartDateFormProvider @Inject() extends Mappings {
+@Singleton
+class PlanStartDateFormProvider @Inject() (clockProvider: ClockProvider) extends Mappings {
 
   def apply()(implicit messages: Messages): Form[LocalDate] = {
     Form(
@@ -54,7 +55,8 @@ class PlanStartDateFormProvider @Inject() extends Mappings {
         timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
         dateFormats              = DateFormats.defaultDateFormats,
         userAnswers              = userAnswers,
-        earliestPlanStartDate    = earliestPlanStartDate
+        earliestPlanStartDate    = earliestPlanStartDate,
+        clock                    = clockProvider.clock
       ).verifying(
         checkIfDateAfter(userAnswers.get(PlanEndDatePage))
       )

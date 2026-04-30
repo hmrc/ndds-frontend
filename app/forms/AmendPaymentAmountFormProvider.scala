@@ -19,8 +19,9 @@ package forms
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class AmendPaymentAmountFormProvider @Inject() () extends Mappings {
 
   val MIN_AMOUNT: BigDecimal = 1.0

@@ -32,9 +32,10 @@ import views.html.AmendPlanStartDateView
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class AmendPlanStartDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,

@@ -39,7 +39,7 @@ import play.api.test.Helpers.*
 import queries.*
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.DirectDebitDetailsData
+import utils.{ClockProvider, DirectDebitDetailsData}
 import utils.Frequency.*
 
 import java.time.*
@@ -59,7 +59,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
   val mockCache: DirectDebitCacheRepository = mock[DirectDebitCacheRepository]
   val mockConfig: FrontendAppConfig = mock[FrontendAppConfig]
   val currentClock: Clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
-  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, currentClock)
+  val service = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(currentClock))
 
   val testId = "id"
   val testSortCode = "123456"
@@ -1374,7 +1374,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.of(2025, 3, 15)
             val startDate = today
@@ -1392,7 +1392,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.of(2025 - 1, 3, 15)
             val startDate = today
@@ -1410,8 +1410,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-01-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
-
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.now(fixedClock)
 
             val startDate = LocalDate.of(2024, 1, 31)
@@ -1432,7 +1431,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.now(fixedClock)
 
@@ -1454,7 +1453,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.of(2025 - 2, 3, 15)
             val startDate = today
@@ -1537,7 +1536,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
 
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.of(2025, 3, 15)
             val startDate = today
@@ -1555,7 +1554,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.of(2025 - 1, 3, 15)
             val startDate = today
             val planEndDate = today.plusYears(6)
@@ -1572,7 +1571,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-03-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.now(fixedClock)
 
@@ -1594,7 +1593,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-02-28T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.now(fixedClock)
 
@@ -1616,7 +1615,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.of(2025 - 2, 3, 15)
             val startDate = today
             val planEndDate = today.plusYears(6)
@@ -1633,7 +1632,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-10-29T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.now(fixedClock)
             val startDate = LocalDate.of(2020, 3, 29)
@@ -1707,7 +1706,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.of(2025, 3, 15)
             val startDate = today
             val planEndDate = today.plusYears(6)
@@ -1724,7 +1723,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.of(2025 - 1, 3, 15)
             val startDate = today
             val planEndDate = today.plusYears(6)
@@ -1741,7 +1740,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-05-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.now(fixedClock)
 
@@ -1763,7 +1762,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.now(fixedClock)
 
@@ -1785,7 +1784,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.of(2025 - 2, 3, 15)
             val startDate = today
             val planEndDate = today.plusYears(6)
@@ -1838,7 +1837,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is same calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.of(2025, 3, 15)
             val startDate = today
             val planEndDate = today.plusYears(6)
@@ -1854,7 +1853,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.of(2025 - 1, 3, 15)
             val startDate = today
             val planEndDate = today.plusYears(6)
@@ -1871,7 +1870,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is more than one calendar year and potentialNextPaymentDate is not within 3 working days" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-11-17T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
             val today = LocalDate.of(2025 - 2, 3, 15)
             val startDate = today
             val planEndDate = today.plusYears(6)
@@ -1888,7 +1887,7 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
 
           "but planStartDate is last calendar year and potentialNextPaymentDate is within 3 working days and next month is not a shorter month" in {
             val fixedClock = Clock.fixed(Instant.parse("2025-04-30T00:00:00Z"), ZoneId.of("UTC"))
-            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, fixedClock)
+            val nddService = new NationalDirectDebitService(mockConnector, mockCache, mockConfig, ClockProvider(fixedClock))
 
             val today = LocalDate.now(fixedClock)
 

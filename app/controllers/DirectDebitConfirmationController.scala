@@ -27,16 +27,17 @@ import queries.ExistingDirectDebitIdentifierQuery
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.*
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import utils.{Constants, MaskAndFormatUtils}
+import utils.{ClockProvider, Constants, MaskAndFormatUtils}
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.{SummaryListRowViewModel, SummaryListViewModel, ValueViewModel}
 import views.html.DirectDebitConfirmationView
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.math.BigDecimal.RoundingMode
 
+@Singleton
 class DirectDebitConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
@@ -44,7 +45,8 @@ class DirectDebitConfirmationController @Inject() (
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   view: DirectDebitConfirmationView,
-  appConfig: FrontendAppConfig
+  appConfig: FrontendAppConfig,
+  clockProvider: ClockProvider
 ) extends FrontendBaseController
     with I18nSupport {
 
@@ -160,7 +162,7 @@ class DirectDebitConfirmationController @Inject() (
         key = Key(Text(messages("directDebitConfirmation.details.dateSetUp"))),
         value = ValueViewModel(
           Text(
-            LocalDate.now().format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, messages.lang.locale))
+            LocalDate.now(clockProvider.clock).format(DateTimeFormatter.ofPattern(Constants.shortDateTimeFormatPattern, messages.lang.locale))
           )
         ),
         actions = Seq.empty
