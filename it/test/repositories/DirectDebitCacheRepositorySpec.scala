@@ -31,6 +31,7 @@ import org.slf4j.MDC
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.play.bootstrap.dispatchers.MDCPropagatingExecutorService
+import utils.ClockProvider
 
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, LocalDateTime, ZoneId}
@@ -93,7 +94,7 @@ class DirectDebitCacheRepositorySpec
   protected override val repository: DirectDebitCacheRepository = new DirectDebitCacheRepository(
     mongoComponent = mongoComponent,
     appConfig      = mockAppConfig,
-    clock          = stubClock,
+    clockProvider  = ClockProvider(stubClock),
     crypto         = fakeCrypto
   )(scala.concurrent.ExecutionContext.Implicits.global)
 

@@ -22,8 +22,9 @@ import play.api.data.Form
 import play.api.i18n.Messages
 import utils.DateFormats
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class YearEndAndMonthFormProvider @Inject() extends Mappings {
 
   def apply()(implicit messages: Messages): Form[YearEndAndMonth] =

@@ -20,12 +20,14 @@ import forms.mappings.Mappings
 import play.api.data.Form
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.i18n.Messages
+import utils.ClockProvider
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
-class PlanEndDateFormProvider @Inject() extends Mappings {
+@Singleton
+class PlanEndDateFormProvider @Inject() (clockProvider: ClockProvider) extends Mappings {
 
   def apply(startDate: LocalDate)(implicit messages: Messages): Form[LocalDate] =
     Form(
@@ -51,7 +53,7 @@ class PlanEndDateFormProvider @Inject() extends Mappings {
   }
 
   private def maxYearConstraint(errorKey: String)(implicit messages: Messages): Constraint[LocalDate] = {
-    val maxDate = LocalDate.now().plusYears(100)
+    val maxDate = LocalDate.now(clockProvider.clock).plusYears(100)
     val formatter = DateTimeFormatter
       .ofPattern("d MMMM yyyy")
       .withLocale(messages.lang.locale)

@@ -28,9 +28,10 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.Utils.cleanConfirmationFlags
 import views.html.YourDirectDebitInstructionsView
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class YourDirectDebitInstructionsController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

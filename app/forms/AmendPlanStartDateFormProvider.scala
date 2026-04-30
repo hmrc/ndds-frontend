@@ -20,12 +20,13 @@ import forms.mappings.Mappings
 import models.UserAnswers
 import play.api.data.Form
 import play.api.i18n.Messages
-import utils.DateFormats
+import utils.{ClockProvider, DateFormats}
 
-import java.time.{Clock, LocalDate}
-import javax.inject.Inject
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 
-class AmendPlanStartDateFormProvider @Inject() (clock: Clock) extends Mappings {
+@Singleton
+class AmendPlanStartDateFormProvider @Inject() (clockProvider: ClockProvider) extends Mappings {
 
   def apply()(implicit messages: Messages): Form[LocalDate] =
     Form(
@@ -40,7 +41,7 @@ class AmendPlanStartDateFormProvider @Inject() (clock: Clock) extends Mappings {
 
   def apply(userAnswers: UserAnswers, earliestPlanStartDate: LocalDate)(implicit messages: Messages): Form[LocalDate] =
 
-    val maxAllowedDate = LocalDate.now(clock).plusYears(1)
+    val maxAllowedDate = LocalDate.now(clockProvider.clock).plusYears(1)
 
     Form(
       "value" -> customPaymentDate(

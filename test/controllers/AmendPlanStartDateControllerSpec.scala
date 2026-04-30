@@ -36,6 +36,7 @@ import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.ClockProvider
 import views.html.AmendPlanStartDateView
 
 import java.time.{Clock, LocalDate, LocalDateTime, ZoneId}
@@ -51,7 +52,7 @@ class AmendPlanStartDateControllerSpec extends SpecBase with MockitoSugar {
     ZoneId.systemDefault()
   )
 
-  private val formProvider = new AmendPlanStartDateFormProvider(fixedClock)
+  private val formProvider = new AmendPlanStartDateFormProvider(ClockProvider(fixedClock))
   private def form = formProvider()
   val validAnswer: LocalDate = LocalDate.now()
   val singlePlan: String = "Single Payment"

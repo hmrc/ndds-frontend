@@ -18,23 +18,21 @@ package services
 
 import config.FrontendAppConfig
 import connectors.NationalDirectDebitConnector
-import controllers.routes
 import models.DirectDebitSource.{MGD, singlePlanDirectDebitSources}
 import models.PaymentPlanType.VariablePaymentPlan
 import models.requests.*
 import models.responses.*
-import models.{DirectDebitSource, NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers, responses}
+import models.{NddResponse, NextPaymentValidationResult, PaymentPlanType, UserAnswers}
 import pages.*
 import play.api.Logging
-import play.api.mvc.Results.Redirect
 import queries.{DirectDebitReferenceQuery, ExistingDirectDebitIdentifierQuery, PaymentPlansCountQuery}
 import repositories.DirectDebitCacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{Frequency, Utils}
-import play.api.mvc.{Request, Result}
+import utils.{ClockProvider, Frequency, Utils}
+import play.api.mvc.Request
 
 import java.text.SimpleDateFormat
-import java.time.{Clock, LocalDate, ZoneOffset}
+import java.time.{LocalDate, ZoneOffset}
 import java.util.{Calendar, Date}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,7 +41,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitConnector,
                                             val directDebitCache: DirectDebitCacheRepository,
                                             config: FrontendAppConfig,
-                                            clock: Clock
+                                            clockProvider: ClockProvider
                                            )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -72,7 +70,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   }
 
   def getFutureWorkingDays(userAnswers: UserAnswers, userId: String)(implicit hc: HeaderCarrier): Future[Option[EarliestPaymentDate]] = {
-    val currentDate = LocalDate.now().toString
+    val currentDate = LocalDate.now(clockProvider.clock).toString
     val paymentPlanType = userAnswers
       .get(PaymentPlanTypePage)
       .orElse(userAnswers.get(ManagePaymentPlanTypePage))
@@ -251,7 +249,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     isSinglePaymentPlan(userAnswers) || isBudgetPaymentPlan(userAnswers)
 
   def isTwoDaysPriorPaymentDate(planStarDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    val currentDate = LocalDate.now(clock).toString
+    val currentDate = LocalDate.now(clockProvider.clock).toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = config.TWO_WORKING_DAYS)).map {
       futureWorkingDays =>
         planStarDate.isAfter(LocalDate.parse(futureWorkingDays.date))
@@ -259,7 +257,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   }
 
   def isThreeDaysPriorPlanEndDate(planEndDate: LocalDate)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    val currentDate = LocalDate.now(clock).toString
+    val currentDate = LocalDate.now(clockProvider.clock).toString
     nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(baseDate = currentDate, offsetWorkingDays = config.THREE_WORKING_DAYS)).map {
       futureWorkingDays =>
         planEndDate.isAfter(LocalDate.parse(futureWorkingDays.date))
@@ -281,7 +279,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
       )
     } { currentPaymentPlanEndDate => // when planEndDate has a date
       {
-        val today = LocalDate.now(clock)
+        val today = LocalDate.now(clockProvider.clock)
 
         for {
           isBeyondThreeDays <- isThreeDaysPriorPlanEndDate(planStartDate)
@@ -348,7 +346,8 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     potentialNextCollectionCal.add(Calendar.WEEK_OF_YEAR, wholeFrequencies * weeksPerFrequency)
 
     for {
-      workingDays <- nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(LocalDate.now(clock).toString, config.THREE_WORKING_DAYS))
+      workingDays <-
+        nddConnector.getFutureWorkingDays(WorkingDaysOffsetRequest(LocalDate.now(clockProvider.clock).toString, config.THREE_WORKING_DAYS))
     } yield {
       val df = SimpleDateFormat("yyyy-MM-dd")
       val nextPaymentDate: Calendar = if (potentialNextCollectionCal.getTime.before(df.parse(workingDays.date))) {
@@ -525,7 +524,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
     planEndDateOpt: Option[LocalDate],
     earliestStartDate: LocalDate
   ): Boolean = {
-    val latestStartDate = LocalDate.now().plusMonths(MaxMonthsAhead)
+    val latestStartDate = LocalDate.now(clockProvider.clock).plusMonths(MaxMonthsAhead)
 
     val afterPlanStart = planStartDateOpt.forall(planStart => !startDate.isBefore(planStart))
     val beforePlanEnd = planEndDateOpt.forall(planEnd => !startDate.isAfter(planEnd))
@@ -560,7 +559,7 @@ class NationalDirectDebitService @Inject() (nddConnector: NationalDirectDebitCon
   }
 
   def earliestSuspendStartDate(workingDaysOffset: Int = 3)(implicit hc: HeaderCarrier): Future[LocalDate] = {
-    val today = LocalDate.now()
+    val today = LocalDate.now(clockProvider.clock)
     val request = WorkingDaysOffsetRequest(baseDate = today.toString, offsetWorkingDays = workingDaysOffset)
 
     nddConnector.getFutureWorkingDays(request).map { response =>

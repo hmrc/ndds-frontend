@@ -20,8 +20,9 @@ import forms.mappings.Mappings
 import models.PersonalOrBusinessAccount
 import play.api.data.Form
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class PersonalOrBusinessAccountFormProvider @Inject() extends Mappings {
 
   def apply(): Form[PersonalOrBusinessAccount] =

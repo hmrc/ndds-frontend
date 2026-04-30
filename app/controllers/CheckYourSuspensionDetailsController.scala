@@ -31,14 +31,16 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import utils.ClockProvider
 import viewmodels.checkAnswers.*
 import viewmodels.govuk.all.SummaryListViewModel
 import views.html.CheckYourSuspensionDetailsView
 
 import java.time.LocalDate
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class CheckYourSuspensionDetailsController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
@@ -48,7 +50,8 @@ class CheckYourSuspensionDetailsController @Inject() (
   navigator: Navigator,
   val controllerComponents: MessagesControllerComponents,
   view: CheckYourSuspensionDetailsView,
-  nddService: NationalDirectDebitService
+  nddService: NationalDirectDebitService,
+  clockProvider: ClockProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -188,7 +191,7 @@ class CheckYourSuspensionDetailsController @Inject() (
   private def isSuspendPeriodActive(planDetail: PaymentPlanDetails): Boolean = {
     (for {
       suspensionEndDate <- planDetail.suspensionEndDate
-    } yield !LocalDate.now().isAfter(suspensionEndDate)).getOrElse(false)
+    } yield !LocalDate.now(clockProvider.clock).isAfter(suspensionEndDate)).getOrElse(false)
   }
 
   private def buildSummaryList(answers: models.UserAnswers)(implicit messages: Messages): SummaryList =

@@ -20,9 +20,10 @@ import play.api.mvc.*
 import play.api.{Configuration, Logging}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class StartController @Inject() (
   configuration: Configuration,
   val controllerComponents: MessagesControllerComponents

@@ -37,9 +37,10 @@ import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class PaymentPlanDetailsController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
@@ -95,11 +96,7 @@ class PaymentPlanDetailsController @Inject() (
               updatedAnswers        <- Future.fromTry(updatedAnswers.set(AdvanceNoticeResponseQuery, advanceNoticeResponse))
               _                     <- sessionRepository.set(updatedAnswers)
             } yield {
-              val showAmendLink =
-                if (planDetail.planType == PaymentPlanType.BudgetPaymentPlan.toString)
-                  false
-                else
-                  isAmendLinkVisible(showAllActionsFlag, planDetail)
+              val showAmendLink = isAmendLinkVisible(showAllActionsFlag, planDetail)
               val showCancelLink = isCancelLinkVisible(showAllActionsFlag, planDetail)
               val showSuspendLink = isSuspendLinkVisible(showAllActionsFlag, planDetail)
               val summaryRows: Seq[SummaryListRow] = buildSummaryRows(showAllActionsFlag, planDetail)

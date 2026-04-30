@@ -19,7 +19,7 @@ package utils
 import play.api.i18n.{Lang, Messages}
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, ZonedDateTime}
+import java.time.{Clock, LocalDate, ZonedDateTime}
 import java.util.Locale
 
 object DateTimeFormats {
@@ -35,12 +35,12 @@ object DateTimeFormats {
     localisedDateTimeFormatters.getOrElse(lang.code, dateTimeFormatter)
   }
 
-  def formattedCurrentDate(implicit messages: Messages): String = {
+  def formattedCurrentDate(clock: Clock)(implicit messages: Messages): String = {
     val formatter = DateTimeFormatter.ofPattern(
       "d MMMM yyyy",
       messages.lang.locale
     )
-    LocalDate.now().format(formatter)
+    LocalDate.now(clock).format(formatter)
   }
 
   def formattedDateTime(dateTime: ZonedDateTime)(implicit messages: Messages): String = { // example: 24 July 2020, 16:29pm in local zone BST time (ZonedDateTime)

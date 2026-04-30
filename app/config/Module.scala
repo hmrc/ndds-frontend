@@ -21,8 +21,6 @@ import play.api.inject.{Binding, Module as PlayModule}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
-import java.time.{Clock, ZoneOffset}
-
 class Module extends PlayModule {
 
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
@@ -31,7 +29,6 @@ class Module extends PlayModule {
     bind[FrontendAppConfig].toSelf,
     bind[Encrypter with Decrypter].toProvider[CryptoProvider],
     // For session based storage instead of persistent, change to SessionIdentifierAction
-    bind[IdentifierAction].to[AuthenticatedIdentifierAction],
-    bind[Clock].toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
+    bind[IdentifierAction].to[AuthenticatedIdentifierAction]
   )
 }

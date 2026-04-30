@@ -19,7 +19,7 @@ package forms.mappings
 import play.api.data.FormError
 import play.api.i18n.Messages
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
 
 class SuspensionPeriodRangeStartDateFormatter(
@@ -31,7 +31,8 @@ class SuspensionPeriodRangeStartDateFormatter(
   dateFormats: Seq[DateFormat],
   planStartDateOpt: Option[LocalDate],
   planEndDateOpt: Option[LocalDate],
-  earliestStartDate: LocalDate
+  earliestStartDate: LocalDate,
+  clock: Clock
 )(implicit messages: Messages)
     extends CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats) {
 
@@ -47,8 +48,8 @@ class SuspensionPeriodRangeStartDateFormatter(
 
   private def validateBusinessRules(key: String, enteredDate: LocalDate): Either[Seq[FormError], LocalDate] = {
     val lowerBound = planStartDateOpt.fold(earliestStartDate)(psd => if (psd.isAfter(earliestStartDate)) psd else earliestStartDate)
-    val upperBound = planEndDateOpt.fold(LocalDate.now().plusMonths(MaxMonthsAhead)) { ped =>
-      val sixMonthsFromToday = LocalDate.now().plusMonths(MaxMonthsAhead)
+    val upperBound = planEndDateOpt.fold(LocalDate.now(clock).plusMonths(MaxMonthsAhead)) { ped =>
+      val sixMonthsFromToday = LocalDate.now(clock).plusMonths(MaxMonthsAhead)
       if (ped.isBefore(sixMonthsFromToday)) ped else sixMonthsFromToday
     }
 

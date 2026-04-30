@@ -32,9 +32,10 @@ import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSumma
 import views.html.RemoveSuspensionConfirmationView
 
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
+@Singleton
 class RemoveSuspensionConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

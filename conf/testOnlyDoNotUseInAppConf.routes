@@ -11,3 +11,8 @@
 
 # Add all the application routes to the prod.routes file
 ->          /                                                                       prod.Routes
+
+
+GET    /direct-debits/test-only/clock          testOnly.controllers.ClockController.onPageLoad
+POST   /direct-debits/test-only/clock          testOnly.controllers.ClockController.submitNewTime
+GET   /direct-debits/test-only/clock/reset     testOnly.controllers.ClockController.submitResetTime

@@ -21,8 +21,9 @@ import models.DirectDebitSource.{MGD, SA, TC}
 import models.{DirectDebitSource, PaymentPlanType}
 import play.api.data.Form
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class PaymentPlanTypeFormProvider @Inject() extends Mappings {
 
   def apply(selectedAnswer: Option[DirectDebitSource]): Form[PaymentPlanType] = {

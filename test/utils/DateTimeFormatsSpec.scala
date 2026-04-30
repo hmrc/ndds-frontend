@@ -22,7 +22,7 @@ import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.test.Helpers.stubMessagesApi
 import utils.DateTimeFormats.dateTimeFormat
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -58,7 +58,7 @@ class DateTimeFormatsSpec extends AnyFreeSpec with Matchers {
           DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         )
 
-        DateTimeFormats.formattedCurrentDate mustEqual expected
+        DateTimeFormats.formattedCurrentDate(Clock.systemUTC()) mustEqual expected
       }
     }
 

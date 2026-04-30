@@ -21,8 +21,9 @@ import config.FrontendAppConfig
 import java.util.Base64
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class MacGenerator @Inject() (appConfig: FrontendAppConfig) {
 
   private val Algorithm = "HmacSHA1"

@@ -20,7 +20,7 @@ import controllers.actions.*
 import forms.PlanStartDateFormProvider
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.PaymentPlanType.{BudgetPaymentPlan, TaxCreditRepaymentPlan, VariablePaymentPlan}
-import models.{DirectDebitSource, Mode, PaymentPlanType, PlanStartDateDetails, UserAnswers}
+import models.{DirectDebitSource, Mode, PlanStartDateDetails, UserAnswers}
 import navigation.Navigator
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PlanStartDatePage}
 import play.api.Logging
@@ -34,9 +34,10 @@ import views.html.PlanStartDateView
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class PlanStartDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,

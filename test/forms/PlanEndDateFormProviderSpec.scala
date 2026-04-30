@@ -20,14 +20,15 @@ import forms.behaviours.DateBehaviours
 import play.api.data.FormError
 import play.api.i18n.Messages
 import play.api.test.Helpers.stubMessages
+import utils.ClockProvider
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
 
 class PlanEndDateFormProviderSpec extends DateBehaviours {
   private implicit val messages: Messages = stubMessages()
   private val startDate = LocalDate.of(2024, 4, 6)
-  private val form = new PlanEndDateFormProvider()(startDate)
+  private val form = new PlanEndDateFormProvider(ClockProvider(Clock.systemUTC()))(startDate)
 
   "PlanEndDateFormProvider" - {
 

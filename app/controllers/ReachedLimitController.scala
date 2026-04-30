@@ -25,9 +25,10 @@ import views.html.ReachedLimitView
 
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class ReachedLimitController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

@@ -26,9 +26,10 @@ import views.html.AccountDetailsNotVerifiedView
 
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class AccountDetailsNotVerifiedController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

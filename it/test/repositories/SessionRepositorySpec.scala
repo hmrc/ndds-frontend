@@ -33,6 +33,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.play.bootstrap.dispatchers.MDCPropagatingExecutorService
+import utils.ClockProvider
 
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, ZoneId}
@@ -64,7 +65,7 @@ class SessionRepositorySpec
   protected override val repository: SessionRepository = new SessionRepository(
     mongoComponent = mongoComponent,
     appConfig      = mockAppConfig,
-    clock          = stubClock,
+    clockProvider          = ClockProvider(stubClock),
     crypto         = fakeCrypto
   )(scala.concurrent.ExecutionContext.Implicits.global)
 
@@ -86,7 +87,7 @@ class SessionRepositorySpec
           "mongodb.encryption.enabled" -> "true"
         )
         .overrides(
-          inject.bind[Clock].toInstance(stubClock)
+          inject.bind[ClockProvider].toInstance(ClockProvider(stubClock))
         )
         .build()
 

@@ -21,7 +21,7 @@ import pages.{DirectDebitSourcePage, PaymentPlanTypePage}
 import play.api.data.FormError
 import play.api.i18n.Messages
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
 
 class PlanStartDateFormatter(
@@ -35,7 +35,8 @@ class PlanStartDateFormatter(
   args: Seq[String] = Seq.empty,
   dateFormats: Seq[DateFormat],
   userAnswers: UserAnswers,
-  earliestPlanStartDate: LocalDate
+  earliestPlanStartDate: LocalDate,
+  clock: Clock
 )(implicit messages: Messages)
     extends CustomDateFormatter(invalidKey, allRequiredKey, twoRequiredKey, requiredKey, args, dateFormats) {
 
@@ -51,7 +52,7 @@ class PlanStartDateFormatter(
     }
 
   private def validateBusinessRules(key: String, enteredDate: LocalDate): Either[Seq[FormError], LocalDate] = {
-    val currentDate = LocalDate.now()
+    val currentDate = LocalDate.now(clock)
     val errors = scala.collection.mutable.ListBuffer[FormError]()
 
     if (enteredDate.isBefore(earliestPlanStartDate)) {

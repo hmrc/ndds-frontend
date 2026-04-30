@@ -23,7 +23,7 @@ import play.api.data.FormError
 import play.api.test.Helpers.stubMessages
 import utils.DateFormats
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
 
 class PlanStartDateFormatterSpec extends SpecBase {
@@ -40,7 +40,8 @@ class PlanStartDateFormatterSpec extends SpecBase {
     timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
     dateFormats              = DateFormats.defaultDateFormats,
     userAnswers              = UserAnswers("test-id"),
-    earliestPlanStartDate    = LocalDate.of(2024, 1, 15)
+    earliestPlanStartDate    = LocalDate.of(2024, 1, 15),
+    clock                    = Clock.systemUTC()
   )(stubMessages())
 
   "PlanStartDateFormatter" - {
@@ -91,7 +92,8 @@ class PlanStartDateFormatterSpec extends SpecBase {
         timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
         dateFormats              = DateFormats.defaultDateFormats,
         userAnswers              = budgetUserAnswers,
-        earliestPlanStartDate    = LocalDate.of(2024, 1, 15)
+        earliestPlanStartDate    = LocalDate.of(2024, 1, 15),
+        clock                    = Clock.systemUTC()
       )(stubMessages())
 
       val futureDate = currentDate.plusYears(1).plusDays(1)
@@ -128,7 +130,8 @@ class PlanStartDateFormatterSpec extends SpecBase {
         timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
         dateFormats              = DateFormats.defaultDateFormats,
         userAnswers              = vppUserAnswers,
-        earliestPlanStartDate    = LocalDate.of(2024, 1, 15)
+        earliestPlanStartDate    = LocalDate.of(2024, 1, 15),
+        clock                    = Clock.systemUTC()
       )(stubMessages())
 
       val futureDate = currentDate.plusDays(31)
@@ -164,7 +167,8 @@ class PlanStartDateFormatterSpec extends SpecBase {
         timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
         dateFormats              = DateFormats.defaultDateFormats,
         userAnswers              = budgetUserAnswers,
-        earliestPlanStartDate    = LocalDate.of(2024, 1, 15)
+        earliestPlanStartDate    = LocalDate.of(2024, 1, 15),
+        clock                    = Clock.systemUTC()
       )(stubMessages())
 
       val validDate = currentDate.plusMonths(6)
@@ -198,7 +202,8 @@ class PlanStartDateFormatterSpec extends SpecBase {
         timeToPayAfterMaxDateKey = "planStartDate.error.timeToPayAfterMaxDate",
         dateFormats              = DateFormats.defaultDateFormats,
         userAnswers              = vppUserAnswers,
-        earliestPlanStartDate    = LocalDate.of(2024, 1, 15)
+        earliestPlanStartDate    = LocalDate.of(2024, 1, 15),
+        clock                    = Clock.systemUTC()
       )(stubMessages())
 
       val validDate = currentDate.plusDays(15)

@@ -33,16 +33,17 @@ import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import repositories.SessionRepository
 import services.NationalDirectDebitService
+import utils.ClockProvider
 import utils.MaskAndFormatUtils.formatAmount
 import views.html.SuspensionPeriodRangeDateView
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{Clock, LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
 class SuspensionPeriodRangeDateControllerSpec extends SpecBase with MockitoSugar {
 
   implicit private val messages: Messages = stubMessages()
-  private val formProvider = new SuspensionPeriodRangeDateFormProvider()
+  private val formProvider = new SuspensionPeriodRangeDateFormProvider(ClockProvider(Clock.systemUTC()))
 
   private val PlanStartDate = Some(LocalDate.of(2025, 10, 1))
   private val planEndDate = Some(LocalDate.of(2025, 10, 10))

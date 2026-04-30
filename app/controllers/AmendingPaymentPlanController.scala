@@ -33,9 +33,10 @@ import utils.Constants
 import viewmodels.checkAnswers.{AmendPaymentAmountSummary, AmendPlanEndDateSummary, AmendPlanStartDateSummary}
 import views.html.AmendingPaymentPlanView
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class AmendingPaymentPlanController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,

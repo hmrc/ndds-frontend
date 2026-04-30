@@ -31,16 +31,16 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import queries.PaymentPlanDetailsQuery
 import services.NationalDirectDebitService
-import utils.Constants
+import utils.{ClockProvider, Constants}
 import views.html.AmendPlanEndDateView
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{Clock, LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
 class AmendPlanEndDateControllerSpec extends SpecBase with MockitoSugar {
   private implicit val messages: Messages = stubMessages()
-  private val formProvider = new AmendPlanEndDateFormProvider()
+  private val formProvider = new AmendPlanEndDateFormProvider(ClockProvider(Clock.systemUTC()))
   private def form = formProvider()
   val validAnswer: LocalDate = LocalDate.now()
 

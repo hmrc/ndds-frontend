@@ -26,8 +26,9 @@ import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import utils.ClockProvider
 
-import java.time.{Clock, Instant}
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SessionRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: FrontendAppConfig,
-  clock: Clock,
+  clockProvider: ClockProvider,
   crypto: Encrypter with Decrypter
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[UserAnswersEncrypted](
@@ -61,7 +62,7 @@ class SessionRepository @Inject() (
     collection
       .updateOne(
         filter = byId(id),
-        update = Updates.set("lastUpdated", Instant.now(clock))
+        update = Updates.set("lastUpdated", Instant.now(clockProvider.clock))
       )
       .toFuture()
       .map(_ => true)
@@ -80,7 +81,7 @@ class SessionRepository @Inject() (
 
   def set(answers: UserAnswers): Future[Boolean] = Mdc.preservingMdc {
 
-    val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
+    val updatedAnswers = answers copy (lastUpdated = Instant.now(clockProvider.clock))
 
     collection
       .replaceOne(

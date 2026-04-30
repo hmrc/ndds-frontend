@@ -22,7 +22,7 @@ import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.data.{FieldMapping, Mapping}
 import play.api.i18n.Messages
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 
 trait Mappings extends Formatters with Constraints {
 
@@ -71,7 +71,8 @@ trait Mappings extends Formatters with Constraints {
                               args: Seq[String] = Seq.empty,
                               dateFormats: Seq[DateFormat],
                               userAnswers: models.UserAnswers,
-                              earliestPlanStartDate: java.time.LocalDate
+                              earliestPlanStartDate: java.time.LocalDate,
+                              clock: Clock
                              )(implicit messages: Messages): FieldMapping[java.time.LocalDate] =
     of(
       new PlanStartDateFormatter(
@@ -85,7 +86,8 @@ trait Mappings extends Formatters with Constraints {
         args,
         dateFormats,
         userAnswers,
-        earliestPlanStartDate
+        earliestPlanStartDate,
+        clock
       )
     )
 
@@ -112,7 +114,8 @@ trait Mappings extends Formatters with Constraints {
                                                dateFormats: Seq[DateFormat],
                                                planStartDateOpt: Option[java.time.LocalDate],
                                                planEndDateOpt: Option[java.time.LocalDate],
-                                               earliestStartDate: java.time.LocalDate
+                                               earliestStartDate: java.time.LocalDate,
+                                               clock: Clock
                                               )(implicit messages: Messages): FieldMapping[java.time.LocalDate] =
     of(
       new SuspensionPeriodRangeStartDateFormatter(
@@ -124,7 +127,8 @@ trait Mappings extends Formatters with Constraints {
         dateFormats,
         planStartDateOpt,
         planEndDateOpt,
-        earliestStartDate
+        earliestStartDate,
+        clock
       )
     )
 

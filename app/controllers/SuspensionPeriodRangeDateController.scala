@@ -30,13 +30,14 @@ import repositories.SessionRepository
 import services.NationalDirectDebitService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import utils.MaskAndFormatUtils.formatAmount
-import utils.{Constants, MaskAndFormatUtils}
+import utils.Constants
 import views.html.SuspensionPeriodRangeDateView
 
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class SuspensionPeriodRangeDateController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,

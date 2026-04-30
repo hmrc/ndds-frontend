@@ -20,8 +20,9 @@ import forms.mappings.Mappings
 import models.ConfirmAuthority
 import play.api.data.Form
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+@Singleton
 class ConfirmAuthorityFormProvider @Inject() extends Mappings {
   def apply(): Form[ConfirmAuthority] =
     Form(
