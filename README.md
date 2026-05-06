@@ -28,7 +28,7 @@ To check libraries update, run all tests and coverage: `./run_all_tests.sh`
 
 To start the server locally: `sbt run` or `sbt run 6990`
 
-To execute the scala formatter: `./run_all_checks.sh`
+To execute the scala formatter: `./run_fmt_checks.sh`
 
 Reference to Testing data: https://confluence.tools.tax.service.gov.uk/x/67m5B
 
