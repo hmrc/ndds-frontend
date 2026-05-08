@@ -30,7 +30,7 @@
 
 @(hmrcHelplineUrl: String,referenceNumber: String, paymentAmount: String, paymentDate: String, directDebitDetails: SummaryList, paymentDetails: SummaryList)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title")), showBackLink = false, showUserBanner = true) {
+@layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title")), showBackLink = false, showUserBanner = false) {
     @govukPanel(Panel(
         title = messages("directDebitConfirmation.panel.title"),
         content = HtmlContent(messages("directDebitConfirmation.panel.body", referenceNumber)),
