@@ -19,6 +19,7 @@
 @this(
         layout: templates.Layout,
         govukPanel: GovukPanel,
+        formHelper: FormWithCSRF,
         govukInsetText: GovukInsetText,
         govukButton: GovukButton,
         paragraph: Paragraph,
@@ -82,5 +83,13 @@
         linkUrl = routes.YourDirectDebitInstructionsController.onPageLoad().url,
         classes = "govuk-!-display-none-print"
     )
+
+
+@formHelper(action = routes.DirectDebitConfirmationController.sendToBtaOrPta) {
+    @govukButton(
+        ButtonViewModel(messages("directDebitConfirmation.goToTaxAccount"))
+    )
+}
+
 
 }

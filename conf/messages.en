@@ -473,6 +473,7 @@ directDebitConfirmation.budgetPaymentPlan = Budget payment
 directDebitConfirmation.taxCreditRepaymentPlan = Tax Credit repayment
 directDebitConfirmation.print = You can print this page for your records using the print function on your browser
 directDebitConfirmation.viewDirectDebitInstructions = Return to Direct Debit Instructions
+directDebitConfirmation.goToTaxAccount = Go to tax account
 
 directDebitPaymentSummary.title.paginated = {0} (page {1} of {2})
 directDebitPaymentSummary.title.noPlans = Set up a payment plan for this Direct Debit
