@@ -19,7 +19,7 @@ package controllers
 import config.CurrencyFormatter.currencyFormat
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.PaymentPlanType
+import models.{DirectDebitSource, PaymentPlanType}
 import pages.*
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -49,6 +49,11 @@ class DirectDebitConfirmationController @Inject() (
   clockProvider: ClockProvider
 ) extends FrontendBaseController
     with I18nSupport {
+
+  val sendToBtaOrPta: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
+    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage).getOrElse(DirectDebitSource.SA)
+    SeeOther(appConfig.PtaBtaUrl(directDebitSource))
+  }
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     implicit val messages: Messages = messagesApi.preferred(request)
