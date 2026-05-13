@@ -17,7 +17,7 @@
 package testOnly.controllers
 
 import config.FrontendAppConfig
-import play.api.i18n.I18nSupport
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.mvc.AnyContent
 import testOnly.views.html.{IAmBtaPage, IAmPtaPage}
@@ -27,7 +27,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-abstract class DirectDebitConfirmationController @Inject() (
+class DirectDebitConfirmationController @Inject() (
+  override val messagesApi: MessagesApi,
+  val controllerComponents: MessagesControllerComponents,
   iAmBtaPage: IAmBtaPage,
   iAmPtaPage: IAmPtaPage
 )(using ExecutionContext, FrontendAppConfig)

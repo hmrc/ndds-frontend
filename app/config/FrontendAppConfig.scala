@@ -39,7 +39,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val TEN_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.ten-days")
 
   def PtaBtaUrl(directDebitSource: DirectDebitSource): String =
-    println(directDebitSource.toString + " this is the source")
     if (directDebitSource.toString.equals("sa") || directDebitSource.toString.equals("tc")) {
       Some(configuration.get[String]("urls.ptaUrl"))
         .filter(_.nonEmpty)
