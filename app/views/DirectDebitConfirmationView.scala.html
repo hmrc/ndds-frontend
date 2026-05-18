@@ -15,6 +15,8 @@
  *@
 
 @import views.html.components.*
+@import pages.DirectDebitSourcePage
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
         layout: templates.Layout,
@@ -29,7 +31,7 @@
         govukSummaryList: GovukSummaryList
 )
 
-@(hmrcHelplineUrl: String,referenceNumber: String, paymentAmount: String, paymentDate: String, directDebitDetails: SummaryList, paymentDetails: SummaryList)(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String,referenceNumber: String, paymentAmount: String, paymentDate: String, directDebitDetails: SummaryList, paymentDetails: SummaryList, taxAccountUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("directDebitConfirmation.title")), showBackLink = false, showUserBanner = false) {
     @govukPanel(Panel(
@@ -85,11 +87,9 @@
     )
 
 
-@formHelper(action = routes.DirectDebitConfirmationController.sendToBtaOrPta) {
     @govukButton(
-        ButtonViewModel(messages("directDebitConfirmation.goToTaxAccount"))
-    )
-}
-
+        Button(href = Some(taxAccountUrl),
+        content = messages("directDebitConfirmation.goToTaxAccount")
+    ))
 
 }

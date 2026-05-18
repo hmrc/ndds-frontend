@@ -52,7 +52,7 @@ class DirectDebitConfirmationController @Inject() (
 
   val sendToBtaOrPta: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     val directDebitSource = request.userAnswers.get(DirectDebitSourcePage).getOrElse(DirectDebitSource.SA)
-    SeeOther(appConfig.PtaBtaUrl(directDebitSource))
+    SeeOther(appConfig.returnToTaxAccountUrl(directDebitSource))
   }
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
@@ -193,6 +193,9 @@ class DirectDebitConfirmationController @Inject() (
       ).flatten
     )
 
+    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage).getOrElse(DirectDebitSource.SA)
+    val returnToTaxAccountUrl = appConfig.returnToTaxAccountUrl(directDebitSource)
+
     Ok(
       view(
         appConfig.hmrcHelplineUrl,
@@ -200,7 +203,8 @@ class DirectDebitConfirmationController @Inject() (
         formattedPaymentAmount,
         paymentDateString,
         directDebitDetails,
-        list
+        list,
+        returnToTaxAccountUrl
       )
     )
   }

@@ -19,6 +19,8 @@ lazy val microservice = (project in file("."))
       s"""set javaOptions += "-Dplay.http.router=testOnlyDoNotUseInAppConf.Routes"""" ::
         "run" ::
         s"""set javaOptions -= "-Dplay.http.router=testOnlyDoNotUseInAppConf.Routes"""" ::
+      "run" ::
+        s"""-Dclock-module=testOnly.config.Module""" ::
         state
     }
   )

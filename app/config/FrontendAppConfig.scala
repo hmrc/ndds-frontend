@@ -38,16 +38,17 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val THREE_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.three-days")
   val TEN_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.ten-days")
 
-  def PtaBtaUrl(directDebitSource: DirectDebitSource): String =
-    if (directDebitSource.toString.equals("sa") || directDebitSource.toString.equals("tc")) {
-      Some(configuration.get[String]("urls.ptaUrl"))
-        .filter(_.nonEmpty)
-        .getOrElse(testOnly.controllers.routes.DirectDebitConfirmationController.showPtaPage.url)
-    } else {
-      Some(configuration.get[String]("urls.btaUrl"))
-        .filter(_.nonEmpty)
-        .getOrElse(testOnly.controllers.routes.DirectDebitConfirmationController.showBtaPage.url)
-    }
+  val ptaUrl: String = Some(configuration.get[String]("urls.ptaUrl"))
+    .filter(_.nonEmpty)
+    .getOrElse(testOnly.controllers.routes.DirectDebitConfirmationController.showPtaPage.url)
+  val btaUrl: String = Some(configuration.get[String]("urls.btaUrl"))
+    .filter(_.nonEmpty)
+    .getOrElse(testOnly.controllers.routes.DirectDebitConfirmationController.showBtaPage.url)
+
+  def returnToTaxAccountUrl(directDebitSource: DirectDebitSource): String = directDebitSource match {
+    case SA | TC => ptaUrl
+    case _       => btaUrl
+  }
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"

@@ -17,5 +17,5 @@ GET    /direct-debits/test-only/clock          testOnly.controllers.ClockControl
 POST   /direct-debits/test-only/clock          testOnly.controllers.ClockController.submitNewTime
 GET   /direct-debits/test-only/clock/reset     testOnly.controllers.ClockController.submitResetTime
 
-GET /direct-debits/test-only/sendToPTA         testOnly.controllers.DirectDebitConfirmationController.showPtaPage
-GET /direct-debits/test-only/sendToBTA         testOnly.controllers.DirectDebitConfirmationController.showBtaPage
+GET /direct-debits/test-only/send-to-pta         testOnly.controllers.DirectDebitConfirmationController.showPtaPage
+GET /direct-debits/test-only/send-to-bta         testOnly.controllers.DirectDebitConfirmationController.showBtaPage
