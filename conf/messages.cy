@@ -473,6 +473,8 @@ directDebitConfirmation.budgetPaymentPlan = Taliad cyllidebol
 directDebitConfirmation.taxCreditRepaymentPlan = Ad-daliad credydau treth
 directDebitConfirmation.print = Gallwch argraffu’r dudalen hon ar gyfer eich cofnodion gan ddefnyddio’r opsiwn argraffu ar eich porwr
 directDebitConfirmation.viewDirectDebitInstructions = Yn ôl i’r Cyfarwyddiadau Debyd Uniongyrchol
+directDebitConfirmation.goToTaxAccount = Ewch i’r cyfrif treth
+
 
 directDebitPaymentSummary.title.paginated = {0} (tudalen {1} o {2})
 directDebitPaymentSummary.title.noPlans = Sefydlu cynllun talu ar gyfer y Debyd Uniongyrchol hwn

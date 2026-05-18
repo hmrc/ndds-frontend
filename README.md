@@ -40,7 +40,7 @@ To run in test-only mode make sure these values are set in the config:
 play.http.router = testOnlyDoNotUseInAppConf.Routes
 clock-module     = testOnly.config.Module
 ```
-Locally, running the `run_test_only.sh` script will ensure this is set up correctly.
+Locally, running the `sbt runTestOnly` will ensure this is set up correctly.
 
 ### /direct-debits/test-only/clock
 

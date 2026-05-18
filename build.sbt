@@ -14,6 +14,17 @@ lazy val microservice = (project in file("."))
   .settings(ThisBuild / useSuperShell := false)
   .settings(scalafmtOnCompile := true, scalafmtDetailedError := true, scalafmtPrintDiff := true, scalafmtFailOnErrors := true)
   .settings(
+    commands += Command.command("runTestOnly") { state =>
+      state.globalLogging.full.info("running play using 'testOnlyDoNotUseInAppConf' routes...")
+      s"""set javaOptions += "-Dplay.http.router=testOnlyDoNotUseInAppConf.Routes"""" ::
+        "run" ::
+        s"""set javaOptions -= "-Dplay.http.router=testOnlyDoNotUseInAppConf.Routes"""" ::
+      "run" ::
+        s"""-Dclock-module=testOnly.config.Module""" ::
+        state
+    }
+  )
+  .settings(
     name := "ndds-frontend",
     PlayKeys.playDefaultPort := 6990,
     sCoverageSettings,

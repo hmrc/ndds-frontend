@@ -17,7 +17,9 @@
 package config
 
 import com.google.inject.{Inject, Singleton}
-import play.api.Configuration
+import models.DirectDebitSource
+import models.DirectDebitSource.*
+import play.api.{ConfigLoader, Configuration}
 import play.api.i18n.Lang
 import play.api.mvc.RequestHeader
 
@@ -35,6 +37,18 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val TWO_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.two-days")
   val THREE_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.three-days")
   val TEN_WORKING_DAYS: Int = configuration.get[Int]("working-days-delay.ten-days")
+
+  val ptaUrl: String = Some(configuration.get[String]("urls.ptaUrl"))
+    .filter(_.nonEmpty)
+    .getOrElse(testOnly.controllers.routes.DirectDebitConfirmationController.showPtaPage.url)
+  val btaUrl: String = Some(configuration.get[String]("urls.btaUrl"))
+    .filter(_.nonEmpty)
+    .getOrElse(testOnly.controllers.routes.DirectDebitConfirmationController.showBtaPage.url)
+
+  def returnToTaxAccountUrl(directDebitSource: DirectDebitSource): String = directDebitSource match {
+    case SA | TC                                 => ptaUrl
+    case CT | MGD | NIC | PAYE | SDLT | VAT | OL => btaUrl
+  }
 
   def feedbackUrl(implicit request: RequestHeader): String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${host + request.uri}"

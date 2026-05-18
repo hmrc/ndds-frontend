@@ -19,7 +19,7 @@ package controllers
 import config.CurrencyFormatter.currencyFormat
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.PaymentPlanType
+import models.{DirectDebitSource, PaymentPlanType}
 import pages.*
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -188,6 +188,9 @@ class DirectDebitConfirmationController @Inject() (
       ).flatten
     )
 
+    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw Exception("no direct debit source found"))
+    val returnToTaxAccountUrl = appConfig.returnToTaxAccountUrl(directDebitSource)
+
     Ok(
       view(
         appConfig.hmrcHelplineUrl,
@@ -195,7 +198,8 @@ class DirectDebitConfirmationController @Inject() (
         formattedPaymentAmount,
         paymentDateString,
         directDebitDetails,
-        list
+        list,
+        returnToTaxAccountUrl
       )
     )
   }
