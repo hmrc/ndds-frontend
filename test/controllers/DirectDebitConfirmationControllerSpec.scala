@@ -18,6 +18,7 @@ package controllers
 
 import base.SpecBase
 import config.CurrencyFormatter.currencyFormat
+import models.DirectDebitSource.*
 import models.responses.GenerateDdiRefResponse
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, YourBankDetailsWithAuddisStatus}
 import pages.*
@@ -36,6 +37,120 @@ import java.time.format.DateTimeFormatter
 class DirectDebitConfirmationControllerSpec extends SpecBase {
 
   "DirectDebitConfirmation Controller" - {
+
+    Seq[(DirectDebitSource, String)](
+      (SA, "/direct-debits/test-only/send-to-pta"),
+      (TC, "/direct-debits/test-only/send-to-pta"),
+      (CT, "/direct-debits/test-only/send-to-bta"),
+      (MGD, "/direct-debits/test-only/send-to-bta"),
+      (NIC, "/direct-debits/test-only/send-to-bta"),
+      (PAYE, "/direct-debits/test-only/send-to-bta"),
+      (SDLT, "/direct-debits/test-only/send-to-bta"),
+      (VAT, "/direct-debits/test-only/send-to-bta"),
+      (OL, "/direct-debits/test-only/send-to-bta")
+    ).foreach { case (source, url) =>
+      s"must return OK and the correct view for a GET with direct debit source $source" in {
+        val ddiRefNumber = "ddiRef"
+        val ppRef = "ppRef"
+        val paymentAmount = BigDecimal(120)
+        val paymentDate = LocalDate.of(2025, 12, 12)
+        val bankAccountHolderName = "John Doe"
+        val bankAccountNumber = "12345678"
+        val bankSortCode = "205142"
+        val auddisStatus = true
+        val accountVerified = true
+        val dateSetup = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMM yyyy"))
+
+        val yourBankDetails = YourBankDetailsWithAuddisStatus(
+          bankAccountHolderName,
+          bankSortCode,
+          bankAccountNumber,
+          auddisStatus,
+          accountVerified
+        )
+
+        val userAnswers = emptyUserAnswers
+          .setOrException(CheckYourAnswerPage, GenerateDdiRefResponse(ddiRefNumber))
+          .setOrException(PaymentDatePage, PaymentDateDetails(paymentDate, "earliest"))
+          .setOrException(PaymentAmountPage, paymentAmount)
+          .setOrException(DirectDebitSourcePage, source)
+          .setOrException(YourBankDetailsPage, yourBankDetails)
+          .setOrException(PaymentReferencePage, ppRef)
+          .setOrException(PaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan)
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+        running(application) {
+          val request = FakeRequest(GET, routes.DirectDebitConfirmationController.onPageLoad().url)
+
+          implicit val messages: Messages =
+            application.injector.instanceOf[MessagesApi].preferred(request)
+
+          val result = route(application, request).value
+
+          status(result) mustEqual OK
+
+          val view = application.injector.instanceOf[DirectDebitConfirmationView]
+          val appConfig = application.injector.instanceOf[config.FrontendAppConfig]
+
+          val directDebitDetails = SummaryListViewModel(
+            rows = Seq(
+              Option(
+                SummaryListRowViewModel(
+                  key     = Key(Text("Direct Debit reference")),
+                  value   = ValueViewModel(Text(ddiRefNumber)),
+                  actions = Seq.empty
+                )
+              ),
+              YourBankDetailsAccountHolderNameSummary.row(userAnswers, false),
+              YourBankDetailsAccountNumberSummary.row(userAnswers, false),
+              YourBankDetailsSortCodeSummary.row(userAnswers, "directDebitConfirmation.sortCode", showChange = false)
+            ).collect { case Some(row) => row }
+          )
+
+          val formattedPaymentAmount = currencyFormat(paymentAmount)
+          val paymentDateString = paymentDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+
+          val paymentPlanDetails = SummaryListViewModel(
+            rows = Seq(
+              DirectDebitSourceSummary.rowNoAction(userAnswers),
+              PaymentPlanTypeSummary.rowNoAction(userAnswers),
+              PaymentReferenceSummary.rowNoAction(userAnswers).flatMap(Some(_)),
+              Some(
+                SummaryListRowViewModel(
+                  key     = Key(Text("Date set up")),
+                  value   = ValueViewModel(Text(dateSetup)),
+                  actions = Seq.empty
+                )
+              ),
+              Some(
+                SummaryListRowViewModel(
+                  key     = Key(Text("Payment amount")),
+                  value   = ValueViewModel(Text(formattedPaymentAmount)),
+                  actions = Seq.empty
+                )
+              ),
+              PaymentDateSummary.row(userAnswers, false)
+            ).flatten
+          )
+          val expectedHtml = view(
+            appConfig.hmrcHelplineUrl,
+            ddiRefNumber,
+            formattedPaymentAmount,
+            paymentDateString,
+            directDebitDetails,
+            paymentPlanDetails,
+            url
+          )(request, messages).toString
+
+          contentAsString(result) mustEqual expectedHtml
+
+          // check the sort code
+          contentAsString(result) must include("20 51 42")
+        }
+      }
+
+    }
 
     "must return OK and the correct view for a GET" in {
       val ddiRefNumber = "ddiRef"

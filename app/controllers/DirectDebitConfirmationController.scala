@@ -50,11 +50,6 @@ class DirectDebitConfirmationController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  val sendToBtaOrPta: Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
-    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage).getOrElse(DirectDebitSource.SA)
-    SeeOther(appConfig.returnToTaxAccountUrl(directDebitSource))
-  }
-
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData) { implicit request =>
     implicit val messages: Messages = messagesApi.preferred(request)
     val referenceNumber = request.userAnswers
@@ -193,7 +188,7 @@ class DirectDebitConfirmationController @Inject() (
       ).flatten
     )
 
-    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage).getOrElse(DirectDebitSource.SA)
+    val directDebitSource = request.userAnswers.get(DirectDebitSourcePage).getOrElse(throw Exception("no direct debit source found"))
     val returnToTaxAccountUrl = appConfig.returnToTaxAccountUrl(directDebitSource)
 
     Ok(

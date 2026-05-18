@@ -46,8 +46,8 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
     .getOrElse(testOnly.controllers.routes.DirectDebitConfirmationController.showBtaPage.url)
 
   def returnToTaxAccountUrl(directDebitSource: DirectDebitSource): String = directDebitSource match {
-    case SA | TC => ptaUrl
-    case _       => btaUrl
+    case SA | TC                                 => ptaUrl
+    case CT | MGD | NIC | PAYE | SDLT | VAT | OL => btaUrl
   }
 
   def feedbackUrl(implicit request: RequestHeader): String =
