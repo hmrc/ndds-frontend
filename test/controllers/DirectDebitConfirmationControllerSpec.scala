@@ -127,7 +127,8 @@ class DirectDebitConfirmationControllerSpec extends SpecBase {
           formattedPaymentAmount,
           paymentDateString,
           directDebitDetails,
-          paymentPlanDetails
+          paymentPlanDetails,
+          "/direct-debits/test-only/send-to-bta"
         )(request, messages).toString
 
         contentAsString(result) mustEqual expectedHtml
