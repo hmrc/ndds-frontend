@@ -74,8 +74,9 @@ class AmendPaymentPlanUpdateController @Inject() (
         val paymentRef = paymentPlan.paymentPlanDetails.paymentReference
         val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentRef)
         val directDebitSourceString = request.userAnswers.get(ManageDirectDebitSourcePage).getOrElse(throw Exception("no direct debit source found"))
-        val directDebitSource =
-          DirectDebitSource.enumerable.withName(directDebitSourceString).getOrElse(throw Exception("no direct debit source found"))
+        val directDebitSource = DirectDebitSource.enumerable
+          .withName(directDebitSourceString)
+          .getOrElse(throw Exception(s"could not parse direct debit source '$directDebitSourceString'"))
         val returnToTaxAccountUrl = appConfig.returnToTaxAccountUrl(directDebitSource)
 
         Ok(
