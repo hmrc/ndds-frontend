@@ -18,12 +18,13 @@ package controllers
 
 import base.SpecBase
 import config.FrontendAppConfig
-import models.PaymentPlanType
+import models.DirectDebitSource.*
+import models.{DirectDebitSource, PaymentPlanType}
 import models.responses.{DirectDebitDetails, PaymentPlanDetails, PaymentPlanResponse}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
-import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManagePaymentPlanTypePage}
+import pages.{AmendPaymentAmountPage, AmendPlanEndDatePage, AmendPlanStartDatePage, ManageDirectDebitSourcePage, ManagePaymentPlanTypePage}
 import play.api.inject
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
@@ -48,92 +49,108 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
     val startDate: LocalDate = LocalDate.of(2025, 10, 2)
     val endDate: LocalDate = LocalDate.of(2025, 10, 25)
 
-    "must return OK and the correct view for a GET when plan type is Single Payment Plan" in {
-      val mockSinglePaymentPlanDetailResponse =
-        dummyPlanDetailResponse.copy(
-          paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
-            planType = PaymentPlanType.SinglePaymentPlan.toString
-          )
-        )
-
-      val directDebitRef = "DD-REF-123"
-      val paymentPlanRef = "PP-REF-987"
-
-      val userAnswers = emptyUserAnswers
-        .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
-        .success
-        .value
-        .set(AmendPaymentAmountPage, regPaymentAmount)
-        .success
-        .value
-        .set(AmendPlanStartDatePage, startDate)
-        .success
-        .value
-        .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
-        .success
-        .value
-        .set(DirectDebitReferenceQuery, directDebitRef)
-        .success
-        .value
-        .set(PaymentPlanReferenceQuery, paymentPlanRef)
-        .success
-        .value
-
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(inject.bind[NationalDirectDebitService].toInstance(mockService))
-        .build()
-
-      running(application) {
-
-        when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
-
-        val controller = application.injector.instanceOf[AmendPaymentPlanUpdateController]
-        val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
-        val result = controller.onPageLoad()(request)
-
-        val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
-        val appConfig = application.injector.instanceOf[FrontendAppConfig]
-
-        val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
-        val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
-
-        val formattedRegPaymentAmount = currencyFormat.format(regPaymentAmount)
-        val formattedStartDateLong = dateFormatLong.format(startDate)
-
-        val dd = mockSinglePaymentPlanDetailResponse.directDebitDetails
-        val formattedSortCode = dd.bankSortCode.map(sc => sc.grouped(2).mkString(" ")).getOrElse("")
-
-        val paymentList =
-          SummaryListViewModel(
-            Seq(
-              PaymentReferenceSummary.row(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference)(messages(application)),
-              DateSetupSummary.row(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.submissionDateTime)(messages(application)),
-              AmendPaymentAmountSummary.row(
-                PaymentPlanType.SinglePaymentPlan.toString,
-                Some(regPaymentAmount)
-              )(messages(application)),
-              AmendPlanStartDateSummary.row(
-                PaymentPlanType.SinglePaymentPlan.toString,
-                Some(startDate),
-                Constants.shortDateTimeFormatPattern
-              )(messages(application))
+    Seq[(String, String)](
+      ("sa", "/direct-debits/test-only/send-to-pta"),
+      ("tc", "/direct-debits/test-only/send-to-pta"),
+      ("ct", "/direct-debits/test-only/send-to-bta"),
+      ("mgd", "/direct-debits/test-only/send-to-bta"),
+      ("nic", "/direct-debits/test-only/send-to-bta"),
+      ("paye", "/direct-debits/test-only/send-to-bta"),
+      ("sdlt", "/direct-debits/test-only/send-to-bta"),
+      ("vat", "/direct-debits/test-only/send-to-bta"),
+      ("otherLiability", "/direct-debits/test-only/send-to-bta")
+    ).foreach { case (source, url) =>
+      s"must return OK and the correct view for a GET when plan type is Single Payment Plan for source $source" in {
+        val mockSinglePaymentPlanDetailResponse =
+          dummyPlanDetailResponse.copy(
+            paymentPlanDetails = dummyPlanDetailResponse.paymentPlanDetails.copy(
+              planType = PaymentPlanType.SinglePaymentPlan.toString
             )
           )
 
-        status(result) mustEqual OK
+        val directDebitRef = "DD-REF-123"
+        val paymentPlanRef = "PP-REF-987"
 
-        contentAsString(result) mustEqual view(
-          appConfig.hmrcHelplineUrl,
-          formattedRegPaymentAmount,
-          formattedStartDateLong,
-          directDebitRef,
-          dd.bankAccountName.getOrElse(""),
-          dd.bankAccountNumber.getOrElse(""),
-          formattedSortCode,
-          paymentList,
-          PaymentPlanType.SinglePaymentPlan.toString,
-          controllers.routes.PaymentPlanDetailsController.onPageLoad()
-        )(request, messages(application)).toString
+        val userAnswers = emptyUserAnswers
+          .set(PaymentPlanDetailsQuery, mockSinglePaymentPlanDetailResponse)
+          .success
+          .value
+          .set(AmendPaymentAmountPage, regPaymentAmount)
+          .success
+          .value
+          .set(AmendPlanStartDatePage, startDate)
+          .success
+          .value
+          .set(ManageDirectDebitSourcePage, source)
+          .success
+          .value
+          .set(ManagePaymentPlanTypePage, PaymentPlanType.SinglePaymentPlan.toString)
+          .success
+          .value
+          .set(DirectDebitReferenceQuery, directDebitRef)
+          .success
+          .value
+          .set(PaymentPlanReferenceQuery, paymentPlanRef)
+          .success
+          .value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(inject.bind[NationalDirectDebitService].toInstance(mockService))
+          .build()
+
+        running(application) {
+
+          when(mockService.amendPaymentPlanGuard(any())).thenReturn(true)
+
+          val controller = application.injector.instanceOf[AmendPaymentPlanUpdateController]
+          val request = FakeRequest(GET, routes.AmendPaymentPlanUpdateController.onPageLoad().url)
+          val result = controller.onPageLoad()(request)
+
+          val view = application.injector.instanceOf[AmendPaymentPlanUpdateView]
+          val appConfig = application.injector.instanceOf[FrontendAppConfig]
+
+          val currencyFormat = NumberFormat.getCurrencyInstance(Locale.UK)
+          val dateFormatLong = DateTimeFormatter.ofPattern("d MMMM yyyy")
+
+          val formattedRegPaymentAmount = currencyFormat.format(regPaymentAmount)
+          val formattedStartDateLong = dateFormatLong.format(startDate)
+
+          val dd = mockSinglePaymentPlanDetailResponse.directDebitDetails
+          val formattedSortCode = dd.bankSortCode.map(sc => sc.grouped(2).mkString(" ")).getOrElse("")
+
+          val paymentList =
+            SummaryListViewModel(
+              Seq(
+                PaymentReferenceSummary.row(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.paymentReference)(messages(application)),
+                DateSetupSummary.row(mockSinglePaymentPlanDetailResponse.paymentPlanDetails.submissionDateTime)(messages(application)),
+                AmendPaymentAmountSummary.row(
+                  PaymentPlanType.SinglePaymentPlan.toString,
+                  Some(regPaymentAmount)
+                )(messages(application)),
+                AmendPlanStartDateSummary.row(
+                  PaymentPlanType.SinglePaymentPlan.toString,
+                  Some(startDate),
+                  Constants.shortDateTimeFormatPattern
+                )(messages(application))
+              )
+            )
+
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual view(
+            appConfig.hmrcHelplineUrl,
+            formattedRegPaymentAmount,
+            formattedStartDateLong,
+            directDebitRef,
+            dd.bankAccountName.getOrElse(""),
+            dd.bankAccountNumber.getOrElse(""),
+            formattedSortCode,
+            paymentList,
+            PaymentPlanType.SinglePaymentPlan.toString,
+            controllers.routes.PaymentPlanDetailsController.onPageLoad(),
+            url
+          )(request, messages(application)).toString
+        }
       }
     }
 
@@ -162,6 +179,9 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
         .success
         .value
         .set(AmendPlanEndDatePage, endDate)
+        .success
+        .value
+        .set(ManageDirectDebitSourcePage, "paye")
         .success
         .value
         .set(ManagePaymentPlanTypePage, PaymentPlanType.BudgetPaymentPlan.toString)
@@ -233,7 +253,8 @@ class AmendPaymentPlanUpdateControllerSpec extends SpecBase {
           formattedSortCode,
           paymentList,
           PaymentPlanType.BudgetPaymentPlan.toString,
-          controllers.routes.PaymentPlanDetailsController.onPageLoad()
+          controllers.routes.PaymentPlanDetailsController.onPageLoad(),
+          "/direct-debits/test-only/send-to-bta"
         )(request, messages(application)).toString
       }
     }

@@ -18,7 +18,7 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.{PaymentPlanType, UserAnswers}
+import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -73,6 +73,11 @@ class AmendPaymentPlanUpdateController @Inject() (
         val scheduledFrequency = paymentPlan.paymentPlanDetails.scheduledPaymentFrequency
         val paymentRef = paymentPlan.paymentPlanDetails.paymentReference
         val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentRef)
+        val directDebitSourceString = request.userAnswers.get(ManageDirectDebitSourcePage).getOrElse(throw Exception("no direct debit source found"))
+        val directDebitSource = DirectDebitSource.enumerable
+          .withName(directDebitSourceString)
+          .getOrElse(throw Exception(s"could not parse direct debit source '$directDebitSourceString'"))
+        val returnToTaxAccountUrl = appConfig.returnToTaxAccountUrl(directDebitSource)
 
         Ok(
           view(
@@ -85,7 +90,8 @@ class AmendPaymentPlanUpdateController @Inject() (
             formattedSortCode,
             paymentList,
             paymentPlan.paymentPlanDetails.planType,
-            routes.PaymentPlanDetailsController.onPageLoad()
+            routes.PaymentPlanDetailsController.onPageLoad(),
+            returnToTaxAccountUrl
           )
         )
       }

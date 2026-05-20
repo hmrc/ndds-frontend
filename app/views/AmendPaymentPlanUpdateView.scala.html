@@ -26,10 +26,10 @@
         govukDetails: GovukDetails,
         govukInsetText: GovukInsetText,
         paragraphWithLink: ParagraphMessageWithLink,
-        govukPanel: GovukPanel,
+        govukPanel: GovukPanel
 )
 
-@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentList: SummaryList, planType: String, call: Call)(implicit request: Request[_], messages: Messages)
+@(hmrcHelplineUrl: String, paymentAmount: String, startDate: String, directDebitReference: String, bankAccountName: String, accountNumber: String, sortCode: String, paymentList: SummaryList, planType: String, call: Call, taxAccountUrl: String)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = titleNoForm(messages("amendPaymentPlanUpdate.title")), showBackLink = false) {
 
@@ -109,4 +109,11 @@
         linkMessage = messages("amendPaymentPlanUpdate.returnLink"),
         linkUrl = call.url
     )
+
+    @govukButton(
+        Button(href = Some(taxAccountUrl),
+        content = messages("directDebitConfirmation.goToTaxAccount")
+    ))
+
+
 }
