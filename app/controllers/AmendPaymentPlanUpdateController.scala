@@ -73,6 +73,9 @@ class AmendPaymentPlanUpdateController @Inject() (
         val scheduledFrequency = paymentPlan.paymentPlanDetails.scheduledPaymentFrequency
         val paymentRef = paymentPlan.paymentPlanDetails.paymentReference
         val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentRef)
+        val directDebitSourceString = request.userAnswers.get(ManageDirectDebitSourcePage).getOrElse(throw Exception("no direct debit source found"))
+        val directDebitSource = appConfig.stringToSource(directDebitSourceString)
+        val returnToTaxAccountUrl = appConfig.returnToTaxAccountUrl(directDebitSource)
 
         Ok(
           view(
@@ -85,7 +88,8 @@ class AmendPaymentPlanUpdateController @Inject() (
             formattedSortCode,
             paymentList,
             paymentPlan.paymentPlanDetails.planType,
-            routes.PaymentPlanDetailsController.onPageLoad()
+            routes.PaymentPlanDetailsController.onPageLoad(),
+            returnToTaxAccountUrl
           )
         )
       }
