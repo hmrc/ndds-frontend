@@ -18,7 +18,7 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
-import models.{PaymentPlanType, UserAnswers}
+import models.{DirectDebitSource, PaymentPlanType, UserAnswers}
 import pages.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
@@ -74,7 +74,8 @@ class AmendPaymentPlanUpdateController @Inject() (
         val paymentRef = paymentPlan.paymentPlanDetails.paymentReference
         val paymentList = buildSummaryRows(false, userAnswers, submissionDate, scheduledFrequency, paymentRef)
         val directDebitSourceString = request.userAnswers.get(ManageDirectDebitSourcePage).getOrElse(throw Exception("no direct debit source found"))
-        val directDebitSource = appConfig.stringToSource(directDebitSourceString)
+        val directDebitSource =
+          DirectDebitSource.enumerable.withName(directDebitSourceString).getOrElse(throw Exception("no direct debit source found"))
         val returnToTaxAccountUrl = appConfig.returnToTaxAccountUrl(directDebitSource)
 
         Ok(
