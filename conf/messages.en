@@ -444,6 +444,9 @@ duplicateWarningForAddOrCreatePP.change.hidden = Duplicate Warning For Add Or Cr
 duplicateWarningForAddOrCreatePP.p1 = You already have a payment plan set up with the same amount and dates.
 duplicateWarningForAddOrCreatePP.h2 = Do you want to continue setting up this plan?
 
+duplicatePaymentReference.title = You need to sign out before setting up another payment
+duplicatePaymentReference.alreadySetUp = You've already set up a payment plan for this reference. To set up another payment plan for the same reference, you will need to sign out and sign back in.
+
 directDebitConfirmation.title = Direct Debit payment set up
 directDebitConfirmation.panel.title = Direct Debit payment set up
 directDebitConfirmation.panel.body = Your Direct Debit reference is<br /><strong>{0}</strong>
