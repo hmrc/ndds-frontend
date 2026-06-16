@@ -114,7 +114,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val requestBody = GenerateDdiRefRequest("testRef")
       val result = connector.generateNewDdiReference(requestBody).futureValue
 
-      result shouldBe GenerateDdiRefResponse("testRef")
+      result shouldBe Some(GenerateDdiRefResponse("testRef"))
     }
 
     "must fail when the result is parsed as a HttpResponse but is not a 200 (OK) response" in {
