@@ -79,7 +79,7 @@ class DuplicateWarningForAddOrCreatePPController @Inject() (
                   .getOrElse(
                     nddService
                       .generateNewDdiReference(required(PaymentReferencePage))
-                      .map(_.ddiRefNumber)
+                      .map(_.get.ddiRefNumber)
                   )
 
               for {

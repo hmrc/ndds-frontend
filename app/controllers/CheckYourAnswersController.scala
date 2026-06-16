@@ -306,7 +306,10 @@ class CheckYourAnswersController @Inject() (
             case (Some(mac1), Some(mac2)) if mac1 == mac2 =>
               nddService
                 .generateNewDdiReference(required(PaymentReferencePage)(ua))
-                .map(ref => Right(ref.ddiRefNumber))
+                .map {
+                  case None           => Left(Redirect(routes.DuplicatePaymentReferenceController.onPageLoad()))
+                  case Some(response) => Right(response.ddiRefNumber)
+                }
 
             case (Some(_), Some(_)) =>
               logger.error(s"MAC validation failed for user")

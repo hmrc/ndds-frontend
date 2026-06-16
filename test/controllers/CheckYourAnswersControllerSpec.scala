@@ -386,7 +386,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-01-10"))))
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("fakeRef")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("fakeRef"))))
 
         when(
           mockMacGenerator.generateMac(
@@ -534,7 +534,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.submitChrisData(any())(any()))
             .thenReturn(Future.successful(true))
           when(
@@ -580,7 +580,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
           when(mockNddService.submitChrisData(any())(any()))
@@ -621,7 +621,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.submitChrisData(any())(any()))
             .thenReturn(Future.successful(false))
 
@@ -667,7 +667,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01")))) // earliest <= entered (15th)
 
@@ -714,7 +714,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
           when(
@@ -764,7 +764,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.getFutureWorkingDays(any(), any())(any()))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.submitChrisData(any())(any()))
             .thenReturn(Future.successful(true))
           when(
@@ -1082,7 +1082,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.getFutureWorkingDays(any(), any())(any()))
           .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
         when(
@@ -1134,7 +1134,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
         when(
@@ -1185,7 +1185,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
         when(
@@ -1237,7 +1237,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.submitChrisData(any())(any()))
             .thenReturn(Future.successful(true))
           when(mockSessionRepository.set(any()))
