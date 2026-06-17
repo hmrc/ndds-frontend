@@ -25,7 +25,7 @@ import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsF
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.*
-import play.api.http.Status.{BAD_REQUEST, BAD_GATEWAY, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
+import play.api.http.Status.{BAD_REQUEST, CONFLICT, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
@@ -123,7 +123,7 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
         post(urlPathMatching("/national-direct-debit/direct-debit-reference"))
           .willReturn(
             aResponse()
-              .withStatus(BAD_GATEWAY)
+              .withStatus(CONFLICT)
               .withBody("Failed to generate DDI Reference.")
           )
       )
