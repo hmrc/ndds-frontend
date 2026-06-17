@@ -80,7 +80,7 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
         case Right(response) if response.status == OK =>
           Future.fromTry(Try(Some(response.json.as[GenerateDdiRefResponse])))
         case Left(upstream) =>
-          if (upstream.message.contains("Failed to generate DDI Reference.")) {
+          if (upstream.statusCode == 409 && upstream.message.contains("Failed to generate DDI Reference.")) {
             Future.successful(None)
           } else Future.failed(upstream)
         case Right(response) =>
