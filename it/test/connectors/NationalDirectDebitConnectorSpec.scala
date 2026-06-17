@@ -24,7 +24,8 @@ import models.responses.*
 import models.{DirectDebitSource, PaymentDateDetails, PaymentPlanType, PaymentsFrequency, PlanStartDateDetails, YourBankDetailsWithAuddisStatus}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
-import play.api.http.Status.{BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
+import play.api.test.Helpers.*
+import play.api.http.Status.{BAD_REQUEST, BAD_GATEWAY, CREATED, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
@@ -115,6 +116,22 @@ class NationalDirectDebitConnectorSpec extends ApplicationWithWiremock with Matc
       val result = connector.generateNewDdiReference(requestBody).futureValue
 
       result shouldBe Some(GenerateDdiRefResponse("testRef"))
+    }
+
+    "fail to retrieve ddi reference number, getting None" in {
+      stubFor(
+        post(urlPathMatching("/national-direct-debit/direct-debit-reference"))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_GATEWAY)
+              .withBody("Failed to generate DDI Reference.")
+          )
+      )
+
+      val requestBody = GenerateDdiRefRequest("testRef")
+      val result = connector.generateNewDdiReference(requestBody).futureValue
+
+      result shouldBe None
     }
 
     "must fail when the result is parsed as a HttpResponse but is not a 200 (OK) response" in {
