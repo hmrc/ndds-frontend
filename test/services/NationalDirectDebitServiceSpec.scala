@@ -418,11 +418,11 @@ class NationalDirectDebitServiceSpec extends SpecBase with MockitoSugar with Dir
     "generateNewDdiReference" - {
       "must successfully return the DDI Reference Number" in {
         when(mockConnector.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRes")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRes"))))
 
         val result = service.generateNewDdiReference("testRef").futureValue
 
-        result mustBe GenerateDdiRefResponse("testRes")
+        result mustBe Some(GenerateDdiRefResponse("testRes"))
       }
 
       "fail when the connector call fails" in {

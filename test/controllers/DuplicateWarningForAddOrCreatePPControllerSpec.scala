@@ -129,7 +129,7 @@ class DuplicateWarningForAddOrCreatePPControllerSpec extends SpecBase with Mocki
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
       when(mockNddService.generateNewDdiReference(any())(any()))
-        .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+        .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
       when(mockNddService.submitChrisData(any())(any()))
         .thenReturn(Future.successful(true))
 

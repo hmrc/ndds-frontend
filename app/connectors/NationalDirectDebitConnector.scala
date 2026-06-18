@@ -20,7 +20,7 @@ import models.NddResponse
 import models.requests.{ChrisSubmissionRequest, GenerateDdiRefRequest, PaymentPlanDuplicateCheckRequest, WorkingDaysOffsetRequest}
 import models.responses.*
 import play.api.Logging
-import play.api.http.Status.OK
+import play.api.http.Status.{BAD_GATEWAY, OK}
 import play.api.libs.json.Json
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -71,15 +71,18 @@ class NationalDirectDebitConnector @Inject() (config: ServicesConfig, http: Http
       }
   }
 
-  def generateNewDdiReference(generateDdiRefRequest: GenerateDdiRefRequest)(implicit hc: HeaderCarrier): Future[GenerateDdiRefResponse] = {
+  def generateNewDdiReference(generateDdiRefRequest: GenerateDdiRefRequest)(implicit hc: HeaderCarrier): Future[Option[GenerateDdiRefResponse]] = {
     http
       .post(url"$nationalDirectDebitBaseUrl/direct-debit-reference")
       .withBody(Json.toJson(generateDdiRefRequest))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .flatMap {
         case Right(response) if response.status == OK =>
-          Future.fromTry(Try(response.json.as[GenerateDdiRefResponse]))
-        case Left(upstream) => Future.failed(upstream)
+          Future.fromTry(Try(Some(response.json.as[GenerateDdiRefResponse])))
+        case Left(upstream) =>
+          if (upstream.statusCode == 409 && upstream.message.contains("Failed to generate DDI Reference.")) {
+            Future.successful(None)
+          } else Future.failed(upstream)
         case Right(response) =>
           Future.failed(UpstreamErrorResponse("Unexpected status while generating DDI ref", response.status))
       }

@@ -386,7 +386,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-01-10"))))
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("fakeRef")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("fakeRef"))))
 
         when(
           mockMacGenerator.generateMac(
@@ -534,7 +534,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.submitChrisData(any())(any()))
             .thenReturn(Future.successful(true))
           when(
@@ -565,6 +565,63 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           }
         }
 
+        "must redirect to duplicate reference payment page if ddi reference is returned as None" in {
+          val paymentAmount = 200
+          val ua = emptyUserAnswers
+            .setOrException(DirectDebitSourcePage, DirectDebitSource.CT)
+            .setOrException(
+              YourBankDetailsPage,
+              YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false)
+            )
+            .setOrException(PaymentAmountPage, paymentAmount)
+            .setOrException(
+              PaymentDatePage,
+              PaymentDateDetails(LocalDate.of(2025, 9, 15), "2025-09-15")
+            )
+            .setOrException(PaymentReferencePage, "testReference")
+            .setOrException(
+              BankDetailsAddressPage,
+              BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH"))
+            )
+            .setOrException(BankDetailsBankNamePage, "Barclays")
+            .setOrException(pages.MacValuePage, "valid-mac")
+
+          when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+            .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+          when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+            .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
+          when(mockNddService.generateNewDdiReference(any())(any()))
+            .thenReturn(Future.successful(None))
+          when(mockNddService.submitChrisData(any())(any()))
+            .thenReturn(Future.successful(true))
+          when(
+            mockMacGenerator.generateMac(
+              any[String],
+              any[String],
+              any[String],
+              any[Seq[String]],
+              any[Option[String]],
+              any[Option[String]],
+              any[String],
+              any[String]
+            )
+          ).thenReturn("valid-mac")
+
+          val application = applicationBuilder(userAnswers = Some(ua))
+            .overrides(
+              bind[NationalDirectDebitService].toInstance(mockNddService),
+              bind[MacGenerator].toInstance(mockMacGenerator)
+            )
+            .build()
+
+          running(application) {
+            val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.DuplicatePaymentReferenceController.onPageLoad().url
+          }
+        }
+
         "must redirect to System Error for a POST if CHRIS submission fails" in {
           val incompleteAnswers = emptyUserAnswers
             .setOrException(DirectDebitSourcePage, DirectDebitSource.TC)
@@ -580,7 +637,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
           when(mockNddService.submitChrisData(any())(any()))
@@ -621,7 +678,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.submitChrisData(any())(any()))
             .thenReturn(Future.successful(false))
 
@@ -667,7 +724,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01")))) // earliest <= entered (15th)
 
@@ -714,7 +771,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-09-01"))))
           when(
@@ -764,7 +821,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.getFutureWorkingDays(any(), any())(any()))
             .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.submitChrisData(any())(any()))
             .thenReturn(Future.successful(true))
           when(
@@ -1082,7 +1139,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.getFutureWorkingDays(any(), any())(any()))
           .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
         when(
@@ -1134,7 +1191,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
         when(
@@ -1185,7 +1242,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
         when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
           .thenReturn(Future.successful(DuplicateCheckResponse(false)))
         when(mockNddService.generateNewDdiReference(any())(any()))
-          .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
         when(mockNddService.submitChrisData(any())(any()))
           .thenReturn(Future.successful(true))
         when(
@@ -1237,7 +1294,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
           when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
             .thenReturn(Future.successful(DuplicateCheckResponse(false)))
           when(mockNddService.generateNewDdiReference(any())(any()))
-            .thenReturn(Future.successful(GenerateDdiRefResponse("testRefNo")))
+            .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
           when(mockNddService.submitChrisData(any())(any()))
             .thenReturn(Future.successful(true))
           when(mockSessionRepository.set(any()))

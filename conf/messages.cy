@@ -444,6 +444,9 @@ duplicateWarningForAddOrCreatePP.change.hidden = Mae gennych gynllun talu eisoes
 duplicateWarningForAddOrCreatePP.p1 = Mae gennych gynllun talu wedi’i sefydlu eisoes sydd â’r un symiau a dyddiadau.
 duplicateWarningForAddOrCreatePP.h2 = A ydych am barhau i sefydlu’r cynllun hwn?
 
+duplicatePaymentReference.title = Mae’n rhaid i chi allgofnodi cyn sefydlu taliad arall
+duplicatePaymentReference.alreadySetUp = Rydych eisoes wedi sefydlu cynllun talu ar gyfer y cyfeirnod hwn. I sefydlu cynllun talu arall ar gyfer yr un cyfeirnod, bydd angen i chi allgofnodi ac yna mewngofnodi eto.
+
 directDebitConfirmation.title = Taliad debyd Uniongyrchol wedi’i sefydlu
 directDebitConfirmation.panel.title = Taliad debyd Uniongyrchol wedi’i sefydlu
 directDebitConfirmation.panel.body = Eich cyfeirnod Debyd Uniongyrchol yw<br /><strong>{0}</strong>

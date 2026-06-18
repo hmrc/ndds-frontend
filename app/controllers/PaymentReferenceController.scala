@@ -22,7 +22,7 @@ import forms.PaymentReferenceFormProvider
 import models.DirectDebitSource.{MGD, SA, TC}
 import models.{DirectDebitSource, Mode}
 import navigation.Navigator
-import pages.{DirectDebitSourcePage, PaymentReferencePage}
+import pages.{CreateConfirmationPage, DirectDebitSourcePage, PaymentReferencePage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -78,24 +78,29 @@ class PaymentReferenceController @Inject() (
   def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async { implicit request =>
     val answers = request.userAnswers
     val selectedAnswers = answers.get(DirectDebitSourcePage)
+    val confirmed = answers.get(CreateConfirmationPage).contains(true)
     val dds = selectedAnswers.flatMap(dds => DirectDebitSource.objectMap.get(dds.toString))
     val result = dds.flatMap(v => ReferenceTypeValidatorMap.validatorType(v))
 
-    result match {
-      case None =>
-        Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
-      case Some(serviceType) =>
-        val form = formProvider(selectedAnswers, Some(serviceType))
-        form
-          .bindFromRequest()
-          .fold(
-            formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, backLocation(selectedAnswers, mode)))),
-            value =>
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, value))
-                _              <- sessionRepository.set(updatedAnswers)
-              } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
-          )
+    if (confirmed) {
+      Future.successful(Redirect(routes.DuplicatePaymentReferenceController.onPageLoad()))
+    } else {
+      result match {
+        case None =>
+          Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
+        case Some(serviceType) =>
+          val form = formProvider(selectedAnswers, Some(serviceType))
+          form
+            .bindFromRequest()
+            .fold(
+              formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, backLocation(selectedAnswers, mode)))),
+              value =>
+                for {
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, value))
+                  _              <- sessionRepository.set(updatedAnswers)
+                } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
+            )
+      }
     }
   }
 }
