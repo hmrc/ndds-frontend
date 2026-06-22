@@ -2,7 +2,7 @@ repoVisibility: public_0C3F0CE3E6E6448FAD341E7BFA50FCD333E06A20CFF05FCACE61154DD
 type: service
 service-type: frontend
 tags: []
-digital-service: National Direct Debit System
+digital-service: Payments Oceans 11 
 
 test-repositories:
   - ndds-accept-tests
