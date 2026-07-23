@@ -51,7 +51,7 @@ class YourDirectDebitInstructionsController @Inject() (
     val currentPage = request.getQueryString("page").flatMap(_.toIntOption).getOrElse(1)
 
     val cleanedAnswers = cleanConfirmationFlags(userAnswers)(
-      Seq(DirectDebitReferenceQuery, PaymentPlansCountQuery, ExistingDirectDebitIdentifierQuery)
+      Seq(PaymentPlansCountQuery, ExistingDirectDebitIdentifierQuery)
     )
 
     for {
