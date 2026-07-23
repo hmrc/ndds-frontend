@@ -159,7 +159,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers w
         }
       }
 
-      "must clear ExistingDirectDebitIdentifierQuery from session" in {
+      "must clear ExistingDirectDebitIdentifierQuery but not DirectDebitReferenceQuery from session" in {
         val testData = createTestNddResponse(1)
         val mockNddService = mock[NationalDirectDebitService]
         val mockPaginationService = mock[PaginationService]
@@ -215,7 +215,7 @@ class YourDirectDebitInstructionsControllerSpec extends SpecBase with Matchers w
 
           val savedAnswers = captor.getValue
           savedAnswers.get(ExistingDirectDebitIdentifierQuery) mustBe None
-          savedAnswers.get(DirectDebitReferenceQuery) mustBe None
+          savedAnswers.get(DirectDebitReferenceQuery) mustBe Some("testDDRef")
           savedAnswers.get(PaymentPlansCountQuery) mustBe None
           savedAnswers.get(CreateConfirmationPage) mustBe None
         }
