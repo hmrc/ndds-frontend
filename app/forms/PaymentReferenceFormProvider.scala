@@ -49,6 +49,12 @@ class PaymentReferenceFormProvider @Inject() extends Mappings {
         val matches = formatRegexMap(DirectDebitSource.OL).r.matches(ref)
         matches && !(ref.length == 14 && ref.charAt(2) == 'M')
 
+      case DirectDebitSource.SA =>
+        val reference =
+          if (ref.toUpperCase.endsWith("K"))
+            ref
+          else ref + "K"
+        formatRegexMap(DirectDebitSource.SA).r.matches(reference)
       case _ =>
         formatRegexMap.get(source).forall(regex => ref.matches(regex))
     }
