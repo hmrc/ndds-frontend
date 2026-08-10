@@ -90,7 +90,6 @@ class PaymentReferenceController @Inject() (
           Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
         case Some(serviceType) =>
           val form = formProvider(selectedAnswers, Some(serviceType))
-          println(form)
           form
             .bindFromRequest()
             .fold(
