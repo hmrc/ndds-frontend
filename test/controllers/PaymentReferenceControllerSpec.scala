@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import forms.PaymentReferenceFormProvider
-import models.DirectDebitSource.{MGD, TC, VAT}
+import models.DirectDebitSource.{MGD, SA, TC, VAT}
 import models.{DirectDebitSource, NormalMode, PaymentPlanType, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
@@ -174,6 +174,31 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
         val request =
           FakeRequest(POST, paymentReferenceRoute.url)
             .withFormUrlEncodedBody(("value", "answer"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual onwardRoute.url
+      }
+    }
+
+    "must redirect to the next page for SA when reference has no K on the end" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, SA)
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, paymentReferenceRoute.url)
+            .withFormUrlEncodedBody(("value", "5829820384"))
 
         val result = route(application, request).value
 
