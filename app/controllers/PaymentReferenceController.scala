@@ -102,7 +102,6 @@ class PaymentReferenceController @Inject() (
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, newVal))
                   _ <-
-                    println(updatedAnswers.toString)
                     sessionRepository.set(updatedAnswers)
                 } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
             )
