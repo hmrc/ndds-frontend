@@ -87,10 +87,8 @@ class PaymentReferenceController @Inject() (
     } else {
       result match {
         case None =>
-          println("no result")
           Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
         case Some(serviceType) =>
-          println("some result")
           val form = formProvider(selectedAnswers, Some(serviceType))
           form
             .bindFromRequest()
@@ -104,7 +102,6 @@ class PaymentReferenceController @Inject() (
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, newVal))
                   _ <-
-                    println(updatedAnswers.toString + source.toString)
                     sessionRepository.set(updatedAnswers)
                 } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
             )
