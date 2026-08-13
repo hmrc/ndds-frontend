@@ -103,7 +103,11 @@ object ReferenceTypeValidator {
 
   given Validator[SA.type] with {
     def validate(ref: String): Boolean = {
-      val reference = ref.toUpperCase
+      val reference = if (ref.toUpperCase().endsWith("K")) {
+        ref.toUpperCase
+      } else {
+        ref + "K"
+      }
       UTR_FORMAT.matcher(reference).matches && modulusU11(reference)
     }
   }

@@ -97,7 +97,7 @@ class ReferenceTypeValidatorSpec extends AnyFreeSpec with Matchers {
         "8337018376K",
         "8337018412K",
         "8337018507K",
-        "8337018507k"
+        "8337018507"
       )
       validSAReference.foreach(ref => validation.validate(ref) mustEqual true)
     }

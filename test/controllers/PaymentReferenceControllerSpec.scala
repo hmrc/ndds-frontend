@@ -18,11 +18,11 @@ package controllers
 
 import base.SpecBase
 import forms.PaymentReferenceFormProvider
-import models.DirectDebitSource.{MGD, TC, VAT}
+import models.DirectDebitSource.{MGD, SA, TC, VAT}
 import models.{DirectDebitSource, NormalMode, PaymentPlanType, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{DirectDebitSourcePage, PaymentPlanTypePage, PaymentReferencePage}
 import play.api.data.Form
@@ -34,6 +34,7 @@ import repositories.SessionRepository
 import views.html.PaymentReferenceView
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
@@ -179,6 +180,41 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
+      }
+    }
+
+    "must redirect to the next page for SA when reference has no K on the end" in {
+      val mockSessionRepository = mock[SessionRepository]
+      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, SA)
+      val userAnswersWithPaymentReference =
+        userAnswer
+          .set(
+            PaymentReferencePage,
+            "5829820384K"
+          )
+          .success
+          .value
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      val application =
+        applicationBuilder(userAnswers = Some(userAnswer))
+          .overrides(
+            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+      running(application) {
+        val request =
+          FakeRequest(POST, paymentReferenceRoute.url)
+            .withFormUrlEncodedBody(("value", "5829820384"))
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual onwardRoute.url
+
+        verify(mockSessionRepository).set(eqTo(userAnswersWithPaymentReference))
       }
     }
 
