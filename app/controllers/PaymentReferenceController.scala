@@ -87,8 +87,10 @@ class PaymentReferenceController @Inject() (
     } else {
       result match {
         case None =>
+          println("no result")
           Future.successful(Redirect(navigator.nextPage(PaymentReferencePage, mode, answers)))
         case Some(serviceType) =>
+          println("some result")
           val form = formProvider(selectedAnswers, Some(serviceType))
           form
             .bindFromRequest()
@@ -96,12 +98,13 @@ class PaymentReferenceController @Inject() (
               formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode, selectedAnswers, backLocation(selectedAnswers, mode)))),
               value =>
                 val source = dds.getOrElse(throw new RuntimeException("Missing direct debit source"))
-                val newVal = if (source == DirectDebitSource.SA || !value.toUpperCase.endsWith("K")) {
+                val newVal = if (source == DirectDebitSource.SA && !value.toUpperCase.endsWith("K")) {
                   value + "K"
                 } else value
                 for {
                   updatedAnswers <- Future.fromTry(request.userAnswers.set(PaymentReferencePage, newVal))
                   _ <-
+                    println(updatedAnswers.toString + source.toString)
                     sessionRepository.set(updatedAnswers)
                 } yield Redirect(navigator.nextPage(PaymentReferencePage, mode, updatedAnswers))
             )
