@@ -183,41 +183,6 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
       }
     }
 
-    "must redirect to the next page for SA when reference has no K on the end" in {
-      val mockSessionRepository = mock[SessionRepository]
-      val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, SA)
-      val userAnswersWithPaymentReference =
-        userAnswer
-          .set(
-            PaymentReferencePage,
-            "5829820384K"
-          )
-          .success
-          .value
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-
-      val application =
-        applicationBuilder(userAnswers = Some(userAnswer))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute)),
-            bind[SessionRepository].toInstance(mockSessionRepository)
-          )
-          .build()
-
-      running(application) {
-        val request =
-          FakeRequest(POST, paymentReferenceRoute.url)
-            .withFormUrlEncodedBody(("value", "5829820384"))
-
-        val result = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual onwardRoute.url
-
-        verify(mockSessionRepository).set(eqTo(userAnswersWithPaymentReference))
-      }
-    }
-
     "must return a Bad Request and errors when invalid data is submitted" in {
       val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, VAT)
       val application = applicationBuilder(userAnswers = Some(userAnswer)).build()

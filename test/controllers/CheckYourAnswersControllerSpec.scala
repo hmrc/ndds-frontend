@@ -1337,6 +1337,69 @@ class CheckYourAnswersControllerSpec extends SpecBase with SummaryListFluency {
             redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
           }
         }
+
+      "must proceed normally and add a K to paymentReference when DirectDebitSource is 'SA', and the paymentReference does not end with a K already" in {
+        val mockSessionRepository = mock[SessionRepository]
+        val paymentReference = "5829820384"
+
+        val userAnswers = emptyUserAnswers
+          .setOrException(DirectDebitSourcePage, DirectDebitSource.SA)
+          .setOrException(PaymentReferencePage, paymentReference)
+          .setOrException(TellAboutThisPaymentPage, true)
+          .setOrException(YearEndAndMonthPage, yearEndAndMonthDate)
+          .setOrException(PaymentAmountPage, 123.01)
+          .setOrException(PaymentDatePage, paymentDateDetails)
+          .setOrException(YourBankDetailsPage, YourBankDetailsWithAuddisStatus("Test", "123456", "12345678", false, false))
+          .setOrException(BankDetailsAddressPage, BankAddress(Seq("line 1"), Some("Town"), Country("UK"), Some("NE5 2DH")))
+          .setOrException(BankDetailsBankNamePage, "Barclays")
+          .setOrException(pages.MacValuePage, "valid-mac")
+
+        when(mockNddService.isDuplicatePlanSetupAmendAndAddPaymentPlan(any(), any(), any(), any())(any(), any()))
+          .thenReturn(Future.successful(DuplicateCheckResponse(false)))
+        when(mockNddService.generateNewDdiReference(any())(any()))
+          .thenReturn(Future.successful(Some(GenerateDdiRefResponse("testRefNo"))))
+        when(mockNddService.submitChrisData(any())(any()))
+          .thenReturn(Future.successful(true))
+        when(mockSessionRepository.set(any()))
+          .thenReturn(Future.successful(true))
+        when(mockNddService.getFutureWorkingDays(any[UserAnswers], any[String])(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(EarliestPaymentDate("2025-07-01"))))
+
+        when(
+          mockMacGenerator.generateMac(
+            any[String],
+            any[String],
+            any[String],
+            any[Seq[String]],
+            any[Option[String]],
+            any[Option[String]],
+            any[String],
+            any[String]
+          )
+        ).thenReturn("valid-mac")
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers))
+          .overrides(
+            bind[NationalDirectDebitService].toInstance(mockNddService),
+            bind[MacGenerator].toInstance(mockMacGenerator),
+            bind[SessionRepository].toInstance(mockSessionRepository)
+          )
+          .build()
+
+        running(application) {
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+
+          val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+          verify(mockSessionRepository).set(uaCaptor.capture())
+          val savedUa = uaCaptor.getValue
+
+          savedUa.get(PaymentReferencePage) must be(Some(paymentReference + "K"))
+          redirectLocation(result).value mustEqual routes.DirectDebitConfirmationController.onPageLoad().url
+        }
+      }
     }
   }
 
