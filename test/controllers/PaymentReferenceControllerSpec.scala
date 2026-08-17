@@ -186,14 +186,6 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
     "must redirect to the next page for SA when reference has no K on the end" in {
       val mockSessionRepository = mock[SessionRepository]
       val userAnswer = emptyUserAnswers.setOrException(DirectDebitSourcePage, SA)
-      val userAnswersWithPaymentReference =
-        userAnswer
-          .set(
-            PaymentReferencePage,
-            "5829820384K"
-          )
-          .success
-          .value
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
@@ -213,8 +205,6 @@ class PaymentReferenceControllerSpec extends SpecBase with MockitoSugar {
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual onwardRoute.url
-
-        verify(mockSessionRepository).set(eqTo(userAnswersWithPaymentReference))
       }
     }
 

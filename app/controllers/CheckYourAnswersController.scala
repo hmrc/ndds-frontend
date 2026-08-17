@@ -127,6 +127,7 @@ class CheckYourAnswersController @Inject() (
         val directDebitSource = request.userAnswers.get(DirectDebitSourcePage)
         val fourExtraNumbers = request.userAnswers.get(YearEndAndMonthPage)
         if (directDebitSource.contains(DirectDebitSource.PAYE) && fourExtraNumbers.isDefined) addFourExtraNoToPayRef(request.userAnswers)
+        else if (directDebitSource.contains(DirectDebitSource.SA)) addExtraLetterToSaPayRef(request.userAnswers)
         else request.userAnswers
       }
 
@@ -356,6 +357,16 @@ class CheckYourAnswersController @Inject() (
       paymentRef       <- ua.get(PaymentReferencePage)
       fourExtraNumbers <- ua.get(YearEndAndMonthPage)
       updatedPaymentRef = paymentRef + fourExtraNumbers.displayFormat
+      updatedAnswers <- ua.set(PaymentReferencePage, updatedPaymentRef).toOption
+    } yield updatedAnswers).getOrElse(ua)
+  }
+
+  private def addExtraLetterToSaPayRef(ua: UserAnswers): UserAnswers = {
+    (for {
+      paymentRef <- ua.get(PaymentReferencePage)
+      updatedPaymentRef = if (!paymentRef.toUpperCase.endsWith("K")) {
+                            paymentRef + "K"
+                          } else paymentRef
       updatedAnswers <- ua.set(PaymentReferencePage, updatedPaymentRef).toOption
     } yield updatedAnswers).getOrElse(ua)
   }
