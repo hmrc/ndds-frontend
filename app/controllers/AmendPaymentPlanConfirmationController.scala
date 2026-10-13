@@ -273,10 +273,21 @@ class AmendPaymentPlanConfirmationController @Inject() (
             earliestPaymentDate.plusDays((existingDayOfWeek.getValue - earliestPaymentDate.getDayOfWeek.getValue + 7) % 7)
 
           case Some(PaymentsFrequency.Monthly.toString) =>
-            val proposedNewScheduledPaymentStartDate = earliestPaymentDate.withDayOfMonth(existingScheduledPaymentStartDate.getDayOfMonth)
+            def adjustPaymentDate(date: LocalDate) = {
+              val existingDay = existingScheduledPaymentStartDate.getDayOfMonth
+              if (existingDay == 31 || (date.getMonthValue == 2 && (existingDay == 29 || existingDay == 30))) {
+                // if the existing day is 31 or if we're about to try to set a date in February and the existing day is 29 or 30, use the last day of the month
+                date.withDayOfMonth(date.lengthOfMonth())
+              } else {
+                // otherwise, keep the same day of the month as the existing start date
+                date.withDayOfMonth(existingDay)
+              }
+            }
+
+            val proposedNewScheduledPaymentStartDate = adjustPaymentDate(earliestPaymentDate)
 
             if (proposedNewScheduledPaymentStartDate.isBefore(earliestPaymentDate))
-              proposedNewScheduledPaymentStartDate.plusMonths(1)
+              adjustPaymentDate(earliestPaymentDate.plusMonths(1))
             else
               proposedNewScheduledPaymentStartDate
 

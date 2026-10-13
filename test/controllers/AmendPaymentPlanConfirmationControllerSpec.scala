@@ -535,6 +535,104 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
           PaymentsFrequency.Monthly,
           "2026-04-16",
           "2026-05-15"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 29th Jan, next collection in Feb non-leap year",
+          "2026-01-29",
+          PaymentsFrequency.Monthly,
+          "2026-02-05",
+          "2026-02-28"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 30th Jan, next collection in Feb non-leap year",
+          "2026-01-30",
+          PaymentsFrequency.Monthly,
+          "2026-02-05",
+          "2026-02-28"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 31st Jan, next collection in Feb non-leap year",
+          "2026-01-31",
+          PaymentsFrequency.Monthly,
+          "2026-02-05",
+          "2026-02-28"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 29th Jan, next collection in Feb leap year",
+          "2024-01-29",
+          PaymentsFrequency.Monthly,
+          "2024-02-05",
+          "2024-02-29"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 30th Jan, next collection in Feb leap year",
+          "2024-01-30",
+          PaymentsFrequency.Monthly,
+          "2024-02-05",
+          "2024-02-29"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 31st Jan, next collection in Feb leap year",
+          "2024-01-31",
+          PaymentsFrequency.Monthly,
+          "2024-02-05",
+          "2024-02-29"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 29th Jan, next collection in Mar",
+          "2024-01-29",
+          PaymentsFrequency.Monthly,
+          "2024-03-05",
+          "2024-03-29"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 30th Jan, next collection in Mar",
+          "2024-01-30",
+          PaymentsFrequency.Monthly,
+          "2024-03-05",
+          "2024-03-30"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 31st Jan, next collection in Mar",
+          "2024-01-31",
+          PaymentsFrequency.Monthly,
+          "2024-03-05",
+          "2024-03-31"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 28th Feb (non-leap year), next collection in Mar",
+          "2026-02-28",
+          PaymentsFrequency.Monthly,
+          "2026-03-05",
+          "2026-03-28"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 29th Feb (leap year), next collection in Mar",
+          "2024-02-29",
+          PaymentsFrequency.Monthly,
+          "2024-03-05",
+          "2024-03-29"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 30th Mar, next collection in Apr",
+          "2024-03-30",
+          PaymentsFrequency.Monthly,
+          "2024-04-05",
+          "2024-04-30"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 31st Mar, next collection in Apr",
+          "2024-03-31",
+          PaymentsFrequency.Monthly,
+          "2024-04-05",
+          "2024-04-30"
+        ),
+        BudgetPaymentPlanAmendStartDateTestCase(
+          "paymentFreq is monthly, plan collected on 30th Apr, next collection in May",
+          "2024-04-30",
+          PaymentsFrequency.Monthly,
+          "2024-05-05",
+          "2024-05-30"
         )
       ).foreach {
         case BudgetPaymentPlanAmendStartDateTestCase(description, originalStartDate, frequency, earliestPaymentDate, expectedNewStartDate) =>
