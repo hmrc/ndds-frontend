@@ -552,7 +552,7 @@ class AmendPaymentPlanConfirmationControllerSpec extends SpecBase with DirectDeb
         ),
         BudgetPaymentPlanAmendStartDateTestCase(
           "paymentFreq is monthly, plan collected on 31st Jan, next collection in Feb non-leap year",
-          "2026-01-30",
+          "2026-01-31",
           PaymentsFrequency.Monthly,
           "2026-02-05",
           "2026-02-28"
